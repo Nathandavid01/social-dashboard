@@ -1,9 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { mockupCaptions, type CaptionExample } from '@/lib/data/mockup-captions'
-import { CaptionCard } from './caption-card'
-import { CaptionFilters } from './caption-filters'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,119 +13,130 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Sparkles, Copy, CheckCheck } from 'lucide-react'
+import { Sparkles, Copy, CheckCheck, RefreshCw } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
+import { getStoredConfig, getPosts, formatDateParam } from '@/lib/metricool/client'
+import { createClient as createSupabaseClient } from '@/lib/supabase/client'
+import type { Client } from '@/lib/supabase/types'
 
-const industries = [...new Set(mockupCaptions.map((c) => c.industry))]
 const platforms = ['Instagram', 'TikTok', 'Facebook', 'Twitter/X'] as const
-const captionTypes = ['promotional', 'engagement', 'educational', 'testimonial', 'announcement'] as const
-
-const typeLabels: Record<string, string> = {
-  promotional: 'Promocional',
-  engagement: 'Engagement',
-  educational: 'Educativo',
-  testimonial: 'Testimonio',
-  announcement: 'Anuncio',
-}
 
 export function CaptionGenerator() {
   const { toast } = useToast()
-  const [clientName, setClientName] = useState('')
-  const [industry, setIndustry] = useState('')
+  const [clients, setClients] = useState<Client[]>([])
+  const [selectedClientId, setSelectedClientId] = useState('')
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [platform, setPlatform] = useState('')
-  const [captionType, setCaptionType] = useState('')
-  const [topic, setTopic] = useState('')
-  const [generatedCaptions, setGeneratedCaptions] = useState<CaptionExample[]>([])
-  const [filterIndustry, setFilterIndustry] = useState('all')
-  const [filterPlatform, setFilterPlatform] = useState('all')
-  const [copiedAll, setCopiedAll] = useState(false)
+  const [videoTitle, setVideoTitle] = useState('')
+  const [generatedCaption, setGeneratedCaption] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  const handleGenerate = () => {
-    // Filter mockup captions based on selections, or show all if no filters
-    let results = [...mockupCaptions]
-
-    if (industry) {
-      results = results.filter((c) => c.industry === industry)
-    }
-    if (platform) {
-      results = results.filter((c) => c.platform === platform)
-    }
-    if (captionType) {
-      results = results.filter((c) => c.type === captionType)
-    }
-
-    // If we have specific filters that narrow results too much, fall back to type-matched or all
-    if (results.length === 0) {
-      results = mockupCaptions.filter((c) => {
-        if (captionType) return c.type === captionType
-        if (platform) return c.platform === platform
-        return true
+  useEffect(() => {
+    const supabase = createSupabaseClient()
+    supabase
+      .from('clients')
+      .select('*')
+      .eq('status', 'active')
+      .order('name')
+      .then(({ data }) => {
+        if (data) setClients(data as Client[])
       })
+  }, [])
+
+  useEffect(() => {
+    const client = clients.find((c) => c.id === selectedClientId) ?? null
+    setSelectedClient(client)
+    if (client?.platforms?.[0]) {
+      const p = client.platforms[0]
+      setPlatform(p.charAt(0).toUpperCase() + p.slice(1))
+    }
+  }, [selectedClientId, clients])
+
+  const handleGenerate = async () => {
+    if (!videoTitle.trim()) {
+      toast({ title: 'Falta el tema', description: 'Escribe el título o tema del video', variant: 'destructive' })
+      return
     }
 
-    // Replace client names in captions if user provided one
-    if (clientName) {
-      results = results.map((c) => ({
-        ...c,
-        client: clientName,
-      }))
+    setLoading(true)
+    setGeneratedCaption('')
+
+    let existingCaptions: { text: string; provider: string }[] = []
+    try {
+      const config = getStoredConfig()
+      if (config) {
+        const end = new Date()
+        const start = new Date()
+        start.setDate(start.getDate() - 90)
+        const posts = await getPosts(config, formatDateParam(start), formatDateParam(end))
+        existingCaptions = posts
+          .filter((p) => p.text && p.text.trim().length > 20)
+          .map((p) => ({ text: p.text, provider: p.provider }))
+      }
+    } catch {
+      // proceed without examples
     }
 
-    setGeneratedCaptions(results)
-    toast({
-      title: 'Captions generados',
-      description: `${results.length} caption${results.length !== 1 ? 's' : ''} listo${results.length !== 1 ? 's' : ''} para exportar`,
-    })
+    try {
+      const res = await fetch('/api/generate-caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoTitle,
+          platform,
+          clientName: selectedClient?.name || '',
+          existingCaptions,
+          brandVoice: selectedClient?.brand_voice || '',
+          captionLanguage: selectedClient?.caption_language || 'spanish',
+          defaultCta: selectedClient?.default_cta || '',
+          defaultHashtags: selectedClient?.default_hashtags || '',
+          captionNotes: selectedClient?.caption_notes || '',
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error generando caption')
+
+      setGeneratedCaption(data.caption)
+      toast({
+        title: 'Caption generado',
+        description: existingCaptions.length > 0
+          ? `Basado en ${existingCaptions.length} captions de Metricool`
+          : 'Generado con el perfil del cliente',
+      })
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'No se pudo generar el caption',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleCopyAll = async () => {
-    const allText = filteredCaptions
-      .map((c, i) => `--- Caption ${i + 1} (${c.client} | ${c.platform} | ${typeLabels[c.type]}) ---\n\n${c.caption}`)
-      .join('\n\n\n')
-
-    await navigator.clipboard.writeText(allText)
-    setCopiedAll(true)
-    setTimeout(() => setCopiedAll(false), 2000)
-    toast({
-      title: 'Copiado',
-      description: `${filteredCaptions.length} captions copiados al portapapeles`,
-    })
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(generatedCaption)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+    toast({ title: 'Copiado al portapapeles' })
   }
-
-  // Apply view filters to generated captions
-  const filteredCaptions = generatedCaptions.filter((c) => {
-    if (filterIndustry !== 'all' && c.industry !== filterIndustry) return false
-    if (filterPlatform !== 'all' && c.platform !== filterPlatform) return false
-    return true
-  })
 
   return (
     <div className="space-y-6">
-      {/* Generator Form */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="pt-6 space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="client">Nombre del cliente</Label>
-              <Input
-                id="client"
-                placeholder="ej. Brisa Salon"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Industria</Label>
-              <Select value={industry} onValueChange={setIndustry}>
+              <Label>Cliente</Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar industria" />
+                  <SelectValue placeholder="Seleccionar cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {industries.map((ind) => (
-                    <SelectItem key={ind} value={ind}>
-                      {ind}
-                    </SelectItem>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -142,109 +150,77 @@ export function CaptionGenerator() {
                 </SelectTrigger>
                 <SelectContent>
                   {platforms.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
+                    <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Tipo de caption</Label>
-              <Select value={captionType} onValueChange={setCaptionType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {captionTypes.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {typeLabels[t]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="video">Título o tema del video</Label>
+              <Input
+                id="video"
+                placeholder="ej. 3 tips para el cabello en verano"
+                value={videoTitle}
+                onChange={(e) => setVideoTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+              />
             </div>
           </div>
 
-          <div className="mt-4 space-y-2">
-            <Label htmlFor="topic">Tema o descripcion del post (opcional)</Label>
-            <Textarea
-              id="topic"
-              placeholder="ej. Promocion de verano, nuevo servicio, testimonio de cliente..."
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              rows={2}
-            />
-          </div>
+          {selectedClient && (
+            <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground space-y-0.5">
+              {selectedClient.brand_voice && <p><span className="font-medium">Voz:</span> {selectedClient.brand_voice}</p>}
+              {selectedClient.default_cta && <p><span className="font-medium">CTA:</span> {selectedClient.default_cta}</p>}
+              {selectedClient.caption_notes && <p><span className="font-medium">Reglas:</span> {selectedClient.caption_notes}</p>}
+            </div>
+          )}
 
-          <div className="mt-4 flex gap-2">
-            <Button onClick={handleGenerate}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generar Captions
+          <div className="flex gap-2">
+            <Button onClick={handleGenerate} disabled={loading}>
+              {loading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {loading ? 'Generando...' : 'Generar Caption'}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setClientName('')
-                setIndustry('')
-                setPlatform('')
-                setCaptionType('')
-                setTopic('')
-                setGeneratedCaptions([])
-              }}
-            >
+            <Button variant="outline" onClick={() => { setSelectedClientId(''); setPlatform(''); setVideoTitle(''); setGeneratedCaption('') }}>
               Limpiar
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Results */}
-      {generatedCaptions.length > 0 && (
-        <>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold">
-                Resultados ({filteredCaptions.length})
-              </h2>
-              <CaptionFilters
-                filterIndustry={filterIndustry}
-                filterPlatform={filterPlatform}
-                onIndustryChange={setFilterIndustry}
-                onPlatformChange={setFilterPlatform}
-                industries={industries}
-              />
+      {generatedCaption && (
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">Caption generado</Label>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleGenerate} disabled={loading}>
+                  <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                  Regenerar
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleCopy}>
+                  {copied ? <CheckCheck className="mr-2 h-3.5 w-3.5 text-green-500" /> : <Copy className="mr-2 h-3.5 w-3.5" />}
+                  {copied ? 'Copiado' : 'Copiar'}
+                </Button>
+              </div>
             </div>
-            <Button variant="outline" onClick={handleCopyAll} disabled={filteredCaptions.length === 0}>
-              {copiedAll ? (
-                <CheckCheck className="mr-2 h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="mr-2 h-4 w-4" />
-              )}
-              {copiedAll ? 'Copiado' : 'Copiar todos'}
-            </Button>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredCaptions.map((caption) => (
-              <CaptionCard key={caption.id} caption={caption} />
-            ))}
-          </div>
-
-          {filteredCaptions.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              No hay captions que coincidan con los filtros seleccionados.
-            </div>
-          )}
-        </>
+            <Textarea
+              value={generatedCaption}
+              onChange={(e) => setGeneratedCaption(e.target.value)}
+              rows={12}
+              className="font-mono text-sm resize-none"
+            />
+            <p className="text-xs text-muted-foreground">Puedes editar el caption directamente antes de copiarlo.</p>
+          </CardContent>
+        </Card>
       )}
 
-      {generatedCaptions.length === 0 && (
+      {!generatedCaption && !loading && (
         <div className="text-center py-16 text-muted-foreground">
           <Sparkles className="mx-auto h-10 w-10 mb-3 opacity-50" />
-          <p className="text-lg font-medium">Genera captions para tus clientes</p>
-          <p className="text-sm mt-1">Selecciona los filtros arriba y presiona &quot;Generar Captions&quot;</p>
+          <p className="text-lg font-medium">Genera captions con IA</p>
+          <p className="text-sm mt-1">Selecciona un cliente, escribe el título del video y presiona &quot;Generar Caption&quot;</p>
+          <p className="text-xs mt-2 opacity-60">El modelo aprende del estilo de tus captions en Metricool y del perfil del cliente</p>
         </div>
       )}
     </div>

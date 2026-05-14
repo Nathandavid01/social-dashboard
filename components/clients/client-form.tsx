@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Separator } from '@/components/ui/separator'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
   { value: 'instagram', label: 'Instagram' },
@@ -54,6 +55,12 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
       status: client?.status ?? 'onboarding',
       assigned_to: client?.assigned_to ?? null,
       notes: client?.notes ?? '',
+      brand_voice: client?.brand_voice ?? '',
+      caption_language: (client?.caption_language as 'spanish' | 'english' | 'spanglish') ?? 'spanish',
+      default_cta: client?.default_cta ?? '',
+      default_hashtags: client?.default_hashtags ?? '',
+      metricool_blog_id: client?.metricool_blog_id ?? '',
+      caption_notes: client?.caption_notes ?? '',
     },
   })
 
@@ -79,7 +86,8 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
-        {/* Name */}
+
+        {/* ── Basic Info ── */}
         <FormField
           control={form.control}
           name="name"
@@ -87,14 +95,13 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
             <FormItem>
               <FormLabel>Client Name</FormLabel>
               <FormControl>
-                <Input placeholder="Acme Corp" {...field} />
+                <Input placeholder="Brisa Salon" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Industry */}
         <FormField
           control={form.control}
           name="industry"
@@ -102,14 +109,13 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
             <FormItem>
               <FormLabel>Industry</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Fashion, Technology, Food & Beverage" {...field} />
+                <Input placeholder="e.g. Salon, Restaurant, Retail" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Platforms */}
         <FormField
           control={form.control}
           name="platforms"
@@ -136,9 +142,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
                             }}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">
-                          {platform.label}
-                        </FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">{platform.label}</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -149,7 +153,6 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           )}
         />
 
-        {/* Status */}
         <FormField
           control={form.control}
           name="status"
@@ -173,7 +176,6 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           )}
         />
 
-        {/* Assigned To */}
         <FormField
           control={form.control}
           name="assigned_to"
@@ -203,7 +205,6 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           )}
         />
 
-        {/* Notes */}
         <FormField
           control={form.control}
           name="notes"
@@ -211,9 +212,116 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
+                <Textarea placeholder="Any important context about this client..." className="resize-none h-24" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Separator />
+
+        {/* ── Caption AI Settings ── */}
+        <div>
+          <h3 className="text-sm font-semibold mb-1">Caption AI Settings</h3>
+          <p className="text-xs text-muted-foreground mb-4">This info is fed to the AI every time you generate a caption for this client.</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="caption_language"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Caption Language</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="spanish">Spanish</SelectItem>
+                    <SelectItem value="english">English</SelectItem>
+                    <SelectItem value="spanglish">Spanglish</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="metricool_blog_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Metricool Blog ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. 12345" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="brand_voice"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Brand Voice</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Friendly and energetic, speaks directly to women 25-45 in PR" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="default_cta"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Default Call to Action</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Llama al 787-555-0101 o escríbenos por DM" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="default_hashtags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Default Hashtags</FormLabel>
+              <FormControl>
                 <Textarea
-                  placeholder="Any important context about this client..."
-                  className="resize-none h-28"
+                  placeholder="#BrisaSalon #SalonPR #PuertoRico #CabelloSaludable"
+                  className="resize-none h-20"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="caption_notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Caption Rules for AI</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="e.g. Never use the word 'cheap'. Always mention Santurce location. Use emojis sparingly."
+                  className="resize-none h-24"
                   {...field}
                 />
               </FormControl>

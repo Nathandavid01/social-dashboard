@@ -24,6 +24,12 @@ export interface Client {
   status: ClientStatus
   assigned_to: string | null
   notes: string | null
+  brand_voice: string | null
+  caption_language: string | null
+  default_cta: string | null
+  default_hashtags: string | null
+  metricool_blog_id: string | null
+  caption_notes: string | null
   created_by: string
   created_at: string
   updated_at: string
