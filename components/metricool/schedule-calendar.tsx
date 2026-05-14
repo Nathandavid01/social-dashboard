@@ -2,23 +2,14 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useToast } from '@/lib/hooks/use-toast'
 import { getStoredConfig } from '@/lib/metricool/client'
 import {
   getScheduledPosts,
@@ -82,7 +73,6 @@ const networkIconColors: Record<string, string> = {
 }
 
 export function ScheduleCalendar() {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [verifications, setVerifications] = useState<ScheduleVerification[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -253,9 +243,6 @@ export function ScheduleCalendar() {
                     const isToday = date === today
                     const isSelected = date === selectedDay
                     const hasErrors = dayPosts.some((p) => p.overallStatus === 'error')
-                    const hasPending = dayPosts.some((p) => p.overallStatus === 'pending')
-                    const allPublished = dayPosts.length > 0 && dayPosts.every((p) => p.overallStatus === 'on-time')
-
                     return (
                       <div
                         key={date}

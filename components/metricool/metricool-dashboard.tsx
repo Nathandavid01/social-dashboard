@@ -19,7 +19,6 @@ import {
   getPosts,
   getStatsAggregation,
   formatDateParam,
-  type MetricoolConfig,
   type PublicBlog,
   type PublicPost,
 } from '@/lib/metricool/client'

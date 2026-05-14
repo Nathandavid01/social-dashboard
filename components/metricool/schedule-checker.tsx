@@ -12,8 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '@/lib/hooks/use-toast'
-import { getStoredConfig, type MetricoolConfig } from '@/lib/metricool/client'
+import { getStoredConfig } from '@/lib/metricool/client'
 import {
   getScheduledPosts,
   verifySchedule,
@@ -65,7 +64,6 @@ const networkColors: Record<string, string> = {
 }
 
 export function ScheduleChecker() {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')

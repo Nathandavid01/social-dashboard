@@ -8,7 +8,7 @@ export const clientSchema = z.object({
   assigned_to: z.string().uuid().optional().nullable(),
   notes: z.string().max(2000).optional(),
   brand_voice: z.string().max(500).optional(),
-  caption_language: z.enum(['spanish', 'english', 'spanglish']).default('spanish'),
+  caption_language: z.enum(['spanish', 'english', 'spanglish']),
   default_cta: z.string().max(300).optional(),
   default_hashtags: z.string().max(1000).optional(),
   metricool_blog_id: z.string().max(100).optional(),

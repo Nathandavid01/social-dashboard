@@ -37,7 +37,7 @@ export function SavedCaptionsView({ captions, clientName }: SavedCaptionsViewPro
   const perPage = 12
 
   const platforms = useMemo(
-    () => [...new Set(captions.map((c) => c.platform))],
+    () => Array.from(new Set(captions.map((c) => c.platform))),
     [captions]
   )
 
