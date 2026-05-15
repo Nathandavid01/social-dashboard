@@ -25,7 +25,7 @@ export function MobileNav() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Zap className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg tracking-tight">AgencyFlow</span>
+          <span className="font-bold text-lg tracking-tight">NMedia</span>
         </div>
         <nav className="px-3 py-4 space-y-1">
           {navItems.map((item) => {

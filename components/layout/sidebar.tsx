@@ -16,7 +16,7 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
           <Zap className="h-4 w-4 text-primary-foreground" />
         </div>
-        <span className="font-bold text-lg tracking-tight">AgencyFlow</span>
+        <span className="font-bold text-lg tracking-tight">NMedia</span>
       </div>
 
       {/* Nav */}
@@ -43,7 +43,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-4 py-4 border-t border-border">
-        <p className="text-xs text-muted-foreground text-center">AgencyFlow v1.0</p>
+        <p className="text-xs text-muted-foreground text-center">NMedia PR</p>
       </div>
     </aside>
   )

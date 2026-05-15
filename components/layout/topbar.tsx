@@ -1,6 +1,6 @@
 import { MobileNav } from './mobile-nav'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { UserMenu } from '@/components/auth/user-menu'
 
 export function Topbar() {
   return (
@@ -9,11 +9,7 @@ export function Topbar() {
       <div className="flex-1" />
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-            NT
-          </AvatarFallback>
-        </Avatar>
+        <UserMenu />
       </div>
     </header>
   )

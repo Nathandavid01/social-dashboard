@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/shared/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AgencyFlow — Social Media Operations Dashboard",
-  description: "Workflow efficiency dashboard for social media marketing agencies",
+  title: "NMedia PR — Dashboard",
+  description: "Operations dashboard for NMedia PR",
 };
 
 export default function RootLayout({

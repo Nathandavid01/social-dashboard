@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,10 +21,11 @@ import type { Client } from '@/lib/supabase/types'
 
 const platforms = ['Instagram', 'TikTok', 'Facebook', 'Twitter/X'] as const
 
-export function CaptionGenerator() {
+function CaptionGeneratorInner() {
   const { toast } = useToast()
+  const searchParams = useSearchParams()
   const [clients, setClients] = useState<Client[]>([])
-  const [selectedClientId, setSelectedClientId] = useState('')
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get('client') ?? '')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [platform, setPlatform] = useState('')
   const [videoTitle, setVideoTitle] = useState('')
@@ -220,5 +222,13 @@ export function CaptionGenerator() {
         </div>
       )}
     </div>
+  )
+}
+
+export function CaptionGenerator() {
+  return (
+    <Suspense>
+      <CaptionGeneratorInner />
+    </Suspense>
   )
 }
