@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, RefreshCw, CheckCircle, XCircle, Clock, Zap } from 'lucide-react'
+import { Sparkles, RefreshCw, CheckCircle, XCircle, Clock, Zap, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 
 interface QueueTask {
@@ -27,6 +27,7 @@ export function AutomationPanel() {
   const [loadingTasks, setLoadingTasks] = useState(false)
   const [processing, setProcessing] = useState<string | null>(null)
   const [results, setResults] = useState<ProcessResult[]>([])
+  const [expandedResult, setExpandedResult] = useState<string | null>(null)
 
   const fetchQueue = async () => {
     setLoadingTasks(true)
@@ -35,7 +36,7 @@ export function AutomationPanel() {
       const data = await res.json()
       setTasks(data.tasks || [])
     } catch {
-      toast({ title: 'Error', description: 'Could not load Video Queue tasks', variant: 'destructive' })
+      toast({ title: 'Error', description: 'No se pudo cargar el Video Queue', variant: 'destructive' })
     } finally {
       setLoadingTasks(false)
     }
@@ -53,9 +54,9 @@ export function AutomationPanel() {
       })
       const result: ProcessResult = await res.json()
       setResults((prev) => [result, ...prev.filter((r) => r.taskId !== taskId)])
-
       if (result.success) {
-        toast({ title: 'Caption generado', description: `"${taskName}" → Metricool draft creado` })
+        setExpandedResult(taskId)
+        toast({ title: 'Caption generado', description: `"${taskName}" → Borrador creado en Metricool` })
       } else {
         toast({ title: 'Error', description: result.error || 'Processing failed', variant: 'destructive' })
       }
@@ -151,7 +152,7 @@ export function AutomationPanel() {
                   ) : (
                     <Zap className="mr-2 h-3.5 w-3.5" />
                   )}
-                  Process All
+                  Procesar Todo
                 </Button>
               )}
             </div>
@@ -161,8 +162,8 @@ export function AutomationPanel() {
           {tasks.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Clock className="mx-auto h-8 w-8 mb-2 opacity-40" />
-              <p className="text-sm">No tasks in Video Queue</p>
-              <p className="text-xs mt-1 opacity-60">Have your editors create tasks in ClickUp → Daily Operation → Video Queue</p>
+              <p className="text-sm">No hay tareas en el Video Queue</p>
+              <p className="text-xs mt-1 opacity-60">Cuando tus editores creen tareas en ClickUp → Video Queue, aparecerán aquí</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -171,7 +172,7 @@ export function AutomationPanel() {
                 const isProcessing = processing === task.id
                 return (
                   <div key={task.id} className="flex items-center justify-between rounded-lg border p-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       {result?.success ? (
                         <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
                       ) : result?.error ? (
@@ -179,12 +180,12 @@ export function AutomationPanel() {
                       ) : (
                         <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                       )}
-                      <p className="text-sm font-medium">{task.name}</p>
+                      <p className="text-sm font-medium truncate">{task.name}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       {result?.success && (
                         <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10 text-xs">
-                          Done
+                          Listo
                         </Badge>
                       )}
                       {!result?.success && (
@@ -199,7 +200,7 @@ export function AutomationPanel() {
                           ) : (
                             <Sparkles className="mr-2 h-3 w-3" />
                           )}
-                          {isProcessing ? 'Generating...' : 'Generate'}
+                          {isProcessing ? 'Generando...' : 'Generar'}
                         </Button>
                       )}
                     </div>
@@ -215,37 +216,76 @@ export function AutomationPanel() {
       {results.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Results</CardTitle>
+            <CardTitle className="text-base">Captions generados</CardTitle>
+            <CardDescription>Revisa y aprueba antes de publicar en Metricool</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {results.map((result, i) => (
-                <div key={i} className="rounded-lg border p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{result.taskTitle}</p>
-                    <Badge
-                      variant="outline"
-                      className={result.success
-                        ? 'text-green-500 border-green-500/30 bg-green-500/10'
-                        : 'text-red-500 border-red-500/30 bg-red-500/10'
-                      }
+              {results.map((result) => {
+                const isExpanded = expandedResult === result.taskId
+                return (
+                  <div key={result.taskId} className="rounded-lg border overflow-hidden">
+                    <div
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                      onClick={() => setExpandedResult(isExpanded ? null : result.taskId)}
                     >
-                      {result.success ? 'Success' : 'Failed'}
-                    </Badge>
+                      <div className="flex items-center gap-3 min-w-0">
+                        {result.success ? (
+                          <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500 shrink-0" />
+                        )}
+                        <p className="text-sm font-medium truncate">{result.taskTitle}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge
+                          variant="outline"
+                          className={result.success
+                            ? 'text-green-500 border-green-500/30 bg-green-500/10 text-xs'
+                            : 'text-red-500 border-red-500/30 bg-red-500/10 text-xs'
+                          }
+                        >
+                          {result.success ? 'Listo' : 'Error'}
+                        </Badge>
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 space-y-3 border-t pt-3">
+                        {result.caption && (
+                          <div className="rounded-md bg-muted/50 p-3">
+                            <p className="text-sm whitespace-pre-line leading-relaxed">{result.caption}</p>
+                          </div>
+                        )}
+                        {result.error && (
+                          <p className="text-xs text-red-500 bg-red-500/10 rounded px-3 py-2">{result.error}</p>
+                        )}
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          {result.metricoolPostId && (
+                            <span className="flex items-center gap-1">
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              Borrador creado en Metricool
+                              <a
+                                href="https://app.metricool.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline flex items-center gap-0.5 ml-1"
+                              >
+                                Abrir Metricool <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {result.caption && (
-                    <p className="text-xs text-muted-foreground line-clamp-3 font-mono whitespace-pre-wrap">
-                      {result.caption}
-                    </p>
-                  )}
-                  {result.error && (
-                    <p className="text-xs text-red-500">{result.error}</p>
-                  )}
-                  {result.metricoolPostId && (
-                    <p className="text-xs text-muted-foreground">Metricool draft ID: {result.metricoolPostId}</p>
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </CardContent>
         </Card>

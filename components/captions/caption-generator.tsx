@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/select'
 import { Sparkles, Copy, CheckCheck, RefreshCw } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
-import { getStoredConfig, getPosts, formatDateParam } from '@/lib/metricool/client'
 import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import type { Client } from '@/lib/supabase/types'
 
@@ -29,6 +28,7 @@ export function CaptionGenerator() {
   const [platform, setPlatform] = useState('')
   const [videoTitle, setVideoTitle] = useState('')
   const [generatedCaption, setGeneratedCaption] = useState('')
+  const [examplesUsed, setExamplesUsed] = useState(0)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -61,22 +61,7 @@ export function CaptionGenerator() {
 
     setLoading(true)
     setGeneratedCaption('')
-
-    let existingCaptions: { text: string; provider: string }[] = []
-    try {
-      const config = getStoredConfig()
-      if (config) {
-        const end = new Date()
-        const start = new Date()
-        start.setDate(start.getDate() - 90)
-        const posts = await getPosts(config, formatDateParam(start), formatDateParam(end))
-        existingCaptions = posts
-          .filter((p) => p.text && p.text.trim().length > 20)
-          .map((p) => ({ text: p.text, provider: p.provider }))
-      }
-    } catch {
-      // proceed without examples
-    }
+    setExamplesUsed(0)
 
     try {
       const res = await fetch('/api/generate-caption', {
@@ -86,7 +71,8 @@ export function CaptionGenerator() {
           videoTitle,
           platform,
           clientName: selectedClient?.name || '',
-          existingCaptions,
+          industry: selectedClient?.industry || '',
+          metricoolBlogId: selectedClient?.metricool_blog_id || '',
           brandVoice: selectedClient?.brand_voice || '',
           captionLanguage: selectedClient?.caption_language || 'spanish',
           defaultCta: selectedClient?.default_cta || '',
@@ -99,10 +85,11 @@ export function CaptionGenerator() {
       if (!res.ok) throw new Error(data.error || 'Error generando caption')
 
       setGeneratedCaption(data.caption)
+      setExamplesUsed(data.examplesUsed ?? 0)
       toast({
         title: 'Caption generado',
-        description: existingCaptions.length > 0
-          ? `Basado en ${existingCaptions.length} captions de Metricool`
+        description: data.examplesUsed > 0
+          ? `Basado en ${data.examplesUsed} captions reales de Metricool`
           : 'Generado con el perfil del cliente',
       })
     } catch (err) {
@@ -171,8 +158,12 @@ export function CaptionGenerator() {
           {selectedClient && (
             <div className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground space-y-0.5">
               {selectedClient.brand_voice && <p><span className="font-medium">Voz:</span> {selectedClient.brand_voice}</p>}
+              {selectedClient.caption_language && <p><span className="font-medium">Idioma:</span> {selectedClient.caption_language}</p>}
               {selectedClient.default_cta && <p><span className="font-medium">CTA:</span> {selectedClient.default_cta}</p>}
               {selectedClient.caption_notes && <p><span className="font-medium">Reglas:</span> {selectedClient.caption_notes}</p>}
+              {selectedClient.metricool_blog_id && (
+                <p className="text-green-600 dark:text-green-400"><span className="font-medium">Metricool:</span> perfil de estilo conectado</p>
+              )}
             </div>
           )}
 
@@ -181,7 +172,7 @@ export function CaptionGenerator() {
               {loading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               {loading ? 'Generando...' : 'Generar Caption'}
             </Button>
-            <Button variant="outline" onClick={() => { setSelectedClientId(''); setPlatform(''); setVideoTitle(''); setGeneratedCaption('') }}>
+            <Button variant="outline" onClick={() => { setSelectedClientId(''); setPlatform(''); setVideoTitle(''); setGeneratedCaption(''); setExamplesUsed(0) }}>
               Limpiar
             </Button>
           </div>
@@ -192,7 +183,12 @@ export function CaptionGenerator() {
         <Card>
           <CardContent className="pt-6 space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold">Caption generado</Label>
+              <div>
+                <Label className="text-base font-semibold">Caption generado</Label>
+                {examplesUsed > 0 && (
+                  <p className="text-xs text-muted-foreground mt-0.5">Aprendido de {examplesUsed} captions reales de este cliente</p>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleGenerate} disabled={loading}>
                   <RefreshCw className="mr-2 h-3.5 w-3.5" />
@@ -220,7 +216,7 @@ export function CaptionGenerator() {
           <Sparkles className="mx-auto h-10 w-10 mb-3 opacity-50" />
           <p className="text-lg font-medium">Genera captions con IA</p>
           <p className="text-sm mt-1">Selecciona un cliente, escribe el título del video y presiona &quot;Generar Caption&quot;</p>
-          <p className="text-xs mt-2 opacity-60">El modelo aprende del estilo de tus captions en Metricool y del perfil del cliente</p>
+          <p className="text-xs mt-2 opacity-60">La IA aprende del estilo real de cada cliente en Metricool</p>
         </div>
       )}
     </div>

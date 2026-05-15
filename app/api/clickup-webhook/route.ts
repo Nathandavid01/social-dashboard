@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 import { processClickUpTask } from '@/lib/automation/process-task'
 import { VIDEO_QUEUE_LIST_ID } from '@/lib/clickup/client'
 
+function verifySignature(rawBody: string, signature: string | null): boolean {
+  const secret = process.env.CLICKUP_WEBHOOK_SECRET
+  if (!secret || !signature) return false
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  return expected === signature
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    const rawBody = await req.text()
+    const signature = req.headers.get('x-signature')
+
+    if (!verifySignature(rawBody, signature)) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+
+    const body = JSON.parse(rawBody)
 
     // ClickUp sends a verification challenge on webhook setup
     if (body.webhook_id && !body.task_id) {

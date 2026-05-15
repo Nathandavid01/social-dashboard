@@ -7,7 +7,8 @@ import { StatusBadge } from '@/components/clients/status-badge'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Pencil, Calendar, CheckSquare } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Pencil, Calendar, CheckSquare, Sparkles, Brain } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export default async function ClientDetailPage({
@@ -35,18 +36,28 @@ export default async function ClientDetailPage({
       .limit(10),
   ])
 
+  const hasAiProfile = client.brand_voice || client.caption_language || client.default_cta || client.default_hashtags || client.caption_notes
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={client.name}
         description={client.industry ?? undefined}
         action={
-          <Button asChild variant="outline">
-            <Link href={`/clients/${id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link href={`/captions?client=${id}`}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generar Caption
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/clients/${id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -78,6 +89,53 @@ export default async function ClientDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Caption Profile */}
+      {hasAiProfile && (
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-2 pb-3">
+            <Brain className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm">Caption AI Profile</CardTitle>
+            {client.metricool_blog_id && (
+              <Badge variant="outline" className="text-green-600 border-green-500/30 bg-green-500/10 text-xs ml-auto">
+                Metricool conectado
+              </Badge>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {client.caption_language && (
+              <div className="flex items-start gap-2 text-sm">
+                <span className="font-medium text-muted-foreground w-28 shrink-0">Idioma</span>
+                <span className="capitalize">{client.caption_language}</span>
+              </div>
+            )}
+            {client.brand_voice && (
+              <div className="flex items-start gap-2 text-sm">
+                <span className="font-medium text-muted-foreground w-28 shrink-0">Brand Voice</span>
+                <span>{client.brand_voice}</span>
+              </div>
+            )}
+            {client.default_cta && (
+              <div className="flex items-start gap-2 text-sm">
+                <span className="font-medium text-muted-foreground w-28 shrink-0">CTA</span>
+                <span>{client.default_cta}</span>
+              </div>
+            )}
+            {client.default_hashtags && (
+              <div className="flex items-start gap-2 text-sm">
+                <span className="font-medium text-muted-foreground w-28 shrink-0">Hashtags</span>
+                <span className="text-xs font-mono text-muted-foreground">{client.default_hashtags}</span>
+              </div>
+            )}
+            {client.caption_notes && (
+              <div className="flex items-start gap-2 text-sm">
+                <span className="font-medium text-muted-foreground w-28 shrink-0">Reglas</span>
+                <span className="text-muted-foreground">{client.caption_notes}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {client.notes && (
         <Card>

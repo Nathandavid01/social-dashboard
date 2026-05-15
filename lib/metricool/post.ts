@@ -26,7 +26,8 @@ function getServerConfig(): MetricoolServerConfig | null {
 export async function createDraftPost(
   caption: string,
   blogId?: string,
-  platforms?: string[]
+  platforms?: string[],
+  driveLink?: string
 ): Promise<MetricoolDraftResponse> {
   const config = getServerConfig()
   if (!config) throw new Error('Metricool server credentials not configured')
@@ -56,6 +57,7 @@ export async function createDraftPost(
       draft: true,
       providers,
       publicationDate,
+      ...(driveLink ? { firstCommentText: driveLink } : {}),
     }),
   })
 

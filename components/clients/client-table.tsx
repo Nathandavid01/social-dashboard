@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MoreHorizontal, Pencil, Trash2, Eye, Search } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Users } from 'lucide-react'
 
@@ -112,9 +112,21 @@ export function ClientTable({ clients }: ClientTableProps) {
               {filtered.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/clients/${client.id}`} className="hover:text-primary transition-colors">
-                      {client.name}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/clients/${client.id}`} className="hover:text-primary transition-colors">
+                        {client.name}
+                      </Link>
+                      {client.metricool_blog_id && (
+                        <span title="Metricool conectado" className="shrink-0">
+                          <Zap className="h-3 w-3 text-yellow-500" />
+                        </span>
+                      )}
+                      {client.brand_voice && (
+                        <span title="Perfil de IA configurado" className="shrink-0">
+                          <Brain className="h-3 w-3 text-purple-500" />
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                     {client.industry || '—'}
