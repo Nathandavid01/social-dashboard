@@ -110,8 +110,8 @@ export async function processClickUpTask(taskId: string): Promise<ProcessResult>
     // 5. Post to Metricool as draft
     let metricoolPostId: string | number | undefined
     try {
-      const draft = await createDraftPost(caption, client?.metricool_blog_id ?? undefined)
-      metricoolPostId = draft.id ?? draft.uuid
+      const draft = await createDraftPost(caption, client?.metricool_blog_id ?? undefined, client?.platforms ?? undefined)
+      metricoolPostId = draft.data?.id ?? draft.data?.uuid
     } catch (err) {
       console.error('Metricool post failed:', err)
     }

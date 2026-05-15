@@ -6,15 +6,12 @@ export interface MetricoolServerConfig {
   blogId: string
 }
 
-export interface CreateDraftPost {
-  text: string
-  blogId: string
-  userId: string
-}
-
 export interface MetricoolDraftResponse {
-  id?: number
-  uuid?: string
+  data?: {
+    id?: number
+    uuid?: string
+    [key: string]: unknown
+  }
   [key: string]: unknown
 }
 
@@ -26,14 +23,27 @@ function getServerConfig(): MetricoolServerConfig | null {
   return { userToken: token, userId, blogId }
 }
 
-async function metricoolPost<T>(
-  endpoint: string,
-  config: MetricoolServerConfig,
-  body: Record<string, unknown>
-): Promise<T> {
-  const url = new URL(`${METRICOOL_BASE}${endpoint}`)
+export async function createDraftPost(
+  caption: string,
+  blogId?: string,
+  platforms?: string[]
+): Promise<MetricoolDraftResponse> {
+  const config = getServerConfig()
+  if (!config) throw new Error('Metricool server credentials not configured')
+
+  const effectiveBlogId = blogId || config.blogId
+
+  const providers = (platforms && platforms.length > 0 ? platforms : ['instagram', 'facebook', 'tiktok'])
+    .map((p) => ({ network: p.toLowerCase() }))
+
+  const publicationDate = {
+    dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 19),
+    timezone: 'America/Puerto_Rico',
+  }
+
+  const url = new URL(`${METRICOOL_BASE}/v2/scheduler/posts`)
   url.searchParams.set('userId', config.userId)
-  url.searchParams.set('blogId', config.blogId)
+  url.searchParams.set('blogId', effectiveBlogId)
 
   const res = await fetch(url.toString(), {
     method: 'POST',
@@ -41,7 +51,12 @@ async function metricoolPost<T>(
       'X-Mc-Auth': config.userToken,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      text: caption,
+      draft: true,
+      providers,
+      publicationDate,
+    }),
   })
 
   if (!res.ok) {
@@ -49,27 +64,7 @@ async function metricoolPost<T>(
     throw new Error(`Metricool API error: ${res.status} - ${text}`)
   }
 
-  return res.json() as Promise<T>
-}
-
-export async function createDraftPost(
-  caption: string,
-  blogId?: string
-): Promise<MetricoolDraftResponse> {
-  const config = getServerConfig()
-  if (!config) throw new Error('Metricool server credentials not configured')
-
-  const effectiveBlogId = blogId || config.blogId
-
-  return metricoolPost<MetricoolDraftResponse>(
-    '/v2/scheduler/post',
-    { ...config, blogId: effectiveBlogId },
-    {
-      text: caption,
-      draft: true,
-      blogId: Number(effectiveBlogId),
-    }
-  )
+  return res.json() as Promise<MetricoolDraftResponse>
 }
 
 export { getServerConfig }
