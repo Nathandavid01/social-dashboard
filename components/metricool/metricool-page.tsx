@@ -8,7 +8,7 @@ import { MetricoolDashboard } from './metricool-dashboard'
 const DEFAULT_CONFIG = {
   userToken: 'ZTHVWXJOYRYXTRNHGEQSYJDKFAYSPTQCXTILGYIJBTGMMUGDTYOTPNVXSHMLGBZG',
   userId: '3746997',
-  blogId: '5923041',
+  blogId: '5062650',
 }
 
 export function MetricoolPage() {
