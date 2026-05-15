@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { RefreshCw } from 'lucide-react'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
   { value: 'instagram', label: 'Instagram' },
@@ -251,19 +252,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="metricool_blog_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Metricool Blog ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. 12345" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <MetricoolBlogPicker form={form} />
         </div>
 
         <FormField
@@ -340,5 +329,80 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
         </div>
       </form>
     </Form>
+  )
+}
+
+interface MetricoolBlog {
+  id: string
+  name: string
+  url: string
+}
+
+function MetricoolBlogPicker({ form }: { form: ReturnType<typeof useForm<ClientFormValues>> }) {
+  const [blogs, setBlogs] = useState<MetricoolBlog[]>([])
+  const [loading, setLoading] = useState(false)
+  const [fetched, setFetched] = useState(false)
+  const currentValue = form.watch('metricool_blog_id')
+
+  const fetchBlogs = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/metricool/blogs')
+      const data = await res.json()
+      if (data.blogs) {
+        setBlogs(data.blogs)
+        setFetched(true)
+      }
+    } catch {
+      // fall back to manual input
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <FormField
+      control={form.control}
+      name="metricool_blog_id"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Metricool Blog ID</FormLabel>
+          {fetched && blogs.length > 0 ? (
+            <Select onValueChange={field.onChange} value={field.value ?? ''}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar cuenta" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {blogs.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.name} <span className="text-muted-foreground ml-1 text-xs">({b.id})</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="flex gap-2">
+              <FormControl>
+                <Input placeholder="e.g. 5062650" {...field} />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={fetchBlogs}
+                disabled={loading}
+                className="shrink-0"
+              >
+                {loading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : 'Buscar'}
+              </Button>
+            </div>
+          )}
+          {currentValue && <p className="text-xs text-muted-foreground mt-1">ID: {currentValue}</p>}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   )
 }

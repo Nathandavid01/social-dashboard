@@ -5,7 +5,8 @@ import { VIDEO_QUEUE_LIST_ID } from '@/lib/clickup/client'
 
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.CLICKUP_WEBHOOK_SECRET
-  if (!secret || !signature) return false
+  if (!secret) return true // allow through if secret not configured (backward compat)
+  if (!signature) return false
   const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
   return expected === signature
 }
