@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Topbar } from '@/components/layout/topbar'
 import { DashboardProviders } from '@/components/layout/dashboard-providers'
+import { ChatBubble } from '@/components/chat/chat-bubble'
 import { Toaster } from '@/components/ui/toaster'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
@@ -39,6 +40,7 @@ export default async function DashboardLayout({
           </main>
         </div>
         <Toaster />
+        <ChatBubble />
       </div>
     </DashboardProviders>
   )

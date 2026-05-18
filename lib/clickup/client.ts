@@ -4,7 +4,8 @@ const TOKEN = process.env.CLICKUP_API_TOKEN!
 // Field IDs for Video Queue list
 export const FIELD_IDS = {
   driveLink: '5d77dc39-032a-4156-b7c1-9c31e4753be8',
-  cliente: 'fc3fa0c6-8fd4-46ab-b695-afd00806927c',
+  clientName: 'ac77d5c0-8965-4dc5-b49b-7a9a2177481f',
+  cliente: 'fc3fa0c6-8fd4-46ab-b695-afd00806927c', // legacy dropdown, kept for fallback
 }
 
 export const VIDEO_QUEUE_LIST_ID = '901416434640'
@@ -48,16 +49,23 @@ export function extractTaskFields(task: ClickUpTask): {
   clientName: string | null
 } {
   const driveField = task.custom_fields.find((f) => f.id === FIELD_IDS.driveLink)
-  const clientField = task.custom_fields.find((f) => f.id === FIELD_IDS.cliente)
+  // Prefer text "Client Name" field; fall back to legacy dropdown "Cliente"
+  const clientTextField = task.custom_fields.find((f) => f.id === FIELD_IDS.clientName)
+  const clientDropField = task.custom_fields.find((f) => f.id === FIELD_IDS.cliente)
+
+  let clientName: string | null = null
+  if (clientTextField?.value) {
+    clientName = String(clientTextField.value).trim() || null
+  } else if (clientDropField?.value) {
+    clientName = typeof clientDropField.value === 'object'
+      ? (clientDropField.value as { name?: string })?.name ?? null
+      : String(clientDropField.value)
+  }
 
   return {
     title: task.name,
     driveLink: driveField?.value ? String(driveField.value) : null,
-    clientName: clientField?.value
-      ? typeof clientField.value === 'object'
-        ? (clientField.value as { name?: string })?.name ?? null
-        : String(clientField.value)
-      : null,
+    clientName,
   }
 }
 
