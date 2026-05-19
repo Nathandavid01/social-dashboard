@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
   const start = new Date()
   switch (range) {
     case '7d': start.setDate(start.getDate() - 7); break
+    case '14d': start.setDate(start.getDate() - 14); break
     case '30d': start.setDate(start.getDate() - 30); break
     case '90d': start.setDate(start.getDate() - 90); break
     case '180d': start.setDate(start.getDate() - 180); break
@@ -76,13 +77,13 @@ export async function GET(req: NextRequest) {
     const supabase = await createClient()
 
     if (all) {
-      // Fetch from all clients with metricool_blog_id in parallel (cap at 20 to avoid rate limits)
+      // Fetch from all active clients with metricool_blog_id in parallel
       const { data: clients } = await supabase
         .from('clients')
         .select('id, name, metricool_blog_id')
         .not('metricool_blog_id', 'is', null)
         .eq('status', 'active')
-        .limit(20)
+        .limit(50)
 
       if (!clients?.length) return NextResponse.json({ posts: [] })
 

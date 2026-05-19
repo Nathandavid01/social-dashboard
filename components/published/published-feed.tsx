@@ -15,7 +15,7 @@ import {
 import { RefreshCw, ChevronDown, ChevronUp, ExternalLink, ImageIcon } from 'lucide-react'
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
 
-type Range = '7d' | '30d' | '90d' | '180d'
+type Range = '7d' | '14d' | '30d' | '90d' | '180d'
 
 interface Client {
   id: string
@@ -144,7 +144,7 @@ function PostCard({ post }: { post: PublishedPost }) {
 export function PublishedFeed({ clients }: { clients: Client[] }) {
   const [posts, setPosts] = useState<PublishedPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState<Range>('30d')
+  const [range, setRange] = useState<Range>('14d')
   const [selectedBlogId, setSelectedBlogId] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
   const [totalFetched, setTotalFetched] = useState(0)
@@ -201,6 +201,7 @@ export function PublishedFeed({ clients }: { clients: Client[] }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="7d">Últimos 7 días</SelectItem>
+              <SelectItem value="14d">Últimas 2 semanas</SelectItem>
               <SelectItem value="30d">Últimos 30 días</SelectItem>
               <SelectItem value="90d">Últimos 90 días</SelectItem>
               <SelectItem value="180d">Últimos 6 meses</SelectItem>

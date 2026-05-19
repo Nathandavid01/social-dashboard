@@ -53,6 +53,11 @@ const tools: Anthropic.Tool[] = [
       required: ['client_name', 'topic'],
     },
   },
+  {
+    name: 'get_video_queue',
+    description: 'Get the current tasks in the ClickUp Video Queue — videos waiting to be processed into captions.',
+    input_schema: { type: 'object' as const, properties: {} },
+  },
 ]
 
 // ── Tool executors ───────────────────────────────────────────────────────────
@@ -199,6 +204,27 @@ async function execGenerateCaption(clientName: string, topic: string, platform?:
   }
 }
 
+async function execGetVideoQueue(): Promise<string> {
+  try {
+    const token = process.env.CLICKUP_API_TOKEN
+    if (!token) return 'ClickUp not configured.'
+    const res = await fetch('https://api.clickup.com/api/v2/list/901416434640/task?archived=false&include_closed=false', {
+      headers: { Authorization: token },
+    })
+    if (!res.ok) return 'Could not reach ClickUp.'
+    const data = await res.json() as { tasks?: { name: string; status: { status: string }; custom_fields?: { name: string; value?: unknown }[] }[] }
+    const tasks = data.tasks || []
+    if (!tasks.length) return 'No tasks in Video Queue right now.'
+    return tasks.map((t) => {
+      const cn = t.custom_fields?.find((f) => f.name === 'Client Name')?.value
+      const dr = t.custom_fields?.find((f) => f.name === 'Drive Link')?.value
+      return `- **${t.name}** | Cliente: ${cn || 'sin asignar'} | Drive: ${dr ? '✓' : 'sin link'} | Status: ${t.status?.status}`
+    }).join('\n')
+  } catch {
+    return 'Error fetching Video Queue.'
+  }
+}
+
 // ── Tool router ──────────────────────────────────────────────────────────────
 
 async function runTool(name: string, input: Record<string, unknown>): Promise<string> {
@@ -211,6 +237,8 @@ async function runTool(name: string, input: Record<string, unknown>): Promise<st
       return execGetTasks(input.status as string | undefined, input.client_name as string | undefined)
     case 'generate_caption':
       return execGenerateCaption(input.client_name as string, input.topic as string, input.platform as string | undefined)
+    case 'get_video_queue':
+      return execGetVideoQueue()
     default:
       return 'Unknown tool'
   }
@@ -218,13 +246,22 @@ async function runTool(name: string, input: Record<string, unknown>): Promise<st
 
 // ── Route handler ────────────────────────────────────────────────────────────
 
-const SYSTEM = `You are NMedia AI, the intelligent assistant for NMedia PR — a Puerto Rican digital marketing agency with 48 clients.
+const SYSTEM = `You are NMedia AI, the intelligent assistant for NMedia PR — a Puerto Rican digital marketing agency with 48 active clients.
 
-You have access to tools that let you look up real-time data: client profiles, open tasks, and caption generation.
+You have real-time access to:
+- All client profiles (brand voice, hashtags, CTA, rules, language, Metricool connection)
+- Operations board (pending, in-progress, and blocked tasks)
+- ClickUp Video Queue (videos waiting for captions)
+- Caption generation (write captions on demand with each client's real style)
 
-You respond like a senior team member: direct, helpful, and knowledgeable. When someone asks about a client, search for them. When asked to generate a caption, use the generate_caption tool. When asked about tasks or operations, use get_tasks.
-
-Always respond in the same language the user writes in (Spanish or English).`
+Behavior:
+- When someone asks about a specific client → search_client
+- When asked to list clients → list_clients
+- When asked about tasks/operations → get_tasks
+- When asked about the Video Queue or pending videos → get_video_queue
+- When asked to write or generate a caption → generate_caption
+- Keep responses concise and actionable — you're talking to busy agency staff
+- Always respond in the same language the user writes in (Spanish or English)`
 
 export async function POST(req: NextRequest) {
   try {

@@ -15,10 +15,10 @@ interface Message {
 const STORAGE_KEY = 'nmedia_chat_history'
 
 const SUGGESTIONS = [
-  'Dame el perfil de Quantika Global',
-  '¿Qué tareas están pendientes?',
+  '¿Qué videos están en el Video Queue?',
   'Genera un caption para Pizzeria San Lazaro sobre una nueva pizza',
-  'Lista todos los clientes activos',
+  '¿Qué tareas están pendientes hoy?',
+  'Dame el perfil completo de Quantika Global',
 ]
 
 function CopyButton({ text }: { text: string }) {
