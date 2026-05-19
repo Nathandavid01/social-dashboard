@@ -9,6 +9,7 @@ import {
   Activity,
   ClipboardCheck,
   Zap,
+  Globe,
   type LucideIcon,
 } from 'lucide-react'
 import type { UserRole } from '@/lib/supabase/types'
@@ -28,6 +29,7 @@ export const navItems: NavItem[] = [
   { href: '/performance', label: 'Performance', icon: BarChart3 },
   { href: '/efficiency', label: 'Efficiency', icon: Gauge },
   { href: '/captions', label: 'Captions', icon: MessageSquareText },
+  { href: '/published', label: 'Publicados', icon: Globe },
   { href: '/metricool', label: 'Metricool', icon: Activity },
   { href: '/schedule-check', label: 'Verificacion', icon: ClipboardCheck },
   { href: '/automation', label: 'Automation', icon: Zap },
