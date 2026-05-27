@@ -83,7 +83,7 @@ export function EfficiencyTable({ rows }: Props) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search clients..."
+            placeholder="Buscar clientes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -94,19 +94,22 @@ export function EfficiencyTable({ rows }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="paused">Paused</SelectItem>
+            <SelectItem value="all">Todos los estados</SelectItem>
+            <SelectItem value="active">Activo</SelectItem>
+            <SelectItem value="paused">Pausado</SelectItem>
             <SelectItem value="onboarding">Onboarding</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
+      {filtered.length > 0 && (
+        <p className="text-xs text-muted-foreground/60">* Las publicaciones requieren datos de Metricool — el score se basa en salud de tareas y producción.</p>
+      )}
       {filtered.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No clients found"
-          description="Try adjusting your filters."
+          title="Sin clientes"
+          description="Ajusta los filtros para ver resultados."
         />
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
@@ -114,14 +117,12 @@ export function EfficiencyTable({ rows }: Props) {
             <TableHeader>
               <TableRow>
                 <SortHeader label="Score" col="score" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} />
-                <SortHeader label="Client" col="name" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} />
-                <TableHead className="hidden lg:table-cell">Status</TableHead>
-                <SortHeader label="Open" col="openTasks" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden md:table-cell text-right" />
-                <SortHeader label="Overdue" col="overdueTasks" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="text-right" />
-                <SortHeader label="Done 30d" col="completedTasks30d" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden md:table-cell text-right" />
-                <SortHeader label="Posts 30d" col="postsPublished30d" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden md:table-cell text-right" />
-                <SortHeader label="Next 7d" col="postsScheduledNext7d" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden lg:table-cell text-right" />
-                <SortHeader label="Last Post" col="daysSinceLastPost" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden lg:table-cell text-right" />
+                <SortHeader label="Cliente" col="name" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} />
+                <TableHead className="hidden lg:table-cell">Estado</TableHead>
+                <SortHeader label="Abiertas" col="openTasks" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden md:table-cell text-right" />
+                <SortHeader label="Vencidas" col="overdueTasks" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="text-right" />
+                <SortHeader label="Hechas 30d" col="completedTasks30d" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} className="hidden md:table-cell text-right" />
+                <TableHead className="hidden lg:table-cell text-right text-muted-foreground/60">Posts 30d*</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -160,25 +161,8 @@ export function EfficiencyTable({ rows }: Props) {
                   <TableCell className="hidden md:table-cell text-right tabular-nums text-muted-foreground">
                     {r.completedTasks30d}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-right tabular-nums text-muted-foreground">
-                    {r.postsPublished30d}
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-right tabular-nums text-muted-foreground">
-                    {r.postsScheduledNext7d}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      'hidden lg:table-cell text-right tabular-nums text-muted-foreground',
-                      r.daysSinceLastPost != null &&
-                        r.daysSinceLastPost > 14 &&
-                        'text-yellow-500',
-                    )}
-                  >
-                    {r.daysSinceLastPost == null
-                      ? '—'
-                      : r.daysSinceLastPost === 0
-                      ? 'today'
-                      : `${r.daysSinceLastPost}d ago`}
+                  <TableCell className="hidden lg:table-cell text-right tabular-nums text-muted-foreground/50 text-xs">
+                    — *
                   </TableCell>
                 </TableRow>
               ))}

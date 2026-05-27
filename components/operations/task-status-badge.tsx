@@ -3,10 +3,10 @@ import { cn, taskStatusColors } from '@/lib/utils'
 import type { TaskStatus } from '@/lib/supabase/types'
 
 const taskStatusLabels: Record<TaskStatus, string> = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  completed: 'Completed',
-  blocked: 'Blocked',
+  pending: 'Pendiente',
+  in_progress: 'En Progreso',
+  completed: 'Completado',
+  blocked: 'Bloqueado',
 }
 
 export function TaskStatusBadge({ status }: { status: TaskStatus }) {

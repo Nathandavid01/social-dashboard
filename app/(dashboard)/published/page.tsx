@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { PageHeader } from '@/components/shared/page-header'
-import { PublishedFeed } from '@/components/published/published-feed'
+import { PublishedPageClient } from '@/components/published/published-page-client'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PublishedPage() {
   const supabase = await createClient()
@@ -11,13 +12,5 @@ export default async function PublishedPage() {
     .eq('status', 'active')
     .order('name')
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Posts Publicados"
-        description="Todo el contenido publicado y programado en Metricool"
-      />
-      <PublishedFeed clients={clients ?? []} />
-    </div>
-  )
+  return <PublishedPageClient clients={clients ?? []} />
 }

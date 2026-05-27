@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Users } from 'lucide-react'
 
@@ -52,13 +52,13 @@ export function ClientTable({ clients }: ClientTableProps) {
   })
 
   function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    if (!confirm(`¿Eliminar "${name}"? Esto no se puede deshacer.`)) return
     startTransition(async () => {
       const result = await deleteClient(id)
       if (result.error) {
         toast({ title: 'Error', description: result.error, variant: 'destructive' })
       } else {
-        toast({ title: 'Client deleted', description: `${name} has been removed.` })
+        toast({ title: 'Cliente eliminado', description: `${name} ha sido eliminado.` })
       }
     })
   }
@@ -70,7 +70,7 @@ export function ClientTable({ clients }: ClientTableProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search clients..."
+            placeholder="Buscar clientes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -78,12 +78,12 @@ export function ClientTable({ clients }: ClientTableProps) {
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder="Todos los estados" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="paused">Paused</SelectItem>
+            <SelectItem value="all">Todos los estados</SelectItem>
+            <SelectItem value="active">Activo</SelectItem>
+            <SelectItem value="paused">Pausado</SelectItem>
             <SelectItem value="onboarding">Onboarding</SelectItem>
           </SelectContent>
         </Select>
@@ -92,19 +92,19 @@ export function ClientTable({ clients }: ClientTableProps) {
       {filtered.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No clients found"
-          description="Try adjusting your filters or add a new client."
+          title="Sin clientes"
+          description="Ajusta los filtros o agrega un nuevo cliente."
         />
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Client</TableHead>
-                <TableHead className="hidden md:table-cell">Industry</TableHead>
-                <TableHead className="hidden sm:table-cell">Platforms</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Assigned To</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead className="hidden md:table-cell">Industria</TableHead>
+                <TableHead className="hidden sm:table-cell">Plataformas</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead className="hidden lg:table-cell">Asignado a</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -151,22 +151,36 @@ export function ClientTable({ clients }: ClientTableProps) {
                         <DropdownMenuItem asChild>
                           <Link href={`/clients/${client.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
-                            View
+                            Ver
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/clients/${client.id}/edit`}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            Editar
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/captions?client=${client.id}`}>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Generar Caption
+                          </Link>
+                        </DropdownMenuItem>
+                        {client.metricool_blog_id && (
+                          <DropdownMenuItem asChild>
+                            <Link href={`/published?blogId=${client.metricool_blog_id}`}>
+                              <Globe className="mr-2 h-4 w-4" />
+                              Ver publicados
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive cursor-pointer"
                           onClick={() => handleDelete(client.id, client.name)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Eliminar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

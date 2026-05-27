@@ -27,7 +27,8 @@ export async function createDraftPost(
   caption: string,
   blogId?: string,
   platforms?: string[],
-  driveLink?: string
+  driveLink?: string,
+  scheduledFor?: string  // ISO datetime — defaults to 24h from now
 ): Promise<MetricoolDraftResponse> {
   const config = getServerConfig()
   if (!config) throw new Error('Metricool server credentials not configured')
@@ -37,8 +38,13 @@ export async function createDraftPost(
   const providers = (platforms && platforms.length > 0 ? platforms : ['instagram', 'facebook', 'tiktok'])
     .map((p) => ({ network: p.toLowerCase() }))
 
+  const dateTime = (scheduledFor
+    ? new Date(scheduledFor)
+    : new Date(Date.now() + 24 * 60 * 60 * 1000)
+  ).toISOString().slice(0, 19)
+
   const publicationDate = {
-    dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 19),
+    dateTime,
     timezone: 'America/Puerto_Rico',
   }
 

@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { KpiCard } from '@/components/performance/kpi-card'
 import { EngagementChart } from '@/components/performance/engagement-chart'
 import { PlatformBreakdown } from '@/components/performance/platform-breakdown'
-import { Users, CalendarCheck, AlertCircle, Clock } from 'lucide-react'
+import { Users, CheckCircle2, AlertCircle, ShieldAlert, Clock } from 'lucide-react'
 import { startOfWeek, endOfWeek } from 'date-fns'
 
 export default async function PerformancePage() {
@@ -12,29 +12,38 @@ export default async function PerformancePage() {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
 
+  const now = new Date()
+
   const [
     { count: totalActive },
-    { count: postsThisWeek },
-    { count: pendingApprovals },
+    { count: completedThisWeek },
     { count: alertCount },
+    { count: blockedTasks },
+    { count: overdueTasks },
   ] = await Promise.all([
     supabase
       .from('clients')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'active'),
     supabase
-      .from('content_events')
-      .select('id', { count: 'exact', head: true })
-      .gte('scheduled_at', weekStart.toISOString())
-      .lte('scheduled_at', weekEnd.toISOString()),
-    supabase
       .from('tasks')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'pending')
-      .eq('type', 'review'),
+      .eq('status', 'completed')
+      .gte('updated_at', weekStart.toISOString())
+      .lte('updated_at', weekEnd.toISOString()),
     supabase
       .from('alerts')
       .select('id', { count: 'exact', head: true }),
+    supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'blocked'),
+    supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .neq('status', 'completed')
+      .not('due_at', 'is', null)
+      .lt('due_at', now.toISOString()),
   ])
 
   return (
@@ -45,33 +54,40 @@ export default async function PerformancePage() {
       />
 
       {/* KPI Bar */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard
-          label="Active Clients"
+          label="Clientes Activos"
           value={totalActive ?? 0}
           icon={Users}
-          description="Currently active"
+          description="En operación activa"
         />
         <KpiCard
-          label="Posts This Week"
-          value={postsThisWeek ?? 0}
-          icon={CalendarCheck}
-          description="Scheduled for this week"
+          label="Tasks esta semana"
+          value={completedThisWeek ?? 0}
+          icon={CheckCircle2}
+          description="Completadas esta semana"
           highlight="success"
         />
         <KpiCard
-          label="Pending Reviews"
-          value={pendingApprovals ?? 0}
+          label="Tasks Vencidas"
+          value={overdueTasks ?? 0}
           icon={Clock}
-          description="Awaiting approval"
-          highlight="warning"
+          description="Pasaron la fecha límite"
+          highlight={(overdueTasks ?? 0) > 0 ? 'danger' : 'default'}
         />
         <KpiCard
-          label="Active Alerts"
+          label="Tasks Bloqueadas"
+          value={blockedTasks ?? 0}
+          icon={ShieldAlert}
+          description="Necesitan atención"
+          highlight={(blockedTasks ?? 0) > 0 ? 'warning' : 'default'}
+        />
+        <KpiCard
+          label="Alertas Activas"
           value={alertCount ?? 0}
           icon={AlertCircle}
-          description="Require attention"
-          highlight={alertCount && alertCount > 0 ? 'danger' : 'default'}
+          description="Requieren atención"
+          highlight={alertCount && alertCount > 0 ? 'warning' : 'default'}
         />
       </div>
 

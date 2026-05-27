@@ -6,7 +6,13 @@ import { cn } from '@/lib/utils'
 import { navItems } from './nav-items'
 import { Zap } from 'lucide-react'
 
-export function Sidebar() {
+interface SidebarProps {
+  overdueCount?: number
+  requestsCount?: number
+  videoReviewCount?: number
+}
+
+export function Sidebar({ overdueCount = 0, requestsCount = 0, videoReviewCount = 0 }: SidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -23,6 +29,15 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          const badge =
+            item.href === '/operations' && overdueCount > 0 ? overdueCount
+            : item.href === '/inbox' && requestsCount > 0 ? requestsCount
+            : item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
+            : 0
+          const badgeColor =
+            item.href === '/operations' ? 'bg-red-500'
+            : item.href === '/video-reviews' ? 'bg-orange-500'
+            : 'bg-blue-500'
           return (
             <Link
               key={item.href}
@@ -36,6 +51,11 @@ export function Sidebar() {
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
+              {badge > 0 && (
+                <span className={cn('ml-auto text-[10px] font-bold text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center', badgeColor)}>
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              )}
             </Link>
           )
         })}

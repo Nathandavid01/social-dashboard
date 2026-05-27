@@ -1,28 +1,28 @@
 import { PageHeader } from '@/components/shared/page-header'
 import { AutomationPanel } from '@/components/automation/automation-panel'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, Webhook, Zap } from 'lucide-react'
+import { CheckCircle, Film, Zap } from 'lucide-react'
 
 export default function AutomationPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Automation"
-        description="ClickUp → Caption → Metricool pipeline"
+        title="Automatización"
+        description="Video QC aprobado → Caption AI → Metricool"
       />
 
-      {/* Pipeline Status */}
+      {/* Pipeline status */}
       <div className="grid gap-3 md:grid-cols-3">
         <Card>
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                <Webhook className="h-4 w-4 text-green-500" />
+                <Film className="h-4 w-4 text-green-500" />
               </div>
               <div>
-                <p className="text-xs font-medium">Webhook ClickUp</p>
+                <p className="text-xs font-medium">Video QC</p>
                 <p className="text-xs text-green-500 flex items-center gap-1 mt-0.5">
-                  <CheckCircle className="h-3 w-3" /> Activo — Video Queue
+                  <CheckCircle className="h-3 w-3" /> Aprobados → Cola
                 </p>
               </div>
             </div>

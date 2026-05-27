@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
-import { MessageCircle, X, Send, Loader2, Bot, Trash2, Copy, CheckCheck } from 'lucide-react'
+import { MessageCircle, X, Send, Loader2, Bot, Trash2, Copy, CheckCheck, Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Message {
@@ -15,10 +15,28 @@ interface Message {
 const STORAGE_KEY = 'nmedia_chat_history'
 
 const SUGGESTIONS = [
-  '¿Qué videos están en el Video Queue?',
-  'Genera un caption para Pizzeria San Lazaro sobre una nueva pizza',
-  '¿Qué tareas están pendientes hoy?',
-  'Dame el perfil completo de Quantika Global',
+  // First 8 shown in compact mode — highest daily value
+  { text: "Dame el resumen de hoy", emoji: "📊" },
+  { text: "¿Qué se publicó hoy en todos los clientes?", emoji: "📅" },
+  { text: "¿Qué tareas están vencidas o bloqueadas?", emoji: "🔴" },
+  { text: "¿Cómo va la producción esta semana?", emoji: "🎬" },
+  { text: "¿Qué Reels están en revisión ahora?", emoji: "✂️" },
+  { text: "Genera un caption para un cliente", emoji: "✍️" },
+  { text: "Muéstrame la carga de trabajo del equipo", emoji: "👥" },
+  { text: "¿Cuáles clientes no han publicado en 7+ días?", emoji: "⚠️" },
+  // Expanded mode extras
+  { text: "¿Cómo está [nombre de cliente]?", emoji: "🔍" },
+  { text: "Reporte semanal — ¿cómo nos fue esta semana?", emoji: "📈" },
+  { text: "Reporte mensual — ¿cómo nos fue este mes?", emoji: "🗓️" },
+  { text: "¿Qué contenido está programado esta semana?", emoji: "📆" },
+  { text: "Muestra el tablero de producción esta semana", emoji: "🎞️" },
+  { text: "Crear una solicitud especial de producción", emoji: "➕" },
+  { text: "¿Cuál es el horario de producción de [cliente]?", emoji: "📋" },
+  { text: "Muéstrame las tareas de Anibeliz", emoji: "👤" },
+  { text: "¿Qué grabaciones hay esta semana?", emoji: "📷" },
+  { text: "Muestra los video reviews pendientes", emoji: "🎥" },
+  { text: "Crear una tarea para el equipo", emoji: "✅" },
+  { text: "¿Cuántos posts publica [cliente] por semana?", emoji: "📋" },
 ]
 
 function CopyButton({ text }: { text: string }) {
@@ -41,6 +59,7 @@ function CopyButton({ text }: { text: string }) {
 
 export function ChatBubble() {
   const [open, setOpen] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -73,6 +92,33 @@ export function ChatBubble() {
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 150)
   }, [open])
+
+  // Keyboard shortcuts: Escape to close, Ctrl/Cmd+K to toggle
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        if (expanded) setExpanded(false)
+        else setOpen(false)
+      } else if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((v) => !v)
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [open])
+
+  // Listen for external open+send events (e.g. Quick Briefing button)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const msg = (e as CustomEvent<{ message?: string }>).detail?.message
+      setOpen(true)
+      if (msg) setTimeout(() => send(msg), 300)
+    }
+    window.addEventListener('nmedia:open-chat', handler)
+    return () => window.removeEventListener('nmedia:open-chat', handler)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const clearChat = useCallback(() => {
     setMessages([])
@@ -143,13 +189,15 @@ export function ChatBubble() {
       {/* Chat Panel */}
       <div
         className={cn(
-          'fixed bottom-20 right-4 z-50 flex flex-col rounded-2xl border border-border bg-background shadow-2xl transition-all duration-300 ease-out',
-          'w-[380px] max-w-[calc(100vw-2rem)]',
+          'fixed z-50 flex flex-col rounded-2xl border border-border bg-background shadow-2xl transition-all duration-300 ease-out',
+          expanded
+            ? 'bottom-4 right-4 left-4 md:left-auto md:w-[680px] md:bottom-20'
+            : 'bottom-20 right-4 w-[400px] max-w-[calc(100vw-2rem)]',
           open
             ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
             : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
         )}
-        style={{ height: '560px' }}
+        style={{ height: expanded ? 'calc(100vh - 5rem)' : '580px' }}
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border rounded-t-2xl bg-card shrink-0">
@@ -158,7 +206,7 @@ export function ChatBubble() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold leading-none">NMedia AI</p>
-            <p className="text-xs text-muted-foreground mt-0.5">48 clientes · operaciones · captions</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Clientes · Posts · Tareas · Equipo · Grabaciones</p>
           </div>
           <div className="flex items-center gap-1">
             {messages.length > 0 && (
@@ -167,11 +215,20 @@ export function ChatBubble() {
                 size="icon"
                 className="h-7 w-7 text-muted-foreground hover:text-destructive"
                 onClick={clearChat}
-                title="Borrar conversación"
+                title="Clear conversation"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground"
+              onClick={() => setExpanded((v) => !v)}
+              title={expanded ? 'Collapse' : 'Expand'}
+            >
+              {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
@@ -182,16 +239,19 @@ export function ChatBubble() {
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 min-h-0">
           {messages.length === 0 ? (
             <div className="flex flex-col gap-2 pt-2">
-              <p className="text-xs text-muted-foreground text-center mb-2">Pregúntame sobre tus clientes, tareas, o pide que genere un caption</p>
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="text-left text-xs rounded-xl border border-border px-3 py-2.5 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground leading-snug"
-                >
-                  {s}
-                </button>
-              ))}
+              <p className="text-xs text-muted-foreground text-center mb-2">Clientes · Tareas · Posts · Captions · Grabaciones · Equipo</p>
+              <div className={cn('grid gap-2', expanded ? 'grid-cols-2' : 'grid-cols-1')}>
+                {(expanded ? SUGGESTIONS : SUGGESTIONS.slice(0, 8)).map((s) => (
+                  <button
+                    key={s.text}
+                    onClick={() => send(s.text)}
+                    className="text-left text-xs rounded-xl border border-border px-3 py-2.5 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground leading-snug flex items-start gap-2"
+                  >
+                    <span className="shrink-0">{s.emoji}</span>
+                    <span>{s.text}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             messages.map((msg, i) => (
@@ -274,8 +334,9 @@ export function ChatBubble() {
       {/* Floating Button */}
       <button
         onClick={() => setOpen((v) => !v)}
+        title="NMedia AI (⌘K)"
         className={cn(
-          'fixed bottom-4 right-4 z-50 h-13 w-13 flex items-center justify-center rounded-full shadow-lg transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90',
+          'fixed bottom-4 right-4 z-50 flex items-center justify-center rounded-full shadow-lg transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90',
           'h-12 w-12',
           open && 'rotate-90'
         )}

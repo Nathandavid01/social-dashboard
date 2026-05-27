@@ -60,15 +60,33 @@ export async function GET(req: NextRequest) {
   const blogId = searchParams.get('blogId')
   const range = searchParams.get('range') || '30d'
   const all = searchParams.get('all') === 'true'
+  const todayOnly = searchParams.get('today') === 'true'
+  // Direct date params for calendar view — ISO date strings (YYYY-MM-DD)
+  const startParam = searchParams.get('startDate')
+  const endParam = searchParams.get('endDate')
 
-  const end = new Date()
-  const start = new Date()
-  switch (range) {
-    case '7d': start.setDate(start.getDate() - 7); break
-    case '14d': start.setDate(start.getDate() - 14); break
-    case '30d': start.setDate(start.getDate() - 30); break
-    case '90d': start.setDate(start.getDate() - 90); break
-    case '180d': start.setDate(start.getDate() - 180); break
+  let start: Date
+  let end: Date
+
+  if (startParam && endParam) {
+    start = new Date(startParam + 'T00:00:00')
+    end = new Date(endParam + 'T23:59:59')
+  } else if (todayOnly) {
+    const now = new Date()
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+  } else {
+    // Default: past range + 30 days into the future for scheduled posts
+    start = new Date()
+    switch (range) {
+      case '7d': start.setDate(start.getDate() - 7); break
+      case '14d': start.setDate(start.getDate() - 14); break
+      case '30d': start.setDate(start.getDate() - 30); break
+      case '90d': start.setDate(start.getDate() - 90); break
+      case '180d': start.setDate(start.getDate() - 180); break
+    }
+    end = new Date()
+    end.setDate(end.getDate() + 30) // Always include 30 days of future scheduled posts
   }
   const startStr = start.toISOString().slice(0, 19)
   const endStr = end.toISOString().slice(0, 19)
@@ -97,7 +115,9 @@ export async function GET(req: NextRequest) {
         .filter((r) => r.status === 'fulfilled')
         .flatMap((r) => (r as PromiseFulfilledResult<PublishedPost[]>).value)
         .filter((p) => !p.draft)
-        .sort((a, b) => b.publicationDate.localeCompare(a.publicationDate))
+        .sort((a, b) => todayOnly
+          ? a.publicationDate.localeCompare(b.publicationDate)
+          : b.publicationDate.localeCompare(a.publicationDate))
 
       return NextResponse.json({ posts, clientCount: clients.length })
     }

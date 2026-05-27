@@ -19,6 +19,33 @@ export function formatTime(date: string | Date) {
   return format(new Date(date), 'h:mm a')
 }
 
+export function formatDueDate(date: string | Date): {
+  label: string
+  isOverdue: boolean
+  isDueToday: boolean
+} {
+  const d = new Date(date)
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const tomorrowStart = new Date(todayStart.getTime() + 86_400_000)
+  const dStart = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+
+  const isOverdue = d < now
+  const isDueToday = dStart.getTime() === todayStart.getTime()
+  const isDueTomorrow = dStart.getTime() === tomorrowStart.getTime()
+
+  let label: string
+  if (isDueToday) {
+    label = `Today ${format(d, 'h:mm a')}`
+  } else if (isDueTomorrow) {
+    label = `Tomorrow ${format(d, 'h:mm a')}`
+  } else {
+    label = format(d, 'MMM d, h:mm a')
+  }
+
+  return { label, isOverdue, isDueToday }
+}
+
 export function formatRelative(date: string | Date) {
   return formatDistanceToNow(new Date(date), { addSuffix: true })
 }

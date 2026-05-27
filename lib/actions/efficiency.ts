@@ -24,12 +24,13 @@ function clamp(n: number, min: number, max: number) {
 function computeScore(
   overdue: number,
   completed30d: number,
-  posts30d: number,
+  openTasks: number,
 ): number {
-  const onTime = clamp(100 - overdue * 25, 0, 100)
-  const throughput = clamp(completed30d * 10, 0, 100)
-  const posting = clamp(posts30d * 5, 0, 100)
-  return Math.round((onTime + throughput + posting) / 3)
+  // Health: -20 per overdue, -5 per stale open task (more than 5)
+  const health = clamp(100 - overdue * 20 - Math.max(0, openTasks - 5) * 5, 0, 100)
+  // Throughput: +8 per completed task in 30d, capped at 100 (12+ = full score)
+  const throughput = clamp(completed30d * 8, 0, 100)
+  return Math.round((health + throughput) / 2)
 }
 
 export async function getClientEfficiency(): Promise<ClientEfficiencyRow[]> {
@@ -112,7 +113,7 @@ export async function getClientEfficiency(): Promise<ClientEfficiencyRow[]> {
       postsPublished30d,
       postsScheduledNext7d,
       daysSinceLastPost,
-      score: computeScore(overdueTasks, completedTasks30d, postsPublished30d),
+      score: computeScore(overdueTasks, completedTasks30d, openTasks),
     }
   })
 }

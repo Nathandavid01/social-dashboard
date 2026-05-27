@@ -9,7 +9,13 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu, Zap } from 'lucide-react'
 
-export function MobileNav() {
+interface MobileNavProps {
+  overdueCount?: number
+  requestsCount?: number
+  videoReviewCount?: number
+}
+
+export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCount = 0 }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -30,6 +36,15 @@ export function MobileNav() {
         <nav className="px-3 py-4 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const badge =
+              item.href === '/operations' && overdueCount > 0 ? overdueCount
+              : item.href === '/inbox' && requestsCount > 0 ? requestsCount
+              : item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
+              : 0
+            const badgeColor =
+              item.href === '/operations' ? 'bg-red-500'
+              : item.href === '/video-reviews' ? 'bg-orange-500'
+              : 'bg-blue-500'
             return (
               <Link
                 key={item.href}
@@ -44,6 +59,11 @@ export function MobileNav() {
               >
                 <item.icon className="h-4 w-4 shrink-0" />
                 {item.label}
+                {badge > 0 && (
+                  <span className={cn('ml-auto text-[10px] font-bold text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center', badgeColor)}>
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </Link>
             )
           })}

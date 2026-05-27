@@ -4,7 +4,16 @@
       "Bash(npm run dev)",
       "Bash(npm run build)",
       "Bash(npm run lint)",
-      "Bash(npm run typecheck)"
+      "Bash(npm run typecheck)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(export PATH*&&*tsc --noEmit*)",
+      "Bash(export PATH*&&*npx tsc*)",
+      "Bash(open http://localhost:*)",
+      "Bash(open https://*)",
+      "Bash(curl -s *)",
+      "Bash(curl -s -H *)",
+      "Bash(source ~/.nvm/nvm.sh*)",
+      "Bash(export NVM_DIR*)"
     ]
   }
 }

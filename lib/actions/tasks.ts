@@ -25,7 +25,7 @@ export async function getTasks(filters?: { date?: string; assignee?: string }) {
   return data ?? []
 }
 
-export async function createTask(values: TaskFormValues) {
+export async function createTask(values: TaskFormValues, collaboratorIds?: string[]) {
   const supabase = await createClient()
   const parsed = taskSchema.safeParse(values)
   if (!parsed.success) return { error: 'Invalid form data' }
@@ -33,26 +33,37 @@ export async function createTask(values: TaskFormValues) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const { error } = await supabase.from('tasks').insert({
+  const { data: newTask, error } = await supabase.from('tasks').insert({
     ...parsed.data,
     created_by: user.id,
-  })
+  }).select('id').single()
 
   if (error) return { error: error.message }
+
+  // Set collaborators if any (requires migration 0004)
+  if (collaboratorIds && collaboratorIds.length > 0 && newTask?.id) {
+    await supabase.from('tasks').update({ collaborators: collaboratorIds }).eq('id', newTask.id)
+  }
+
   revalidatePath('/operations')
+  revalidatePath('/home')
   return { success: true }
 }
 
-export async function updateTask(id: string, values: Partial<TaskFormValues>) {
+export async function updateTask(id: string, values: Partial<TaskFormValues>, collaboratorIds?: string[]) {
   const supabase = await createClient()
+
+  const updateData: Record<string, unknown> = { ...values }
+  if (collaboratorIds !== undefined) updateData.collaborators = collaboratorIds
 
   const { error } = await supabase
     .from('tasks')
-    .update(values)
+    .update(updateData)
     .eq('id', id)
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
+  revalidatePath('/home')
   return { success: true }
 }
 
@@ -66,6 +77,7 @@ export async function updateTaskStatus(id: string, status: string) {
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
+  revalidatePath('/home')
   return { success: true }
 }
 
@@ -76,5 +88,32 @@ export async function deleteTask(id: string) {
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
+  revalidatePath('/home')
+  return { success: true }
+}
+
+export async function duplicateTask(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: task } = await supabase.from('tasks').select('*').eq('id', id).single()
+  if (!task) return { error: 'Task not found' }
+
+  const { error } = await supabase.from('tasks').insert({
+    title: `${task.title} (copy)`,
+    description: task.description,
+    type: task.type,
+    client_id: task.client_id,
+    assignee_id: task.assignee_id,
+    status: 'pending',
+    due_at: task.due_at,
+    priority: task.priority,
+    created_by: user.id,
+  })
+
+  if (error) return { error: error.message }
+  revalidatePath('/operations')
+  revalidatePath('/home')
   return { success: true }
 }

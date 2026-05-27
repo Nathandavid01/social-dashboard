@@ -77,8 +77,8 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
       }
 
       toast({
-        title: client ? 'Client updated' : 'Client created',
-        description: `${values.name} has been ${client ? 'updated' : 'added'} successfully.`,
+        title: client ? 'Cliente actualizado' : 'Cliente creado',
+        description: `${values.name} ha sido ${client ? 'actualizado' : 'agregado'} exitosamente.`,
       })
       router.push('/clients')
     })
@@ -94,7 +94,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Client Name</FormLabel>
+              <FormLabel>Nombre del Cliente</FormLabel>
               <FormControl>
                 <Input placeholder="Brisa Salon" {...field} />
               </FormControl>
@@ -108,9 +108,9 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="industry"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Industry</FormLabel>
+              <FormLabel>Industria</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Salon, Restaurant, Retail" {...field} />
+                <Input placeholder="p.ej. Salón, Restaurante, Retail" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -122,7 +122,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="platforms"
           render={() => (
             <FormItem>
-              <FormLabel>Active Platforms</FormLabel>
+              <FormLabel>Plataformas Activas</FormLabel>
               <div className="flex flex-wrap gap-4 mt-2">
                 {PLATFORMS.map((platform) => (
                   <FormField
@@ -159,16 +159,16 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Estado</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="paused">Pausado</SelectItem>
                   <SelectItem value="onboarding">Onboarding</SelectItem>
                 </SelectContent>
               </Select>
@@ -182,18 +182,18 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="assigned_to"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Assigned Team Member</FormLabel>
+              <FormLabel>Miembro del Equipo Asignado</FormLabel>
               <Select
                 onValueChange={(val) => field.onChange(val === 'unassigned' ? null : val)}
                 defaultValue={field.value ?? 'unassigned'}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team member" />
+                    <SelectValue placeholder="Selecciona miembro del equipo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Sin asignar</SelectItem>
                   {teamMembers.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.full_name || member.email}
@@ -211,9 +211,9 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes</FormLabel>
+              <FormLabel>Notas</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any important context about this client..." className="resize-none h-24" {...field} />
+                <Textarea placeholder="Contexto importante sobre este cliente..." className="resize-none h-24" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -224,8 +224,8 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
 
         {/* ── Caption AI Settings ── */}
         <div>
-          <h3 className="text-sm font-semibold mb-1">Caption AI Settings</h3>
-          <p className="text-xs text-muted-foreground mb-4">This info is fed to the AI every time you generate a caption for this client.</p>
+          <h3 className="text-sm font-semibold mb-1">Configuración de Caption AI</h3>
+          <p className="text-xs text-muted-foreground mb-4">Esta información se envía a la IA cada vez que generas un caption para este cliente.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -234,7 +234,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
             name="caption_language"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Caption Language</FormLabel>
+                <FormLabel>Idioma del Caption</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -242,8 +242,8 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="spanish">Spanish</SelectItem>
-                    <SelectItem value="english">English</SelectItem>
+                    <SelectItem value="spanish">Español</SelectItem>
+                    <SelectItem value="english">Inglés</SelectItem>
                     <SelectItem value="spanglish">Spanglish</SelectItem>
                   </SelectContent>
                 </Select>
@@ -260,9 +260,9 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="brand_voice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Brand Voice</FormLabel>
+              <FormLabel>Voz de Marca</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Friendly and energetic, speaks directly to women 25-45 in PR" {...field} />
+                <Input placeholder="p.ej. Amigable y energético, habla directamente a mujeres de 25-45 en PR" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -274,7 +274,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="default_cta"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default Call to Action</FormLabel>
+              <FormLabel>CTA Predeterminado</FormLabel>
               <FormControl>
                 <Input placeholder="e.g. Llama al 787-555-0101 o escríbenos por DM" {...field} />
               </FormControl>
@@ -288,7 +288,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="default_hashtags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default Hashtags</FormLabel>
+              <FormLabel>Hashtags Predeterminados</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="#BrisaSalon #SalonPR #PuertoRico #CabelloSaludable"
@@ -306,10 +306,10 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
           name="caption_notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Caption Rules for AI</FormLabel>
+              <FormLabel>Reglas de Caption para IA</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="e.g. Never use the word 'cheap'. Always mention Santurce location. Use emojis sparingly."
+                  placeholder="p.ej. Nunca uses la palabra 'barato'. Siempre menciona la ubicación de Santurce. Usa emojis con moderación."
                   className="resize-none h-24"
                   {...field}
                 />
@@ -321,10 +321,10 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
 
         <div className="flex gap-3">
           <Button type="submit" disabled={isPending}>
-            {isPending ? 'Saving...' : client ? 'Update Client' : 'Create Client'}
+            {isPending ? 'Guardando...' : client ? 'Actualizar Cliente' : 'Crear Cliente'}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
+            Cancelar
           </Button>
         </div>
       </form>

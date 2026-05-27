@@ -14,7 +14,22 @@ import {
 } from '@/components/ui/select'
 import { Copy, CheckCheck, Search, Download } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
-import type { SavedCaption } from '@/lib/data/casita-vieja-captions'
+
+export interface SavedCaption {
+  id: number | string
+  client: string
+  platform: string
+  date: string
+  caption: string
+  reactions?: number
+  likes?: number
+  comments?: number
+  shares?: number
+  impressions?: number
+  reach?: number
+  views?: number
+  engagement?: number
+}
 
 interface SavedCaptionsViewProps {
   captions: SavedCaption[]
@@ -31,7 +46,7 @@ export function SavedCaptionsView({ captions, clientName }: SavedCaptionsViewPro
   const { toast } = useToast()
   const [search, setSearch] = useState('')
   const [platformFilter, setPlatformFilter] = useState('all')
-  const [copiedId, setCopiedId] = useState<number | null>(null)
+  const [copiedId, setCopiedId] = useState<number | string | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
   const [page, setPage] = useState(1)
   const perPage = 12

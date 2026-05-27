@@ -5,12 +5,19 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function getAlerts() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('alerts')
     .select('*')
     .order('created_at', { ascending: false })
 
+  // Filter out alerts dismissed by the current user
+  if (user) {
+    query = query.not('dismissed_by', 'cs', JSON.stringify([user.id]))
+  }
+
+  const { data, error } = await query
   if (error) throw new Error(error.message)
   return data ?? []
 }

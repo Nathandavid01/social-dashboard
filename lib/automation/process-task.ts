@@ -1,21 +1,22 @@
 'use server'
 
 import Anthropic from '@anthropic-ai/sdk'
-import { getTask, extractTaskFields, addCommentToTask } from '@/lib/clickup/client'
 import { createDraftPost } from '@/lib/metricool/post'
 import { createClient } from '@/lib/supabase/server'
-import type { Client } from '@/lib/supabase/types'
+import type { Client, VideoReview } from '@/lib/supabase/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export interface ProcessResult {
   success: boolean
-  taskId: string
-  taskTitle: string
+  videoReviewId: string
+  videoTitle: string
   caption?: string
   metricoolPostId?: string | number
   error?: string
 }
+
+// ── Fetch Metricool style examples ───────────────────────────────────────────
 
 async function fetchMetricoolExamples(metricoolBlogId?: string | null): Promise<{ text: string; provider: string }[]> {
   try {
@@ -29,18 +30,16 @@ async function fetchMetricoolExamples(metricoolBlogId?: string | null): Promise<
     if (!res.ok) return []
 
     const json = await res.json() as { data?: { text: string; providers?: { network: string }[]; draft?: boolean }[] }
-    const posts = json.data || []
-    return posts
+    return (json.data || [])
       .filter(p => p.text?.trim().length > 20 && !p.draft)
-      .map(p => ({
-        text: p.text,
-        provider: p.providers?.[0]?.network || 'instagram'
-      }))
+      .map(p => ({ text: p.text, provider: p.providers?.[0]?.network || 'instagram' }))
       .slice(0, 12)
   } catch {
     return []
   }
 }
+
+// ── Generate caption with Claude ─────────────────────────────────────────────
 
 async function generateCaption(
   title: string,
@@ -61,7 +60,7 @@ async function generateCaption(
     client.caption_notes && `Rules to follow: ${client.caption_notes}`,
   ].filter(Boolean).join('\n') : ''
 
-  const prompt = `You are a professional social media copywriter for NMedia PR, a Puerto Rican marketing agency. You write captions that perform well on Instagram, TikTok, and Facebook.
+  const prompt = `You are a professional social media copywriter for NMedia PR, a Puerto Rican marketing agency.
 
 CLIENT: ${client?.name || 'Unknown client'}
 INDUSTRY: ${client?.industry || 'Business'}
@@ -77,8 +76,7 @@ RULES:
 - Match the EXACT tone, length, emoji style, and hashtag format from the reference captions above
 - Follow the client profile rules precisely
 - Include: hook that grabs attention, body that adds value, clear call to action, hashtags
-- Do NOT include any explanation, title, or label — output ONLY the caption text itself
-- Do NOT add "[Caption]" or "Here is your caption:" — just the raw caption`
+- Do NOT include any explanation, title, or label — output ONLY the caption text itself`
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -89,61 +87,82 @@ RULES:
   return message.content[0].type === 'text' ? message.content[0].text.trim() : ''
 }
 
-export async function processClickUpTask(taskId: string): Promise<ProcessResult> {
+// ── Process a video review → generate caption → save + Metricool draft ───────
+
+export async function processVideoReview(videoReviewId: string): Promise<ProcessResult> {
   try {
-    // 1. Fetch task from ClickUp
-    const task = await getTask(taskId)
-    const { title, driveLink, clientName } = extractTaskFields(task)
+    const supabase = await createClient()
 
-    // 2. Look up client in Supabase
-    let client: Client | null = null
-    if (clientName) {
-      const supabase = await createClient()
-      const { data } = await supabase
-        .from('clients')
-        .select('*')
-        .ilike('name', `%${clientName}%`)
-        .limit(1)
-        .single()
-      client = data as Client | null
-    }
+    // 1. Fetch the video review with client
+    const { data: review, error: reviewErr } = await supabase
+      .from('video_reviews')
+      .select('*, client:clients!video_reviews_client_id_fkey(*)')
+      .eq('id', videoReviewId)
+      .single()
 
-    // 3. Fetch Metricool style examples
+    if (reviewErr || !review) throw new Error('Video review not found')
+
+    const videoReview = review as unknown as VideoReview & { client: Client | null }
+    const client = videoReview.client ?? null
+
+    // 2. Fetch Metricool style examples
     const examples = await fetchMetricoolExamples(client?.metricool_blog_id)
 
-    // 4. Generate caption
-    const caption = await generateCaption(title, client, examples)
+    // 3. Generate caption
+    const caption = await generateCaption(videoReview.title, client, examples)
     if (!caption) throw new Error('Caption generation returned empty result')
 
-    // 5. Post to Metricool as draft (include Drive link as first comment)
+    // 4. Save caption to saved_captions table
+    const { data: { user } } = await supabase.auth.getUser()
+    await supabase.from('saved_captions').insert({
+      client_id: videoReview.client_id,
+      video_review_id: videoReviewId,
+      video_title: videoReview.title,
+      caption,
+      examples_used: examples.length,
+      model: 'claude-sonnet-4-6',
+      generated_by: user?.id ?? null,
+    })
+
+    // 5. Post to Metricool as draft
     let metricoolPostId: string | number | undefined
     try {
       const draft = await createDraftPost(
         caption,
         client?.metricool_blog_id ?? undefined,
         client?.platforms ?? undefined,
-        driveLink ?? undefined
+        videoReview.drive_link ?? undefined
       )
       metricoolPostId = draft.data?.id ?? draft.data?.uuid
     } catch (err) {
       console.error('Metricool post failed:', err)
     }
 
-    // 6. Add caption as comment on ClickUp task
-    const commentText = [
-      '✅ *Caption generado automáticamente por NMedia Dashboard*',
-      '',
+    return {
+      success: true,
+      videoReviewId,
+      videoTitle: videoReview.title,
       caption,
-      driveLink ? `\n🎬 *Video:* ${driveLink}` : '',
-      metricoolPostId ? `\n📋 *Metricool Draft ID:* ${metricoolPostId}` : '',
-    ].filter(s => s !== null).join('\n')
-
-    await addCommentToTask(taskId, commentText)
-
-    return { success: true, taskId, taskTitle: title, caption, metricoolPostId }
+      metricoolPostId,
+    }
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`Failed to process task ${taskId}:`, msg)
-    return { success: false, taskId, taskTitle: '', error: msg }
+    console.error(`Failed to process video review ${videoReviewId}:`, msg)
+    return { success: false, videoReviewId, videoTitle: '', error: msg }
   }
+}
+
+// ── Fetch approved video reviews ready for caption generation ─────────────────
+
+export async function getApprovedVideoReviews() {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('video_reviews')
+    .select('*, client:clients!video_reviews_client_id_fkey(id, name)')
+    .eq('status', 'approved')
+    .order('updated_at', { ascending: false })
+    .limit(50)
+
+  if (error) return []
+  return data ?? []
 }

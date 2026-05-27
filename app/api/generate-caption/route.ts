@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
+const CAPTION_MODEL = 'claude-sonnet-4-6'
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 async function fetchClientStyleExamples(blogId?: string): Promise<{ text: string; provider: string }[]> {
@@ -27,10 +29,16 @@ async function fetchClientStyleExamples(blogId?: string): Promise<{ text: string
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY is not configured on the server' }, { status: 500 })
+    }
+
     const {
       videoTitle,
       platform,
       clientName,
+      clientId,
+      videoReviewId,
       metricoolBlogId,
       brandVoice,
       captionLanguage,
@@ -38,6 +46,7 @@ export async function POST(req: NextRequest) {
       defaultHashtags,
       captionNotes,
       industry,
+      suggestions,
     } = await req.json()
 
     if (!videoTitle) {
@@ -62,6 +71,10 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .join('\n')
 
+    const suggestionsBlock = suggestions?.trim()
+      ? `\nSPECIFIC INFO TO INCLUDE (mandatory — weave these naturally into the caption):\n${suggestions.trim()}`
+      : ''
+
     const prompt = `You are a professional social media copywriter for NMedia PR, a Puerto Rican marketing agency. You write captions that perform well on Instagram, TikTok, and Facebook.
 
 CLIENT: ${clientName || 'Unknown client'}
@@ -71,28 +84,50 @@ ${clientProfile ? `\nCLIENT PROFILE:\n${clientProfile}` : ''}
 ${examplesBlock}
 
 VIDEO TOPIC: "${videoTitle}"
-PLATFORM: ${platform || 'Instagram'}
+PLATFORM: ${platform || 'Instagram'}${suggestionsBlock}
 
 TASK: Write ONE complete social media caption for this video.
 
 RULES:
 - Match the EXACT tone, length, emoji style, and hashtag format from the reference captions above
 - Follow the client profile rules precisely
+- If "SPECIFIC INFO TO INCLUDE" is provided above, you MUST incorporate ALL of it naturally in the caption — do not skip any detail
 - Include: hook that grabs attention, body that adds value, clear call to action, hashtags
 - Do NOT include any explanation, title, or label — output ONLY the caption text itself
 - Do NOT add "[Caption]" or "Here is your caption:" — just the raw caption`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CAPTION_MODEL,
       max_tokens: 1200,
       messages: [{ role: 'user', content: prompt }],
     })
 
     const caption = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
 
+    // Persist to saved_captions (best effort — don't fail the request if it errors)
+    if (caption) {
+      try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        await supabase.from('saved_captions').insert({
+          client_id: clientId ?? null,
+          video_review_id: videoReviewId ?? null,
+          generated_by: user?.id ?? null,
+          video_title: videoTitle,
+          platform: platform ?? null,
+          caption,
+          examples_used: examples.length,
+          model: CAPTION_MODEL,
+        })
+      } catch (err) {
+        console.warn('[generate-caption] persist failed (non-fatal):', err instanceof Error ? err.message : err)
+      }
+    }
+
     return NextResponse.json({ caption, examplesUsed: examples.length })
   } catch (error) {
     console.error('Caption generation error:', error)
-    return NextResponse.json({ error: 'Failed to generate caption' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to generate caption'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
