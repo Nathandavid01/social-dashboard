@@ -7,19 +7,22 @@ export async function getAlerts() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let query = supabase
+  const { data, error } = await supabase
     .from('alerts')
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Filter out alerts dismissed by the current user
-  if (user) {
-    query = query.not('dismissed_by', 'cs', JSON.stringify([user.id]))
-  }
-
-  const { data, error } = await query
   if (error) throw new Error(error.message)
-  return data ?? []
+
+  // Filter out alerts dismissed by the current user (client-side because
+  // postgrest's array-contains filter on uuid[] doesn't accept JSON syntax —
+  // and the list is small).
+  const rows = data ?? []
+  if (!user) return rows
+  return rows.filter((r) => {
+    const dismissed = (r as { dismissed_by?: string[] | null }).dismissed_by ?? []
+    return !dismissed.includes(user.id)
+  })
 }
 
 export async function dismissAlert(id: string) {

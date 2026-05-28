@@ -117,23 +117,21 @@ export function ClientRequestsPanel({ initialRequests, showHistory = false }: Pr
     <>
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Inbox className="h-4 w-4 text-blue-500" />
-              <CardTitle className="text-sm text-blue-600 dark:text-blue-400">
-                Solicitudes de Clientes
-                {open.length > 0 && (
-                  <span className="ml-2 text-xs font-normal bg-blue-500 text-white rounded-full px-1.5 py-0.5">
-                    {open.length} nueva{open.length !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </CardTitle>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+              <Inbox className="h-4 w-4 shrink-0 text-blue-500" />
+              <span className="truncate">Solicitudes de Clientes</span>
+              {open.length > 0 && (
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-normal text-white">
+                  {open.length} nueva{open.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </CardTitle>
             <a
               href="/portal"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-primary hover:underline"
             >
               Abrir portal <ExternalLink className="h-3 w-3" />
             </a>

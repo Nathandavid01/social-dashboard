@@ -1,10 +1,15 @@
-export type UserRole = 'owner' | 'team_member'
+export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'team_member'
 export type ClientStatus = 'active' | 'paused' | 'onboarding'
 export type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
 export type TaskType = 'content_creation' | 'scheduling' | 'reporting' | 'client_call' | 'review' | 'other'
 export type AlertSeverity = 'info' | 'warning' | 'error' | 'success'
 export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'cancelled'
+
+export interface NavPreferences {
+  order?: string[]
+  hidden?: string[]
+}
 
 export interface Profile {
   id: string
@@ -13,8 +18,88 @@ export interface Profile {
   avatar_url: string | null
   role: UserRole
   title: string | null
+  nav_preferences?: NavPreferences
   created_at: string
   updated_at: string
+}
+
+export interface BrandColors {
+  primary?: string | null
+  secondary?: string | null
+  accent?: string | null
+  text?: string | null
+}
+
+export type ClientAssetKind = 'logo' | 'color_guide' | 'font' | 'legal' | 'contract' | 'other'
+
+export interface ClientAsset {
+  id: string
+  client_id: string
+  kind: ClientAssetKind
+  name: string
+  url: string
+  storage_path: string | null
+  size_bytes: number | null
+  mime_type: string | null
+  uploaded_by: string | null
+  uploaded_at: string
+}
+
+export interface ClientPayment {
+  id: string
+  client_id: string
+  amount: number
+  paid_at: string
+  method: string | null
+  reference: string | null
+  notes: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export type PaymentStatus = 'paid' | 'overdue' | 'pending' | 'no_contract'
+
+export type ContentIdeaVideoKind = 'raw' | 'edited'
+export type ContentIdeaVideoStatus = 'uploading' | 'uploaded' | 'processing' | 'failed' | 'archived'
+
+export interface ContentIdeaVideo {
+  id: string
+  idea_id: string
+  kind: ContentIdeaVideoKind
+  name: string
+  drive_file_id: string | null
+  drive_view_link: string | null
+  drive_thumb_url: string | null
+  mime_type: string | null
+  size_bytes: number | null
+  duration_sec: number | null
+  notes: string | null
+  uploaded_by: string | null
+  status: ContentIdeaVideoStatus
+  error_message: string | null
+  uploaded_at: string
+  updated_at: string
+}
+
+export type NotificationKind =
+  | 'task_assigned' | 'task_due_soon' | 'task_overdue' | 'task_completed'
+  | 'request_new' | 'review_pending' | 'review_approved' | 'review_rejected'
+  | 'mention' | 'client_message' | 'payment_received' | 'meeting_reminder'
+  | 'goal_reached' | 'system'
+
+export type NotificationSeverity = 'info' | 'success' | 'warning' | 'error'
+
+export interface Notification {
+  id: string
+  user_id: string
+  kind: NotificationKind
+  title: string
+  body: string | null
+  link: string | null
+  severity: NotificationSeverity
+  meta: Record<string, unknown>
+  read_at: string | null
+  created_at: string
 }
 
 export interface Client {
@@ -32,6 +117,21 @@ export interface Client {
   metricool_blog_id: string | null
   caption_notes: string | null
   default_platforms: string[]
+  owner_name: string | null
+  owner_email: string | null
+  owner_phone: string | null
+  brand_colors: BrandColors
+  logo_url: string | null
+  logo_dark_url: string | null
+  posting_days: number[]
+  posting_time: string | null
+  posting_schedule: Record<string, string>
+  contract_url: string | null
+  contract_signed_at: string | null
+  contract_expires_at: string | null
+  monthly_fee: number | null
+  last_meeting_at: string | null
+  last_meeting_notes: string | null
   created_by: string
   created_at: string
   updated_at: string
@@ -69,6 +169,9 @@ export interface RecordingSession {
   title: string
   notes: string | null
   location: string | null
+  location_lat: number | null
+  location_lng: number | null
+  location_address: string | null
   start_time: string | null
   end_time: string | null
   status: RecordingSessionStatus

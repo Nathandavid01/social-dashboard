@@ -62,17 +62,17 @@ export function UpcomingSchedule() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" />
-            Próximos 7 Días
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <CardTitle className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+            <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">Próximos 7 Días</span>
           </CardTitle>
           {!loading && posts.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 text-xs">
-                {posts.length} programados
+            <div className="flex shrink-0 items-center gap-1.5">
+              <Badge variant="outline" className="whitespace-nowrap border-yellow-500/30 bg-yellow-500/10 text-xs text-yellow-500">
+                {posts.length} prog.
               </Badge>
-              <Link href="/published?tab=calendar" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/published?tab=calendar" className="text-muted-foreground transition-colors hover:text-primary" aria-label="Ver calendario">
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

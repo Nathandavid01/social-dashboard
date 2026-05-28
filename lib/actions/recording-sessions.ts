@@ -40,6 +40,9 @@ export async function createRecordingSession(values: {
   title: string
   notes?: string | null
   location?: string | null
+  location_lat?: number | null
+  location_lng?: number | null
+  location_address?: string | null
   start_time?: string | null
   end_time?: string | null
 }) {
@@ -63,6 +66,9 @@ export async function updateRecordingSession(id: string, values: Partial<{
   title: string
   notes: string | null
   location: string | null
+  location_lat: number | null
+  location_lng: number | null
+  location_address: string | null
   start_time: string | null
   end_time: string | null
   status: string

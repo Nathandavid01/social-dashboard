@@ -8,6 +8,10 @@ import { UrgentTaskList } from '@/components/home/urgent-task-list'
 import { TeamWorkload } from '@/components/home/team-workload'
 import { RecentCompletions } from '@/components/home/recent-completions'
 import { UpcomingSchedule } from '@/components/home/upcoming-schedule'
+import { GlobalPipelineSection } from '@/components/home/global-pipeline-section'
+import { PlanningBanner } from '@/components/home/planning-banner'
+import { getPipelineTotals } from '@/lib/utils/content-pipeline'
+import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import Link from 'next/link'
 import {
   Users,
@@ -170,6 +174,15 @@ export default async function HomePage() {
 
   const dayName = now.toLocaleDateString('es-PR', { weekday: 'long', month: 'long', day: 'numeric' })
 
+  const pipelineGlobal = await getPipelineTotals()
+  const planning = await getWorkflowProgress().catch(() => ({ rows: [], pendingCount: 0 }))
+  const planningBuckets = {
+    reagendar: planning.rows.filter((r) => r.status === 'reagendar').length,
+    agendar: planning.rows.filter((r) => r.status === 'agendar').length,
+    ideas: planning.rows.filter((r) => r.status === 'ideas').length,
+    listo: planning.rows.filter((r) => r.status === 'listo').length,
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -181,96 +194,15 @@ export default async function HomePage() {
         <QuickBriefingButton />
       </div>
 
-      {/* KPI Row */}
-      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-11">
-        <KpiCard
-          label="Clientes Activos"
-          value={activeClients ?? 0}
-          icon={Users}
-          description="En operación"
-          href="/clients"
-        />
-        <KpiCard
-          label="Vence Hoy"
-          value={dueTodayTasks?.length ?? 0}
-          icon={Clock}
-          description="Tareas con deadline hoy"
-          highlight={(dueTodayTasks?.length ?? 0) > 0 ? 'warning' : 'default'}
-          href="/operations?type=due_today"
-        />
-        <KpiCard
-          label="Vencidas"
-          value={overdueTasks?.length ?? 0}
-          icon={AlertTriangle}
-          description="Pasaron la fecha límite"
-          highlight={(overdueTasks?.length ?? 0) > 0 ? 'danger' : 'default'}
-          href="/operations?type=overdue"
-        />
-        <KpiCard
-          label="Bloqueadas"
-          value={blockedTasks?.length ?? 0}
-          icon={ShieldAlert}
-          description="Necesitan desbloqueo"
-          highlight={(blockedTasks?.length ?? 0) > 0 ? 'danger' : 'default'}
-          href="/operations?status=blocked"
-        />
-        <KpiCard
-          label="Completadas (7d)"
-          value={completedThisWeek ?? 0}
-          icon={CheckCircle2}
-          description="Esta semana"
-          highlight="success"
-          href="/operations?status=completed"
-        />
-        <KpiCard
-          label="Alertas Activas"
-          value={activeAlerts ?? 0}
-          icon={Bell}
-          description="Requieren atención"
-          highlight={(activeAlerts ?? 0) > 0 ? 'warning' : 'default'}
-          href="/alerts"
-        />
-        <KpiCard
-          label="Solicitudes"
-          value={pendingRequests ?? 0}
-          icon={Inbox}
-          description="Pedidos de clientes"
-          highlight={(pendingRequests ?? 0) > 0 ? 'warning' : 'default'}
-          href="/inbox"
-        />
-        <KpiCard
-          label="Video QC"
-          value={pendingVideoReviews ?? 0}
-          icon={Film}
-          description="Videos pendientes de revisión"
-          highlight={(pendingVideoReviews ?? 0) > 0 ? 'warning' : 'default'}
-          href="/video-reviews"
-        />
-        <KpiCard
-          label="En Revisión"
-          value={productionInReview ?? 0}
-          icon={Clapperboard}
-          description="Producción esperando revisión"
-          highlight={(productionInReview ?? 0) > 0 ? 'warning' : 'default'}
-          href="/produccion"
-        />
-        <KpiCard
-          label="Publican Hoy"
-          value={productionPublishingToday ?? 0}
-          icon={CalendarCheck}
-          description="Piezas listas para publicar"
-          highlight={(productionPublishingToday ?? 0) > 0 ? 'success' : 'default'}
-          href="/produccion"
-        />
-        <KpiCard
-          label="Buffer Bajo"
-          value={totalBufferAlert}
-          icon={Video}
-          description={criticalBufferCount > 0 ? `${criticalBufferCount} crítico${criticalBufferCount !== 1 ? 's' : ''}, ${lowBufferCount} bajo${lowBufferCount !== 1 ? 's' : ''}` : 'Clientes con poco video stock'}
-          highlight={criticalBufferCount > 0 ? 'danger' : totalBufferAlert > 0 ? 'warning' : 'default'}
-          href="/clients"
-        />
-      </div>
+      {/* Planning banner — always visible, non-dismissible until everyone is ready */}
+      <PlanningBanner
+        pendingCount={planning.pendingCount}
+        buckets={planningBuckets}
+        total={planning.rows.length}
+      />
+
+      {/* Global content pipeline overview */}
+      <GlobalPipelineSection totals={pipelineGlobal.totals} perClient={pipelineGlobal.perClient} />
 
       {/* My Tasks */}
       {(myTasks?.length ?? 0) > 0 && (
@@ -331,7 +263,6 @@ export default async function HomePage() {
           { href: '/published', label: 'Publicados', sub: 'Ver todo el contenido', color: 'bg-green-500/10 text-green-500' },
           { href: '/clients', label: 'Clientes', sub: `${activeClients ?? 0} clientes activos`, color: 'bg-orange-500/10 text-orange-500' },
           { href: '/video-reviews', label: 'Video QC', sub: `${pendingVideoReviews ?? 0} pendientes`, color: 'bg-cyan-500/10 text-cyan-500' },
-          { href: '/inbox', label: 'Bandeja', sub: `${pendingRequests ?? 0} solicitudes`, color: 'bg-pink-500/10 text-pink-500' },
           { href: '/team', label: 'Equipo', sub: 'Tareas por miembro', color: 'bg-violet-500/10 text-violet-500' },
           { href: '/recording-calendar', label: 'Grabaciones', sub: `${totalBufferAlert > 0 ? `${totalBufferAlert} cliente${totalBufferAlert !== 1 ? 's' : ''} buffer bajo` : 'Calendario de sesiones'}`, color: 'bg-rose-500/10 text-rose-500' },
           { href: '/produccion', label: 'Producción', sub: `${productionInReview ?? 0} en revisión`, color: 'bg-yellow-500/10 text-yellow-600' },

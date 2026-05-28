@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -8,6 +8,8 @@ import { navItems } from './nav-items'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu, Zap } from 'lucide-react'
+import { useAuth } from '@/lib/context/auth-context'
+import { hasPermission } from '@/lib/auth/permissions'
 
 interface MobileNavProps {
   overdueCount?: number
@@ -18,6 +20,11 @@ interface MobileNavProps {
 export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCount = 0 }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const { role } = useAuth()
+  const allowed = useMemo(
+    () => navItems.filter((n) => !n.permission || hasPermission(role, n.permission)),
+    [role],
+  )
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -34,7 +41,7 @@ export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCoun
           <span className="font-bold text-lg tracking-tight">NMedia</span>
         </div>
         <nav className="px-3 py-4 space-y-1">
-          {navItems.map((item) => {
+          {allowed.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             const badge =
               item.href === '/operations' && overdueCount > 0 ? overdueCount

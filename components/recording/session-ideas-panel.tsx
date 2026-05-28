@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { IdeaVideoLoader } from './idea-video-loader'
 import {
   Camera, CheckCircle2, Circle, Plus, Video, BookOpen,
   Building2, Clock, MapPin, Link2, Unlink, Loader2,
@@ -170,6 +171,7 @@ function IdeaRow({
   }
 
   return (
+    <div className="space-y-2">
     <div className={cn(
       'flex items-start gap-3 rounded-lg border p-3 transition-colors',
       isRecorded ? 'bg-green-500/5 border-green-500/20' :
@@ -228,6 +230,13 @@ function IdeaRow({
       >
         {isLinked ? <Link2 className="h-3.5 w-3.5" /> : <Unlink className="h-3.5 w-3.5" />}
       </button>
+    </div>
+
+    {isRecorded && (
+      <div className="ml-7">
+        <IdeaVideoLoader ideaId={idea.id} ideaTitle={idea.title} compact />
+      </div>
+    )}
     </div>
   )
 }

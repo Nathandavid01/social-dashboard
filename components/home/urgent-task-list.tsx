@@ -49,9 +49,9 @@ export function UrgentTaskList({ tasks, title, emptyMsg, linkHref }: UrgentTaskL
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-          <Link href={linkHref} className="text-xs text-primary hover:underline flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <CardTitle className="min-w-0 truncate text-sm font-semibold">{title}</CardTitle>
+          <Link href={linkHref} className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-primary hover:underline">
             Ver todas <ArrowRight className="h-3 w-3" />
           </Link>
         </div>

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { GpsPicker } from './gps-picker'
 import {
   Select,
   SelectContent,
@@ -113,6 +114,9 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
   const [startTime, setStartTime] = useState(editing?.start_time ?? '')
   const [endTime, setEndTime] = useState(editing?.end_time ?? '')
   const [location, setLocation] = useState(editing?.location ?? '')
+  const [locationAddress, setLocationAddress] = useState(editing?.location_address ?? '')
+  const [locationLat, setLocationLat] = useState<number | null>(editing?.location_lat ?? null)
+  const [locationLng, setLocationLng] = useState<number | null>(editing?.location_lng ?? null)
   const [notes, setNotes] = useState(editing?.notes ?? '')
 
   function handleSubmit(e: React.FormEvent) {
@@ -127,6 +131,9 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
         start_time: startTime || null,
         end_time: endTime || null,
         location: location || null,
+        location_address: locationAddress || null,
+        location_lat: locationLat,
+        location_lng: locationLng,
         notes: notes || null,
       }
       if (editing) {
@@ -178,10 +185,22 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 text-sm" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><MapPin className="h-3 w-3" /> Ubicación</Label>
+              <Label className="text-xs flex items-center gap-1"><MapPin className="h-3 w-3" /> Tipo de ubicación</Label>
               <Input placeholder="Estudio, en sitio..." value={location} onChange={(e) => setLocation(e.target.value)} className="h-9 text-sm" />
             </div>
           </div>
+
+          <GpsPicker
+            address={locationAddress}
+            lat={locationLat}
+            lng={locationLng}
+            onChange={({ address, lat, lng }) => {
+              setLocationAddress(address)
+              setLocationLat(lat)
+              setLocationLng(lng)
+            }}
+            compact
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -287,6 +306,22 @@ function SessionCard({
               {session.location}
             </span>
           )}
+          {(session.location_lat != null && session.location_lng != null) || session.location_address ? (
+            <a
+              href={`https://www.google.com/maps?q=${
+                session.location_lat != null && session.location_lng != null
+                  ? `${session.location_lat},${session.location_lng}`
+                  : encodeURIComponent(session.location_address ?? '')
+              }`}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-[10px] text-green-600 transition-colors hover:bg-green-500/20"
+              title={session.location_address ?? 'Abrir en Maps'}
+            >
+              <MapPin className="h-3 w-3" /> {session.location_address ? 'Dirección' : 'GPS'}
+            </a>
+          ) : null}
         </div>
         {session.notes && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">{session.notes}</p>

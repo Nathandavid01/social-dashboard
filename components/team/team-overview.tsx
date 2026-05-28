@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TaskStatusBadge } from '@/components/operations/task-status-badge'
+import { RoleSelector } from './role-selector'
 import { Users, AlertTriangle, CheckSquare, Clock, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
@@ -52,7 +53,13 @@ function MemberCard({ member }: { member: Member }) {
             {member.title ? (
               <p className="text-xs text-foreground/80 truncate">{member.title}</p>
             ) : null}
-            <p className="text-[10px] text-muted-foreground capitalize">{member.role}</p>
+            <div className="mt-1">
+              <RoleSelector
+                userId={member.id}
+                userName={member.full_name ?? member.email}
+                currentRole={member.role}
+              />
+            </div>
           </div>
           <div className="flex items-center gap-1.5">
             {member.overdue > 0 && (

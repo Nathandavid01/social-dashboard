@@ -23,12 +23,12 @@ export function TeamWorkload({ members }: TeamWorkloadProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-semibold">Carga del Equipo</CardTitle>
-          </div>
-          <Link href="/team" className="text-muted-foreground hover:text-primary transition-colors">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <CardTitle className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+            <Users className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">Carga del Equipo</span>
+          </CardTitle>
+          <Link href="/team" className="shrink-0 text-muted-foreground transition-colors hover:text-primary" aria-label="Ver equipo">
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

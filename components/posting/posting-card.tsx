@@ -144,11 +144,11 @@ export function PostingCard({ item, onSent, readonly = false }: PostingCardProps
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-sm leading-snug truncate">{review.title}</p>
-            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-              {client?.name ? <span className="font-medium text-foreground">@ {client.name}</span> : <span className="text-red-500">Sin cliente</span>}
-              {!hasMetricool && <Badge variant="outline" className="text-[10px] border-yellow-400 text-yellow-700">Sin Metricool</Badge>}
-              {isSent && <Badge className="text-[10px] bg-green-600">Enviado</Badge>}
-              {isFailed && <Badge variant="destructive" className="text-[10px]">Falló</Badge>}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+              {client?.name ? <span className="truncate font-medium text-foreground">@ {client.name}</span> : <span className="text-red-500">Sin cliente</span>}
+              {!hasMetricool && <Badge variant="outline" className="shrink-0 whitespace-nowrap border-yellow-400 text-[10px] text-yellow-700">Sin Metricool</Badge>}
+              {isSent && <Badge className="shrink-0 whitespace-nowrap bg-green-600 text-[10px]">Enviado</Badge>}
+              {isFailed && <Badge variant="destructive" className="shrink-0 whitespace-nowrap text-[10px]">Falló</Badge>}
             </div>
           </div>
           <a

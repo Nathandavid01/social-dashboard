@@ -44,26 +44,24 @@ export function TodaysPosts() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            Contenido de Hoy
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <CardTitle className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+            <CalendarClock className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">Contenido de Hoy</span>
           </CardTitle>
-          <div className="flex items-center gap-2">
-            {loading ? null : (
-              <>
-                <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/10 text-xs">
-                  {published.length} publicados
-                </Badge>
-                <Badge variant="outline" className="text-yellow-500 border-yellow-500/30 bg-yellow-500/10 text-xs">
-                  {upcoming.length} programados
-                </Badge>
-                <Link href="/published" className="text-muted-foreground hover:text-primary transition-colors">
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </>
-            )}
-          </div>
+          {!loading && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant="outline" className="whitespace-nowrap border-green-500/30 bg-green-500/10 text-xs text-green-500">
+                {published.length} pub.
+              </Badge>
+              <Badge variant="outline" className="whitespace-nowrap border-yellow-500/30 bg-yellow-500/10 text-xs text-yellow-500">
+                {upcoming.length} prog.
+              </Badge>
+              <Link href="/published" className="text-muted-foreground transition-colors hover:text-primary" aria-label="Ver todos">
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="pt-0">
