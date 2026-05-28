@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Maskable icon: safe zone is the inner 80% (40-460 of 512). The logo must
+     fit within that safe zone because the OS may crop the outer 10% per side
+     into a circle, squircle, etc. We scale the content down. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#000000"/>
+  <defs>
+    <linearGradient id="gm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5B528"/>
+      <stop offset="50%" stop-color="#D4A017"/>
+      <stop offset="100%" stop-color="#B8870E"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(102, 102) scale(0.6)">
+    <rect x="130" y="220" width="42" height="160" rx="6" fill="url(#gm)"/>
+    <rect x="208" y="140" width="42" height="240" rx="6" fill="url(#gm)"/>
+    <rect x="286" y="100" width="42" height="280" rx="6" fill="url(#gm)"/>
+    <rect x="364" y="190" width="42" height="190" rx="6" fill="url(#gm)"/>
+    <path d="M85 340 L165 254 L240 290 L320 184 L450 100" fill="none" stroke="url(#gm)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M415 80 L470 76 L466 134 Z" fill="url(#gm)"/>
+  </g>
+</svg>

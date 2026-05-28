@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { assertOwner, requirePermission } from '@/lib/auth/server'
+import { hasPermission } from '@/lib/auth/permissions'
 import {
   clientProfilePatchSchema,
   paymentSchema,
@@ -9,6 +11,31 @@ import {
   type PaymentInput,
 } from '@/lib/validations/client-profile.schema'
 import type { ClientAsset, ClientAssetKind, ClientPayment } from '@/lib/supabase/types'
+
+/**
+ * The fields in `clients` are gated by different permissions:
+ *   - billing/contract fields           → 'clients.billing.edit' / 'clients.contract.edit' (owner)
+ *   - everything else (brand/owner/etc) → 'clients.brand.edit'
+ * This function inspects the patch and throws if the user can't touch the
+ * fields they're trying to change.
+ */
+async function authorizeProfilePatch(patch: Record<string, unknown>): Promise<void> {
+  const { getCurrentRole } = await import('@/lib/auth/server')
+  const role = await getCurrentRole()
+
+  const touchesContract = 'contract_url' in patch || 'contract_signed_at' in patch || 'contract_expires_at' in patch
+  const touchesBilling  = 'monthly_fee' in patch
+
+  if (touchesContract && !hasPermission(role, 'clients.contract.edit')) {
+    throw new Error('Solo Owners pueden editar el contrato.')
+  }
+  if (touchesBilling && !hasPermission(role, 'clients.billing.edit')) {
+    throw new Error('Solo Owners pueden editar facturación.')
+  }
+  if (!hasPermission(role, 'clients.brand.edit')) {
+    throw new Error('No tienes permiso para editar este cliente.')
+  }
+}
 
 const ASSETS_BUCKET = 'client-assets'
 const CONTRACTS_BUCKET = 'client-contracts'
@@ -31,6 +58,12 @@ export async function updateClientProfile(clientId: string, input: ClientProfile
   }
   const patch = parsed.data
   if (Object.keys(patch).length === 0) return { ok: true }
+
+  try {
+    await authorizeProfilePatch(patch)
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
 
   const { error } = await supabase
     .from('clients')
@@ -112,6 +145,12 @@ export async function uploadContract(
   clientId: string,
   formData: FormData,
 ): Promise<{ ok?: true; url?: string; error?: string }> {
+  try {
+    await requirePermission('clients.contract.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createClient()
   const file = formData.get('file') as File | null
   if (!file || file.size === 0) return { error: 'Archivo requerido' }
@@ -254,6 +293,12 @@ export async function addPayment(
   clientId: string,
   input: PaymentInput,
 ): Promise<{ ok?: true; payment?: ClientPayment; error?: string }> {
+  try {
+    await requirePermission('clients.billing.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createClient()
   const parsed = paymentSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.issues.map((i) => i.message).join('; ') }
@@ -271,6 +316,12 @@ export async function addPayment(
 }
 
 export async function deletePayment(paymentId: string, clientId: string): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('clients.billing.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createClient()
   const { error } = await supabase.from('client_payments').delete().eq('id', paymentId)
   if (error) return { error: error.message }

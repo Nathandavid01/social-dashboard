@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient as createSupabaseClient } from '@/lib/supabase/server'
+import { assertOwner, requirePermission } from '@/lib/auth/server'
 import { clientSchema } from '@/lib/validations/client.schema'
 import type { ClientFormValues } from '@/lib/validations/client.schema'
 
@@ -49,6 +50,12 @@ export async function getClientById(id: string) {
 }
 
 export async function createClient(values: ClientFormValues) {
+  try {
+    await requirePermission('clients.create')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createSupabaseClient()
   const parsed = clientSchema.safeParse(values)
   if (!parsed.success) return { error: 'Invalid form data' }
@@ -68,6 +75,12 @@ export async function createClient(values: ClientFormValues) {
 }
 
 export async function updateClient(id: string, values: ClientFormValues) {
+  try {
+    await requirePermission('clients.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createSupabaseClient()
   const parsed = clientSchema.safeParse(values)
   if (!parsed.success) return { error: 'Invalid form data' }
@@ -85,6 +98,14 @@ export async function updateClient(id: string, values: ClientFormValues) {
 }
 
 export async function deleteClient(id: string) {
+  // Borrar un cliente arrastra payments, assets, ideas, tareas, sesiones —
+  // operación destructiva, restringida a owner.
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createSupabaseClient()
 
   const { error } = await supabase.from('clients').delete().eq('id', id)
