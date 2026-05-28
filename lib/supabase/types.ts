@@ -70,6 +70,7 @@ export interface ContentIdeaVideo {
   drive_file_id: string | null
   drive_view_link: string | null
   drive_thumb_url: string | null
+  storage_provider: 'drive' | 'r2' | 'supabase'
   mime_type: string | null
   size_bytes: number | null
   duration_sec: number | null

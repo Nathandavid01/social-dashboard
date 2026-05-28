@@ -1,164 +1,152 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { Video, Scissors, Upload, ExternalLink, Trash2, Loader2, Camera, Clapperboard, AlertCircle } from 'lucide-react'
+import { useRef, useState, useTransition } from 'react'
+import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription,
-} from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
-import { registerIdeaVideoFromLink, deleteIdeaVideo } from '@/lib/actions/idea-videos'
-import { cn } from '@/lib/utils'
+import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
   ideaId: string
   ideaTitle?: string
   videos: ContentIdeaVideo[]
-  /** Compact rendering for embedding in cards. */
   compact?: boolean
 }
 
-export function IdeaVideoPanel({ ideaId, ideaTitle, videos, compact }: Props) {
+const META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon: typeof Camera; tone: string }> = {
+  raw:    { label: 'Video crudo',   sub: 'Material grabado, listo para editar', icon: Camera,       tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30' },
+  broll:  { label: 'B-roll',        sub: 'Tomas de apoyo',                      icon: Video,        tone: 'text-teal-500 bg-teal-500/10 border-teal-500/30' },
+  edited: { label: 'Video editado', sub: 'Versión final para QC',               icon: Clapperboard, tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30' },
+}
+
+function formatBytes(n: number | null): string {
+  if (!n) return ''
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
+}
+
+export function IdeaVideoPanel({ ideaId, videos }: Props) {
   const canUpload = useHasPermission('video.upload')
   const raw = videos.find((v) => v.kind === 'raw' && v.status === 'uploaded')
   const edited = videos.find((v) => v.kind === 'edited' && v.status === 'uploaded')
   const brolls = videos.filter((v) => v.kind === 'broll' && v.status === 'uploaded')
 
   return (
-    <div className={cn('space-y-2', compact ? '' : 'space-y-3')}>
-      <VideoSlot
-        kind="raw"
-        ideaId={ideaId}
-        ideaTitle={ideaTitle}
-        video={raw}
-        canUpload={canUpload}
-        compact={compact}
-      />
+    <div className="space-y-2.5">
+      <Slot kind="raw" ideaId={ideaId} video={raw} canUpload={canUpload} />
 
-      {/* B-rolls — multiple per idea: existing ones + one upload slot */}
-      {brolls.map((b) => (
-        <VideoSlot
-          key={b.id}
-          kind="broll"
-          ideaId={ideaId}
-          ideaTitle={ideaTitle}
-          video={b}
-          canUpload={canUpload}
-          compact={compact}
-        />
-      ))}
-      {canUpload && (
-        <VideoSlot
-          kind="broll"
-          ideaId={ideaId}
-          ideaTitle={ideaTitle}
-          video={undefined}
-          canUpload={canUpload}
-          compact={compact}
-        />
-      )}
+      {brolls.map((b) => <Slot key={b.id} kind="broll" ideaId={ideaId} video={b} canUpload={canUpload} />)}
+      {canUpload && <Slot kind="broll" ideaId={ideaId} video={undefined} canUpload={canUpload} />}
 
-      <VideoSlot
-        kind="edited"
-        ideaId={ideaId}
-        ideaTitle={ideaTitle}
-        video={edited}
-        canUpload={canUpload}
-        compact={compact}
-        /* Editor pipeline is unlocked once raw exists */
-        disabledReason={!raw ? 'Sube el video crudo primero' : undefined}
-      />
+      <Slot kind="edited" ideaId={ideaId} video={edited} canUpload={canUpload} disabledReason={!raw ? 'Sube el video crudo primero' : undefined} />
     </div>
   )
 }
 
-const SLOT_META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon: typeof Camera; tone: string }> = {
-  raw: {
-    label: 'Video crudo',
-    sub: 'Material recién grabado, listo para editar',
-    icon: Camera,
-    tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30',
-  },
-  broll: {
-    label: 'B-roll',
-    sub: 'Tomas de apoyo para la edición',
-    icon: Video,
-    tone: 'text-teal-500 bg-teal-500/10 border-teal-500/30',
-  },
-  edited: {
-    label: 'Video editado',
-    sub: 'Versión final para QC y publicación',
-    icon: Clapperboard,
-    tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30',
-  },
-}
-
-function VideoSlot({
-  kind, ideaId, ideaTitle, video, canUpload, compact, disabledReason,
+function Slot({
+  kind, ideaId, video, canUpload, disabledReason,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
-  ideaTitle?: string
   video: ContentIdeaVideo | undefined
   canUpload: boolean
-  compact?: boolean
   disabledReason?: string
 }) {
-  const meta = SLOT_META[kind]
+  const meta = META[kind]
   const Icon = meta.icon
-  const [isDeleting, startDelete] = useTransition()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [progress, setProgress] = useState<number | null>(null)
+  const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
 
+  async function handleFile(file: File | null) {
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024 * 1024) {
+      toast({ title: 'Muy grande', description: 'Máximo 5 GB', variant: 'destructive' })
+      return
+    }
+
+    const slot = await getR2UploadUrl({ ideaId, kind, fileName: file.name, contentType: file.type || 'video/mp4' })
+    if (slot.error || !slot.url || !slot.key) {
+      toast({ title: 'Error', description: slot.error ?? 'No se pudo iniciar la subida', variant: 'destructive' })
+      return
+    }
+
+    setProgress(0)
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', slot.url!, true)
+        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
+        xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)) }
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 ${xhr.status}`)))
+        xhr.onerror = () => reject(new Error('Error de red durante la subida'))
+        xhr.send(file)
+      })
+      startTransition(async () => {
+        const res = await registerR2Video({
+          ideaId, kind, key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4',
+        })
+        setProgress(null)
+        if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+        else toast({ title: `${meta.label} subido` })
+      })
+    } catch (err) {
+      setProgress(null)
+      toast({ title: 'Falló la subida', description: err instanceof Error ? err.message : 'Error', variant: 'destructive' })
+    }
+  }
+
+  async function download() {
+    if (!video) return
+    const res = await getR2DownloadUrl(video.id)
+    if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+    else if (res.url) window.open(res.url, '_blank')
+  }
+
   if (video) {
+    const isR2 = video.storage_provider === 'r2'
     return (
       <div className={cn('flex items-center gap-3 rounded-lg border p-3', meta.tone)}>
-        {video.drive_thumb_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={video.drive_thumb_url} alt="" className="h-12 w-16 shrink-0 rounded object-cover" />
-        ) : (
-          <div className={cn('grid h-12 w-16 shrink-0 place-items-center rounded', meta.tone)}>
-            <Icon className="h-5 w-5" />
-          </div>
-        )}
+        <div className={cn('grid h-11 w-14 shrink-0 place-items-center rounded', meta.tone)}>
+          <Icon className="h-5 w-5" />
+        </div>
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
-            <Icon className="h-3 w-3" />
-            {meta.label}
+          <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide">
+            <Icon className="h-3 w-3" /> {meta.label}
           </p>
           <p className="truncate text-sm font-medium">{video.name}</p>
-          {video.notes && <p className="truncate text-xs text-muted-foreground">{video.notes}</p>}
+          <p className="text-xs text-muted-foreground">{formatBytes(video.size_bytes)}{isR2 ? ' · R2' : ''}</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {video.drive_view_link && (
-            <a
-              href={video.drive_view_link}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs font-medium hover:bg-accent"
-            >
+          {isR2 ? (
+            <Button size="sm" variant="outline" onClick={download}>
+              <Download className="mr-1 h-3.5 w-3.5" /> Bajar
+            </Button>
+          ) : video.drive_view_link ? (
+            <a href={video.drive_view_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs hover:bg-accent">
               <ExternalLink className="h-3 w-3" /> Drive
             </a>
-          )}
+          ) : null}
           {canUpload && (
             <button
               onClick={() => {
                 if (!confirm(`¿Quitar este ${meta.label.toLowerCase()}?`)) return
-                startDelete(async () => {
-                  const res = await deleteIdeaVideo(video.id)
+                startTransition(async () => {
+                  const res = await deleteR2Video(video.id, ideaId)
                   if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-                  else toast({ title: 'Video archivado' })
+                  else toast({ title: 'Video eliminado' })
                 })
               }}
               className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"
-              disabled={isDeleting}
+              disabled={isPending}
               aria-label="Eliminar"
             >
-              {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
             </button>
           )}
         </div>
@@ -166,155 +154,53 @@ function VideoSlot({
     )
   }
 
-  // Empty state — show upload CTA
   if (!canUpload) {
     return (
-      <div className={cn('rounded-lg border border-dashed p-3 text-xs text-muted-foreground', compact && 'p-2')}>
-        <div className="flex items-center gap-2 opacity-70">
-          <Icon className="h-3.5 w-3.5" /> {meta.label} pendiente
+      <div className="flex items-center gap-2 rounded-lg border border-dashed p-2.5 text-xs text-muted-foreground opacity-70">
+        <Icon className="h-3.5 w-3.5" /> {meta.label} pendiente
+      </div>
+    )
+  }
+
+  if (progress !== null) {
+    return (
+      <div className={cn('rounded-lg border p-3', meta.tone)}>
+        <div className="mb-2 flex items-center justify-between text-xs font-medium">
+          <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…</span>
+          <span className="tabular-nums">{progress}%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-background/60">
+          <div className="h-full bg-current transition-all duration-200" style={{ width: `${progress}%` }} />
         </div>
       </div>
     )
   }
 
   return (
-    <UploadDialog
-      ideaId={ideaId}
-      ideaTitle={ideaTitle}
-      kind={kind}
-      compact={compact}
-      disabledReason={disabledReason}
-    />
-  )
-}
-
-function UploadDialog({
-  ideaId, ideaTitle, kind, compact, disabledReason,
-}: {
-  ideaId: string
-  ideaTitle?: string
-  kind: ContentIdeaVideoKind
-  compact?: boolean
-  disabledReason?: string
-}) {
-  const meta = SLOT_META[kind]
-  const Icon = meta.icon
-  const [open, setOpen] = useState(false)
-  const [link, setLink] = useState('')
-  const [name, setName] = useState('')
-  const [notes, setNotes] = useState('')
-  const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
-
-  function submit() {
-    startTransition(async () => {
-      const res = await registerIdeaVideoFromLink({
-        ideaId,
-        kind,
-        driveLink: link,
-        name: name || undefined,
-        notes: notes || undefined,
-      })
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else {
-        toast({ title: `${meta.label} registrado` })
-        setOpen(false)
-        setLink('')
-        setName('')
-        setNotes('')
-      }
-    })
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          disabled={!!disabledReason}
-          className={cn(
-            'group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all',
-            'hover:border-primary hover:bg-primary/5',
-            disabledReason && 'cursor-not-allowed opacity-50 hover:border-dashed hover:bg-transparent',
-            compact && 'p-2 text-xs',
-          )}
-        >
-          <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', meta.tone)}>
-            <Icon className="h-4 w-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-medium">Subir {meta.label.toLowerCase()}</p>
-            <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub}</p>
-          </div>
-          <Upload className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:scale-110 group-hover:text-primary" />
-        </button>
-      </DialogTrigger>
-
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {kind === 'raw' ? <Video className="h-5 w-5" /> : <Scissors className="h-5 w-5" />}
-            Subir {meta.label.toLowerCase()}
-            {ideaTitle && <span className="text-muted-foreground text-sm font-normal">— {ideaTitle}</span>}
-          </DialogTitle>
-          <DialogDescription>
-            Sube tu archivo a Google Drive (cualquier carpeta) y pega aquí el link compartible.
-            La calidad del archivo se preserva intacta porque la app solo guarda la referencia.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="drive_link" className="text-xs">Link de Google Drive *</Label>
-            <Input
-              id="drive_link"
-              autoFocus
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              placeholder="https://drive.google.com/file/d/…"
-              className="h-9 font-mono text-xs"
-            />
-            <p className="text-[10px] text-muted-foreground">
-              Acepta el link compartible (.../file/d/&lt;id&gt;/view), el link de descarga, o solo el file ID.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="vname" className="text-xs">Nombre (opcional)</Label>
-            <Input
-              id="vname"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={kind === 'raw' ? 'Reel VSS Properties — Tomas crudas' : 'Reel VSS Properties — Final v1'}
-              className="h-9"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="vnotes" className="text-xs">Notas para el {kind === 'raw' ? 'editor' : 'revisor'}</Label>
-            <Textarea
-              id="vnotes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder={kind === 'raw' ? 'Cortar primeros 8s, usar la toma del balcón al final…' : 'Cambios aplicados, listo para publicar…'}
-              className="resize-none text-sm"
-            />
-          </div>
-          {kind === 'raw' && (
-            <div className="flex items-start gap-2 rounded-md border border-blue-500/30 bg-blue-500/5 p-2 text-xs text-blue-600 dark:text-blue-300">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              <p>Al guardar, la idea pasa automáticamente a estado <strong>grabada</strong> y queda disponible para el editor.</p>
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={isPending}>Cancelar</Button>
-          <Button onClick={submit} disabled={!link.trim() || isPending}>
-            {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-2 h-3.5 w-3.5" />}
-            Registrar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <button
+      type="button"
+      disabled={!!disabledReason}
+      onClick={() => fileRef.current?.click()}
+      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-primary/5') }}
+      onDragLeave={(e) => e.currentTarget.classList.remove('border-primary', 'bg-primary/5')}
+      onDrop={(e) => {
+        e.preventDefault()
+        e.currentTarget.classList.remove('border-primary', 'bg-primary/5')
+        handleFile(e.dataTransfer.files?.[0] ?? null)
+      }}
+      className={cn(
+        'group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all',
+        'hover:border-primary hover:bg-primary/5',
+        disabledReason && 'cursor-not-allowed opacity-50 hover:border-dashed hover:bg-transparent',
+      )}
+    >
+      <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', meta.tone)}><Icon className="h-4 w-4" /></div>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">Subir {meta.label.toLowerCase()}</p>
+        <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub} · arrastra o haz click</p>
+      </div>
+      <Upload className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:scale-110 group-hover:text-primary" />
+      <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0] ?? null)} />
+    </button>
   )
 }
