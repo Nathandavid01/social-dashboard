@@ -43,6 +43,11 @@ export const clientProfilePatchSchema = z
     logo_url: z.string().nullable().optional(),
     logo_dark_url: z.string().nullable().optional(),
     posting_days: z.array(z.number().int().min(0).max(6)).max(7).optional(),
+    video_threshold: z.union([z.number().int().min(0).max(500), z.string()]).optional().transform((v) => {
+      if (v === undefined || v === '') return undefined
+      const n = typeof v === 'string' ? parseInt(v, 10) : v
+      return Number.isFinite(n) ? Math.max(0, Math.min(500, n)) : undefined
+    }),
     contract_url: z.string().nullable().optional(),
     contract_signed_at: dateOnly,
     contract_expires_at: dateOnly,

@@ -4,7 +4,8 @@ import { PostingDaysEditor } from '../posting-days-editor'
 import { OwnerForm } from '../owner-form'
 import { LastMeetingEditor } from '../last-meeting-editor'
 import { ColorSwatches } from '../color-swatches'
-import { CalendarDays, User, Users, Palette } from 'lucide-react'
+import { VideoThresholdCard } from '../video-threshold-card'
+import { CalendarDays, User, Users, Palette, Video } from 'lucide-react'
 import type { Client } from '@/lib/supabase/types'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
 
@@ -55,6 +56,19 @@ export function OverviewTab({ client, pipeline }: Props) {
             clientId={client.id}
             initialAt={client.last_meeting_at}
             initialNotes={client.last_meeting_notes}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '210ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Video className="h-4 w-4" /> Buffer de videos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <VideoThresholdCard
+            clientId={client.id}
+            initialThreshold={client.video_threshold ?? 0}
+            accumulated={(pipeline?.porEditar ?? 0) + (pipeline?.porPublicar ?? 0)}
           />
         </CardContent>
       </Card>

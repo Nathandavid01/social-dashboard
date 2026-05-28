@@ -127,6 +127,7 @@ export interface Client {
   posting_days: number[]
   posting_time: string | null
   posting_schedule: Record<string, string>
+  video_threshold: number
   contract_url: string | null
   contract_signed_at: string | null
   contract_expires_at: string | null
