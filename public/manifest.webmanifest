@@ -11,6 +11,36 @@
   "categories": ["productivity", "business"],
   "lang": "es-PR",
   "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Planning de la semana",
+      "short_name": "Planning",
+      "description": "Clientes por agendar y con ideas pendientes",
+      "url": "/planning",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Operaciones",
+      "short_name": "Tareas",
+      "description": "Todas las tareas del equipo",
+      "url": "/operations",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Video QC",
+      "short_name": "Video QC",
+      "description": "Videos pendientes de revisión",
+      "url": "/video-reviews",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Lista de clientes",
+      "url": "/clients",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.svg",

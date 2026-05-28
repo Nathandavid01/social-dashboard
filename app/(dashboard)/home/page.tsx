@@ -201,15 +201,17 @@ export default async function HomePage() {
         total={planning.rows.length}
       />
 
-      {/* Global content pipeline overview */}
-      <GlobalPipelineSection totals={pipelineGlobal.totals} perClient={pipelineGlobal.perClient} />
-
-      {/* My Tasks */}
+      {/* My Tasks — personal work first, before the global view */}
       {(myTasks?.length ?? 0) > 0 && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Mis Tareas</h2>
-            <Link href="/operations?assignee=me" className="text-xs text-primary hover:underline flex items-center gap-1">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              Mis Tareas
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium tabular-nums text-primary">
+                {myTasks?.length ?? 0}
+              </span>
+            </h2>
+            <Link href="/operations?assignee=me" className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-primary hover:underline">
               Ver en Operaciones <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -221,6 +223,9 @@ export default async function HomePage() {
           />
         </div>
       )}
+
+      {/* Global content pipeline overview */}
+      <GlobalPipelineSection totals={pipelineGlobal.totals} perClient={pipelineGlobal.perClient} />
 
       {/* Main content grid */}
       <div className="grid gap-6 lg:grid-cols-3">
