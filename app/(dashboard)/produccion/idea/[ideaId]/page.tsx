@@ -10,6 +10,7 @@ import {
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ClientAssetsDownload } from '@/components/produccion/client-assets-download'
+import { PipelineTimeline, type TimelineStage } from '@/components/produccion/pipeline-timeline'
 import { getIdeaVideos } from '@/lib/actions/idea-videos'
 import { getClientAssets } from '@/lib/actions/client-profile'
 import type { ContentIdea, ContentIdeaVideo, ClientAsset } from '@/lib/supabase/types'
@@ -36,11 +37,13 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
     idea.client_id ? getClientAssets(idea.client_id) : Promise.resolve([] as ClientAsset[]),
   ])
 
-  const stages: { num: number; label: string; done: boolean }[] = [
-    { num: 1, label: 'Idea', done: true },
-    { num: 2, label: 'Caption', done: !!idea.generated_caption },
-    { num: 3, label: 'Material', done: (videos as ContentIdeaVideo[]).some((v) => v.kind === 'raw') },
-    { num: 4, label: 'Editado', done: (videos as ContentIdeaVideo[]).some((v) => v.kind === 'edited') },
+  const vids = videos as ContentIdeaVideo[]
+  const timeline: TimelineStage[] = [
+    { id: 'stage-idea',     label: 'Idea',     icon: 'idea',     done: true },
+    { id: 'stage-caption',  label: 'Caption',  icon: 'caption',  done: !!idea.generated_caption },
+    { id: 'stage-material', label: 'Material', icon: 'material', done: vids.some((v) => v.kind === 'raw') },
+    { id: 'stage-material', label: 'Editado',  icon: 'edited',   done: vids.some((v) => v.kind === 'edited') },
+    { id: 'stage-assets',   label: 'Assets',   icon: 'assets',   done: false },
   ]
 
   return (
@@ -61,25 +64,13 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
             </Link>
           )}
         </div>
-        {/* Stage progress */}
-        <div className="flex items-center gap-1.5">
-          {stages.map((s) => (
-            <div
-              key={s.num}
-              className={`flex h-7 items-center gap-1 rounded-full border px-2.5 text-xs font-medium ${
-                s.done ? 'border-green-500/30 bg-green-500/10 text-green-500' : 'border-border bg-muted text-muted-foreground'
-              }`}
-              title={s.label}
-            >
-              <span className="tabular-nums">{s.num}</span>
-              <span className="hidden sm:inline">{s.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
+      {/* Clickable timeline — jumps to each stage */}
+      <PipelineTimeline stages={timeline} />
+
       {/* Stage 1: Idea brief */}
-      <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+      <Card id="stage-idea" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Lightbulb className="h-4 w-4 text-purple-500" /> La idea
@@ -97,7 +88,7 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
       </Card>
 
       {/* Stage 2: Caption */}
-      <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
+      <Card id="stage-caption" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" /> Caption
@@ -114,7 +105,7 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Stage 3: Material crudo + b-rolls + editado */}
-        <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
+        <Card id="stage-material" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Scissors className="h-4 w-4 text-cyan-500" /> Material de video
@@ -126,7 +117,7 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
         </Card>
 
         {/* Stage 4: Client assets to download */}
-        <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
+        <Card id="stage-assets" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Palette className="h-4 w-4 text-pink-500" /> Assets del cliente

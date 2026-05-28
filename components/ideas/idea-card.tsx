@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import type { ContentIdea, Client, ContentIdeaStatus } from '@/lib/supabase/types'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ import {
   PenTool,
   Hash,
   Sparkles,
+  Clapperboard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -128,6 +130,12 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/produccion/idea/${idea.id}`}>
+                  <Clapperboard className="mr-2 h-3.5 w-3.5" />
+                  Abrir workspace
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={copyBrief}>
                 <Copy className="mr-2 h-3.5 w-3.5" />
                 Copiar brief
@@ -229,6 +237,12 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
               ✓ Publicada
             </Badge>
           ) : null}
+          <Button asChild size="sm" variant="outline" className="h-8 gap-1.5" title="Workspace del editor">
+            <Link href={`/produccion/idea/${idea.id}`}>
+              <Clapperboard className="h-3 w-3" />
+              <span className="hidden sm:inline">Workspace</span>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

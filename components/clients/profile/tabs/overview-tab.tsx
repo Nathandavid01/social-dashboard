@@ -18,7 +18,7 @@ export function OverviewTab({ client, pipeline }: Props) {
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {/* Pipeline spans full width on mobile, half on md, full on xl */}
       <div className="md:col-span-2 xl:col-span-3">
-        {pipeline && <PipelineCard data={pipeline} title="Pipeline de contenido" />}
+        {pipeline && <PipelineCard data={pipeline} title="Pipeline de contenido" linkable clientId={client.id} />}
       </div>
 
       <Card className="animate-in fade-in duration-500" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>

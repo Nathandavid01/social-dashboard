@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Lightbulb, Video, Scissors, CalendarCheck, Send, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -8,6 +9,10 @@ interface Props {
   /** Either a single client's pipeline or aggregated totals. */
   data: ClientPipeline | (PipelineTotals & { title?: string })
   title?: string
+  /** When true, each funnel node links to its corresponding view. */
+  linkable?: boolean
+  /** Optional client id to scope the links (?client=). */
+  clientId?: string
 }
 
 interface Step {
@@ -16,15 +21,17 @@ interface Step {
   value: number
   icon: LucideIcon
   tone: string
+  href: string
 }
 
-export function PipelineCard({ data, title }: Props) {
+export function PipelineCard({ data, title, linkable, clientId }: Props) {
+  const q = clientId ? `?client=${clientId}` : ''
   const steps: Step[] = [
-    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30' },
-    { key: 'porGrabar',   label: 'Por grabar',   value: data.porGrabar,    icon: Video,         tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30' },
-    { key: 'porEditar',   label: 'Por editar',   value: data.porEditar,    icon: Scissors,      tone: 'text-orange-500 bg-orange-500/10 border-orange-500/30' },
-    { key: 'porPublicar', label: 'Por publicar', value: data.porPublicar,  icon: CalendarCheck, tone: 'text-blue-500 bg-blue-500/10 border-blue-500/30' },
-    { key: 'publicadas',  label: 'Publicados (sem)', value: data.publicadasSemana, icon: Send,  tone: 'text-green-500 bg-green-500/10 border-green-500/30' },
+    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30', href: `/ideacion${q}` },
+    { key: 'porGrabar',   label: 'Por grabar',   value: data.porGrabar,    icon: Video,         tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30', href: `/recording-calendar${q}` },
+    { key: 'porEditar',   label: 'Por editar',   value: data.porEditar,    icon: Scissors,      tone: 'text-orange-500 bg-orange-500/10 border-orange-500/30', href: `/produccion${q}` },
+    { key: 'porPublicar', label: 'Por publicar', value: data.porPublicar,  icon: CalendarCheck, tone: 'text-blue-500 bg-blue-500/10 border-blue-500/30', href: `/posting${q}` },
+    { key: 'publicadas',  label: 'Publicados (sem)', value: data.publicadasSemana, icon: Send,  tone: 'text-green-500 bg-green-500/10 border-green-500/30', href: `/published${q}` },
   ]
 
   const weekPct = data.targetSemana > 0 ? Math.min((data.publicadasSemana / data.targetSemana) * 100, 100) : 0
@@ -40,26 +47,37 @@ export function PipelineCard({ data, title }: Props) {
       <CardContent className="space-y-5">
         {/* Funnel */}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-          {steps.map((s, i) => (
-            <div key={s.key} className="relative">
-              <div
-                className={cn(
-                  'flex flex-col items-center gap-1 rounded-lg border p-3 transition-transform hover:scale-[1.02] hover:-translate-y-0.5',
-                  s.tone,
-                  'animate-in fade-in slide-in-from-bottom-1 duration-300',
-                )}
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}
-              >
+          {steps.map((s, i) => {
+            const inner = (
+              <>
                 <s.icon className="h-4 w-4" />
                 <p className="text-2xl font-bold tabular-nums">{s.value}</p>
                 <p className="text-[10px] text-center uppercase tracking-wide opacity-90 md:text-xs">{s.label}</p>
+              </>
+            )
+            const nodeClass = cn(
+              'flex flex-col items-center gap-1 rounded-lg border p-3 transition-all hover:scale-[1.02] hover:-translate-y-0.5',
+              s.tone,
+              'animate-in fade-in slide-in-from-bottom-1 duration-300',
+              linkable && 'cursor-pointer hover:shadow-md',
+            )
+            return (
+              <div key={s.key} className="relative">
+                {linkable ? (
+                  <Link href={s.href} className={nodeClass} style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <div className={nodeClass} style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}>
+                    {inner}
+                  </div>
+                )}
+                {i < steps.length - 1 && (
+                  <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-muted-foreground/50 md:block" />
+                )}
               </div>
-              {/* Connector arrow (desktop only) */}
-              {i < steps.length - 1 && (
-                <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-muted-foreground/50 md:block" />
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Progress vs target */}

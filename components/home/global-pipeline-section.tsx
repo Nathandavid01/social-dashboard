@@ -18,7 +18,7 @@ export function GlobalPipelineSection({ totals, perClient }: Props) {
 
   return (
     <section className="space-y-4">
-      <PipelineCard data={totals} title="Pipeline global — todos los clientes activos" />
+      <PipelineCard data={totals} title="Pipeline global — todos los clientes activos" linkable />
 
       {/* Top clients at risk this week */}
       {atRiskWeek.length > 0 && (
