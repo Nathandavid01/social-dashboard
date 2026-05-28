@@ -34,7 +34,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
   const { toast } = useToast()
   const [title, setTitle] = useState('')
   const [driveLink, setDriveLink] = useState('')
-  const [clientId, setClientId] = useState<string>('')
+  const [clientId, setClientId] = useState<string>('__none__')
   const [notes, setNotes] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
@@ -43,7 +43,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
       const result = await submitVideoReview({
         title,
         drive_link: driveLink,
-        client_id: clientId || null,
+        client_id: clientId === '__none__' || !clientId ? null : clientId,
         general_notes: notes || null,
       })
       if (result.error) {
@@ -52,7 +52,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
         toast({ title: 'Video enviado para revisión' })
         setTitle('')
         setDriveLink('')
-        setClientId('')
+        setClientId('__none__')
         setNotes('')
         onClose()
       }
@@ -92,7 +92,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
                 value={driveLink}
                 onChange={(e) => setDriveLink(e.target.value)}
                 required
-                type="url"
+                type="text"
               />
             </div>
           </div>
@@ -104,7 +104,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
                 <SelectValue placeholder="Selecciona un cliente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin cliente</SelectItem>
+                <SelectItem value="__none__">Sin cliente</SelectItem>
                 {clients.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
