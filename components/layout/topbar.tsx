@@ -3,7 +3,6 @@
 import { MobileNav } from './mobile-nav'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { UserMenu } from '@/components/auth/user-menu'
-import { KeyboardShortcutsHelp } from '@/components/shared/keyboard-shortcuts-help'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { PresenceBar } from '@/components/presence/presence-bar'
 import { Search } from 'lucide-react'
@@ -41,7 +40,6 @@ export function Topbar({
           <span>Buscar...</span>
           <kbd className="ml-1 text-[10px] bg-background rounded px-1">⌘P</kbd>
         </button>
-        <KeyboardShortcutsHelp />
         {currentUser && (
           <NotificationBell
             initialNotifications={notifications}

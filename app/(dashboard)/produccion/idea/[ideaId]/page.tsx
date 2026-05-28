@@ -1,0 +1,154 @@
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  ArrowLeft, Lightbulb, Sparkles, Camera, Palette, Scissors, Eye, Hash,
+} from 'lucide-react'
+import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
+import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { ClientAssetsDownload } from '@/components/produccion/client-assets-download'
+import { getIdeaVideos } from '@/lib/actions/idea-videos'
+import { getClientAssets } from '@/lib/actions/client-profile'
+import type { ContentIdea, ContentIdeaVideo, ClientAsset } from '@/lib/supabase/types'
+
+export const dynamic = 'force-dynamic'
+
+const TYPE_LABEL: Record<string, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
+
+export default async function IdeaWorkspacePage({ params }: { params: Promise<{ ideaId: string }> }) {
+  const { ideaId } = await params
+  const supabase = await createClient()
+
+  const { data: ideaRaw } = await supabase
+    .from('content_ideas')
+    .select('*, client:clients(id, name, industry)')
+    .eq('id', ideaId)
+    .single()
+
+  if (!ideaRaw) notFound()
+  const idea = ideaRaw as unknown as ContentIdea
+
+  const [videos, assets] = await Promise.all([
+    getIdeaVideos(ideaId),
+    idea.client_id ? getClientAssets(idea.client_id) : Promise.resolve([] as ClientAsset[]),
+  ])
+
+  const stages: { num: number; label: string; done: boolean }[] = [
+    { num: 1, label: 'Idea', done: true },
+    { num: 2, label: 'Caption', done: !!idea.generated_caption },
+    { num: 3, label: 'Material', done: (videos as ContentIdeaVideo[]).some((v) => v.kind === 'raw') },
+    { num: 4, label: 'Editado', done: (videos as ContentIdeaVideo[]).some((v) => v.kind === 'edited') },
+  ]
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-5">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Link href="/ideacion" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-3 w-3" /> Ideación
+          </Link>
+          <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight">
+            {idea.title}
+            <Badge variant="outline" className="text-xs">{TYPE_LABEL[idea.content_type] ?? idea.content_type}</Badge>
+          </h1>
+          {idea.client?.name && (
+            <Link href={`/clients/${idea.client_id}`} className="text-sm text-muted-foreground hover:text-primary">
+              {idea.client.name}
+            </Link>
+          )}
+        </div>
+        {/* Stage progress */}
+        <div className="flex items-center gap-1.5">
+          {stages.map((s) => (
+            <div
+              key={s.num}
+              className={`flex h-7 items-center gap-1 rounded-full border px-2.5 text-xs font-medium ${
+                s.done ? 'border-green-500/30 bg-green-500/10 text-green-500' : 'border-border bg-muted text-muted-foreground'
+              }`}
+              title={s.label}
+            >
+              <span className="tabular-nums">{s.num}</span>
+              <span className="hidden sm:inline">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Stage 1: Idea brief */}
+      <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Lightbulb className="h-4 w-4 text-purple-500" /> La idea
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {idea.hook && <Field icon={Eye} label="Hook" value={idea.hook} />}
+          {idea.visual_brief && <Field icon={Camera} label="Brief visual (para el editor)" value={idea.visual_brief} />}
+          {idea.caption_angle && <Field icon={Sparkles} label="Ángulo del caption" value={idea.caption_angle} />}
+          {idea.hashtags_suggestion && <Field icon={Hash} label="Hashtags sugeridos" value={idea.hashtags_suggestion} mono />}
+          {!idea.hook && !idea.visual_brief && !idea.caption_angle && (
+            <p className="text-muted-foreground">Sin brief adicional. Solo el título.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Stage 2: Caption */}
+      <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 text-primary" /> Caption
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <IdeaCaptionEditor
+            ideaId={ideaId}
+            initialCaption={idea.generated_caption}
+            initialPlatform={idea.caption_platform}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        {/* Stage 3: Material crudo + b-rolls + editado */}
+        <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Scissors className="h-4 w-4 text-cyan-500" /> Material de video
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos as ContentIdeaVideo[]} />
+          </CardContent>
+        </Card>
+
+        {/* Stage 4: Client assets to download */}
+        <Card className="animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Palette className="h-4 w-4 text-pink-500" /> Assets del cliente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ClientAssetsDownload assets={assets as ClientAsset[]} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+function Field({ icon: Icon, label, value, mono }: { icon: typeof Eye; label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex gap-2">
+      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className={mono ? 'font-mono text-xs' : 'text-sm'}>{value}</p>
+      </div>
+    </div>
+  )
+}

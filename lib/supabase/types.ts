@@ -59,7 +59,7 @@ export interface ClientPayment {
 
 export type PaymentStatus = 'paid' | 'overdue' | 'pending' | 'no_contract'
 
-export type ContentIdeaVideoKind = 'raw' | 'edited'
+export type ContentIdeaVideoKind = 'raw' | 'broll' | 'edited'
 export type ContentIdeaVideoStatus = 'uploading' | 'uploaded' | 'processing' | 'failed' | 'archived'
 
 export interface ContentIdeaVideo {
@@ -368,6 +368,9 @@ export interface ContentIdea {
   theme: string | null
   generation_prompt: string | null
   model: string | null
+  generated_caption: string | null
+  caption_platform: string | null
+  caption_generated_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string

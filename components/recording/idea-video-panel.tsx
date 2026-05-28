@@ -27,6 +27,7 @@ export function IdeaVideoPanel({ ideaId, ideaTitle, videos, compact }: Props) {
   const canUpload = useHasPermission('video.upload')
   const raw = videos.find((v) => v.kind === 'raw' && v.status === 'uploaded')
   const edited = videos.find((v) => v.kind === 'edited' && v.status === 'uploaded')
+  const brolls = videos.filter((v) => v.kind === 'broll' && v.status === 'uploaded')
 
   return (
     <div className={cn('space-y-2', compact ? '' : 'space-y-3')}>
@@ -38,6 +39,30 @@ export function IdeaVideoPanel({ ideaId, ideaTitle, videos, compact }: Props) {
         canUpload={canUpload}
         compact={compact}
       />
+
+      {/* B-rolls — multiple per idea: existing ones + one upload slot */}
+      {brolls.map((b) => (
+        <VideoSlot
+          key={b.id}
+          kind="broll"
+          ideaId={ideaId}
+          ideaTitle={ideaTitle}
+          video={b}
+          canUpload={canUpload}
+          compact={compact}
+        />
+      ))}
+      {canUpload && (
+        <VideoSlot
+          kind="broll"
+          ideaId={ideaId}
+          ideaTitle={ideaTitle}
+          video={undefined}
+          canUpload={canUpload}
+          compact={compact}
+        />
+      )}
+
       <VideoSlot
         kind="edited"
         ideaId={ideaId}
@@ -58,6 +83,12 @@ const SLOT_META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon
     sub: 'Material recién grabado, listo para editar',
     icon: Camera,
     tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30',
+  },
+  broll: {
+    label: 'B-roll',
+    sub: 'Tomas de apoyo para la edición',
+    icon: Video,
+    tone: 'text-teal-500 bg-teal-500/10 border-teal-500/30',
   },
   edited: {
     label: 'Video editado',
