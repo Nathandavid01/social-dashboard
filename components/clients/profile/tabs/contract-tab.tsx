@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Save, FileSignature, Upload, Download, FileText } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { updateClientProfile, uploadContract, getContractSignedUrl } from '@/lib/actions/client-profile'
+import { useHasPermission } from '@/components/auth/role-gate'
 import type { Client } from '@/lib/supabase/types'
 
 interface Props {
@@ -22,6 +23,9 @@ export function ContractTab({ client }: Props) {
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+  const canEditContract = useHasPermission('clients.contract.edit')
+  const canEditBilling = useHasPermission('clients.billing.edit')
+  const canEdit = canEditContract && canEditBilling
 
   const dirty =
     signedAt !== (client.contract_signed_at ?? '') ||
@@ -77,11 +81,11 @@ export function ContractTab({ client }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="signed_at" className="text-xs">Firmado</Label>
-              <Input id="signed_at" type="date" value={signedAt} onChange={(e) => setSignedAt(e.target.value)} className="h-9" />
+              <Input id="signed_at" type="date" value={signedAt} onChange={(e) => setSignedAt(e.target.value)} disabled={!canEdit} className="h-9" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="expires_at" className="text-xs">Expira</Label>
-              <Input id="expires_at" type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="h-9" />
+              <Input id="expires_at" type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} disabled={!canEdit} className="h-9" />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -94,13 +98,18 @@ export function ContractTab({ client }: Props) {
               value={monthlyFee}
               onChange={(e) => setMonthlyFee(e.target.value)}
               placeholder="0.00"
+              disabled={!canEdit}
               className="h-9"
             />
           </div>
-          <Button onClick={saveMetadata} disabled={!dirty || isPending} size="sm" className="w-full">
-            {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-2 h-3.5 w-3.5" />}
-            Guardar términos
-          </Button>
+          {canEdit ? (
+            <Button onClick={saveMetadata} disabled={!dirty || isPending} size="sm" className="w-full">
+              {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-2 h-3.5 w-3.5" />}
+              Guardar términos
+            </Button>
+          ) : (
+            <p className="text-center text-xs text-muted-foreground">Solo los Owners pueden editar términos del contrato.</p>
+          )}
         </CardContent>
       </Card>
 
@@ -125,7 +134,7 @@ export function ContractTab({ client }: Props) {
             <p className="text-sm text-muted-foreground">Sin PDF cargado.</p>
           )}
 
-          <div
+          {canEditContract && <div
             onDragOver={(e) => {
               e.preventDefault()
               e.currentTarget.classList.add('border-primary', 'bg-primary/5')
@@ -155,7 +164,7 @@ export function ContractTab({ client }: Props) {
               className="hidden"
               onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
             />
-          </div>
+          </div>}
         </CardContent>
       </Card>
     </div>

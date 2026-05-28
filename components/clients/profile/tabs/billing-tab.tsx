@@ -18,6 +18,7 @@ import { Plus, Trash2, DollarSign, Loader2, TrendingUp, AlertCircle, CheckCircle
 import { useToast } from '@/lib/hooks/use-toast'
 import { addPayment, deletePayment } from '@/lib/actions/client-profile'
 import { derivePaymentStatus } from '@/lib/utils/payment-status'
+import { RoleGate, useHasPermission } from '@/components/auth/role-gate'
 import { cn, formatDate } from '@/lib/utils'
 import type { Client, ClientPayment } from '@/lib/supabase/types'
 
@@ -79,9 +80,11 @@ export function BillingTab({ client, payments }: Props) {
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <CardTitle className="min-w-0 truncate text-base">Historial de pagos</CardTitle>
-            <div className="shrink-0">
-              <AddPaymentDialog clientId={client.id} />
-            </div>
+            <RoleGate perm="clients.billing.edit">
+              <div className="shrink-0">
+                <AddPaymentDialog clientId={client.id} />
+              </div>
+            </RoleGate>
           </div>
         </CardHeader>
         <CardContent>
@@ -120,23 +123,25 @@ function PaymentRow({ payment, clientId, index }: { payment: ClientPayment; clie
           {payment.notes && <span className="truncate">· {payment.notes}</span>}
         </div>
       </div>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="text-muted-foreground hover:text-destructive"
-        disabled={isDeleting}
-        onClick={() => {
-          if (!confirm('¿Eliminar este pago?')) return
-          startDelete(async () => {
-            const res = await deletePayment(payment.id, clientId)
-            if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-            else toast({ title: 'Pago eliminado' })
-          })
-        }}
-        aria-label="Eliminar pago"
-      >
-        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-      </Button>
+      <RoleGate perm="clients.billing.edit">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-destructive"
+          disabled={isDeleting}
+          onClick={() => {
+            if (!confirm('¿Eliminar este pago?')) return
+            startDelete(async () => {
+              const res = await deletePayment(payment.id, clientId)
+              if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+              else toast({ title: 'Pago eliminado' })
+            })
+          }}
+          aria-label="Eliminar pago"
+        >
+          {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </Button>
+      </RoleGate>
     </li>
   )
 }
