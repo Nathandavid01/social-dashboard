@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Calendar, CalendarCheck, Film } from 'lucide-react'
+import { Calendar, CalendarCheck, Film, Send } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { IdeaStatusBar } from './idea-status-bar'
@@ -44,7 +45,13 @@ function groupByClient(ideas: IdeaWithPipeline[]): ClientGroup[] {
   return Array.from(map.values())
 }
 
-export function ClientIdeasRows({ ideas }: { ideas: IdeaWithPipeline[] }) {
+export function ClientIdeasRows({
+  ideas,
+  onAssign,
+}: {
+  ideas: IdeaWithPipeline[]
+  onAssign?: (idea: IdeaWithPipeline) => void
+}) {
   const groups = groupByClient(ideas)
 
   return (
@@ -70,7 +77,7 @@ export function ClientIdeasRows({ ideas }: { ideas: IdeaWithPipeline[] }) {
           ) : (
             <div className="divide-y">
               {g.ideas.map((idea) => (
-                <IdeaRow key={idea.id} idea={idea} />
+                <IdeaRow key={idea.id} idea={idea} onAssign={onAssign} />
               ))}
             </div>
           )}
@@ -80,7 +87,7 @@ export function ClientIdeasRows({ ideas }: { ideas: IdeaWithPipeline[] }) {
   )
 }
 
-function IdeaRow({ idea }: { idea: IdeaWithPipeline }) {
+function IdeaRow({ idea, onAssign }: { idea: IdeaWithPipeline; onAssign?: (idea: IdeaWithPipeline) => void }) {
   const pipeline = computeIdeaPipeline({
     idea,
     videos: idea.videos,
@@ -114,6 +121,17 @@ function IdeaRow({ idea }: { idea: IdeaWithPipeline }) {
       <div className="w-full shrink-0 sm:w-64">
         <IdeaStatusBar pipeline={pipeline} />
       </div>
+
+      {onAssign && idea.status === 'idea' && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onAssign(idea)}
+          className="h-8 shrink-0 whitespace-nowrap text-xs"
+        >
+          <Send className="mr-1 h-3.5 w-3.5" /> Asignar
+        </Button>
+      )}
     </div>
   )
 }

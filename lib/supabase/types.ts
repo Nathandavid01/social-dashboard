@@ -396,7 +396,7 @@ export interface ContentIdea {
 export interface IdeaWithPipeline extends ContentIdea {
   recordingScheduled: boolean
   videos: ContentIdeaVideo[]
-  client?: Pick<Client, 'id' | 'name' | 'industry' | 'logo_url' | 'platforms'> | null
+  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms'>>) | null
 }
 
 export type ContentIdeaActivityAction =
