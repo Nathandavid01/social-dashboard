@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PageHeader } from '@/components/shared/page-header'
 import { Card, CardContent } from '@/components/ui/card'
+import { APP_VERSION } from '@/lib/version'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,12 @@ export default async function ChangelogPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Novedades" description="Actualizaciones del dashboard, por commit." />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PageHeader title="Novedades" description="Actualizaciones del dashboard, por commit." />
+        <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+          v{APP_VERSION}
+        </span>
+      </div>
       <Card>
         <CardContent className="py-6">
           <ReactMarkdown

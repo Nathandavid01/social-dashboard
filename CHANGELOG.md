@@ -2,7 +2,9 @@
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
 
-## 2026-05-28
+> Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
+
+## v1.0 — 2026-05-28
 
 ### Captions dentro del perfil del cliente
 - Los captions ahora viven en una pestaña **Captions** dentro de cada cliente; se eliminó la página suelta de Captions.

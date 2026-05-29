@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { navItems } from './nav-items'
 import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2 } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
+import { APP_VERSION } from '@/lib/version'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
 import { hasPermission } from '@/lib/auth/permissions'
@@ -281,7 +282,12 @@ export function Sidebar({
             Mantén presionado un ítem para reordenar
           </p>
         )}
-        <p className="text-center text-[10px] text-muted-foreground">NMedia PR</p>
+        <Link
+          href="/changelog"
+          className="block text-center text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Nate Media · v{APP_VERSION}
+        </Link>
       </div>
     </aside>
   )
