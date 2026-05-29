@@ -1,12 +1,12 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Plus } from 'lucide-react'
+import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Plus, Play, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
-import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, getR2PreviewUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -129,7 +129,25 @@ function Slot({
   const fileRef = useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
   const { toast } = useToast()
+
+  async function togglePreview() {
+    if (!video) return
+    if (previewUrl) {
+      setPreviewUrl(null)
+      return
+    }
+    setPreviewLoading(true)
+    const res = await getR2PreviewUrl(video.id)
+    setPreviewLoading(false)
+    if (res.error || !res.url) {
+      toast({ title: 'Error', description: res.error ?? 'No se pudo cargar el preview', variant: 'destructive' })
+      return
+    }
+    setPreviewUrl(res.url)
+  }
 
   async function handleFile(file: File | null) {
     if (!file) return
@@ -179,6 +197,7 @@ function Slot({
   if (video) {
     const isR2 = video.storage_provider === 'r2'
     return (
+      <div className="space-y-2">
       <div className={cn('flex items-center gap-3 rounded-lg border p-3', meta.tone)}>
         <div className={cn('grid h-11 w-14 shrink-0 place-items-center rounded', meta.tone)}>
           <Icon className="h-5 w-5" />
@@ -191,6 +210,18 @@ function Slot({
           <p className="text-xs text-muted-foreground">{formatBytes(video.size_bytes)}{isR2 ? ' · R2' : ''}</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          {isR2 && (
+            <Button size="sm" variant="outline" onClick={togglePreview} disabled={previewLoading}>
+              {previewLoading ? (
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+              ) : previewUrl ? (
+                <X className="mr-1 h-3.5 w-3.5" />
+              ) : (
+                <Play className="mr-1 h-3.5 w-3.5" />
+              )}
+              Ver
+            </Button>
+          )}
           {isR2 ? (
             <Button size="sm" variant="outline" onClick={download}>
               <Download className="mr-1 h-3.5 w-3.5" /> Bajar
@@ -218,6 +249,15 @@ function Slot({
             </button>
           )}
         </div>
+      </div>
+        {previewUrl && (
+          <video
+            src={previewUrl}
+            controls
+            playsInline
+            className="aspect-video w-full rounded-lg border bg-black"
+          />
+        )}
       </div>
     )
   }

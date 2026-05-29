@@ -16,6 +16,7 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getR2UploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k' })),
   registerR2Video: vi.fn(async () => ({ ok: true, id: 'v1' })),
   getR2DownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
+  getR2PreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview' })),
   deleteR2Video: vi.fn(async () => ({ ok: true })),
 }))
 
@@ -153,5 +154,13 @@ describe('IdeaVideoPanel — permission gating', () => {
     expect(screen.queryByRole('button', { name: /Agregar más/i })).not.toBeInTheDocument()
     // Still shows the minimum read-only "pendiente" placeholders.
     expect(screen.getAllByText(/pendiente$/i).length).toBeGreaterThanOrEqual(4 + 4 + 2)
+  })
+})
+
+describe('IdeaVideoPanel — inline preview', () => {
+  it('shows a "Ver" button for an uploaded R2 video', () => {
+    canUpload = true
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
   })
 })

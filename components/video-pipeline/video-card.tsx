@@ -12,6 +12,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { ApprovalButton } from '@/components/produccion/approval-button'
 import { computeIdeaProgress } from '@/lib/utils/idea-progress'
+import { ClientLogo } from '@/components/clients/client-logo'
 import type {
   ContentIdeaType,
   ContentIdeaStatus,
@@ -70,7 +71,17 @@ function stop(e: React.MouseEvent) {
   e.stopPropagation()
 }
 
-export function VideoCard({ video, assetCount = 0 }: { video: PipelineVideo; assetCount?: number }) {
+export function VideoCard({
+  video,
+  assetCount = 0,
+  clientName,
+  clientLogoUrl,
+}: {
+  video: PipelineVideo
+  assetCount?: number
+  clientName?: string | null
+  clientLogoUrl?: string | null
+}) {
   const { toast } = useToast()
   const typeCfg = TYPE_CONFIG[video.content_type] ?? TYPE_CONFIG.R
   const statusCfg = STATUS_CONFIG[video.status] ?? STATUS_CONFIG.idea
@@ -108,7 +119,10 @@ export function VideoCard({ video, assetCount = 0 }: { video: PipelineVideo; ass
 
       {/* Header: title + badges */}
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {(clientLogoUrl || clientName) && (
+            <ClientLogo name={clientName} logoUrl={clientLogoUrl} className="h-6 w-6 text-[9px]" />
+          )}
           <p className="truncate text-sm font-semibold leading-snug group-hover:text-primary">
             {video.title || 'Sin título'}
           </p>

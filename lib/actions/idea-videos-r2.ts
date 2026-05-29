@@ -135,6 +135,38 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
   }
 }
 
+/** Presigned GET URL for inline playback (no attachment), usable as a <video src>. */
+export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider')
+    .eq('id', videoId)
+    .single()
+  if (error || !video) return { error: 'Video no encontrado' }
+  if (video.storage_provider !== 'r2' || !video.drive_file_id) {
+    return { error: 'Este video no está en R2' }
+  }
+
+  const client = r2Client()
+  if (!client) return { error: 'R2 no está configurado' }
+
+  try {
+    const url = await getSignedUrl(
+      client,
+      new GetObjectCommand({
+        Bucket: r2Bucket(),
+        Key: video.drive_file_id,
+        ResponseContentDisposition: 'inline',
+      }),
+      { expiresIn: 60 * 60 },
+    )
+    return { url }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Error generando URL de preview' }
+  }
+}
+
 export async function deleteR2Video(videoId: string, ideaId: string): Promise<{ ok?: true; error?: string }> {
   try {
     await requirePermission('video.upload')

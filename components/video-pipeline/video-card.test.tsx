@@ -360,3 +360,16 @@ describe('VideoCard — stage progress chips', () => {
     expect(screen.getByText('Material 1/4')).toBeInTheDocument()
   })
 })
+
+// ── Client logo ─────────────────────────────────────────────────────────────────
+describe('VideoCard — client logo', () => {
+  it('renders the client logo image when a url is provided', () => {
+    render(<VideoCard video={makeVideoCard()} clientName="Acme" clientLogoUrl="https://logo.png" />)
+    expect(screen.getByAltText('Acme')).toBeInTheDocument()
+  })
+
+  it('falls back to initials when there is no logo url', () => {
+    render(<VideoCard video={makeVideoCard()} clientName="Acme Corp" clientLogoUrl={null} />)
+    expect(screen.getByText('AC')).toBeInTheDocument()
+  })
+})
