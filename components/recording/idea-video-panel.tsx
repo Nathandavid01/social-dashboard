@@ -31,6 +31,14 @@ function formatBytes(n: number | null): string {
   return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
+/** Upload time, e.g. "2 jun, 3:42 p. m." — so it's clear WHEN the video landed. */
+function formatUploadedAt(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
 const MIN_SLOTS: Record<ContentIdeaVideoKind, number> = { raw: 4, broll: 4, edited: 2 }
 
 export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
@@ -248,7 +256,10 @@ function Slot({
             <Icon className="h-3 w-3" /> {meta.label}
           </p>
           <p className="truncate text-sm font-medium">{video.name}</p>
-          <p className="text-xs text-muted-foreground">{formatBytes(video.size_bytes)}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatBytes(video.size_bytes)}
+            {video.uploaded_at ? ` · subido ${formatUploadedAt(video.uploaded_at)}` : ''}
+          </p>
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
