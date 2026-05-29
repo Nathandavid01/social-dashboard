@@ -2,6 +2,23 @@
 
 Next.js 14 (App Router) · Supabase (auth + Postgres + Storage + Realtime) · Anthropic SDK · Radix/shadcn + Tailwind.
 
+## Mandatory: TDD for ALL work
+
+Every change — feature, fix, refactor — is done **test-first (TDD)**. No exceptions.
+
+1. **Write the test first.** Capture the expected behavior in a `*.test.ts(x)` before touching implementation. It should fail (red).
+2. **Implement** the minimum to make it pass (green).
+3. **Refactor** with the test as a safety net.
+4. **Verify before claiming done:** run `npx vitest run <files> --exclude '**/.claude/**'` (the `.claude/worktrees/*` copies have their own `node_modules` and produce spurious "Cannot read properties of null (reading 'useState')" duplicate-React failures — always exclude them) and `npx tsc --noEmit`. Pure logic → unit test; UI → render/interaction test (React Testing Library + jsdom, already configured in `vitest.config.ts`).
+5. **Commit frequently**, then merge to `main` once green (see "Workflow & commits" below).
+
+If a requested task **cannot be completed now** (needs a DB migration to be applied, an external integration, a product decision), DO NOT drop it — leave it as a tracked TODO (in the session task list and/or `docs/TODO.md`) and implement it when the blocker clears.
+
+## Workflow & commits
+
+- Work on a feature branch (e.g. `eric/dev`). Commit in small, green increments — never leave large uncommitted work.
+- After each green increment: commit, then merge the branch into `main` locally. Only push when explicitly asked.
+
 ## Mandatory: every new feature must respect RBAC
 
 The 4 roles live in `lib/auth/permissions.ts`:
