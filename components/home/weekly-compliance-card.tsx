@@ -27,9 +27,11 @@ export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }
   const [live, setLive] = useState(false)
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Live updates: whenever a content_idea changes (e.g. marked 'publicada')
-  // or an activity row lands, re-fetch the server data. Debounced so a burst
-  // of changes triggers a single refresh.
+  // Live updates. The published counts come from Metricool, which is polled
+  // (cached ~5 min upstream), so we re-fetch the server data on an interval to
+  // reflect newly published posts. We ALSO listen to Supabase Realtime on
+  // content_ideas / activity so internal changes (and quota edits surfacing
+  // through a publish) refresh promptly. Both paths debounce into one refresh.
   useEffect(() => {
     const supabase = createClient()
     const scheduleRefresh = () => {
@@ -43,8 +45,12 @@ export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'content_idea_activity' }, scheduleRefresh)
       .subscribe((status) => setLive(status === 'SUBSCRIBED'))
 
+    // Poll Metricool-backed data every 5 min (matches upstream revalidate).
+    const poll = setInterval(() => router.refresh(), 5 * 60 * 1000)
+
     return () => {
       if (refreshTimer.current) clearTimeout(refreshTimer.current)
+      clearInterval(poll)
       supabase.removeChannel(channel)
     }
   }, [router])
@@ -87,7 +93,7 @@ export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }
             )}
           </CardTitle>
           <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
-            {data.totalPublished}/{data.totalQuota} posts · {done} al 100% · {behind} atrasados
+            {data.totalPublished}/{data.totalQuota} publicados (Metricool) · {done} al 100% · {behind} atrasados
           </span>
         </div>
       </CardHeader>
