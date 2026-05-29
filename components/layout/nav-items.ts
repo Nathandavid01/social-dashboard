@@ -30,7 +30,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: '/home',                label: 'Inicio',          icon: Home },
-  { href: '/planning',            label: 'Planning',        icon: ListChecks,      permission: 'planning.read' },
+  { href: '/planning',            label: 'Workflow',        icon: ListChecks,      permission: 'planning.read' },
   { href: '/video-reviews',       label: 'Video QC',        icon: Film,            permission: 'video_reviews.read' },
   { href: '/posting',             label: 'Posting',         icon: Send,            permission: 'posting.read' },
   { href: '/team',                label: 'Equipo',          icon: UserSquare2,     permission: 'team.read' },
