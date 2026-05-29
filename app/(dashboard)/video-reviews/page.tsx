@@ -1,26 +1,58 @@
 import { getVideoReviews } from '@/lib/actions/video-reviews'
+import { getClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import { createClient } from '@/lib/supabase/server'
 import { VideoReviewBoard } from '@/components/video-reviews/video-review-board'
+import { ClientVideoSection } from '@/components/video-pipeline/client-video-section'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { VideoReview, Client } from '@/lib/supabase/types'
+import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 
 export const dynamic = 'force-dynamic'
 
 export default async function VideoReviewsPage() {
   const supabase = await createClient()
 
-  const [reviews, { data: clients }, { data: sentDrafts }] = await Promise.all([
+  const [reviews, { data: clients }, { data: sentDrafts }, pipeline] = await Promise.all([
     getVideoReviews().catch(() => [] as VideoReview[]),
     supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('posting_drafts').select('video_review_id').eq('status', 'sent'),
+    getClientVideoPipeline().catch(() => [] as ClientVideoPipeline[]),
   ])
 
   const sentReviewIds = (sentDrafts ?? []).map((d) => d.video_review_id as string)
 
+  // Hide clients with no pipeline videos to keep the view focused.
+  const pipelineWithVideos = pipeline.filter((p) => p.videos.length > 0)
+
   return (
-    <VideoReviewBoard
-      initialReviews={reviews as VideoReview[]}
-      clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
-      sentReviewIds={sentReviewIds}
-    />
+    <Tabs defaultValue="pipeline" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="pipeline">Pipeline de videos</TabsTrigger>
+        <TabsTrigger value="board">Tablero de revisiones</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="pipeline" className="space-y-5">
+        {pipelineWithVideos.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-10 text-center">
+            <p className="text-sm font-medium text-muted-foreground">
+              Aún no hay videos en el pipeline
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              Las ideas de contenido con material o caption aparecerán aquí agrupadas por cliente.
+            </p>
+          </div>
+        ) : (
+          pipelineWithVideos.map((p) => <ClientVideoSection key={p.client.id} pipeline={p} />)
+        )}
+      </TabsContent>
+
+      <TabsContent value="board">
+        <VideoReviewBoard
+          initialReviews={reviews as VideoReview[]}
+          clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
+          sentReviewIds={sentReviewIds}
+        />
+      </TabsContent>
+    </Tabs>
   )
 }

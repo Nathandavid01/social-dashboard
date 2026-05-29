@@ -47,8 +47,8 @@ export async function getR2UploadUrl(input: {
 
 /**
  * After the browser finishes the PUT, record the video row.
- * Archives any previous active video of the same kind (except b-rolls, which
- * accumulate).
+ * All kinds (raw, broll, edited) accumulate — previous videos of the same
+ * kind are kept, not archived. Deletion is explicit via deleteR2Video.
  */
 export async function registerR2Video(input: {
   ideaId: string
@@ -67,15 +67,6 @@ export async function registerR2Video(input: {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  if (input.kind !== 'broll') {
-    await supabase
-      .from('content_idea_videos')
-      .update({ status: 'archived' })
-      .eq('idea_id', input.ideaId)
-      .eq('kind', input.kind)
-      .eq('status', 'uploaded')
-  }
 
   const { data, error } = await supabase
     .from('content_idea_videos')
