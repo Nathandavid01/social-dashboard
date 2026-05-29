@@ -7,7 +7,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
  * so the rest of the app can keep falling back to presigned (private) URLs.
  */
 
-import { r2PublicBaseUrl, r2PublicUrl } from '@/lib/integrations/r2'
+import { r2PublicBaseUrl, r2PublicUrl, isR2PublicConfigured } from '@/lib/integrations/r2'
 
 const ORIGINAL = process.env.R2_PUBLIC_BASE_URL
 
@@ -31,6 +31,18 @@ describe('r2PublicBaseUrl', () => {
   it('strips trailing slashes', () => {
     process.env.R2_PUBLIC_BASE_URL = 'https://videos.natemedia.com/'
     expect(r2PublicBaseUrl()).toBe('https://videos.natemedia.com')
+  })
+})
+
+describe('isR2PublicConfigured', () => {
+  it('is false when no base URL is set', () => {
+    delete process.env.R2_PUBLIC_BASE_URL
+    expect(isR2PublicConfigured()).toBe(false)
+  })
+
+  it('is true when a base URL is set', () => {
+    process.env.R2_PUBLIC_BASE_URL = 'https://videos.natemedia.com'
+    expect(isR2PublicConfigured()).toBe(true)
   })
 })
 

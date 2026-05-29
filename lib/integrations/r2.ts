@@ -52,6 +52,11 @@ export function r2PublicBaseUrl(): string | null {
   return base ? base.replace(/\/+$/, '') : null
 }
 
+/** True when public access (the edited-videos Worker domain) is configured. */
+export function isR2PublicConfigured(): boolean {
+  return r2PublicBaseUrl() !== null
+}
+
 /** Permanent public URL for an object key, or null if public access isn't configured. */
 export function r2PublicUrl(key: string): string | null {
   const base = r2PublicBaseUrl()

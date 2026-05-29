@@ -14,6 +14,7 @@ import { PipelineTimeline, type TimelineStage } from '@/components/produccion/pi
 import { getIdeaVideos } from '@/lib/actions/idea-videos'
 import { getClientAssets } from '@/lib/actions/client-profile'
 import { getIdeaActivity } from '@/lib/utils/idea-activity'
+import { isR2PublicConfigured } from '@/lib/integrations/r2'
 import { currentUserHas } from '@/lib/auth/server'
 import { IdeaActivityTimeline } from '@/components/produccion/idea-activity-timeline'
 import type { ContentIdea, ContentIdeaVideo, ClientAsset } from '@/lib/supabase/types'
@@ -117,7 +118,7 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos as ContentIdeaVideo[]} />
+            <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos as ContentIdeaVideo[]} publicEnabled={isR2PublicConfigured()} />
           </CardContent>
         </Card>
 
