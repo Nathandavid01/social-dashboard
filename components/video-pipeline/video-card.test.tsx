@@ -186,7 +186,8 @@ describe('VideoCard — caption', () => {
       <VideoCard video={makeVideoCard({ generated_caption: null, caption_platform: null })} />,
     )
     expect(screen.getByText('Sin caption generado')).toBeInTheDocument()
-    expect(screen.queryByText('Caption')).not.toBeInTheDocument()
+    // The only "Caption" is the stage chip; the caption preview header is not rendered.
+    expect(screen.queryAllByText('Caption')).toHaveLength(1)
   })
 
   it('treats a whitespace-only caption as empty', () => {
@@ -342,5 +343,20 @@ describe('VideoCard — slot chips', () => {
     const link = screen.getByTitle('Abrir crudo-drive en Drive')
     expect(link.tagName).toBe('A')
     expect(link).toHaveAttribute('href', 'https://drive.google.com/view')
+  })
+})
+
+// ── Stage progress chips ────────────────────────────────────────────────────────
+describe('VideoCard — stage progress chips', () => {
+  it('renders the stage chip row (incl. Aprobación + Publicado)', () => {
+    render(<VideoCard video={makeVideoCard()} assetCount={2} />)
+    // "Aprobación" and "Publicado" are unique to the chip row (badges use other labels).
+    expect(screen.getByText('Aprobación')).toBeInTheDocument()
+    expect(screen.getByText('Publicado')).toBeInTheDocument()
+  })
+
+  it('shows a material count chip derived from active videos', () => {
+    render(<VideoCard video={makeVideoCard({ videos: slots({ raw: 1 }) })} assetCount={0} />)
+    expect(screen.getByText('Material 1/4')).toBeInTheDocument()
   })
 })
