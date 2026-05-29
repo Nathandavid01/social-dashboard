@@ -17,6 +17,8 @@ import type { ClientPipeline } from '@/lib/utils/content-pipeline'
 interface Props {
   rows: ClientWorkflowProgress[]
   pipelines?: Record<string, ClientPipeline>
+  /** Posts actually published this week per client (from Metricool). */
+  postedByClient?: Record<string, number>
 }
 
 const STATUS_ICONS = {
@@ -26,7 +28,7 @@ const STATUS_ICONS = {
   listo:     CheckCircle2,
 } as const
 
-export function PlanningBoard({ rows, pipelines = {} }: Props) {
+export function PlanningBoard({ rows, pipelines = {}, postedByClient = {} }: Props) {
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState(false)
 
@@ -111,10 +113,10 @@ export function PlanningBoard({ rows, pipelines = {} }: Props) {
       {/* Groups */}
       <div className="space-y-4">
         {(['ideas', 'reagendar', 'agendar'] as const).map((s) =>
-          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} pipelines={pipelines} /> : null,
+          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} pipelines={pipelines} postedByClient={postedByClient} /> : null,
         )}
         {groups.listo.length > 0 && (
-          <ClientGroup status="listo" rows={groups.listo} pipelines={pipelines} collapsedDefault={collapsed} />
+          <ClientGroup status="listo" rows={groups.listo} pipelines={pipelines} postedByClient={postedByClient} collapsedDefault={collapsed} />
         )}
       </div>
     </div>
@@ -143,11 +145,13 @@ function ClientGroup({
   status,
   rows,
   pipelines,
+  postedByClient,
   collapsedDefault,
 }: {
   status: WorkflowStepStatus
   rows: ClientWorkflowProgress[]
   pipelines: Record<string, ClientPipeline>
+  postedByClient: Record<string, number>
   collapsedDefault?: boolean
 }) {
   const [open, setOpen] = useState(!collapsedDefault)
@@ -177,7 +181,7 @@ function ClientGroup({
         <CardContent className="space-y-0 p-0">
           <ul className="divide-y">
             {rows.map((r, i) => (
-              <ClientRow key={r.clientId} row={r} index={i} pipe={pipelines[r.clientId]} />
+              <ClientRow key={r.clientId} row={r} index={i} pipe={pipelines[r.clientId]} posted={postedByClient[r.clientId]} />
             ))}
           </ul>
         </CardContent>
@@ -186,7 +190,7 @@ function ClientGroup({
   )
 }
 
-function ClientRow({ row, index, pipe }: { row: ClientWorkflowProgress; index: number; pipe?: ClientPipeline }) {
+function ClientRow({ row, index, pipe, posted }: { row: ClientWorkflowProgress; index: number; pipe?: ClientPipeline; posted?: number }) {
   const meta = STATUS_META[row.status]
   return (
     <li
@@ -214,7 +218,7 @@ function ClientRow({ row, index, pipe }: { row: ClientWorkflowProgress; index: n
           {row.nextSessionAt && <span>Próxima: <strong className="text-foreground">{formatDate(row.nextSessionAt)}</strong></span>}
           {!row.nextSessionAt && row.lastSessionAt && <span>Última: <strong className="text-foreground">{formatDate(row.lastSessionAt)}</strong></span>}
         </div>
-        <PipelineStrip pipe={pipe} />
+        <PipelineStrip pipe={pipe} posted={posted} />
       </div>
       <div className={cn('shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap', meta.tone)}>
         {meta.label}
@@ -225,7 +229,7 @@ function ClientRow({ row, index, pipe }: { row: ClientWorkflowProgress; index: n
 }
 
 /** Compact content pipeline + weekly pace for a client, shown inline in planning. */
-function PipelineStrip({ pipe }: { pipe?: ClientPipeline }) {
+function PipelineStrip({ pipe, posted }: { pipe?: ClientPipeline; posted?: number }) {
   if (!pipe) return null
   const stages = [
     { label: 'Ideas', v: pipe.ideas },
@@ -233,7 +237,9 @@ function PipelineStrip({ pipe }: { pipe?: ClientPipeline }) {
     { label: 'Editar', v: pipe.porEditar },
     { label: 'Publicar', v: pipe.porPublicar },
   ]
-  const onPace = pipe.targetSemana === 0 || pipe.publicadasSemana >= pipe.targetSemana
+  // "Posted this week" comes from Metricool (real published posts); fall back to internal count.
+  const postedWeek = posted ?? pipe.publicadasSemana
+  const onPace = pipe.targetSemana === 0 || postedWeek >= pipe.targetSemana
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
       {stages.map((s) => (
@@ -254,7 +260,7 @@ function PipelineStrip({ pipe }: { pipe?: ClientPipeline }) {
       >
         {pipe.targetSemana === 0
           ? 'Sin cadencia'
-          : `Esta semana ${pipe.publicadasSemana}/${pipe.targetSemana}`}
+          : `Esta semana ${postedWeek}/${pipe.targetSemana}`}
       </span>
     </div>
   )

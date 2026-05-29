@@ -4,14 +4,19 @@ import { PlanningBoard } from '@/components/planning/planning-board'
 import { NateLoader } from '@/components/shared/nate-loader'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
+import { getMetricoolWeeklyPostsByClient } from '@/lib/utils/metricool-weekly'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 async function PlanningData() {
-  const [{ rows }, pipeline] = await Promise.all([getWorkflowProgress(), getPipelineTotals()])
+  const [{ rows }, pipeline, postedByClient] = await Promise.all([
+    getWorkflowProgress(),
+    getPipelineTotals(),
+    getMetricoolWeeklyPostsByClient(),
+  ])
   const pipelines = Object.fromEntries(pipeline.perClient.map((p) => [p.clientId, p]))
-  return <PlanningBoard rows={rows} pipelines={pipelines} />
+  return <PlanningBoard rows={rows} pipelines={pipelines} postedByClient={postedByClient} />
 }
 
 export default function PlanningPage() {
