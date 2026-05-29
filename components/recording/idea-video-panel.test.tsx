@@ -169,6 +169,13 @@ describe('IdeaVideoPanel — per-video status badges', () => {
     expect(screen.queryByText('Público')).not.toBeInTheDocument()
     expect(screen.getAllByText('Drive').length).toBeGreaterThan(0)
   })
+
+  it('shows the upload time of an uploaded video', () => {
+    const v = { ...makeVideo('edited', 0), uploaded_at: '2026-06-02T15:42:00.000Z' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), v]} />)
+    // "subido <fecha/hora>" appears for the uploaded video.
+    expect(screen.getAllByText(/subido/i).length).toBeGreaterThan(0)
+  })
 })
 
 describe('IdeaVideoPanel — permission gating', () => {

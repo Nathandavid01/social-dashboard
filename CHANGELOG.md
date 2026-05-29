@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.7 — 2026-05-29
+
+### Flujo del cliente como tablero (Kanban)
+- La pestaña **Flujo** del cliente pasó de una tabla de checkmarks a un **tablero por etapa**: columnas Idea → Grabado → Editado → Caption → Publicado, con cada video como tarjeta en su etapa actual y el **conteo** por columna.
+- Cada tarjeta muestra tipo (Reel/Post…), fecha y **mini-puntos de progreso** de las 5 etapas; al hacer clic abre el detalle del video.
+- Los videos **atrasados** se marcan con ⚠ (ámbar): fecha de publicación vencida sin publicar, o más de 7 días sin actividad.
+
+## v1.6 — 2026-05-29
+
+### Aviso cuando llega un video
+- Cuando se sube un video **crudo o editado**, le llega una **notificación** (campana) al manager del cliente —o a los owners si el cliente no tiene manager asignado—, con el cliente, el tipo de video y un enlace directo a la idea. La hora del aviso es la hora exacta en que se subió.
+- No te avisas a ti mismo de tus propias subidas, y los **b-roll** no generan aviso (para no hacer ruido).
+
+### Hora de subida visible
+- Cada video subido ahora muestra **"subido [fecha y hora]"** en el flujo, para saber de un vistazo cuándo llegó.
+
 ## v1.5 — 2026-05-29
 
 ### Pipeline de videos por cliente (en Video QC)

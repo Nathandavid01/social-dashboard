@@ -6,6 +6,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, r2PublicUrl } from '@/lib/integrations/r2'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
@@ -96,6 +97,13 @@ export async function registerR2Video(input: {
     userId: user?.id ?? null,
     action: 'video_uploaded',
     metadata: { kind: input.kind, name: input.name, provider: 'r2' },
+  })
+
+  // Ping the client's manager (or owners) that material landed — best-effort.
+  await notifyVideoUploaded(supabase, {
+    ideaId: input.ideaId,
+    kind: input.kind,
+    uploaderId: user?.id ?? null,
   })
 
   revalidatePath(`/produccion/idea/${input.ideaId}`)
