@@ -131,6 +131,7 @@ function Slot({
   const [isPending, startTransition] = useTransition()
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [batch, setBatch] = useState<{ done: number; total: number } | null>(null)
   const { toast } = useToast()
 
   async function togglePreview() {
@@ -149,41 +150,57 @@ function Slot({
     setPreviewUrl(res.url)
   }
 
-  async function handleFile(file: File | null) {
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024 * 1024) {
-      toast({ title: 'Muy grande', description: 'Máximo 5 GB', variant: 'destructive' })
-      return
-    }
+  const MAX_BYTES = 5 * 1024 * 1024 * 1024
 
+  // Upload a single file end-to-end (presign → PUT → register). Throws on failure.
+  async function uploadOne(file: File) {
     const slot = await getR2UploadUrl({ ideaId, kind, fileName: file.name, contentType: file.type || 'video/mp4' })
-    if (slot.error || !slot.url || !slot.key) {
-      toast({ title: 'Error', description: slot.error ?? 'No se pudo iniciar la subida', variant: 'destructive' })
-      return
-    }
+    if (slot.error || !slot.url || !slot.key) throw new Error(slot.error ?? 'No se pudo iniciar la subida')
 
-    setProgress(0)
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open('PUT', slot.url!, true)
-        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
-        xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)) }
-        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 ${xhr.status}`)))
-        xhr.onerror = () => reject(new Error('Error de red durante la subida'))
-        xhr.send(file)
-      })
-      startTransition(async () => {
-        const res = await registerR2Video({
-          ideaId, kind, key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4',
-        })
-        setProgress(null)
-        if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-        else toast({ title: `${meta.label} subido` })
-      })
-    } catch (err) {
-      setProgress(null)
-      toast({ title: 'Falló la subida', description: err instanceof Error ? err.message : 'Error', variant: 'destructive' })
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', slot.url!, true)
+      xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
+      xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)) }
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 ${xhr.status}`)))
+      xhr.onerror = () => reject(new Error('Error de red durante la subida'))
+      xhr.send(file)
+    })
+
+    const res = await registerR2Video({
+      ideaId, kind, key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4',
+    })
+    if (res.error) throw new Error(res.error)
+  }
+
+  // Accepts one OR many files; uploads them sequentially into this kind.
+  async function handleFiles(files: FileList | File[] | null) {
+    const list = Array.from(files ?? [])
+    if (list.length === 0) return
+    const ok = list.filter((f) => f.size <= MAX_BYTES)
+    if (ok.length < list.length) {
+      toast({ title: 'Algunos archivos son muy grandes', description: 'Máximo 5 GB por archivo', variant: 'destructive' })
+    }
+    if (ok.length === 0) return
+
+    let failed = 0
+    for (let i = 0; i < ok.length; i++) {
+      setBatch({ done: i, total: ok.length })
+      setProgress(0)
+      try {
+        await uploadOne(ok[i])
+      } catch (err) {
+        failed++
+        toast({ title: 'Falló una subida', description: err instanceof Error ? err.message : 'Error', variant: 'destructive' })
+      }
+    }
+    setBatch(null)
+    setProgress(null)
+
+    const done = ok.length - failed
+    if (done > 0) {
+      const label = meta.label.toLowerCase()
+      toast({ title: done === 1 ? `${label} subido` : `${done} ${label}s subidos` })
     }
   }
 
@@ -274,7 +291,12 @@ function Slot({
     return (
       <div className={cn('rounded-lg border p-3', meta.tone)}>
         <div className="mb-2 flex items-center justify-between text-xs font-medium">
-          <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…</span>
+          <span className="flex items-center gap-1.5">
+            <Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…
+            {batch && batch.total > 1 && (
+              <span className="text-muted-foreground">({batch.done + 1} de {batch.total})</span>
+            )}
+          </span>
           <span className="tabular-nums">{progress}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-background/60">
@@ -294,7 +316,7 @@ function Slot({
       onDrop={(e) => {
         e.preventDefault()
         e.currentTarget.classList.remove('border-primary', 'bg-primary/5')
-        handleFile(e.dataTransfer.files?.[0] ?? null)
+        handleFiles(e.dataTransfer.files)
       }}
       className={cn(
         'group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all',
@@ -305,10 +327,10 @@ function Slot({
       <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', meta.tone)}><Icon className="h-4 w-4" /></div>
       <div className="min-w-0 flex-1">
         <p className="font-medium">Subir {meta.label.toLowerCase()}</p>
-        <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub} · arrastra o haz click</p>
+        <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub} · arrastra uno o varios o haz click</p>
       </div>
       <Upload className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:scale-110 group-hover:text-primary" />
-      <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={(e) => handleFile(e.target.files?.[0] ?? null)} />
+      <input ref={fileRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
     </button>
   )
 }
