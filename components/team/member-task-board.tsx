@@ -51,6 +51,8 @@ interface MemberTaskBoardProps {
   initialTasks: ExtendedTask[]
   clients: Pick<Client, 'id' | 'name'>[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
+  /** Videos assigned to this person and not yet submitted — counted as open work. */
+  assignedVideoCount?: number
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -417,7 +419,7 @@ function CalendarView({ tasks, onAddTask }: { tasks: ExtendedTask[]; onAddTask: 
 
 // ── Main Board ───────────────────────────────────────────────────────────────
 
-export function MemberTaskBoard({ member, initialTasks, clients, teamMembers }: MemberTaskBoardProps) {
+export function MemberTaskBoard({ member, initialTasks, clients, teamMembers, assignedVideoCount = 0 }: MemberTaskBoardProps) {
   const router = useRouter()
   const [tasks, setTasks] = useState<ExtendedTask[]>(initialTasks)
   const [view, setView] = useState<'list' | 'calendar'>('list')
@@ -492,6 +494,7 @@ export function MemberTaskBoard({ member, initialTasks, clients, teamMembers }: 
             <h2 className="text-lg font-semibold">{member.full_name ?? member.email}</h2>
             <p className="text-xs text-muted-foreground">
               {openCount} tarea{openCount !== 1 ? 's' : ''} abiert{openCount !== 1 ? 'as' : 'a'}
+              {assignedVideoCount > 0 && <span className="text-primary ml-1">· {assignedVideoCount} video{assignedVideoCount !== 1 ? 's' : ''} por trabajar</span>}
               {overdueCount > 0 && <span className="text-red-500 ml-1">· {overdueCount} vencida{overdueCount !== 1 ? 's' : ''}</span>}
             </p>
           </div>

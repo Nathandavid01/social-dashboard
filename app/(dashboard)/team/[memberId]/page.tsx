@@ -53,6 +53,7 @@ export default async function MemberPage({ params }: Props) {
         initialTasks={(tasks ?? []) as unknown as Task[]}
         clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
         teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
+        assignedVideoCount={assignedVideos.length}
       />
 
       <section className="space-y-2">
