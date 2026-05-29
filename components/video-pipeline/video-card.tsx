@@ -236,7 +236,13 @@ export function VideoCard({
 
       {/* Approval button — sits above the navigation overlay so it never navigates. */}
       <div onClick={stop} className="relative z-10 pt-1">
-        <ApprovalButton ideaId={video.id} approvalStatus={video.approval_status} />
+        <ApprovalButton
+          ideaId={video.id}
+          approvalStatus={video.approval_status}
+          clientName={clientName}
+          clientLogoUrl={clientLogoUrl}
+          ideaTitle={video.title}
+        />
       </div>
     </div>
   )

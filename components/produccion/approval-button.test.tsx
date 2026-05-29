@@ -144,15 +144,25 @@ describe('unauthorised role — gated out', () => {
 // ── Wiring: clicking an action calls the matching server action ───────────────
 
 describe('action wiring', () => {
-  it('approve button invokes approveIdea with the idea id', async () => {
+  it('clicking Aprobar opens a confirm dialog and does NOT approve immediately', async () => {
     const { default: userEventDefault } = await import('@testing-library/user-event')
     const user = userEventDefault.setup()
-    renderButton('submitted', 'owner')
-    const approveBtn = screen
-      .getAllByRole('button')
-      .find((b) => (b.textContent ?? '').toLowerCase().includes('aprob') && !(b as HTMLButtonElement).disabled)
-    expect(approveBtn).toBeTruthy()
-    await user.click(approveBtn!)
+    mockRole = 'owner'
+    render(<ApprovalButton ideaId="idea-1" approvalStatus="submitted" clientName="612 C. Lounge" ideaTitle="Reel promo" />)
+    await user.click(screen.getByRole('button', { name: /^aprobar$/i }))
+    expect(approveIdea).not.toHaveBeenCalled()
+    // The dialog surfaces the client so you confirm the right one.
+    expect(await screen.findByText('612 C. Lounge')).toBeInTheDocument()
+  })
+
+  it('approve fires only after confirming in the dialog', async () => {
+    const { default: userEventDefault } = await import('@testing-library/user-event')
+    const user = userEventDefault.setup()
+    mockRole = 'owner'
+    render(<ApprovalButton ideaId="idea-1" approvalStatus="submitted" clientName="612 C. Lounge" />)
+    await user.click(screen.getByRole('button', { name: /^aprobar$/i }))
+    const confirm = await screen.findByRole('button', { name: /sí, aprobar/i })
+    await user.click(confirm)
     expect(approveIdea).toHaveBeenCalledWith('idea-1')
   })
 
