@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getMetricoolWeeklyPostsByClient } from './metricool-weekly'
 import {
   deriveComplianceStatus,
   type ClientWeeklyCompliance,
@@ -21,8 +22,9 @@ function weekRangeMon(ref: Date = new Date()): { start: string; end: string; day
 
 /**
  * Per-client weekly posting compliance: how many posts the contract requires
- * (weekly_post_quota) vs. how many were actually published this week
- * (content_ideas with status 'publicada' and published_at within the week).
+ * (weekly_post_quota) vs. how many were ACTUALLY published this week on social
+ * media — sourced from Metricool (getMetricoolWeeklyPostsByClient), the source
+ * of truth for what really went live, matched to clients by metricool_blog_id.
  *
  * Returns ALL active clients; the UI separates those without a quota set.
  * Status is derived on read — never stored.
@@ -31,29 +33,20 @@ export async function getWeeklyComplianceByClient(): Promise<WeeklyComplianceSum
   const supabase = await createClient()
   const { start, end, daysElapsed } = weekRangeMon()
 
-  const [{ data: clients }, { data: published }] = await Promise.all([
+  const [{ data: clients }, publishedByClient] = await Promise.all([
     supabase
       .from('clients')
       .select('id, name, weekly_post_quota')
       .eq('status', 'active')
       .order('name', { ascending: true }),
-    supabase
-      .from('content_ideas')
-      .select('client_id')
-      .eq('status', 'publicada')
-      .gte('published_at', `${start}T00:00:00`)
-      .lte('published_at', `${end}T23:59:59.999`),
+    // Published-this-week counts come from Metricool (real social posts),
+    // not internal idea status. Keyed by client id, cached ~5 min upstream.
+    getMetricoolWeeklyPostsByClient(),
   ])
-
-  const publishedByClient = new Map<string, number>()
-  for (const row of published ?? []) {
-    const cid = row.client_id as string
-    publishedByClient.set(cid, (publishedByClient.get(cid) ?? 0) + 1)
-  }
 
   const rows: ClientWeeklyCompliance[] = (clients ?? []).map((c) => {
     const quota = (c.weekly_post_quota as number | null) ?? null
-    const count = publishedByClient.get(c.id as string) ?? 0
+    const count = publishedByClient[c.id as string] ?? 0
     return {
       clientId: c.id as string,
       clientName: c.name as string,
