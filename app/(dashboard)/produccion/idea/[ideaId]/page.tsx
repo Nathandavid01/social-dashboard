@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  ArrowLeft, Lightbulb, Sparkles, Camera, Palette, Scissors, Eye, Hash,
+  ArrowLeft, Lightbulb, Sparkles, Camera, Palette, Scissors, Eye, Hash, History,
 } from 'lucide-react'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
@@ -13,6 +13,9 @@ import { ClientAssetsDownload } from '@/components/produccion/client-assets-down
 import { PipelineTimeline, type TimelineStage } from '@/components/produccion/pipeline-timeline'
 import { getIdeaVideos } from '@/lib/actions/idea-videos'
 import { getClientAssets } from '@/lib/actions/client-profile'
+import { getIdeaActivity } from '@/lib/utils/idea-activity'
+import { currentUserHas } from '@/lib/auth/server'
+import { IdeaActivityTimeline } from '@/components/produccion/idea-activity-timeline'
 import type { ContentIdea, ContentIdeaVideo, ClientAsset } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -32,9 +35,11 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
   if (!ideaRaw) notFound()
   const idea = ideaRaw as unknown as ContentIdea
 
-  const [videos, assets] = await Promise.all([
+  const canSeeActivity = await currentUserHas('activity.read')
+  const [videos, assets, activity] = await Promise.all([
     getIdeaVideos(ideaId),
     idea.client_id ? getClientAssets(idea.client_id) : Promise.resolve([] as ClientAsset[]),
+    canSeeActivity ? getIdeaActivity(ideaId) : Promise.resolve([]),
   ])
 
   const vids = videos as ContentIdeaVideo[]
@@ -128,6 +133,20 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
           </CardContent>
         </Card>
       </div>
+
+      {/* Activity log — who did what, when */}
+      {canSeeActivity && (
+        <Card className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '240ms', animationFillMode: 'backwards' }}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <History className="h-4 w-4 text-muted-foreground" /> Actividad
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <IdeaActivityTimeline activities={activity} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

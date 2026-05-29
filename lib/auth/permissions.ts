@@ -47,6 +47,8 @@ export type Permission =
   // Insights
   | 'performance.read'
   | 'efficiency.read'
+  | 'weekly_compliance.read'
+  | 'activity.read'
   | 'planning.read'
   | 'planning.act'
   // Team & admin
@@ -83,6 +85,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
+    'weekly_compliance.read', 'activity.read',
     'planning.read', 'planning.act',
     'team.read',
     'automation.read',
@@ -99,6 +102,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'recording.read',
     'posting.read', 'captions.use', 'captions.edit',
     'metricool.read',
+    'weekly_compliance.read', 'activity.read',
     'planning.read', 'planning.act',
     'alerts.read',
   ],
@@ -111,6 +115,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video_reviews.read', 'video_reviews.write', 'video.upload',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete',
+    'weekly_compliance.read', 'activity.read',
     'planning.read',
     'alerts.read',
   ],

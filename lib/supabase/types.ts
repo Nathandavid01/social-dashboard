@@ -128,6 +128,7 @@ export interface Client {
   posting_time: string | null
   posting_schedule: Record<string, string>
   video_threshold: number
+  weekly_post_quota: number | null
   contract_url: string | null
   contract_signed_at: string | null
   contract_expires_at: string | null
@@ -373,12 +374,35 @@ export interface ContentIdea {
   generated_caption: string | null
   caption_platform: string | null
   caption_generated_at: string | null
+  published_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string
   // Joined
   client?: Pick<Client, 'id' | 'name' | 'industry'> | null
   production_task?: Pick<ProductionTask, 'id' | 'status' | 'publish_date'> | null
+}
+
+export type ContentIdeaActivityAction =
+  | 'recorded'
+  | 'caption_generated'
+  | 'caption_saved'
+  | 'video_uploaded'
+  | 'published'
+  | 'assigned'
+  | 'status_changed'
+
+export interface ContentIdeaActivity {
+  id: string
+  content_idea_id: string
+  client_id: string | null
+  user_id: string | null
+  action: ContentIdeaActivityAction
+  metadata: Record<string, unknown>
+  created_at: string
+  // Joined
+  user?: Pick<Profile, 'id' | 'full_name'> | null
+  idea?: Pick<ContentIdea, 'id' | 'title' | 'content_type'> | null
 }
 
 export interface SavedCaptionRow {

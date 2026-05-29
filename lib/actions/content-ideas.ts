@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { ContentIdea, ContentIdeaStatus, ContentIdeaType } from '@/lib/supabase/types'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 export async function getContentIdeas(filter?: {
   clientId?: string
@@ -79,6 +80,11 @@ export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
   const supabase = await createClient()
   const { error } = await supabase.from('content_ideas').update({ status }).eq('id', id)
   if (error) return { error: error.message }
+  await logIdeaActivity(supabase, {
+    ideaId: id,
+    action: status === 'publicada' ? 'published' : 'status_changed',
+    metadata: { status },
+  })
   revalidatePath('/ideacion')
   revalidatePath('/recording-calendar')
   return { success: true }
@@ -138,6 +144,9 @@ export async function markIdeaRecorded(ideaId: string, recorded: boolean) {
     .update({ status: newStatus })
     .eq('id', ideaId)
   if (error) return { error: error.message }
+  if (recorded) {
+    await logIdeaActivity(supabase, { ideaId, action: 'recorded' })
+  }
   revalidatePath('/recording-calendar')
   revalidatePath('/ideacion')
   return { success: true }
@@ -217,6 +226,14 @@ export async function assignIdeaToProductionTask(input: {
     .eq('id', input.ideaId)
 
   if (ideaErr) return { error: ideaErr.message, taskId: task.id }
+
+  await logIdeaActivity(supabase, {
+    ideaId: input.ideaId,
+    clientId: input.clientId,
+    userId: user?.id ?? null,
+    action: 'assigned',
+    metadata: { taskId: task.id, publishDate: input.publishDate, assignedToId: input.assignedToId ?? null },
+  })
 
   revalidatePath('/ideacion')
   revalidatePath('/produccion')

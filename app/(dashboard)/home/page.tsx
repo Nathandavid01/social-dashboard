@@ -14,6 +14,9 @@ import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getWeeklyProductionStatus } from '@/lib/utils/weekly-production'
 import { WeeklyProductionCard } from '@/components/home/weekly-production-card'
+import { WeeklyComplianceCard } from '@/components/home/weekly-compliance-card'
+import { getWeeklyComplianceByClient } from '@/lib/utils/weekly-compliance'
+import { currentUserHas } from '@/lib/auth/server'
 import Link from 'next/link'
 import {
   Users,
@@ -178,6 +181,8 @@ export default async function HomePage() {
 
   const pipelineGlobal = await getPipelineTotals()
   const weeklyProduction = await getWeeklyProductionStatus()
+  const canSeeWeeklyCompliance = await currentUserHas('weekly_compliance.read')
+  const weeklyCompliance = canSeeWeeklyCompliance ? await getWeeklyComplianceByClient() : null
   const planning = await getWorkflowProgress().catch(() => ({ rows: [], pendingCount: 0 }))
   const planningBuckets = {
     reagendar: planning.rows.filter((r) => r.status === 'reagendar').length,
@@ -254,6 +259,9 @@ export default async function HomePage() {
 
       {/* Weekly production readiness — recorded / edited / captioned */}
       <WeeklyProductionCard status={weeklyProduction} />
+
+      {/* Weekly posting compliance per client (live) — quota vs published */}
+      {weeklyCompliance && <WeeklyComplianceCard data={weeklyCompliance} />}
 
       {/* Activity Grid */}
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">

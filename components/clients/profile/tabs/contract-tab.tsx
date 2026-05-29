@@ -19,6 +19,7 @@ export function ContractTab({ client }: Props) {
   const [signedAt, setSignedAt] = useState(client.contract_signed_at ?? '')
   const [expiresAt, setExpiresAt] = useState(client.contract_expires_at ?? '')
   const [monthlyFee, setMonthlyFee] = useState(client.monthly_fee?.toString() ?? '')
+  const [weeklyQuota, setWeeklyQuota] = useState(client.weekly_post_quota?.toString() ?? '')
   const [isPending, startTransition] = useTransition()
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -30,7 +31,8 @@ export function ContractTab({ client }: Props) {
   const dirty =
     signedAt !== (client.contract_signed_at ?? '') ||
     expiresAt !== (client.contract_expires_at ?? '') ||
-    monthlyFee !== (client.monthly_fee?.toString() ?? '')
+    monthlyFee !== (client.monthly_fee?.toString() ?? '') ||
+    weeklyQuota !== (client.weekly_post_quota?.toString() ?? '')
 
   function saveMetadata() {
     startTransition(async () => {
@@ -38,6 +40,7 @@ export function ContractTab({ client }: Props) {
         contract_signed_at: signedAt || null,
         contract_expires_at: expiresAt || null,
         monthly_fee: monthlyFee || null,
+        weekly_post_quota: weeklyQuota === '' ? null : weeklyQuota,
       })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else toast({ title: 'Contrato actualizado' })
@@ -101,6 +104,22 @@ export function ContractTab({ client }: Props) {
               disabled={!canEdit}
               className="h-9"
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="weekly_post_quota" className="text-xs">Posts por semana (contrato)</Label>
+            <Input
+              id="weekly_post_quota"
+              type="number"
+              step="1"
+              min="0"
+              max="100"
+              value={weeklyQuota}
+              onChange={(e) => setWeeklyQuota(e.target.value)}
+              placeholder="Ej. 5"
+              disabled={!canEdit}
+              className="h-9"
+            />
+            <p className="text-[11px] text-muted-foreground">Cuántas publicaciones debe entregar el cliente cada semana segun su contrato.</p>
           </div>
           {canEdit ? (
             <Button onClick={saveMetadata} disabled={!dirty || isPending} size="sm" className="w-full">

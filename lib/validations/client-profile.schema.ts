@@ -48,6 +48,12 @@ export const clientProfilePatchSchema = z
       const n = typeof v === 'string' ? parseInt(v, 10) : v
       return Number.isFinite(n) ? Math.max(0, Math.min(500, n)) : undefined
     }),
+    weekly_post_quota: z.union([z.number().int().min(0).max(100), z.string()]).nullable().optional().transform((v) => {
+      if (v === undefined) return undefined
+      if (v === null || v === '') return null
+      const n = typeof v === 'string' ? parseInt(v, 10) : v
+      return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null
+    }),
     contract_url: z.string().nullable().optional(),
     contract_signed_at: dateOnly,
     contract_expires_at: dateOnly,

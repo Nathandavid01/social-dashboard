@@ -23,7 +23,7 @@ async function authorizeProfilePatch(patch: Record<string, unknown>): Promise<vo
   const { getCurrentRole } = await import('@/lib/auth/server')
   const role = await getCurrentRole()
 
-  const touchesContract = 'contract_url' in patch || 'contract_signed_at' in patch || 'contract_expires_at' in patch
+  const touchesContract = 'contract_url' in patch || 'contract_signed_at' in patch || 'contract_expires_at' in patch || 'weekly_post_quota' in patch
   const touchesBilling  = 'monthly_fee' in patch
 
   if (touchesContract && !hasPermission(role, 'clients.contract.edit')) {

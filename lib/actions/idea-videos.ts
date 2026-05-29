@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { isDriveConfigured } from '@/lib/integrations/google-drive'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 export async function getIdeaVideos(ideaId: string): Promise<ContentIdeaVideo[]> {
   const supabase = await createClient()
@@ -81,6 +82,13 @@ export async function registerIdeaVideo(input: {
       .in('status', ['idea', 'asignada'])
   }
   // 'edited' upload does NOT auto-advance — that happens after QC approves.
+
+  await logIdeaActivity(supabase, {
+    ideaId: input.ideaId,
+    userId: user?.id ?? null,
+    action: 'video_uploaded',
+    metadata: { kind: input.kind, name: input.name },
+  })
 
   revalidatePath(`/ideacion`)
   revalidatePath(`/produccion`)

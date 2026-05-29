@@ -5,6 +5,7 @@ import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sd
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
@@ -98,6 +99,13 @@ export async function registerR2Video(input: {
     await supabase.from('content_ideas').update({ status: 'grabada' })
       .eq('id', input.ideaId).in('status', ['idea', 'asignada'])
   }
+
+  await logIdeaActivity(supabase, {
+    ideaId: input.ideaId,
+    userId: user?.id ?? null,
+    action: 'video_uploaded',
+    metadata: { kind: input.kind, name: input.name, provider: 'r2' },
+  })
 
   revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/ideacion')

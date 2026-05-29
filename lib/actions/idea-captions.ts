@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 
@@ -94,6 +95,8 @@ TAREA: Escribe UN caption completo para este video, alineado con el hook y el á
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platform } })
+
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/ideacion')
     return { ok: true, caption }
@@ -123,6 +126,8 @@ export async function saveIdeaCaption(
     })
     .eq('id', ideaId)
   if (error) return { error: error.message }
+
+  await logIdeaActivity(supabase, { ideaId, action: 'caption_saved', metadata: { platform: platform ?? null } })
 
   revalidatePath(`/produccion/idea/${ideaId}`)
   revalidatePath('/ideacion')
