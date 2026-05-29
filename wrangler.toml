@@ -14,6 +14,10 @@ name = "nmedia-public-videos"
 main = "infra/r2-public-edited-worker.js"
 compatibility_date = "2025-01-01"
 
+# Served at https://nmedia-public-videos.nmedia.workers.dev
+workers_dev = true
+preview_urls = false
+
 # Binds the private R2 bucket to the Worker as `env.VIDEOS`.
 [[r2_buckets]]
 binding = "VIDEOS"
