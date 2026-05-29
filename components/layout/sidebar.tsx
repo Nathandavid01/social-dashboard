@@ -284,7 +284,8 @@ export function Sidebar({
         )}
         <Link
           href="/changelog"
-          className="block text-center text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+          title="Ver novedades / changelog"
+          className="block text-center text-[10px] text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
           Nate Media · v{APP_VERSION}
         </Link>
