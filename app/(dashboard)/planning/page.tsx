@@ -3,13 +3,15 @@ import { PageHeader } from '@/components/shared/page-header'
 import { PlanningBoard } from '@/components/planning/planning-board'
 import { NateLoader } from '@/components/shared/nate-loader'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
+import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 async function PlanningData() {
-  const { rows } = await getWorkflowProgress()
-  return <PlanningBoard rows={rows} />
+  const [{ rows }, pipeline] = await Promise.all([getWorkflowProgress(), getPipelineTotals()])
+  const pipelines = Object.fromEntries(pipeline.perClient.map((p) => [p.clientId, p]))
+  return <PlanningBoard rows={rows} pipelines={pipelines} />
 }
 
 export default function PlanningPage() {

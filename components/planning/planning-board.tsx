@@ -12,9 +12,11 @@ import {
 import { cn, formatDate } from '@/lib/utils'
 import { STATUS_META, type ClientWorkflowProgress, type WorkflowStepStatus } from '@/lib/utils/workflow-types'
 import { dayLabelsShort } from '@/lib/utils/posting-cadence'
+import type { ClientPipeline } from '@/lib/utils/content-pipeline'
 
 interface Props {
   rows: ClientWorkflowProgress[]
+  pipelines?: Record<string, ClientPipeline>
 }
 
 const STATUS_ICONS = {
@@ -24,7 +26,7 @@ const STATUS_ICONS = {
   listo:     CheckCircle2,
 } as const
 
-export function PlanningBoard({ rows }: Props) {
+export function PlanningBoard({ rows, pipelines = {} }: Props) {
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState(false)
 
@@ -109,10 +111,10 @@ export function PlanningBoard({ rows }: Props) {
       {/* Groups */}
       <div className="space-y-4">
         {(['ideas', 'reagendar', 'agendar'] as const).map((s) =>
-          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} /> : null,
+          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} pipelines={pipelines} /> : null,
         )}
         {groups.listo.length > 0 && (
-          <ClientGroup status="listo" rows={groups.listo} collapsedDefault={collapsed} />
+          <ClientGroup status="listo" rows={groups.listo} pipelines={pipelines} collapsedDefault={collapsed} />
         )}
       </div>
     </div>
@@ -140,10 +142,12 @@ function StatusPill({ status, count }: { status: WorkflowStepStatus; count: numb
 function ClientGroup({
   status,
   rows,
+  pipelines,
   collapsedDefault,
 }: {
   status: WorkflowStepStatus
   rows: ClientWorkflowProgress[]
+  pipelines: Record<string, ClientPipeline>
   collapsedDefault?: boolean
 }) {
   const [open, setOpen] = useState(!collapsedDefault)
@@ -173,7 +177,7 @@ function ClientGroup({
         <CardContent className="space-y-0 p-0">
           <ul className="divide-y">
             {rows.map((r, i) => (
-              <ClientRow key={r.clientId} row={r} index={i} />
+              <ClientRow key={r.clientId} row={r} index={i} pipe={pipelines[r.clientId]} />
             ))}
           </ul>
         </CardContent>
@@ -182,7 +186,7 @@ function ClientGroup({
   )
 }
 
-function ClientRow({ row, index }: { row: ClientWorkflowProgress; index: number }) {
+function ClientRow({ row, index, pipe }: { row: ClientWorkflowProgress; index: number; pipe?: ClientPipeline }) {
   const meta = STATUS_META[row.status]
   return (
     <li
@@ -210,12 +214,49 @@ function ClientRow({ row, index }: { row: ClientWorkflowProgress; index: number 
           {row.nextSessionAt && <span>Próxima: <strong className="text-foreground">{formatDate(row.nextSessionAt)}</strong></span>}
           {!row.nextSessionAt && row.lastSessionAt && <span>Última: <strong className="text-foreground">{formatDate(row.lastSessionAt)}</strong></span>}
         </div>
+        <PipelineStrip pipe={pipe} />
       </div>
       <div className={cn('shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap', meta.tone)}>
         {meta.label}
       </div>
       <ActionButton row={row} />
     </li>
+  )
+}
+
+/** Compact content pipeline + weekly pace for a client, shown inline in planning. */
+function PipelineStrip({ pipe }: { pipe?: ClientPipeline }) {
+  if (!pipe) return null
+  const stages = [
+    { label: 'Ideas', v: pipe.ideas },
+    { label: 'Grabar', v: pipe.porGrabar },
+    { label: 'Editar', v: pipe.porEditar },
+    { label: 'Publicar', v: pipe.porPublicar },
+  ]
+  const onPace = pipe.targetSemana === 0 || pipe.publicadasSemana >= pipe.targetSemana
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+      {stages.map((s) => (
+        <span key={s.label} className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+          <span className="text-muted-foreground">{s.label}</span>
+          <strong className="tabular-nums text-foreground">{s.v}</strong>
+        </span>
+      ))}
+      <span
+        className={cn(
+          'inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium',
+          pipe.targetSemana === 0
+            ? 'bg-muted text-muted-foreground'
+            : onPace
+              ? 'bg-green-500/10 text-green-600'
+              : 'bg-amber-500/10 text-amber-600',
+        )}
+      >
+        {pipe.targetSemana === 0
+          ? 'Sin cadencia'
+          : `Esta semana ${pipe.publicadasSemana}/${pipe.targetSemana}`}
+      </span>
+    </div>
   )
 }
 
