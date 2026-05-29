@@ -13,7 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, Camera, Loader2, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -129,6 +130,19 @@ export function UserMenu() {
             Quitar foto
           </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/settings/metricool">
+            <Activity className="mr-2 h-4 w-4" />
+            Metricool
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/changelog">
+            <Sparkles className="mr-2 h-4 w-4" />
+            Novedades
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive cursor-pointer"
