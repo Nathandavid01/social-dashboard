@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Sparkles, Loader2, Check, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
@@ -80,7 +81,16 @@ export function ClientSchedule({ postingDays, tasks }: { postingDays: number[]; 
                 <td className="py-2.5 pr-3">
                   {idea ? (
                     <div className="space-y-1">
-                      <span className="line-clamp-2">{idea}</span>
+                      {ideaId ? (
+                        <Link
+                          href={`/produccion/idea/${ideaId}`}
+                          className="line-clamp-2 font-medium text-primary hover:underline"
+                        >
+                          {idea}
+                        </Link>
+                      ) : (
+                        <span className="line-clamp-2">{idea}</span>
+                      )}
                       {generated && (
                         <div className="rounded-md border bg-muted/40 p-2 text-xs">
                           <div className="mb-1 flex items-center justify-between">
