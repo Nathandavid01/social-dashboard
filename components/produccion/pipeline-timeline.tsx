@@ -1,14 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Lightbulb, Sparkles, Scissors, Palette, Clapperboard, Check, type LucideIcon } from 'lucide-react'
+import {
+  Lightbulb, Sparkles, Scissors, Palette, Clapperboard, CheckCircle2, Megaphone, Check, type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface TimelineStage {
   id: string          // anchor id of the section in the page
   label: string
-  icon: 'idea' | 'caption' | 'material' | 'assets' | 'edited'
+  icon: 'idea' | 'caption' | 'material' | 'assets' | 'edited' | 'approval' | 'published'
   done: boolean
+  count?: { current: number; total: number }
+  detail?: string
 }
 
 const ICONS: Record<TimelineStage['icon'], LucideIcon> = {
@@ -17,6 +21,8 @@ const ICONS: Record<TimelineStage['icon'], LucideIcon> = {
   material: Scissors,
   assets: Palette,
   edited: Clapperboard,
+  approval: CheckCircle2,
+  published: Megaphone,
 }
 
 /**
@@ -83,6 +89,12 @@ export function PipelineTimeline({ stages }: { stages: TimelineStage[] }) {
                   {s.done && !isActive ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
                 </span>
                 <span className="whitespace-nowrap">{s.label}</span>
+                {s.count && (
+                  <span className="tabular-nums opacity-80">{s.count.current}/{s.count.total}</span>
+                )}
+                {s.detail && !s.count && (
+                  <span className="whitespace-nowrap opacity-70">· {s.detail}</span>
+                )}
               </button>
               {i < stages.length - 1 && (
                 <span className={cn('mx-0.5 h-px w-4 shrink-0 sm:w-6', s.done ? 'bg-green-500/40' : 'bg-border')} />

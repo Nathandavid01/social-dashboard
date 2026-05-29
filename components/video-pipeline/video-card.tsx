@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { ApprovalButton } from '@/components/produccion/approval-button'
+import { computeIdeaProgress } from '@/lib/utils/idea-progress'
+import { ClientLogo } from '@/components/clients/client-logo'
 import type {
   ContentIdeaType,
   ContentIdeaStatus,
@@ -69,7 +71,17 @@ function stop(e: React.MouseEvent) {
   e.stopPropagation()
 }
 
-export function VideoCard({ video }: { video: PipelineVideo }) {
+export function VideoCard({
+  video,
+  assetCount = 0,
+  clientName,
+  clientLogoUrl,
+}: {
+  video: PipelineVideo
+  assetCount?: number
+  clientName?: string | null
+  clientLogoUrl?: string | null
+}) {
   const { toast } = useToast()
   const typeCfg = TYPE_CONFIG[video.content_type] ?? TYPE_CONFIG.R
   const statusCfg = STATUS_CONFIG[video.status] ?? STATUS_CONFIG.idea
@@ -80,6 +92,12 @@ export function VideoCard({ video }: { video: PipelineVideo }) {
   const caption = video.generated_caption?.trim() || null
   const recordingDate = formatDate(video.recording_date)
   const publishDate = formatDate(video.publish_date)
+
+  const progress = computeIdeaProgress({
+    idea: video,
+    videos: [...video.videos.raw, ...video.videos.broll, ...video.videos.edited],
+    assetCount,
+  })
 
   return (
     <div
@@ -101,7 +119,10 @@ export function VideoCard({ video }: { video: PipelineVideo }) {
 
       {/* Header: title + badges */}
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {(clientLogoUrl || clientName) && (
+            <ClientLogo name={clientName} logoUrl={clientLogoUrl} className="h-6 w-6 text-[9px]" />
+          )}
           <p className="truncate text-sm font-semibold leading-snug group-hover:text-primary">
             {video.title || 'Sin título'}
           </p>
@@ -118,6 +139,24 @@ export function VideoCard({ video }: { video: PipelineVideo }) {
             {approvalCfg.label}
           </Badge>
         </div>
+      </div>
+
+      {/* Stage progress chips */}
+      <div className="relative z-10 flex flex-wrap gap-1">
+        {progress.stages.map((s) => (
+          <span
+            key={s.key}
+            className={cn(
+              'inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium',
+              s.done
+                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                : 'bg-muted text-muted-foreground',
+            )}
+          >
+            {s.label}
+            {s.count ? ` ${s.count.current}/${s.count.total}` : s.done ? ' ✓' : ''}
+          </span>
+        ))}
       </div>
 
       {/* Brief / hook */}
