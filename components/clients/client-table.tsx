@@ -103,8 +103,9 @@ export function ClientTable({ clients }: ClientTableProps) {
                 <TableHead>Cliente</TableHead>
                 <TableHead className="hidden md:table-cell">Industria</TableHead>
                 <TableHead className="hidden sm:table-cell">Plataformas</TableHead>
+                <TableHead className="hidden md:table-cell">Metricool</TableHead>
+                <TableHead className="hidden md:table-cell">IA</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead className="hidden lg:table-cell">Asignado a</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -112,21 +113,9 @@ export function ClientTable({ clients }: ClientTableProps) {
               {filtered.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/clients/${client.id}`} className="hover:text-primary transition-colors">
-                        {client.name}
-                      </Link>
-                      {client.metricool_blog_id && (
-                        <span title="Metricool conectado" className="shrink-0">
-                          <Zap className="h-3 w-3 text-yellow-500" />
-                        </span>
-                      )}
-                      {client.brand_voice && (
-                        <span title="Perfil de IA configurado" className="shrink-0">
-                          <Brain className="h-3 w-3 text-purple-500" />
-                        </span>
-                      )}
-                    </div>
+                    <Link href={`/clients/${client.id}`} className="hover:text-primary transition-colors">
+                      {client.name}
+                    </Link>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                     {client.industry || '—'}
@@ -134,11 +123,26 @@ export function ClientTable({ clients }: ClientTableProps) {
                   <TableCell className="hidden sm:table-cell">
                     <PlatformBadges platforms={client.platforms} />
                   </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {client.metricool_blog_id ? (
+                      <span title="Metricool conectado" className="inline-flex items-center gap-1 text-xs font-medium text-yellow-600">
+                        <Zap className="h-3.5 w-3.5 text-yellow-500" /> Conectado
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {client.brand_voice ? (
+                      <span title="Perfil de IA configurado" className="inline-flex items-center gap-1 text-xs font-medium text-purple-600">
+                        <Brain className="h-3.5 w-3.5 text-purple-500" /> Listo
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge status={client.status} />
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
-                    {(client as Client & { assignee?: { full_name: string } }).assignee?.full_name || '—'}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
