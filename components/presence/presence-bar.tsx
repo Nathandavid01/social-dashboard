@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -32,50 +32,74 @@ function initials(name: string | null | undefined): string {
 
 export function PresenceBar({ currentUser }: Props) {
   const [users, setUsers] = useState<PresenceUser[]>([])
+  // Latest profile, read inside the effect without re-subscribing when the
+  // name/avatar change (only `id` keys the subscription).
+  const userRef = useRef(currentUser)
+  userRef.current = currentUser
 
   useEffect(() => {
     const supabase = createClient()
+    const userId = currentUser.id
+    const realtimeTopic = `realtime:${PRESENCE_CHANNEL}`
+
+    // `createBrowserClient` is a singleton, so a previous mount's channel can
+    // linger in the client registry while its async teardown is still in flight.
+    // realtime-js returns that same instance for this topic, and binding presence
+    // callbacks to an already-joined channel throws ("cannot add presence
+    // callbacks after joining a channel"). Drop any leftover first.
+    for (const stale of supabase.getChannels()) {
+      if (stale.topic === realtimeTopic) supabase.removeChannel(stale)
+    }
+
     const channel = supabase.channel(PRESENCE_CHANNEL, {
-      config: { presence: { key: currentUser.id } },
+      config: { presence: { key: userId } },
     })
 
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<PresenceUser>()
-        // state shape: { [key]: PresenceUser[] }
-        const flat: PresenceUser[] = []
-        const seen = new Set<string>()
-        for (const arr of Object.values(state)) {
-          for (const u of arr) {
-            if (!seen.has(u.id)) {
-              seen.add(u.id)
-              flat.push(u)
-            }
+    const syncUsers = () => {
+      const state = channel.presenceState<PresenceUser>()
+      // state shape: { [key]: PresenceUser[] }
+      const flat: PresenceUser[] = []
+      const seen = new Set<string>()
+      for (const arr of Object.values(state)) {
+        for (const u of arr) {
+          if (!seen.has(u.id)) {
+            seen.add(u.id)
+            flat.push(u)
           }
         }
-        // Sort: current user first, then by online_at desc
-        flat.sort((a, b) => {
-          if (a.id === currentUser.id) return -1
-          if (b.id === currentUser.id) return 1
-          return b.online_at.localeCompare(a.online_at)
-        })
-        setUsers(flat)
+      }
+      // Sort: current user first, then by online_at desc
+      flat.sort((a, b) => {
+        if (a.id === userId) return -1
+        if (b.id === userId) return 1
+        return b.online_at.localeCompare(a.online_at)
       })
-      .subscribe(async (status) => {
+      setUsers(flat)
+    }
+
+    // Only wire up + join a freshly-created channel (`state === 'closed'`). If the
+    // teardown above hasn't settled and we still got a live one, reflect its
+    // current state without re-binding presence callbacks (which would throw).
+    if (channel.state === 'closed') {
+      channel.on('presence', { event: 'sync' }, syncUsers).subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
+          const u = userRef.current
           await channel.track({
-            id: currentUser.id,
-            full_name: currentUser.full_name,
-            avatar_url: currentUser.avatar_url,
+            id: u.id,
+            full_name: u.full_name,
+            avatar_url: u.avatar_url,
             online_at: new Date().toISOString(),
           } satisfies PresenceUser)
         }
       })
+    } else {
+      syncUsers()
+    }
 
     return () => {
-      channel.untrack().then(() => supabase.removeChannel(channel))
+      supabase.removeChannel(channel)
     }
-  }, [currentUser.id, currentUser.full_name, currentUser.avatar_url])
+  }, [currentUser.id])
 
   if (users.length === 0) return null
 
