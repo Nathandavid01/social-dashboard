@@ -6,6 +6,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v1.0 — 2026-05-28
 
+### Flujo de producción por cliente
+- Nueva pestaña **Flujo** en el perfil: tabla con un video por fila (con fecha) y una columna por proceso (Idea, Grabado, Editado, Caption, Publicado), con checks de avance.
+
+### Tabla de clientes más limpia
+- Se quitó la columna "Asignado a" y las tarjetas de resumen Metricool/Con IA; ahora Metricool e IA son **columnas** de la tabla.
+
+### Versión visible
+- La versión de la app se muestra en el sidebar y en Novedades. Cada merge a `main` la sube (grande = feature grande, pequeño = feature chica).
+
+### Banner de planning
+- Rediseñado y reescrito ("Prepara la semana"), más claro y menos alarmante.
+
 ### Captions dentro del perfil del cliente
 - Los captions ahora viven en una pestaña **Captions** dentro de cada cliente; se eliminó la página suelta de Captions.
 - Deep-link `?tab=captions` para abrir esa pestaña directamente desde la lista de clientes.
