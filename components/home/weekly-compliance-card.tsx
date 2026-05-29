@@ -50,7 +50,7 @@ export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }
   }, [router])
 
   const withQuota = useMemo(
-    () => data.clients.filter((c) => c.quota !== null && c.quota > 0),
+    () => data.clients.filter((c) => c.quota !== null),
     [data.clients],
   )
   const noQuota = useMemo(
