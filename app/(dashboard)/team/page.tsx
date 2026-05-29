@@ -1,16 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/auth/server'
+import { RoleGate } from '@/components/auth/role-gate'
 import { TeamOverview } from '@/components/team/team-overview'
+import { UserAdminTable } from '@/components/team/user-admin-table'
 import type { Task, Profile } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
+  await requirePermission('team.read')
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const nowIso = new Date().toISOString()
 
   const [{ data: profiles }, { data: allTasks }] = await Promise.all([
-    supabase.from('profiles').select('id, full_name, email, role, avatar_url').order('full_name'),
+    supabase.from('profiles').select('id, full_name, email, role, status, title, avatar_url').order('full_name'),
     supabase
       .from('tasks')
       .select('id, title, status, priority, due_at, type, assignee_id, client:clients(id, name)')
@@ -35,6 +40,11 @@ export default async function TeamPage() {
   })).sort((a, b) => b.tasks.length - a.tasks.length)
 
   return (
-    <TeamOverview members={members as (Profile & { tasks: Task[]; overdue: number })[]} />
+    <div className="space-y-6">
+      <RoleGate perm="team.assign_roles">
+        <UserAdminTable users={(profiles ?? []) as Profile[]} currentUserId={user?.id ?? ''} />
+      </RoleGate>
+      <TeamOverview members={members as (Profile & { tasks: Task[]; overdue: number })[]} />
+    </div>
   )
 }
