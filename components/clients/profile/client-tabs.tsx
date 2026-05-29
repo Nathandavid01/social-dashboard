@@ -2,10 +2,10 @@
 
 import { useState, type ReactNode } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LayoutGrid, Palette, FileSignature, DollarSign, FolderOpen, CheckSquare, Sparkles } from 'lucide-react'
+import { LayoutGrid, Palette, FileSignature, DollarSign, FolderOpen, CheckSquare, Sparkles, MessageSquareText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type ClientTabKey = 'overview' | 'brand' | 'contract' | 'billing' | 'assets' | 'tasks' | 'content'
+export type ClientTabKey = 'overview' | 'brand' | 'contract' | 'billing' | 'assets' | 'tasks' | 'content' | 'captions'
 
 interface Props {
   defaultTab?: ClientTabKey
@@ -16,6 +16,7 @@ interface Props {
   assets: ReactNode
   tasks: ReactNode
   content: ReactNode
+  captions: ReactNode
 }
 
 const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] = [
@@ -26,6 +27,7 @@ const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] 
   { key: 'assets',   label: 'Assets',     icon: FolderOpen },
   { key: 'tasks',    label: 'Tareas',     icon: CheckSquare },
   { key: 'content',  label: 'Contenido',  icon: Sparkles },
+  { key: 'captions', label: 'Captions',   icon: MessageSquareText },
 ]
 
 export function ClientTabs({
@@ -37,6 +39,7 @@ export function ClientTabs({
   assets,
   tasks,
   content,
+  captions,
 }: Props) {
   const [tab, setTab] = useState<ClientTabKey>(defaultTab)
 
@@ -88,6 +91,9 @@ export function ClientTabs({
       </TabsContent>
       <TabsContent value="content" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
         {content}
+      </TabsContent>
+      <TabsContent value="captions" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+        {captions}
       </TabsContent>
     </Tabs>
   )

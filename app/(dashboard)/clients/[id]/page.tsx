@@ -5,10 +5,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Sparkles, Plus, AlertTriangle, CheckSquare, Calendar } from 'lucide-react'
+import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText } from 'lucide-react'
 import { formatDate, taskStatusColors } from '@/lib/utils'
 import { ClientHero } from '@/components/clients/profile/client-hero'
-import { ClientTabs } from '@/components/clients/profile/client-tabs'
+import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
+import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
+import { fetchClientCaptions } from '@/lib/utils/client-captions'
 import { OverviewTab } from '@/components/clients/profile/tabs/overview-tab'
 import { BrandTab } from '@/components/clients/profile/tabs/brand-tab'
 import { ContractTab } from '@/components/clients/profile/tabs/contract-tab'
@@ -19,12 +21,18 @@ import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-but
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
 import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
 
+const VALID_TABS: ClientTabKey[] = ['overview', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
+
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ tab?: string }>
 }) {
   const { id } = await params
+  const { tab } = await searchParams
+  const defaultTab = (VALID_TABS as string[]).includes(tab ?? '') ? (tab as ClientTabKey) : 'overview'
   const [clientRaw, supabase] = await Promise.all([getClientById(id), createClient()])
 
   if (!clientRaw) notFound()
@@ -95,6 +103,32 @@ export default async function ClientDetailPage({
       /* proceed without posts */
     }
   }
+
+  const captionsResult = client.metricool_blog_id
+    ? await fetchClientCaptions(client.metricool_blog_id, client.name)
+    : null
+  const captionsSlot = (
+    <Card>
+      <CardHeader className="flex flex-row items-center gap-2 pb-3">
+        <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+        <CardTitle className="text-base">
+          Captions publicados
+          {captionsResult?.ok && captionsResult.captions.length > 0 && ` (${captionsResult.captions.length})`}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {!client.metricool_blog_id ? (
+          <p className="text-sm text-muted-foreground">Conecta el blog de Metricool para ver sus captions.</p>
+        ) : captionsResult && !captionsResult.ok ? (
+          <p className="text-sm text-red-500">{captionsResult.error}</p>
+        ) : !captionsResult?.ok || captionsResult.captions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No hay publicaciones en los últimos 90 días.</p>
+        ) : (
+          <SavedCaptionsView captions={captionsResult.captions} clientName={client.name} />
+        )}
+      </CardContent>
+    </Card>
+  )
 
   const nowIso = new Date().toISOString()
   const openTasks = (tasks ?? []).filter((t) => t.status !== 'completed')
@@ -208,11 +242,6 @@ export default async function ClientDetailPage({
           />
         )}
         <Button asChild variant="outline" size="sm">
-          <Link href={`/captions?client=${id}`}>
-            <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Caption AI
-          </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
           <Link href={`/operations?client=${id}`}>
             <Plus className="mr-1.5 h-3.5 w-3.5" /> Nueva tarea
           </Link>
@@ -226,6 +255,7 @@ export default async function ClientDetailPage({
       </div>
 
       <ClientTabs
+        defaultTab={defaultTab}
         overview={<OverviewTab client={client} pipeline={pipeline} />}
         brand={<BrandTab client={client} />}
         contract={<ContractTab client={client} />}
@@ -233,6 +263,7 @@ export default async function ClientDetailPage({
         assets={<AssetsTab clientId={id} assets={assetsList} />}
         tasks={tasksSlot}
         content={contentSlot}
+        captions={captionsSlot}
       />
 
       {client.notes && (

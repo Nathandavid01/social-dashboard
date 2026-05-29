@@ -161,9 +161,9 @@ export function ClientTable({ clients }: ClientTableProps) {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/captions?client=${client.id}`}>
+                          <Link href={`/clients/${client.id}?tab=captions`}>
                             <Sparkles className="mr-2 h-4 w-4" />
-                            Generar Caption
+                            Ver captions
                           </Link>
                         </DropdownMenuItem>
                         {client.metricool_blog_id && (
