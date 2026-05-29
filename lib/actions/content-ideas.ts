@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import type { ContentIdea, ContentIdeaStatus, ContentIdeaType } from '@/lib/supabase/types'
+import type {
+  ContentIdea, ContentIdeaStatus, ContentIdeaType, ContentIdeaVideo, IdeaWithPipeline,
+} from '@/lib/supabase/types'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 export async function getContentIdeas(filter?: {
@@ -34,6 +36,48 @@ export async function getContentIdeas(filter?: {
     return []
   }
   return (data ?? []) as unknown as ContentIdea[]
+}
+
+/**
+ * Ideas enriched for the Ideación pipeline-rows view: joins the linked recording
+ * session (for the "Agendada" stage) and the uploaded videos (for grabación/edición).
+ * Returns a flat list; the board groups by client. Degrades to [] on error.
+ */
+export async function getIdeacionPipeline(filter?: {
+  clientId?: string
+  limit?: number
+}): Promise<IdeaWithPipeline[]> {
+  const supabase = await createClient()
+  let query = supabase
+    .from('content_ideas')
+    .select(`
+      *,
+      client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms),
+      recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status),
+      videos:content_idea_videos!content_idea_videos_idea_id_fkey(*)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(filter?.limit ?? 300)
+  if (filter?.clientId) query = query.eq('client_id', filter.clientId)
+
+  const { data, error } = await query
+  if (error) {
+    console.warn('[content-ideas] pipeline fetch failed:', error.message)
+    return []
+  }
+  return (data ?? []).map((row) => {
+    const r = row as unknown as ContentIdea & {
+      recording_session?: { status?: string } | null
+      videos?: ContentIdeaVideo[] | null
+    }
+    const sessionStatus = r.recording_session?.status
+    return {
+      ...(r as ContentIdea),
+      recordingScheduled:
+        r.recording_session_id != null && (sessionStatus === 'scheduled' || sessionStatus === 'completed'),
+      videos: (r.videos ?? []) as ContentIdeaVideo[],
+    } as IdeaWithPipeline
+  })
 }
 
 export async function saveContentIdea(input: {
