@@ -11,9 +11,9 @@ import {
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { STATUS_META, type ClientWorkflowProgress, type WorkflowStepStatus } from '@/lib/utils/workflow-types'
-import { dayLabelsShort } from '@/lib/utils/posting-cadence'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
 import { ClientSchedule, type ScheduleTask } from './client-schedule'
+import { InlineDayPicker } from './inline-day-picker'
 
 interface Props {
   rows: ClientWorkflowProgress[]
@@ -209,14 +209,10 @@ function ClientRow({ row, index, pipe, posted, schedule }: { row: ClientWorkflow
             {row.clientName}
           </Link>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-            {row.postingDays.length > 0 ? (
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {row.postingDays.map((d) => dayLabelsShort[d]).join(', ')}
-              </span>
-            ) : (
-              <span>Sin días configurados</span>
-            )}
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 shrink-0" />
+              <InlineDayPicker clientId={row.clientId} initial={row.postingDays} />
+            </span>
             <span>
               Ideas <strong className={cn('tabular-nums', row.ideaCount >= row.ideasTarget ? 'text-green-500' : 'text-foreground')}>
                 {row.ideaCount}/{row.ideasTarget}
