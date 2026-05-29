@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.7 — 2026-05-29
+
+### Flujo del cliente como tablero (Kanban)
+- La pestaña **Flujo** del cliente pasó de una tabla de checkmarks a un **tablero por etapa**: columnas Idea → Grabado → Editado → Caption → Publicado, con cada video como tarjeta en su etapa actual y el **conteo** por columna.
+- Cada tarjeta muestra tipo (Reel/Post…), fecha y **mini-puntos de progreso** de las 5 etapas; al hacer clic abre el detalle del video.
+- Los videos **atrasados** se marcan con ⚠ (ámbar): fecha de publicación vencida sin publicar, o más de 7 días sin actividad.
+
 ## v1.6 — 2026-05-29
 
 ### Aviso cuando llega un video
