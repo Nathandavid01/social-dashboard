@@ -1,0 +1,20 @@
+# Cloudflare Worker — public gateway for FINAL (edited) videos only.
+# See infra/r2-public-edited-worker.js for what it serves and why the bucket
+# stays private.
+#
+# Deploy:
+#   npx wrangler login      # one-time, opens the browser
+#   npx wrangler deploy
+#
+# After deploy, map a custom domain (e.g. videos.natemedia.com) to this Worker
+# in the Cloudflare dashboard (Workers → this worker → Settings → Domains &
+# Routes), then set R2_PUBLIC_BASE_URL=https://videos.natemedia.com in the app.
+
+name = "nmedia-public-videos"
+main = "infra/r2-public-edited-worker.js"
+compatibility_date = "2025-01-01"
+
+# Binds the private R2 bucket to the Worker as `env.VIDEOS`.
+[[r2_buckets]]
+binding = "VIDEOS"
+bucket_name = "nmedia-videos"
