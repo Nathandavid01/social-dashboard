@@ -17,7 +17,7 @@ export default function PlanningPage() {
     <div className="space-y-6">
       <PageHeader
         title="Planning"
-        description="Agendar próximas sesiones y tener ideas listas para cada cliente. Hasta que todos estén listos, este trabajo sigue abierto."
+        description="Primero, ideación: cada cliente debe tener ideas listas al menos un mes por adelantado según su cadencia. Luego se agendan las grabaciones. Hasta que todos estén listos, este trabajo sigue abierto."
       />
       <Suspense fallback={<div className="grid h-64 place-items-center"><NateLoader variant="inline" label="Calculando estado…" /></div>}>
         <PlanningData />

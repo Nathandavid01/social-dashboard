@@ -80,9 +80,9 @@ export function PlanningBoard({ rows }: Props) {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <StatusPill status="ideas"     count={stats.ideas} />
               <StatusPill status="reagendar" count={stats.reagendar} />
               <StatusPill status="agendar"   count={stats.agendar} />
-              <StatusPill status="ideas"     count={stats.ideas} />
               <StatusPill status="listo"     count={stats.listo} />
             </div>
           </div>
@@ -108,7 +108,7 @@ export function PlanningBoard({ rows }: Props) {
 
       {/* Groups */}
       <div className="space-y-4">
-        {(['reagendar', 'agendar', 'ideas'] as const).map((s) =>
+        {(['ideas', 'reagendar', 'agendar'] as const).map((s) =>
           groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} /> : null,
         )}
         {groups.listo.length > 0 && (

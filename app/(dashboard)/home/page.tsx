@@ -12,6 +12,8 @@ import { GlobalPipelineSection } from '@/components/home/global-pipeline-section
 import { PlanningBanner } from '@/components/home/planning-banner'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
+import { getWeeklyProductionStatus } from '@/lib/utils/weekly-production'
+import { WeeklyProductionCard } from '@/components/home/weekly-production-card'
 import Link from 'next/link'
 import {
   Users,
@@ -175,6 +177,7 @@ export default async function HomePage() {
   const dayName = now.toLocaleDateString('es-PR', { weekday: 'long', month: 'long', day: 'numeric' })
 
   const pipelineGlobal = await getPipelineTotals()
+  const weeklyProduction = await getWeeklyProductionStatus()
   const planning = await getWorkflowProgress().catch(() => ({ rows: [], pendingCount: 0 }))
   const planningBuckets = {
     reagendar: planning.rows.filter((r) => r.status === 'reagendar').length,
@@ -249,6 +252,9 @@ export default async function HomePage() {
         />
       </div>
 
+      {/* Weekly production readiness — recorded / edited / captioned */}
+      <WeeklyProductionCard status={weeklyProduction} />
+
       {/* Activity Grid */}
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
         <WeekActivity days={weekDays} />
@@ -264,7 +270,6 @@ export default async function HomePage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9">
         {[
           { href: '/operations', label: 'Operaciones', sub: 'Ver todas las tareas', color: 'bg-blue-500/10 text-blue-500' },
-          { href: '/captions', label: 'Captions AI', sub: 'Generar con IA', color: 'bg-purple-500/10 text-purple-500' },
           { href: '/published', label: 'Publicados', sub: 'Ver todo el contenido', color: 'bg-green-500/10 text-green-500' },
           { href: '/clients', label: 'Clientes', sub: `${activeClients ?? 0} clientes activos`, color: 'bg-orange-500/10 text-orange-500' },
           { href: '/video-reviews', label: 'Video QC', sub: `${pendingVideoReviews ?? 0} pendientes`, color: 'bg-cyan-500/10 text-cyan-500' },

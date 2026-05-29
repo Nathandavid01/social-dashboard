@@ -39,10 +39,7 @@ export function PlanningBanner({ pendingCount, buckets, total }: Props) {
     )
   }
 
-  const tone =
-    buckets.reagendar > 0
-      ? 'border-red-500/40 bg-red-500/[0.06] text-red-500'
-      : 'border-orange-500/40 bg-orange-500/[0.06] text-orange-500'
+  const tone = 'border-red-500/40 bg-red-500/[0.06] text-red-500'
 
   return (
     <Link
@@ -66,6 +63,11 @@ export function PlanningBanner({ pendingCount, buckets, total }: Props) {
           {pendingCount} cliente{pendingCount === 1 ? '' : 's'} requieren tu acción esta semana
         </p>
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+          {buckets.ideas > 0 && (
+            <span className="inline-flex items-center gap-1 text-yellow-500">
+              <Lightbulb className="h-3 w-3" /> {buckets.ideas} sin ideas
+            </span>
+          )}
           {buckets.reagendar > 0 && (
             <span className="inline-flex items-center gap-1 text-red-500">
               <RefreshCcw className="h-3 w-3" /> {buckets.reagendar} reagendar
@@ -74,11 +76,6 @@ export function PlanningBanner({ pendingCount, buckets, total }: Props) {
           {buckets.agendar > 0 && (
             <span className="inline-flex items-center gap-1 text-orange-500">
               <Calendar className="h-3 w-3" /> {buckets.agendar} sin agendar
-            </span>
-          )}
-          {buckets.ideas > 0 && (
-            <span className="inline-flex items-center gap-1 text-yellow-500">
-              <Lightbulb className="h-3 w-3" /> {buckets.ideas} sin ideas
             </span>
           )}
         </div>

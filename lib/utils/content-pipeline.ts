@@ -37,6 +37,9 @@ export interface PipelineTotals {
   publicadasMes: number
   targetSemana: number
   targetMes: number
+  /** Sum across clients of posts still owed this week/month (each clamped at 0). */
+  semanaRemaining: number
+  mesRemaining: number
 }
 
 const COUNTED_STATUSES = ['idea', 'asignada', 'grabada', 'producida', 'publicada'] as const
@@ -162,13 +165,15 @@ export async function getPipelineTotals(): Promise<{
     publicadasMes: 0,
     targetSemana: 0,
     targetMes: 0,
+    semanaRemaining: 0,
+    mesRemaining: 0,
   }
 
   for (const c of clients ?? []) {
     const buckets = bucketize(byClient.get(c.id) ?? [], weekStart, monthStart)
     const targets = computePostingTargets(c.posting_days ?? [])
 
-    perClient.push({
+    const entry: ClientPipeline = {
       clientId: c.id,
       clientName: c.name,
       ...buckets,
@@ -176,16 +181,19 @@ export async function getPipelineTotals(): Promise<{
       targetMes: targets.perMonth,
       semanaRemaining: Math.max(targets.perWeek - buckets.publicadasSemana, 0),
       mesRemaining: Math.max(targets.perMonth - buckets.publicadasMes, 0),
-    })
+    }
+    perClient.push(entry)
 
-    totals.ideas += buckets.ideas
-    totals.porGrabar += buckets.porGrabar
-    totals.porEditar += buckets.porEditar
-    totals.porPublicar += buckets.porPublicar
-    totals.publicadasSemana += buckets.publicadasSemana
-    totals.publicadasMes += buckets.publicadasMes
-    totals.targetSemana += targets.perWeek
-    totals.targetMes += targets.perMonth
+    totals.ideas += entry.ideas
+    totals.porGrabar += entry.porGrabar
+    totals.porEditar += entry.porEditar
+    totals.porPublicar += entry.porPublicar
+    totals.publicadasSemana += entry.publicadasSemana
+    totals.publicadasMes += entry.publicadasMes
+    totals.targetSemana += entry.targetSemana
+    totals.targetMes += entry.targetMes
+    totals.semanaRemaining += entry.semanaRemaining
+    totals.mesRemaining += entry.mesRemaining
   }
 
   return { totals, perClient }

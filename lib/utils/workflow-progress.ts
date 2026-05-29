@@ -115,17 +115,17 @@ export async function getWorkflowProgress(): Promise<{
 
     const postingDays = c.posting_days ?? []
     const ideaCount = ideasByClient.get(c.id) ?? 0
-    const ideasTarget = Math.max(
-      settings.min_ideas_per_session,
-      Math.ceil(postingDays.length * settings.ideas_multiplier),
-    )
+    // Ideation is the first step: keep at least a month (4 weeks of cadence) of
+    // ideas ready ahead of time, with a hard floor for clients without cadence.
+    const ideasTarget = Math.max(settings.min_ideas_per_session, postingDays.length * 4)
 
     const needsRescheduling = settings.require_rescheduling && !hasUpcomingSession && !!lastSessionAt
 
+    // Order matters: ideación always comes first, then scheduling/rescheduling.
     let status: WorkflowStepStatus
-    if (needsRescheduling) status = 'reagendar'
+    if (ideaCount < ideasTarget) status = 'ideas'
+    else if (needsRescheduling) status = 'reagendar'
     else if (!hasUpcomingSession) status = 'agendar'
-    else if (ideaCount < ideasTarget) status = 'ideas'
     else status = 'listo'
 
     rows.push({
@@ -142,8 +142,8 @@ export async function getWorkflowProgress(): Promise<{
     })
   }
 
-  // Sort by urgency: reagendar > agendar > ideas > listo
-  const order: Record<WorkflowStepStatus, number> = { reagendar: 0, agendar: 1, ideas: 2, listo: 3 }
+  // Sort by workflow order: ideación first, then rescheduling, then scheduling, then listo
+  const order: Record<WorkflowStepStatus, number> = { ideas: 0, reagendar: 1, agendar: 2, listo: 3 }
   rows.sort((a, b) => order[a.status] - order[b.status] || a.clientName.localeCompare(b.clientName))
 
   const pendingCount = rows.filter((r) => r.status !== 'listo').length

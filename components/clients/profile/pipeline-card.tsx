@@ -36,8 +36,8 @@ export function PipelineCard({ data, title, linkable, clientId }: Props) {
 
   const weekPct = data.targetSemana > 0 ? Math.min((data.publicadasSemana / data.targetSemana) * 100, 100) : 0
   const monthPct = data.targetMes > 0 ? Math.min((data.publicadasMes / data.targetMes) * 100, 100) : 0
-  const weekDeficit = Math.max(data.targetSemana - data.publicadasSemana, 0)
-  const monthDeficit = Math.max(data.targetMes - data.publicadasMes, 0)
+  const weekDeficit = data.semanaRemaining
+  const monthDeficit = data.mesRemaining
 
   return (
     <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500">
