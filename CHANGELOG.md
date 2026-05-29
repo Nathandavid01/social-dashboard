@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.8 — 2026-05-29
+
+### Confirmación al aprobar (anti-cliente-equivocado)
+- **Aprobar** un video ahora pide una **confirmación** que muestra el **logo y nombre del cliente** + el título: "Verifica que el video sea del cliente correcto". La aprobación solo se aplica tras confirmar — así no se da luz verde al video del cliente equivocado.
+
 ## v1.7 — 2026-05-29
 
 ### Flujo del cliente como tablero (Kanban)
