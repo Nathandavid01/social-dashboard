@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import type { ContentIdea, Client, Profile, ContentIdeaStatus } from '@/lib/supabase/types'
+import type { ContentIdea, IdeaWithPipeline, Client, Profile, ContentIdeaStatus } from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -11,13 +11,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Lightbulb, Plus, Filter } from 'lucide-react'
-import { IdeaCard } from './idea-card'
+import { ClientIdeasRows } from './client-ideas-rows'
 import { GenerateIdeasModal } from './generate-ideas-modal'
 import { AssignToProductionModal } from './assign-to-production-modal'
 import { EmptyState } from '@/components/shared/empty-state'
 
 interface Props {
-  initialIdeas: ContentIdea[]
+  initialIdeas: IdeaWithPipeline[]
   clients: Client[]
   profiles: Pick<Profile, 'id' | 'full_name'>[]
 }
@@ -33,11 +33,11 @@ const STATUS_OPTIONS: { value: 'all' | 'open' | ContentIdeaStatus; label: string
 ]
 
 export function IdeacionBoard({ initialIdeas, clients, profiles }: Props) {
-  const [ideas, setIdeas] = useState<ContentIdea[]>(initialIdeas)
+  const [ideas, setIdeas] = useState<IdeaWithPipeline[]>(initialIdeas)
   const [clientFilter, setClientFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | ContentIdeaStatus>('open')
   const [showGenerator, setShowGenerator] = useState(false)
-  const [assigningIdea, setAssigningIdea] = useState<ContentIdea | null>(null)
+  const [assigningIdea, setAssigningIdea] = useState<IdeaWithPipeline | null>(null)
 
   const filtered = useMemo(() => {
     return ideas.filter((idea) => {
@@ -49,15 +49,13 @@ export function IdeacionBoard({ initialIdeas, clients, profiles }: Props) {
   }, [ideas, clientFilter, statusFilter])
 
   function handleIdeasGenerated(newIdeas: ContentIdea[]) {
-    setIdeas((prev) => [...newIdeas, ...prev])
+    const enriched: IdeaWithPipeline[] = newIdeas.map((i) => ({ ...i, recordingScheduled: false, videos: [] }))
+    setIdeas((prev) => [...enriched, ...prev])
   }
 
   function handleIdeaUpdate(updated: ContentIdea) {
-    setIdeas((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
-  }
-
-  function handleIdeaDelete(id: string) {
-    setIdeas((prev) => prev.filter((i) => i.id !== id))
+    // Merge so the row keeps its pipeline fields (recordingScheduled, videos).
+    setIdeas((prev) => prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i)))
   }
 
   const stats = {
@@ -132,18 +130,7 @@ export function IdeacionBoard({ initialIdeas, clients, profiles }: Props) {
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((idea) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              clients={clients}
-              onUpdate={handleIdeaUpdate}
-              onDelete={handleIdeaDelete}
-              onAssign={() => setAssigningIdea(idea)}
-            />
-          ))}
-        </div>
+        <ClientIdeasRows ideas={filtered} onAssign={(idea) => setAssigningIdea(idea)} />
       )}
 
       {/* Modals */}
