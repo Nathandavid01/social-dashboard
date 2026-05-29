@@ -3,6 +3,7 @@ import { Film, ImageIcon, Palette, Type, FolderOpen, Download } from 'lucide-rea
 import { Badge } from '@/components/ui/badge'
 import { cn, platformColors, platformLabels } from '@/lib/utils'
 import { VideoCard } from './video-card'
+import { ClientLogo } from '@/components/clients/client-logo'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { ClientAsset, ClientAssetKind, SocialPlatform } from '@/lib/supabase/types'
 
@@ -37,7 +38,7 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
         )}
         <div className="relative flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3.5">
           <div className="flex min-w-0 items-center gap-3">
-            <ClientLogo client={client} />
+            <ClientLogo name={client.name} logoUrl={client.logo_url} />
             <div className="min-w-0">
               <Link
                 href={`/clients/${client.id}`}
@@ -89,29 +90,17 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {videos.map((video) => (
-            <VideoCard key={video.id} video={video} />
+            <VideoCard
+              key={video.id}
+              video={video}
+              assetCount={assets.length}
+              clientName={client.name}
+              clientLogoUrl={client.logo_url}
+            />
           ))}
         </div>
       )}
     </section>
-  )
-}
-
-function ClientLogo({ client }: { client: ClientVideoPipeline['client'] }) {
-  if (client.logo_url) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={client.logo_url}
-        alt={client.name}
-        className="h-11 w-11 shrink-0 rounded-lg border object-contain bg-background p-0.5"
-      />
-    )
-  }
-  return (
-    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border bg-muted text-sm font-bold text-muted-foreground">
-      {client.name?.slice(0, 2).toUpperCase() || '??'}
-    </div>
   )
 }
 

@@ -11,6 +11,8 @@ import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ClientAssetsDownload } from '@/components/produccion/client-assets-download'
 import { PipelineTimeline, type TimelineStage } from '@/components/produccion/pipeline-timeline'
+import { IdeaProgressBar } from '@/components/produccion/idea-progress-bar'
+import { computeIdeaProgress, type StageKey } from '@/lib/utils/idea-progress'
 import { getIdeaVideos } from '@/lib/actions/idea-videos'
 import { getClientAssets } from '@/lib/actions/client-profile'
 import { getIdeaActivity } from '@/lib/utils/idea-activity'
@@ -43,13 +45,24 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
   ])
 
   const vids = videos as ContentIdeaVideo[]
-  const timeline: TimelineStage[] = [
-    { id: 'stage-idea',     label: 'Idea',     icon: 'idea',     done: true },
-    { id: 'stage-caption',  label: 'Caption',  icon: 'caption',  done: !!idea.generated_caption },
-    { id: 'stage-material', label: 'Material', icon: 'material', done: vids.some((v) => v.kind === 'raw') },
-    { id: 'stage-material', label: 'Editado',  icon: 'edited',   done: vids.some((v) => v.kind === 'edited') },
-    { id: 'stage-assets',   label: 'Assets',   icon: 'assets',   done: false },
-  ]
+  const progress = computeIdeaProgress({ idea, videos: vids, assetCount: (assets as ClientAsset[]).length })
+  const ANCHOR_BY_KEY: Record<StageKey, string> = {
+    idea: 'stage-idea',
+    caption: 'stage-caption',
+    material: 'stage-material',
+    edited: 'stage-material',
+    assets: 'stage-assets',
+    approval: 'stage-assets',
+    published: 'stage-assets',
+  }
+  const timeline: TimelineStage[] = progress.stages.map((s) => ({
+    id: ANCHOR_BY_KEY[s.key],
+    label: s.label,
+    icon: s.key,
+    done: s.done,
+    count: s.count,
+    detail: s.detail,
+  }))
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
@@ -73,6 +86,9 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
 
       {/* Clickable timeline — jumps to each stage */}
       <PipelineTimeline stages={timeline} />
+
+      {/* Overall progress + what's missing */}
+      <IdeaProgressBar progress={progress} />
 
       {/* Stage 1: Idea brief */}
       <Card id="stage-idea" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300">
