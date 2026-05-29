@@ -24,7 +24,11 @@ export interface IdeaProgress {
 }
 
 const MIN: Record<ContentIdeaVideoKind, number> = { raw: 4, broll: 4, edited: 2 }
-const ACTIVE: ReadonlySet<ContentIdeaVideo['status']> = new Set(['uploading', 'uploaded', 'processing'])
+const ACTIVE: ReadonlySet<ContentIdeaVideo['status']> = new Set<ContentIdeaVideo['status']>([
+  'uploading',
+  'uploaded',
+  'processing',
+])
 
 const APPROVAL_DETAIL: Record<IdeaApprovalStatus, string> = {
   pending: 'Sin enviar',
