@@ -19,6 +19,12 @@ vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
 }))
 
+// Activity logging is an orthogonal side effect; stub it so the op recorder
+// only sees registerR2Video's own Supabase writes.
+vi.mock('@/lib/utils/idea-activity', () => ({
+  logIdeaActivity: vi.fn(async () => {}),
+}))
+
 vi.mock('@/lib/integrations/r2', () => ({
   r2Client: vi.fn(() => ({ send: vi.fn() })),
   r2Bucket: vi.fn(() => 'nmedia-videos'),

@@ -104,6 +104,7 @@ function makeVideoCard(overrides: Partial<PipelineVideo> = {}): PipelineVideo {
     generated_caption: 'Este es el caption generado',
     caption_platform: 'instagram',
     caption_generated_at: '2026-05-01T00:00:00Z',
+    published_at: null,
     approval_status: 'pending',
     approved_by: null,
     approved_at: null,

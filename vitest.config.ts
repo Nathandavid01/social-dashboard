@@ -12,9 +12,13 @@ export default defineConfig({
     exclude: ['node_modules', '.next', 'dist'],
   },
   resolve: {
-    // Mirror the tsconfig "@/*" -> "./*" path alias (project root).
     alias: {
+      // Mirror the tsconfig "@/*" -> "./*" path alias (project root).
       '@': resolve(__dirname, '.'),
+      // Next.js-only marker packages have no runtime under Vitest; stub them so
+      // server modules (which `import "server-only"`) can be imported in tests.
+      'server-only': resolve(__dirname, 'tests/empty-module.ts'),
+      'client-only': resolve(__dirname, 'tests/empty-module.ts'),
     },
   },
 })
