@@ -25,10 +25,13 @@ vi.mock('@/lib/utils/idea-activity', () => ({
   logIdeaActivity: vi.fn(async () => {}),
 }))
 
+let publicBase: string | null = 'https://videos.natemedia.com'
+let videoKind = 'edited'
 vi.mock('@/lib/integrations/r2', () => ({
   r2Client: vi.fn(() => ({ send: vi.fn() })),
   r2Bucket: vi.fn(() => 'nmedia-videos'),
   isR2Configured: vi.fn(() => true),
+  r2PublicUrl: vi.fn((key: string) => (publicBase ? `${publicBase}/${key}` : null)),
 }))
 
 // Spy registry so each test can inspect what the action did to Supabase.
@@ -41,7 +44,16 @@ function makeChain() {
   const chain: Record<string, unknown> = {}
   const passthrough = () => chain
   for (const m of ['eq', 'in', 'select']) chain[m] = vi.fn(passthrough)
-  chain.single = vi.fn(async () => ({ data: { id: 'new-video-id' }, error: null }))
+  chain.single = vi.fn(async () => ({
+    data: {
+      id: 'new-video-id',
+      drive_file_id: `ideas/idea-1/${videoKind}/1-final.mp4`,
+      storage_provider: 'r2',
+      kind: videoKind,
+      name: 'final.mp4',
+    },
+    error: null,
+  }))
   // Make the chain awaitable (for update() calls that aren't .single()'d).
   ;(chain as { then: unknown }).then = (resolve: (v: unknown) => unknown) =>
     resolve({ data: null, error: null })
@@ -73,11 +85,13 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 // Import AFTER mocks are registered.
-import { registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { registerR2Video, getR2PublicUrl } from '@/lib/actions/idea-videos-r2'
 
 beforeEach(() => {
   ops.length = 0
   vi.clearAllMocks()
+  publicBase = 'https://videos.natemedia.com'
+  videoKind = 'edited'
   supabaseMock.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 })
 
@@ -174,6 +188,38 @@ describe('registerR2Video — accumulate semantics', () => {
     expect(archiveUpdates()).toHaveLength(0)
   })
 
+})
+
+describe('getR2PublicUrl — permanent public link', () => {
+  it('returns the permanent public URL for a final (edited) R2 video', async () => {
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.url).toBe('https://videos.natemedia.com/ideas/idea-1/edited/1-final.mp4')
+    expect(res.error).toBeUndefined()
+  })
+
+  it('refuses raw footage — only finals can be public', async () => {
+    videoKind = 'raw'
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/finales \(editados\)/i)
+  })
+
+  it('refuses b-roll — only finals can be public', async () => {
+    videoKind = 'broll'
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/finales \(editados\)/i)
+  })
+
+  it('errors when public access is not configured (no base URL)', async () => {
+    publicBase = null
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/público no configurado/i)
+  })
+})
+
+describe('registerR2Video — idea promotion', () => {
   it('promotes the idea to "grabada" on raw upload but only via an idea status update, not by archiving videos', async () => {
     await registerR2Video({
       ideaId: 'idea-1',
