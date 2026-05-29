@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/page-header'
+import { SettingsTabs } from '@/components/settings/settings-tabs'
 import { WorkflowSettingsForm } from '@/components/settings/workflow-settings-form'
 import { getCurrentRole } from '@/lib/auth/server'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
@@ -18,6 +19,7 @@ export default async function WorkflowSettingsPage() {
         title="Workflow · Planning"
         description="Configura cuándo un cliente cuenta como 'agendado' y cuántas ideas necesita para considerarse listo cada semana. Solo los Owners pueden cambiar estos valores."
       />
+      <SettingsTabs />
       <WorkflowSettingsForm initial={settings} />
     </div>
   )

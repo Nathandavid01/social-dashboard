@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +23,8 @@ import {
   type PublicPost,
 } from '@/lib/metricool/client'
 import { useToast } from '@/lib/hooks/use-toast'
+import { PlatformBadges } from '@/components/clients/platform-badges'
+import type { CachedMetricoolProfile } from '@/lib/actions/metricool-profiles'
 import {
   RefreshCw,
   Unplug,
@@ -36,6 +38,19 @@ import {
 
 interface MetricoolDashboardProps {
   onDisconnect: () => void
+  /** Profiles served from Supabase cache — shown without hitting Metricool on load. */
+  cachedProfiles?: CachedMetricoolProfile[]
+}
+
+function normalizeProfile(p: PublicBlog): CachedMetricoolProfile {
+  const name =
+    (typeof p.label === 'string' && p.label) || p.name || `Perfil ${p.id}`
+  const picture =
+    p.picture || (typeof p.userPicture === 'string' ? p.userPicture : null)
+  const networks = (['instagram', 'facebook', 'tiktok', 'linkedin'] as const).filter(
+    (k) => p[k],
+  )
+  return { id: String(p.id), name, picture: picture ?? null, networks }
 }
 
 type DateRange = '7d' | '30d' | '90d'
@@ -66,11 +81,12 @@ const platformColors: Record<string, string> = {
   youtube: 'bg-red-500/10 text-red-500 border-red-500/20',
 }
 
-export function MetricoolDashboard({ onDisconnect }: MetricoolDashboardProps) {
+export function MetricoolDashboard({ onDisconnect, cachedProfiles = [] }: MetricoolDashboardProps) {
   const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
-  const [profiles, setProfiles] = useState<PublicBlog[]>([])
+  // Profiles come from Supabase cache; only a manual refresh re-syncs from Metricool.
+  const [profiles, setProfiles] = useState<CachedMetricoolProfile[]>(cachedProfiles)
   const [posts, setPosts] = useState<PublicPost[]>([])
   const [stats, setStats] = useState<Record<string, number>>({})
   const [error, setError] = useState<string | null>(null)
@@ -91,7 +107,9 @@ export function MetricoolDashboard({ onDisconnect }: MetricoolDashboardProps) {
         getStatsAggregation(config, 'instagram', start, end),
       ])
 
-      if (profilesData.status === 'fulfilled') setProfiles(profilesData.value)
+      if (profilesData.status === 'fulfilled' && profilesData.value.length > 0) {
+        setProfiles(profilesData.value.map(normalizeProfile))
+      }
       if (postsData.status === 'fulfilled') setPosts(postsData.value)
       if (statsData.status === 'fulfilled') setStats(statsData.value)
 
@@ -107,10 +125,6 @@ export function MetricoolDashboard({ onDisconnect }: MetricoolDashboardProps) {
       setLoading(false)
     }
   }, [dateRange])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
 
   const handleDisconnect = () => {
     clearConfig()
@@ -196,33 +210,21 @@ export function MetricoolDashboard({ onDisconnect }: MetricoolDashboardProps) {
             <div className="space-y-3">
               {profiles.map((profile, i) => (
                 <div key={profile.id ?? i} className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     {profile.picture ? (
                       <img
                         src={profile.picture}
                         alt={profile.name}
-                        className="h-8 w-8 rounded-full"
+                        className="h-8 w-8 shrink-0 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-                        {profile.name?.[0]?.toUpperCase() ?? '?'}
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+                        {profile.name[0]?.toUpperCase() ?? '?'}
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm font-medium">{profile.name}</p>
-                      {profile.url && (
-                        <p className="text-xs text-muted-foreground">{profile.url}</p>
-                      )}
-                    </div>
+                    <p className="min-w-0 truncate text-sm font-medium">{profile.name}</p>
                   </div>
-                  {profile.provider && (
-                    <Badge
-                      variant="outline"
-                      className={platformColors[profile.provider.toLowerCase()] ?? ''}
-                    >
-                      {profile.provider}
-                    </Badge>
-                  )}
+                  {profile.networks.length > 0 && <PlatformBadges platforms={profile.networks} />}
                 </div>
               ))}
             </div>

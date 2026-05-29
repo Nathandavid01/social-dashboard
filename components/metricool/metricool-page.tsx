@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { isConfigured, getStoredConfig, saveConfig } from '@/lib/metricool/client'
 import { MetricoolSetup } from './metricool-setup'
 import { MetricoolDashboard } from './metricool-dashboard'
+import type { CachedMetricoolProfile } from '@/lib/actions/metricool-profiles'
 
 const DEFAULT_CONFIG = {
   userToken: 'ZTHVWXJOYRYXTRNHGEQSYJDKFAYSPTQCXTILGYIJBTGMMUGDTYOTPNVXSHMLGBZG',
@@ -11,7 +12,7 @@ const DEFAULT_CONFIG = {
   blogId: '5062650',
 }
 
-export function MetricoolPage() {
+export function MetricoolPage({ cachedProfiles = [] }: { cachedProfiles?: CachedMetricoolProfile[] }) {
   const [connected, setConnected] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -34,5 +35,5 @@ export function MetricoolPage() {
     )
   }
 
-  return <MetricoolDashboard onDisconnect={() => setConnected(false)} />
+  return <MetricoolDashboard onDisconnect={() => setConnected(false)} cachedProfiles={cachedProfiles} />
 }
