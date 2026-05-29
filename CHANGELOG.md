@@ -4,6 +4,25 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.5 — 2026-05-29
+
+### Pipeline de videos por cliente (en Video QC)
+- Cada cliente aparece con su logo y un **grid de tarjetas de video**: estado, idea, caption, assets compartidos, fechas (grabación/publicación) y **botón de aprobación**.
+- Slots de subida a la nube (Cloudflare R2): **4 crudos · 4 b-roll · 2 editados** (mínimos, ampliables).
+
+### Progreso por etapa visible
+- El flujo de cada idea muestra el avance por etapa con **conteos** (ej. Material 1/4), una **barra de progreso** con "qué falta", y **chips de etapa** en cada tarjeta de video.
+
+### Logo del cliente y preview de video
+- El **logo de la empresa** aparece en cada tarjeta (con iniciales como respaldo).
+- Botón **"Ver"** para reproducir el video directamente desde el flujo, sin descargarlo.
+
+### "Planning" ahora es "Workflow"
+- Se renombró la sección del sidebar para reflejar que ahí sucede todo el flujo de trabajo.
+
+### Administración de usuarios en Equipo (solo Owner)
+- El Owner puede **editar nombre y título**, **activar/desactivar** usuarios (los inactivos no pueden entrar) y cambiar su rol, todo desde la página de Equipo.
+
 ## v1.4 — 2026-05-29
 
 ### Configurar la cadencia desde Planning
