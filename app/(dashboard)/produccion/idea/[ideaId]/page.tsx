@@ -70,8 +70,8 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <Link href="/ideacion" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
-            <ArrowLeft className="h-3 w-3" /> Ideación
+          <Link href="/planning" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-3 w-3" /> Workflow
           </Link>
           <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight">
             {idea.title}

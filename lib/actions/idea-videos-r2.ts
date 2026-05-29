@@ -107,7 +107,7 @@ export async function registerR2Video(input: {
   })
 
   revalidatePath(`/produccion/idea/${input.ideaId}`)
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { ok: true, id: data.id }
 }
 

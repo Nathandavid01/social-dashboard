@@ -51,6 +51,7 @@ export type Permission =
   | 'activity.read'
   | 'planning.read'
   | 'planning.act'
+  | 'planning.assign'
   // Team & admin
   | 'team.read'
   | 'team.assign_roles'
@@ -86,7 +87,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'activity.read',
-    'planning.read', 'planning.act',
+    'planning.read', 'planning.act', 'planning.assign',
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',

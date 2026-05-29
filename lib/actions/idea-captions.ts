@@ -98,7 +98,7 @@ TAREA: Escribe UN caption completo para este video, alineado con el hook y el á
     await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platform } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
-    revalidatePath('/ideacion')
+    revalidatePath('/planning')
     return { ok: true, caption }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al generar caption' }
@@ -130,6 +130,6 @@ export async function saveIdeaCaption(
   await logIdeaActivity(supabase, { ideaId, action: 'caption_saved', metadata: { platform: platform ?? null } })
 
   revalidatePath(`/produccion/idea/${ideaId}`)
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { ok: true }
 }

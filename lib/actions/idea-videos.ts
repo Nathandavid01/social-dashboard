@@ -90,7 +90,7 @@ export async function registerIdeaVideo(input: {
     metadata: { kind: input.kind, name: input.name },
   })
 
-  revalidatePath(`/ideacion`)
+  revalidatePath('/planning')
   revalidatePath(`/produccion`)
   return { ok: true, id: data.id }
 }
@@ -108,7 +108,7 @@ export async function deleteIdeaVideo(id: string): Promise<{ ok?: true; error?: 
     .update({ status: 'archived' })
     .eq('id', id)
   if (error) return { error: error.message }
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { ok: true }
 }
 

@@ -26,7 +26,7 @@ interface Props {
   idea: ContentIdea
   profiles: Pick<Profile, 'id' | 'full_name'>[]
   onClose: () => void
-  onAssigned: (updated: ContentIdea) => void
+  onAssigned: (updated: ContentIdea & { assignee?: Pick<Profile, 'id' | 'full_name'> | null }) => void
 }
 
 function defaultPublishDate(): string {
@@ -66,7 +66,8 @@ export function AssignToProductionModal({ idea, profiles, onClose, onAssigned }:
         return
       }
       toast({ title: 'Idea asignada a producción', description: 'Verás la tarea en /produccion' })
-      onAssigned({ ...idea, status: 'asignada', production_task_id: result.taskId ?? null })
+      const assignee = assignedToId === 'unassigned' ? null : profiles.find((p) => p.id === assignedToId) ?? null
+      onAssigned({ ...idea, status: 'asignada', production_task_id: result.taskId ?? null, assignee })
     })
   }
 

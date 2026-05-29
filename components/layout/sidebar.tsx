@@ -141,8 +141,8 @@ export function Sidebar({
       {/* Logo */}
       <div className="flex items-center gap-2 border-b border-border px-6 py-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-512.svg" alt="NMedia" className="h-8 w-8 rounded-lg" />
-        <span className="text-lg font-bold tracking-tight">Nate Media</span>
+        <img src="/icons/icon-512.svg" alt="Nate Media" className="h-8 w-8 rounded-lg" />
+        <span className="text-lg font-bold tracking-tight">Nate <span className="text-primary">Media</span></span>
         {isPending && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-muted-foreground" />}
       </div>
 
