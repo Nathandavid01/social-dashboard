@@ -11,7 +11,7 @@ import { ClientHero } from '@/components/clients/profile/client-hero'
 import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
 import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
 import { fetchClientCaptions } from '@/lib/utils/client-captions'
-import { PipelineFlowTable } from '@/components/clients/profile/pipeline-flow-table'
+import { PipelineFlowBoard } from '@/components/clients/profile/pipeline-flow-board'
 import { OverviewTab } from '@/components/clients/profile/tabs/overview-tab'
 import { BrandTab } from '@/components/clients/profile/tabs/brand-tab'
 import { ContractTab } from '@/components/clients/profile/tabs/contract-tab'
@@ -111,7 +111,7 @@ export default async function ClientDetailPage({
     .eq('client_id', id)
     .neq('status', 'descartada')
     .order('created_at', { ascending: false })
-  const flowSlot = <PipelineFlowTable ideas={(allIdeas ?? []) as unknown as ContentIdea[]} />
+  const flowSlot = <PipelineFlowBoard ideas={(allIdeas ?? []) as unknown as ContentIdea[]} />
 
   const captionsResult = client.metricool_blog_id
     ? await fetchClientCaptions(client.metricool_blog_id, client.name)
