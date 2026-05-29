@@ -354,6 +354,7 @@ export interface ProductionTask {
 
 export type ContentIdeaType = 'R' | 'P' | 'C' | 'S'
 export type ContentIdeaStatus = 'idea' | 'asignada' | 'grabada' | 'producida' | 'publicada' | 'descartada'
+export type IdeaApprovalStatus = 'pending' | 'submitted' | 'approved' | 'revision_needed'
 
 export interface ContentIdea {
   id: string
@@ -375,6 +376,12 @@ export interface ContentIdea {
   caption_platform: string | null
   caption_generated_at: string | null
   published_at: string | null
+  approval_status: IdeaApprovalStatus
+  approved_by: string | null
+  approved_at: string | null
+  submitted_at: string | null
+  recording_date: string | null
+  publish_date: string | null
   created_by: string | null
   created_at: string
   updated_at: string

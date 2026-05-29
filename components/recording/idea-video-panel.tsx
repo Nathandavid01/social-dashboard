@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink } from 'lucide-react'
+import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -29,20 +29,88 @@ function formatBytes(n: number | null): string {
   return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
+const MIN_SLOTS: Record<ContentIdeaVideoKind, number> = { raw: 4, broll: 4, edited: 2 }
+
 export function IdeaVideoPanel({ ideaId, videos }: Props) {
   const canUpload = useHasPermission('video.upload')
-  const raw = videos.find((v) => v.kind === 'raw' && v.status === 'uploaded')
-  const edited = videos.find((v) => v.kind === 'edited' && v.status === 'uploaded')
-  const brolls = videos.filter((v) => v.kind === 'broll' && v.status === 'uploaded')
+  const uploaded = videos.filter((v) => v.status === 'uploaded')
+  const rawVideos = uploaded.filter((v) => v.kind === 'raw')
+  const brollVideos = uploaded.filter((v) => v.kind === 'broll')
+  const editedVideos = uploaded.filter((v) => v.kind === 'edited')
+  const hasRaw = rawVideos.length > 0
 
   return (
-    <div className="space-y-2.5">
-      <Slot kind="raw" ideaId={ideaId} video={raw} canUpload={canUpload} />
+    <div className="space-y-5">
+      <SlotGroup kind="raw" ideaId={ideaId} videos={rawVideos} canUpload={canUpload} />
+      <SlotGroup kind="broll" ideaId={ideaId} videos={brollVideos} canUpload={canUpload} />
+      <SlotGroup
+        kind="edited"
+        ideaId={ideaId}
+        videos={editedVideos}
+        canUpload={canUpload}
+        disabledReason={!hasRaw ? 'Sube el video crudo primero' : undefined}
+      />
+    </div>
+  )
+}
 
-      {brolls.map((b) => <Slot key={b.id} kind="broll" ideaId={ideaId} video={b} canUpload={canUpload} />)}
-      {canUpload && <Slot kind="broll" ideaId={ideaId} video={undefined} canUpload={canUpload} />}
+function SlotGroup({
+  kind, ideaId, videos, canUpload, disabledReason,
+}: {
+  kind: ContentIdeaVideoKind
+  ideaId: string
+  videos: ContentIdeaVideo[]
+  canUpload: boolean
+  disabledReason?: string
+}) {
+  const meta = META[kind]
+  const Icon = meta.icon
+  const min = MIN_SLOTS[kind]
+  // Extra empty slots the user explicitly added beyond the minimum.
+  const [extra, setExtra] = useState(0)
 
-      <Slot kind="edited" ideaId={ideaId} video={edited} canUpload={canUpload} disabledReason={!raw ? 'Sube el video crudo primero' : undefined} />
+  // Minimum visible empty slots so the group always shows at least `min` rows.
+  const minEmpties = Math.max(0, min - videos.length)
+  const emptyCount = minEmpties + extra
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-x-3">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <Icon className="h-3.5 w-3.5" /> {meta.label}
+          <span className="tabular-nums font-normal normal-case text-muted-foreground/70">
+            {videos.length}/{min}
+          </span>
+        </p>
+      </div>
+
+      <div className="space-y-2.5">
+        {videos.map((v) => (
+          <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} />
+        ))}
+        {Array.from({ length: emptyCount }).map((_, i) => (
+          <Slot
+            key={`empty-${i}`}
+            kind={kind}
+            ideaId={ideaId}
+            video={undefined}
+            canUpload={canUpload}
+            disabledReason={disabledReason}
+          />
+        ))}
+      </div>
+
+      {canUpload && (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          onClick={() => setExtra((n) => n + 1)}
+          className="h-8 text-xs text-muted-foreground hover:text-primary"
+        >
+          <Plus className="mr-1 h-3.5 w-3.5" /> Agregar más {meta.label.toLowerCase()}
+        </Button>
+      )}
     </div>
   )
 }
