@@ -13,12 +13,15 @@ import { cn, formatDate } from '@/lib/utils'
 import { STATUS_META, type ClientWorkflowProgress, type WorkflowStepStatus } from '@/lib/utils/workflow-types'
 import { dayLabelsShort } from '@/lib/utils/posting-cadence'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
+import { ClientSchedule, type ScheduleTask } from './client-schedule'
 
 interface Props {
   rows: ClientWorkflowProgress[]
   pipelines?: Record<string, ClientPipeline>
   /** Posts actually published this week per client (from Metricool). */
   postedByClient?: Record<string, number>
+  /** Upcoming production tasks (next 2 weeks) per client. */
+  schedulesByClient?: Record<string, ScheduleTask[]>
 }
 
 const STATUS_ICONS = {
@@ -28,7 +31,7 @@ const STATUS_ICONS = {
   listo:     CheckCircle2,
 } as const
 
-export function PlanningBoard({ rows, pipelines = {}, postedByClient = {} }: Props) {
+export function PlanningBoard({ rows, pipelines = {}, postedByClient = {}, schedulesByClient = {} }: Props) {
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState(false)
 
@@ -113,10 +116,10 @@ export function PlanningBoard({ rows, pipelines = {}, postedByClient = {} }: Pro
       {/* Groups */}
       <div className="space-y-4">
         {(['ideas', 'reagendar', 'agendar'] as const).map((s) =>
-          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} pipelines={pipelines} postedByClient={postedByClient} /> : null,
+          groups[s].length > 0 ? <ClientGroup key={s} status={s} rows={groups[s]} pipelines={pipelines} postedByClient={postedByClient} schedulesByClient={schedulesByClient} /> : null,
         )}
         {groups.listo.length > 0 && (
-          <ClientGroup status="listo" rows={groups.listo} pipelines={pipelines} postedByClient={postedByClient} collapsedDefault={collapsed} />
+          <ClientGroup status="listo" rows={groups.listo} pipelines={pipelines} postedByClient={postedByClient} schedulesByClient={schedulesByClient} collapsedDefault={collapsed} />
         )}
       </div>
     </div>
@@ -146,12 +149,14 @@ function ClientGroup({
   rows,
   pipelines,
   postedByClient,
+  schedulesByClient,
   collapsedDefault,
 }: {
   status: WorkflowStepStatus
   rows: ClientWorkflowProgress[]
   pipelines: Record<string, ClientPipeline>
   postedByClient: Record<string, number>
+  schedulesByClient: Record<string, ScheduleTask[]>
   collapsedDefault?: boolean
 }) {
   const [open, setOpen] = useState(!collapsedDefault)
@@ -181,7 +186,7 @@ function ClientGroup({
         <CardContent className="space-y-0 p-0">
           <ul className="divide-y">
             {rows.map((r, i) => (
-              <ClientRow key={r.clientId} row={r} index={i} pipe={pipelines[r.clientId]} posted={postedByClient[r.clientId]} />
+              <ClientRow key={r.clientId} row={r} index={i} pipe={pipelines[r.clientId]} posted={postedByClient[r.clientId]} schedule={schedulesByClient[r.clientId]} />
             ))}
           </ul>
         </CardContent>
@@ -190,40 +195,55 @@ function ClientGroup({
   )
 }
 
-function ClientRow({ row, index, pipe, posted }: { row: ClientWorkflowProgress; index: number; pipe?: ClientPipeline; posted?: number }) {
+function ClientRow({ row, index, pipe, posted, schedule }: { row: ClientWorkflowProgress; index: number; pipe?: ClientPipeline; posted?: number; schedule?: ScheduleTask[] }) {
   const meta = STATUS_META[row.status]
+  const [open, setOpen] = useState(false)
   return (
     <li
-      className="flex flex-wrap items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40 animate-in fade-in slide-in-from-left-1 duration-300"
+      className="px-4 py-3 transition-colors hover:bg-muted/40 animate-in fade-in slide-in-from-left-1 duration-300"
       style={{ animationDelay: `${Math.min(index * 25, 600)}ms`, animationFillMode: 'backwards' }}
     >
-      <div className="min-w-0 flex-1">
-        <Link href={`/clients/${row.clientId}`} className="block truncate font-medium hover:text-primary">
-          {row.clientName}
-        </Link>
-        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-          {row.postingDays.length > 0 ? (
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {row.postingDays.map((d) => dayLabelsShort[d]).join(', ')}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <Link href={`/clients/${row.clientId}`} className="block truncate font-medium hover:text-primary">
+            {row.clientName}
+          </Link>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+            {row.postingDays.length > 0 ? (
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {row.postingDays.map((d) => dayLabelsShort[d]).join(', ')}
+              </span>
+            ) : (
+              <span>Sin días configurados</span>
+            )}
+            <span>
+              Ideas <strong className={cn('tabular-nums', row.ideaCount >= row.ideasTarget ? 'text-green-500' : 'text-foreground')}>
+                {row.ideaCount}/{row.ideasTarget}
+              </strong>
             </span>
-          ) : (
-            <span>Sin días configurados</span>
-          )}
-          <span>
-            Ideas <strong className={cn('tabular-nums', row.ideaCount >= row.ideasTarget ? 'text-green-500' : 'text-foreground')}>
-              {row.ideaCount}/{row.ideasTarget}
-            </strong>
-          </span>
-          {row.nextSessionAt && <span>Próxima: <strong className="text-foreground">{formatDate(row.nextSessionAt)}</strong></span>}
-          {!row.nextSessionAt && row.lastSessionAt && <span>Última: <strong className="text-foreground">{formatDate(row.lastSessionAt)}</strong></span>}
+            {row.nextSessionAt && <span>Próxima: <strong className="text-foreground">{formatDate(row.nextSessionAt)}</strong></span>}
+            {!row.nextSessionAt && row.lastSessionAt && <span>Última: <strong className="text-foreground">{formatDate(row.lastSessionAt)}</strong></span>}
+          </div>
+          <PipelineStrip pipe={pipe} posted={posted} />
         </div>
-        <PipelineStrip pipe={pipe} posted={posted} />
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <Calendar className="h-3.5 w-3.5" /> Plan 2 sem
+          {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
+        <div className={cn('shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap', meta.tone)}>
+          {meta.label}
+        </div>
+        <ActionButton row={row} />
       </div>
-      <div className={cn('shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap', meta.tone)}>
-        {meta.label}
-      </div>
-      <ActionButton row={row} />
+      {open && (
+        <div className="mt-2 rounded-lg border bg-muted/20 animate-in fade-in slide-in-from-top-1 duration-200">
+          <ClientSchedule postingDays={row.postingDays} tasks={schedule ?? []} />
+        </div>
+      )}
     </li>
   )
 }

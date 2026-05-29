@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.3 — 2026-05-29
+
+### Plan de 2 semanas por cliente (toggable) en Planning
+- Cada cliente tiene un botón **"Plan 2 sem"** que despliega una tabla con los slots de posteo de las próximas 2 semanas (según su cadencia + cualquier video ya programado).
+- Cada slot muestra el día, el tipo (Reel/Post), y la **idea del video** si ya está asignada; los vacíos marcan **"Falta video"**.
+- Botón **Caption** por slot que genera el caption a partir de la idea del video (voz de marca del cliente). Requiere `ANTHROPIC_API_KEY`.
+
 ## v1.2 — 2026-05-28
 
 ### Ritmo semanal con datos reales de Metricool
