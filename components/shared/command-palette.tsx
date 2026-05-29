@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Search, LayoutDashboard, Users, Inbox, Film, Globe, UserSquare2, Sparkles } from 'lucide-react'
+import { Search, LayoutDashboard, Users, Inbox, Film, Globe, UserSquare2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SearchResult {
@@ -179,7 +179,6 @@ export function CommandPalette() {
               { label: 'Bandeja de Clientes', href: '/inbox', icon: Inbox },
               { label: 'Video QC', href: '/video-reviews', icon: Film },
               { label: 'Publicados', href: '/published', icon: Globe },
-              { label: 'Captions AI', href: '/captions', icon: Sparkles },
               { label: 'Equipo', href: '/team', icon: UserSquare2 },
             ].map((item) => (
               <button

@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { navItems } from './nav-items'
-import { Zap, Eye, EyeOff, GripVertical, Settings2, Check, RotateCcw, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2 } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
@@ -58,6 +58,43 @@ export function Sidebar({
   const [hidden, setHidden] = useState<Set<string>>(initial.hidden)
   const [dragHref, setDragHref] = useState<string | null>(null)
 
+  // Long-press (press & hold) to enter reorder mode — works for mouse and touch.
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pressStart = useRef<{ x: number; y: number } | null>(null)
+  const suppressClick = useRef(false)
+
+  function clearLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    pressStart.current = null
+  }
+
+  function startLongPress(e: React.PointerEvent) {
+    if (editing) return
+    pressStart.current = { x: e.clientX, y: e.clientY }
+    clearTimeoutOnly()
+    longPressTimer.current = setTimeout(() => {
+      setEditing(true)
+      suppressClick.current = true
+    }, 450)
+  }
+
+  function clearTimeoutOnly() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
+
+  function onPressMove(e: React.PointerEvent) {
+    if (!pressStart.current) return
+    const dx = Math.abs(e.clientX - pressStart.current.x)
+    const dy = Math.abs(e.clientY - pressStart.current.y)
+    if (dx > 8 || dy > 8) clearLongPress()
+  }
+
   const itemsByHref = useMemo(() => new Map(navItems.map((n) => [n.href, n])), [])
 
   function persist(next: { order: string[]; hidden: string[] }) {
@@ -102,10 +139,9 @@ export function Sidebar({
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r border-border bg-card lg:flex">
       {/* Logo */}
       <div className="flex items-center gap-2 border-b border-border px-6 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <Zap className="h-4 w-4 text-primary-foreground" />
-        </div>
-        <span className="text-lg font-bold tracking-tight">NMedia</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icons/icon-512.svg" alt="NMedia" className="h-8 w-8 rounded-lg" />
+        <span className="text-lg font-bold tracking-tight">Nate Media</span>
         {isPending && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-muted-foreground" />}
       </div>
 
@@ -196,7 +232,20 @@ export function Sidebar({
           }
 
           return (
-            <Link key={item.href} href={item.href}>
+            <Link
+              key={item.href}
+              href={item.href}
+              onPointerDown={startLongPress}
+              onPointerMove={onPressMove}
+              onPointerUp={clearLongPress}
+              onPointerLeave={clearLongPress}
+              onClick={(e) => {
+                if (suppressClick.current) {
+                  e.preventDefault()
+                  suppressClick.current = false
+                }
+              }}
+            >
               {itemEl}
             </Link>
           )
@@ -228,12 +277,9 @@ export function Sidebar({
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setEditing(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <Settings2 className="h-3.5 w-3.5" /> Editar menú
-          </button>
+          <p className="text-center text-[10px] text-muted-foreground/70">
+            Mantén presionado un ítem para reordenar
+          </p>
         )}
         <p className="text-center text-[10px] text-muted-foreground">NMedia PR</p>
       </div>

@@ -34,11 +34,10 @@ export function Topbar({
         <button
           onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', metaKey: true, bubbles: true }))}
           className="hidden sm:flex h-8 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-xs text-muted-foreground hover:bg-muted transition-colors"
-          title="Buscar (⌘P)"
+          title="Buscar"
         >
           <Search className="h-3.5 w-3.5" />
           <span>Buscar...</span>
-          <kbd className="ml-1 text-[10px] bg-background rounded px-1">⌘P</kbd>
         </button>
         {currentUser && (
           <NotificationBell
