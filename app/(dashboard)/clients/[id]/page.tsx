@@ -11,6 +11,7 @@ import { ClientHero } from '@/components/clients/profile/client-hero'
 import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
 import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
 import { fetchClientCaptions } from '@/lib/utils/client-captions'
+import { PipelineFlowTable } from '@/components/clients/profile/pipeline-flow-table'
 import { OverviewTab } from '@/components/clients/profile/tabs/overview-tab'
 import { BrandTab } from '@/components/clients/profile/tabs/brand-tab'
 import { ContractTab } from '@/components/clients/profile/tabs/contract-tab'
@@ -21,7 +22,7 @@ import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-but
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
 import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
 
-const VALID_TABS: ClientTabKey[] = ['overview', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
+const VALID_TABS: ClientTabKey[] = ['overview', 'flujo', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
 
 export default async function ClientDetailPage({
   params,
@@ -103,6 +104,14 @@ export default async function ClientDetailPage({
       /* proceed without posts */
     }
   }
+
+  const { data: allIdeas } = await supabase
+    .from('content_ideas')
+    .select('*')
+    .eq('client_id', id)
+    .neq('status', 'descartada')
+    .order('created_at', { ascending: false })
+  const flowSlot = <PipelineFlowTable ideas={(allIdeas ?? []) as unknown as ContentIdea[]} />
 
   const captionsResult = client.metricool_blog_id
     ? await fetchClientCaptions(client.metricool_blog_id, client.name)
@@ -257,6 +266,7 @@ export default async function ClientDetailPage({
       <ClientTabs
         defaultTab={defaultTab}
         overview={<OverviewTab client={client} pipeline={pipeline} />}
+        flujo={flowSlot}
         brand={<BrandTab client={client} />}
         contract={<ContractTab client={client} />}
         billing={<BillingTab client={client} payments={paymentsList} />}
