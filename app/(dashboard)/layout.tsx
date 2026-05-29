@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Topbar } from '@/components/layout/topbar'
@@ -31,6 +32,12 @@ export default async function DashboardLayout({
       .single()
     profile = data as Profile | null
     role = profile?.role ?? null
+
+    // Deactivated accounts are locked out of the entire dashboard.
+    if (profile && profile.status === 'inactive') {
+      await supabase.auth.signOut()
+      redirect('/login?deactivated=1')
+    }
   }
 
   const authUser = user ? { id: user.id, email: user.email ?? '' } : null
