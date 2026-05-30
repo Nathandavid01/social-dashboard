@@ -6,7 +6,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
-import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
+import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
+import { r2Client, r2Bucket, isR2Configured, r2PublicUrl } from '@/lib/integrations/r2'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 function slugify(name: string): string {
@@ -98,6 +99,13 @@ export async function registerR2Video(input: {
     metadata: { kind: input.kind, name: input.name, provider: 'r2' },
   })
 
+  // Ping the client's manager (or owners) that material landed — best-effort.
+  await notifyVideoUploaded(supabase, {
+    ideaId: input.ideaId,
+    kind: input.kind,
+    uploaderId: user?.id ?? null,
+  })
+
   revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/ideacion')
   return { ok: true, id: data.id }
@@ -133,6 +141,39 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error generando URL de descarga' }
   }
+}
+
+/**
+ * Permanent, public URL for a video — used by consumers that need a stable,
+ * non-expiring link (e.g. Metricool's media normalize step), unlike the 1h
+ * presigned GET URL.
+ *
+ * Only FINAL (`edited`) videos may be exposed publicly. Raw footage and b-roll
+ * stay private and return an error here — this is the app-level half of the
+ * guard; the Cloudflare Worker (infra/r2-public-edited-worker.js) enforces the
+ * same `/edited/` restriction at the edge so the bucket itself never goes
+ * fully public. Requires public access configured + R2_PUBLIC_BASE_URL set.
+ */
+export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider, kind')
+    .eq('id', videoId)
+    .single()
+  if (error || !video) return { error: 'Video no encontrado' }
+  if (video.storage_provider !== 'r2' || !video.drive_file_id) {
+    return { error: 'Este video no está en R2' }
+  }
+  if (video.kind !== 'edited') {
+    return { error: 'Solo los videos finales (editados) pueden hacerse públicos' }
+  }
+
+  const url = r2PublicUrl(video.drive_file_id)
+  if (!url) {
+    return { error: 'Acceso público no configurado (falta habilitarlo en Cloudflare + R2_PUBLIC_BASE_URL)' }
+  }
+  return { url }
 }
 
 /** Presigned GET URL for inline playback (no attachment), usable as a <video src>. */

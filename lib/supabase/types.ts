@@ -392,6 +392,13 @@ export interface ContentIdea {
   production_task?: Pick<ProductionTask, 'id' | 'status' | 'publish_date'> | null
 }
 
+/** A content idea enriched for the Ideación pipeline rows view. */
+export interface IdeaWithPipeline extends ContentIdea {
+  recordingScheduled: boolean
+  videos: ContentIdeaVideo[]
+  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms'>>) | null
+}
+
 export type ContentIdeaActivityAction =
   | 'recorded'
   | 'caption_generated'

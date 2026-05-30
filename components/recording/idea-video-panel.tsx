@@ -14,6 +14,8 @@ interface Props {
   ideaTitle?: string
   videos: ContentIdeaVideo[]
   compact?: boolean
+  /** True when R2 public access is configured (edited videos served publicly). */
+  publicEnabled?: boolean
 }
 
 const META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon: typeof Camera; tone: string }> = {
@@ -29,9 +31,17 @@ function formatBytes(n: number | null): string {
   return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
+/** Upload time, e.g. "2 jun, 3:42 p. m." — so it's clear WHEN the video landed. */
+function formatUploadedAt(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
 const MIN_SLOTS: Record<ContentIdeaVideoKind, number> = { raw: 4, broll: 4, edited: 2 }
 
-export function IdeaVideoPanel({ ideaId, videos }: Props) {
+export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
   const canUpload = useHasPermission('video.upload')
   const uploaded = videos.filter((v) => v.status === 'uploaded')
   const rawVideos = uploaded.filter((v) => v.kind === 'raw')
@@ -41,26 +51,63 @@ export function IdeaVideoPanel({ ideaId, videos }: Props) {
 
   return (
     <div className="space-y-5">
-      <SlotGroup kind="raw" ideaId={ideaId} videos={rawVideos} canUpload={canUpload} />
-      <SlotGroup kind="broll" ideaId={ideaId} videos={brollVideos} canUpload={canUpload} />
+      <SlotGroup kind="raw" ideaId={ideaId} videos={rawVideos} canUpload={canUpload} publicEnabled={publicEnabled} />
+      <SlotGroup kind="broll" ideaId={ideaId} videos={brollVideos} canUpload={canUpload} publicEnabled={publicEnabled} />
       <SlotGroup
         kind="edited"
         ideaId={ideaId}
         videos={editedVideos}
         canUpload={canUpload}
+        publicEnabled={publicEnabled}
         disabledReason={!hasRaw ? 'Sube el video crudo primero' : undefined}
       />
     </div>
   )
 }
 
+/**
+ * Per-video status pill so it's clear what's in R2 at a glance: uploaded /
+ * processing / failed / archived, plus a "Público" tag for final (edited)
+ * videos when public access is configured.
+ */
+const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+  uploaded:   { label: 'Subido',     cls: 'bg-green-500/15 text-green-600 border-green-500/30' },
+  uploading:  { label: 'Subiendo',   cls: 'bg-blue-500/15 text-blue-600 border-blue-500/30' },
+  processing: { label: 'Procesando', cls: 'bg-amber-500/15 text-amber-600 border-amber-500/30' },
+  failed:     { label: 'Falló',      cls: 'bg-red-500/15 text-red-600 border-red-500/30' },
+  archived:   { label: 'Archivado',  cls: 'bg-muted text-muted-foreground border-border' },
+}
+
+function VideoStatusBadges({
+  video, kind, publicEnabled,
+}: {
+  video: ContentIdeaVideo
+  kind: ContentIdeaVideoKind
+  publicEnabled: boolean
+}) {
+  const badge = STATUS_BADGE[video.status] ?? STATUS_BADGE.uploaded
+  const isR2 = video.storage_provider === 'r2'
+  const isPublic = isR2 && kind === 'edited' && publicEnabled && video.status === 'uploaded'
+  const pill = 'rounded border px-1.5 py-0.5 text-[10px] font-medium'
+  return (
+    <span className="mt-1 flex flex-wrap items-center gap-1">
+      <span className={cn(pill, badge.cls)}>{badge.label}</span>
+      <span className={cn(pill, 'bg-muted text-muted-foreground border-border')}>{isR2 ? 'R2' : 'Drive'}</span>
+      {isPublic && (
+        <span className={cn(pill, 'bg-purple-500/15 text-purple-600 border-purple-500/30')}>Público</span>
+      )}
+    </span>
+  )
+}
+
 function SlotGroup({
-  kind, ideaId, videos, canUpload, disabledReason,
+  kind, ideaId, videos, canUpload, publicEnabled, disabledReason,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
   videos: ContentIdeaVideo[]
   canUpload: boolean
+  publicEnabled: boolean
   disabledReason?: string
 }) {
   const meta = META[kind]
@@ -86,7 +133,7 @@ function SlotGroup({
 
       <div className="space-y-2.5">
         {videos.map((v) => (
-          <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} />
+          <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} publicEnabled={publicEnabled} />
         ))}
         {Array.from({ length: emptyCount }).map((_, i) => (
           <Slot
@@ -95,6 +142,7 @@ function SlotGroup({
             ideaId={ideaId}
             video={undefined}
             canUpload={canUpload}
+            publicEnabled={publicEnabled}
             disabledReason={disabledReason}
           />
         ))}
@@ -116,12 +164,13 @@ function SlotGroup({
 }
 
 function Slot({
-  kind, ideaId, video, canUpload, disabledReason,
+  kind, ideaId, video, canUpload, publicEnabled, disabledReason,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
   video: ContentIdeaVideo | undefined
   canUpload: boolean
+  publicEnabled: boolean
   disabledReason?: string
 }) {
   const meta = META[kind]
@@ -224,7 +273,11 @@ function Slot({
             <Icon className="h-3 w-3" /> {meta.label}
           </p>
           <p className="truncate text-sm font-medium">{video.name}</p>
-          <p className="text-xs text-muted-foreground">{formatBytes(video.size_bytes)}{isR2 ? ' · R2' : ''}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatBytes(video.size_bytes)}
+            {video.uploaded_at ? ` · subido ${formatUploadedAt(video.uploaded_at)}` : ''}
+          </p>
+          <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {isR2 && (

@@ -143,6 +143,41 @@ describe('IdeaVideoPanel — "Agregar más" appends a slot', () => {
   })
 })
 
+describe('IdeaVideoPanel — per-video status badges', () => {
+  it('shows a "Subido" badge and the R2 storage tag for an uploaded R2 video', () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    expect(screen.getByText('Subido')).toBeInTheDocument()
+    expect(screen.getAllByText('R2').length).toBeGreaterThan(0)
+  })
+
+  it('shows a "Público" badge ONLY for edited videos when public access is enabled', () => {
+    const videos = [makeVideo('raw', 0), makeVideo('edited', 0)]
+    render(<IdeaVideoPanel ideaId="idea-1" videos={videos} publicEnabled />)
+    // One Público badge — the edited one; the raw video is not public.
+    expect(screen.getAllByText('Público')).toHaveLength(1)
+  })
+
+  it('does NOT show "Público" when public access is disabled', () => {
+    const videos = [makeVideo('edited', 0)]
+    render(<IdeaVideoPanel ideaId="idea-1" videos={videos} publicEnabled={false} />)
+    expect(screen.queryByText('Público')).not.toBeInTheDocument()
+  })
+
+  it('does NOT mark a Drive-stored edited video as Público', () => {
+    const driveEdited = { ...makeVideo('edited', 0), storage_provider: 'drive' as const, drive_view_link: 'https://drive/x' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), driveEdited]} publicEnabled />)
+    expect(screen.queryByText('Público')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Drive').length).toBeGreaterThan(0)
+  })
+
+  it('shows the upload time of an uploaded video', () => {
+    const v = { ...makeVideo('edited', 0), uploaded_at: '2026-06-02T15:42:00.000Z' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), v]} />)
+    // "subido <fecha/hora>" appears for the uploaded video.
+    expect(screen.getAllByText(/subido/i).length).toBeGreaterThan(0)
+  })
+})
+
 describe('IdeaVideoPanel — permission gating', () => {
   it('does not render upload dropzones or "Agregar más" when the user lacks video.upload', () => {
     canUpload = false
