@@ -1,36 +1,55 @@
 /**
- * IdeaBriefCard — the collapsible "La idea" section on the idea detail page.
- * Once the idea is generated (hook + brief present) it starts collapsed so the
- * page stays compact; the header toggles it open.
+ * IdeaBriefCard — the editable "La idea" step-1 card on the idea detail page.
+ * Collapses once generated; fields (hook, brief, caption angle, hashtags) and the
+ * publish date are editable inline and persist via server actions.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
+
+const updateIdeaBrief = vi.fn(async () => ({ success: true as const }))
+const updateIdeaDates = vi.fn(async () => ({ success: true as const }))
+vi.mock('@/lib/actions/content-ideas', () => ({
+  updateIdeaBrief: (...a: unknown[]) => updateIdeaBrief(...(a as [])),
+  updateIdeaDates: (...a: unknown[]) => updateIdeaDates(...(a as [])),
+}))
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+
 import { IdeaBriefCard } from './idea-brief-card'
 
-beforeEach(cleanup)
+beforeEach(() => {
+  cleanup()
+  updateIdeaBrief.mockClear()
+  updateIdeaDates.mockClear()
+})
 
 describe('IdeaBriefCard', () => {
   it('always shows the "La idea" title', () => {
-    render(<IdeaBriefCard hook="h" visualBrief="b" />)
+    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" />)
     expect(screen.getByText('La idea')).toBeInTheDocument()
   })
 
-  it('starts collapsed when the idea is generated (hook + brief), hiding the fields', () => {
-    render(<IdeaBriefCard hook="Mi hook" visualBrief="Mi brief visual" />)
-    // collapsed → field values not visible yet
+  it('starts collapsed when generated (hook + brief), hiding the fields', () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Mi hook" visualBrief="Mi brief" />)
     expect(screen.queryByText('Mi hook')).toBeNull()
-    expect(screen.queryByText('Mi brief visual')).toBeNull()
   })
 
-  it('expands to reveal the fields when the header is clicked', () => {
-    render(<IdeaBriefCard hook="Mi hook" visualBrief="Mi brief visual" />)
-    fireEvent.click(screen.getByRole('button', { name: /la idea/i }))
-    expect(screen.getByText('Mi hook')).toBeInTheDocument()
-    expect(screen.getByText('Mi brief visual')).toBeInTheDocument()
+  it('expands and persists an edited field via updateIdeaBrief', async () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Mi hook" visualBrief="Mi brief" />)
+    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
+    fireEvent.click(screen.getByRole('button', { name: /editar hook/i }))
+    const input = screen.getByLabelText('Hook')
+    fireEvent.change(input, { target: { value: 'Nuevo hook' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(updateIdeaBrief).toHaveBeenCalledWith('i1', { hook: 'Nuevo hook' }))
   })
 
-  it('starts expanded when there is no brief yet (not generated)', () => {
-    render(<IdeaBriefCard hook={null} visualBrief={null} />)
-    expect(screen.getByText(/Sin brief adicional/)).toBeInTheDocument()
+  it('persists the publish date via updateIdeaDates', async () => {
+    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" publishDate={null} />)
+    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
+    fireEvent.click(screen.getByRole('button', { name: /editar fecha de publicación/i }))
+    const input = screen.getByLabelText('Fecha de publicación')
+    fireEvent.change(input, { target: { value: '2026-06-10' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(updateIdeaDates).toHaveBeenCalledWith('i1', { publish_date: '2026-06-10' }))
   })
 })

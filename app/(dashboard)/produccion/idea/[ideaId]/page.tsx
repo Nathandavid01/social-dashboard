@@ -94,10 +94,12 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
 
       {/* Stage 1: Idea brief (collapsible once generated) */}
       <IdeaBriefCard
+        ideaId={ideaId}
         hook={idea.hook}
         visualBrief={idea.visual_brief}
         captionAngle={idea.caption_angle}
         hashtags={idea.hashtags_suggestion}
+        publishDate={idea.publish_date}
       />
 
       {/* Stage 2: Caption */}

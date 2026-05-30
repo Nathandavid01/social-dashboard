@@ -233,6 +233,29 @@ export async function updateIdeaDates(
   return { success: true }
 }
 
+/**
+ * Update editable idea brief fields (hook, visual brief, caption angle, hashtags).
+ * Only the provided keys are written. Used by the inline editor on the idea
+ * workspace's step-1 card.
+ */
+export async function updateIdeaBrief(
+  ideaId: string,
+  fields: Partial<{ hook: string | null; visual_brief: string | null; caption_angle: string | null; hashtags_suggestion: string | null }>,
+) {
+  const supabase = await createClient()
+  const allowed: Record<string, string | null> = {}
+  for (const k of ['hook', 'visual_brief', 'caption_angle', 'hashtags_suggestion'] as const) {
+    if (k in fields) allowed[k] = (fields[k] ?? '') === '' ? null : (fields[k] as string)
+  }
+  if (Object.keys(allowed).length === 0) return { success: true }
+
+  const { error } = await supabase.from('content_ideas').update(allowed).eq('id', ideaId)
+  if (error) return { error: error.message }
+  revalidatePath('/planning')
+  revalidatePath(`/produccion/idea/${ideaId}`)
+  return { success: true }
+}
+
 // ── Manual idea creation (no AI) ─────────────────────────────────────────────
 
 export async function createContentIdeaManual(input: {
