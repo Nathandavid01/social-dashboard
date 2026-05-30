@@ -5,16 +5,19 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 vi.mock('@/components/clients/client-logo', () => ({ ClientLogo: () => <div data-testid="logo" /> }))
 
-// Inline date editing calls this server action; bulk selection uses toast on error.
+// Inline date editing + reassign call these server actions.
 const updateIdeaDates = vi.fn(async () => ({ success: true as const }))
+const reassignVideo = vi.fn(async () => ({ success: true as const }))
 vi.mock('@/lib/actions/content-ideas', () => ({
   updateIdeaDates: (...a: unknown[]) => updateIdeaDates(...(a as [])),
+  reassignVideo: (...a: unknown[]) => reassignVideo(...(a as [])),
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 
 beforeEach(() => {
   cleanup()
   updateIdeaDates.mockClear()
+  reassignVideo.mockClear()
 })
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -162,6 +165,28 @@ describe('IdeaRow assignee', () => {
   it('shows Asignar (not an assignee) on an unassigned idea', () => {
     render(<ClientIdeasRows ideas={[idea({ id: 'y', title: 'Pendiente', status: 'idea' })]} onAssign={vi.fn()} />)
     expect(screen.getByText(/Asignar/)).toBeInTheDocument()
+  })
+})
+
+describe('IdeaRow reassign', () => {
+  const assignedIdea = () =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idea({ id: 'i9', title: 'Asignada', status: 'asignada', production_task_id: 'pt-9', assignee: { id: 'p1', full_name: 'Nathan Torres' } } as any)
+  const profiles = [{ id: 'p1', full_name: 'Nathan Torres' }, { id: 'p2', full_name: 'María Vega' }]
+
+  it('lets a permitted user change the assigned person via the chip', async () => {
+    const onReassigned = vi.fn()
+    render(<ClientIdeasRows ideas={[assignedIdea()]} canAssign profiles={profiles} onReassigned={onReassigned} />)
+    fireEvent.click(screen.getByRole('button', { name: /reasignar/i }))
+    fireEvent.change(screen.getByLabelText('Reasignar persona'), { target: { value: 'p2' } })
+    await waitFor(() => expect(reassignVideo).toHaveBeenCalledWith('pt-9', 'p2'))
+    await waitFor(() => expect(onReassigned).toHaveBeenCalledWith('i9', { id: 'p2', full_name: 'María Vega' }))
+  })
+
+  it('does not offer reassign without permission', () => {
+    render(<ClientIdeasRows ideas={[assignedIdea()]} canAssign={false} profiles={profiles} />)
+    expect(screen.queryByRole('button', { name: /reasignar/i })).toBeNull()
+    expect(screen.getByText('Nathan Torres')).toBeInTheDocument() // still shows who it's assigned to
   })
 })
 

@@ -248,6 +248,8 @@ export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, int
             onToggleGroup={toggleGroup}
             onDatesSaved={handleDatesSaved}
             onAssign={(idea) => setAssigningIdea(idea)}
+            profiles={profiles}
+            onReassigned={(id, assignee) => handleIdeaUpdate({ ...(ideas.find((i) => i.id === id) as ContentIdea), assignee })}
           />
         ))}
         {visibleClients.length === 0 && (
@@ -272,7 +274,7 @@ export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, int
 }
 
 function ClientCard({
-  client, logoUrl, ideas, index, intervalWeeks, canAssign, selectedIds, onToggleSelect, onToggleGroup, onDatesSaved, onAssign,
+  client, logoUrl, ideas, index, intervalWeeks, canAssign, selectedIds, onToggleSelect, onToggleGroup, onDatesSaved, onAssign, profiles, onReassigned,
 }: {
   client: ClientWorkflowProgress
   logoUrl: string | null
@@ -285,6 +287,8 @@ function ClientCard({
   onToggleGroup: (ids: string[], select: boolean) => void
   onDatesSaved: (id: string, dates: IdeaDates) => void
   onAssign: (idea: IdeaWithPipeline) => void
+  profiles: Pick<Profile, 'id' | 'full_name'>[]
+  onReassigned: (id: string, assignee: Pick<Profile, 'id' | 'full_name'> | null) => void
 }) {
   const meta = STATUS_META[client.status]
   // Only surface the ideas needed for the next `intervalWeeks` of recording.
@@ -350,6 +354,8 @@ function ClientCard({
                 onToggleSelect={onToggleSelect}
                 onDatesSaved={onDatesSaved}
                 canAssign={canAssign}
+                profiles={profiles}
+                onReassigned={onReassigned}
               />
             ))}
           </div>

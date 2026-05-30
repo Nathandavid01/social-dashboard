@@ -18,9 +18,11 @@ import { IdeaStatusBar } from './idea-status-bar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { computeIdeaPipeline } from '@/lib/utils/idea-pipeline-stages'
 import { nextAction } from '@/lib/utils/next-action'
-import { updateIdeaDates } from '@/lib/actions/content-ideas'
+import { updateIdeaDates, reassignVideo } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
 import type { IdeaWithPipeline, ContentIdeaType } from '@/lib/supabase/types'
+
+export type PersonOption = { id: string; full_name: string | null }
 
 const TYPE_LABEL: Record<ContentIdeaType, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
 const TYPE_TONE: Record<ContentIdeaType, string> = {
@@ -79,6 +81,10 @@ interface ClientIdeasRowsProps {
   canAssign?: boolean
   /** Show a "next action" badge per video (what to do now). Default false. */
   showNextAction?: boolean
+  /** People that an assigned video can be reassigned to (enables inline reassign). */
+  profiles?: PersonOption[]
+  /** Called after a video is reassigned so the parent can update its state. */
+  onReassigned?: (id: string, assignee: PersonOption | null) => void
 }
 
 export function ClientIdeasRows({
@@ -91,6 +97,8 @@ export function ClientIdeasRows({
   onDatesSaved,
   canAssign = true,
   showNextAction = false,
+  profiles,
+  onReassigned,
 }: ClientIdeasRowsProps) {
   const groups = groupByClient(ideas)
 
@@ -138,6 +146,8 @@ export function ClientIdeasRows({
                     onDatesSaved={onDatesSaved}
                     canAssign={canAssign}
                     showNextAction={showNextAction}
+                    profiles={profiles}
+                    onReassigned={onReassigned}
                   />
                 ))}
               </div>
@@ -160,14 +170,35 @@ export interface IdeaRowProps {
   canAssign?: boolean
   /** Show a "next action" badge (what to do now). Default false. */
   showNextAction?: boolean
+  profiles?: PersonOption[]
+  onReassigned?: (id: string, assignee: PersonOption | null) => void
 }
 
-export function IdeaRow({ idea, onAssign, selectable, selected, onToggleSelect, onDatesSaved, canAssign = true, showNextAction = false }: IdeaRowProps) {
+export function IdeaRow({ idea, onAssign, selectable, selected, onToggleSelect, onDatesSaved, canAssign = true, showNextAction = false, profiles, onReassigned }: IdeaRowProps) {
   const { toast } = useToast()
   const [editing, setEditing] = useState(false)
   const [recording, setRecording] = useState(toInputDate(idea.recording_date))
   const [publish, setPublish] = useState(toInputDate(idea.publish_date))
   const [isPending, startTransition] = useTransition()
+  const [reassigning, setReassigning] = useState(false)
+  const [, startReassign] = useTransition()
+
+  const canReassign = canAssign && !!profiles?.length && !!idea.production_task_id
+
+  function saveReassign(value: string) {
+    const newId = value || null
+    startReassign(async () => {
+      const res = await reassignVideo(idea.production_task_id as string, newId)
+      if (res.error) {
+        toast({ title: 'Error', description: res.error, variant: 'destructive' })
+        return
+      }
+      const person = newId ? profiles!.find((p) => p.id === newId) ?? null : null
+      onReassigned?.(idea.id, person)
+      setReassigning(false)
+      toast({ title: person ? `Reasignado a ${person.full_name ?? 'alguien'}` : 'Sin asignar' })
+    })
+  }
 
   const pipeline = computeIdeaPipeline({
     idea,
@@ -301,18 +332,53 @@ export function IdeaRow({ idea, onAssign, selectable, selected, onToggleSelect, 
           <Send className="mr-1 h-3.5 w-3.5" /> Asignar
         </Button>
       ) : idea.assignee ? (
-        <span
-          className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
-          title={`Asignado a ${idea.assignee.full_name ?? 'alguien'}`}
-        >
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={idea.assignee.avatar_url ?? undefined} alt={idea.assignee.full_name ?? ''} />
-            <AvatarFallback className="bg-primary/15 text-[9px] font-semibold text-primary">
-              {initials(idea.assignee.full_name)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="hidden max-w-[100px] truncate sm:inline">{idea.assignee.full_name ?? 'Asignado'}</span>
-        </span>
+        reassigning ? (
+          <div className="flex shrink-0 items-center gap-1">
+            <select
+              aria-label="Reasignar persona"
+              defaultValue={idea.assignee.id}
+              onChange={(e) => saveReassign(e.target.value)}
+              className="h-8 rounded border border-input bg-background px-1.5 text-xs"
+            >
+              <option value="">Sin asignar</option>
+              {profiles!.map((p) => (
+                <option key={p.id} value={p.id}>{p.full_name ?? p.id}</option>
+              ))}
+            </select>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setReassigning(false)} aria-label="Cancelar">
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : canReassign ? (
+          <button
+            type="button"
+            onClick={() => setReassigning(true)}
+            aria-label={`Reasignar ${idea.assignee.full_name ?? 'persona'}`}
+            title="Reasignar"
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-1 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={idea.assignee.avatar_url ?? undefined} alt={idea.assignee.full_name ?? ''} />
+              <AvatarFallback className="bg-primary/15 text-[9px] font-semibold text-primary">
+                {initials(idea.assignee.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden max-w-[100px] truncate sm:inline">{idea.assignee.full_name ?? 'Asignado'}</span>
+          </button>
+        ) : (
+          <span
+            className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
+            title={`Asignado a ${idea.assignee.full_name ?? 'alguien'}`}
+          >
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={idea.assignee.avatar_url ?? undefined} alt={idea.assignee.full_name ?? ''} />
+              <AvatarFallback className="bg-primary/15 text-[9px] font-semibold text-primary">
+                {initials(idea.assignee.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden max-w-[100px] truncate sm:inline">{idea.assignee.full_name ?? 'Asignado'}</span>
+          </span>
+        )
       ) : null}
     </div>
   )

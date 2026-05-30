@@ -173,6 +173,25 @@ export async function saveContentIdea(input: {
   return { idea: data as ContentIdea }
 }
 
+/**
+ * Reassign an already-assigned video to a different person (or unassign).
+ * Updates the linked production task's assignee. Permission-gated.
+ */
+export async function reassignVideo(productionTaskId: string, assigneeId: string | null) {
+  if (!(await currentUserHas('planning.assign'))) {
+    return { error: 'No tienes permiso para reasignar videos.' }
+  }
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('production_tasks')
+    .update({ assigned_to_id: assigneeId })
+    .eq('id', productionTaskId)
+  if (error) return { error: error.message }
+  revalidatePath('/planning')
+  revalidatePath('/team')
+  return { success: true }
+}
+
 export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
   const supabase = await createClient()
   const { error } = await supabase.from('content_ideas').update({ status }).eq('id', id)
