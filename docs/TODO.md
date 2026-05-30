@@ -7,7 +7,7 @@ Tracked work not yet done. Each is implemented **test-first (TDD)** when unblock
 - [x] Make the **"La idea"** section collapsible (collapse once generated). — `IdeaBriefCard`
 - [x] **Stage pills** fit on one screen (no h-scroll); done stages collapse to icon. — `pipeline-timeline.tsx`
 - [x] Stage dialog has a **"Trabajar en este paso →"** link to the workspace anchored at that stage. — `idea-status-bar.tsx`
-- [ ] **Caption**: generate with AI **automatically and simultaneously per chosen social network** (one caption per platform in `client.default_platforms`), not a single platform. Needs schema for per-platform captions + multi-call generation. *Product decision: store where? `content_idea_captions` table?*
+- [~] **Caption per social network** in step 1 (one caption per chosen platform, AI-generated simultaneously + editable). Migration **`0030_content_idea_captions.sql`** written (table `content_idea_captions`). **BLOCKED**: apply 0030 in Supabase, then build the per-platform caption editor (uses `InlineEdit`) + a `generateCaptionsForPlatforms` action that fans out per `client.default_platforms`. Editable step-1 card (date + brief) is already done; this is the caption upgrade on top.
 - [ ] **Video Editado** section (`idea-video-panel.tsx`): add an **assign-to-person** control.
 
 ## Workflow (`/planning`)
