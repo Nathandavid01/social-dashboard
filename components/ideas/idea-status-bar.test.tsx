@@ -52,4 +52,17 @@ describe('IdeaStatusBar', () => {
     fireEvent.click(screen.getAllByTestId('stage-segment')[3]) // Grabación
     expect(screen.getByText('El material fue grabado y está en el buffer.')).toBeInTheDocument()
   })
+
+  it('offers a "work on this step" link to the idea workspace when ideaId is given', () => {
+    render(<IdeaStatusBar pipeline={pipeline} ideaId="abc" />)
+    fireEvent.click(screen.getAllByTestId('stage-segment')[1]) // Caption
+    const link = screen.getByRole('link', { name: /trabajar en este paso/i })
+    expect(link).toHaveAttribute('href', '/produccion/idea/abc#stage-caption')
+  })
+
+  it('does not show the work link without an ideaId', () => {
+    render(<IdeaStatusBar pipeline={pipeline} />)
+    fireEvent.click(screen.getAllByTestId('stage-segment')[1])
+    expect(screen.queryByRole('link', { name: /trabajar en este paso/i })).toBeNull()
+  })
 })

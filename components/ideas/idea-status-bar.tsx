@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import Link from 'next/link'
+import { Check, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -19,6 +20,17 @@ const STAGE_INFO: Record<PipelineStageKey, string> = {
   published: 'El video fue publicado en redes.',
 }
 
+/** Anchor on the idea workspace page where you act on each stage. */
+const STAGE_ANCHOR: Record<PipelineStageKey, string> = {
+  idea: '#stage-idea',
+  caption: '#stage-caption',
+  scheduled: '#stage-material',
+  recorded: '#stage-material',
+  edited: '#stage-material',
+  approval: '#stage-assets',
+  published: '#stage-assets',
+}
+
 function stageState(pipeline: IdeaPipeline, index: number): 'done' | 'current' | 'pending' {
   if (pipeline.stages[index].done) return 'done'
   if (index === pipeline.currentIndex) return 'current'
@@ -34,7 +46,7 @@ const STATE_TONE = {
 
 /** Segmented status bar: one segment per pipeline stage. Clicking a segment
  * opens a dialog with details for that stage and the full pipeline. */
-export function IdeaStatusBar({ pipeline, title }: { pipeline: IdeaPipeline; title?: string }) {
+export function IdeaStatusBar({ pipeline, title, ideaId }: { pipeline: IdeaPipeline; title?: string; ideaId?: string }) {
   const { stages, currentIndex, completed } = pipeline
   const current = currentIndex < stages.length ? stages[currentIndex] : null
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -107,6 +119,15 @@ export function IdeaStatusBar({ pipeline, title }: { pipeline: IdeaPipeline; tit
                   )
                 })}
               </ol>
+
+              {ideaId && (
+                <Link
+                  href={`/produccion/idea/${ideaId}${STAGE_ANCHOR[stages[openIndex].key]}`}
+                  className="mt-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform hover:scale-[1.02]"
+                >
+                  Trabajar en este paso <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
             </>
           )}
         </DialogContent>

@@ -288,7 +288,7 @@ export function IdeaRow({ idea, onAssign, selectable, selected, onToggleSelect, 
       )}
 
       <div className="w-full shrink-0 sm:w-64">
-        <IdeaStatusBar pipeline={pipeline} title={idea.title || undefined} />
+        <IdeaStatusBar pipeline={pipeline} title={idea.title || undefined} ideaId={idea.id} />
       </div>
 
       {onAssign && isAssignable && canAssign ? (
