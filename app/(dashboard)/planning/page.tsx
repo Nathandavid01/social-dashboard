@@ -6,7 +6,7 @@ import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { getMetricoolWeeklyPostsByClient } from '@/lib/utils/metricool-weekly'
 import { createClient } from '@/lib/supabase/server'
-import type { ScheduleTask } from '@/components/planning/client-schedule'
+import type { ScheduleTask, ScheduleIdeaFields } from '@/components/planning/client-schedule'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -30,13 +30,15 @@ async function PlanningData() {
   ])
 
   const ideaIds = Array.from(new Set((tasks ?? []).map((t) => t.idea_id).filter(Boolean))) as string[]
-  const ideaMap = new Map<string, { title: string; generated_caption: string | null }>()
+  const ideaMap = new Map<string, { title: string } & ScheduleIdeaFields>()
   if (ideaIds.length) {
     const { data: ideas } = await supabase
       .from('content_ideas')
-      .select('id, title, generated_caption')
+      .select('id, title, generated_caption, hook, visual_brief, status, approval_status, published_at, recording_session_id, recording_date')
       .in('id', ideaIds)
-    for (const i of ideas ?? []) ideaMap.set(i.id, { title: i.title, generated_caption: i.generated_caption })
+    for (const i of ideas ?? []) {
+      ideaMap.set(i.id, i as unknown as { title: string } & ScheduleIdeaFields)
+    }
   }
 
   const schedulesByClient: Record<string, ScheduleTask[]> = {}
@@ -48,6 +50,7 @@ async function PlanningData() {
       ideaTitle: idea?.title ?? null,
       contentType: t.content_type,
       hasCaption: !!idea?.generated_caption,
+      idea: idea ?? null,
     })
   }
 
