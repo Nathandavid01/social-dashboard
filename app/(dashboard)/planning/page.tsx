@@ -4,7 +4,9 @@ import { WorkflowBoard } from '@/components/planning/workflow-board'
 import { NateLoader } from '@/components/shared/nate-loader'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
+import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { resolveInterval } from '@/lib/utils/recording-window'
+import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { createClient } from '@/lib/supabase/server'
 import type { Client, Profile } from '@/lib/supabase/types'
 
@@ -14,7 +16,7 @@ export const revalidate = 0
 async function WorkflowData() {
   const supabase = await createClient()
 
-  const [{ rows }, ideas, { data: clients }, { data: profiles }, intervalRes] = await Promise.all([
+  const [{ rows }, ideas, { data: clients }, { data: profiles }, intervalRes, metricoolPics] = await Promise.all([
     getWorkflowProgress(),
     getIdeacionPipeline({ limit: 300 }),
     supabase
@@ -26,11 +28,22 @@ async function WorkflowData() {
     // Resilient: this column may not exist yet (migration 0029). On error the
     // query returns { data: null } and every client falls back to the default.
     supabase.from('clients').select('id, recording_interval_weeks').eq('status', 'active'),
+    // Brand pictures from Metricool ({} when not configured → falls back to initials).
+    getMetricoolPicturesByBlogId(),
   ])
+
+  const clientRows = (clients ?? []) as Client[]
 
   const intervalByClient: Record<string, number> = {}
   for (const r of (intervalRes?.data ?? []) as { id: string; recording_interval_weeks: number | null }[]) {
     intervalByClient[r.id] = resolveInterval(r.recording_interval_weeks)
+  }
+
+  // Effective logo per client: uploaded logo_url first, else the Metricool brand picture.
+  const logoByClient: Record<string, string | null> = {}
+  for (const c of clientRows) {
+    const pic = c.metricool_blog_id ? metricoolPics[String(c.metricool_blog_id)] : undefined
+    logoByClient[c.id] = resolveClientLogo(c.logo_url, pic)
   }
 
   return (
@@ -38,8 +51,9 @@ async function WorkflowData() {
       clients={rows}
       initialIdeas={ideas}
       profiles={(profiles ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
-      clientList={(clients ?? []) as Client[]}
+      clientList={clientRows}
       intervalByClient={intervalByClient}
+      logoByClient={logoByClient}
     />
   )
 }

@@ -34,6 +34,8 @@ interface Props {
   clientList: Client[]
   /** Per-client recording interval (weeks). Missing → default. */
   intervalByClient?: Record<string, number>
+  /** Effective logo URL per client (uploaded logo or Metricool picture). */
+  logoByClient?: Record<string, string | null>
 }
 
 const STATUS_OPTIONS: { value: 'all' | 'open' | ContentIdeaStatus; label: string }[] = [
@@ -62,7 +64,7 @@ function getMondayOfWeek(dateStr: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, intervalByClient = {} }: Props) {
+export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, intervalByClient = {}, logoByClient: logoByClientProp }: Props) {
   const { toast } = useToast()
   const canAssign = useHasPermission('planning.assign')
   const [ideas, setIdeas] = useState<IdeaWithPipeline[]>(initialIdeas)
@@ -94,10 +96,11 @@ export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, int
   }, [clients, search])
 
   const logoByClient = useMemo(() => {
+    if (logoByClientProp) return logoByClientProp
     const map: Record<string, string | null> = {}
     for (const c of clientList) map[c.id] = c.logo_url ?? null
     return map
-  }, [clientList])
+  }, [logoByClientProp, clientList])
 
   function handleIdeasGenerated(newIdeas: ContentIdea[]) {
     const enriched: IdeaWithPipeline[] = newIdeas.map((i) => ({ ...i, recordingScheduled: false, videos: [] }))
