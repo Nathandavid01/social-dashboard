@@ -76,11 +76,14 @@ export function VideoCard({
   assetCount = 0,
   clientName,
   clientLogoUrl,
+  accentColor,
 }: {
   video: PipelineVideo
   assetCount?: number
   clientName?: string | null
   clientLogoUrl?: string | null
+  /** Client brand color, applied as a left accent so cross-client cards stand out. */
+  accentColor?: string | null
 }) {
   const { toast } = useToast()
   const typeCfg = TYPE_CONFIG[video.content_type] ?? TYPE_CONFIG.R
@@ -107,7 +110,9 @@ export function VideoCard({
         'focus-within:border-primary/40',
         'animate-in fade-in slide-in-from-bottom-1 duration-300',
         video.status === 'descartada' && 'opacity-60',
+        accentColor && 'border-l-[3px]',
       )}
+      style={accentColor ? { borderLeftColor: accentColor } : undefined}
     >
       {/* Card-wide navigation overlay. Sits behind interactive children (z-10) so
           chips/buttons stay clickable and we avoid nesting <a>/<button> inside <a>. */}

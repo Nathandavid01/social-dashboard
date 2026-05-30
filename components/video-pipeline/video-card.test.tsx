@@ -373,3 +373,17 @@ describe('VideoCard — client logo', () => {
     expect(screen.getByText('AC')).toBeInTheDocument()
   })
 })
+
+describe('VideoCard — brand-color accent (client identity)', () => {
+  it('applies the client brand color as a left accent when provided', () => {
+    const { container } = render(<VideoCard video={makeVideoCard()} accentColor="#3E64DE" />)
+    const root = container.firstChild as HTMLElement
+    expect(root).toHaveStyle({ borderLeftColor: '#3E64DE' })
+  })
+
+  it('has no inline left-accent color when none is provided', () => {
+    const { container } = render(<VideoCard video={makeVideoCard()} />)
+    const root = container.firstChild as HTMLElement
+    expect(root.style.borderLeftColor).toBe('')
+  })
+})
