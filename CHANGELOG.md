@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.9 — 2026-05-29
+
+### Color de marca por cliente en el pipeline de videos
+- Cada tarjeta de video lleva ahora un **acento con el color de marca del cliente** (borde izquierdo). Así, en la vista de Video QC, las tarjetas de un cliente se distinguen de un vistazo y salta a la vista si una es de otro cliente — refuerza el evitar mezclar contenido entre clientes.
+
 ## v1.8 — 2026-05-29
 
 ### Confirmación al aprobar (anti-cliente-equivocado)
