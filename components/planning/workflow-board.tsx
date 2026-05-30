@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Calendar, Lightbulb, Search,
+  Calendar, Search,
   Send, Loader2, X, Plus, Filter, Film,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
@@ -22,6 +22,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { GenerateIdeasModal } from '@/components/ideas/generate-ideas-modal'
 import { AssignToProductionModal } from '@/components/ideas/assign-to-production-modal'
 import { InlineDayPicker } from './inline-day-picker'
+import { WorkflowStats } from './workflow-stats'
 import { STATUS_META, type ClientWorkflowProgress } from '@/lib/utils/workflow-types'
 import { recordingWindowSize, DEFAULT_RECORDING_INTERVAL_WEEKS } from '@/lib/utils/recording-window'
 import type { ContentIdea, IdeaWithPipeline, Client, Profile, ContentIdeaStatus } from '@/lib/supabase/types'
@@ -179,16 +180,12 @@ export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, int
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm">
-          <Lightbulb className="h-4 w-4 text-primary" />
-          <span className="font-medium">{stats.total} ideas</span>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-muted-foreground">{stats.idea} pendientes</span>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-muted-foreground">{stats.asignada + stats.producida} en flujo</span>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-green-600">{stats.publicada} publicadas</span>
-        </div>
+        <WorkflowStats
+          total={stats.total}
+          pendientes={stats.idea}
+          enFlujo={stats.asignada + stats.producida}
+          publicadas={stats.publicada}
+        />
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
