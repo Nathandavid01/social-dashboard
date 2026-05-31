@@ -55,3 +55,21 @@ describe('VideoPipelineRow', () => {
     expect(screen.getByText('Sin caption')).toBeInTheDocument()
   })
 })
+
+describe('VideoPipelineRow — brand-color accent (client identity)', () => {
+  it('applies the client brand color as a left accent on the first cell', () => {
+    const { container } = render(
+      <table><tbody><VideoPipelineRow video={video()} assetCount={0} accentColor="#3E64DE" /></tbody></table>,
+    )
+    const firstCell = container.querySelector('td')
+    expect(firstCell).toHaveStyle({ borderLeftColor: '#3E64DE' })
+  })
+
+  it('has no inline left-accent color when none is provided', () => {
+    const { container } = render(
+      <table><tbody><VideoPipelineRow video={video()} assetCount={0} /></tbody></table>,
+    )
+    const firstCell = container.querySelector('td') as HTMLElement
+    expect(firstCell.style.borderLeftColor).toBe('')
+  })
+})
