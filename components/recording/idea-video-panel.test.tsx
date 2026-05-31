@@ -199,3 +199,13 @@ describe('IdeaVideoPanel — inline preview', () => {
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
   })
 })
+
+describe('IdeaVideoPanel — multi-file upload', () => {
+  it('every upload input accepts multiple files', () => {
+    canUpload = true
+    const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    const inputs = container.querySelectorAll('input[type="file"]')
+    expect(inputs.length).toBeGreaterThan(0)
+    inputs.forEach((input) => expect(input).toHaveAttribute('multiple'))
+  })
+})

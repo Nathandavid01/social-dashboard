@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Film, ImageIcon, Palette, Type, FolderOpen, Download } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn, platformColors, platformLabels } from '@/lib/utils'
-import { VideoCard } from './video-card'
+import { VideoPipelineTable } from './video-pipeline-table'
 import { ClientLogo } from '@/components/clients/client-logo'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { ClientAsset, ClientAssetKind, SocialPlatform } from '@/lib/supabase/types'
@@ -88,18 +88,12 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              assetCount={assets.length}
-              clientName={client.name}
-              clientLogoUrl={client.logo_url}
-              accentColor={primaryColor}
-            />
-          ))}
-        </div>
+        <VideoPipelineTable
+          videos={videos}
+          assetCount={assets.length}
+          clientName={client.name}
+          clientLogoUrl={client.logo_url}
+        />
       )}
     </section>
   )
