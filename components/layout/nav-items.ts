@@ -18,7 +18,8 @@ import {
   Settings,
   type LucideIcon,
 } from 'lucide-react'
-import type { Permission } from '@/lib/auth/permissions'
+import { hasPermission, type Permission } from '@/lib/auth/permissions'
+import type { UserRole } from '@/lib/supabase/types'
 
 export interface NavItem {
   href: string
@@ -47,3 +48,12 @@ export const navItems: NavItem[] = [
   { href: '/automation',          label: 'Automatización',  icon: Zap,             permission: 'automation.read' },
   { href: '/settings/workflow',   label: 'Configuración',   icon: Settings,        permission: 'settings.edit' },
 ]
+
+/**
+ * Nav items the given role may see: an item shows when it has no `permission`
+ * gate, or the role satisfies it (owner satisfies everything). Used by the
+ * sidebar to hide routes the role can't access.
+ */
+export function visibleNavItems(role: UserRole | null | undefined): NavItem[] {
+  return navItems.filter((n) => !n.permission || hasPermission(role, n.permission))
+}

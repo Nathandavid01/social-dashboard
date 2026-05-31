@@ -4,13 +4,12 @@ import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navItems } from './nav-items'
+import { navItems, visibleNavItems } from './nav-items'
 import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2 } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
 import { APP_VERSION } from '@/lib/version'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
-import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {
@@ -47,10 +46,7 @@ export function Sidebar({
   const [editing, setEditing] = useState(false)
 
   // Hide items the current role cannot access (independent of user prefs).
-  const allowedItems = useMemo(
-    () => navItems.filter((n) => !n.permission || hasPermission(role, n.permission)),
-    [role],
-  )
+  const allowedItems = useMemo(() => visibleNavItems(role), [role])
   const allowedHrefs = useMemo(() => new Set(allowedItems.map((n) => n.href)), [allowedItems])
 
   // Local working copy during edit mode (optimistic)
