@@ -48,6 +48,7 @@ export type Permission =
   | 'performance.read'
   | 'efficiency.read'
   | 'weekly_compliance.read'
+  | 'runway.read'
   | 'activity.read'
   | 'planning.read'
   | 'planning.act'
@@ -86,7 +87,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
-    'weekly_compliance.read', 'activity.read',
+    'weekly_compliance.read', 'runway.read', 'activity.read',
     'planning.read', 'planning.act', 'planning.assign',
     'team.read',
     'automation.read',

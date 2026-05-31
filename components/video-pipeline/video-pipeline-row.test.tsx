@@ -50,9 +50,11 @@ describe('VideoPipelineRow', () => {
     expect(screen.getByText('Mi caption')).toBeInTheDocument()
   })
 
-  it('shows "Sin caption" when there is no caption', () => {
+  it('does not render caption text when there is no caption', () => {
     row(video({ generated_caption: null }))
-    expect(screen.getByText('Sin caption')).toBeInTheDocument()
+    expect(screen.queryByText('Mi caption')).not.toBeInTheDocument()
+    // The row still renders the title.
+    expect(screen.getByRole('link', { name: /Promo del finde/i })).toBeInTheDocument()
   })
 })
 
