@@ -14,6 +14,7 @@ import {
   Send,
   ListChecks,
   CalendarClock,
+  Rocket,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -30,6 +31,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: '/home',                label: 'Inicio',          icon: Home },
+  { href: '/runway',              label: 'Runway',          icon: Rocket,          permission: 'runway.read' },
   { href: '/planning',            label: 'Workflow',        icon: ListChecks,      permission: 'planning.read' },
   { href: '/video-reviews',       label: 'Video QC',        icon: Film,            permission: 'video_reviews.read' },
   { href: '/posting',             label: 'Posting',         icon: Send,            permission: 'posting.read' },
