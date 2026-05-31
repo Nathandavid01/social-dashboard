@@ -9,6 +9,9 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 ### Color de marca por cliente en el pipeline de videos
 - Cada tarjeta de video lleva ahora un **acento con el color de marca del cliente** (borde izquierdo). Así, en la vista de Video QC, las tarjetas de un cliente se distinguen de un vistazo y salta a la vista si una es de otro cliente — refuerza el evitar mezclar contenido entre clientes.
 
+### Ideación como filas por cliente
+- La pantalla de **Ideación** ahora agrupa las ideas por cliente, cada una con una **barra de estado segmentada** que muestra en qué etapa va cada video (idea → agendada → grabada → producida → publicada). Más fácil ver el estado de todo un cliente de un vistazo.
+
 ## v1.8 — 2026-05-29
 
 ### Confirmación al aprobar (anti-cliente-equivocado)
