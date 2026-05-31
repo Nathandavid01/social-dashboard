@@ -20,18 +20,19 @@ interface Step {
   label: string
   value: number
   icon: LucideIcon
-  tone: string
+  tone: string          // full classes for the card border + text accent
+  iconBg: string        // classes for the icon circle background
   href: string
 }
 
 export function PipelineCard({ data, title, linkable, clientId }: Props) {
   const q = clientId ? `?client=${clientId}` : ''
   const steps: Step[] = [
-    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30', href: `/planning${q}` },
-    { key: 'porGrabar',   label: 'Por grabar',   value: data.porGrabar,    icon: Video,         tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30', href: `/recording-calendar${q}` },
-    { key: 'porEditar',   label: 'Por editar',   value: data.porEditar,    icon: Scissors,      tone: 'text-orange-500 bg-orange-500/10 border-orange-500/30', href: `/produccion${q}` },
-    { key: 'porPublicar', label: 'Por publicar', value: data.porPublicar,  icon: CalendarCheck, tone: 'text-blue-500 bg-blue-500/10 border-blue-500/30', href: `/posting${q}` },
-    { key: 'publicadas',  label: 'Publicados (sem)', value: data.publicadasSemana, icon: Send,  tone: 'text-green-500 bg-green-500/10 border-green-500/30', href: `/published${q}` },
+    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-600 bg-purple-500/10 border-purple-500/25', iconBg: 'bg-purple-500/15 text-purple-600', href: `/planning${q}` },
+    { key: 'porGrabar',   label: 'Por grabar',   value: data.porGrabar,    icon: Video,         tone: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/25',   iconBg: 'bg-cyan-500/15 text-cyan-600',   href: `/recording-calendar${q}` },
+    { key: 'porEditar',   label: 'Por editar',   value: data.porEditar,    icon: Scissors,      tone: 'text-orange-600 bg-orange-500/10 border-orange-500/25', iconBg: 'bg-orange-500/15 text-orange-600', href: `/produccion${q}` },
+    { key: 'porPublicar', label: 'Por publicar', value: data.porPublicar,  icon: CalendarCheck, tone: 'text-blue-600 bg-blue-500/10 border-blue-500/25',   iconBg: 'bg-blue-500/15 text-blue-600',   href: `/posting${q}` },
+    { key: 'publicadas',  label: 'Publicados (sem)', value: data.publicadasSemana, icon: Send,  tone: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/25', iconBg: 'bg-emerald-500/15 text-emerald-600', href: `/published${q}` },
   ]
 
   const weekPct = data.targetSemana > 0 ? Math.min((data.publicadasSemana / data.targetSemana) * 100, 100) : 0
@@ -45,43 +46,62 @@ export function PipelineCard({ data, title, linkable, clientId }: Props) {
         <CardTitle className="text-base">{title ?? 'Pipeline de contenido'}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        {/* Funnel */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+        {/* Funnel - Premium pipeline stages */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
           {steps.map((s, i) => {
             const inner = (
-              <>
-                <s.icon className="h-4 w-4" />
-                <p className="text-2xl font-bold tabular-nums">{s.value}</p>
-                <p className="text-[10px] text-center uppercase tracking-wide opacity-90 md:text-xs">{s.label}</p>
-              </>
+              <div className="flex flex-col items-center gap-2.5 text-center">
+                {/* Larger icon in colored circle */}
+                <div className={cn('rounded-full p-3 shadow-sm', s.iconBg)}>
+                  <s.icon className="h-6 w-6" />
+                </div>
+
+                {/* Dominant number */}
+                <div className="text-[42px] leading-none font-semibold tabular-nums tracking-[-2px] text-foreground">
+                  {s.value}
+                </div>
+
+                {/* Label */}
+                <div className="text-xs font-semibold tracking-[0.5px] text-foreground/70 uppercase">
+                  {s.label}
+                </div>
+              </div>
             )
+
             const nodeClass = cn(
-              'flex flex-col items-center gap-1 rounded-lg border p-3 transition-all hover:scale-[1.02] hover:-translate-y-0.5',
+              'group flex w-full flex-col items-center justify-center rounded-3xl border bg-background/70 p-5 transition-all duration-200',
+              'hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg',
               s.tone,
               'animate-in fade-in slide-in-from-bottom-1 duration-300',
-              linkable && 'cursor-pointer hover:shadow-md',
+              linkable && 'cursor-pointer active:scale-[0.985]',
             )
+
             return (
               <div key={s.key} className="relative">
                 {linkable ? (
-                  <Link href={s.href} className={nodeClass} style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}>
+                  <Link href={s.href} className={nodeClass} style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'backwards' }}>
                     {inner}
                   </Link>
                 ) : (
-                  <div className={nodeClass} style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}>
+                  <div className={nodeClass} style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'backwards' }}>
                     {inner}
                   </div>
                 )}
+
+                {/* Nicer connectors */}
                 {i < steps.length - 1 && (
-                  <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-muted-foreground/50 md:block" />
+                  <div className="absolute -right-3 top-1/2 hidden -translate-y-1/2 items-center justify-center md:flex">
+                    <div className="h-px w-5 bg-border" />
+                    <ArrowRight className="h-4 w-4 -ml-1 text-muted-foreground/50 group-hover:text-foreground/60 transition-colors" />
+                  </div>
                 )}
               </div>
             )
           })}
         </div>
 
-        {/* Progress vs target */}
-        <div className="space-y-3">
+        {/* Progress vs target — much stronger visual treatment */}
+        <div className="space-y-4 pt-1">
           <ProgressRow
             label="Esta semana"
             done={data.publicadasSemana}
@@ -110,28 +130,70 @@ function ProgressRow({ label, done, target, pct, deficit }: {
   deficit: number
 }) {
   const onTrack = target === 0 || done >= target
+
   const barColor = target === 0
-    ? 'bg-muted-foreground/30'
+    ? 'bg-muted-foreground/50'
     : onTrack
-      ? 'bg-green-500'
+      ? 'bg-emerald-500'
       : pct >= 50
-        ? 'bg-yellow-500'
+        ? 'bg-amber-500'
         : 'bg-red-500'
 
+  const hasTarget = target > 0
+
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium">{label}</span>
-        <span className="tabular-nums text-muted-foreground">
-          {target === 0 ? 'Sin target' : `${done}/${target}${deficit > 0 ? ` (faltan ${deficit})` : ' ✓'}`}
-        </span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-semibold text-foreground">{label}</span>
+
+        {hasTarget ? (
+          <div className="flex items-center gap-2 text-sm tabular-nums">
+            <span className="font-semibold text-foreground">
+              {done}
+            </span>
+            <span className="text-muted-foreground">/ {target}</span>
+
+            {deficit > 0 && (
+              <span className="ml-1 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-600">
+                Faltan {deficit}
+              </span>
+            )}
+            {deficit === 0 && (
+              <span className="ml-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
+                ¡Al día!
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">Sin target definido</span>
+        )}
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
+
+      {/* Much more prominent progress bar */}
+      <div className="relative h-3 overflow-hidden rounded-full bg-muted">
         <div
-          className={cn('h-full transition-all duration-700 ease-out', barColor)}
-          style={{ width: target === 0 ? '0%' : `${pct}%` }}
+          className={cn(
+            'h-full rounded-full transition-all duration-700 ease-out',
+            barColor
+          )}
+          style={{ width: hasTarget ? `${pct}%` : '0%' }}
         />
+
+        {/* Target marker line */}
+        {hasTarget && (
+          <div
+            className="absolute top-0 h-3 w-px bg-foreground/30"
+            style={{ left: `${Math.min(pct, 100)}%` }}
+          />
+        )}
       </div>
+
+      {hasTarget && (
+        <div className="flex justify-between text-[10px] text-muted-foreground">
+          <span>{pct}% completado</span>
+          <span>{target} objetivo</span>
+        </div>
+      )}
     </div>
   )
 }

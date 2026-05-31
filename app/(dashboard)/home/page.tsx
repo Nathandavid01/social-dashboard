@@ -1,13 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { KpiCard } from '@/components/performance/kpi-card'
 import { Card, CardContent } from '@/components/ui/card'
-import { TodaysPosts } from '@/components/home/todays-posts'
-import { WeekActivity } from '@/components/home/week-activity'
 import { QuickBriefingButton } from '@/components/home/quick-briefing-button'
 import { UrgentTaskList } from '@/components/home/urgent-task-list'
 import { TeamWorkload } from '@/components/home/team-workload'
 import { RecentCompletions } from '@/components/home/recent-completions'
-import { UpcomingSchedule } from '@/components/home/upcoming-schedule'
 import { GlobalPipelineSection } from '@/components/home/global-pipeline-section'
 import { PlanningBanner } from '@/components/home/planning-banner'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
@@ -40,7 +37,6 @@ export default async function HomePage() {
   const now = new Date()
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
-  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString()
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -50,8 +46,6 @@ export default async function HomePage() {
     { data: overdueTasks },
     { data: blockedTasks },
     { count: activeAlerts },
-    { count: completedThisWeek },
-    { data: completedTasksWeek },
     { count: pendingRequests },
     { count: pendingVideoReviews },
     { data: myTasks },
@@ -83,16 +77,6 @@ export default async function HomePage() {
       .eq('status', 'blocked')
       .order('priority', { ascending: true }),
     supabase.from('alerts').select('id', { count: 'exact', head: true }),
-    supabase
-      .from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'completed')
-      .gte('updated_at', weekStart),
-    supabase
-      .from('tasks')
-      .select('updated_at')
-      .eq('status', 'completed')
-      .gte('updated_at', weekStart),
     supabase
       .from('client_requests')
       .select('id', { count: 'exact', head: true })
@@ -138,22 +122,6 @@ export default async function HomePage() {
     else if (count <= 6) lowBufferCount++
   }
   const totalBufferAlert = criticalBufferCount + lowBufferCount
-
-  // Build per-day completion data for the last 7 days
-  const dayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + i)
-    return {
-      date: d.toISOString().slice(0, 10),
-      label: dayLabels[d.getDay()],
-      completed: 0,
-    }
-  })
-  for (const task of completedTasksWeek ?? []) {
-    const date = task.updated_at?.slice(0, 10)
-    const day = weekDays.find((d) => d.date === date)
-    if (day) day.completed++
-  }
 
   // Build team workload
   const nowIso2 = now.toISOString()
@@ -263,13 +231,8 @@ export default async function HomePage() {
       {/* Weekly posting compliance per client (live) — quota vs published */}
       {weeklyCompliance && <WeeklyComplianceCard data={weeklyCompliance} />}
 
-      {/* Activity Grid */}
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
-        <WeekActivity days={weekDays} />
-        <TodaysPosts />
-        <UpcomingSchedule />
-        <TeamWorkload members={teamWorkload} />
-      </div>
+      {/* Team workload */}
+      <TeamWorkload members={teamWorkload} />
 
       {/* Completions */}
       <RecentCompletions completions={(recentCompletions ?? []) as unknown as Parameters<typeof RecentCompletions>[0]['completions']} />

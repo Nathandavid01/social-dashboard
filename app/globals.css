@@ -49,6 +49,11 @@
     --input: 0 0% 15%;
     --ring: 43 80% 52%;
   }
+
+  /* Improve native date inputs in dark mode (reduce blue browser accents) */
+  .dark input[type="date"] {
+    color-scheme: dark;
+  }
 }
 
 @layer base {

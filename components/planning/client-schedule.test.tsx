@@ -26,7 +26,7 @@ beforeEach(() => cleanup())
 describe('ClientSchedule — row links to detail', () => {
   it('renders the idea title as a link to /produccion/idea/[ideaId]', () => {
     const tasks: ScheduleTask[] = [
-      { publishDate: '2026-06-02', ideaId: 'idea-42', ideaTitle: 'Promo del finde', contentType: 'R', hasCaption: false, idea: null },
+      { publishDate: '2026-06-02', ideaId: 'idea-42', ideaTitle: 'Promo del finde', contentType: 'R', hasCaption: false, pipeline: null },
     ]
     render(<ClientSchedule postingDays={[]} tasks={tasks} />)
     const link = screen.getByRole('link', { name: /promo del finde/i })
@@ -36,7 +36,7 @@ describe('ClientSchedule — row links to detail', () => {
   it('does NOT render a link for a "Falta video" slot (no idea)', () => {
     // A cadence day with no scheduled idea → "Falta video", not a link.
     const tasks: ScheduleTask[] = [
-      { publishDate: '2026-06-02', ideaId: 'idea-42', ideaTitle: 'Promo', contentType: 'R', hasCaption: false, idea: null },
+      { publishDate: '2026-06-02', ideaId: 'idea-42', ideaTitle: 'Promo', contentType: 'R', hasCaption: false, pipeline: null },
     ]
     // postingDays includes a weekday that produces extra empty slots.
     render(<ClientSchedule postingDays={[0, 1, 2, 3, 4, 5, 6]} tasks={tasks} />)
@@ -54,16 +54,9 @@ describe('ClientSchedule — per-row status column', () => {
     ideaTitle: 'Promo',
     contentType: 'R',
     hasCaption: false,
-    idea: {
-      hook: 'h',
-      visual_brief: 'b',
-      generated_caption: null,
-      status: 'idea',
-      approval_status: 'pending',
-      published_at: null,
-      recording_session_id: null,
-      recording_date: null,
-    },
+    pipeline: {
+      stages: Array.from({ length: 7 }, (_, i) => ({ key: `s${i}`, label: `Stage ${i}`, done: i < 3 })),
+    } as any,
   }
 
   it('renders a 7-segment status bar for a slot that has an idea', () => {

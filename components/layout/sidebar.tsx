@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navItems } from './nav-items'
+import { navItems, visibleNavItems } from './nav-items'
 import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
 import { APP_VERSION } from '@/lib/version'
@@ -191,7 +191,11 @@ export function Sidebar({
                 'relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 collapsed && 'justify-center px-2',
                 editing
-                  ? 'cursor-grab active:cursor-grabbing bg-muted/40'
+                  ? cn(
+                      'cursor-grab active:cursor-grabbing bg-muted/50',
+                      // Subtle indicator for current page while in reorder mode (instead of full gold)
+                      isActive && 'ring-1 ring-primary/40 bg-primary/5'
+                    )
                   : isActive
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',

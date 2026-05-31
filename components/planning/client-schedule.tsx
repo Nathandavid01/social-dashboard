@@ -115,7 +115,6 @@ export function ClientSchedule({ postingDays, tasks }: { postingDays: number[]; 
                     <span className="text-xs text-amber-600">Falta video</span>
                   )}
                 </td>
-<<<<<<< HEAD
                 <td className="w-40 py-2.5 pr-3">
                   {t?.pipeline ? (
                     <IdeaStatusBar pipeline={t.pipeline} />

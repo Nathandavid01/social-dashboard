@@ -82,32 +82,43 @@ export function VideoPipelineRow({
 
   return (
     <tr className={cn('group transition-colors hover:bg-muted/40', video.status === 'descartada' && 'opacity-60')}>
-      {/* VIDEO */}
+      {/* VIDEO — Title + Date on top row, status below */}
       <td
-        className={cn('max-w-0 py-2.5 pl-3 pr-3 align-middle', accentColor && 'border-l-[3px]')}
+        className={cn('max-w-0 py-3 pl-3 pr-3 align-top', accentColor && 'border-l-[3px]')}
         style={accentColor ? { borderLeftColor: accentColor } : undefined}
       >
-        <div className="flex min-w-0 items-center gap-2">
-          <TypeIcon className={cn('h-4 w-4 shrink-0', type.color)} />
-          <div className="min-w-0">
-            <Link
-              href={`/produccion/idea/${video.id}`}
-              className="block truncate text-sm font-medium hover:text-primary"
-            >
-              {video.title || 'Sin título'}
-            </Link>
-            <p className={cn('truncate text-xs', caption ? 'text-muted-foreground' : 'italic text-muted-foreground/50')}>
-              {caption ?? 'Sin caption'}
-            </p>
-          </div>
-        </div>
-      </td>
+        <div className="space-y-1.5">
+          {/* Top row: Title + Date */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <TypeIcon className={cn('h-4 w-4 shrink-0', type.color)} />
+              <Link
+                href={`/produccion/idea/${video.id}`}
+                className="block truncate text-sm font-semibold hover:text-primary"
+              >
+                {video.title || 'Sin título'}
+              </Link>
+            </div>
 
-      {/* ESTADO */}
-      <td className="py-2.5 pr-3 align-middle">
-        <div className="flex flex-wrap items-center gap-1">
-          <span className={cn(pill, status.cls)}>{status.label}</span>
-          <span className={cn(pill, approval.cls)}>{approval.label}</span>
+            {/* Date on the same top row as title */}
+            <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground whitespace-nowrap">
+              <span className="inline-flex items-center gap-0.5">
+                <Calendar className="h-3 w-3" /> {fmt(video.recording_date)}
+              </span>
+              <span className="inline-flex items-center gap-0.5">
+                <CalendarCheck className="h-3 w-3" /> {fmt(video.publish_date)}
+              </span>
+            </div>
+          </div>
+
+          {/* Status directly under the title line */}
+          <div className="flex flex-wrap items-center gap-1">
+            <span className={cn(pill, status.cls)}>{status.label}</span>
+            <span className={cn(pill, approval.cls)}>{approval.label}</span>
+            {caption && (
+              <span className="ml-1 truncate text-xs text-muted-foreground">{caption}</span>
+            )}
+          </div>
         </div>
       </td>
 
@@ -145,16 +156,6 @@ export function VideoPipelineRow({
               </span>
             )
           })}
-        </div>
-      </td>
-
-      {/* FECHAS */}
-      <td className="whitespace-nowrap py-2.5 pr-3 align-middle text-[11px] text-muted-foreground">
-        <div className="inline-flex items-center gap-1">
-          <Calendar className="h-3 w-3" /> {fmt(video.recording_date)}
-        </div>
-        <div className="inline-flex items-center gap-1">
-          <CalendarCheck className="h-3 w-3" /> {fmt(video.publish_date)}
         </div>
       </td>
 

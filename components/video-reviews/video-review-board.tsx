@@ -177,8 +177,8 @@ export function VideoReviewBoard({ initialReviews, clients, sentReviewIds: initi
 
       {/* Pendientes expandable strip */}
       {pendientesOpen && pendientes.length > 0 && (
-        <div className="rounded-xl border border-blue-200 bg-blue-50/30 p-3 space-y-2">
-          <p className="text-xs font-semibold text-blue-700 px-1">VIDEOS RECIÉN ENVIADOS — Head Editor: empieza la revisión</p>
+        <div className="rounded-xl border border-white/10 bg-black/50 p-3 space-y-2">
+          <p className="text-xs font-semibold text-white/90 px-1">VIDEOS RECIÉN ENVIADOS — Head Editor: empieza la revisión</p>
           <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {pendientes.map((review) => (
               <VideoReviewCard
@@ -193,8 +193,8 @@ export function VideoReviewBoard({ initialReviews, clients, sentReviewIds: initi
 
       {/* Aprobados expandable strip with inline posting actions */}
       {aprobadosOpen && aprobadosNotSent.length > 0 && (
-        <div className="rounded-xl border border-green-300 bg-green-50/30 p-3 space-y-3">
-          <p className="text-xs font-semibold text-green-700 px-1">
+        <div className="rounded-xl border border-white/10 bg-black/50 p-3 space-y-3">
+          <p className="text-xs font-semibold text-white/90 px-1">
             APROBADOS — Genera caption y envía a Metricool
           </p>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

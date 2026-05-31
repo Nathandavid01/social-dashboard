@@ -22,10 +22,8 @@ export function VideoPipelineTable({
         <thead>
           <tr className="border-b bg-muted/30">
             <th className={`${HEAD} pl-3`}>Video</th>
-            <th className={HEAD}>Estado</th>
             <th className={HEAD}>Progreso</th>
             <th className={HEAD}>Material</th>
-            <th className={HEAD}>Fechas</th>
             <th className={`${HEAD} pr-3 text-right`} aria-label="Acción" />
           </tr>
         </thead>
