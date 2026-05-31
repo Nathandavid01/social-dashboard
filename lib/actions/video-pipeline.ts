@@ -35,6 +35,7 @@ export interface ClientVideoPipeline {
     | 'logo_url'
     | 'logo_dark_url'
     | 'brand_colors'
+    | 'metricool_blog_id'
   >
   videos: PipelineVideo[]
   assets: ClientAsset[]
@@ -61,7 +62,7 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id',
       )
       .order('name', { ascending: true }),
     supabase
