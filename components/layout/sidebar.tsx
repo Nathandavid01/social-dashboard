@@ -4,12 +4,14 @@ import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navItems, visibleNavItems } from './nav-items'
-import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2 } from 'lucide-react'
+import { navItems } from './nav-items'
+import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
 import { APP_VERSION } from '@/lib/version'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
+import { useSidebar } from '@/lib/context/sidebar-context'
+import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {
@@ -41,6 +43,7 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname()
   const { role } = useAuth()
+  const { collapsed, toggle } = useSidebar()
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const [editing, setEditing] = useState(false)
@@ -133,13 +136,32 @@ export function Sidebar({
     .filter((h) => allowedHrefs.has(h))
 
   return (
-    <aside className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r border-border bg-card lg:flex">
-      {/* Logo */}
-      <div className="flex items-center gap-2 border-b border-border px-6 py-5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-512.svg" alt="NMedia" className="h-8 w-8 rounded-lg" />
-        <span className="text-lg font-bold tracking-tight">Nate Media</span>
-        {isPending && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+    <aside className={cn(
+      'fixed left-0 top-0 z-30 hidden h-screen flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex',
+      collapsed ? 'w-16' : 'w-60',
+    )}>
+      {/* Logo + collapse toggle */}
+      <div className={cn('flex items-center border-b border-border py-5', collapsed ? 'justify-center px-2' : 'gap-2 px-6')}>
+        {!collapsed && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/icon-512.svg" alt="Nate Media" className="h-8 w-8 rounded-lg" />
+            <span className="text-lg font-bold tracking-tight">Nate <span className="text-primary">Media</span></span>
+            {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          </>
+        )}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+          title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+          className={cn(
+            'rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+            !collapsed && 'ml-auto',
+          )}
+        >
+          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Nav */}
@@ -164,8 +186,10 @@ export function Sidebar({
 
           const itemEl = (
             <span
+              title={collapsed ? item.label : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                collapsed && 'justify-center px-2',
                 editing
                   ? 'cursor-grab active:cursor-grabbing bg-muted/40'
                   : isActive
@@ -175,10 +199,14 @@ export function Sidebar({
                 dragHref === item.href && 'opacity-50',
               )}
             >
-              {editing && <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+              {editing && !collapsed && <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
               <item.icon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{item.label}</span>
-              {!editing && badge > 0 && (
+              {!collapsed && <span className="truncate">{item.label}</span>}
+              {/* Collapsed: a small dot signals a pending badge without the number */}
+              {collapsed && !editing && badge > 0 && (
+                <span className={cn('absolute right-1 top-1 h-2 w-2 rounded-full', badgeColor)} />
+              )}
+              {!collapsed && !editing && badge > 0 && (
                 <span className={cn(
                   'ml-auto min-w-[18px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white',
                   badgeColor,
@@ -186,7 +214,7 @@ export function Sidebar({
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
-              {editing && (
+              {editing && !collapsed && (
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleHidden(item.href) }}
@@ -255,7 +283,8 @@ export function Sidebar({
         )}
       </nav>
 
-      {/* Footer */}
+      {/* Footer (hidden when collapsed to keep the rail clean) */}
+      {!collapsed && (
       <div className="space-y-2 border-t border-border px-3 py-3">
         {editing ? (
           <div className="flex gap-1.5">
@@ -286,6 +315,7 @@ export function Sidebar({
           Nate Media · v{APP_VERSION}
         </Link>
       </div>
+      )}
     </aside>
   )
 }

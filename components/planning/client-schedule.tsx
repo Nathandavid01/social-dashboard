@@ -7,20 +7,7 @@ import { cn } from '@/lib/utils'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { useToast } from '@/lib/hooks/use-toast'
 import { IdeaStatusBar } from '@/components/ideas/idea-status-bar'
-import { computeIdeaPipeline } from '@/lib/utils/idea-pipeline-stages'
-import type { ContentIdea } from '@/lib/supabase/types'
-
-export type ScheduleIdeaFields = Pick<
-  ContentIdea,
-  | 'hook'
-  | 'visual_brief'
-  | 'generated_caption'
-  | 'status'
-  | 'approval_status'
-  | 'published_at'
-  | 'recording_session_id'
-  | 'recording_date'
->
+import type { IdeaPipeline } from '@/lib/utils/idea-pipeline-stages'
 
 export interface ScheduleTask {
   publishDate: string // YYYY-MM-DD
@@ -28,7 +15,8 @@ export interface ScheduleTask {
   ideaTitle: string | null
   contentType: string | null
   hasCaption: boolean
-  idea: ScheduleIdeaFields | null
+  /** Production pipeline stages for the linked idea (Idea → … → Publicado). */
+  pipeline?: IdeaPipeline | null
 }
 
 function cadenceDates(postingDays: number[], days = 14): string[] {
@@ -81,7 +69,7 @@ export function ClientSchedule({ postingDays, tasks }: { postingDays: number[]; 
             <th className="py-2 pr-3 text-left font-medium">Día</th>
             <th className="py-2 pr-3 text-left font-medium">Tipo</th>
             <th className="py-2 pr-3 text-left font-medium">Idea del video</th>
-            <th className="py-2 pr-3 text-left font-medium">Status</th>
+            <th className="py-2 pr-3 text-left font-medium">Flujo</th>
             <th className="py-2 text-right font-medium">Caption</th>
           </tr>
         </thead>
@@ -127,13 +115,10 @@ export function ClientSchedule({ postingDays, tasks }: { postingDays: number[]; 
                     <span className="text-xs text-amber-600">Falta video</span>
                   )}
                 </td>
-                <td className="py-2.5 pr-3">
-                  {ideaId && t?.idea ? (
-                    <div className="w-40">
-                      <IdeaStatusBar
-                        pipeline={computeIdeaPipeline({ idea: t.idea, videos: [], recordingScheduled: false })}
-                      />
-                    </div>
+<<<<<<< HEAD
+                <td className="w-40 py-2.5 pr-3">
+                  {t?.pipeline ? (
+                    <IdeaStatusBar pipeline={t.pipeline} />
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}

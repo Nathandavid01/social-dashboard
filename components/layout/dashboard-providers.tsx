@@ -1,6 +1,7 @@
 'use client'
 
 import { AuthProvider } from '@/lib/context/auth-context'
+import { SidebarProvider } from '@/lib/context/sidebar-context'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 export function DashboardProviders({ children, user, profile, role }: Props) {
   return (
     <AuthProvider value={{ user, profile, role }}>
-      {children}
+      <SidebarProvider>{children}</SidebarProvider>
     </AuthProvider>
   )
 }

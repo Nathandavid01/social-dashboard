@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  ArrowLeft, Lightbulb, Sparkles, Camera, Palette, Scissors, Eye, Hash, History,
+  ArrowLeft, Sparkles, Palette, Scissors, History,
 } from 'lucide-react'
+import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ClientAssetsDownload } from '@/components/produccion/client-assets-download'
@@ -70,8 +71,8 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <Link href="/ideacion" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
-            <ArrowLeft className="h-3 w-3" /> Ideación
+          <Link href="/planning" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-3 w-3" /> Workflow
           </Link>
           <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight">
             {idea.title}
@@ -91,23 +92,15 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
       {/* Overall progress + what's missing */}
       <IdeaProgressBar progress={progress} />
 
-      {/* Stage 1: Idea brief */}
-      <Card id="stage-idea" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Lightbulb className="h-4 w-4 text-purple-500" /> La idea
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {idea.hook && <Field icon={Eye} label="Hook" value={idea.hook} />}
-          {idea.visual_brief && <Field icon={Camera} label="Brief visual (para el editor)" value={idea.visual_brief} />}
-          {idea.caption_angle && <Field icon={Sparkles} label="Ángulo del caption" value={idea.caption_angle} />}
-          {idea.hashtags_suggestion && <Field icon={Hash} label="Hashtags sugeridos" value={idea.hashtags_suggestion} mono />}
-          {!idea.hook && !idea.visual_brief && !idea.caption_angle && (
-            <p className="text-muted-foreground">Sin brief adicional. Solo el título.</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Stage 1: Idea brief (collapsible once generated) */}
+      <IdeaBriefCard
+        ideaId={ideaId}
+        hook={idea.hook}
+        visualBrief={idea.visual_brief}
+        captionAngle={idea.caption_angle}
+        hashtags={idea.hashtags_suggestion}
+        publishDate={idea.publish_date}
+      />
 
       {/* Stage 2: Caption */}
       <Card id="stage-caption" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
@@ -168,14 +161,3 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
   )
 }
 
-function Field({ icon: Icon, label, value, mono }: { icon: typeof Eye; label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex gap-2">
-      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <p className={mono ? 'font-mono text-xs' : 'text-sm'}>{value}</p>
-      </div>
-    </div>
-  )
-}

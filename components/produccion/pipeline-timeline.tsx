@@ -65,16 +65,21 @@ export function PipelineTimeline({ stages }: { stages: TimelineStage[] }) {
       className="sticky top-0 z-20 -mx-4 border-b bg-background/85 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6"
       aria-label="Etapas de producción"
     >
-      <ol className="no-scrollbar flex items-center gap-1 overflow-x-auto">
+      <ol className="flex flex-wrap items-center gap-1.5">
         {stages.map((s, i) => {
           const Icon = ICONS[s.icon]
           const isActive = active === s.id
+          // Done (and not the one you're viewing) → collapse to an icon to save room.
+          const collapsed = s.done && !isActive
           return (
-            <li key={`${s.id}-${i}`} className="flex shrink-0 items-center">
+            <li key={`${s.id}-${i}`} className="flex items-center">
               <button
                 onClick={() => goTo(s.id)}
+                aria-label={s.label}
+                title={s.detail ? `${s.label} · ${s.detail}` : s.label}
                 className={cn(
-                  'group flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+                  'group flex items-center rounded-full border font-medium transition-all',
+                  collapsed ? 'gap-0 p-1' : 'gap-2 px-3 py-1.5 text-xs',
                   isActive
                     ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : s.done
@@ -88,17 +93,18 @@ export function PipelineTimeline({ stages }: { stages: TimelineStage[] }) {
                 )}>
                   {s.done && !isActive ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
                 </span>
-                <span className="whitespace-nowrap">{s.label}</span>
-                {s.count && (
-                  <span className="tabular-nums opacity-80">{s.count.current}/{s.count.total}</span>
-                )}
-                {s.detail && !s.count && (
-                  <span className="whitespace-nowrap opacity-70">· {s.detail}</span>
+                {!collapsed && (
+                  <>
+                    <span className="whitespace-nowrap">{s.label}</span>
+                    {s.count && (
+                      <span className="tabular-nums opacity-80">{s.count.current}/{s.count.total}</span>
+                    )}
+                    {s.detail && !s.count && (
+                      <span className="whitespace-nowrap opacity-70">· {s.detail}</span>
+                    )}
+                  </>
                 )}
               </button>
-              {i < stages.length - 1 && (
-                <span className={cn('mx-0.5 h-px w-4 shrink-0 sm:w-6', s.done ? 'bg-green-500/40' : 'bg-border')} />
-              )}
             </li>
           )
         })}

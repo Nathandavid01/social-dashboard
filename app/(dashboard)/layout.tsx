@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
+import { SidebarAwareContent } from '@/components/layout/sidebar-aware-content'
 import { Topbar } from '@/components/layout/topbar'
 import { DashboardProviders } from '@/components/layout/dashboard-providers'
 import { ChatBubble } from '@/components/chat/chat-bubble'
@@ -85,7 +86,7 @@ export default async function DashboardLayout({
           planningPendingCount={planningPendingCount}
           navPreferences={profile?.nav_preferences}
         />
-        <div className="flex flex-col flex-1 min-w-0 lg:ml-60">
+        <SidebarAwareContent>
           <Topbar
             overdueCount={overdueCount ?? 0}
             requestsCount={pendingRequestsCount ?? 0}
@@ -97,7 +98,7 @@ export default async function DashboardLayout({
           <main className="flex-1 overflow-y-auto">
             <div className="p-4 lg:p-6">{children}</div>
           </main>
-        </div>
+        </SidebarAwareContent>
         <Toaster />
         <ChatBubble />
         <CommandPalette />

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { IdeaStatusBar } from './idea-status-bar'
 import type { IdeaPipeline } from '@/lib/utils/idea-pipeline-stages'
 
@@ -35,5 +35,34 @@ describe('IdeaStatusBar', () => {
     }
     render(<IdeaStatusBar pipeline={done} />)
     expect(screen.getByText('Completado')).toBeInTheDocument()
+  })
+
+  it('opens an info dialog with the stage description + video title when a segment is clicked', () => {
+    render(<IdeaStatusBar pipeline={pipeline} title="Mi video" />)
+    expect(screen.queryByText('La idea está definida con su hook y brief visual.')).toBeNull()
+
+    fireEvent.click(screen.getAllByTestId('stage-segment')[0])
+
+    expect(screen.getByText('La idea está definida con su hook y brief visual.')).toBeInTheDocument()
+    expect(screen.getByText('Mi video')).toBeInTheDocument()
+  })
+
+  it('shows the description of the specific stage clicked', () => {
+    render(<IdeaStatusBar pipeline={pipeline} />)
+    fireEvent.click(screen.getAllByTestId('stage-segment')[3]) // Grabación
+    expect(screen.getByText('El material fue grabado y está en el buffer.')).toBeInTheDocument()
+  })
+
+  it('offers a "work on this step" link to the idea workspace when ideaId is given', () => {
+    render(<IdeaStatusBar pipeline={pipeline} ideaId="abc" />)
+    fireEvent.click(screen.getAllByTestId('stage-segment')[1]) // Caption
+    const link = screen.getByRole('link', { name: /trabajar en este paso/i })
+    expect(link).toHaveAttribute('href', '/produccion/idea/abc#stage-caption')
+  })
+
+  it('does not show the work link without an ideaId', () => {
+    render(<IdeaStatusBar pipeline={pipeline} />)
+    fireEvent.click(screen.getAllByTestId('stage-segment')[1])
+    expect(screen.queryByRole('link', { name: /trabajar en este paso/i })).toBeNull()
   })
 })

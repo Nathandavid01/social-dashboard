@@ -218,6 +218,24 @@ export interface ContentEvent {
   assignee?: Pick<Profile, 'id' | 'full_name'> | null
 }
 
+/** A unified, read-only event shown on the content calendar (aggregated from
+ * multiple sources: manual posting events, idea recording/publish dates, and
+ * recording sessions). */
+export type CalendarItemType = 'grabacion' | 'publicacion' | 'posting' | 'sesion'
+
+export interface CalendarItem {
+  id: string
+  type: CalendarItemType
+  /** ISO datetime used for day placement. */
+  date: string
+  title: string
+  clientId: string | null
+  clientName: string | null
+  assignee: Pick<Profile, 'id' | 'full_name'> | null
+  /** Optional deep-link (e.g. to the idea detail). */
+  href: string | null
+}
+
 export interface PerformanceMetric {
   id: string
   client_id: string
@@ -397,6 +415,10 @@ export interface IdeaWithPipeline extends ContentIdea {
   recordingScheduled: boolean
   videos: ContentIdeaVideo[]
   client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms'>>) | null
+  /** Person the linked production task is assigned to (null when unassigned).
+   * avatar_url is optional so optimistic updates (from a name-only profile list)
+   * still type-check; the fetched data includes it. */
+  assignee?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
 }
 
 export type ContentIdeaActivityAction =

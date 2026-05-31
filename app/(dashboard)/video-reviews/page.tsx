@@ -1,6 +1,8 @@
 import { getVideoReviews } from '@/lib/actions/video-reviews'
 import { getClientVideoPipeline } from '@/lib/actions/video-pipeline'
+import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
+import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { VideoReviewBoard } from '@/components/video-reviews/video-review-board'
 import { ClientVideoSection } from '@/components/video-pipeline/client-video-section'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -12,17 +14,35 @@ export const dynamic = 'force-dynamic'
 export default async function VideoReviewsPage() {
   const supabase = await createClient()
 
-  const [reviews, { data: clients }, { data: sentDrafts }, pipeline] = await Promise.all([
+  const [reviews, { data: clients }, { data: sentDrafts }, pipeline, metricoolPics] = await Promise.all([
     getVideoReviews().catch(() => [] as VideoReview[]),
     supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('posting_drafts').select('video_review_id').eq('status', 'sent'),
     getClientVideoPipeline().catch(() => [] as ClientVideoPipeline[]),
+    getMetricoolPicturesByBlogId().catch(() => ({} as Record<string, string>)),
   ])
 
   const sentReviewIds = (sentDrafts ?? []).map((d) => d.video_review_id as string)
 
+  // Use the Metricool profile picture (the same one shown in the "Perfiles conectados"
+  // list in /settings/metricool) as the client logo in the pipeline. Falls back to
+  // the client's local logo_url if no Metricool picture is available.
+  const pipelineWithLogos: ClientVideoPipeline[] = pipeline.map((p) => {
+    const pic = p.client.metricool_blog_id
+      ? metricoolPics[String(p.client.metricool_blog_id)]
+      : undefined
+    const displayLogo = pic || p.client.logo_url
+    return {
+      ...p,
+      client: {
+        ...p.client,
+        logo_url: displayLogo,
+      },
+    }
+  })
+
   // Hide clients with no pipeline videos to keep the view focused.
-  const pipelineWithVideos = pipeline.filter((p) => p.videos.length > 0)
+  const pipelineWithVideos = pipelineWithLogos.filter((p) => p.videos.length > 0)
 
   return (
     <Tabs defaultValue="pipeline" className="space-y-4">

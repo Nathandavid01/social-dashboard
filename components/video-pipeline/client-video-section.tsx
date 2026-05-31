@@ -38,7 +38,11 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
         )}
         <div className="relative flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3.5">
           <div className="flex min-w-0 items-center gap-3">
-            <ClientLogo name={client.name} logoUrl={client.logo_url} />
+            <ClientLogo
+              name={client.name}
+              logoUrl={client.logo_url}
+              className="h-8 w-8 shrink-0 text-[10px]"
+            />
             <div className="min-w-0">
               <Link
                 href={`/clients/${client.id}`}

@@ -6,6 +6,7 @@ import type {
   ContentIdea, ContentIdeaStatus, ContentIdeaType, ContentIdeaVideo, IdeaWithPipeline,
 } from '@/lib/supabase/types'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { currentUserHas } from '@/lib/auth/server'
 
 export async function getContentIdeas(filter?: {
   clientId?: string
@@ -54,7 +55,11 @@ export async function getIdeacionPipeline(filter?: {
       *,
       client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms),
       recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status),
-      videos:content_idea_videos!content_idea_videos_idea_id_fkey(*)
+      videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
+      production_task:production_tasks!content_ideas_production_task_id_fkey(
+        id, status, publish_date,
+        assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)
+      )
     `)
     .order('created_at', { ascending: false })
     .limit(filter?.limit ?? 300)
@@ -69,6 +74,7 @@ export async function getIdeacionPipeline(filter?: {
     const r = row as unknown as ContentIdea & {
       recording_session?: { status?: string } | null
       videos?: ContentIdeaVideo[] | null
+      production_task?: { assigned_to?: { id: string; full_name: string | null; avatar_url: string | null } | null } | null
     }
     const sessionStatus = r.recording_session?.status
     return {
@@ -76,6 +82,53 @@ export async function getIdeacionPipeline(filter?: {
       recordingScheduled:
         r.recording_session_id != null && (sessionStatus === 'scheduled' || sessionStatus === 'completed'),
       videos: (r.videos ?? []) as ContentIdeaVideo[],
+      assignee: r.production_task?.assigned_to ?? null,
+    } as IdeaWithPipeline
+  })
+}
+
+/**
+ * Videos currently assigned to a person and still in their court — i.e. linked
+ * to a production task assigned to them, and not yet submitted for approval
+ * (nor approved/published/discarded). Powers the "Videos asignados" section on
+ * the person's profile. Returns [] on error.
+ */
+export async function getAssignedVideosForMember(memberId: string): Promise<IdeaWithPipeline[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('content_ideas')
+    .select(`
+      *,
+      client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms),
+      recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status),
+      videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
+      production_task:production_tasks!content_ideas_production_task_id_fkey!inner(
+        id, status, publish_date, assigned_to_id,
+        assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)
+      )
+    `)
+    .eq('production_task.assigned_to_id', memberId)
+    .not('status', 'in', '(publicada,descartada)')
+    .not('approval_status', 'in', '(submitted,approved)')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.warn('[content-ideas] assigned-videos fetch failed:', error.message)
+    return []
+  }
+  return (data ?? []).map((row) => {
+    const r = row as unknown as ContentIdea & {
+      recording_session?: { status?: string } | null
+      videos?: ContentIdeaVideo[] | null
+      production_task?: { assigned_to?: { id: string; full_name: string | null; avatar_url: string | null } | null } | null
+    }
+    const sessionStatus = r.recording_session?.status
+    return {
+      ...(r as ContentIdea),
+      recordingScheduled:
+        r.recording_session_id != null && (sessionStatus === 'scheduled' || sessionStatus === 'completed'),
+      videos: (r.videos ?? []) as ContentIdeaVideo[],
+      assignee: r.production_task?.assigned_to ?? null,
     } as IdeaWithPipeline
   })
 }
@@ -116,8 +169,27 @@ export async function saveContentIdea(input: {
     .single()
 
   if (error) return { error: error.message }
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { idea: data as ContentIdea }
+}
+
+/**
+ * Reassign an already-assigned video to a different person (or unassign).
+ * Updates the linked production task's assignee. Permission-gated.
+ */
+export async function reassignVideo(productionTaskId: string, assigneeId: string | null) {
+  if (!(await currentUserHas('planning.assign'))) {
+    return { error: 'No tienes permiso para reasignar videos.' }
+  }
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('production_tasks')
+    .update({ assigned_to_id: assigneeId })
+    .eq('id', productionTaskId)
+  if (error) return { error: error.message }
+  revalidatePath('/planning')
+  revalidatePath('/team')
+  return { success: true }
 }
 
 export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
@@ -129,8 +201,58 @@ export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
     action: status === 'publicada' ? 'published' : 'status_changed',
     metadata: { status },
   })
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   revalidatePath('/recording-calendar')
+  return { success: true }
+}
+
+// ── Inline date editing (recording / publish) ────────────────────────────────
+
+/**
+ * Update an idea's recording and/or publish dates inline.
+ * Pass `null` for a field to clear it. Omit a field to leave it unchanged.
+ * Dates are date-only strings ('YYYY-MM-DD').
+ */
+export async function updateIdeaDates(
+  ideaId: string,
+  dates: { recording_date?: string | null; publish_date?: string | null },
+) {
+  const supabase = await createClient()
+
+  const patch: { recording_date?: string | null; publish_date?: string | null } = {}
+  if ('recording_date' in dates) patch.recording_date = dates.recording_date || null
+  if ('publish_date' in dates) patch.publish_date = dates.publish_date || null
+  if (Object.keys(patch).length === 0) return { success: true }
+
+  const { error } = await supabase.from('content_ideas').update(patch).eq('id', ideaId)
+  if (error) return { error: error.message }
+
+  await logIdeaActivity(supabase, { ideaId, action: 'status_changed', metadata: { dates: patch } })
+  revalidatePath('/planning')
+  revalidatePath('/recording-calendar')
+  return { success: true }
+}
+
+/**
+ * Update editable idea brief fields (hook, visual brief, caption angle, hashtags).
+ * Only the provided keys are written. Used by the inline editor on the idea
+ * workspace's step-1 card.
+ */
+export async function updateIdeaBrief(
+  ideaId: string,
+  fields: Partial<{ hook: string | null; visual_brief: string | null; caption_angle: string | null; hashtags_suggestion: string | null }>,
+) {
+  const supabase = await createClient()
+  const allowed: Record<string, string | null> = {}
+  for (const k of ['hook', 'visual_brief', 'caption_angle', 'hashtags_suggestion'] as const) {
+    if (k in fields) allowed[k] = (fields[k] ?? '') === '' ? null : (fields[k] as string)
+  }
+  if (Object.keys(allowed).length === 0) return { success: true }
+
+  const { error } = await supabase.from('content_ideas').update(allowed).eq('id', ideaId)
+  if (error) return { error: error.message }
+  revalidatePath('/planning')
+  revalidatePath(`/produccion/idea/${ideaId}`)
   return { success: true }
 }
 
@@ -160,7 +282,7 @@ export async function createContentIdeaManual(input: {
     .single()
 
   if (error) return { error: error.message }
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   revalidatePath(`/clients/${input.clientId}`)
   revalidatePath('/recording-calendar')
   return { idea: data as ContentIdea }
@@ -192,7 +314,7 @@ export async function markIdeaRecorded(ideaId: string, recorded: boolean) {
     await logIdeaActivity(supabase, { ideaId, action: 'recorded' })
   }
   revalidatePath('/recording-calendar')
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { success: true }
 }
 
@@ -221,7 +343,7 @@ export async function deleteContentIdea(id: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('content_ideas').delete().eq('id', id)
   if (error) return { error: error.message }
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   return { success: true }
 }
 
@@ -233,6 +355,10 @@ export async function assignIdeaToProductionTask(input: {
   assignedToId?: string | null
   weekStart?: string | null
 }) {
+  // Assigning videos to others is permission-gated (see CLAUDE.md RBAC).
+  if (!(await currentUserHas('planning.assign'))) {
+    return { error: 'No tienes permiso para asignar videos a producción.' }
+  }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -279,7 +405,7 @@ export async function assignIdeaToProductionTask(input: {
     metadata: { taskId: task.id, publishDate: input.publishDate, assignedToId: input.assignedToId ?? null },
   })
 
-  revalidatePath('/ideacion')
+  revalidatePath('/planning')
   revalidatePath('/produccion')
   return { success: true, taskId: task.id }
 }
