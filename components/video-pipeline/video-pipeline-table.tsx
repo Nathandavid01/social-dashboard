@@ -8,11 +8,13 @@ export function VideoPipelineTable({
   assetCount,
   clientName,
   clientLogoUrl,
+  accentColor,
 }: {
   videos: PipelineVideo[]
   assetCount: number
   clientName?: string | null
   clientLogoUrl?: string | null
+  accentColor?: string | null
 }) {
   return (
     <div className="overflow-x-auto rounded-lg border bg-card">
@@ -35,6 +37,7 @@ export function VideoPipelineTable({
               assetCount={assetCount}
               clientName={clientName}
               clientLogoUrl={clientLogoUrl}
+              accentColor={accentColor}
             />
           ))}
         </tbody>

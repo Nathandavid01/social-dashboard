@@ -4,6 +4,23 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v1.9 — 2026-05-30
+
+### Color de marca por cliente en Video QC
+- Cada **fila de la tabla de videos** lleva ahora un **acento con el color de marca del cliente** (borde izquierdo). Así, en Video QC, las filas de un cliente se distinguen de un vistazo y salta a la vista si una es de otro cliente — refuerza el evitar mezclar contenido entre clientes.
+
+### Video QC como tabla de datos
+- La revisión de videos pasó de tarjetas a una **tabla** (Video, Estado, Progreso, Material, Fechas, Acción): más densa y fácil de escanear cuando un cliente tiene muchos videos.
+
+### Subida de varios archivos a la vez
+- Ahora puedes **soltar/seleccionar varios videos juntos** en un slot; se suben en lote con su progreso.
+
+### Columna de estado en el plan de 2 semanas
+- En el plan semanal de cada cliente, cada fila muestra ahora su **estado** de producción directamente.
+
+### Ideación como filas por cliente
+- La pantalla de **Ideación** ahora agrupa las ideas por cliente, cada una con una **barra de estado segmentada** que muestra en qué etapa va cada video (idea → agendada → grabada → producida → publicada). Más fácil ver el estado de todo un cliente de un vistazo.
+
 ## v1.8 — 2026-05-29
 
 ### Confirmación al aprobar (anti-cliente-equivocado)

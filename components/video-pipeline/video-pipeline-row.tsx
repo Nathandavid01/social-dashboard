@@ -51,11 +51,14 @@ export function VideoPipelineRow({
   assetCount,
   clientName,
   clientLogoUrl,
+  accentColor,
 }: {
   video: PipelineVideo
   assetCount: number
   clientName?: string | null
   clientLogoUrl?: string | null
+  /** Client brand color — a left accent so cross-client rows stand out. */
+  accentColor?: string | null
 }) {
   const type = TYPE_CFG[video.content_type] ?? TYPE_CFG.R
   const TypeIcon = type.icon
@@ -80,7 +83,10 @@ export function VideoPipelineRow({
   return (
     <tr className={cn('group transition-colors hover:bg-muted/40', video.status === 'descartada' && 'opacity-60')}>
       {/* VIDEO */}
-      <td className="max-w-0 py-2.5 pl-3 pr-3 align-middle">
+      <td
+        className={cn('max-w-0 py-2.5 pl-3 pr-3 align-middle', accentColor && 'border-l-[3px]')}
+        style={accentColor ? { borderLeftColor: accentColor } : undefined}
+      >
         <div className="flex min-w-0 items-center gap-2">
           <TypeIcon className={cn('h-4 w-4 shrink-0', type.color)} />
           <div className="min-w-0">

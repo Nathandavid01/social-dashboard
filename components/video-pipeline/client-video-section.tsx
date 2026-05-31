@@ -93,6 +93,7 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
           assetCount={assets.length}
           clientName={client.name}
           clientLogoUrl={client.logo_url}
+          accentColor={primaryColor}
         />
       )}
     </section>
