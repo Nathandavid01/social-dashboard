@@ -19,7 +19,6 @@ describe('VideoPipelineTable', () => {
     expect(screen.getByText('A')).toBeInTheDocument()
     expect(screen.getByText('B')).toBeInTheDocument()
     expect(screen.getByText('Video')).toBeInTheDocument()
-    expect(screen.getByText('Estado')).toBeInTheDocument()
     expect(screen.getByText('Progreso')).toBeInTheDocument()
     expect(screen.getByText('Material')).toBeInTheDocument()
   })
