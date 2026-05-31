@@ -3,11 +3,15 @@ import { getClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
+import { currentUserHas } from '@/lib/auth/server'
+import { isReadyToEdit } from '@/lib/utils/edit-queue'
 import { VideoReviewBoard } from '@/components/video-reviews/video-review-board'
 import { ClientVideoSection } from '@/components/video-pipeline/client-video-section'
+import { EditoresTab } from '@/components/video-pipeline/editores-tab'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { VideoReview, Client } from '@/lib/supabase/types'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
+import type { EditQueueItem } from '@/components/video-pipeline/editor-video-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,11 +48,27 @@ export default async function VideoReviewsPage() {
   // Hide clients with no pipeline videos to keep the view focused.
   const pipelineWithVideos = pipelineWithLogos.filter((p) => p.videos.length > 0)
 
+  // Editing queue: videos with raw uploaded but no edited yet — only for uploaders.
+  const canEdit = await currentUserHas('video.upload')
+  const editQueue: EditQueueItem[] = canEdit
+    ? pipeline.flatMap((p) =>
+        p.videos.filter(isReadyToEdit).map((video) => ({
+          video,
+          client: { id: p.client.id, name: p.client.name, logo_url: p.client.logo_url },
+        })),
+      )
+    : []
+
   return (
     <Tabs defaultValue="pipeline" className="space-y-4">
       <TabsList>
         <TabsTrigger value="pipeline">Pipeline de videos</TabsTrigger>
         <TabsTrigger value="board">Tablero de revisiones</TabsTrigger>
+        {canEdit && (
+          <TabsTrigger value="editores">
+            Editores{editQueue.length > 0 ? ` (${editQueue.length})` : ''}
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <TabsContent value="pipeline" className="space-y-5">
@@ -73,6 +93,12 @@ export default async function VideoReviewsPage() {
           sentReviewIds={sentReviewIds}
         />
       </TabsContent>
+
+      {canEdit && (
+        <TabsContent value="editores" className="space-y-5">
+          <EditoresTab items={editQueue} />
+        </TabsContent>
+      )}
     </Tabs>
   )
 }
