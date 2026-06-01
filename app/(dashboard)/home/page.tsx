@@ -6,6 +6,7 @@ import { UrgentTaskList } from '@/components/home/urgent-task-list'
 import { TeamWorkload } from '@/components/home/team-workload'
 import { RecentCompletions } from '@/components/home/recent-completions'
 import { GlobalPipelineSection } from '@/components/home/global-pipeline-section'
+import { RunwayHealthCard } from '@/components/runway/runway-health-card'
 import { PlanningBanner } from '@/components/home/planning-banner'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
@@ -199,6 +200,9 @@ export default async function HomePage() {
           />
         </div>
       )}
+
+      {/* Content runway health (portfolio) */}
+      <RunwayHealthCard perClient={pipelineGlobal.perClient} />
 
       {/* Global content pipeline overview */}
       <GlobalPipelineSection totals={pipelineGlobal.totals} perClient={pipelineGlobal.perClient} />
