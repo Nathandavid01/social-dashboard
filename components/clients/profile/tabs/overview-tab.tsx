@@ -5,6 +5,7 @@ import { OwnerForm } from '../owner-form'
 import { LastMeetingEditor } from '../last-meeting-editor'
 import { ColorSwatches } from '../color-swatches'
 import { VideoThresholdCard } from '../video-threshold-card'
+import { ClientRunwayWidget } from '@/components/runway/client-runway-widget'
 import { CalendarDays, User, Users, Palette, Video } from 'lucide-react'
 import type { Client } from '@/lib/supabase/types'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
@@ -21,6 +22,8 @@ export function OverviewTab({ client, pipeline }: Props) {
       <div className="md:col-span-2 xl:col-span-3">
         {pipeline && <PipelineCard data={pipeline} title="Pipeline de contenido" linkable clientId={client.id} />}
       </div>
+
+      {pipeline && <ClientRunwayWidget pipeline={pipeline} />}
 
       <Card className="animate-in fade-in duration-500" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
         <CardHeader className="pb-3">
