@@ -6,14 +6,12 @@ import { UserMenu } from '@/components/auth/user-menu'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { PresenceBar } from '@/components/presence/presence-bar'
 import { Search } from 'lucide-react'
-import type { Notification, Profile } from '@/lib/supabase/types'
+import type { Profile } from '@/lib/supabase/types'
 
 interface TopbarProps {
   overdueCount?: number
   requestsCount?: number
   videoReviewCount?: number
-  notifications: Notification[]
-  unreadCount: number
   currentUser: { id: string; full_name: string | null; avatar_url: string | null } | null
 }
 
@@ -21,8 +19,6 @@ export function Topbar({
   overdueCount = 0,
   requestsCount = 0,
   videoReviewCount = 0,
-  notifications,
-  unreadCount,
   currentUser,
 }: TopbarProps) {
   return (
@@ -40,11 +36,7 @@ export function Topbar({
           <span>Buscar...</span>
         </button>
         {currentUser && (
-          <NotificationBell
-            initialNotifications={notifications}
-            initialUnreadCount={unreadCount}
-            userId={currentUser.id}
-          />
+          <NotificationBell userId={currentUser.id} />
         )}
         <ThemeToggle />
         <UserMenu />
