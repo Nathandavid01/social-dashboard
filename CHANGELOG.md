@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.2 — 2026-06-03
+
+### Pulido del board Pipeline
+- Las tarjetas muestran ahora los **iconos reales de cada plataforma** (Instagram, TikTok, Facebook, LinkedIn) en vez de texto.
+- El encabezado muestra los **avatares del equipo** asignado a los videos del tablero.
+
 ## v2.1 — 2026-06-03
 
 ### Board global "Pipeline" (estilo Trello, todos los clientes)

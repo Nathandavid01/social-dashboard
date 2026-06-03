@@ -3,6 +3,7 @@
 import { memo, useCallback, useMemo, useState, useTransition } from 'react'
 import { Search, Filter, LayoutGrid, Plus, Calendar, Film, ChevronDown, Play, Check, CheckCircle2, Clock, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { PlatformBadges } from '@/components/clients/platform-badges'
 import { PIPELINE_STAGES, computeStage, adjacentStage, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
 import { moveIdeaStage } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -11,7 +12,6 @@ import { IdeaDetailSheet } from '@/components/clients/profile/idea-detail-sheet'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const TYPE_LABEL: Record<string, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
-const PLATFORM_LABEL: Record<string, string> = { instagram: 'IG', facebook: 'FB', tiktok: 'TT', linkedin: 'IN' }
 
 type Card = IdeaWithPipeline
 
@@ -56,6 +56,14 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
       map.set(c.id, e)
     }
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
+  }, [ideas])
+
+  const team = useMemo(() => {
+    const m = new Map<string, { id: string; name: string }>()
+    for (const i of ideas) {
+      if (i.assignee) m.set(i.assignee.id, { id: i.assignee.id, name: i.assignee.full_name ?? '?' })
+    }
+    return Array.from(m.values())
   }, [ideas])
 
   const visible = useMemo(() => {
@@ -106,6 +114,24 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
           <button className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
             <Plus className="h-3.5 w-3.5" /> Nuevo video
           </button>
+          {team.length > 0 && (
+            <div className="ml-1 hidden items-center -space-x-1.5 lg:flex" aria-label="Equipo">
+              {team.slice(0, 4).map((t) => (
+                <span
+                  key={t.id}
+                  title={t.name}
+                  className="grid h-7 w-7 place-items-center rounded-full border-2 border-[#0a0a0b] bg-white/[0.1] text-[10px] font-bold text-foreground"
+                >
+                  {t.name.slice(0, 1).toUpperCase()}
+                </span>
+              ))}
+              {team.length > 4 && (
+                <span className="grid h-7 w-7 place-items-center rounded-full border-2 border-[#0a0a0b] bg-white/[0.06] text-[9px] font-semibold text-muted-foreground">
+                  +{team.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -258,12 +284,8 @@ const PipelineCard = memo(function PipelineCard({ card, stage, onMove, onOpen }:
 
         {/* footer */}
         <div className="flex items-center justify-between gap-2 pt-0.5">
-          <div className="flex items-center gap-1.5">
-            {platforms.slice(0, 3).map((p) => (
-              <span key={p} className="grid h-4 w-4 place-items-center rounded bg-white/[0.06] text-[8px] font-bold text-muted-foreground">
-                {PLATFORM_LABEL[p] ?? p.slice(0, 2).toUpperCase()}
-              </span>
-            ))}
+          <div className="flex items-center gap-1.5 [&_svg]:h-3.5 [&_svg]:w-3.5">
+            {platforms.length > 0 && <PlatformBadges platforms={platforms.slice(0, 4)} />}
           </div>
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
             {videoCount > 0 && (
