@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.1 — 2026-06-03
+
+### Board global "Pipeline" (estilo Trello, todos los clientes)
+- Nueva pantalla **Pipeline** en el menú: **todos los videos de todos los clientes** en un solo tablero estilo Trello, **filtrable por cliente** con chips de color (cada cliente con su número) y búsqueda.
+- **7 columnas**: Title → Idea → Caption → Video → Edited → Approval → Publication. Cada tarjeta cae en su columna según dónde va el video.
+- **Tarjetas ricas**: color del cliente, miniatura con play, checklist de QC, badge de aprobación/publicación, plataformas, fecha y tags.
+- **Mover con botones** ◀ ▶ (aparecen al pasar el mouse) — avanza o retrocede el video al instante.
+- **Clic en una tarjeta** abre el panel con la ideación, captions, videos e historial, sin salir del tablero.
+- Conteo claro arriba: **videos · publicados · atrasados**.
+
 ## v2.0 — 2026-06-03
 
 ### Tablero estilo Trello del flujo de cada cliente
