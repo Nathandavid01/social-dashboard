@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.6 — 2026-06-03
+
+### Fix de build (deploy en Vercel)
+- El `Topbar` no reenviaba `notifications`/`unreadCount` a la campana de notificaciones, lo que **rompía el build de producción** (`next build` falla con errores de tipo). Corregido: ahora el build pasa verde y la app puede desplegar en Vercel.
+
 ## v2.5 — 2026-06-03
 
 ### Board Pipeline por BATCHES de cliente (color por persona)
