@@ -23,6 +23,7 @@ import { GenerateIdeasModal } from '@/components/ideas/generate-ideas-modal'
 import { AssignToProductionModal } from '@/components/ideas/assign-to-production-modal'
 import { InlineDayPicker } from './inline-day-picker'
 import { WorkflowStats } from './workflow-stats'
+import { ClientBoardButton } from './client-board-button'
 import { STATUS_META, type ClientWorkflowProgress } from '@/lib/utils/workflow-types'
 import { recordingWindowSize, DEFAULT_RECORDING_INTERVAL_WEEKS } from '@/lib/utils/recording-window'
 import type { ContentIdea, IdeaWithPipeline, Client, Profile, ContentIdeaStatus } from '@/lib/supabase/types'
@@ -333,6 +334,7 @@ function ClientCard({
               </strong>
             </span>
             {client.nextSessionAt && <span>Próxima: <strong className="text-foreground">{formatDate(client.nextSessionAt)}</strong></span>}
+            <ClientBoardButton clientName={client.clientName} ideas={ideas} />
           </div>
         </div>
       </CardHeader>
