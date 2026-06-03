@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.0 — 2026-06-03
+
+### Tablero estilo Trello del flujo de cada cliente
+- Desde **Workflow**, cada cliente tiene ahora un botón **"Abrir board"** que abre su flujo de producción como un **tablero estilo Trello** con cinco columnas: **Idea → Asignada → Grabada → Producida → Publicada**.
+- Cada video/publicación es una **tarjeta** que se **arrastra** de una columna a otra para avanzar el proceso. El cambio se guarda al instante (y se revierte solo si algo falla).
+- Soltar una tarjeta en **Publicada** pide **confirmación** (porque registra la fecha de publicación y cuenta para la meta de la semana).
+- Al hacer **clic en una tarjeta** se abre un **panel lateral** con toda la información del video sin salir de la pantalla: la **ideación** (hook, brief, ángulo), los **captions por plataforma** (que se generan con IA a partir de esa ideación), los **videos subidos** y el **historial de quién trabajó** con esa tarjeta y cuándo.
+- El mismo tablero está disponible también dentro del cliente, en el tab **Flujo**.
+- Solo quien tiene permiso de mover (Owner / Supervisor / Editor) puede arrastrar; el resto lo ve en modo lectura.
+
+### Conteo de "publicadas esta semana" corregido
+- La meta semanal contaba las publicaciones por la **fecha real de publicación** en vez de la última edición, así que ya no se infla el número cuando se toca un video viejo.
+
 ## v1.9 — 2026-05-30
 
 ### Color de marca por cliente en Video QC
