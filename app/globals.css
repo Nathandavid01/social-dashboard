@@ -24,7 +24,7 @@
     --border: 0 0% 90%;
     --input: 0 0% 90%;
     --ring: 43 80% 46%;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
   }
 
   .dark {
@@ -45,8 +45,8 @@
     --accent-foreground: 43 80% 80%;
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 0 0% 12%;
+    --input: 0 0% 14%;
     --ring: 43 80% 52%;
   }
 

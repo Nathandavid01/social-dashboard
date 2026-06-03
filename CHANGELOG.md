@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.4 — 2026-06-03
+
+### Tema oscuro más pulido (toda la app)
+- Primer paso del tema global: **bordes más sutiles** y **esquinas más redondeadas** en toda la app, para acercar el acabado al del board Pipeline. (Afecta tarjetas, inputs y contenedores en todas las pantallas.)
+
 ## v2.3 — 2026-06-03
 
 ### "Nuevo video" desde el board Pipeline
