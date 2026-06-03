@@ -62,6 +62,21 @@ describe('ContentPipelineBoard', () => {
     expect(screen.queryByText('Rutina matutina')).not.toBeInTheDocument()
   })
 
+  it('shows the QC checklist on cards in the Edited column', () => {
+    render(<ContentPipelineBoard ideas={[card({ status: 'producida', title: 'En edición' })]} />)
+    expect(screen.getByText(/checklist qc/i)).toBeInTheDocument()
+  })
+
+  it('shows an approval badge on cards in the Approval column', () => {
+    render(<ContentPipelineBoard ideas={[card({ status: 'producida', approval_status: 'approved', title: 'Aprobado video' })]} />)
+    expect(screen.getByText(/^aprobado$/i)).toBeInTheDocument()
+  })
+
+  it('shows a publication badge on published cards', () => {
+    render(<ContentPipelineBoard ideas={[card({ status: 'publicada', published_at: '2026-06-02T00:00:00Z', title: 'Ya salió' })]} />)
+    expect(screen.getByText(/^publicado$/i)).toBeInTheDocument()
+  })
+
   it('excludes descartada and counts published in the stats', () => {
     render(<ContentPipelineBoard ideas={[
       card({ id: 'i1', title: 'Publicado', status: 'publicada', published_at: '2026-06-02T00:00:00Z' }),

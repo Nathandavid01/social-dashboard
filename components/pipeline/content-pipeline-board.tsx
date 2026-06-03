@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Search, Filter, LayoutGrid, Plus, Calendar, MessageSquare, Film, ChevronDown } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, Calendar, Film, ChevronDown, Play, Check, CheckCircle2, Clock, Sparkles } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { PIPELINE_STAGES, bucketByStage, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
 import { clientAccent } from '@/lib/utils/client-accent'
@@ -141,24 +141,31 @@ function StageColumn({ stageKey, label, cards }: { stageKey: PipelineStageKey; l
         {cards.length === 0 ? (
           <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
-          cards.map((card) => <PipelineCard key={card.id} card={card} />)
+          cards.map((card) => <PipelineCard key={card.id} card={card} stage={stageKey} />)
         )}
       </div>
     </section>
   )
 }
 
-function PipelineCard({ card }: { card: Card }) {
+const SHOW_THUMB: Record<PipelineStageKey, boolean> = {
+  title: false, idea: false, caption: false, video: true, edited: true, approval: true, publication: true,
+}
+
+function PipelineCard({ card, stage }: { card: Card; stage: PipelineStageKey }) {
   const a = clientAccent(card.client?.id)
   const videoCount = card.videos?.length ?? 0
   const platforms = card.client?.platforms ?? []
   const dateStr = card.publish_date ?? card.created_at
+  const thumb = card.videos?.find((v) => v.drive_thumb_url)?.drive_thumb_url ?? null
 
   return (
     <article
       className="group cursor-pointer overflow-hidden rounded-lg border border-white/[0.06] bg-[#141416] transition-all hover:border-white/[0.14] hover:bg-[#17171a]"
       style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}
     >
+      {SHOW_THUMB[stage] && <CardThumb thumb={thumb} accent={a.dot} />}
+
       <div className="space-y-2 p-2.5 pl-3">
         {/* client chip */}
         <div className="flex items-center justify-between gap-2">
@@ -179,6 +186,10 @@ function PipelineCard({ card }: { card: Card }) {
           <h3 className="text-[13px] font-semibold leading-snug tracking-tight text-foreground">{card.title}</h3>
           {card.hook && <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{card.hook}</p>}
         </div>
+
+        {stage === 'edited' && <QcChecklist card={card} />}
+        {stage === 'approval' && <ApprovalRow card={card} accent={a.dot} />}
+        {stage === 'publication' && <PublicationRow card={card} />}
 
         {/* footer */}
         <div className="flex items-center justify-between gap-2 pt-0.5">
@@ -213,6 +224,98 @@ function PipelineCard({ card }: { card: Card }) {
         </div>
       </div>
     </article>
+  )
+}
+
+function CardThumb({ thumb, accent }: { thumb: string | null; accent: string }) {
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden"
+      style={!thumb ? { background: `linear-gradient(135deg, ${accent}cc, ${accent}33 60%, #0a0a0b)` } : undefined}
+    >
+      {thumb && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumb} alt="" className="h-full w-full object-cover" />
+      )}
+      <div className="absolute inset-0 grid place-items-center">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-black/40 backdrop-blur-sm ring-1 ring-white/20 transition group-hover:scale-110">
+          <Play className="h-4 w-4 translate-x-px fill-white text-white" />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function QcChecklist({ card }: { card: Card }) {
+  const items = [
+    { label: 'Caption', done: !!card.generated_caption },
+    { label: 'Editado', done: (card.videos ?? []).some((v) => v.kind === 'edited') },
+    { label: 'Aprobado', done: card.approval_status === 'approved' },
+  ]
+  const done = items.filter((i) => i.done).length
+  return (
+    <div className="space-y-1.5 rounded-md bg-white/[0.03] p-2">
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+        <span className="font-medium">Checklist QC</span>
+        <span className="tabular-nums">{done}/{items.length}</span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {items.map((it) => (
+          <span
+            key={it.label}
+            className={cn(
+              'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px]',
+              it.done ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.04] text-muted-foreground',
+            )}
+          >
+            <Check className={cn('h-2.5 w-2.5', !it.done && 'opacity-30')} /> {it.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ApprovalRow({ card, accent }: { card: Card; accent: string }) {
+  const map = {
+    approved: { label: 'Aprobado', tone: 'bg-emerald-500/15 text-emerald-400', icon: CheckCircle2 },
+    submitted: { label: 'En revisión', tone: 'bg-sky-500/15 text-sky-400', icon: Clock },
+    revision_needed: { label: 'Necesita cambios', tone: 'bg-amber-500/15 text-amber-400', icon: Clock },
+    pending: { label: 'Sin enviar', tone: 'bg-white/[0.06] text-muted-foreground', icon: Clock },
+  } as const
+  const s = map[card.approval_status as keyof typeof map] ?? map.pending
+  const Icon = s.icon
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium', s.tone)}>
+        <Icon className="h-3 w-3" /> {s.label}
+      </span>
+      {card.assignee && (
+        <span className="grid h-5 w-5 place-items-center rounded-full text-[9px] font-bold text-black" style={{ backgroundColor: accent }} title={card.assignee.full_name ?? ''}>
+          {(card.assignee.full_name ?? '?').slice(0, 1).toUpperCase()}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function PublicationRow({ card }: { card: Card }) {
+  const published = !!card.published_at || card.status === 'publicada'
+  const scheduled = !published && !!card.publish_date
+  const badge = published
+    ? { label: 'Publicado', tone: 'bg-emerald-500/15 text-emerald-400', icon: CheckCircle2 }
+    : scheduled
+      ? { label: 'Programado', tone: 'bg-sky-500/15 text-sky-400', icon: Calendar }
+      : { label: 'Listo', tone: 'bg-violet-500/15 text-violet-400', icon: Sparkles }
+  const Icon = badge.icon
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium', badge.tone)}>
+        <Icon className="h-3 w-3" /> {badge.label}
+      </span>
+      {/* métricas reales (Metricool) llegan en la Fase 4 */}
+      <span className="text-[10px] text-muted-foreground/50">— vistas</span>
+    </div>
   )
 }
 
