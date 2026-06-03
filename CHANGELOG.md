@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.5 — 2026-06-03
+
+### Board Pipeline por BATCHES de cliente (color por persona)
+- El board ahora trabaja por **batches de cliente**, no video por video: cuando trabajas un cliente, trabajas **todo su período** (mes / semana / sesión de grabación), así que **todos sus videos viajan juntos** por el pipeline como una sola tarjeta y se mueven en bloque.
+- **El color lo define la persona asignada**: cada miembro del equipo tiene su color, y el batch se pinta del color de su responsable — el board se vuelve un mapa visual de **quién tiene qué**.
+- **Filtro por persona asignada** (Asignado a: Todos / cada persona) además del filtro por cliente.
+- Orden de columnas: **Idea → Title** → Caption → Video → Edited → Approval → Publication.
+- Cada tarjeta de batch muestra: cliente, nº de videos del batch, tira de videos, progreso en el pipeline, plataformas y responsable; botones ◀▶ mueven **todo el batch**. Clic abre el cliente.
+
 ## v2.4 — 2026-06-03
 
 ### Tema oscuro más pulido (toda la app)

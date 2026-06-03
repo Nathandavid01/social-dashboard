@@ -433,6 +433,24 @@ export async function moveIdeaStage(id: string, stage: PipelineStageKey) {
   return updateIdeaStatus(id, stageToStatus(stage))
 }
 
+/**
+ * Move a whole CLIENT BATCH to a stage at once — all the batch's videos travel
+ * the pipeline together. Gated by planning.move. Stage keys match stageToStatus.
+ */
+export async function moveBatch(ideaIds: string[], stage: PipelineStageKey) {
+  if (!(await currentUserHas('planning.move'))) {
+    return { error: 'No tienes permiso para mover videos en el flujo.' }
+  }
+  if (ideaIds.length === 0) return { success: true }
+  const supabase = await createClient()
+  const { error } = await supabase.from('content_ideas').update({ status: stageToStatus(stage) }).in('id', ideaIds)
+  if (error) return { error: error.message }
+  await logIdeaActivity(supabase, { ideaId: ideaIds[0], action: 'status_changed', metadata: { stage, batch: ideaIds.length } })
+  revalidatePath('/planning')
+  revalidatePath('/pipeline')
+  return { success: true }
+}
+
 // ── Idea detail bundle (for the Flujo board side panel) ───────────────────────
 
 export interface IdeaDetailBundle {
