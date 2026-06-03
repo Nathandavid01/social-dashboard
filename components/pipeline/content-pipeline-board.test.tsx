@@ -5,6 +5,10 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 const moveIdeaStage = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
 vi.mock('@/lib/actions/content-ideas', () => ({ moveIdeaStage: (...a: unknown[]) => moveIdeaStage(...a) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+vi.mock('@/components/clients/profile/idea-detail-sheet', () => ({
+  IdeaDetailSheet: ({ ideaId, open }: { ideaId: string | null; open: boolean }) =>
+    open ? <div data-testid="sheet">sheet:{ideaId}</div> : null,
+}))
 
 import { ContentPipelineBoard } from './content-pipeline-board'
 
@@ -91,6 +95,13 @@ describe('ContentPipelineBoard', () => {
     // card is in Idea; the forward button moves it to Caption
     fireEvent.click(screen.getByRole('button', { name: /mover adelante/i }))
     await waitFor(() => expect(moveIdeaStage).toHaveBeenCalledWith(expect.any(String), 'caption'))
+  })
+
+  it('opens the detail sheet when a card is clicked', () => {
+    render(<ContentPipelineBoard ideas={[card({ id: 'idea-9', title: 'Abrir esto' })]} />)
+    expect(screen.queryByTestId('sheet')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Abrir esto'))
+    expect(screen.getByTestId('sheet')).toHaveTextContent('sheet:idea-9')
   })
 
   it('disables moving back from the first column', () => {

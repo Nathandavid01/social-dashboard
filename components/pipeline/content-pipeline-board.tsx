@@ -7,6 +7,7 @@ import { PIPELINE_STAGES, computeStage, adjacentStage, type PipelineStageKey } f
 import { moveIdeaStage } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
 import { clientAccent } from '@/lib/utils/client-accent'
+import { IdeaDetailSheet } from '@/components/clients/profile/idea-detail-sheet'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const TYPE_LABEL: Record<string, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
@@ -19,6 +20,7 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [overrides, setOverrides] = useState<Record<string, PipelineStageKey>>({})
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [, startMove] = useTransition()
   const { toast } = useToast()
 
@@ -140,10 +142,16 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full min-w-max gap-3 p-4">
           {PIPELINE_STAGES.map((stage) => (
-            <StageColumn key={stage.key} stageKey={stage.key} label={stage.label} cards={byStage[stage.key]} onMove={moveCard} />
+            <StageColumn key={stage.key} stageKey={stage.key} label={stage.label} cards={byStage[stage.key]} onMove={moveCard} onOpen={setSelectedId} />
           ))}
         </div>
       </div>
+
+      <IdeaDetailSheet
+        ideaId={selectedId}
+        open={selectedId != null}
+        onOpenChange={(o) => { if (!o) setSelectedId(null) }}
+      />
     </div>
   )
 }
@@ -153,7 +161,7 @@ const STAGE_DOT: Record<PipelineStageKey, string> = {
   edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
 }
 
-function StageColumn({ stageKey, label, cards, onMove }: { stageKey: PipelineStageKey; label: string; cards: Card[]; onMove: (card: Card, dir: 1 | -1) => void }) {
+function StageColumn({ stageKey, label, cards, onMove, onOpen }: { stageKey: PipelineStageKey; label: string; cards: Card[]; onMove: (card: Card, dir: 1 | -1) => void; onOpen: (id: string) => void }) {
   return (
     <section className="flex h-full w-[268px] flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
@@ -172,7 +180,7 @@ function StageColumn({ stageKey, label, cards, onMove }: { stageKey: PipelineSta
         {cards.length === 0 ? (
           <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
-          cards.map((card) => <PipelineCard key={card.id} card={card} stage={stageKey} onMove={onMove} />)
+          cards.map((card) => <PipelineCard key={card.id} card={card} stage={stageKey} onMove={onMove} onOpen={onOpen} />)
         )}
       </div>
     </section>
@@ -183,7 +191,7 @@ const SHOW_THUMB: Record<PipelineStageKey, boolean> = {
   title: false, idea: false, caption: false, video: true, edited: true, approval: true, publication: true,
 }
 
-const PipelineCard = memo(function PipelineCard({ card, stage, onMove }: { card: Card; stage: PipelineStageKey; onMove: (card: Card, dir: 1 | -1) => void }) {
+const PipelineCard = memo(function PipelineCard({ card, stage, onMove, onOpen }: { card: Card; stage: PipelineStageKey; onMove: (card: Card, dir: 1 | -1) => void; onOpen: (id: string) => void }) {
   const a = clientAccent(card.client?.id)
   const videoCount = card.videos?.length ?? 0
   const platforms = card.client?.platforms ?? []
@@ -194,13 +202,14 @@ const PipelineCard = memo(function PipelineCard({ card, stage, onMove }: { card:
 
   return (
     <article
+      onClick={() => onOpen(card.id)}
       className="group relative cursor-pointer overflow-hidden rounded-lg border border-white/[0.06] bg-[#141416] transition-all hover:border-white/[0.14] hover:bg-[#17171a]"
       style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}
     >
       {/* move controls (appear on hover) */}
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
-        <MoveBtn dir={-1} disabled={!canBack} onClick={() => onMove(card, -1)} />
-        <MoveBtn dir={1} disabled={!canFwd} onClick={() => onMove(card, 1)} />
+        <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(card, -1) }} />
+        <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(card, 1) }} />
       </div>
       {SHOW_THUMB[stage] && <CardThumb thumb={thumb} accent={a.dot} />}
 
@@ -283,7 +292,7 @@ const PipelineCard = memo(function PipelineCard({ card, stage, onMove }: { card:
   )
 })
 
-function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: () => void }) {
+function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: (e: React.MouseEvent) => void }) {
   const Icon = dir === 1 ? ChevronRight : ChevronLeft
   return (
     <button
