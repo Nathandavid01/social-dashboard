@@ -4,8 +4,12 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type {
   ContentIdea, ContentIdeaStatus, ContentIdeaType, ContentIdeaVideo, IdeaWithPipeline,
+  ClientAsset, ContentIdeaActivity,
 } from '@/lib/supabase/types'
-import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { logIdeaActivity, getIdeaActivity } from '@/lib/utils/idea-activity'
+import { computeIdeaProgress, type IdeaProgress } from '@/lib/utils/idea-progress'
+import { getIdeaVideos } from './idea-videos'
+import { getClientAssets } from './client-profile'
 import { currentUserHas } from '@/lib/auth/server'
 
 export async function getContentIdeas(filter?: {
@@ -193,6 +197,12 @@ export async function reassignVideo(productionTaskId: string, assigneeId: string
 }
 
 export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
+  // Moving a card through the pipeline is permission-gated (see CLAUDE.md RBAC).
+  // published_at is set/cleared automatically by the set_idea_published_at DB
+  // trigger when status enters/leaves 'publicada' — we only write status here.
+  if (!(await currentUserHas('planning.move'))) {
+    return { error: 'No tienes permiso para mover videos en el flujo.' }
+  }
   const supabase = await createClient()
   const { error } = await supabase.from('content_ideas').update({ status }).eq('id', id)
   if (error) return { error: error.message }
@@ -408,4 +418,57 @@ export async function assignIdeaToProductionTask(input: {
   revalidatePath('/planning')
   revalidatePath('/produccion')
   return { success: true, taskId: task.id }
+}
+
+// ── Idea detail bundle (for the Flujo board side panel) ───────────────────────
+
+export interface IdeaDetailBundle {
+  idea: ContentIdea
+  videos: ContentIdeaVideo[]
+  assets: ClientAsset[]
+  activity: ContentIdeaActivity[]
+  progress: IdeaProgress
+}
+
+/**
+ * One-shot fetch of everything the IdeaDetailSheet needs, so the side panel can
+ * open from a client component without four separate round-trips. Mirrors what
+ * /produccion/idea/[id]/page.tsx fetches server-side. Activity is gated by
+ * 'activity.read' (empty array when the caller lacks it).
+ */
+export async function getIdeaDetailBundle(
+  ideaId: string,
+): Promise<{ bundle?: IdeaDetailBundle; error?: string }> {
+  const supabase = await createClient()
+  const { data: idea, error } = await supabase
+    .from('content_ideas')
+    .select('*, client:clients(id, name, industry)')
+    .eq('id', ideaId)
+    .single()
+  if (error || !idea) return { error: error?.message ?? 'Idea no encontrada' }
+
+  const canSeeActivity = await currentUserHas('activity.read')
+  const [videos, assets, activity] = await Promise.all([
+    getIdeaVideos(ideaId),
+    idea.client_id
+      ? getClientAssets(idea.client_id).catch(() => [] as ClientAsset[])
+      : Promise.resolve([] as ClientAsset[]),
+    canSeeActivity ? getIdeaActivity(ideaId) : Promise.resolve([] as ContentIdeaActivity[]),
+  ])
+
+  const progress = computeIdeaProgress({
+    idea: idea as unknown as ContentIdea,
+    videos,
+    assetCount: assets.length,
+  })
+
+  return {
+    bundle: {
+      idea: idea as unknown as ContentIdea,
+      videos,
+      assets,
+      activity,
+      progress,
+    },
+  }
 }

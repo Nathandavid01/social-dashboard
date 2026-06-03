@@ -20,6 +20,7 @@ import { AssetsTab } from '@/components/clients/profile/tabs/assets-tab'
 import { VideoBufferCard } from '@/components/clients/video-buffer-card'
 import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-button'
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
+import { currentUserHas } from '@/lib/auth/server'
 import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
 
 const VALID_TABS: ClientTabKey[] = ['overview', 'flujo', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
@@ -105,13 +106,18 @@ export default async function ClientDetailPage({
     }
   }
 
-  const { data: allIdeas } = await supabase
-    .from('content_ideas')
-    .select('*')
-    .eq('client_id', id)
-    .neq('status', 'descartada')
-    .order('created_at', { ascending: false })
-  const flowSlot = <PipelineFlowBoard ideas={(allIdeas ?? []) as unknown as ContentIdea[]} />
+  const [{ data: allIdeas }, canMoveCards] = await Promise.all([
+    supabase
+      .from('content_ideas')
+      .select('*')
+      .eq('client_id', id)
+      .neq('status', 'descartada')
+      .order('created_at', { ascending: false }),
+    currentUserHas('planning.move'),
+  ])
+  const flowSlot = (
+    <PipelineFlowBoard ideas={(allIdeas ?? []) as unknown as ContentIdea[]} canMove={canMoveCards} />
+  )
 
   const captionsResult = client.metricool_blog_id
     ? await fetchClientCaptions(client.metricool_blog_id, client.name)

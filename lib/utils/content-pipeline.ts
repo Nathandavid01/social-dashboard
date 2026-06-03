@@ -57,9 +57,10 @@ function startOfMonthIso(): string {
   return new Date(d.getFullYear(), d.getMonth(), 1).toISOString()
 }
 
-interface IdeaRow {
+export interface IdeaRow {
   client_id: string | null
   status: string
+  published_at?: string | null
   updated_at: string | null
   created_at: string
 }
@@ -73,7 +74,7 @@ export async function getClientPipeline(clientId: string, postingDays: number[])
   const monthStart = startOfMonthIso()
   const { data: ideas } = await supabase
     .from('content_ideas')
-    .select('client_id, status, updated_at, created_at')
+    .select('client_id, status, published_at, updated_at, created_at')
     .eq('client_id', clientId)
     .in('status', COUNTED_STATUSES)
 
@@ -91,7 +92,7 @@ export async function getClientPipeline(clientId: string, postingDays: number[])
   }
 }
 
-function bucketize(rows: IdeaRow[], weekStart: string, monthStart: string) {
+export function bucketize(rows: IdeaRow[], weekStart: string, monthStart: string) {
   let ideas = 0
   let porGrabar = 0
   let porEditar = 0
@@ -114,7 +115,9 @@ function bucketize(rows: IdeaRow[], weekStart: string, monthStart: string) {
         porPublicar++
         break
       case 'publicada': {
-        const ts = r.updated_at ?? r.created_at
+        // Count by published_at (set by the set_idea_published_at trigger).
+        // Fall back to updated_at/created_at only for legacy rows with no stamp.
+        const ts = r.published_at ?? r.updated_at ?? r.created_at
         if (ts >= monthStart) publicadasMes++
         if (ts >= weekStart) publicadasSemana++
         break
@@ -139,7 +142,7 @@ export async function getPipelineTotals(): Promise<{
     supabase.from('clients').select('id, name, posting_days').eq('status', 'active'),
     supabase
       .from('content_ideas')
-      .select('client_id, status, updated_at, created_at')
+      .select('client_id, status, published_at, updated_at, created_at')
       .in('status', COUNTED_STATUSES),
   ])
 
