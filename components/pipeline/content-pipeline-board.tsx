@@ -9,6 +9,7 @@ import { moveIdeaStage } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
 import { clientAccent } from '@/lib/utils/client-accent'
 import { IdeaDetailSheet } from '@/components/clients/profile/idea-detail-sheet'
+import { NewVideoDialog } from './new-video-dialog'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const TYPE_LABEL: Record<string, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
@@ -111,9 +112,7 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
           </div>
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <button className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
-            <Plus className="h-3.5 w-3.5" /> Nuevo video
-          </button>
+          <NewVideoDialog clients={clients} />
           {team.length > 0 && (
             <div className="ml-1 hidden items-center -space-x-1.5 lg:flex" aria-label="Equipo">
               {team.slice(0, 4).map((t) => (

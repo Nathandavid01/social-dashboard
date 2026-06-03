@@ -9,6 +9,7 @@ vi.mock('@/components/clients/profile/idea-detail-sheet', () => ({
   IdeaDetailSheet: ({ ideaId, open }: { ideaId: string | null; open: boolean }) =>
     open ? <div data-testid="sheet">sheet:{ideaId}</div> : null,
 }))
+vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 
 import { ContentPipelineBoard } from './content-pipeline-board'
 

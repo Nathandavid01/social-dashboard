@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.3 — 2026-06-03
+
+### "Nuevo video" desde el board Pipeline
+- El botón **Nuevo video** del tablero ahora **crea un video** de verdad: eliges cliente, título y tipo (Reel/Post/Carrusel/Story) y aparece en la primera columna, listo para idear.
+
 ## v2.2 — 2026-06-03
 
 ### Pulido del board Pipeline
