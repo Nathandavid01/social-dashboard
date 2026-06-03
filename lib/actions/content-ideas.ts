@@ -8,6 +8,7 @@ import type {
 } from '@/lib/supabase/types'
 import { logIdeaActivity, getIdeaActivity } from '@/lib/utils/idea-activity'
 import { computeIdeaProgress, type IdeaProgress } from '@/lib/utils/idea-progress'
+import { stageToStatus, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
 import { getIdeaVideos } from './idea-videos'
 import { getClientAssets } from './client-profile'
 import { currentUserHas } from '@/lib/auth/server'
@@ -418,6 +419,18 @@ export async function assignIdeaToProductionTask(input: {
   revalidatePath('/planning')
   revalidatePath('/produccion')
   return { success: true, taskId: task.id }
+}
+
+// ── Global pipeline board: move a card between stages ─────────────────────────
+
+/**
+ * Move a card to a board stage from the global Content Pipeline board.
+ * Persists the best-matching base status (see stageToStatus) — exact 7-stage
+ * persistence lands with the pipeline_stage migration (0031). Reuses
+ * updateIdeaStatus, so it inherits the planning.move gate + activity log.
+ */
+export async function moveIdeaStage(id: string, stage: PipelineStageKey) {
+  return updateIdeaStatus(id, stageToStatus(stage))
 }
 
 // ── Idea detail bundle (for the Flujo board side panel) ───────────────────────

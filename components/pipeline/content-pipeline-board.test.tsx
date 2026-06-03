@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+
+const moveIdeaStage = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
+vi.mock('@/lib/actions/content-ideas', () => ({ moveIdeaStage: (...a: unknown[]) => moveIdeaStage(...a) }))
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+
 import { ContentPipelineBoard } from './content-pipeline-board'
 
 function card(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -18,7 +23,11 @@ function card(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   } as IdeaWithPipeline
 }
 
-beforeEach(() => cleanup())
+beforeEach(() => {
+  cleanup()
+  moveIdeaStage.mockClear()
+  moveIdeaStage.mockResolvedValue({ success: true })
+})
 
 describe('ContentPipelineBoard', () => {
   it('renders all 7 pipeline columns', () => {
@@ -75,6 +84,18 @@ describe('ContentPipelineBoard', () => {
   it('shows a publication badge on published cards', () => {
     render(<ContentPipelineBoard ideas={[card({ status: 'publicada', published_at: '2026-06-02T00:00:00Z', title: 'Ya salió' })]} />)
     expect(screen.getByText(/^publicado$/i)).toBeInTheDocument()
+  })
+
+  it('moves a card forward to the next stage and persists it', async () => {
+    render(<ContentPipelineBoard ideas={[card({ hook: 'h', title: 'Avanza' })]} />)
+    // card is in Idea; the forward button moves it to Caption
+    fireEvent.click(screen.getByRole('button', { name: /mover adelante/i }))
+    await waitFor(() => expect(moveIdeaStage).toHaveBeenCalledWith(expect.any(String), 'caption'))
+  })
+
+  it('disables moving back from the first column', () => {
+    render(<ContentPipelineBoard ideas={[card({ title: 'En title' })]} />)
+    expect(screen.getByRole('button', { name: /mover atrás/i })).toBeDisabled()
   })
 
   it('excludes descartada and counts published in the stats', () => {

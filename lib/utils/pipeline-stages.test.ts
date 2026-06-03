@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeStage, bucketByStage, PIPELINE_STAGES, type StageInput } from './pipeline-stages'
+import { computeStage, bucketByStage, adjacentStage, stageToStatus, PIPELINE_STAGES, type StageInput } from './pipeline-stages'
 
 function idea(over: Partial<StageInput> = {}): StageInput {
   return {
@@ -37,6 +37,29 @@ describe('computeStage — furthest milestone reached', () => {
   it('published wins over everything', () => {
     expect(computeStage(idea({ status: 'publicada' }))).toBe('publication')
     expect(computeStage(idea({ published_at: '2026-06-01T00:00:00Z', approval_status: 'approved' }))).toBe('publication')
+  })
+})
+
+describe('adjacentStage', () => {
+  it('moves forward and backward', () => {
+    expect(adjacentStage('idea', 1)).toBe('caption')
+    expect(adjacentStage('idea', -1)).toBe('title')
+  })
+  it('returns null at the ends', () => {
+    expect(adjacentStage('title', -1)).toBeNull()
+    expect(adjacentStage('publication', 1)).toBeNull()
+  })
+})
+
+describe('stageToStatus', () => {
+  it('maps board stages to the persisting base status', () => {
+    expect(stageToStatus('title')).toBe('idea')
+    expect(stageToStatus('idea')).toBe('idea')
+    expect(stageToStatus('caption')).toBe('idea')
+    expect(stageToStatus('video')).toBe('grabada')
+    expect(stageToStatus('edited')).toBe('producida')
+    expect(stageToStatus('approval')).toBe('producida')
+    expect(stageToStatus('publication')).toBe('publicada')
   })
 })
 

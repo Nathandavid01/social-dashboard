@@ -42,6 +42,30 @@ export function computeStage(idea: StageInput): PipelineStageKey {
   return 'title'
 }
 
+const STAGE_ORDER = PIPELINE_STAGES.map((s) => s.key)
+
+/** Adjacent stage in the given direction, or null at the ends. */
+export function adjacentStage(stage: PipelineStageKey, dir: 1 | -1): PipelineStageKey | null {
+  const i = STAGE_ORDER.indexOf(stage)
+  const j = i + dir
+  return j >= 0 && j < STAGE_ORDER.length ? STAGE_ORDER[j] : null
+}
+
+/**
+ * The content_ideas.status that best persists a board stage today (before the
+ * pipeline_stage column migration). Sub-stages share a base status; exact
+ * 7-stage persistence arrives with migration 0031.
+ */
+export function stageToStatus(stage: PipelineStageKey): 'idea' | 'grabada' | 'producida' | 'publicada' {
+  switch (stage) {
+    case 'video': return 'grabada'
+    case 'edited':
+    case 'approval': return 'producida'
+    case 'publication': return 'publicada'
+    default: return 'idea' // title, idea, caption
+  }
+}
+
 /** Bucket a list of cards into the 7 columns, preserving input order. */
 export function bucketByStage<T extends StageInput>(ideas: T[]): Record<PipelineStageKey, T[]> {
   const out = {

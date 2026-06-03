@@ -1,9 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Search, Filter, LayoutGrid, Plus, Calendar, Film, ChevronDown, Play, Check, CheckCircle2, Clock, Sparkles } from 'lucide-react'
+import { memo, useCallback, useMemo, useState, useTransition } from 'react'
+import { Search, Filter, LayoutGrid, Plus, Calendar, Film, ChevronDown, Play, Check, CheckCircle2, Clock, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
-import { PIPELINE_STAGES, bucketByStage, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
+import { PIPELINE_STAGES, computeStage, adjacentStage, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
+import { moveIdeaStage } from '@/lib/actions/content-ideas'
+import { useToast } from '@/lib/hooks/use-toast'
 import { clientAccent } from '@/lib/utils/client-accent'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
@@ -16,6 +18,31 @@ type Card = IdeaWithPipeline
 export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [overrides, setOverrides] = useState<Record<string, PipelineStageKey>>({})
+  const [, startMove] = useTransition()
+  const { toast } = useToast()
+
+  const stageOf = useCallback(
+    (i: Card): PipelineStageKey => overrides[i.id] ?? computeStage(i),
+    [overrides],
+  )
+
+  const moveCard = useCallback(
+    (card: Card, dir: 1 | -1) => {
+      const cur = stageOf(card)
+      const target = adjacentStage(cur, dir)
+      if (!target) return
+      setOverrides((o) => ({ ...o, [card.id]: target }))
+      startMove(async () => {
+        const res = await moveIdeaStage(card.id, target)
+        if (res?.error) {
+          setOverrides((o) => ({ ...o, [card.id]: cur }))
+          toast({ title: 'No se pudo mover', description: res.error, variant: 'destructive' })
+        }
+      })
+    },
+    [stageOf, toast],
+  )
 
   const clients = useMemo(() => {
     const map = new Map<string, { id: string; name: string; count: number }>()
@@ -39,7 +66,11 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
     })
   }, [ideas, clientFilter, search])
 
-  const byStage = useMemo(() => bucketByStage(visible), [visible])
+  const byStage = useMemo(() => {
+    const out = { title: [], idea: [], caption: [], video: [], edited: [], approval: [], publication: [] } as Record<PipelineStageKey, Card[]>
+    for (const i of visible) out[stageOf(i)].push(i)
+    return out
+  }, [visible, stageOf])
   const published = visible.filter((i) => i.published_at || i.status === 'publicada').length
   const overdue = visible.filter(
     (i) => !i.published_at && i.status !== 'publicada' && i.publish_date && new Date(`${i.publish_date}T23:59:59`) < new Date(),
@@ -109,7 +140,7 @@ export function ContentPipelineBoard({ ideas }: { ideas: Card[] }) {
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full min-w-max gap-3 p-4">
           {PIPELINE_STAGES.map((stage) => (
-            <StageColumn key={stage.key} stageKey={stage.key} label={stage.label} cards={byStage[stage.key]} />
+            <StageColumn key={stage.key} stageKey={stage.key} label={stage.label} cards={byStage[stage.key]} onMove={moveCard} />
           ))}
         </div>
       </div>
@@ -122,7 +153,7 @@ const STAGE_DOT: Record<PipelineStageKey, string> = {
   edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
 }
 
-function StageColumn({ stageKey, label, cards }: { stageKey: PipelineStageKey; label: string; cards: Card[] }) {
+function StageColumn({ stageKey, label, cards, onMove }: { stageKey: PipelineStageKey; label: string; cards: Card[]; onMove: (card: Card, dir: 1 | -1) => void }) {
   return (
     <section className="flex h-full w-[268px] flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
@@ -141,7 +172,7 @@ function StageColumn({ stageKey, label, cards }: { stageKey: PipelineStageKey; l
         {cards.length === 0 ? (
           <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
-          cards.map((card) => <PipelineCard key={card.id} card={card} stage={stageKey} />)
+          cards.map((card) => <PipelineCard key={card.id} card={card} stage={stageKey} onMove={onMove} />)
         )}
       </div>
     </section>
@@ -152,18 +183,25 @@ const SHOW_THUMB: Record<PipelineStageKey, boolean> = {
   title: false, idea: false, caption: false, video: true, edited: true, approval: true, publication: true,
 }
 
-function PipelineCard({ card, stage }: { card: Card; stage: PipelineStageKey }) {
+const PipelineCard = memo(function PipelineCard({ card, stage, onMove }: { card: Card; stage: PipelineStageKey; onMove: (card: Card, dir: 1 | -1) => void }) {
   const a = clientAccent(card.client?.id)
   const videoCount = card.videos?.length ?? 0
   const platforms = card.client?.platforms ?? []
   const dateStr = card.publish_date ?? card.created_at
   const thumb = card.videos?.find((v) => v.drive_thumb_url)?.drive_thumb_url ?? null
+  const canBack = adjacentStage(stage, -1) !== null
+  const canFwd = adjacentStage(stage, 1) !== null
 
   return (
     <article
-      className="group cursor-pointer overflow-hidden rounded-lg border border-white/[0.06] bg-[#141416] transition-all hover:border-white/[0.14] hover:bg-[#17171a]"
+      className="group relative cursor-pointer overflow-hidden rounded-lg border border-white/[0.06] bg-[#141416] transition-all hover:border-white/[0.14] hover:bg-[#17171a]"
       style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}
     >
+      {/* move controls (appear on hover) */}
+      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
+        <MoveBtn dir={-1} disabled={!canBack} onClick={() => onMove(card, -1)} />
+        <MoveBtn dir={1} disabled={!canFwd} onClick={() => onMove(card, 1)} />
+      </div>
       {SHOW_THUMB[stage] && <CardThumb thumb={thumb} accent={a.dot} />}
 
       <div className="space-y-2 p-2.5 pl-3">
@@ -186,6 +224,24 @@ function PipelineCard({ card, stage }: { card: Card; stage: PipelineStageKey }) 
           <h3 className="text-[13px] font-semibold leading-snug tracking-tight text-foreground">{card.title}</h3>
           {card.hook && <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{card.hook}</p>}
         </div>
+
+        {/* tags */}
+        {(() => {
+          const tags = (card.hashtags_suggestion ?? '')
+            .split(/[\s,]+/)
+            .map((t) => t.replace(/^#/, '').trim())
+            .filter(Boolean)
+            .slice(0, 3)
+          return tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {tags.map((t) => (
+                <span key={t} className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+                  #{t}
+                </span>
+              ))}
+            </div>
+          ) : null
+        })()}
 
         {stage === 'edited' && <QcChecklist card={card} />}
         {stage === 'approval' && <ApprovalRow card={card} accent={a.dot} />}
@@ -224,6 +280,20 @@ function PipelineCard({ card, stage }: { card: Card; stage: PipelineStageKey }) 
         </div>
       </div>
     </article>
+  )
+})
+
+function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: () => void }) {
+  const Icon = dir === 1 ? ChevronRight : ChevronLeft
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={dir === 1 ? 'Mover adelante' : 'Mover atrás'}
+      className="grid h-5 w-5 place-items-center rounded border border-white/10 bg-black/50 text-muted-foreground backdrop-blur-sm transition hover:bg-black/70 hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </button>
   )
 }
 
