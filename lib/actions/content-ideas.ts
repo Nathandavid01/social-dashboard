@@ -267,6 +267,17 @@ export async function updateIdeaBrief(
   return { success: true }
 }
 
+/** Rename a video/idea. Empty title falls back to "Sin título". */
+export async function updateIdeaTitle(ideaId: string, title: string) {
+  const supabase = await createClient()
+  const clean = title.trim() || 'Sin título'
+  const { error } = await supabase.from('content_ideas').update({ title: clean }).eq('id', ideaId)
+  if (error) return { error: error.message }
+  revalidatePath('/planning')
+  revalidatePath(`/produccion/idea/${ideaId}`)
+  return { success: true }
+}
+
 // ── Manual idea creation (no AI) ─────────────────────────────────────────────
 
 export async function createContentIdeaManual(input: {

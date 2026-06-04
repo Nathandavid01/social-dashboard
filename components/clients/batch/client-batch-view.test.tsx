@@ -99,14 +99,14 @@ describe('ClientBatchView', () => {
     expect(screen.getByText(/Este lote está en la etapa/i)).toBeInTheDocument()
   })
 
-  it('renders every video as an editable card (Video N + inline idea, caption, uploads)', () => {
-    expect(screen.getByText('Video 1')).toBeInTheDocument()
-    expect(screen.getByText('Video 2')).toBeInTheDocument()
+  it('renders every video as an editable card (editable title + inline idea, caption, uploads)', () => {
+    // editable title per video (InlineEdit shows the content_idea title)
+    expect(screen.getByText('612 de noche: planes para cada vibe')).toBeInTheDocument()
+    expect(screen.getByText('Cómo encender un cigarro como un pro')).toBeInTheDocument()
     // each video has its own inline idea brief + caption editor + uploads
     expect(screen.getAllByTestId('brief')).toHaveLength(2)
     expect(screen.getAllByTestId('caption')).toHaveLength(2)
     expect(screen.getAllByTestId('video-panel')).toHaveLength(2)
-    // editors are wired to each real video id
     expect(screen.getByText('brief:v-real')).toBeInTheDocument()
     expect(screen.getByText('caption:v-rec')).toBeInTheDocument()
   })

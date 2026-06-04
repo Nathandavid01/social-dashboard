@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.18 — 2026-06-04
+
+### Título editable por video
+- Cada video del lote tiene ahora un **título editable** (clic para renombrar; se guarda al instante). Debajo queda "Video N · Reel" como referencia. No requiere migración (la columna `title` ya existe).
+
 ## v2.17 — 2026-06-04
 
 ### Resumen del lote editable: nombre, cantidad de videos y encargado

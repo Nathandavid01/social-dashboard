@@ -3,6 +3,8 @@
 import { Check, Film } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
+import { InlineEdit } from '@/components/shared/inline-edit'
+import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
@@ -24,9 +26,16 @@ export function VideoWorkCard({ video, index }: { video: BatchVideo; index: numb
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-muted text-xs font-bold text-muted-foreground">
             {index + 1}
           </span>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground">Video {index + 1}</span>
-            <span className="text-[11px] text-muted-foreground">{contentTypeLabel(video.content_type)}</span>
+          <div className="flex min-w-0 flex-col">
+            <InlineEdit
+              value={video.title}
+              onSave={(v) => updateIdeaTitle(video.id, v)}
+              placeholder={`Video ${index + 1}`}
+              displayClassName="text-sm font-semibold text-foreground"
+            />
+            <span className="text-[11px] text-muted-foreground">
+              Video {index + 1} · {contentTypeLabel(video.content_type)}
+            </span>
           </div>
         </div>
         <span
