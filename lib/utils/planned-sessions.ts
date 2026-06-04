@@ -21,6 +21,21 @@ export interface PlannedSession {
   empty: number
 }
 
+/**
+ * Whether to draw planned empty-slot cards for a client on the board.
+ *
+ * Only active clients with a posting cadence that haven't started yet (no active
+ * ideas) get planned cards — clients already being worked keep their real batch
+ * card (which preserves their pipeline progress), so nothing appears twice.
+ */
+export function shouldPlanForClient(opts: {
+  status: string
+  postingDaysLength: number
+  activeIdeasCount: number
+}): boolean {
+  return opts.status === 'active' && opts.postingDaysLength > 0 && opts.activeIdeasCount === 0
+}
+
 export interface PlanSessionsInput {
   /** Videos needed this month (from posting cadence, e.g. perMonth). */
   monthlyTarget: number

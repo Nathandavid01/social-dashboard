@@ -88,9 +88,9 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
   const published = visible.filter((b) => stageOf(b) === 'publication').length
 
   return (
-    <div className="dark flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a0a0b] text-foreground">
+    <div className="flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-background text-foreground">
       {/* Header */}
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3.5">
         <div className="flex items-center gap-3">
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-[13px] font-bold text-black shadow-lg shadow-primary/20">N</div>
           <div className="min-w-0">
@@ -101,7 +101,7 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
         <div className="flex items-center gap-2">
           <div className="relative hidden sm:block">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar clientes, personas…" className="h-8 w-52 rounded-md border border-white/[0.08] bg-white/[0.03] pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar clientes, personas…" className="h-8 w-52 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
           </div>
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
@@ -110,7 +110,7 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
       </header>
 
       {/* Client chips + stats */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-5 py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-2.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <Chip active={clientFilter === null} onClick={() => setClientFilter(null)} dot="#3b82f6" label="Todos" count={batches.length} />
           {clients.map((c) => (
@@ -123,9 +123,9 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
       </div>
 
       {/* Assignee filter — color = person */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-5 py-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
         <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
-        <button onClick={() => setAssigneeFilter(null)} className={cn('rounded-full border px-3 py-1 text-[11px] font-medium transition', assigneeFilter === null ? 'border-white/20 bg-white/[0.08] text-foreground' : 'border-white/[0.06] text-muted-foreground hover:bg-white/[0.04]')}>Todos</button>
+        <button onClick={() => setAssigneeFilter(null)} className={cn('rounded-full border px-3 py-1 text-[11px] font-medium transition', assigneeFilter === null ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60')}>Todos</button>
         {team.map((p) => {
           const a = userAccent(p.id)
           const on = assigneeFilter === p.id
@@ -159,10 +159,10 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STAGE_DOT[stageKey] }} />
           <h2 className="text-[12px] font-semibold tracking-tight">{label}</h2>
-          <span className="rounded-full bg-white/[0.06] px-1.5 text-[10px] font-medium tabular-nums text-muted-foreground">{count}</span>
+          <span className="rounded-full bg-muted px-1.5 text-[10px] font-medium tabular-nums text-muted-foreground">{count}</span>
         </div>
       </div>
-      <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-white/[0.015] p-2">
+      <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-muted/30 p-2">
         {count === 0 ? (
           <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
@@ -184,17 +184,17 @@ function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient
   return (
     <article
       onClick={() => onOpen(client.clientId)}
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-white/[0.12] bg-[#111114] transition-all hover:border-white/[0.2] hover:bg-[#15151a]"
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-border bg-card transition-all hover:border-foreground/30 hover:bg-muted"
       style={{ boxShadow: 'inset 3px 0 0 0 #3b82f6' }}
     >
       <div className="space-y-2.5 p-3 pl-3.5">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-[12px] font-bold text-muted-foreground">{client.clientName.slice(0, 1).toUpperCase()}</span>
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-muted text-[12px] font-bold text-muted-foreground">{client.clientName.slice(0, 1).toUpperCase()}</span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{client.clientName}</p>
             <p className="truncate text-[10px] text-muted-foreground">{session.label} · {session.total} video{session.total === 1 ? '' : 's'}</p>
           </div>
-          <span className="shrink-0 rounded-full border border-dashed border-white/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80">Planificado</span>
+          <span className="shrink-0 rounded-full border border-dashed border-border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80">Planificado</span>
         </div>
 
         {/* empty slot grid (visual placeholders, no DB rows) */}
@@ -204,7 +204,7 @@ function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient
               key={i}
               className={cn(
                 'h-6 rounded-[5px] border',
-                i < session.filled ? 'border-transparent bg-cyan-500/30' : 'border-dashed border-white/15 bg-white/[0.02]',
+                i < session.filled ? 'border-transparent bg-cyan-500/30' : 'border-dashed border-border bg-muted/40',
               )}
             />
           ))}
@@ -232,7 +232,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const more = batch.total - thumbs
 
   return (
-    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/[0.06] bg-[#141416] transition-all hover:border-white/[0.14] hover:bg-[#17171a]" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
         <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(batch, -1) }} />
         <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(batch, 1) }} />
@@ -252,9 +252,9 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
         {/* thumbnail strip (assignee-tinted) */}
         <div className="flex gap-1">
           {Array.from({ length: thumbs }).map((_, i) => (
-            <div key={i} className="h-[42px] flex-1 rounded-md" style={{ background: `linear-gradient(135deg, ${a.dot}, ${a.dot}22 70%, #0a0a0b)` }} />
+            <div key={i} className="h-[42px] flex-1 rounded-md" style={{ background: `linear-gradient(135deg, ${a.dot}, ${a.dot}22 70%, transparent)` }} />
           ))}
-          {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-white/[0.05] text-[11px] font-semibold text-muted-foreground">+{more}</div>}
+          {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">+{more}</div>}
         </div>
 
         {/* progress */}
@@ -263,7 +263,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
             <span className="text-muted-foreground">En el pipeline</span>
             <span className="font-semibold tabular-nums" style={{ color: a.text }}>{pct}%</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
             <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: a.dot }} />
           </div>
         </div>
@@ -286,7 +286,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
 function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: (e: React.MouseEvent) => void }) {
   const Icon = dir === 1 ? ChevronRight : ChevronLeft
   return (
-    <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover batch adelante' : 'Mover batch atrás'} className="grid h-5 w-5 place-items-center rounded border border-white/10 bg-black/50 text-muted-foreground backdrop-blur-sm transition hover:bg-black/70 hover:text-foreground disabled:pointer-events-none disabled:opacity-30">
+    <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover batch adelante' : 'Mover batch atrás'} className="grid h-5 w-5 place-items-center rounded border border-border bg-background/80 text-muted-foreground backdrop-blur-sm transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30">
       <Icon className="h-3.5 w-3.5" />
     </button>
   )
@@ -294,7 +294,7 @@ function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; o
 
 function Chip({ active, onClick, dot, label, count }: { active: boolean; onClick: () => void; dot: string; label: string; count: number }) {
   return (
-    <button onClick={onClick} className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition', active ? 'border-white/20 bg-white/[0.08] text-foreground' : 'border-white/[0.06] text-muted-foreground hover:bg-white/[0.04] hover:text-foreground')}>
+    <button onClick={onClick} className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition', active ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground')}>
       <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: dot }} />
       {label}
       <span className="tabular-nums opacity-60">{count}</span>
@@ -304,7 +304,7 @@ function Chip({ active, onClick, dot, label, count }: { active: boolean; onClick
 
 function HeaderButton({ icon: Icon, label, trailing: Trailing }: { icon: typeof Filter; label: string; trailing?: typeof ChevronDown }) {
   return (
-    <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.02] px-2.5 text-xs text-muted-foreground transition hover:bg-white/[0.05] hover:text-foreground">
+    <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground">
       <Icon className="h-3.5 w-3.5" />
       <span className="hidden md:inline">{label}</span>
       {Trailing && <Trailing className="h-3 w-3 opacity-60" />}

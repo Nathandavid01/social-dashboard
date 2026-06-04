@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.12 — 2026-06-03
+
+### Sesiones planificadas para todos los clientes activos + board en light/dark
+- Las **tarjetas de sesión planificada** (espacios vacíos "por idear") ahora aparecen para **todos los clientes activos con cadencia que aún no han empezado** (sin ideas). Los que ya tienen ideas conservan su tarjeta de batch normal — nada se duplica.
+- El **Content Pipeline Board** ahora **respeta el modo claro/oscuro** de la app (antes estaba forzado a oscuro). En light mode el fondo es blanco, como el resto del dashboard.
+
 ## v2.11 — 2026-06-03
 
 ### Sesiones planificadas con espacios vacíos en el board (piloto: Nathandavid)

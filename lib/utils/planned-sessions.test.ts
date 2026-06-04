@@ -1,5 +1,20 @@
 import { describe, it, expect } from 'vitest'
-import { planSessions } from './planned-sessions'
+import { planSessions, shouldPlanForClient } from './planned-sessions'
+
+describe('shouldPlanForClient', () => {
+  it('plans for an active client with cadence and no active ideas', () => {
+    expect(shouldPlanForClient({ status: 'active', postingDaysLength: 7, activeIdeasCount: 0 })).toBe(true)
+  })
+  it('does not plan for paused/inactive clients', () => {
+    expect(shouldPlanForClient({ status: 'paused', postingDaysLength: 7, activeIdeasCount: 0 })).toBe(false)
+  })
+  it('does not plan when the client has no posting cadence', () => {
+    expect(shouldPlanForClient({ status: 'active', postingDaysLength: 0, activeIdeasCount: 0 })).toBe(false)
+  })
+  it('does not plan when the client already has ideas (real batch shows instead)', () => {
+    expect(shouldPlanForClient({ status: 'active', postingDaysLength: 7, activeIdeasCount: 3 })).toBe(false)
+  })
+})
 
 describe('planSessions', () => {
   it('splits a daily client (30/month, 2-week interval) into 2 cards of 15', () => {
