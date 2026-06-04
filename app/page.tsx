@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
 export default function Home() {
-  redirect('/home')
+  // Landing principal: el Content Pipeline Board (por ahora).
+  redirect('/pipeline')
 }

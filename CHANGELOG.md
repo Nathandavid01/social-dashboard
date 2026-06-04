@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.9 — 2026-06-03
+
+### El Content Pipeline Board es ahora la pantalla principal
+- Al **iniciar sesión** (y al entrar a la raíz del app) el usuario va directo al **Content Pipeline Board** (`/pipeline`), en vez de la pantalla de Operaciones. Es el centro de trabajo del equipo, por ahora.
+
 ## v2.8 — 2026-06-03
 
 ### Nueva pantalla: "Lote de videos" del cliente
