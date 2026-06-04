@@ -16,6 +16,8 @@ import {
 } from '@/lib/utils/batch-view'
 import type { PlannedSlot } from '@/lib/utils/planned-sessions'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
+import type { BatchConfig, TeamMember } from '@/lib/actions/client-batch'
+import { BatchSummaryBar } from './batch-summary-bar'
 import { BatchStepper } from './batch-stepper'
 import { VideoWorkCard } from './video-work-card'
 
@@ -39,11 +41,15 @@ function formatSlotDay(iso: string): string {
 export function ClientBatchView({
   pipeline,
   plannedSlots = [],
+  config = { batchLabel: null, videosPerBatch: null },
+  members = [],
   onClose,
   onChanged,
 }: {
   pipeline: ClientVideoPipeline
   plannedSlots?: PlannedSlot[]
+  config?: BatchConfig
+  members?: TeamMember[]
   /** When set, the view is an in-place overlay — shows a close button. */
   onClose?: () => void
   /** Called after a create/upload so an overlay can refetch its data. */
@@ -159,42 +165,15 @@ export function ClientBatchView({
           </div>
         </div>
 
-        {/* batch summary */}
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-              Lote
-            </span>
-            <span className="text-sm font-semibold text-foreground">Lote actual</span>
-          </div>
-          <div className="h-7 w-px bg-border" />
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-              Videos
-            </span>
-            <span className="text-sm font-semibold text-foreground">
-              {videos.length} {videos.length === 1 ? 'video' : 'videos'}
-            </span>
-          </div>
-          <div className="h-7 w-px bg-border" />
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-              Encargado
-            </span>
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              {client.assignee ? (
-                <>
-                  <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
-                    {(client.assignee.full_name ?? '?').slice(0, 1).toUpperCase()}
-                  </span>
-                  {client.assignee.full_name ?? 'Sin asignar'}
-                </>
-              ) : (
-                <span className="text-muted-foreground">Sin asignar</span>
-              )}
-            </span>
-          </div>
-        </div>
+        {/* editable batch summary: LOTE / cantidad / ENCARGADO */}
+        <BatchSummaryBar
+          clientId={client.id}
+          videosCount={videos.length}
+          config={config}
+          members={members}
+          assignee={client.assignee}
+          onChanged={refresh}
+        />
       </div>
 
       {/* stepper */}

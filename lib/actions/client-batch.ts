@@ -6,10 +6,72 @@ import { planSessions, planSlots, type PlannedSlot } from '@/lib/utils/planned-s
 import { resolveInterval } from '@/lib/utils/recording-window'
 import { getClientVideoBatch, type ClientVideoPipeline } from './video-pipeline'
 
+export interface BatchConfig {
+  /** Optional name/period for the current batch (LOTE). */
+  batchLabel: string | null
+  /** Optional override of videos per batch; null = derived from cadence. */
+  videosPerBatch: number | null
+}
+
+export interface TeamMember {
+  id: string
+  full_name: string | null
+}
+
 export interface ClientBatchData {
   pipeline: ClientVideoPipeline
   /** Empty, dated video slots when the client hasn't started (no videos). */
   plannedSlots: PlannedSlot[]
+  /** Editable LOTE + cantidad config (degrades to nulls before migration 0031). */
+  config: BatchConfig
+  /** Team members for the ENCARGADO picker. */
+  members: TeamMember[]
+}
+
+/**
+ * Defensive read of the per-client batch config (migration 0031). Returns nulls
+ * if the columns don't exist yet, so the view works before the migration lands.
+ */
+export async function getClientBatchConfig(clientId: string): Promise<BatchConfig> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('clients')
+    .select('batch_label, videos_per_batch')
+    .eq('id', clientId)
+    .maybeSingle()
+  if (error || !data) return { batchLabel: null, videosPerBatch: null }
+  const row = data as { batch_label?: string | null; videos_per_batch?: number | null }
+  return { batchLabel: row.batch_label ?? null, videosPerBatch: row.videos_per_batch ?? null }
+}
+
+/** Team members (for the ENCARGADO picker). */
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('profiles').select('id, full_name').order('full_name')
+  return (data ?? []) as TeamMember[]
+}
+
+/** Assign (or unassign) the client's owner/encargado. Uses clients.assigned_to. */
+export async function assignClient(clientId: string, userId: string | null): Promise<{ ok?: true; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('clients').update({ assigned_to: userId }).eq('id', clientId)
+  if (error) return { error: error.message }
+  return { ok: true }
+}
+
+/** Save the editable LOTE label + videos-per-batch override (needs migration 0031). */
+export async function updateClientBatchConfig(
+  clientId: string,
+  input: { batchLabel?: string | null; videosPerBatch?: number | null },
+): Promise<{ ok?: true; error?: string }> {
+  const supabase = await createClient()
+  const patch: Record<string, unknown> = {}
+  if ('batchLabel' in input) patch.batch_label = input.batchLabel?.trim() || null
+  if ('videosPerBatch' in input) patch.videos_per_batch = input.videosPerBatch ?? null
+  if (Object.keys(patch).length === 0) return { ok: true }
+  const { error } = await supabase.from('clients').update(patch).eq('id', clientId)
+  if (error) return { error: error.message }
+  return { ok: true }
 }
 
 /**
@@ -24,8 +86,12 @@ export async function getClientBatchData(clientId: string): Promise<ClientBatchD
   await ensureBatchVideos(clientId)
   const pipeline = await getClientVideoBatch(clientId)
   if (!pipeline) return null
-  const plannedSlots = pipeline.videos.length === 0 ? await buildPlannedSlots(clientId) : []
-  return { pipeline, plannedSlots }
+  const [plannedSlots, config, members] = await Promise.all([
+    pipeline.videos.length === 0 ? buildPlannedSlots(clientId) : Promise.resolve([]),
+    getClientBatchConfig(clientId),
+    getTeamMembers(),
+  ])
+  return { pipeline, plannedSlots, config, members }
 }
 
 /**
@@ -63,7 +129,8 @@ export async function ensureBatchVideos(clientId: string): Promise<{ created: nu
     intervalWeeks: resolveInterval(null),
     ideasCount: 0,
   })
-  const sessionSize = sessions[0]?.total ?? 0
+  const { videosPerBatch } = await getClientBatchConfig(clientId)
+  const sessionSize = videosPerBatch ?? (sessions[0]?.total ?? 0)
   if (sessionSize === 0) return { created: 0 }
 
   const {
@@ -107,7 +174,8 @@ export async function buildPlannedSlots(clientId: string): Promise<PlannedSlot[]
     intervalWeeks: resolveInterval(null),
     ideasCount: 0,
   })
-  const sessionSize = sessions[0]?.total ?? 0
+  const { videosPerBatch } = await getClientBatchConfig(clientId)
+  const sessionSize = videosPerBatch ?? (sessions[0]?.total ?? 0)
   if (sessionSize === 0) return []
 
   return planSlots(postingDays, sessionSize, new Date())

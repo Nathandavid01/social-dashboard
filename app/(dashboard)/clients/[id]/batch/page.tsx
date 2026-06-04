@@ -17,5 +17,12 @@ export default async function ClientBatchPage({
   const data = await getClientBatchData(id)
   if (!data) notFound()
 
-  return <ClientBatchView pipeline={data.pipeline} plannedSlots={data.plannedSlots} />
+  return (
+    <ClientBatchView
+      pipeline={data.pipeline}
+      plannedSlots={data.plannedSlots}
+      config={data.config}
+      members={data.members}
+    />
+  )
 }

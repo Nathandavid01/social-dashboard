@@ -188,6 +188,8 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
             <ClientBatchView
               pipeline={batchData.pipeline}
               plannedSlots={batchData.plannedSlots}
+              config={batchData.config}
+              members={batchData.members}
               onClose={closeBatch}
               onChanged={refetchBatch}
             />

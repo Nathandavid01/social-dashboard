@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.17 — 2026-06-04
+
+### Resumen del lote editable: nombre, cantidad de videos y encargado
+- En el Lote de videos, el recuadro de resumen ahora es **editable**:
+  - **Encargado** — selector de persona para **asignar** el cliente/lote a alguien del equipo (funciona ya).
+  - **Lote** — nómbralo (ej. "Junio 2026").
+  - **Videos** — fija la **cantidad de videos** del lote (sobrescribe el cálculo automático por cadencia).
+- Nota técnica: el Encargado funciona de inmediato; **Lote** y **cantidad** requieren aplicar la migración `0031_client_batch_config.sql` en la base de producción (Nathan la corre una vez). El código degrada con elegancia mientras tanto.
+
 ## v2.16 — 2026-06-04
 
 ### Los videos del lote ya vienen creados, con idea y caption editables en cada uno
