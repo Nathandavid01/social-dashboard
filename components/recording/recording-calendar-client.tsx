@@ -5,6 +5,7 @@ import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supab
 import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { userAccent } from '@/lib/utils/user-accent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -457,37 +458,36 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all'
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-foreground sm:p-5">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-semibold flex items-center gap-2">
-            <Camera className="h-5 w-5 text-primary" />
-            Calendario de Grabación
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Programa y rastrea todas las sesiones de grabación
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-black shadow-lg shadow-primary/20">
+            <Camera className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Calendario de Grabación</h1>
+            <p className="text-[11px] text-muted-foreground">Todas las grabaciones agendadas · color por videógrafo</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* View toggle */}
-          <div className="flex items-center gap-1 rounded-lg border bg-muted/40 p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
             <button
               onClick={() => setView('calendar')}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'calendar' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'calendar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
             >
               <CalendarDays className="h-3.5 w-3.5" /> Calendario
             </button>
             <button
               onClick={() => setView('list')}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'list' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
             >
               <List className="h-3.5 w-3.5" /> Lista
             </button>
           </div>
-          <Button size="sm" className="gap-1.5" onClick={() => { setAddDate(undefined); setShowAdd(true) }}>
-            <Plus className="h-4 w-4" /> Agregar Sesión
-          </Button>
+          <button onClick={() => { setAddDate(undefined); setShowAdd(true) }} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
+            <Plus className="h-3.5 w-3.5" /> Agregar sesión
+          </button>
         </div>
       </div>
 
@@ -532,6 +532,22 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
         )}
       </div>
 
+      {/* Videographer color legend */}
+      {teamMembers.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-border bg-muted/30 px-3 py-2">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Videógrafos</span>
+          {teamMembers.map((m) => {
+            const a = userAccent(m.id)
+            return (
+              <span key={m.id} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: a.dot }} />
+                {m.full_name}
+              </span>
+            )
+          })}
+        </div>
+      )}
+
       {/* Month nav */}
       <div className="flex items-center justify-between">
         <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 rounded hover:bg-muted transition-colors">
@@ -564,35 +580,36 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                 <div
                   key={dateStr}
                   className={cn(
-                    'min-h-[90px] rounded-xl border p-2 cursor-pointer hover:border-primary/50 transition-colors group',
-                    isToday(day) ? 'border-primary bg-primary/5' : 'border-border',
-                    !isCurrentMonth && 'opacity-25'
+                    'group min-h-[96px] cursor-pointer rounded-lg border p-2 transition-colors',
+                    isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border bg-muted/20 hover:border-primary/40',
+                    !isCurrentMonth && 'opacity-30',
                   )}
                   onClick={() => { setAddDate(dateStr); setShowAdd(true) }}
                 >
                   {/* Date number */}
                   <div className={cn(
-                    'text-xs font-semibold mb-1.5 w-6 h-6 flex items-center justify-center rounded-full',
-                    isToday(day) ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+                    'mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                    isToday(day) ? 'bg-primary text-black' : 'text-muted-foreground',
                   )}>
                     {format(day, 'd')}
                   </div>
 
-                  {/* Sessions */}
+                  {/* Sessions — colored by videographer */}
                   <div className="space-y-1">
                     {daySessions.slice(0, 3).map((session) => {
-                      const sc = statusConfig[session.status] ?? statusConfig.scheduled
+                      const a = userAccent(session.videographer_id)
                       const clientIdeas = session.client_id ? (ideasMap[session.client_id] ?? []) : []
                       const sessionIdeaCount = clientIdeas.filter((i) => i.recording_session_id === session.id).length
                       return (
                         <div
                           key={session.id}
-                          className={cn('rounded-md px-1.5 py-1 border text-[9px] leading-tight cursor-pointer hover:opacity-80', sc.bg)}
+                          className="cursor-pointer rounded-md px-1.5 py-1 text-[9px] leading-tight transition hover:opacity-80"
+                          style={{ backgroundColor: a.soft, boxShadow: `inset 2px 0 0 0 ${a.dot}` }}
                           onClick={(e) => { e.stopPropagation(); setIdeasSession(session) }}
                         >
-                          <p className={cn('font-semibold truncate', sc.color)}>{session.title}</p>
+                          <p className="truncate font-semibold" style={{ color: a.text }}>{session.title}</p>
                           {session.client && (
-                            <p className="text-muted-foreground truncate">{session.client.name}</p>
+                            <p className="truncate text-muted-foreground">{session.client.name}</p>
                           )}
                           {sessionIdeaCount > 0 && (
                             <p className="text-muted-foreground">{sessionIdeaCount} ideas</p>
@@ -601,7 +618,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                       )
                     })}
                     {daySessions.length > 3 && (
-                      <p className="text-[9px] text-muted-foreground pl-0.5">+{daySessions.length - 3} más</p>
+                      <p className="pl-0.5 text-[9px] text-muted-foreground">+{daySessions.length - 3} más</p>
                     )}
                   </div>
 

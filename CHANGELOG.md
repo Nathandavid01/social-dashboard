@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.19 — 2026-06-04
+
+### Calendario de Grabación rediseñado (color por videógrafo)
+- El calendario de grabación (menú **Grabación**) se rediseñó: header pulido, celdas más limpias, y **las grabaciones se colorean por videógrafo** (cada persona su color, igual que el board), con una **leyenda de colores** arriba para ver de un vistazo quién graba qué. Theme-aware (se ve bien en claro y oscuro). Se mantienen vistas Calendario/Lista, filtros y crear/editar sesión.
+
 ## v2.18 — 2026-06-04
 
 ### Título editable por video
