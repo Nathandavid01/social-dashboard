@@ -8,6 +8,9 @@ vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }
 const push = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
+const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
+vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
+vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
 
 import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
 
@@ -78,10 +81,13 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
-  it('navigates to the client batch view on card click', () => {
+  it('opens the client batch overlay in place on card click (no navigation)', async () => {
+    getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(push).toHaveBeenCalledWith('/clients/c9/batch')
+    expect(getClientBatchData).toHaveBeenCalledWith('c9')
+    expect(push).not.toHaveBeenCalled()
+    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
   })
 })
 
@@ -107,9 +113,10 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getAllByText('Planificado')).toHaveLength(2)
   })
 
-  it('opens the client batch view when a planned card is clicked', () => {
+  it('opens the client batch overlay when a planned card is clicked', () => {
+    getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(push).toHaveBeenCalledWith('/clients/nd/batch')
+    expect(getClientBatchData).toHaveBeenCalledWith('nd')
   })
 })

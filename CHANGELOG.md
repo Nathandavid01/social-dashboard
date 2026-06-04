@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.14 — 2026-06-03
+
+### Todo corre por el Pipeline: el Lote de videos abre ahí mismo y los botones funcionan
+- En el **Content Pipeline Board**, hacer clic en la tarjeta de un cliente ahora **abre el Lote de videos ahí mismo, a pantalla completa** (superposición), sin salir del pipeline. Botón **Cerrar** para volver.
+- **Los botones ahora funcionan:**
+  - **"Nuevo video"** crea el video de verdad (con el cliente ya seleccionado).
+  - En cada video, la **subida de grabación va a R2** (raw / b-roll / editado), usando el flujo de subida real de la app.
+  - En los espacios planificados, **"Crear video"** crea el video de ese espacio.
+- Se **quitó "Workflow"** del menú lateral: el pipeline es ahora el único centro de trabajo.
+
 ## v2.13 — 2026-06-03
 
 ### Lote de videos: muestra los 15 espacios a crear, con día, idea y caption

@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Calendar, ChevronLeft, LayoutGrid, Lightbulb, MessageSquare, Plus, Upload, Users, Zap } from 'lucide-react'
+import { Calendar, ChevronLeft, LayoutGrid, Lightbulb, MessageSquare, Plus, Users, X, Zap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { PlatformBadges } from '@/components/clients/platform-badges'
+import { NewVideoDialog } from '@/components/pipeline/new-video-dialog'
 import { cn } from '@/lib/utils'
 import {
   batchHint,
@@ -46,12 +48,21 @@ function formatSlotDay(iso: string): string {
 export function ClientBatchView({
   pipeline,
   plannedSlots = [],
+  onClose,
+  onChanged,
 }: {
   pipeline: ClientVideoPipeline
   plannedSlots?: PlannedSlot[]
+  /** When set, the view is an in-place overlay — shows a close button. */
+  onClose?: () => void
+  /** Called after a create/upload so an overlay can refetch its data. */
+  onChanged?: () => void
 }) {
+  const router = useRouter()
   const { client } = pipeline
   const videos = pipeline.videos as BatchVideo[]
+  const clientForDialog = [{ id: client.id, name: client.name }]
+  const refresh = onChanged ?? (() => router.refresh())
 
   const stepper = useMemo(() => buildStepper(videos), [videos])
   const hint = useMemo(() => batchHint(videos), [videos])
@@ -73,22 +84,39 @@ export function ClientBatchView({
       {/* topbar */}
       <div className="flex items-center justify-between border-b border-border px-6 py-3.5">
         <div className="flex items-center gap-2 text-sm">
-          <Link
-            href={`/clients/${client.id}`}
-            className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
-            Clientes
-          </Link>
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
+              Pipeline
+            </button>
+          ) : (
+            <Link
+              href="/pipeline"
+              className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
+              Pipeline
+            </Link>
+          )}
           <span className="text-muted-foreground/50">/</span>
           <span className="font-semibold text-foreground">{client.name}</span>
         </div>
-        <Button asChild variant="secondary" size="sm" className="gap-1.5">
-          <Link href={`/clients/${client.id}?tab=flujo`}>
-            <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
-            Ver tablero
-          </Link>
-        </Button>
+        {onClose ? (
+          <Button variant="secondary" size="sm" className="gap-1.5" onClick={onClose}>
+            <X className="h-3.5 w-3.5" aria-hidden />
+            Cerrar
+          </Button>
+        ) : (
+          <Button asChild variant="secondary" size="sm" className="gap-1.5">
+            <Link href={`/clients/${client.id}`}>
+              <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
+              Ver perfil
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* hero */}
@@ -194,10 +222,12 @@ export function ClientBatchView({
                 {videos.length > 0 ? videos.length : plannedSlots.length}
               </span>
             </div>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-3.5 w-3.5" aria-hidden />
-              Nuevo video
-            </Button>
+            <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-3.5 w-3.5" aria-hidden />
+                Nuevo video
+              </Button>
+            </NewVideoDialog>
           </div>
 
           {videos.length > 0 ? (
@@ -221,7 +251,19 @@ export function ClientBatchView({
               </p>
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
                 {plannedSlots.map((slot) => (
-                  <PlannedSlotCard key={slot.index} index={slot.index} dayLabel={formatSlotDay(slot.date)} />
+                  <PlannedSlotCard
+                    key={slot.index}
+                    index={slot.index}
+                    dayLabel={formatSlotDay(slot.date)}
+                    action={
+                      <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+                        <Button variant="secondary" size="sm" className="w-full gap-1.5">
+                          <Plus className="h-3.5 w-3.5" aria-hidden />
+                          Crear video
+                        </Button>
+                      </NewVideoDialog>
+                    }
+                  />
                 ))}
               </div>
             </>
@@ -234,17 +276,19 @@ export function ClientBatchView({
               <p className="max-w-xs text-xs text-muted-foreground">
                 Crea el primer video para empezar a trabajar el contenido de {client.name}.
               </p>
-              <Button size="sm" className="mt-1 gap-1.5">
-                <Plus className="h-3.5 w-3.5" aria-hidden />
-                Nuevo video
-              </Button>
+              <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+                <Button size="sm" className="mt-1 gap-1.5">
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
+                  Nuevo video
+                </Button>
+              </NewVideoDialog>
             </div>
           )}
         </div>
 
         {videos.length > 0 && (
           <div className="w-full shrink-0 lg:sticky lg:top-4 lg:w-[560px]">
-            <BatchVideoDetail video={selected} />
+            <BatchVideoDetail video={selected} onChanged={refresh} />
           </div>
         )}
       </div>
@@ -253,7 +297,7 @@ export function ClientBatchView({
 }
 
 /** A planned, empty video slot: dated by cadence, waiting for its idea + caption. */
-function PlannedSlotCard({ index, dayLabel }: { index: number; dayLabel: string }) {
+function PlannedSlotCard({ index, dayLabel, action }: { index: number; dayLabel: string; action: React.ReactNode }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-dashed border-border bg-card">
       <div className="flex items-center justify-between border-b border-dashed border-border bg-muted/40 px-3 py-2">
@@ -278,10 +322,7 @@ function PlannedSlotCard({ index, dayLabel }: { index: number; dayLabel: string 
             <p className="text-xs text-muted-foreground/70">Por crear</p>
           </div>
         </div>
-        <Button variant="secondary" size="sm" className="mt-0.5 w-full gap-1.5">
-          <Upload className="h-3.5 w-3.5" aria-hidden />
-          Subir grabación
-        </Button>
+        <div className="mt-0.5">{action}</div>
       </div>
     </div>
   )

@@ -3,29 +3,19 @@
 import {
   Calendar,
   Check,
-  Clapperboard,
   FileVideo,
   Film,
   Hash,
   Image as ImageIcon,
   MessageSquare,
-  Pencil,
   Send,
-  Upload,
   UploadCloud,
   Video as VideoIcon,
   Zap,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn, formatDate } from '@/lib/utils'
-import {
-  cardStatus,
-  contentTypeLabel,
-  isRecorded,
-  slotStatus,
-  type BatchVideo,
-  type SlotTone,
-} from '@/lib/utils/batch-view'
+import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo, type SlotTone } from '@/lib/utils/batch-view'
+import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 
 const SLOT_TONE: Record<SlotTone, string> = {
   ready: 'bg-emerald-500/10 text-emerald-500',
@@ -67,9 +57,12 @@ function parseHashtags(raw: string | null): string[] {
 export function BatchVideoDetail({
   video,
   assigneeName,
+  onChanged,
 }: {
   video: BatchVideo | null
   assigneeName?: string | null
+  /** Called after an upload so the parent can refetch. */
+  onChanged?: () => void
 }) {
   if (!video) {
     return (
@@ -85,9 +78,8 @@ export function BatchVideoDetail({
   const recorded = isRecorded(video)
   const status = cardStatus(video)
   const hashtags = parseHashtags(video.hashtags_suggestion)
-  const raw = slotStatus(video.videos.raw.length)
-  const broll = slotStatus(video.videos.broll.length, true)
-  const edited = slotStatus(video.videos.edited.length)
+  const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
+  void onChanged
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
@@ -107,18 +99,14 @@ export function BatchVideoDetail({
           </span>
         </div>
       ) : (
-        <div className="flex h-[240px] flex-col items-center justify-center gap-2.5 border-b border-dashed border-border bg-muted/40 px-6 text-center">
+        <div className="flex h-[160px] flex-col items-center justify-center gap-2.5 border-b border-dashed border-border bg-muted/40 px-6 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <UploadCloud className="h-6 w-6 text-primary" aria-hidden />
           </span>
-          <p className="text-sm font-semibold text-foreground">Sube la grabación de este video</p>
+          <p className="text-sm font-semibold text-foreground">Aún sin grabación</p>
           <p className="text-xs text-muted-foreground">
-            Arrastra el archivo aquí o haz clic para buscarlo
+            Sube el archivo en la sección «Archivos» de abajo.
           </p>
-          <Button size="sm" className="mt-1 gap-1.5">
-            <Upload className="h-3.5 w-3.5" aria-hidden />
-            Subir archivo
-          </Button>
         </div>
       )}
 
@@ -242,45 +230,10 @@ export function BatchVideoDetail({
           </Section>
         )}
 
-        {/* files */}
+        {/* files — real upload to R2 (raw / b-roll / edited) */}
         <Section icon={<Film className="h-3 w-3 text-amber-500" aria-hidden />} title="Archivos">
-          <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-muted/30">
-            {[
-              { icon: <VideoIcon className="h-3 w-3" aria-hidden />, label: 'Video sin editar (raw)', slot: raw },
-              { icon: <Film className="h-3 w-3" aria-hidden />, label: 'B-roll', slot: broll },
-              { icon: <Clapperboard className="h-3 w-3" aria-hidden />, label: 'Versión editada', slot: edited },
-            ].map((row) => (
-              <div key={row.label} className="flex items-center justify-between px-3 py-2.5">
-                <span className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                    {row.icon}
-                  </span>
-                  <span className="text-[13px] font-medium text-foreground">{row.label}</span>
-                </span>
-                <span
-                  className={cn(
-                    'rounded-full px-2.5 py-1 text-[11px] font-semibold',
-                    SLOT_TONE[row.slot.tone],
-                  )}
-                >
-                  {row.slot.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
         </Section>
-
-        {/* actions */}
-        <div className="flex gap-2.5">
-          <Button className="flex-1 gap-1.5">
-            <Check className="h-4 w-4" aria-hidden />
-            {recorded ? 'Marcado como grabado' : 'Marcar como grabado'}
-          </Button>
-          <Button variant="secondary" className="gap-1.5">
-            <Pencil className="h-3.5 w-3.5" aria-hidden />
-            Editar
-          </Button>
-        </div>
       </div>
     </div>
   )

@@ -10,6 +10,13 @@ vi.mock('next/link', () => ({
     <a href={typeof href === 'string' ? href : '#'}>{children}</a>
   ),
 }))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }))
+vi.mock('@/components/pipeline/new-video-dialog', () => ({
+  NewVideoDialog: ({ children }: { children?: React.ReactNode }) => <>{children ?? <button>Nuevo video</button>}</>,
+}))
+vi.mock('@/components/recording/idea-video-panel', () => ({
+  IdeaVideoPanel: ({ ideaId }: { ideaId: string }) => <div data-testid="video-panel">upload:{ideaId}</div>,
+}))
 
 function rawFile(): ContentIdeaVideo {
   return {
@@ -97,20 +104,18 @@ describe('ClientBatchView', () => {
     expect(screen.getAllByText('Grabado').length).toBeGreaterThan(0)
   })
 
-  it('opens the first video in the detail panel with its real fields and pending files', () => {
+  it('opens the first video in the detail panel with its real fields and the upload panel', () => {
     expect(screen.getByText('Detalle del video')).toBeInTheDocument()
     expect(screen.getByText('Gancho')).toBeInTheDocument()
     expect(screen.getByText('Idea visual')).toBeInTheDocument()
     expect(screen.getByText('#612cigarlounge')).toBeInTheDocument()
-    // raw + edited not uploaded for the selected video → "Pendiente"
-    expect(screen.getAllByText('Pendiente').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getByText('Sube la grabación de este video')).toBeInTheDocument()
+    // the real R2 upload panel is wired in for the selected video
+    expect(screen.getByTestId('video-panel')).toHaveTextContent('upload:v-real')
   })
 
   it('switches the detail panel when another video is selected', () => {
     fireEvent.click(screen.getByRole('button', { name: /Cómo encender un cigarro como un pro/i }))
-    // recorded video → detail shows the preview, not the dropzone CTA
-    expect(screen.queryByText('Sube la grabación de este video')).not.toBeInTheDocument()
+    expect(screen.getByTestId('video-panel')).toHaveTextContent('upload:v-rec')
   })
 })
 
@@ -134,9 +139,9 @@ describe('ClientBatchView planned slots', () => {
     expect(screen.getByText('Videos por crear')).toBeInTheDocument()
     expect(screen.getByText('Video 1')).toBeInTheDocument()
     expect(screen.getByText('Video 3')).toBeInTheDocument()
-    // each slot prompts for its idea + caption (2 "Por crear" each)
+    // each slot prompts for its idea + caption (2 "Por crear" each) and a create action
     expect(screen.getAllByText('Por crear')).toHaveLength(6)
-    expect(screen.getAllByText('Subir grabación')).toHaveLength(3)
+    expect(screen.getAllByText('Crear video')).toHaveLength(3)
     expect(screen.getByText('Mar 9 jun')).toBeInTheDocument()
     expect(screen.queryByText('Este lote aún no tiene videos')).not.toBeInTheDocument()
   })

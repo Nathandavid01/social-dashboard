@@ -1,14 +1,15 @@
 'use client'
 
 import { memo, useCallback, useMemo, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, type BatchStageKey, type ClientBatch } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
+import { getClientBatchData, type ClientBatchData } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
 import { PlatformBadges } from '@/components/clients/platform-badges'
+import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
 import { NewVideoDialog } from './new-video-dialog'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
@@ -36,7 +37,29 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
-  const router = useRouter()
+
+  // In-place full-screen overlay of a client's batch view (no navigation).
+  const [openClientId, setOpenClientId] = useState<string | null>(null)
+  const [batchData, setBatchData] = useState<ClientBatchData | null>(null)
+  const [batchLoading, setBatchLoading] = useState(false)
+
+  const openClientBatch = useCallback(async (clientId: string) => {
+    setOpenClientId(clientId)
+    setBatchData(null)
+    setBatchLoading(true)
+    const data = await getClientBatchData(clientId)
+    setBatchData(data)
+    setBatchLoading(false)
+  }, [])
+  const closeBatch = useCallback(() => {
+    setOpenClientId(null)
+    setBatchData(null)
+  }, [])
+  const refetchBatch = useCallback(async () => {
+    if (!openClientId) return
+    const data = await getClientBatchData(openClientId)
+    setBatchData(data)
+  }, [openClientId])
 
   const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
 
@@ -142,10 +165,35 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={(clientId) => router.push(`/clients/${clientId}/batch`)} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>
+
+      {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
+      {openClientId && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+          {!batchData ? (
+            <div className="flex h-screen flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+              <button
+                onClick={closeBatch}
+                aria-label="Cerrar"
+                className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              {batchLoading ? 'Cargando…' : 'No se pudo cargar el cliente.'}
+            </div>
+          ) : (
+            <ClientBatchView
+              pipeline={batchData.pipeline}
+              plannedSlots={batchData.plannedSlots}
+              onClose={closeBatch}
+              onChanged={refetchBatch}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 }

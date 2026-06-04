@@ -18,10 +18,27 @@ const TYPES: { value: ContentIdeaType; label: string }[] = [
   { value: 'S', label: 'Story' },
 ]
 
-/** "Nuevo video" — creates a content_idea (lands in the Title/Idea column). */
-export function NewVideoDialog({ clients }: { clients: { id: string; name: string }[] }) {
+/**
+ * "Nuevo video" — creates a content_idea (lands in the Title/Idea column).
+ *
+ * `defaultClientId` pre-selects a client (used when opened from a client's batch
+ * view). `onCreated` runs after a successful create — pass it so an in-place
+ * overlay can refetch instead of relying on router.refresh(). `children`, when
+ * given, replaces the default gold trigger button (so callers can style it).
+ */
+export function NewVideoDialog({
+  clients,
+  defaultClientId = '',
+  onCreated,
+  children,
+}: {
+  clients: { id: string; name: string }[]
+  defaultClientId?: string
+  onCreated?: () => void
+  children?: React.ReactNode
+}) {
   const [open, setOpen] = useState(false)
-  const [clientId, setClientId] = useState('')
+  const [clientId, setClientId] = useState(defaultClientId)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<ContentIdeaType>('R')
   const [pending, setPending] = useState(false)
@@ -41,18 +58,25 @@ export function NewVideoDialog({ clients }: { clients: { id: string; name: strin
     }
     setOpen(false)
     setTitle('')
-    setClientId('')
-    router.refresh()
+    setClientId(defaultClientId)
+    if (onCreated) onCreated()
+    else router.refresh()
   }
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90"
-      >
-        <Plus className="h-3.5 w-3.5" /> Nuevo video
-      </button>
+      {children ? (
+        <span onClick={() => setOpen(true)} className="contents">
+          {children}
+        </span>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90"
+        >
+          <Plus className="h-3.5 w-3.5" /> Nuevo video
+        </button>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
