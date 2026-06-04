@@ -99,28 +99,21 @@ describe('ClientBatchView', () => {
     expect(screen.getByText(/Este lote está en la etapa/i)).toBeInTheDocument()
   })
 
-  it('lists every video in the batch with its title', () => {
-    // The selected video's title appears both on its card and in the detail panel.
-    expect(screen.getAllByRole('heading', { name: '612 de noche: planes para cada vibe' }).length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByRole('heading', { name: 'Cómo encender un cigarro como un pro' })).toBeInTheDocument()
+  it('renders every video as an editable card (Video N + inline idea, caption, uploads)', () => {
+    expect(screen.getByText('Video 1')).toBeInTheDocument()
+    expect(screen.getByText('Video 2')).toBeInTheDocument()
+    // each video has its own inline idea brief + caption editor + uploads
+    expect(screen.getAllByTestId('brief')).toHaveLength(2)
+    expect(screen.getAllByTestId('caption')).toHaveLength(2)
+    expect(screen.getAllByTestId('video-panel')).toHaveLength(2)
+    // editors are wired to each real video id
+    expect(screen.getByText('brief:v-real')).toBeInTheDocument()
+    expect(screen.getByText('caption:v-rec')).toBeInTheDocument()
   })
 
   it('renders per-video recorded/por-grabar status', () => {
     expect(screen.getAllByText('Por grabar').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Grabado').length).toBeGreaterThan(0)
-  })
-
-  it('opens the first video in the detail panel with editable idea, caption and uploads', () => {
-    expect(screen.getByText('Detalle del video')).toBeInTheDocument()
-    // each video gets an editable idea brief + caption editor + raw/edited uploads
-    expect(screen.getByTestId('brief')).toHaveTextContent('brief:v-real')
-    expect(screen.getByTestId('caption')).toHaveTextContent('caption:v-real')
-    expect(screen.getByTestId('video-panel')).toHaveTextContent('upload:v-real')
-  })
-
-  it('switches the detail panel when another video is selected', () => {
-    fireEvent.click(screen.getByRole('button', { name: /Cómo encender un cigarro como un pro/i }))
-    expect(screen.getByTestId('video-panel')).toHaveTextContent('upload:v-rec')
   })
 })
 
@@ -157,13 +150,12 @@ describe('ClientBatchView filters + encargado', () => {
 
   it('filters the grid by recorded / por-grabar status', () => {
     render(<ClientBatchView pipeline={mkPipeline([selectedVideo, recordedVideo])} />)
-    // both cards visible under "Todos" (cards are buttons; the title also shows in the detail panel)
-    expect(screen.getByRole('button', { name: /612 de noche/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Cómo encender/ })).toBeInTheDocument()
-    // filter to "Grabados" → only the recorded one's card remains
+    expect(screen.getAllByTestId('brief')).toHaveLength(2)
+    // filter to "Grabados" → only the recorded video's card remains
     fireEvent.click(screen.getByRole('button', { name: /Grabados/ }))
-    expect(screen.queryByRole('button', { name: /612 de noche/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Cómo encender/ })).toBeInTheDocument()
+    expect(screen.getAllByTestId('brief')).toHaveLength(1)
+    expect(screen.getByText('brief:v-rec')).toBeInTheDocument()
+    expect(screen.queryByText('brief:v-real')).not.toBeInTheDocument()
   })
 
   it('shows the Encargado field in the batch summary', () => {

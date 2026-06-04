@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.16 — 2026-06-04
+
+### Los videos del lote ya vienen creados, con idea y caption editables en cada uno
+- Al abrir un cliente, los **videos del lote ya están creados** automáticamente (uno por cada espacio de la sesión, con su fecha de publicación). Se acabó el "Crear video" en cada espacio.
+- **Cada video es una tarjeta de trabajo** donde escribes y editas **la idea** (gancho, brief visual, ángulo, hashtags, fecha) y **el caption** (a mano o con IA) **ahí mismo**, sin abrir un panel aparte. Debajo, la **subida de la grabación** (raw / b-roll / editado).
+- Vista en grid de 2 columnas, más limpia y profesional.
+
 ## v2.15 — 2026-06-04
 
 ### Lote de videos más parecido al diseño + idea/caption editables por video

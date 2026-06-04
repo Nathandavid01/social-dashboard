@@ -17,22 +17,13 @@ import {
 import type { PlannedSlot } from '@/lib/utils/planned-sessions'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import { BatchStepper } from './batch-stepper'
-import { BatchVideoCard } from './batch-video-card'
-import { BatchVideoDetail } from './batch-video-detail'
+import { VideoWorkCard } from './video-work-card'
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
   active: { label: 'Activo', tone: 'bg-emerald-500/10 text-emerald-500' },
   paused: { label: 'Pausado', tone: 'bg-amber-500/10 text-amber-500' },
   inactive: { label: 'Inactivo', tone: 'bg-muted text-muted-foreground' },
   archived: { label: 'Archivado', tone: 'bg-muted text-muted-foreground' },
-}
-
-function durationLabel(v: BatchVideo): string | null {
-  const sec = v.videos.raw[0]?.duration_sec ?? v.videos.edited[0]?.duration_sec ?? null
-  if (!sec) return null
-  const m = Math.floor(sec / 60)
-  const s = Math.round(sec % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 const WEEKDAY_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
@@ -78,8 +69,6 @@ export function ClientBatchView({
     [videos, statusFilter],
   )
 
-  const [selectedId, setSelectedId] = useState<string | null>(videos[0]?.id ?? null)
-  const selected = videos.find((v) => v.id === selectedId) ?? null
 
   const status = STATUS_LABEL[client.status] ?? {
     label: client.status,
@@ -228,9 +217,9 @@ export function ClientBatchView({
         </div>
       </div>
 
-      {/* body: videos + detail */}
-      <div className="flex flex-col gap-5 px-6 pb-6 lg:flex-row lg:items-start">
-        <div className="flex flex-1 flex-col gap-3.5">
+      {/* body: editable video cards */}
+      <div className="flex flex-col gap-5 px-6 pb-6">
+        <div className="flex flex-col gap-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">
@@ -274,16 +263,9 @@ export function ClientBatchView({
           )}
 
           {videos.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-              {shownVideos.map((v, i) => (
-                <BatchVideoCard
-                  key={v.id}
-                  video={v}
-                  accentIndex={i}
-                  selected={v.id === selectedId}
-                  durationLabel={durationLabel(v)}
-                  onSelect={setSelectedId}
-                />
+            <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
+              {shownVideos.map((v) => (
+                <VideoWorkCard key={v.id} video={v} index={videos.indexOf(v)} />
               ))}
             </div>
           ) : plannedSlots.length > 0 ? (
@@ -328,12 +310,6 @@ export function ClientBatchView({
             </div>
           )}
         </div>
-
-        {videos.length > 0 && (
-          <div className="w-full shrink-0 lg:sticky lg:top-4 lg:w-[560px]">
-            <BatchVideoDetail video={selected} onChanged={refresh} />
-          </div>
-        )}
       </div>
     </div>
   )

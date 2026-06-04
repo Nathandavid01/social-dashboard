@@ -7,4 +7,4 @@
  *
  * e.g. 1.4 → 1.5 for a small feature, 1.4 → 2.0 for a big one.
  */
-export const APP_VERSION = '2.15'
+export const APP_VERSION = '2.16'
