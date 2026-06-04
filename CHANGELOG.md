@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.8 — 2026-06-03
+
+### Nueva pantalla: "Lote de videos" del cliente
+- Al abrir un cliente (Clientes → menú ⋯ → **"Lote de videos"**) hay una **pantalla completa** dedicada al lote de videos que se está trabajando, pensada para que **cualquiera entienda el flujo sin entrenamiento**.
+- **Línea de etapas** (Idea → Título → Caption → Video → Edición → Aprobación → Publicación) con la etapa actual marcada **"AQUÍ"**, para ver de un vistazo dónde va el lote.
+- **Guía "qué hacer ahora"** en lenguaje sencillo según la etapa (ej. "Sube el archivo grabado de cada video").
+- **Grid de videos** del lote: los grabados muestran miniatura; los pendientes muestran "Subir grabación".
+- **Panel de detalle** al hacer clic en un video: gancho, idea visual, caption, hashtags, fechas, aprobación y archivos (raw / b-roll / editado).
+- Usa los **clientes y videos reales** del dashboard.
+
 ## v2.7 — 2026-06-03
 
 ### Quitado el tab "Flujo" del cliente

@@ -132,3 +132,70 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
     assets: assetsByClient.get(client.id) ?? [],
   }))
 }
+
+/**
+ * Single-client variant of getClientVideoPipeline, used by the full-screen
+ * Client Batch view (clients/[id]/batch). Same idea+videos shape, scoped to one
+ * client. Returns null when the client doesn't exist; degrades to an empty
+ * videos/assets list on a read failure rather than throwing.
+ */
+export async function getClientVideoBatch(clientId: string): Promise<ClientVideoPipeline | null> {
+  const supabase = await createClient()
+
+  const [clientRes, ideasRes, assetsRes] = await Promise.all([
+    supabase
+      .from('clients')
+      .select(
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id',
+      )
+      .eq('id', clientId)
+      .maybeSingle(),
+    supabase
+      .from('content_ideas')
+      .select(
+        `
+        *,
+        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*)
+      `,
+      )
+      .eq('client_id', clientId)
+      .neq('status', 'descartada')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('client_assets')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('uploaded_at', { ascending: false }),
+  ])
+
+  if (clientRes.error) {
+    console.warn('[video-pipeline] client fetch failed:', clientRes.error.message)
+    return null
+  }
+  if (!clientRes.data) return null
+  if (ideasRes.error) {
+    console.warn('[video-pipeline] ideas fetch failed:', ideasRes.error.message)
+  }
+  if (assetsRes.error) {
+    console.warn('[video-pipeline] assets fetch failed:', assetsRes.error.message)
+  }
+
+  const videos: PipelineVideo[] = []
+  for (const raw of ideasRes.data ?? []) {
+    const row = raw as unknown as ContentIdea & { videos?: ContentIdeaVideo[] | null }
+    const slots = emptySlots()
+    for (const v of row.videos ?? []) {
+      const kind = v.kind as ContentIdeaVideoKind
+      if (!(kind in slots)) continue
+      slots[kind].push(v)
+    }
+    const { videos: _joined, ...idea } = row
+    videos.push({ ...(idea as ContentIdea), videos: slots })
+  }
+
+  return {
+    client: clientRes.data as ClientVideoPipeline['client'],
+    videos,
+    assets: (assetsRes.data ?? []) as ClientAsset[],
+  }
+}

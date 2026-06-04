@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Users } from 'lucide-react'
 
@@ -156,6 +156,12 @@ export function ClientTable({ clients }: ClientTableProps) {
                           <Link href={`/clients/${client.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             Ver
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/clients/${client.id}/batch`}>
+                            <Clapperboard className="mr-2 h-4 w-4" />
+                            Lote de videos
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
