@@ -81,6 +81,6 @@ describe('ContentPipelineBoard — batch model', () => {
   it('navigates to the client on card click', () => {
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(push).toHaveBeenCalledWith('/clients/c9?tab=flujo')
+    expect(push).toHaveBeenCalledWith('/clients/c9')
   })
 })

@@ -11,7 +11,6 @@ import { ClientHero } from '@/components/clients/profile/client-hero'
 import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
 import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
 import { fetchClientCaptions } from '@/lib/utils/client-captions'
-import { PipelineFlowBoard } from '@/components/clients/profile/pipeline-flow-board'
 import { OverviewTab } from '@/components/clients/profile/tabs/overview-tab'
 import { BrandTab } from '@/components/clients/profile/tabs/brand-tab'
 import { ContractTab } from '@/components/clients/profile/tabs/contract-tab'
@@ -20,10 +19,9 @@ import { AssetsTab } from '@/components/clients/profile/tabs/assets-tab'
 import { VideoBufferCard } from '@/components/clients/video-buffer-card'
 import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-button'
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
-import { currentUserHas } from '@/lib/auth/server'
 import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
 
-const VALID_TABS: ClientTabKey[] = ['overview', 'flujo', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
+const VALID_TABS: ClientTabKey[] = ['overview', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
 
 export default async function ClientDetailPage({
   params,
@@ -105,19 +103,6 @@ export default async function ClientDetailPage({
       /* proceed without posts */
     }
   }
-
-  const [{ data: allIdeas }, canMoveCards] = await Promise.all([
-    supabase
-      .from('content_ideas')
-      .select('*')
-      .eq('client_id', id)
-      .neq('status', 'descartada')
-      .order('created_at', { ascending: false }),
-    currentUserHas('planning.move'),
-  ])
-  const flowSlot = (
-    <PipelineFlowBoard ideas={(allIdeas ?? []) as unknown as ContentIdea[]} canMove={canMoveCards} />
-  )
 
   const captionsResult = client.metricool_blog_id
     ? await fetchClientCaptions(client.metricool_blog_id, client.name)
@@ -272,7 +257,6 @@ export default async function ClientDetailPage({
       <ClientTabs
         defaultTab={defaultTab}
         overview={<OverviewTab client={client} pipeline={pipeline} />}
-        flujo={flowSlot}
         brand={<BrandTab client={client} />}
         contract={<ContractTab client={client} />}
         billing={<BillingTab client={client} payments={paymentsList} />}

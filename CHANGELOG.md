@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.7 — 2026-06-03
+
+### Quitado el tab "Flujo" del cliente
+- Se eliminó el tablero "Flujo" (5 columnas, estilo viejo) dentro de cada cliente — el **board Pipeline global** (por batches) ya es el único lugar del pipeline. Al hacer clic en un batch ahora se abre el cliente directamente.
+
 ## v2.6 — 2026-06-03
 
 ### Fix de build (deploy en Vercel)
