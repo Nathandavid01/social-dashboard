@@ -70,6 +70,13 @@ export function ClientBatchView({
     () => videos.filter((v) => cardStatus(v).key === 'por_grabar').length,
     [videos],
   )
+  const grabados = videos.length - pendientes
+
+  const [statusFilter, setStatusFilter] = useState<'all' | 'por_grabar' | 'grabado'>('all')
+  const shownVideos = useMemo(
+    () => (statusFilter === 'all' ? videos : videos.filter((v) => cardStatus(v).key === statusFilter)),
+    [videos, statusFilter],
+  )
 
   const [selectedId, setSelectedId] = useState<string | null>(videos[0]?.id ?? null)
   const selected = videos.find((v) => v.id === selectedId) ?? null
@@ -183,9 +190,20 @@ export function ClientBatchView({
           <div className="h-7 w-px bg-border" />
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-              Por grabar
+              Encargado
             </span>
-            <span className="text-sm font-semibold text-foreground">{pendientes}</span>
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              {client.assignee ? (
+                <>
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                    {(client.assignee.full_name ?? '?').slice(0, 1).toUpperCase()}
+                  </span>
+                  {client.assignee.full_name ?? 'Sin asignar'}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Sin asignar</span>
+              )}
+            </span>
           </div>
         </div>
       </div>
@@ -230,9 +248,34 @@ export function ClientBatchView({
             </NewVideoDialog>
           </div>
 
+          {videos.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {([
+                { key: 'all', label: 'Todos', count: videos.length, dot: '' },
+                { key: 'por_grabar', label: 'Por grabar', count: pendientes, dot: 'bg-amber-500' },
+                { key: 'grabado', label: 'Grabados', count: grabados, dot: 'bg-emerald-500' },
+              ] as const).map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setStatusFilter(f.key)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
+                    statusFilter === f.key
+                      ? 'border-border bg-muted text-foreground'
+                      : 'border-transparent text-muted-foreground hover:bg-muted/60',
+                  )}
+                >
+                  {f.dot && <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden />}
+                  {f.label}
+                  <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {videos.length > 0 ? (
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-              {videos.map((v, i) => (
+              {shownVideos.map((v, i) => (
                 <BatchVideoCard
                   key={v.id}
                   video={v}

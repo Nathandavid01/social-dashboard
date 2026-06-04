@@ -17,6 +17,12 @@ vi.mock('@/components/pipeline/new-video-dialog', () => ({
 vi.mock('@/components/recording/idea-video-panel', () => ({
   IdeaVideoPanel: ({ ideaId }: { ideaId: string }) => <div data-testid="video-panel">upload:{ideaId}</div>,
 }))
+vi.mock('@/components/produccion/idea-brief-card', () => ({
+  IdeaBriefCard: ({ ideaId }: { ideaId: string }) => <div data-testid="brief">brief:{ideaId}</div>,
+}))
+vi.mock('@/components/produccion/idea-caption-editor', () => ({
+  IdeaCaptionEditor: ({ ideaId }: { ideaId: string }) => <div data-testid="caption">caption:{ideaId}</div>,
+}))
 
 function rawFile(): ContentIdeaVideo {
   return {
@@ -104,12 +110,11 @@ describe('ClientBatchView', () => {
     expect(screen.getAllByText('Grabado').length).toBeGreaterThan(0)
   })
 
-  it('opens the first video in the detail panel with its real fields and the upload panel', () => {
+  it('opens the first video in the detail panel with editable idea, caption and uploads', () => {
     expect(screen.getByText('Detalle del video')).toBeInTheDocument()
-    expect(screen.getByText('Gancho')).toBeInTheDocument()
-    expect(screen.getByText('Idea visual')).toBeInTheDocument()
-    expect(screen.getByText('#612cigarlounge')).toBeInTheDocument()
-    // the real R2 upload panel is wired in for the selected video
+    // each video gets an editable idea brief + caption editor + raw/edited uploads
+    expect(screen.getByTestId('brief')).toHaveTextContent('brief:v-real')
+    expect(screen.getByTestId('caption')).toHaveTextContent('caption:v-real')
     expect(screen.getByTestId('video-panel')).toHaveTextContent('upload:v-real')
   })
 
@@ -144,5 +149,26 @@ describe('ClientBatchView planned slots', () => {
     expect(screen.getAllByText('Crear video')).toHaveLength(3)
     expect(screen.getByText('Mar 9 jun')).toBeInTheDocument()
     expect(screen.queryByText('Este lote aún no tiene videos')).not.toBeInTheDocument()
+  })
+})
+
+describe('ClientBatchView filters + encargado', () => {
+  afterEach(() => cleanup())
+
+  it('filters the grid by recorded / por-grabar status', () => {
+    render(<ClientBatchView pipeline={mkPipeline([selectedVideo, recordedVideo])} />)
+    // both cards visible under "Todos" (cards are buttons; the title also shows in the detail panel)
+    expect(screen.getByRole('button', { name: /612 de noche/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cómo encender/ })).toBeInTheDocument()
+    // filter to "Grabados" → only the recorded one's card remains
+    fireEvent.click(screen.getByRole('button', { name: /Grabados/ }))
+    expect(screen.queryByRole('button', { name: /612 de noche/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cómo encender/ })).toBeInTheDocument()
+  })
+
+  it('shows the Encargado field in the batch summary', () => {
+    render(<ClientBatchView pipeline={mkPipeline([selectedVideo])} />)
+    expect(screen.getAllByText('Encargado').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Sin asignar').length).toBeGreaterThan(0)
   })
 })

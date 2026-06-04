@@ -16,6 +16,8 @@ import {
 import { cn, formatDate } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo, type SlotTone } from '@/lib/utils/batch-view'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
+import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 
 const SLOT_TONE: Record<SlotTone, string> = {
   ready: 'bg-emerald-500/10 text-emerald-500',
@@ -187,50 +189,24 @@ export function BatchVideoDetail({
           </div>
         </div>
 
-        {video.hook && (
-          <Section icon={<Zap className="h-3 w-3 text-primary" aria-hidden />} title="Gancho">
-            <p className="text-[13px] leading-relaxed text-foreground">{video.hook}</p>
-          </Section>
-        )}
-        {video.visual_brief && (
-          <Section
-            icon={<ImageIcon className="h-3 w-3 text-violet-500" aria-hidden />}
-            title="Idea visual"
-          >
-            <p className="text-[13px] leading-relaxed text-muted-foreground">{video.visual_brief}</p>
-          </Section>
-        )}
-        {video.caption_angle && (
-          <Section
-            icon={<MessageSquare className="h-3 w-3 text-cyan-500" aria-hidden />}
-            title="Caption / ángulo"
-          >
-            <p className="text-[13px] leading-relaxed text-muted-foreground">
-              {video.caption_angle}
-            </p>
-          </Section>
-        )}
-        {hashtags.length > 0 && (
-          <Section icon={<Hash className="h-3 w-3 text-emerald-500" aria-hidden />} title="Hashtags">
-            <div className="flex flex-wrap gap-1.5">
-              {hashtags.slice(0, 6).map((t) => (
-                <span
-                  key={t}
-                  className="rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] text-muted-foreground"
-                >
-                  {t}
-                </span>
-              ))}
-              {hashtags.length > 6 && (
-                <span className="px-2.5 py-1 text-[11px] text-muted-foreground/70">
-                  +{hashtags.length - 6} más
-                </span>
-              )}
-            </div>
-          </Section>
-        )}
+        {/* idea — editable (hook, brief, caption angle, hashtags, publish date) */}
+        <IdeaBriefCard
+          ideaId={video.id}
+          hook={video.hook}
+          visualBrief={video.visual_brief}
+          captionAngle={video.caption_angle}
+          hashtags={video.hashtags_suggestion}
+          publishDate={video.publish_date}
+        />
 
-        {/* files — real upload to R2 (raw / b-roll / edited) */}
+        {/* caption — editable, with AI generate */}
+        <IdeaCaptionEditor
+          ideaId={video.id}
+          initialCaption={video.generated_caption}
+          initialPlatform={video.caption_platform}
+        />
+
+        {/* files — raw / b-roll / edited uploads to R2 */}
         <Section icon={<Film className="h-3 w-3 text-amber-500" aria-hidden />} title="Archivos">
           <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
         </Section>

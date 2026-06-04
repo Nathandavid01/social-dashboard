@@ -36,7 +36,10 @@ export interface ClientVideoPipeline {
     | 'logo_dark_url'
     | 'brand_colors'
     | 'metricool_blog_id'
-  >
+  > &
+    Partial<Pick<Client, 'assigned_to'>> & {
+      assignee?: { id: string; full_name: string | null; avatar_url: string | null } | null
+    }
   videos: PipelineVideo[]
   assets: ClientAsset[]
 }
@@ -146,7 +149,7 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
       )
       .eq('id', clientId)
       .maybeSingle(),
@@ -193,8 +196,12 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
     videos.push({ ...(idea as ContentIdea), videos: slots })
   }
 
+  // PostgREST types the to-one assignee join as an array; normalize to one object.
+  const c = clientRes.data as Record<string, unknown> & { assignee?: unknown }
+  const assignee = Array.isArray(c.assignee) ? (c.assignee[0] ?? null) : (c.assignee ?? null)
+
   return {
-    client: clientRes.data as ClientVideoPipeline['client'],
+    client: { ...c, assignee } as unknown as ClientVideoPipeline['client'],
     videos,
     assets: (assetsRes.data ?? []) as ClientAsset[],
   }
