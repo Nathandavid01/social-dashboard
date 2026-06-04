@@ -133,7 +133,7 @@ export function ContentPipelineBoard({ ideas }: { ideas: Idea[] }) {
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} onMove={moveCard} onOpen={(clientId) => router.push(`/clients/${clientId}`)} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} onMove={moveCard} onOpen={(clientId) => router.push(`/clients/${clientId}/batch`)} />
           ))}
         </div>
       </div>

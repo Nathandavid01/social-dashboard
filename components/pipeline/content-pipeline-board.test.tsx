@@ -78,9 +78,9 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
-  it('navigates to the client on card click', () => {
+  it('navigates to the client batch view on card click', () => {
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(push).toHaveBeenCalledWith('/clients/c9')
+    expect(push).toHaveBeenCalledWith('/clients/c9/batch')
   })
 })

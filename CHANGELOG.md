@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.10 — 2026-06-03
+
+### Clic en un cliente del board → "Lote de videos"
+- En el **Content Pipeline Board**, hacer clic en la tarjeta de un cliente ahora abre su **Lote de videos** (`/clients/[id]/batch`) en vez del perfil. Aplica a **todos los clientes** — es la vista estándar al seleccionar un cliente desde el board.
+
 ## v2.9 — 2026-06-03
 
 ### El Content Pipeline Board es ahora la pantalla principal
