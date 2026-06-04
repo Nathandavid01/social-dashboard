@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.11 — 2026-06-03
+
+### Sesiones planificadas con espacios vacíos en el board (piloto: Nathandavid)
+- El board ahora puede mostrar, en la columna **Ideas**, las **sesiones de grabación planificadas** de un cliente como **tarjetas con espacios vacíos** ("por idear"), aunque todavía no existan ideas creadas.
+- El total mensual sale **automático de la frecuencia de posteo** (ej. diario ≈ 30/mes) y se parte en sesiones según la cadencia de grabación (≈ cada 2 semanas) → ej. **2 tarjetas de 15 espacios**.
+- Los espacios son **visuales** (no crean filas en la base): al crear una idea real, llena un espacio.
+- Activado **solo para el cliente "Nathandavid"** por ahora (piloto); se extiende a los demás cuando se valide.
+
 ## v2.10 — 2026-06-03
 
 ### Clic en un cliente del board → "Lote de videos"

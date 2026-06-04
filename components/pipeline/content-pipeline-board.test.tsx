@@ -9,7 +9,7 @@ const push = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 
-import { ContentPipelineBoard } from './content-pipeline-board'
+import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -82,5 +82,34 @@ describe('ContentPipelineBoard — batch model', () => {
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
     expect(push).toHaveBeenCalledWith('/clients/c9/batch')
+  })
+})
+
+describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
+  const planned: PlannedClient[] = [
+    {
+      clientId: 'nd',
+      clientName: 'Nathandavidts._',
+      platforms: ['instagram'],
+      sessions: [
+        { index: 0, label: 'Sesión 1', total: 15, filled: 0, empty: 15 },
+        { index: 1, label: 'Sesión 2', total: 15, filled: 0, empty: 15 },
+      ],
+    },
+  ]
+
+  it('renders one planned card per session with empty-slot counts', () => {
+    render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    expect(screen.getAllByText('Nathandavidts._')).toHaveLength(2)
+    expect(screen.getByText(/Sesión 1 · 15 videos/)).toBeInTheDocument()
+    expect(screen.getByText(/Sesión 2 · 15 videos/)).toBeInTheDocument()
+    expect(screen.getAllByText('15 por idear')).toHaveLength(2)
+    expect(screen.getAllByText('Planificado')).toHaveLength(2)
+  })
+
+  it('opens the client batch view when a planned card is clicked', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    fireEvent.click(container.querySelector('article')!)
+    expect(push).toHaveBeenCalledWith('/clients/nd/batch')
   })
 })

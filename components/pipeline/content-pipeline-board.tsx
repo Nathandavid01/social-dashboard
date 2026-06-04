@@ -10,9 +10,18 @@ import { moveBatch } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { NewVideoDialog } from './new-video-dialog'
+import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
 type Idea = IdeaWithPipeline
+
+/** A client's planned recording sessions, shown as empty-slot cards in Ideas. */
+export interface PlannedClient {
+  clientId: string
+  clientName: string
+  platforms?: SocialPlatform[]
+  sessions: PlannedSession[]
+}
 
 const STAGE_DOT: Record<BatchStageKey, string> = {
   idea: '#3b82f6', title: '#64748b', caption: '#a855f7', video: '#06b6d4',
@@ -20,7 +29,7 @@ const STAGE_DOT: Record<BatchStageKey, string> = {
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({ ideas }: { ideas: Idea[] }) {
+export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -133,7 +142,7 @@ export function ContentPipelineBoard({ ideas }: { ideas: Idea[] }) {
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} onMove={moveCard} onOpen={(clientId) => router.push(`/clients/${clientId}/batch`)} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={(clientId) => router.push(`/clients/${clientId}/batch`)} />
           ))}
         </div>
       </div>
@@ -141,24 +150,76 @@ export function ContentPipelineBoard({ ideas }: { ideas: Idea[] }) {
   )
 }
 
-function BatchColumn({ stageKey, label, batches, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+  const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
+  const count = batches.length + plannedCards.length
   return (
     <section className="flex h-full w-[284px] flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STAGE_DOT[stageKey] }} />
           <h2 className="text-[12px] font-semibold tracking-tight">{label}</h2>
-          <span className="rounded-full bg-white/[0.06] px-1.5 text-[10px] font-medium tabular-nums text-muted-foreground">{batches.length}</span>
+          <span className="rounded-full bg-white/[0.06] px-1.5 text-[10px] font-medium tabular-nums text-muted-foreground">{count}</span>
         </div>
       </div>
       <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-white/[0.015] p-2">
-        {batches.length === 0 ? (
+        {count === 0 ? (
           <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
-          batches.map((b) => <BatchCard key={b.clientId} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)
+          <>
+            {plannedCards.map(({ client, session }) => (
+              <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
+            ))}
+            {batches.map((b) => <BatchCard key={b.clientId} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
+          </>
         )}
       </div>
     </section>
+  )
+}
+
+/** Visual-only card: a planned recording session with empty slots waiting for ideas. */
+function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient; session: PlannedSession; onOpen: (clientId: string) => void }) {
+  const slots = Math.min(session.total, 24) // cap the drawn boxes; count stays exact
+  return (
+    <article
+      onClick={() => onOpen(client.clientId)}
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-white/[0.12] bg-[#111114] transition-all hover:border-white/[0.2] hover:bg-[#15151a]"
+      style={{ boxShadow: 'inset 3px 0 0 0 #3b82f6' }}
+    >
+      <div className="space-y-2.5 p-3 pl-3.5">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-[12px] font-bold text-muted-foreground">{client.clientName.slice(0, 1).toUpperCase()}</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{client.clientName}</p>
+            <p className="truncate text-[10px] text-muted-foreground">{session.label} · {session.total} video{session.total === 1 ? '' : 's'}</p>
+          </div>
+          <span className="shrink-0 rounded-full border border-dashed border-white/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80">Planificado</span>
+        </div>
+
+        {/* empty slot grid (visual placeholders, no DB rows) */}
+        <div className="grid grid-cols-6 gap-1">
+          {Array.from({ length: slots }).map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                'h-6 rounded-[5px] border',
+                i < session.filled ? 'border-transparent bg-cyan-500/30' : 'border-dashed border-white/15 bg-white/[0.02]',
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between gap-2 pt-0.5">
+          <div className="flex items-center gap-1.5 [&_svg]:h-3.5 [&_svg]:w-3.5">
+            {client.platforms && client.platforms.length > 0 && <PlatformBadges platforms={client.platforms.slice(0, 4)} />}
+          </div>
+          <span className="text-[10px] text-muted-foreground">
+            {session.empty > 0 ? `${session.empty} por idear` : 'Lleno'}
+          </span>
+        </div>
+      </div>
+    </article>
   )
 }
 
