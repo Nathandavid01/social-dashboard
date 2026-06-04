@@ -1,5 +1,33 @@
 import { describe, it, expect } from 'vitest'
-import { planSessions, shouldPlanForClient } from './planned-sessions'
+import { planSessions, shouldPlanForClient, nextPostingDates, planSlots } from './planned-sessions'
+
+describe('nextPostingDates', () => {
+  it('returns the next N daily dates from `from` inclusive', () => {
+    const from = new Date(2026, 5, 8) // Mon 2026-06-08
+    const dates = nextPostingDates([0, 1, 2, 3, 4, 5, 6], 3, from)
+    expect(dates).toEqual(['2026-06-08', '2026-06-09', '2026-06-10'])
+  })
+  it('only includes the client posting weekdays (Mon & Thu)', () => {
+    const from = new Date(2026, 5, 8) // Monday
+    const dates = nextPostingDates([1, 4], 3, from)
+    // Mon 8, Thu 11, Mon 15
+    expect(dates).toEqual(['2026-06-08', '2026-06-11', '2026-06-15'])
+  })
+  it('returns [] with no posting days or zero count', () => {
+    expect(nextPostingDates([], 5, new Date(2026, 5, 8))).toEqual([])
+    expect(nextPostingDates([1], 0, new Date(2026, 5, 8))).toEqual([])
+  })
+})
+
+describe('planSlots', () => {
+  it('builds dated, indexed empty slots', () => {
+    const slots = planSlots([0, 1, 2, 3, 4, 5, 6], 2, new Date(2026, 5, 8))
+    expect(slots).toEqual([
+      { index: 0, date: '2026-06-08' },
+      { index: 1, date: '2026-06-09' },
+    ])
+  })
+})
 
 describe('shouldPlanForClient', () => {
   it('plans for an active client with cadence and no active ideas', () => {

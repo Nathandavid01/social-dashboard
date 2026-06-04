@@ -22,6 +22,37 @@ export interface PlannedSession {
 }
 
 /**
+ * The next `count` posting dates for a client, from `from` (inclusive), based on
+ * their posting_days (0=Sun..6=Sat). Used to label each empty video slot with the
+ * day it will be posted. Pure: pass `from` so it's testable. ISO 'YYYY-MM-DD'.
+ */
+export function nextPostingDates(postingDays: number[], count: number, from: Date): string[] {
+  const days = new Set((postingDays ?? []).filter((d) => d >= 0 && d <= 6))
+  const n = Math.max(0, Math.floor(count))
+  if (days.size === 0 || n === 0) return []
+  const out: string[] = []
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate())
+  let guard = 0
+  while (out.length < n && guard < 800) {
+    if (days.has(d.getDay())) out.push(d.toISOString().slice(0, 10))
+    d.setDate(d.getDate() + 1)
+    guard++
+  }
+  return out
+}
+
+export interface PlannedSlot {
+  index: number
+  /** ISO 'YYYY-MM-DD' posting date for this slot. */
+  date: string
+}
+
+/** Build the empty video slots for a client's current session, dated by cadence. */
+export function planSlots(postingDays: number[], count: number, from: Date): PlannedSlot[] {
+  return nextPostingDates(postingDays, count, from).map((date, index) => ({ index, date }))
+}
+
+/**
  * Whether to draw planned empty-slot cards for a client on the board.
  *
  * Only active clients with a posting cadence that haven't started yet (no active

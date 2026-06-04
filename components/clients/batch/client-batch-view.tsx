@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, LayoutGrid, Lightbulb, Plus, Users } from 'lucide-react'
+import { Calendar, ChevronLeft, LayoutGrid, Lightbulb, MessageSquare, Plus, Upload, Users, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import {
   cardStatus,
   type BatchVideo,
 } from '@/lib/utils/batch-view'
+import type { PlannedSlot } from '@/lib/utils/planned-sessions'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import { BatchStepper } from './batch-stepper'
 import { BatchVideoCard } from './batch-video-card'
@@ -32,7 +33,23 @@ function durationLabel(v: BatchVideo): string | null {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function ClientBatchView({ pipeline }: { pipeline: ClientVideoPipeline }) {
+const WEEKDAY_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const MONTH_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+
+/** "Lun 9 jun" from an ISO 'YYYY-MM-DD' (parsed as a local date, no TZ shift). */
+function formatSlotDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return `${WEEKDAY_ES[date.getDay()]} ${d} ${MONTH_ES[m - 1]}`
+}
+
+export function ClientBatchView({
+  pipeline,
+  plannedSlots = [],
+}: {
+  pipeline: ClientVideoPipeline
+  plannedSlots?: PlannedSlot[]
+}) {
   const { client } = pipeline
   const videos = pipeline.videos as BatchVideo[]
 
@@ -170,9 +187,11 @@ export function ClientBatchView({ pipeline }: { pipeline: ClientVideoPipeline })
         <div className="flex flex-1 flex-col gap-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-foreground">Videos de este lote</h2>
+              <h2 className="text-sm font-semibold text-foreground">
+                {videos.length === 0 && plannedSlots.length > 0 ? 'Videos por crear' : 'Videos de este lote'}
+              </h2>
               <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                {videos.length}
+                {videos.length > 0 ? videos.length : plannedSlots.length}
               </span>
             </div>
             <Button size="sm" className="gap-1.5">
@@ -181,7 +200,32 @@ export function ClientBatchView({ pipeline }: { pipeline: ClientVideoPipeline })
             </Button>
           </div>
 
-          {videos.length === 0 ? (
+          {videos.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+              {videos.map((v, i) => (
+                <BatchVideoCard
+                  key={v.id}
+                  video={v}
+                  accentIndex={i}
+                  selected={v.id === selectedId}
+                  durationLabel={durationLabel(v)}
+                  onSelect={setSelectedId}
+                />
+              ))}
+            </div>
+          ) : plannedSlots.length > 0 ? (
+            <>
+              <p className="-mt-1 text-xs text-muted-foreground">
+                Estos son los {plannedSlots.length} videos del próximo lote. Para cada uno: define la
+                idea y el caption, y sube la grabación.
+              </p>
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+                {plannedSlots.map((slot) => (
+                  <PlannedSlotCard key={slot.index} index={slot.index} dayLabel={formatSlotDay(slot.date)} />
+                ))}
+              </div>
+            </>
+          ) : (
             <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card py-16 text-center">
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
                 <Users className="h-5 w-5 text-muted-foreground" aria-hidden />
@@ -195,19 +239,6 @@ export function ClientBatchView({ pipeline }: { pipeline: ClientVideoPipeline })
                 Nuevo video
               </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-              {videos.map((v, i) => (
-                <BatchVideoCard
-                  key={v.id}
-                  video={v}
-                  accentIndex={i}
-                  selected={v.id === selectedId}
-                  durationLabel={durationLabel(v)}
-                  onSelect={setSelectedId}
-                />
-              ))}
-            </div>
           )}
         </div>
 
@@ -216,6 +247,41 @@ export function ClientBatchView({ pipeline }: { pipeline: ClientVideoPipeline })
             <BatchVideoDetail video={selected} />
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/** A planned, empty video slot: dated by cadence, waiting for its idea + caption. */
+function PlannedSlotCard({ index, dayLabel }: { index: number; dayLabel: string }) {
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl border border-dashed border-border bg-card">
+      <div className="flex items-center justify-between border-b border-dashed border-border bg-muted/40 px-3 py-2">
+        <span className="text-sm font-semibold text-foreground">Video {index + 1}</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+          <Calendar className="h-3 w-3" aria-hidden />
+          {dayLabel}
+        </span>
+      </div>
+      <div className="flex flex-col gap-2.5 p-3">
+        <div className="flex items-start gap-2">
+          <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Idea</p>
+            <p className="text-xs text-muted-foreground/70">Por crear</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2">
+          <MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-500" aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</p>
+            <p className="text-xs text-muted-foreground/70">Por crear</p>
+          </div>
+        </div>
+        <Button variant="secondary" size="sm" className="mt-0.5 w-full gap-1.5">
+          <Upload className="h-3.5 w-3.5" aria-hidden />
+          Subir grabación
+        </Button>
       </div>
     </div>
   )

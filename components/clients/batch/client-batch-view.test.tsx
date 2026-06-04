@@ -116,8 +116,28 @@ describe('ClientBatchView', () => {
 
 describe('ClientBatchView empty state', () => {
   afterEach(() => cleanup())
-  it('shows a friendly empty state when the batch has no videos', () => {
+  it('shows a friendly empty state when the batch has no videos and no plan', () => {
     render(<ClientBatchView pipeline={mkPipeline([])} />)
     expect(screen.getByText('Este lote aún no tiene videos')).toBeInTheDocument()
+  })
+})
+
+describe('ClientBatchView planned slots', () => {
+  afterEach(() => cleanup())
+  it('shows dated empty video slots (day + idea + caption) when the client has not started', () => {
+    const plannedSlots = [
+      { index: 0, date: '2026-06-09' },
+      { index: 1, date: '2026-06-10' },
+      { index: 2, date: '2026-06-11' },
+    ]
+    render(<ClientBatchView pipeline={mkPipeline([])} plannedSlots={plannedSlots} />)
+    expect(screen.getByText('Videos por crear')).toBeInTheDocument()
+    expect(screen.getByText('Video 1')).toBeInTheDocument()
+    expect(screen.getByText('Video 3')).toBeInTheDocument()
+    // each slot prompts for its idea + caption (2 "Por crear" each)
+    expect(screen.getAllByText('Por crear')).toHaveLength(6)
+    expect(screen.getAllByText('Subir grabación')).toHaveLength(3)
+    expect(screen.getByText('Mar 9 jun')).toBeInTheDocument()
+    expect(screen.queryByText('Este lote aún no tiene videos')).not.toBeInTheDocument()
   })
 })

@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.13 — 2026-06-03
+
+### Lote de videos: muestra los 15 espacios a crear, con día, idea y caption
+- Al abrir el **Lote de videos** de un cliente que aún no ha empezado, ahora aparecen los **espacios de video del próximo lote** (ej. 15) en vez del estado vacío.
+- Cada espacio muestra **qué día de la semana se postea** (según la frecuencia, ej. "Mar 9 jun") y los campos pendientes: **Idea** (por crear) y **Caption** (por crear), con botón para **subir la grabación**.
+- Las fechas salen de la cadencia de posteo del cliente; los espacios son visuales (no crean filas en la base).
+
 ## v2.12 — 2026-06-03
 
 ### Sesiones planificadas para todos los clientes activos + board en light/dark
