@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.24 — 2026-06-07
+
+### Auto-publicar a Metricool cuando el video está listo
+- Cuando un video tiene **caption + título + video editado + aprobado**, ahora se **publica automáticamente en Metricool** al aprobarlo, en su **fecha planificada** (`publish_date` + la hora de posteo del cliente), con el **video adjunto** (URL pública de Cloudflare R2) y las plataformas del cliente.
+- También hay un botón **"Publicar a Metricool"** (solo owner/supervisor) en los videos aprobados, por si quieres dispararlo a mano.
+- **Seguro por diseño:** idempotente (nunca publica dos veces — guarda el `metricool_post_id`), best-effort (si Metricool falla, la aprobación no se rompe; el error queda registrado), y con un **kill-switch** (`METRICOOL_AUTOPOST_ON_APPROVAL=false`) para desactivar el automático.
+- **Requiere aplicar la migración `0032_idea_posting.sql`** a la base de datos antes de funcionar.
+
 ## v2.23 — 2026-06-07
 
 ### Captions del lote imitan el estilo real del cliente (Metricool)

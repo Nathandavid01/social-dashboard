@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ApprovalButton } from '@/components/produccion/approval-button'
+import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import { computeIdeaProgress } from '@/lib/utils/idea-progress'
 import type {
   ContentIdeaType, ContentIdeaStatus, IdeaApprovalStatus, ContentIdeaVideo,
@@ -161,7 +162,7 @@ export function VideoPipelineRow({
 
       {/* ACCIÓN */}
       <td className="py-2.5 pr-3 text-right align-middle">
-        <div className="inline-flex">
+        <div className="inline-flex items-center gap-2">
           <ApprovalButton
             ideaId={video.id}
             approvalStatus={video.approval_status}
@@ -169,6 +170,12 @@ export function VideoPipelineRow({
             clientLogoUrl={clientLogoUrl}
             ideaTitle={video.title}
           />
+          {video.approval_status === 'approved' && (
+            <PublishToMetricoolButton
+              ideaId={video.id}
+              metricoolPostId={(video as { metricool_post_id?: number | null }).metricool_post_id ?? null}
+            />
+          )}
         </div>
       </td>
     </tr>

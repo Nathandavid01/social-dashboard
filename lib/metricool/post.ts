@@ -28,7 +28,14 @@ export async function createDraftPost(
   blogId?: string,
   platforms?: string[],
   driveLink?: string,
-  scheduledFor?: string  // ISO datetime — defaults to 24h from now
+  scheduledFor?: string,  // ISO datetime — defaults to 24h from now
+  opts?: {
+    /** Public media URLs to ATTACH to the post (e.g. the edited video). */
+    mediaUrls?: string[]
+    /** When true, schedule a REAL post (draft:false + autoPublish) that goes
+     *  live by itself at publicationDate; otherwise create a draft to finalize. */
+    autoPublish?: boolean
+  },
 ): Promise<MetricoolDraftResponse> {
   const config = getServerConfig()
   if (!config) throw new Error('Metricool server credentials not configured')
@@ -38,15 +45,22 @@ export async function createDraftPost(
   const providers = (platforms && platforms.length > 0 ? platforms : ['instagram', 'facebook', 'tiktok'])
     .map((p) => ({ network: p.toLowerCase() }))
 
-  const dateTime = (scheduledFor
-    ? new Date(scheduledFor)
-    : new Date(Date.now() + 24 * 60 * 60 * 1000)
-  ).toISOString().slice(0, 19)
+  // Metricool wants a naive local datetime + a timezone (it publishes at that
+  // wall-clock in `timezone`). Pass a planned naive datetime ("YYYY-MM-DDTHH:MM")
+  // through UNCHANGED so the scheduled hour is honored regardless of the server's
+  // timezone; anything with a Z/offset is normalized via Date (legacy callers).
+  const isNaiveLocal = !!scheduledFor && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(scheduledFor)
+  const dateTime = scheduledFor
+    ? (isNaiveLocal ? `${scheduledFor}:00`.slice(0, 19) : new Date(scheduledFor).toISOString().slice(0, 19))
+    : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 19)
 
   const publicationDate = {
     dateTime,
     timezone: 'America/Puerto_Rico',
   }
+
+  const mediaUrls = opts?.mediaUrls?.filter(Boolean) ?? []
+  const autoPublish = opts?.autoPublish === true
 
   const url = new URL(`${METRICOOL_BASE}/v2/scheduler/posts`)
   url.searchParams.set('userId', config.userId)
@@ -60,9 +74,11 @@ export async function createDraftPost(
     },
     body: JSON.stringify({
       text: caption,
-      draft: true,
+      draft: !autoPublish,
+      ...(autoPublish ? { autoPublish: true } : {}),
       providers,
       publicationDate,
+      ...(mediaUrls.length > 0 ? { media: mediaUrls } : {}),
       ...(driveLink ? { firstCommentText: driveLink } : {}),
     }),
   })
