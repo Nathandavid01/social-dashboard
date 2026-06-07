@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.21 — 2026-06-07
+
+### Content Pipeline: filtro de cliente compacto + arrastrar columnas
+- El filtro de clientes pasó de una **fila de chips** (que envolvía y crecía con cada cliente) a un **selector compacto "Cliente"** con buscador, conteo por cliente y botón para limpiar. Libera una fila completa para el tablero y escala a muchos clientes. La línea de stats (*N batches · N publicados*) se movió a la fila de **Asignado a**.
+- Ahora puedes **arrastrar el tablero horizontalmente con el mouse** (cursor de mano: agarrar → arrastrando) para moverte entre columnas. Las tarjetas siguen clickeables; un arrastre no abre una tarjeta por accidente.
+
 ## v2.20 — 2026-06-04
 
 ### Sin el logo de Nate Media entre pantallas
