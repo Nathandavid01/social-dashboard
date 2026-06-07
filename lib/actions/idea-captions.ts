@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
+import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 
@@ -30,7 +32,7 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes)')
+    .select('id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id)')
     .eq('id', ideaId)
     .single()
 
@@ -43,32 +45,28 @@ export async function generateIdeaCaption(
     default_cta?: string | null
     default_hashtags?: string | null
     caption_notes?: string | null
+    metricool_blog_id?: string | null
   }
 
-  const constraints = [
-    client.caption_language && `Idioma: ${client.caption_language} (IMPORTANTE: escribe el caption en este idioma)`,
-    client.brand_voice && `Voz de marca: ${client.brand_voice}`,
-    client.default_cta && `CTA preferido: ${client.default_cta}`,
-    client.caption_notes && `Reglas a seguir: ${client.caption_notes}`,
-  ].filter(Boolean).join('\n')
+  // Pull the client's recently published captions from Metricool so the model
+  // imitates their real style (best-effort — returns [] if unavailable).
+  const examples = await fetchClientStyleExamples(client.metricool_blog_id ?? undefined)
 
-  const prompt = `Eres un copywriter profesional de redes sociales para NMedia PR, agencia de marketing puertorriqueña. Escribes captions que rinden bien en Instagram, TikTok y Facebook.
-
-CLIENTE: ${client.name ?? 'cliente'}
-PLATAFORMA: ${platform}
-
-LA IDEA DEL VIDEO:
-- Título: ${idea.title}
-${idea.hook ? `- Hook: ${idea.hook}` : ''}
-${idea.caption_angle ? `- Ángulo del caption: ${idea.caption_angle}` : ''}
-${idea.hashtags_suggestion ? `- Hashtags sugeridos: ${idea.hashtags_suggestion}` : ''}
-
-${constraints ? `RESTRICCIONES:\n${constraints}\n` : ''}
-TAREA: Escribe UN caption completo para este video, alineado con el hook y el ángulo de arriba.
-- Engancha en la primera línea
-- Incluye un CTA claro
-- Termina con hashtags relevantes (usa los sugeridos si encajan)
-- Devuelve SOLO el caption, sin explicaciones ni comillas.`
+  const prompt = buildIdeaCaptionPrompt({
+    title: idea.title,
+    hook: idea.hook,
+    captionAngle: idea.caption_angle,
+    hashtags: idea.hashtags_suggestion,
+    platform,
+    examples,
+    client: {
+      name: client.name,
+      brandVoice: client.brand_voice,
+      captionLanguage: client.caption_language,
+      defaultCta: client.default_cta,
+      captionNotes: client.caption_notes,
+    },
+  })
 
   try {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -95,7 +93,7 @@ TAREA: Escribe UN caption completo para este video, alineado con el hook y el á
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
-    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platform } })
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platform, examplesUsed: examples.length } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
