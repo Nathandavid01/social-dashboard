@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.22 — 2026-06-07
+
+### Subir el video editado mueve la tarjeta a "Edited"
+- Cuando subes el **video editado** de un video, su tarjeta **avanza sola a la columna "Edited"** del Content Pipeline (estado `producida`). Antes solo el video *crudo* movía la tarjeta (a "Video"); subir el editado no la movía y el tablero quedaba desincronizado.
+- La promoción **solo avanza**: nunca regresa una tarjeta que ya está aprobada o publicada. El **b-roll** no cambia el estado.
+
 ## v2.21 — 2026-06-07
 
 ### Content Pipeline: filtro de cliente compacto + arrastrar columnas

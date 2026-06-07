@@ -35,7 +35,7 @@ vi.mock('@/lib/integrations/r2', () => ({
 }))
 
 // Spy registry so each test can inspect what the action did to Supabase.
-type Op = { table: string; method: string; payload?: unknown }
+type Op = { table: string; method: string; payload?: unknown; filterIn?: { column: string; values: unknown } }
 const ops: Op[] = []
 
 // Builder used by both insert(...) and update(...) chains. Any chained call
@@ -70,8 +70,15 @@ const supabaseMock = {
       return makeChain()
     }),
     update: vi.fn((payload: unknown) => {
-      ops.push({ table, method: 'update', payload })
-      return makeChain()
+      const op: Op = { table, method: 'update', payload }
+      ops.push(op)
+      const chain = makeChain()
+      // Capture the .in('status', [...]) guard so tests can assert forward-only promotion.
+      chain.in = vi.fn((column: string, values: unknown) => {
+        op.filterIn = { column, values }
+        return chain
+      })
+      return chain
     }),
     select: vi.fn((payload: unknown) => {
       ops.push({ table, method: 'select', payload })
@@ -237,5 +244,52 @@ describe('registerR2Video — idea promotion', () => {
     expect(updates[0].payload).toMatchObject({ status: 'grabada' })
     // and it is NOT an archive of a video.
     expect(archiveUpdates()).toHaveLength(0)
+  })
+
+  it('promotes the idea to "producida" on edited upload (auto-advances the card to "Edited")', async () => {
+    await registerR2Video({
+      ideaId: 'idea-1',
+      kind: 'edited',
+      key: 'ideas/idea-1/edited/1-final.mp4',
+      name: 'final.mp4',
+      sizeBytes: 2000,
+      mimeType: 'video/mp4',
+    })
+
+    const ideaUpdates = ops.filter((o) => o.method === 'update' && o.table === 'content_ideas')
+    expect(ideaUpdates).toHaveLength(1)
+    expect(ideaUpdates[0].payload).toMatchObject({ status: 'producida' })
+    expect(archiveUpdates()).toHaveLength(0)
+  })
+
+  it('does NOT change the idea status on a b-roll upload', async () => {
+    await registerR2Video({
+      ideaId: 'idea-1',
+      kind: 'broll',
+      key: 'ideas/idea-1/broll/1-b.mp4',
+      name: 'b.mp4',
+      sizeBytes: 3000,
+      mimeType: 'video/mp4',
+    })
+
+    const ideaUpdates = ops.filter((o) => o.method === 'update' && o.table === 'content_ideas')
+    expect(ideaUpdates).toHaveLength(0)
+  })
+
+  it('guards the producida promotion to earlier statuses only (never regresses approved/published)', async () => {
+    await registerR2Video({
+      ideaId: 'idea-1',
+      kind: 'edited',
+      key: 'ideas/idea-1/edited/1-final.mp4',
+      name: 'final.mp4',
+      sizeBytes: 2000,
+      mimeType: 'video/mp4',
+    })
+
+    const ideaUpdate = ops.find((o) => o.method === 'update' && o.table === 'content_ideas')
+    expect(ideaUpdate?.payload).toMatchObject({ status: 'producida' })
+    // The forward-only guard: the UPDATE only applies when the current status is
+    // strictly before 'producida'. 'producida'/'publicada'/'descartada' are excluded.
+    expect(ideaUpdate?.filterIn).toEqual({ column: 'status', values: ['idea', 'asignada', 'grabada'] })
   })
 })

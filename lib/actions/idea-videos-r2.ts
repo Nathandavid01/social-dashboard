@@ -90,6 +90,12 @@ export async function registerR2Video(input: {
   if (input.kind === 'raw') {
     await supabase.from('content_ideas').update({ status: 'grabada' })
       .eq('id', input.ideaId).in('status', ['idea', 'asignada'])
+  } else if (input.kind === 'edited') {
+    // Uploading the FINAL cut advances the card to the "Edited" column
+    // (status 'producida'). Guarded to only move forward — never regress an
+    // already-edited/approved/published idea. b-roll never changes status.
+    await supabase.from('content_ideas').update({ status: 'producida' })
+      .eq('id', input.ideaId).in('status', ['idea', 'asignada', 'grabada'])
   }
 
   await logIdeaActivity(supabase, {
@@ -108,6 +114,7 @@ export async function registerR2Video(input: {
 
   revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/planning')
+  revalidatePath('/pipeline') // Content Pipeline board — so the card re-buckets into its new column
   return { ok: true, id: data.id }
 }
 
