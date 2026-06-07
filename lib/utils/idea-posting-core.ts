@@ -20,15 +20,27 @@ export interface PostReadiness {
 
 /**
  * An idea is postable once it is approved, has a caption and an edited video,
- * has not been posted before (idempotency), and isn't already published.
- * Order matters: the idempotency guard is checked first so we never re-post.
+ * has not been posted before (idempotency), isn't already published, AND its
+ * client has a Metricool blog id. Order matters: the idempotency guard is
+ * checked first so we never re-post.
+ *
+ * The blog-id requirement is a SAFETY gate for auto-publish: without it the
+ * post would fall back to the global default Metricool account — i.e. publish a
+ * real post to the WRONG (agency) feed. So we refuse rather than guess.
  */
-export function ideaPostReadiness(idea: PostableIdea, hasEditedVideo: boolean): PostReadiness {
+export function ideaPostReadiness(
+  idea: PostableIdea,
+  hasEditedVideo: boolean,
+  metricoolBlogId: string | null | undefined,
+): PostReadiness {
   if (idea.metricool_post_id != null) return { ready: false, reason: 'Ya se publicó en Metricool' }
   if (idea.published_at || idea.status === 'publicada') return { ready: false, reason: 'El video ya está publicado' }
   if (idea.approval_status !== 'approved') return { ready: false, reason: 'El video no está aprobado' }
   if (!idea.generated_caption || idea.generated_caption.trim().length === 0) return { ready: false, reason: 'Falta el caption' }
   if (!hasEditedVideo) return { ready: false, reason: 'Falta el video editado' }
+  if (!metricoolBlogId || metricoolBlogId.trim().length === 0) {
+    return { ready: false, reason: 'El cliente no tiene Metricool configurado (falta blog_id)' }
+  }
   return { ready: true }
 }
 
@@ -52,7 +64,12 @@ export function buildPublishDateTime(
   postingTime: string | null | undefined,
   nowMs: number = Date.now(),
 ): string {
-  if (publishDate) {
+  // Only schedule on the planned date if it's today or in the future. A PAST
+  // planned date (approving an overdue idea) would otherwise produce a past
+  // publicationDate — which an auto-publish could fire IMMEDIATELY. Clamp those
+  // to +24h so an overdue approval can't blast the video live on the spot.
+  const todayUtc = new Date(nowMs).toISOString().slice(0, 10)
+  if (publishDate && publishDate >= todayUtc) {
     const time = normalizeTime(postingTime) ?? '10:00'
     return `${publishDate}T${time}:00`
   }

@@ -73,6 +73,16 @@ async function runIdeaPost(
     .limit(1)
     .maybeSingle()
 
+  const client = (idea.client ?? {}) as {
+    metricool_blog_id?: string | null
+    platforms?: string[] | null
+    default_platforms?: string[] | null
+    posting_time?: string | null
+  }
+  // Trimmed client blog id — readiness REFUSES if blank, so we never fall back
+  // to the global default account when auto-publishing a real post.
+  const blogId = client.metricool_blog_id?.trim()
+
   const readiness = ideaPostReadiness(
     {
       approval_status: idea.approval_status as string | null,
@@ -82,21 +92,37 @@ async function runIdeaPost(
       metricool_post_id: (idea.metricool_post_id as number | null) ?? null,
     },
     !!edited,
+    blogId,
   )
   if (!readiness.ready) return { skipped: readiness.reason }
 
-  const client = (idea.client ?? {}) as {
-    metricool_blog_id?: string | null
-    platforms?: string[] | null
-    default_platforms?: string[] | null
-    posting_time?: string | null
+  // ── Atomic claim: the real guard against double-posting. Sets posting_started_at
+  // ONLY where metricool_post_id is null AND the slot is free or stale (>5 min, a
+  // crashed prior attempt). If no row is claimed, another trigger already owns it
+  // (approve + manual button, retries) — abort instead of posting twice. ──
+  const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+  const { data: claimed, error: claimErr } = await supabase
+    .from('content_ideas')
+    .update({ posting_started_at: new Date().toISOString() })
+    .eq('id', ideaId)
+    .is('metricool_post_id', null)
+    .or(`posting_started_at.is.null,posting_started_at.lt.${staleBefore}`)
+    .select('id')
+  if (claimErr) return { error: claimErr.message }
+  if (!claimed || claimed.length === 0) return { skipped: 'Ya se publicó o hay una publicación en curso' }
+
+  const releaseClaim = async (postingError: string) => {
+    await supabase
+      .from('content_ideas')
+      .update({ posting_started_at: null, posting_error: postingError })
+      .eq('id', ideaId)
   }
 
   // Public, permanent URL for the edited video (only edited videos are public).
   const pub = await getR2PublicUrl((edited as { id: string }).id)
   if (pub.error || !pub.url) {
     const msg = pub.error ?? 'No se pudo obtener la URL pública del video editado'
-    await supabase.from('content_ideas').update({ posting_error: msg }).eq('id', ideaId)
+    await releaseClaim(msg)
     return { error: msg }
   }
 
@@ -106,7 +132,7 @@ async function runIdeaPost(
   try {
     const res = await createDraftPost(
       idea.generated_caption as string,
-      client.metricool_blog_id ?? undefined,
+      blogId,
       platforms,
       undefined,
       scheduledFor,
@@ -133,11 +159,12 @@ async function runIdeaPost(
     })
 
     revalidatePath('/pipeline')
+    revalidatePath('/video-reviews')
     revalidatePath(`/produccion/idea/${ideaId}`)
     return { ok: true, metricoolPostId: postId }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
-    await supabase.from('content_ideas').update({ posting_error: msg }).eq('id', ideaId)
+    await releaseClaim(msg)
     return { error: msg }
   }
 }

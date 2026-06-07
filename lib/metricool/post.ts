@@ -68,6 +68,7 @@ export async function createDraftPost(
 
   const res = await fetch(url.toString(), {
     method: 'POST',
+    signal: AbortSignal.timeout(15_000), // bound the round-trip so a hung Metricool can't block approval
     headers: {
       'X-Mc-Auth': config.userToken,
       'Content-Type': 'application/json',
