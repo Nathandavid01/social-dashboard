@@ -238,4 +238,34 @@ describe('registerR2Video — idea promotion', () => {
     // and it is NOT an archive of a video.
     expect(archiveUpdates()).toHaveLength(0)
   })
+
+  it('promotes the idea to "producida" on edited upload (auto-advances the card to "Edited")', async () => {
+    await registerR2Video({
+      ideaId: 'idea-1',
+      kind: 'edited',
+      key: 'ideas/idea-1/edited/1-final.mp4',
+      name: 'final.mp4',
+      sizeBytes: 2000,
+      mimeType: 'video/mp4',
+    })
+
+    const ideaUpdates = ops.filter((o) => o.method === 'update' && o.table === 'content_ideas')
+    expect(ideaUpdates).toHaveLength(1)
+    expect(ideaUpdates[0].payload).toMatchObject({ status: 'producida' })
+    expect(archiveUpdates()).toHaveLength(0)
+  })
+
+  it('does NOT change the idea status on a b-roll upload', async () => {
+    await registerR2Video({
+      ideaId: 'idea-1',
+      kind: 'broll',
+      key: 'ideas/idea-1/broll/1-b.mp4',
+      name: 'b.mp4',
+      sizeBytes: 3000,
+      mimeType: 'video/mp4',
+    })
+
+    const ideaUpdates = ops.filter((o) => o.method === 'update' && o.table === 'content_ideas')
+    expect(ideaUpdates).toHaveLength(0)
+  })
 })
