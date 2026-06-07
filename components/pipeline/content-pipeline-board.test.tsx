@@ -120,3 +120,74 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(getClientBatchData).toHaveBeenCalledWith('nd')
   })
 })
+
+describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', () => {
+  const twoClients = [
+    idea({ id: '1', client_id: 'c1' }),
+    idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null } }),
+  ] as IdeaWithPipeline[]
+
+  it('renders a compact "Todos los clientes" dropdown trigger, closed by default', () => {
+    render(<ContentPipelineBoard ideas={twoClients} />)
+    expect(screen.getByRole('button', { name: /todos los clientes/i })).toBeInTheDocument()
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('opens the list with every client + count and filters the board on select', () => {
+    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /lumen/i })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('option', { name: /lumen/i }))
+    const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
+    expect(cardsText).toContain('Lumen')
+    expect(cardsText).not.toContain('Nora Fitness')
+    // trigger now reflects the selection and the list is closed
+    expect(screen.getByRole('button', { name: 'Lumen' })).toBeInTheDocument()
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('clears the filter back to all clients via the clear button', () => {
+    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
+    fireEvent.click(screen.getByRole('option', { name: /lumen/i }))
+    fireEvent.click(screen.getByRole('button', { name: /quitar filtro de cliente/i }))
+    const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
+    expect(cardsText).toContain('Nora Fitness')
+    expect(cardsText).toContain('Lumen')
+  })
+
+  it('still shows the batches/publicados stats line', () => {
+    render(<ContentPipelineBoard ideas={twoClients} />)
+    expect(screen.getByText(/publicados/i)).toBeInTheDocument()
+  })
+})
+
+describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => {
+  function scrollEl() {
+    return document.querySelector('[data-testid="pipeline-scroll"]') as HTMLElement
+  }
+
+  it('shows a grab cursor at rest and grabbing while dragging horizontally', () => {
+    render(<ContentPipelineBoard ideas={[idea()]} />)
+    const el = scrollEl()
+    expect(el.className).toContain('cursor-grab')
+    expect(el.className).not.toContain('cursor-grabbing')
+
+    fireEvent.mouseDown(el, { button: 0, clientX: 300 })
+    fireEvent.mouseMove(el, { clientX: 260 }) // moved 40px ≥ threshold
+    expect(el.className).toContain('cursor-grabbing')
+
+    fireEvent.mouseUp(el)
+    expect(el.className).not.toContain('cursor-grabbing')
+  })
+
+  it('does not enter grabbing state for a click without movement (cards stay clickable)', () => {
+    render(<ContentPipelineBoard ideas={[idea()]} />)
+    const el = scrollEl()
+    fireEvent.mouseDown(el, { button: 0, clientX: 300 })
+    fireEvent.mouseUp(el, { clientX: 300 })
+    expect(el.className).not.toContain('cursor-grabbing')
+  })
+})

@@ -1,8 +1,9 @@
 'use client'
 
-import { memo, useCallback, useMemo, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X } from 'lucide-react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, type BatchStageKey, type ClientBatch } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
@@ -67,6 +68,11 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
     () => batches.map((b) => ({ id: b.clientId, name: b.clientName })).sort((a, b) => a.name.localeCompare(b.name)),
     [batches],
   )
+  const clientCounts = useMemo(() => {
+    const m: Record<string, number> = {}
+    for (const b of batches) m[b.clientId] = (m[b.clientId] ?? 0) + 1
+    return m
+  }, [batches])
   const team = useMemo(() => {
     const m = new Map<string, { id: string; name: string }>()
     for (const b of batches) if (b.assignee) m.set(b.assignee.id, b.assignee)
@@ -110,6 +116,38 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
 
   const published = visible.filter((b) => stageOf(b) === 'publication').length
 
+  // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const pan = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 })
+  const [grabbing, setGrabbing] = useState(false)
+
+  const onPanDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return // left button only
+    const el = scrollRef.current
+    if (!el) return
+    pan.current = { active: true, moved: false, startX: e.clientX, scrollLeft: el.scrollLeft }
+  }, [])
+  const onPanMove = useCallback((e: React.MouseEvent) => {
+    const el = scrollRef.current
+    if (!el || !pan.current.active) return
+    if (!pan.current.moved && !isPanDrag(pan.current.startX, e.clientX)) return
+    pan.current.moved = true
+    setGrabbing(true)
+    el.scrollLeft = panScrollLeft(pan.current.scrollLeft, pan.current.startX, e.clientX)
+  }, [])
+  const endPan = useCallback(() => {
+    pan.current.active = false
+    setGrabbing(false)
+  }, [])
+  // Swallow the click that follows a real drag so a card doesn't open mid-pan.
+  const onPanClickCapture = useCallback((e: React.MouseEvent) => {
+    if (pan.current.moved) {
+      e.stopPropagation()
+      e.preventDefault()
+      pan.current.moved = false
+    }
+  }, [])
+
   return (
     <div className="flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-background text-foreground">
       {/* Header */}
@@ -126,26 +164,14 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar clientes, personas…" className="h-8 w-52 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
           </div>
+          <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
           <NewVideoDialog clients={clients} />
         </div>
       </header>
 
-      {/* Client chips + stats */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-2.5">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Chip active={clientFilter === null} onClick={() => setClientFilter(null)} dot="#3b82f6" label="Todos" count={batches.length} />
-          {clients.map((c) => (
-            <Chip key={c.id} active={clientFilter === c.id} onClick={() => setClientFilter(clientFilter === c.id ? null : c.id)} dot="#9aa0aa" label={c.name} count={batches.filter((b) => b.clientId === c.id).length} />
-          ))}
-        </div>
-        <p className="text-[11px] tabular-nums text-muted-foreground">
-          <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
-        </p>
-      </div>
-
-      {/* Assignee filter — color = person */}
+      {/* Assignee filter — color = person · with batch/publicados stats on the right */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
         <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
         <button onClick={() => setAssigneeFilter(null)} className={cn('rounded-full border px-3 py-1 text-[11px] font-medium transition', assigneeFilter === null ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60')}>Todos</button>
@@ -159,10 +185,22 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
             </button>
           )
         })}
+        <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
+          <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+        </p>
       </div>
 
-      {/* Columns */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+      {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}
+      <div
+        ref={scrollRef}
+        data-testid="pipeline-scroll"
+        onMouseDown={onPanDown}
+        onMouseMove={onPanMove}
+        onMouseUp={endPan}
+        onMouseLeave={endPan}
+        onClickCapture={onPanClickCapture}
+        className={cn('flex-1 overflow-x-auto overflow-y-hidden', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
+      >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
             <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={openClientBatch} />
@@ -342,13 +380,145 @@ function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; o
   )
 }
 
-function Chip({ active, onClick, dot, label, count }: { active: boolean; onClick: () => void; dot: string; label: string; count: number }) {
+/** Compact, searchable client filter — replaces the old wrapping chip row. */
+function ClientFilterDropdown({
+  clients,
+  counts,
+  total,
+  value,
+  onChange,
+}: {
+  clients: { id: string; name: string }[]
+  counts: Record<string, number>
+  total: number
+  value: string | null
+  onChange: (id: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const selected = value ? clients.find((c) => c.id === value) ?? null : null
+  const label = selected ? selected.name : 'Todos los clientes'
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return q ? clients.filter((c) => c.name.toLowerCase().includes(q)) : clients
+  }, [clients, query])
+
+  function choose(id: string | null) {
+    onChange(id)
+    setOpen(false)
+    setQuery('')
+  }
+
   return (
-    <button onClick={onClick} className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition', active ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground')}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: dot }} />
-      {label}
-      <span className="tabular-nums opacity-60">{count}</span>
-    </button>
+    <div ref={ref} className="relative inline-flex items-center">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          'inline-flex h-8 max-w-[180px] items-center gap-1.5 rounded-md border px-2.5 text-xs transition',
+          value
+            ? 'border-primary/40 bg-primary/10 text-foreground'
+            : 'border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
+        )}
+      >
+        <Building2 className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">{label}</span>
+        <ChevronDown className={cn('h-3 w-3 shrink-0 opacity-60 transition', open && 'rotate-180')} />
+      </button>
+
+      {value && (
+        <button
+          type="button"
+          aria-label="Quitar filtro de cliente"
+          onClick={() => choose(null)}
+          className="ml-1 grid h-6 w-6 shrink-0 place-items-center rounded-md border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-1.5 w-64 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+          <div className="relative border-b border-border p-2">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar cliente…"
+              className="h-8 w-full rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none"
+            />
+          </div>
+          <ul role="listbox" className="max-h-72 overflow-y-auto p-1">
+            <li>
+              <button
+                type="button"
+                role="option"
+                aria-selected={value === null}
+                onClick={() => choose(null)}
+                className={cn(
+                  'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs transition',
+                  value === null ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {value === null ? <Check className="h-3.5 w-3.5 shrink-0 text-primary" /> : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3b82f6]" />}
+                  Todos los clientes
+                </span>
+                <span className="shrink-0 tabular-nums opacity-60">{total}</span>
+              </button>
+            </li>
+            {filtered.map((c) => {
+              const on = value === c.id
+              return (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={on}
+                    onClick={() => choose(c.id)}
+                    className={cn(
+                      'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs transition',
+                      on ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                    )}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      {on ? <Check className="h-3.5 w-3.5 shrink-0 text-primary" /> : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/50" />}
+                      <span className="truncate">{c.name}</span>
+                    </span>
+                    <span className="shrink-0 tabular-nums opacity-60">{counts[c.id] ?? 0}</span>
+                  </button>
+                </li>
+              )
+            })}
+            {filtered.length === 0 && (
+              <li className="px-2.5 py-3 text-center text-[11px] text-muted-foreground/60">Sin resultados</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }
 
