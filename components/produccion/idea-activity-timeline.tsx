@@ -1,4 +1,4 @@
-import { Video, Sparkles, Pencil, Upload, Send, ClipboardList, ArrowRight, History } from 'lucide-react'
+import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { ContentIdeaActivity, ContentIdeaActivityAction } from '@/lib/supabase/types'
@@ -12,6 +12,7 @@ const ACTION_META: Record<
   caption_saved:     { icon: Pencil,        tone: 'text-purple-500', verb: () => 'editó el caption' },
   video_uploaded:    { icon: Upload,        tone: 'text-orange-500', verb: (m) => `subió video${m.kind ? ` (${m.kind})` : ''}` },
   published:         { icon: Send,          tone: 'text-green-600',  verb: () => 'marcó como publicado' },
+  posted_to_metricool: { icon: Rocket,      tone: 'text-sky-500',    verb: (m) => `publicó en Metricool${Array.isArray(m.platforms) ? ` (${(m.platforms as string[]).join(', ')})` : ''}` },
   assigned:          { icon: ClipboardList, tone: 'text-blue-500',   verb: () => 'asignó a producción' },
   status_changed:    { icon: ArrowRight,    tone: 'text-zinc-500',   verb: (m) => `cambió el estado${m.status ? ` a “${m.status}”` : ''}` },
 }

@@ -7,6 +7,10 @@ vi.mock('@/components/produccion/approval-button', () => ({
   ApprovalButton: ({ ideaId }: { ideaId: string }) => <button data-idea={ideaId}>Enviar a revisión</button>,
 }))
 
+vi.mock('@/components/produccion/publish-metricool-button', () => ({
+  PublishToMetricoolButton: ({ ideaId }: { ideaId: string }) => <button data-publish={ideaId}>Publicar a Metricool</button>,
+}))
+
 function video(over: Partial<PipelineVideo> = {}): PipelineVideo {
   return {
     id: 'v1', client_id: 'c1', content_type: 'C', title: 'Promo del finde',
