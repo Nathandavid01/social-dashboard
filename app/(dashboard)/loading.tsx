@@ -1,5 +1,3 @@
-import { NateLoader } from '@/components/shared/nate-loader'
-
-export default function DashboardLoading() {
-  return <NateLoader variant="fullscreen" />
+export default function Loading() {
+  return null
 }

@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.20 — 2026-06-04
+
+### Sin el logo de Nate Media entre pantallas
+- Se quitó el **splash full-screen con el logo** que aparecía en cada transición de página. Los loadings de ruta ahora no muestran nada bloqueante; la retroalimentación de navegación la da la **barra de progreso superior**. Los loaders en línea usan un spinner neutro y sutil.
+
 ## v2.19 — 2026-06-04
 
 ### Calendario de Grabación rediseñado (color por videógrafo)
