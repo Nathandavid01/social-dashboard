@@ -5,6 +5,7 @@ import {
   BarChart3,
   Gauge,
   ClipboardCheck,
+  CheckCircle2,
   Zap,
   Globe,
   Film,
@@ -15,6 +16,7 @@ import {
   KanbanSquare,
   CalendarClock,
   Rocket,
+  Lightbulb,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -32,6 +34,8 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { href: '/home',                label: 'Inicio',          icon: Home },
   { href: '/runway',              label: 'Runway',          icon: Rocket,          permission: 'runway.read' },
+  { href: '/idea-lab',            label: 'Lab de Ideas',    icon: Lightbulb,       permission: 'ideas.edit' },
+  { href: '/ideas-aprobadas',     label: 'Ideas Aprobadas', icon: CheckCircle2,    permission: 'ideas.read' },
   { href: '/pipeline',            label: 'Pipeline',        icon: KanbanSquare,    permission: 'planning.read' },
   { href: '/video-reviews',       label: 'Video QC',        icon: Film,            permission: 'video_reviews.read' },
   { href: '/posting',             label: 'Posting',         icon: Send,            permission: 'posting.read' },
