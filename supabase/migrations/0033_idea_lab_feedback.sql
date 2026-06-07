@@ -1,4 +1,4 @@
--- Migration 0032: Idea Lab approve/reject feedback.
+-- Migration 0033: Idea Lab approve/reject feedback.
 -- Each AI-generated idea can be approved (✓) or rejected (✗) by the marketing
 -- team. Approved ideas surface in "Ideas Aprobadas" for editors/designers, and
 -- BOTH verdicts feed the learning loop so the generator self-educates on what

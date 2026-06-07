@@ -13,7 +13,7 @@ export default async function IdeasAprobadasPage() {
   try {
     ideas = await getApprovedIdeas()
   } catch {
-    // Table not yet migrated (0032) — show the empty state instead of erroring.
+    // Table not yet migrated (0033) — show the empty state instead of erroring.
     ideas = []
   }
 

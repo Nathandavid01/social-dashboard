@@ -58,7 +58,7 @@ export async function getApprovedIdeas(limit = 100): Promise<ApprovedIdea[]> {
 
 /**
  * Recent approvals/rejections for the generation prompt (learning loop).
- * Defensive: returns empty on any error (e.g. before the 0032 migration is
+ * Defensive: returns empty on any error (e.g. before the 0033 migration is
  * applied) so idea generation keeps working regardless.
  */
 export async function getIdeaFeedbackForPrompt(clientId?: string | null): Promise<IdeaFeedbackExamples> {
