@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { maybeAutoPostIdea } from '@/lib/actions/idea-posting'
 import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
@@ -88,12 +89,16 @@ export async function approveIdea(ideaId: string): Promise<Result> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  return transition(
+  const res = await transition(
     ideaId,
     'approved',
     { approved_by: user?.id ?? null, approved_at: new Date().toISOString() },
     (current) => `Solo se puede aprobar una idea en revisión (estado actual: "${current}").`,
   )
+  // A fully-ready idea (caption + edited video) auto-posts to Metricool on its
+  // planned date. Best-effort — never blocks or fails the approval.
+  if (res.ok) await maybeAutoPostIdea(ideaId)
+  return res
 }
 
 /** Request changes: submitted -> revision_needed. */

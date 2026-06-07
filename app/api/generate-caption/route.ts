@@ -1,31 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-async function fetchClientStyleExamples(blogId?: string): Promise<{ text: string; provider: string }[]> {
-  try {
-    const token = process.env.METRICOOL_TOKEN
-    const userId = process.env.METRICOOL_USER_ID
-    const effectiveBlogId = blogId || process.env.METRICOOL_BLOG_ID
-    if (!token || !userId || !effectiveBlogId) return []
-
-    const url = `https://app.metricool.com/api/v2/scheduler/posts?userId=${userId}&blogId=${effectiveBlogId}&start=2025-01-01T00:00:00&end=2026-12-31T23:59:59`
-    const res = await fetch(url, { headers: { 'X-Mc-Auth': token } })
-    if (!res.ok) return []
-
-    const json = await res.json() as { data?: { text: string; providers?: { network: string }[]; draft?: boolean }[] }
-    const posts = json.data || []
-    return posts
-      .filter((p) => p.text?.trim().length > 20 && !p.draft)
-      .map((p) => ({ text: p.text, provider: p.providers?.[0]?.network || 'instagram' }))
-      .slice(0, 12)
-  } catch {
-    return []
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {

@@ -64,7 +64,11 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 
 ## Loader
 
-All Suspense fallbacks for major route transitions should use `<NateLoader />` (full-screen splash with the company logo) — placed in `app/loading.tsx`, `app/(dashboard)/loading.tsx`, `app/(auth)/loading.tsx`. Inline loaders use `variant="inline"`.
+**No full-screen brand splash on route transitions** (no Nate Media logo between pages).
+
+- `app/loading.tsx`, `app/(dashboard)/loading.tsx`, `app/(auth)/loading.tsx` return `null` — navigation feedback comes from `<NateTopProgress />` (top bar, already in the dashboard layout).
+- Inline Suspense fallbacks use the minimal, logo-less `<PageSpinner />` (`components/shared/page-spinner.tsx`).
+- The `NateLoader` component was removed; do not reintroduce a logo splash for loading states.
 
 ## When the user reports a "looks broken" UI bug
 

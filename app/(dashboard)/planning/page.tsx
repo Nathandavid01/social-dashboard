@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { PageHeader } from '@/components/shared/page-header'
 import { WorkflowBoard } from '@/components/planning/workflow-board'
-import { NateLoader } from '@/components/shared/nate-loader'
+import { PageSpinner } from '@/components/shared/page-spinner'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
@@ -65,7 +65,7 @@ export default function PlanningPage() {
         title="Workflow"
         description="Cada cliente con sus videos: genera ideas, edita fechas de grabación/publicación, sigue el flujo y asígnalas a producción (individual o en lote)."
       />
-      <Suspense fallback={<div className="grid h-64 place-items-center"><NateLoader variant="inline" label="Cargando workflow…" /></div>}>
+      <Suspense fallback={<div className="grid h-64 place-items-center"><PageSpinner /></div>}>
         <WorkflowData />
       </Suspense>
     </div>

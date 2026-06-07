@@ -4,6 +4,37 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.24 — 2026-06-07
+
+### Auto-publicar a Metricool cuando el video está listo
+- Cuando un video tiene **caption + título + video editado + aprobado**, ahora se **publica automáticamente en Metricool** al aprobarlo, en su **fecha planificada** (`publish_date` + la hora de posteo del cliente), con el **video adjunto** (URL pública de Cloudflare R2) y las plataformas del cliente.
+- También hay un botón **"Publicar a Metricool"** (solo owner/supervisor) en los videos aprobados, por si quieres dispararlo a mano.
+- **Seguro por diseño:** idempotente (nunca publica dos veces — guarda el `metricool_post_id`), best-effort (si Metricool falla, la aprobación no se rompe; el error queda registrado), y con un **kill-switch** (`METRICOOL_AUTOPOST_ON_APPROVAL=false`) para desactivar el automático.
+- **Requiere aplicar la migración `0032_idea_posting.sql`** a la base de datos antes de funcionar.
+
+## v2.23 — 2026-06-07
+
+### Captions del lote imitan el estilo real del cliente (Metricool)
+- Al generar el caption de un video en el lote, ahora se traen los **captions ya publicados del cliente desde Metricool** (por su `metricool_blog_id`) y se usan como **ejemplos de estilo** para que el caption imite su tono, largo, emojis y formato de hashtags — antes solo usaba título + voz de marca.
+- Es **best-effort**: si el cliente no tiene Metricool configurado o la API falla, el caption se genera igual (sin ejemplos). La lógica de Metricool se unificó en un solo módulo compartido con la pantalla de Captions.
+
+## v2.22 — 2026-06-07
+
+### Subir el video editado mueve la tarjeta a "Edited"
+- Cuando subes el **video editado** de un video, su tarjeta **avanza sola a la columna "Edited"** del Content Pipeline (estado `producida`). Antes solo el video *crudo* movía la tarjeta (a "Video"); subir el editado no la movía y el tablero quedaba desincronizado.
+- La promoción **solo avanza**: nunca regresa una tarjeta que ya está aprobada o publicada. El **b-roll** no cambia el estado.
+
+## v2.21 — 2026-06-07
+
+### Content Pipeline: filtro de cliente compacto + arrastrar columnas
+- El filtro de clientes pasó de una **fila de chips** (que envolvía y crecía con cada cliente) a un **selector compacto "Cliente"** con buscador, conteo por cliente y botón para limpiar. Libera una fila completa para el tablero y escala a muchos clientes. La línea de stats (*N batches · N publicados*) se movió a la fila de **Asignado a**.
+- Ahora puedes **arrastrar el tablero horizontalmente con el mouse** (cursor de mano: agarrar → arrastrando) para moverte entre columnas. Las tarjetas siguen clickeables; un arrastre no abre una tarjeta por accidente.
+
+## v2.20 — 2026-06-04
+
+### Sin el logo de Nate Media entre pantallas
+- Se quitó el **splash full-screen con el logo** que aparecía en cada transición de página. Los loadings de ruta ahora no muestran nada bloqueante; la retroalimentación de navegación la da la **barra de progreso superior**. Los loaders en línea usan un spinner neutro y sutil.
+
 ## v2.19 — 2026-06-04
 
 ### Calendario de Grabación rediseñado (color por videógrafo)

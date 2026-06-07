@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 /**
  * Subtle top progress bar (NProgress-style) that flashes on every route change.
- * Complements the full-screen NateLoader: this catches fast client-side
+ * Top progress bar: catches fast client-side
  * navigations where Suspense / loading.tsx wouldn't fire.
  */
 export function NateTopProgress() {

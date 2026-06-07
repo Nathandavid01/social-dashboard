@@ -402,6 +402,11 @@ export interface ContentIdea {
   submitted_at: string | null
   recording_date: string | null
   publish_date: string | null
+  metricool_post_id: number | null
+  metricool_uuid: string | null
+  posted_at: string | null
+  posting_error: string | null
+  posting_started_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -427,6 +432,7 @@ export type ContentIdeaActivityAction =
   | 'caption_saved'
   | 'video_uploaded'
   | 'published'
+  | 'posted_to_metricool'
   | 'assigned'
   | 'status_changed'
 
