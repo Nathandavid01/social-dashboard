@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.23 — 2026-06-07
+
+### Captions del lote imitan el estilo real del cliente (Metricool)
+- Al generar el caption de un video en el lote, ahora se traen los **captions ya publicados del cliente desde Metricool** (por su `metricool_blog_id`) y se usan como **ejemplos de estilo** para que el caption imite su tono, largo, emojis y formato de hashtags — antes solo usaba título + voz de marca.
+- Es **best-effort**: si el cliente no tiene Metricool configurado o la API falla, el caption se genera igual (sin ejemplos). La lógica de Metricool se unificó en un solo módulo compartido con la pantalla de Captions.
+
 ## v2.22 — 2026-06-07
 
 ### Subir el video editado mueve la tarjeta a "Edited"
