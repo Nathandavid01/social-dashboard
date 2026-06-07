@@ -138,6 +138,13 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
   const endPan = useCallback(() => {
     pan.current.active = false
     setGrabbing(false)
+    // The click that follows an on-element drag is swallowed by onClickCapture
+    // (which clears `moved`). But a drag that ends OFF the element fires no click,
+    // so clear `moved` next frame to avoid stranding it and swallowing a later,
+    // unrelated click (e.g. a keyboard-activated button has no preceding mousedown).
+    if (pan.current.moved && typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => { pan.current.moved = false })
+    }
   }, [])
   // Swallow the click that follows a real drag so a card doesn't open mid-pan.
   const onPanClickCapture = useCallback((e: React.MouseEvent) => {
