@@ -1,0 +1,51 @@
+/**
+ * Pure helpers for per-video DEADLINES (fecha límite) on content_ideas.
+ *
+ * All date math is done on date-only "YYYY-MM-DD" strings compared
+ * lexicographically — NEVER via `Date.toISOString()` (which is UTC and shifts
+ * the calendar day for users west of UTC at night). This mirrors how the app
+ * already renders `publish_date` / `recording_date` as local calendar days.
+ *
+ * Kept free of any Supabase import so it's unit-testable in isolation.
+ */
+
+export type DeadlineStatus = 'none' | 'overdue' | 'due-soon' | 'future'
+
+/** Today's date as a local-calendar "YYYY-MM-DD" (no UTC conversion). */
+export function todayISO(now: Date = new Date()): string {
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/** Add `days` to a "YYYY-MM-DD" string, returning a "YYYY-MM-DD" string. */
+export function addDaysISO(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split('-').map(Number)
+  return todayISO(new Date(y, m - 1, d + days))
+}
+
+/** How urgent a video's deadline is, relative to `today`. Days-soon window = 2. */
+export function deadlineStatus(
+  deadline: string | null | undefined,
+  status: string | null | undefined,
+  today: string = todayISO(),
+): DeadlineStatus {
+  // Once published there's nothing left to be late for.
+  if (!deadline || status === 'publicada') return 'none'
+  if (deadline < today) return 'overdue'
+  if (deadline <= addDaysISO(today, 2)) return 'due-soon'
+  return 'future'
+}
+
+/** Spanish label + Tailwind tone classes for a deadline status (badge styling). */
+export function deadlineTone(s: DeadlineStatus): { className: string; label: string | null } {
+  switch (s) {
+    case 'overdue':
+      return { className: 'bg-red-500/12 text-red-400 border-red-500/30', label: 'Atrasado' }
+    case 'due-soon':
+      return { className: 'bg-amber-500/12 text-amber-400 border-amber-500/30', label: 'Pronto' }
+    default:
+      return { className: 'bg-muted text-muted-foreground border-transparent', label: null }
+  }
+}

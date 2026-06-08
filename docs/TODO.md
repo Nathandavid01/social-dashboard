@@ -3,6 +3,11 @@
 Tracked work not yet done. Each is implemented **test-first (TDD)** when unblocked
 (see CLAUDE.md). Check off + reference the commit when completed.
 
+## Migraciones por aplicar en prod (Supabase SQL Editor)
+Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelknmfudcvrzz` → SQL Editor.
+- [ ] **`0032_idea_posting.sql`** — columnas Metricool en `content_ideas` (auto-publish al aprobar). Sin esto, aprobar funciona pero no postea.
+- [ ] **`0034_content_idea_deadline.sql`** — columna `content_ideas.deadline` (fecha límite por video). Sin esto, ver/leer funciona; **guardar** una fecha límite falla.
+
 ## Idea detail page (`/produccion/idea/[ideaId]`)
 - [x] Make the **"La idea"** section collapsible (collapse once generated). — `IdeaBriefCard`
 - [x] **Stage pills** fit on one screen (no h-scroll); done stages collapse to icon. — `pipeline-timeline.tsx`

@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.26 — 2026-06-08
+
+### Fechas límite por video + cuántos videos subió cada persona
+- **Fecha límite (deadline) por video:** ahora puedes ponerle una **fecha límite** a cada video (en la tarjeta de "La idea", junto a la fecha de publicación). En el lote aparece un **badge de urgencia**: **Atrasado** (rojo) si la fecha ya pasó, **Pronto** (ámbar) si vence en ≤2 días — y desaparece cuando el video se publica. Las fechas son por día (sin hora) para que no se corran por zona horaria.
+- **Videos subidos por persona:** en **Equipo**, cada miembro muestra cuántos videos ha subido, separados en **Raw · B-roll · Editados** (+ total), para ver de un vistazo la producción de cada quien. No requiere migración (usa el `uploaded_by` que ya se guarda en cada archivo).
+- **Nota:** la fecha límite necesita la migración `0034_content_idea_deadline.sql` aplicada para poder **guardarse** (ver/leer funciona igual antes). Los conteos de subidas funcionan sin migración.
+
 ## v2.25 — 2026-06-08
 
 ### Pipeline más claro, asignación por persona, aprobación en el lote y Reels

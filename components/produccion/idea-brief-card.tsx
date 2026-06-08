@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Lightbulb, Eye, Camera, Sparkles, Hash, CalendarCheck, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
+import { Lightbulb, Eye, Camera, Sparkles, Hash, CalendarCheck, Flag, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaBrief, updateIdeaDates } from '@/lib/actions/content-ideas'
 
@@ -13,6 +13,7 @@ interface Props {
   captionAngle?: string | null
   hashtags?: string | null
   publishDate?: string | null
+  deadline?: string | null
 }
 
 /**
@@ -20,7 +21,7 @@ interface Props {
  * caption angle, hashtags). Collapses once the idea is generated. Each field is
  * an InlineEdit that persists immediately.
  */
-export function IdeaBriefCard({ ideaId, hook, visualBrief, captionAngle, hashtags, publishDate }: Props) {
+export function IdeaBriefCard({ ideaId, hook, visualBrief, captionAngle, hashtags, publishDate, deadline }: Props) {
   const generated = !!(hook && visualBrief)
   const [open, setOpen] = useState(!generated)
 
@@ -50,6 +51,16 @@ export function IdeaBriefCard({ ideaId, hook, visualBrief, captionAngle, hashtag
               value={publishDate ? publishDate.slice(0, 10) : ''}
               placeholder="Sin fecha"
               onSave={(v) => updateIdeaDates(ideaId, { publish_date: v || null })}
+            />
+          </EditableField>
+
+          <EditableField icon={Flag} label="Fecha límite">
+            <InlineEdit
+              type="date"
+              label="Fecha límite"
+              value={deadline ? deadline.slice(0, 10) : ''}
+              placeholder="Sin fecha límite"
+              onSave={(v) => updateIdeaDates(ideaId, { deadline: v || null })}
             />
           </EditableField>
 

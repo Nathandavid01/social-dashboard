@@ -1,9 +1,17 @@
 'use client'
 
-import { Check, Film } from 'lucide-react'
+import { Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
+import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { userAccent } from '@/lib/utils/user-accent'
+
+const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+/** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
+function fmtDeadline(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} ${MES_ES[(m ?? 1) - 1]}`
+}
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
@@ -45,6 +53,9 @@ export function VideoWorkCard({
   const mine = !!assignee && !!user && assignee.id === user.id
   const accent = userAccent(assignee?.id)
 
+  const dl = deadlineStatus(video.deadline, video.status)
+  const dlTone = deadlineTone(dl)
+
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
       <header className="flex items-start justify-between gap-2">
@@ -78,6 +89,15 @@ export function VideoWorkCard({
             )}
             {status.label}
           </span>
+          {video.deadline && (
+            <span
+              className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap', dlTone.className)}
+              title={`Fecha límite: ${fmtDeadline(video.deadline)}`}
+            >
+              <Flag className="h-3 w-3" aria-hidden />
+              {dlTone.label ? `${dlTone.label} · ` : ''}{fmtDeadline(video.deadline)}
+            </span>
+          )}
           {assignee ? (
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -105,6 +125,7 @@ export function VideoWorkCard({
         captionAngle={video.caption_angle}
         hashtags={video.hashtags_suggestion}
         publishDate={video.publish_date}
+        deadline={video.deadline}
       />
 
       {/* caption — editable inline + AI */}

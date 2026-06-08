@@ -199,4 +199,16 @@ describe('VideoWorkCard approval + assignment (via ClientBatchView)', () => {
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
     expect(screen.getAllByText('Sin asignar').length).toBeGreaterThan(0)
   })
+
+  it('shows an "Atrasado" deadline badge for a past deadline', () => {
+    const overdue = mkVideo({ id: 'd1', status: 'grabada', deadline: '2020-01-01' })
+    render(<ClientBatchView pipeline={mkPipeline([overdue])} />)
+    expect(screen.getByText(/Atrasado/)).toBeInTheDocument()
+  })
+
+  it('does not show an overdue badge once the video is published', () => {
+    const published = mkVideo({ id: 'd3', status: 'publicada', published_at: '2026-01-01', deadline: '2020-01-01' })
+    render(<ClientBatchView pipeline={mkPipeline([published])} />)
+    expect(screen.queryByText(/Atrasado/)).toBeNull()
+  })
 })

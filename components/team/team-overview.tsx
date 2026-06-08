@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TaskStatusBadge } from '@/components/operations/task-status-badge'
 import { RoleSelector } from './role-selector'
-import { Users, AlertTriangle, CheckSquare, Clock, ArrowRight } from 'lucide-react'
+import { Users, AlertTriangle, CheckSquare, Clock, ArrowRight, Film } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -16,6 +16,8 @@ import { es } from 'date-fns/locale'
 interface Member extends Profile {
   tasks: Task[]
   overdue: number
+  /** How many video files this person has uploaded, by kind. */
+  uploads?: { raw: number; broll: number; edited: number; total: number }
 }
 
 function initials(name: string | null) {
@@ -105,6 +107,21 @@ function MemberCard({ member }: { member: Member }) {
               className="h-full bg-blue-500 rounded-full"
               style={{ width: `${Math.min(100, (inProgress / Math.max(total, 1)) * 100)}%` }}
             />
+          </div>
+        )}
+
+        {/* Videos uploaded by this person (raw / b-roll / edited) */}
+        {member.uploads && member.uploads.total > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1 font-medium text-foreground/80">
+              <Film className="h-3 w-3" /> Videos subidos
+            </span>
+            <span>Raw {member.uploads.raw}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span>B-roll {member.uploads.broll}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-foreground">Editados {member.uploads.edited}</span>
+            <span className="ml-auto rounded-full bg-muted px-1.5 font-semibold tabular-nums text-foreground">{member.uploads.total}</span>
           </div>
         )}
       </CardHeader>
