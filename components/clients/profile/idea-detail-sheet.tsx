@@ -82,7 +82,6 @@ export function IdeaDetailSheet({ ideaId, open, onOpenChange }: Props) {
             <IdeaCaptionEditor
               ideaId={idea.id}
               initialCaption={idea.generated_caption}
-              initialPlatform={idea.caption_platform}
             />
             <IdeaVideoPanel ideaId={idea.id} ideaTitle={idea.title} videos={bundle.videos} />
             <IdeaActivityTimeline activities={bundle.activity} />

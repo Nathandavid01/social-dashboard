@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.26 — 2026-06-08
+
+### Una sola caption para todas las redes
+- El caption de cada video deja de ser **por plataforma**: ahora escribes **una sola caption** que se publica igual en **todas las redes del cliente** (Instagram, TikTok, Facebook…).
+- En el editor desaparece el selector de plataforma; en su lugar dice **"Una caption para todas las redes"** con los íconos de las redes del cliente.
+- La **generación con IA** crea la caption pensada exactamente para las redes a las que se va a publicar (las mismas que usa la publicación a Metricool), no para una sola.
+- Cambio **sin migración de base de datos**: la columna anterior se conserva y queda en blanco (no afectaba a qué redes se publica — eso siempre vino del cliente).
+
 ## v2.25 — 2026-06-08
 
 ### Página "Actividad" — quién hizo qué

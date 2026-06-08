@@ -21,7 +21,11 @@ export interface IdeaCaptionPromptInput {
     defaultCta?: string | null
     captionNotes?: string | null
   } | null
-  platform: string
+  /**
+   * The client's networks. ONE caption is written for ALL of them (caption único);
+   * if omitted/empty the prompt uses generic "todas las redes" wording.
+   */
+  platforms?: string[]
   /** Past published captions for this client, pulled from Metricool, to imitate. */
   examples: StyleExample[]
 }
@@ -30,8 +34,11 @@ const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
 
 /** Build the full prompt sent to the model for a single idea's caption. */
 export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
-  const { title, hook, captionAngle, hashtags, platform, examples } = input
+  const { title, hook, captionAngle, hashtags, examples } = input
   const c = input.client ?? {}
+
+  const nets = (input.platforms ?? []).filter((p) => filled(p))
+  const redes = nets.length > 0 ? nets.join(', ') : 'todas las redes del cliente'
 
   const constraints = [
     filled(c.captionLanguage) && `Idioma: ${c.captionLanguage} (IMPORTANTE: escribe el caption en este idioma)`,
@@ -66,14 +73,14 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
   return `Eres un copywriter profesional de redes sociales para NMedia PR, agencia de marketing puertorriqueña. Escribes captions que rinden bien en Instagram, TikTok y Facebook.
 
 CLIENTE: ${filled(c.name) ? c.name : 'cliente'}
-PLATAFORMA: ${platform}
+REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)
 
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
 ${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${examplesBlock}
 
-TAREA: Escribe UN caption completo para este video.
+TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
 ${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)

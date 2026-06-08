@@ -244,7 +244,7 @@ export function ClientBatchView({
           {videos.length > 0 ? (
             <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
               {shownVideos.map((v) => (
-                <VideoWorkCard key={v.id} video={v} index={videos.indexOf(v)} />
+                <VideoWorkCard key={v.id} video={v} index={videos.indexOf(v)} platforms={client.platforms} />
               ))}
             </div>
           ) : plannedSlots.length > 0 ? (

@@ -7,6 +7,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
+import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 
@@ -17,7 +18,6 @@ const CAPTION_MODEL = 'claude-sonnet-4-6'
  */
 export async function generateIdeaCaption(
   ideaId: string,
-  platform = 'instagram',
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -32,7 +32,7 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id)')
+    .select('id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
     .eq('id', ideaId)
     .single()
 
@@ -46,7 +46,13 @@ export async function generateIdeaCaption(
     default_hashtags?: string | null
     caption_notes?: string | null
     metricool_blog_id?: string | null
+    platforms?: string[] | null
+    default_platforms?: string[] | null
   }
+
+  // One caption for ALL the client's networks — generated for exactly the
+  // platforms it will be published to (same resolution the publisher uses).
+  const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   // Pull the client's recently published captions from Metricool so the model
   // imitates their real style (best-effort — returns [] if unavailable).
@@ -57,7 +63,7 @@ export async function generateIdeaCaption(
     hook: idea.hook,
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,
-    platform,
+    platforms,
     examples,
     client: {
       name: client.name,
@@ -87,13 +93,13 @@ export async function generateIdeaCaption(
       .from('content_ideas')
       .update({
         generated_caption: caption,
-        caption_platform: platform,
+        caption_platform: null,
         caption_generated_at: new Date().toISOString(),
       })
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
-    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platform, examplesUsed: examples.length } })
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
@@ -106,7 +112,6 @@ export async function generateIdeaCaption(
 export async function saveIdeaCaption(
   ideaId: string,
   caption: string,
-  platform?: string,
 ): Promise<{ ok?: true; error?: string }> {
   try {
     await requirePermission('captions.edit')
@@ -119,13 +124,13 @@ export async function saveIdeaCaption(
     .from('content_ideas')
     .update({
       generated_caption: caption,
-      caption_platform: platform ?? null,
+      caption_platform: null,
       caption_generated_at: new Date().toISOString(),
     })
     .eq('id', ideaId)
   if (error) return { error: error.message }
 
-  await logIdeaActivity(supabase, { ideaId, action: 'caption_saved', metadata: { platform: platform ?? null } })
+  await logIdeaActivity(supabase, { ideaId, action: 'caption_saved', metadata: {} })
 
   revalidatePath(`/produccion/idea/${ideaId}`)
   revalidatePath('/planning')

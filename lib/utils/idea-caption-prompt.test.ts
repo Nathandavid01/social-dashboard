@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { buildIdeaCaptionPrompt } from './idea-caption-prompt'
 
 describe('buildIdeaCaptionPrompt', () => {
-  const base = { title: 'Cómo limpiar tu sofá', platform: 'instagram', examples: [] }
+  const base = { title: 'Cómo limpiar tu sofá', examples: [] }
 
   it('always includes the video title', () => {
     expect(buildIdeaCaptionPrompt(base)).toContain('Cómo limpiar tu sofá')
@@ -43,5 +43,27 @@ describe('buildIdeaCaptionPrompt', () => {
   it('includes the hook only when provided', () => {
     expect(buildIdeaCaptionPrompt({ ...base, hook: 'Gancho fuerte' })).toContain('- Hook: Gancho fuerte')
     expect(buildIdeaCaptionPrompt(base)).not.toContain('- Hook:')
+  })
+
+  // Caption único: a single caption for ALL the client's networks (no per-platform selection).
+  it('lists the client networks and asks for a single caption that works for all of them', () => {
+    const p = buildIdeaCaptionPrompt({ ...base, platforms: ['instagram', 'tiktok', 'facebook'] })
+    expect(p).toContain('instagram, tiktok, facebook')
+    expect(p).toMatch(/un solo caption/i)
+    expect(p).not.toContain('PLATAFORMA:')
+  })
+
+  it('uses generic all-networks wording when no platforms are given', () => {
+    const p = buildIdeaCaptionPrompt(base)
+    expect(p).toMatch(/todas las redes/i)
+    expect(p).toMatch(/un solo caption/i)
+    // never emit a dangling REDES line with no networks
+    expect(p).not.toMatch(/REDES:\s*\n/)
+  })
+
+  it('ignores empty/blank platform entries', () => {
+    const p = buildIdeaCaptionPrompt({ ...base, platforms: ['', '  '] })
+    expect(p).toMatch(/todas las redes/i)
+    expect(p).not.toMatch(/REDES:\s*\n/)
   })
 })

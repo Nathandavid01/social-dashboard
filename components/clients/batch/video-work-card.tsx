@@ -8,13 +8,14 @@ import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import type { SocialPlatform } from '@/lib/supabase/types'
 
 /**
  * A full work card for one video of the batch: its idea and caption are editable
  * inline (no separate panel), plus the raw/b-roll/edited uploads. This is where
  * the team writes the idea and the caption for each planned video.
  */
-export function VideoWorkCard({ video, index }: { video: BatchVideo; index: number }) {
+export function VideoWorkCard({ video, index, platforms }: { video: BatchVideo; index: number; platforms?: SocialPlatform[] }) {
   const recorded = isRecorded(video)
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
@@ -67,7 +68,7 @@ export function VideoWorkCard({ video, index }: { video: BatchVideo; index: numb
       <IdeaCaptionEditor
         ideaId={video.id}
         initialCaption={video.generated_caption}
-        initialPlatform={video.caption_platform}
+        platforms={platforms}
       />
 
       {/* grabación — raw / b-roll / edited uploads to R2 */}

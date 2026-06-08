@@ -113,7 +113,6 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
           <IdeaCaptionEditor
             ideaId={ideaId}
             initialCaption={idea.generated_caption}
-            initialPlatform={idea.caption_platform}
           />
         </CardContent>
       </Card>
