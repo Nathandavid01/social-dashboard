@@ -13,6 +13,7 @@ vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknow
 vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
 
 import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
+import { AuthProvider } from '@/lib/context/auth-context'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -79,6 +80,33 @@ describe('ContentPipelineBoard — batch model', () => {
   it('shows "Sin asignar" for an unassigned batch', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
+  })
+
+  it('shows the per-client status badge and the per-video status breakdown', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', status: 'producida', client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'], status: 'paused' } }),
+      idea({ id: '2', status: 'grabada', client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'], status: 'paused' } }),
+    ] as IdeaWithPipeline[]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Pausado')           // client status badge
+    expect(card.textContent).toMatch(/Edición\s*1/)          // one video in Edición
+    expect(card.textContent).toMatch(/Video\s*1/)            // one video in Video
+  })
+
+  it('"Mis videos" filters to batches that have a video assigned to the current user', () => {
+    const ideas = [
+      idea({ id: '1', client_id: 'c1', assignee: { id: 'me', full_name: 'Yo' } }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'other', full_name: 'Otro' } }),
+    ] as IdeaWithPipeline[]
+    const { container } = render(
+      <AuthProvider value={{ user: { id: 'me', email: 'me@x.com' }, profile: null, role: 'owner' }}>
+        <ContentPipelineBoard ideas={ideas} />
+      </AuthProvider>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /mis videos/i }))
+    const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
+    expect(cardsText).toContain('Nora Fitness')
+    expect(cardsText).not.toContain('Lumen')
   })
 
   it('opens the client batch overlay in place on card click (no navigation)', async () => {

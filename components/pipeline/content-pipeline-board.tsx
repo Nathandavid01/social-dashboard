@@ -9,6 +9,7 @@ import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
+import { useAuth } from '@/lib/context/auth-context'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
 import { NewVideoDialog } from './new-video-dialog'
@@ -30,8 +31,23 @@ const STAGE_DOT: Record<BatchStageKey, string> = {
   edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
 }
 
+const STAGE_SHORT: Record<BatchStageKey, string> = {
+  idea: 'Idea', title: 'Título', caption: 'Caption', video: 'Video',
+  edited: 'Edición', approval: 'Aprob.', publication: 'Public.',
+}
+
+/** Per-client account-status chip styles. */
+const CLIENT_STATUS: Record<string, { label: string; cls: string }> = {
+  active: { label: 'Activo', cls: 'bg-emerald-500/12 text-emerald-400' },
+  paused: { label: 'Pausado', cls: 'bg-amber-500/12 text-amber-400' },
+  onboarding: { label: 'Onboarding', cls: 'bg-sky-500/12 text-sky-400' },
+  inactive: { label: 'Inactivo', cls: 'bg-muted text-muted-foreground' },
+}
+
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
 export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+  const { user } = useAuth()
+  const currentUserId = user?.id ?? null
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -83,7 +99,9 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
     const q = search.trim().toLowerCase()
     return batches.filter((b) => {
       if (clientFilter && b.clientId !== clientFilter) return false
-      if (assigneeFilter && b.assignee?.id !== assigneeFilter) return false
+      // Match if ANY video in the batch is assigned to the selected person — so a
+      // batch surfaces for everyone who has a video in it, not just its majority owner.
+      if (assigneeFilter && !b.assigneeIds.includes(assigneeFilter)) return false
       if (q && !(`${b.clientName} ${b.assignee?.name ?? ''}`.toLowerCase().includes(q))) return false
       return true
     })
@@ -182,6 +200,19 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
         <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
         <button onClick={() => setAssigneeFilter(null)} className={cn('rounded-full border px-3 py-1 text-[11px] font-medium transition', assigneeFilter === null ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60')}>Todos</button>
+        {currentUserId && (
+          <button
+            onClick={() => setAssigneeFilter((cur) => (cur === currentUserId ? null : currentUserId))}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition',
+              assigneeFilter === currentUserId
+                ? 'border-primary/40 bg-primary/15 text-primary'
+                : 'border-border text-muted-foreground hover:bg-muted/60',
+            )}
+          >
+            <Check className="h-3 w-3" /> Mis videos
+          </button>
+        )}
         {team.map((p) => {
           const a = userAccent(p.id)
           const on = assigneeFilter === p.id
@@ -334,11 +365,14 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
       </div>
 
       <div className="space-y-2.5 p-3 pl-3.5">
-        {/* client + period */}
+        {/* client + status + period */}
         <div className="flex items-center gap-2.5">
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-black" style={{ backgroundColor: a.dot }}>{batch.clientName.slice(0, 1).toUpperCase()}</span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
+              <ClientStatusBadge status={batch.clientStatus} />
+            </div>
             <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
@@ -351,6 +385,9 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
           ))}
           {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">+{more}</div>}
         </div>
+
+        {/* per-video status breakdown — how many videos sit at each stage */}
+        <VideoStatusStrip counts={batch.stageCounts} />
 
         {/* progress */}
         <div className="space-y-1.5">
@@ -377,6 +414,38 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
     </article>
   )
 })
+
+/** Small account-status chip shown next to a batch's client name. */
+function ClientStatusBadge({ status }: { status: string | null }) {
+  if (!status) return null
+  const s = CLIENT_STATUS[status]
+  if (!s) return null
+  return (
+    <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold leading-none', s.cls)}>
+      {s.label}
+    </span>
+  )
+}
+
+/** Compact strip showing how many of the batch's videos sit at each stage. */
+function VideoStatusStrip({ counts }: { counts: Record<BatchStageKey, number> }) {
+  const present = BATCH_STAGES.filter((s) => counts[s.key] > 0)
+  if (present.length === 0) return null
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      {present.map((s) => (
+        <span
+          key={s.key}
+          title={`${counts[s.key]} en ${STAGE_SHORT[s.key]}`}
+          className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium tabular-nums text-muted-foreground"
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: STAGE_DOT[s.key] }} aria-hidden />
+          {STAGE_SHORT[s.key]} {counts[s.key]}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: (e: React.MouseEvent) => void }) {
   const Icon = dir === 1 ? ChevronRight : ChevronLeft

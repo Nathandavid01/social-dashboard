@@ -419,7 +419,7 @@ export interface ContentIdea {
 export interface IdeaWithPipeline extends ContentIdea {
   recordingScheduled: boolean
   videos: ContentIdeaVideo[]
-  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms'>>) | null
+  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms' | 'status'>>) | null
   /** Person the linked production task is assigned to (null when unassigned).
    * avatar_url is optional so optimistic updates (from a name-only profile list)
    * still type-check; the fetched data includes it. */

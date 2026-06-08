@@ -55,7 +55,7 @@ async function runIdeaPost(
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, generated_caption, status, approval_status, published_at, publish_date, metricool_post_id, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
+      'id, title, content_type, generated_caption, status, approval_status, published_at, publish_date, metricool_post_id, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
     )
     .eq('id', ideaId)
     .single()
@@ -136,7 +136,7 @@ async function runIdeaPost(
       platforms,
       undefined,
       scheduledFor,
-      { mediaUrls: [pub.url], autoPublish: true },
+      { mediaUrls: [pub.url], autoPublish: true, contentType: (idea.content_type as string | null) ?? null },
     )
     const postId = res.data?.id ?? null
     const uuid = res.data?.uuid ?? null
