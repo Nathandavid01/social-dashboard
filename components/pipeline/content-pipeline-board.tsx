@@ -1,10 +1,11 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, type BatchStageKey, type ClientBatch } from '@/lib/utils/content-batches'
+import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData } from '@/lib/actions/client-batch'
@@ -90,8 +91,17 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
     return m
   }, [batches])
   const team = useMemo(() => {
+    // Build the filter chips from EVERY assignee with a video in any batch — not
+    // just each batch's dominant owner — so the chip list matches the any-in-batch
+    // filter (assigneeIds.includes). Otherwise a person who only has non-dominant
+    // videos has no chip even though "Mis videos" surfaces their batches.
     const m = new Map<string, { id: string; name: string }>()
-    for (const b of batches) if (b.assignee) m.set(b.assignee.id, b.assignee)
+    for (const b of batches) {
+      for (const i of b.ideas) {
+        const a = i.assignee
+        if (a) m.set(a.id, { id: a.id, name: a.full_name ?? '—' })
+      }
+    }
     return Array.from(m.values()).sort((a, b) => a.name.localeCompare(b.name))
   }, [batches])
 
@@ -357,6 +367,11 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const thumbs = Math.min(3, batch.total)
   const more = batch.total - thumbs
 
+  // Worst deadline across the batch's videos → a single Atrasado/Pronto badge so
+  // leads can triage urgency from the board without opening each client.
+  const dl = worstDeadlineStatus(batch.ideas)
+  const dlt = deadlineTone(dl)
+
   return (
     <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
@@ -372,6 +387,12 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
             <div className="flex items-center gap-1.5">
               <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
               <ClientStatusBadge status={batch.clientStatus} />
+              {dlt.label && (
+                <span className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold leading-none whitespace-nowrap', dlt.className)}>
+                  <Flag className="h-2.5 w-2.5" aria-hidden />
+                  {dlt.label}
+                </span>
+              )}
             </div>
             <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
           </div>

@@ -14,6 +14,7 @@ import {
   cardStatus,
   type BatchVideo,
 } from '@/lib/utils/batch-view'
+import { deadlineStatus } from '@/lib/utils/deadlines'
 import type { PlannedSlot } from '@/lib/utils/planned-sessions'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { BatchConfig, TeamMember } from '@/lib/actions/client-batch'
@@ -70,9 +71,25 @@ export function ClientBatchView({
   const grabados = videos.length - pendientes
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'por_grabar' | 'grabado'>('all')
+  const [deadlineFilter, setDeadlineFilter] = useState<'all' | 'overdue' | 'due-soon'>('all')
+
+  const atrasados = useMemo(
+    () => videos.filter((v) => deadlineStatus(v.deadline, v.status, undefined, v.published_at) === 'overdue').length,
+    [videos],
+  )
+  const proximos = useMemo(
+    () => videos.filter((v) => deadlineStatus(v.deadline, v.status, undefined, v.published_at) === 'due-soon').length,
+    [videos],
+  )
+
   const shownVideos = useMemo(
-    () => (statusFilter === 'all' ? videos : videos.filter((v) => cardStatus(v).key === statusFilter)),
-    [videos, statusFilter],
+    () =>
+      videos.filter((v) => {
+        if (statusFilter !== 'all' && cardStatus(v).key !== statusFilter) return false
+        if (deadlineFilter !== 'all' && deadlineStatus(v.deadline, v.status, undefined, v.published_at) !== deadlineFilter) return false
+        return true
+      }),
+    [videos, statusFilter, deadlineFilter],
   )
 
 
@@ -229,6 +246,33 @@ export function ClientBatchView({
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
                     statusFilter === f.key
+                      ? 'border-border bg-muted text-foreground'
+                      : 'border-transparent text-muted-foreground hover:bg-muted/60',
+                  )}
+                >
+                  {f.dot && <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden />}
+                  {f.label}
+                  <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Deadline filter — only when there's something time-sensitive to focus on */}
+          {videos.length > 0 && atrasados + proximos > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] text-muted-foreground/70">Fecha límite:</span>
+              {([
+                { key: 'all', label: 'Todas', count: videos.length, dot: '' },
+                { key: 'overdue', label: 'Atrasados', count: atrasados, dot: 'bg-red-500' },
+                { key: 'due-soon', label: 'Pronto', count: proximos, dot: 'bg-amber-500' },
+              ] as const).map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setDeadlineFilter(f.key)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
+                    deadlineFilter === f.key
                       ? 'border-border bg-muted text-foreground'
                       : 'border-transparent text-muted-foreground hover:bg-muted/60',
                   )}

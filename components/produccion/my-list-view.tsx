@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { ProductionTask, ProductionTaskStatus, Profile } from '@/lib/supabase/types'
 import { updateTaskStatus } from '@/lib/actions/production'
 import { StatusBadge } from './status-badge'
+import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { cn } from '@/lib/utils'
 
 const STATUS_FLOW: ProductionTaskStatus[] = ['pendiente', 'en_edicion', 'en_revision', 'revisiones', 'aprobado', 'publicado']
@@ -43,8 +44,6 @@ export function MyListView({ tasks: initialTasks }: Props) {
   const { monday, sunday, nextMonday, nextSunday } = getWeekBounds()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const tomorrow = new Date(today)
-  tomorrow.setDate(today.getDate() + 1)
 
   const classify = (t: ProductionTask) => {
     const pub = new Date(t.publish_date + 'T12:00:00')
@@ -108,14 +107,19 @@ export function MyListView({ tasks: initialTasks }: Props) {
               {group.tasks.map(task => {
                 const idx = STATUS_FLOW.indexOf(task.status)
                 const nextStatus = idx < STATUS_FLOW.length - 1 ? STATUS_FLOW[idx + 1] : null
-                const isDeadlineSoon = task.deadline && new Date(task.deadline) <= tomorrow
+                // Reuse the shared deadline logic; done tasks (aprobado/publicado)
+                // map to 'publicada' so their badge is suppressed.
+                const taskDone = task.status === 'aprobado' || task.status === 'publicado'
+                const dl = deadlineStatus(task.deadline ? task.deadline.slice(0, 10) : null, taskDone ? 'publicada' : null)
+                const dlt = deadlineTone(dl)
 
                 return (
                   <div
                     key={task.id}
                     className={cn(
                       'flex items-center gap-3 rounded-xl border bg-card px-4 py-3',
-                      isDeadlineSoon && task.status !== 'aprobado' && 'border-orange-200 dark:border-orange-900/50'
+                      dl === 'overdue' && 'border-red-300 dark:border-red-900/50',
+                      dl === 'due-soon' && 'border-amber-200 dark:border-amber-900/50',
                     )}
                   >
                     {/* Type badge */}
@@ -135,9 +139,9 @@ export function MyListView({ tasks: initialTasks }: Props) {
                         <p className="text-xs text-muted-foreground">
                           {new Date(task.publish_date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'short' })}
                         </p>
-                        {isDeadlineSoon && task.status !== 'aprobado' && (
-                          <span className="text-[10px] font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded-full">
-                            Deadline pronto
+                        {dlt.label && (
+                          <span className={cn('inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium', dlt.className)}>
+                            {dlt.label}
                           </span>
                         )}
                       </div>

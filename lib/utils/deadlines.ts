@@ -41,6 +41,26 @@ export function deadlineStatus(
   return 'future'
 }
 
+/** Urgency ordering — higher wins when rolling many videos into one badge. */
+const RANK: Record<DeadlineStatus, number> = { none: 0, future: 1, 'due-soon': 2, overdue: 3 }
+
+/**
+ * The most-urgent deadline status across a set of videos (for a batch-level
+ * badge). Each video is evaluated with `deadlineStatus` (so published ones are
+ * ignored). Returns 'none' for an empty/all-clear set.
+ */
+export function worstDeadlineStatus(
+  videos: { deadline?: string | null; status?: string | null; published_at?: string | null }[],
+  today: string = todayISO(),
+): DeadlineStatus {
+  let worst: DeadlineStatus = 'none'
+  for (const v of videos) {
+    const s = deadlineStatus(v.deadline, v.status, today, v.published_at)
+    if (RANK[s] > RANK[worst]) worst = s
+  }
+  return worst
+}
+
 /** Spanish label + Tailwind tone classes for a deadline status (badge styling). */
 export function deadlineTone(s: DeadlineStatus): { className: string; label: string | null } {
   switch (s) {

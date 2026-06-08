@@ -71,6 +71,25 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(cardsText).not.toContain('Lumen')
   })
 
+  it('builds an assignee chip for a NON-dominant assignee (not just the batch owner)', () => {
+    // One client batch: 2 videos for María (dominant) + 1 for Diego (non-dominant).
+    render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '2', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '3', client_id: 'c1', assignee: { id: 'u2', full_name: 'Diego V.' } }),
+    ] as IdeaWithPipeline[]} />)
+    // Diego has a clickable chip even though he's not the batch's dominant owner.
+    expect(screen.getByRole('button', { name: /diego v/i })).toBeInTheDocument()
+  })
+
+  it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
+    ] as IdeaWithPipeline[]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Atrasado')
+  })
+
   it('moves the whole batch forward, persisting all its videos', async () => {
     render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))

@@ -4,7 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.26 — 2026-06-08
+## v2.27 — 2026-06-08
+
+### Mejoras al pipeline y a las fechas límite (auditoría con equipo de agentes)
+- **Fechas límite visibles en el tablero:** cada tarjeta de cliente en el pipeline muestra ahora un badge **Atrasado/Pronto** con la urgencia del video más apremiante del lote — se ve sin abrir el cliente.
+- **Filtro por fecha límite** en el lote: además de Por grabar/Grabados, puedes filtrar **Atrasados / Pronto** para atacar primero lo urgente.
+- **Filtro "Asignado a" arreglado:** ahora aparece un chip para **cada** persona con un video en el lote (antes solo salía el dueño mayoritario, así que alguien con pocos videos no podía filtrarse aunque "Mis videos" sí lo mostrara).
+- **Fecha límite en "Mi Lista":** los videos asignados muestran el badge **Atrasado/Pronto** consistente (antes solo un aviso de "pronto").
+- **Fix de refresco:** editar una fecha en el lote ahora revalida la vista del cliente (el badge ya no se queda viejo hasta recargar).
 
 ### Fechas límite por video + cuántos videos subió cada persona
 - **Fecha límite (deadline) por video:** ahora puedes ponerle una **fecha límite** a cada video (en la tarjeta de "La idea", junto a la fecha de publicación). En el lote aparece un **badge de urgencia**: **Atrasado** (rojo) si la fecha ya pasó, **Pronto** (ámbar) si vence en ≤2 días — y desaparece cuando el video se publica. Las fechas son por día (sin hora) para que no se corran por zona horaria.
