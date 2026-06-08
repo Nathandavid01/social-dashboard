@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.27 — 2026-06-08
+
+### Aprobar el video desde el lote
+- En cada tarjeta de video del lote ahora aparece el **botón de aprobación**: según el estado del video, deja **enviar a revisión**, **aprobar** (con confirmación que muestra el cliente, para no aprobar el video equivocado) o **pedir cambios**.
+- Solo quien tiene permiso de aprobar (owner / supervisor) ve las acciones; el resto ve un aviso de "sin permiso".
+- Una vez aprobado, la tarjeta lo muestra como **Aprobado** y queda listo para publicarse en su fecha.
+
 ## v2.26 — 2026-06-08
 
 ### Una sola caption para todas las redes

@@ -8,14 +8,28 @@ import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { ApprovalButton } from '@/components/produccion/approval-button'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 /**
  * A full work card for one video of the batch: its idea and caption are editable
  * inline (no separate panel), plus the raw/b-roll/edited uploads. This is where
- * the team writes the idea and the caption for each planned video.
+ * the team writes the idea and the caption for each planned video — and, once the
+ * edited video is ready, sends it to the client for approval.
  */
-export function VideoWorkCard({ video, index, platforms }: { video: BatchVideo; index: number; platforms?: SocialPlatform[] }) {
+export function VideoWorkCard({
+  video,
+  index,
+  platforms,
+  clientName,
+  clientLogoUrl,
+}: {
+  video: BatchVideo
+  index: number
+  platforms?: SocialPlatform[]
+  clientName?: string | null
+  clientLogoUrl?: string | null
+}) {
   const recorded = isRecorded(video)
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
@@ -81,6 +95,20 @@ export function VideoWorkCard({ video, index, platforms }: { video: BatchVideo; 
         </div>
         <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
       </div>
+
+      {/* aprobación — enviar a revisión / aprobar / pedir cambios según el estado */}
+      <footer className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3">
+        <span className="text-[11px] text-muted-foreground">
+          Cuando el video editado esté listo, envíalo a revisión o apruébalo para publicar.
+        </span>
+        <ApprovalButton
+          ideaId={video.id}
+          approvalStatus={video.approval_status}
+          clientName={clientName}
+          clientLogoUrl={clientLogoUrl}
+          ideaTitle={video.title}
+        />
+      </footer>
     </section>
   )
 }
