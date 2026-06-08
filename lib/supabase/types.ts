@@ -402,6 +402,8 @@ export interface ContentIdea {
   submitted_at: string | null
   recording_date: string | null
   publish_date: string | null
+  /** User-settable due date (fecha límite) for the video's work. null = none. */
+  deadline: string | null
   metricool_post_id: number | null
   metricool_uuid: string | null
   posted_at: string | null
