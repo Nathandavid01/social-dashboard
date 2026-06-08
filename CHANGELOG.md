@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.25 — 2026-06-08
+
+### Pipeline más claro, asignación por persona, aprobación en el lote y Reels
+- **Estado a la vista en el pipeline:** cada tarjeta de cliente muestra ahora su **estado de cuenta** (Activo / Pausado / Onboarding) y un **desglose del estado de sus videos** (cuántos van en Idea, Título, Caption, Video, Edición, Aprobación, Publicación) — todo sin abrir el cliente.
+- **"Mis videos":** filtro nuevo en el pipeline para ver de un toque los lotes que tienen algún video asignado a ti. El filtro por persona ahora calza si **cualquiera** de los videos del lote es de esa persona (antes solo miraba al dueño mayoritario). Cada tarjeta de video muestra a quién está asignado y resalta **"Asignado a ti"** cuando te toca.
+- **Aprobar dentro del lote:** cuando un video tiene su **versión editada subida**, aparece un botón de **Aprobación** en su tarjeta (para todos los clientes). Aprobar ahí dispara la **auto-publicación a Metricool**, igual que en la tabla de QC.
+- **Formato Reel:** si el video es un **Reel** (`content_type = R`), ahora se publica con el **formato Reel** en Instagram y Facebook (TikTok ya es video nativo). Si Metricool rechazara el formato, se reintenta una vez como video normal para que la publicación nunca se rompa.
+- **Nota:** la auto-publicación al aprobar requiere la migración `0032_idea_posting.sql` aplicada (ver handoff). Sin ella, la aprobación funciona igual; solo no dispara el post.
+
 ## v2.24 — 2026-06-07
 
 ### Auto-publicar a Metricool cuando el video está listo

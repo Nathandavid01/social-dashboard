@@ -36,11 +36,17 @@ export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
 export interface ClientBatch {
   clientId: string
   clientName: string
+  /** Client account status (active / paused / onboarding). null when unknown. */
+  clientStatus: string | null
   /** The person the batch is assigned to (drives its color). null = unassigned. */
   assignee: { id: string; name: string } | null
+  /** Every distinct person with a video in this batch (for the "Mis videos" filter). */
+  assigneeIds: string[]
   ideas: IdeaWithPipeline[]
   /** Column the batch sits in — the LEAST-advanced active video (they move together). */
   stage: BatchStageKey
+  /** How many of the batch's videos sit at each pipeline stage (status breakdown). */
+  stageCounts: Record<BatchStageKey, number>
   /** Total videos in the batch. */
   total: number
   /** Videos already pulled ahead of the batch's column (informational). */
@@ -100,12 +106,24 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
     const stage = batchStage(active)
     const ahead = active.filter((i) => STAGE_INDEX[ideaStage(i)] > STAGE_INDEX[stage]).length
     const platforms = active[0]?.client?.platforms ?? []
+
+    // Per-stage video count (the "status of the videos within" the batch).
+    const stageCounts = { idea: 0, title: 0, caption: 0, video: 0, edited: 0, approval: 0, publication: 0 } as Record<BatchStageKey, number>
+    const assigneeSet = new Set<string>()
+    for (const i of active) {
+      stageCounts[ideaStage(i)]++
+      if (i.assignee?.id) assigneeSet.add(i.assignee.id)
+    }
+
     batches.push({
       clientId,
       clientName: active[0]?.client?.name ?? 'Sin cliente',
+      clientStatus: active[0]?.client?.status ?? null,
       assignee: dominantAssignee(active),
+      assigneeIds: Array.from(assigneeSet),
       ideas: active,
       stage,
+      stageCounts,
       total: active.length,
       ahead,
       platforms,

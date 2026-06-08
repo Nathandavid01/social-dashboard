@@ -23,6 +23,11 @@ vi.mock('@/components/produccion/idea-brief-card', () => ({
 vi.mock('@/components/produccion/idea-caption-editor', () => ({
   IdeaCaptionEditor: ({ ideaId }: { ideaId: string }) => <div data-testid="caption">caption:{ideaId}</div>,
 }))
+vi.mock('@/components/produccion/approval-button', () => ({
+  ApprovalButton: ({ ideaId, approvalStatus }: { ideaId: string; approvalStatus: string }) => (
+    <div data-testid="approval">approve:{ideaId}:{approvalStatus}</div>
+  ),
+}))
 
 function rawFile(): ContentIdeaVideo {
   return {
@@ -31,6 +36,10 @@ function rawFile(): ContentIdeaVideo {
     size_bytes: 1000, duration_sec: 42, notes: null, uploaded_by: null, status: 'uploaded',
     error_message: null, uploaded_at: '2026-06-01', updated_at: '2026-06-01',
   }
+}
+
+function editedFile(): ContentIdeaVideo {
+  return { ...rawFile(), id: 'e1', kind: 'edited', name: 'final.mp4' }
 }
 
 function mkVideo(overrides: Partial<BatchVideo> = {}): BatchVideo {
@@ -161,6 +170,33 @@ describe('ClientBatchView filters + encargado', () => {
   it('shows the Encargado field in the batch summary', () => {
     render(<ClientBatchView pipeline={mkPipeline([selectedVideo])} />)
     expect(screen.getAllByText('Encargado').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Sin asignar').length).toBeGreaterThan(0)
+  })
+})
+
+describe('VideoWorkCard approval + assignment (via ClientBatchView)', () => {
+  afterEach(() => cleanup())
+
+  it('shows the approval control only once an edited video is uploaded', () => {
+    const noEdited = mkVideo({ id: 'a', videos: { raw: [rawFile()], broll: [], edited: [] } })
+    const withEdited = mkVideo({ id: 'b', videos: { raw: [rawFile()], broll: [], edited: [editedFile()] } })
+    render(<ClientBatchView pipeline={mkPipeline([noEdited, withEdited])} />)
+    const approvals = screen.getAllByTestId('approval')
+    expect(approvals).toHaveLength(1)
+    expect(approvals[0]).toHaveTextContent('approve:b:pending')
+  })
+
+  it('keeps the approval control visible after the flow starts even with no edited file', () => {
+    const submitted = mkVideo({ id: 's', approval_status: 'submitted', videos: { raw: [], broll: [], edited: [] } })
+    render(<ClientBatchView pipeline={mkPipeline([submitted])} />)
+    expect(screen.getByTestId('approval')).toHaveTextContent('approve:s:submitted')
+  })
+
+  it('shows the assignee name, or "Sin asignar" when unassigned', () => {
+    const assigned = mkVideo({ id: 'x', assignee: { id: 'u9', full_name: 'Ana Torres', avatar_url: null } })
+    const unassigned = mkVideo({ id: 'y' })
+    render(<ClientBatchView pipeline={mkPipeline([assigned, unassigned])} />)
+    expect(screen.getByText('Ana Torres')).toBeInTheDocument()
     expect(screen.getAllByText('Sin asignar').length).toBeGreaterThan(0)
   })
 })
