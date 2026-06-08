@@ -32,6 +32,9 @@ describe('deadlineStatus', () => {
   it("is 'none' when the video is already published, even if the deadline passed", () => {
     expect(deadlineStatus('2026-01-01', 'publicada', today)).toBe('none')
   })
+  it("is 'none' when published_at is set even if status was not flipped to 'publicada'", () => {
+    expect(deadlineStatus('2026-01-01', 'grabada', today, '2026-06-07T10:00:00Z')).toBe('none')
+  })
   it("is 'overdue' when the deadline is before today and not published", () => {
     expect(deadlineStatus('2026-06-07', 'producida', today)).toBe('overdue')
   })

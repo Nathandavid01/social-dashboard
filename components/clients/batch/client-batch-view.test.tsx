@@ -206,8 +206,9 @@ describe('VideoWorkCard approval + assignment (via ClientBatchView)', () => {
     expect(screen.getByText(/Atrasado/)).toBeInTheDocument()
   })
 
-  it('does not show an overdue badge once the video is published', () => {
-    const published = mkVideo({ id: 'd3', status: 'publicada', published_at: '2026-01-01', deadline: '2020-01-01' })
+  it('does not show an overdue badge once the video is published (via published_at only)', () => {
+    // published_at set but status NOT flipped to 'publicada' — the auto-post path.
+    const published = mkVideo({ id: 'd3', status: 'grabada', published_at: '2026-01-01', deadline: '2020-01-01' })
     render(<ClientBatchView pipeline={mkPipeline([published])} />)
     expect(screen.queryByText(/Atrasado/)).toBeNull()
   })

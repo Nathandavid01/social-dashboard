@@ -53,7 +53,8 @@ export function VideoWorkCard({
   const mine = !!assignee && !!user && assignee.id === user.id
   const accent = userAccent(assignee?.id)
 
-  const dl = deadlineStatus(video.deadline, video.status)
+  // `undefined` keeps the default `today`; published_at also suppresses the badge.
+  const dl = deadlineStatus(video.deadline, video.status, undefined, video.published_at)
   const dlTone = deadlineTone(dl)
 
   return (

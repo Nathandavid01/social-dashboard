@@ -30,9 +30,12 @@ export function deadlineStatus(
   deadline: string | null | undefined,
   status: string | null | undefined,
   today: string = todayISO(),
+  publishedAt?: string | null,
 ): DeadlineStatus {
-  // Once published there's nothing left to be late for.
-  if (!deadline || status === 'publicada') return 'none'
+  // Once published there's nothing left to be late for. The app considers a video
+  // published when EITHER published_at is set OR status === 'publicada' (the
+  // auto-post path may set published_at without flipping status) — honor both.
+  if (!deadline || status === 'publicada' || publishedAt) return 'none'
   if (deadline < today) return 'overdue'
   if (deadline <= addDaysISO(today, 2)) return 'due-soon'
   return 'future'
