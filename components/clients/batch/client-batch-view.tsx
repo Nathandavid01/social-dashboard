@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, ChevronLeft, LayoutGrid, Lightbulb, MessageSquare, Plus, Users, X, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -81,6 +81,13 @@ export function ClientBatchView({
     () => videos.filter((v) => deadlineStatus(v.deadline, v.status, undefined, v.published_at) === 'due-soon').length,
     [videos],
   )
+
+  // The deadline-filter chips only render while there's something time-sensitive.
+  // If an edit clears all overdue/due-soon videos, reset the filter so a stale
+  // 'overdue'/'due-soon' selection can't strand the grid empty with no visible control.
+  useEffect(() => {
+    if (atrasados + proximos === 0) setDeadlineFilter('all')
+  }, [atrasados, proximos])
 
   const shownVideos = useMemo(
     () =>
