@@ -203,7 +203,9 @@ describe('VideoWorkCard approval + assignment (via ClientBatchView)', () => {
   it('shows an "Atrasado" deadline badge for a past deadline', () => {
     const overdue = mkVideo({ id: 'd1', status: 'grabada', deadline: '2020-01-01' })
     render(<ClientBatchView pipeline={mkPipeline([overdue])} />)
-    expect(screen.getByText(/Atrasado/)).toBeInTheDocument()
+    // The badge reads "Atrasado · <date>"; the "·" disambiguates it from the
+    // new "Atrasados" deadline-filter button.
+    expect(screen.getByText(/Atrasado ·/)).toBeInTheDocument()
   })
 
   it('does not show an overdue badge once the video is published (via published_at only)', () => {
@@ -211,5 +213,16 @@ describe('VideoWorkCard approval + assignment (via ClientBatchView)', () => {
     const published = mkVideo({ id: 'd3', status: 'grabada', published_at: '2026-01-01', deadline: '2020-01-01' })
     render(<ClientBatchView pipeline={mkPipeline([published])} />)
     expect(screen.queryByText(/Atrasado/)).toBeNull()
+  })
+
+  it('filters the grid to overdue videos via the deadline filter', () => {
+    const overdue = mkVideo({ id: 'o1', status: 'grabada', deadline: '2020-01-01' })
+    const future = mkVideo({ id: 'f1', status: 'grabada', deadline: '2099-01-01' })
+    render(<ClientBatchView pipeline={mkPipeline([overdue, future])} />)
+    expect(screen.getAllByTestId('brief')).toHaveLength(2)
+    // Click the "Atrasados" deadline filter → only the overdue card remains.
+    fireEvent.click(screen.getByRole('button', { name: /Atrasados/ }))
+    expect(screen.getAllByTestId('brief')).toHaveLength(1)
+    expect(screen.getByText('brief:o1')).toBeInTheDocument()
   })
 })

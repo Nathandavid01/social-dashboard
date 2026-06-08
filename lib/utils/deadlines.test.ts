@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deadlineStatus, addDaysISO, todayISO, deadlineTone } from './deadlines'
+import { deadlineStatus, addDaysISO, todayISO, deadlineTone, worstDeadlineStatus } from './deadlines'
 
 describe('todayISO', () => {
   it('uses local calendar parts (no UTC off-by-one near midnight)', () => {
@@ -45,6 +45,28 @@ describe('deadlineStatus', () => {
   })
   it("is 'future' beyond the 2-day window", () => {
     expect(deadlineStatus('2026-06-11', 'idea', today)).toBe('future')
+  })
+})
+
+describe('worstDeadlineStatus', () => {
+  const today = '2026-06-08'
+  it('returns "none" for an empty set', () => {
+    expect(worstDeadlineStatus([], today)).toBe('none')
+  })
+  it('picks the most urgent across videos (overdue beats due-soon beats future)', () => {
+    const vids = [
+      { deadline: '2026-06-20', status: 'idea' }, // future
+      { deadline: '2026-06-09', status: 'idea' }, // due-soon
+      { deadline: '2026-06-01', status: 'grabada' }, // overdue
+    ]
+    expect(worstDeadlineStatus(vids, today)).toBe('overdue')
+  })
+  it('ignores published videos when picking the worst', () => {
+    const vids = [
+      { deadline: '2026-01-01', status: 'grabada', published_at: '2026-05-01' }, // published → ignored
+      { deadline: '2026-06-09', status: 'idea' }, // due-soon
+    ]
+    expect(worstDeadlineStatus(vids, today)).toBe('due-soon')
   })
 })
 

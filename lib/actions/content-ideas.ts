@@ -243,6 +243,9 @@ export async function updateIdeaDates(
   revalidatePath('/planning')
   revalidatePath('/recording-calendar')
   revalidatePath('/pipeline')
+  // The deadline editor + badge live on the client batch view too — revalidate it
+  // so an inline date edit isn't left stale until a full reload.
+  revalidatePath('/clients/[id]/batch', 'page')
   return { success: true }
 }
 
