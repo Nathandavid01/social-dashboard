@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.25 — 2026-06-08
+
+### Página "Actividad" — quién hizo qué
+- Nueva página **Actividad** en el menú lateral: un **registro en vivo** de todo lo que hace el equipo sobre los videos (grabar, generar/editar caption, subir video, cambiar estado, aprobar, publicar a Metricool, asignar a producción).
+- Cada línea dice **quién**, **qué hizo** (en español claro) y **dónde** (título del video · cliente), con la **hora relativa** ("hace 5 min").
+- **Filtro por persona** con el conteo de acciones de cada una, para que cada quien vea su propio aporte de un vistazo.
+- Visible para owner, supervisor, editor y videógrafo (permiso `activity.read`).
+
 ## v2.24 — 2026-06-07
 
 ### Auto-publicar a Metricool cuando el video está listo

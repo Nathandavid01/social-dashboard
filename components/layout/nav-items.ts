@@ -17,6 +17,7 @@ import {
   CalendarClock,
   Rocket,
   Lightbulb,
+  History,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -40,6 +41,7 @@ export const navItems: NavItem[] = [
   { href: '/video-reviews',       label: 'Video QC',        icon: Film,            permission: 'video_reviews.read' },
   { href: '/posting',             label: 'Posting',         icon: Send,            permission: 'posting.read' },
   { href: '/team',                label: 'Equipo',          icon: UserSquare2,     permission: 'team.read' },
+  { href: '/actividad',           label: 'Actividad',       icon: History,         permission: 'activity.read' },
   { href: '/produccion',          label: 'Producción',      icon: Clapperboard,    permission: 'production.read' },
   { href: '/recording-calendar',  label: 'Grabación',       icon: Camera,          permission: 'recording.read' },
   { href: '/clients',             label: 'Clientes',        icon: Users,           permission: 'clients.read' },
