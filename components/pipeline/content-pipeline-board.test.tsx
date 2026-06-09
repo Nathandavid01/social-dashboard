@@ -196,11 +196,13 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getAllByText('Planificado')).toHaveLength(2)
   })
 
-  it('opens the client batch overlay when a planned card is clicked', () => {
+  it('opens the client batch overlay when a planned card is clicked', async () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('nd')
+    // Let the async openClientBatch state update settle (avoids act() warnings).
+    await screen.findByTestId('batch-overlay')
   })
 })
 

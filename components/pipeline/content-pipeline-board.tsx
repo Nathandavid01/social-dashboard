@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -46,8 +46,20 @@ const CLIENT_STATUS: Record<string, { label: string; cls: string }> = {
   inactive: { label: 'Inactivo', cls: 'bg-muted text-muted-foreground' },
 }
 
-/** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+/**
+ * Global content pipeline — one card per CLIENT BATCH, colored by its assignee.
+ * Wrapped in Suspense because the inner board reads `useSearchParams()` (filters
+ * persisted in the URL) — Next requires a boundary around that hook.
+ */
+export function ContentPipelineBoard(props: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+  return (
+    <Suspense fallback={null}>
+      <ContentPipelineBoardInner {...props} />
+    </Suspense>
+  )
+}
+
+function ContentPipelineBoardInner({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
   const { user } = useAuth()
   const currentUserId = user?.id ?? null
 
@@ -65,8 +77,13 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
     if (clientFilter) params.set('cliente', clientFilter)
     if (assigneeFilter) params.set('persona', assigneeFilter)
     const qs = params.toString()
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-  }, [clientFilter, assigneeFilter, pathname, router])
+    const desired = qs ? `${pathname}?${qs}` : pathname
+    const currentQs = searchParams?.toString() ?? ''
+    const current = currentQs ? `${pathname}?${currentQs}` : pathname
+    // Only write when the URL would actually change — avoids a redundant
+    // router.replace (and RSC refetch on this force-dynamic page) on every mount.
+    if (desired !== current) router.replace(desired, { scroll: false })
+  }, [clientFilter, assigneeFilter, pathname, router, searchParams])
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
