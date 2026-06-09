@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TaskStatusBadge } from '@/components/operations/task-status-badge'
 import { RoleSelector } from './role-selector'
 import { Users, AlertTriangle, CheckSquare, Clock, ArrowRight, Film } from 'lucide-react'
+import { editedRatioPct, uploadStaleness } from '@/lib/utils/video-upload-metrics'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -17,8 +18,12 @@ interface Member extends Profile {
   tasks: Task[]
   overdue: number
   /** How many video files this person has uploaded, by kind. */
-  uploads?: { raw: number; broll: number; edited: number; total: number }
+  uploads?: { raw: number; broll: number; edited: number; total: number; lastUploadAt: string | null }
+  /** 1-based rank among uploaders (1=top); only set for the top few. */
+  uploadRank?: number
 }
+
+const MEDAL = ['🥇', '🥈', '🥉']
 
 function initials(name: string | null) {
   if (!name) return '?'
@@ -34,6 +39,11 @@ function MemberCard({ member }: { member: Member }) {
   const pending = member.tasks.filter((t) => t.status === 'pending').length
   const blocked = member.tasks.filter((t) => t.status === 'blocked').length
   const total = member.tasks.length
+
+  const u = member.uploads
+  const uploadRatio = u ? editedRatioPct(u) : null
+  const stale = u ? uploadStaleness(u.lastUploadAt) : null
+  const medal = member.uploadRank && member.uploadRank <= 3 ? MEDAL[member.uploadRank - 1] : null
 
   const displayTasks = expanded ? member.tasks : member.tasks.slice(0, 4)
 
@@ -110,18 +120,38 @@ function MemberCard({ member }: { member: Member }) {
           </div>
         )}
 
-        {/* Videos uploaded by this person (raw / b-roll / edited) */}
-        {member.uploads && member.uploads.total > 0 && (
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-medium text-foreground/80">
-              <Film className="h-3 w-3" /> Videos subidos
-            </span>
-            <span>Raw {member.uploads.raw}</span>
-            <span className="text-muted-foreground/40">·</span>
-            <span>B-roll {member.uploads.broll}</span>
-            <span className="text-muted-foreground/40">·</span>
-            <span className="text-foreground">Editados {member.uploads.edited}</span>
-            <span className="ml-auto rounded-full bg-muted px-1.5 font-semibold tabular-nums text-foreground">{member.uploads.total}</span>
+        {/* Videos uploaded by this person (raw / b-roll / edited) + insights */}
+        {u && u.total > 0 && (
+          <div className="mt-2 space-y-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1 font-medium text-foreground/80">
+                {medal ? <span aria-hidden>{medal}</span> : <Film className="h-3 w-3" />} Videos subidos
+              </span>
+              <span>Raw {u.raw}</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span>B-roll {u.broll}</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="text-foreground">Editados {u.edited}</span>
+              <span className="ml-auto rounded-full bg-muted px-1.5 font-semibold tabular-nums text-foreground">{u.total}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
+              {uploadRatio !== null && (
+                <span title="Editados ÷ raw — qué tanto de lo grabado se editó">Editado {uploadRatio}%</span>
+              )}
+              {stale && (
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5',
+                    stale.tone === 'fresh' && 'text-emerald-500',
+                    stale.tone === 'aging' && 'text-amber-500',
+                    stale.tone === 'stale' && 'bg-red-500/10 text-red-400',
+                  )}
+                >
+                  <Clock className="h-2.5 w-2.5" aria-hidden />
+                  {stale.days === 0 ? 'subió hoy' : `última subida hace ${stale.days}d`}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </CardHeader>
@@ -183,6 +213,15 @@ export function TeamOverview({ members }: TeamOverviewProps) {
   const totalOverdue = members.reduce((s, m) => s + m.overdue, 0)
   const totalInProgress = members.reduce((s, m) => s + m.tasks.filter((t) => t.status === 'in_progress').length, 0)
 
+  // Leaderboard: 1-based rank by total uploads (only people who've uploaded).
+  const rank = new Map(
+    members
+      .filter((m) => m.uploads && m.uploads.total > 0)
+      .sort((a, b) => (b.uploads?.total ?? 0) - (a.uploads?.total ?? 0))
+      .map((m, i) => [m.id, i + 1]),
+  )
+  const rankedMembers = members.map((m) => ({ ...m, uploadRank: rank.get(m.id) }))
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -219,7 +258,7 @@ export function TeamOverview({ members }: TeamOverviewProps) {
 
       {/* Member cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {members.map((member) => (
+        {rankedMembers.map((member) => (
           <MemberCard key={member.id} member={member} />
         ))}
       </div>

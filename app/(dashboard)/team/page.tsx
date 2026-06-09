@@ -44,7 +44,9 @@ export default async function TeamPage() {
       ...p,
       tasks: memberTasks[p.id] ?? [],
       overdue: (memberTasks[p.id] ?? []).filter((t) => t.due_at && t.due_at < nowIso).length,
-      uploads: u ? { raw: u.raw, broll: u.broll, edited: u.edited, total: u.total } : undefined,
+      uploads: u
+        ? { raw: u.raw, broll: u.broll, edited: u.edited, total: u.total, lastUploadAt: u.lastUploadAt }
+        : undefined,
     }
   }).sort((a, b) => b.tasks.length - a.tasks.length)
 
@@ -54,7 +56,7 @@ export default async function TeamPage() {
         <UserAdminTable users={(profiles ?? []) as Profile[]} currentUserId={user?.id ?? ''} />
       </RoleGate>
       <TeamOverview
-        members={members as (Profile & { tasks: Task[]; overdue: number; uploads?: { raw: number; broll: number; edited: number; total: number } })[]}
+        members={members as (Profile & { tasks: Task[]; overdue: number; uploads?: { raw: number; broll: number; edited: number; total: number; lastUploadAt: string | null } })[]}
       />
     </div>
   )

@@ -4,7 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.27 — 2026-06-08
+## v2.28 — 2026-06-08
+
+### Más señal en los conteos de videos subidos (Equipo)
+- **Última subida:** cada miembro muestra **"última subida hace X días"** con color (verde reciente / ámbar / rojo si lleva mucho sin subir) para detectar a quién se le quedó parado el trabajo.
+- **Ratio de edición:** badge **"Editado X%"** (editados ÷ raw) — cuánto de lo grabado realmente se editó.
+- **Leaderboard:** medalla 🥇/🥈/🥉 para los tres que más videos han subido.
+- Sin migración (usa `uploaded_at` que ya se guarda).
 
 ### Mejoras al pipeline y a las fechas límite (auditoría con equipo de agentes)
 - **Fechas límite visibles en el tablero:** cada tarjeta de cliente en el pipeline muestra ahora un badge **Atrasado/Pronto** con la urgencia del video más apremiante del lote — se ve sin abrir el cliente.
