@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.28 — 2026-06-08
+
+### Un video a la vez en el lote
+- La vista de lote ahora se trabaja **un video a la vez**: en lugar de mostrar todas las tarjetas juntas, hay un **navegador** (números + flechas + "Video X de N") y se ve **una sola tarjeta** enfocada.
+- Saltas entre videos con un clic; al filtrar por estado (Todos / Por grabar / Grabados) el navegador se reinicia al primero.
+- Menos ruido y más foco para escribir la idea, el caption y subir la grabación de cada video.
+
 ## v2.27 — 2026-06-08
 
 ### Aprobar el video desde el lote

@@ -99,21 +99,30 @@ describe('ClientBatchView', () => {
     expect(screen.getByText(/Este lote está en la etapa/i)).toBeInTheDocument()
   })
 
-  it('renders every video as an editable card (editable title + inline idea, caption, uploads)', () => {
-    // editable title per video (InlineEdit shows the content_idea title)
+  it('shows ONE video at a time (single-video focus) with its editable idea, caption and uploads', () => {
+    // exactly one card is mounted — you work a single video at a time
+    expect(screen.getAllByTestId('brief')).toHaveLength(1)
+    expect(screen.getAllByTestId('caption')).toHaveLength(1)
+    expect(screen.getAllByTestId('video-panel')).toHaveLength(1)
+    // the first video is shown by default
     expect(screen.getByText('612 de noche: planes para cada vibe')).toBeInTheDocument()
-    expect(screen.getByText('Cómo encender un cigarro como un pro')).toBeInTheDocument()
-    // each video has its own inline idea brief + caption editor + uploads
-    expect(screen.getAllByTestId('brief')).toHaveLength(2)
-    expect(screen.getAllByTestId('caption')).toHaveLength(2)
-    expect(screen.getAllByTestId('video-panel')).toHaveLength(2)
     expect(screen.getByText('brief:v-real')).toBeInTheDocument()
-    expect(screen.getByText('caption:v-rec')).toBeInTheDocument()
+    expect(screen.queryByText('brief:v-rec')).not.toBeInTheDocument()
   })
 
-  it('renders per-video recorded/por-grabar status', () => {
+  it('navigates between videos one at a time', () => {
+    expect(screen.getByText(/Video 1 de 2/i)).toBeInTheDocument()
+    expect(screen.getByText('brief:v-real')).toBeInTheDocument()
+    // jump to video 2 via the numbered navigator
+    fireEvent.click(screen.getByRole('button', { name: 'Ir al video 2' }))
+    expect(screen.getByText('brief:v-rec')).toBeInTheDocument()
+    expect(screen.queryByText('brief:v-real')).not.toBeInTheDocument()
+    expect(screen.getByText(/Video 2 de 2/i)).toBeInTheDocument()
+  })
+
+  it('shows the current video recorded/por-grabar status', () => {
+    // the first (shown) video has no recording yet
     expect(screen.getAllByText('Por grabar').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Grabado').length).toBeGreaterThan(0)
   })
 })
 
@@ -148,10 +157,12 @@ describe('ClientBatchView planned slots', () => {
 describe('ClientBatchView filters + encargado', () => {
   afterEach(() => cleanup())
 
-  it('filters the grid by recorded / por-grabar status', () => {
+  it('filters by status and shows the matching video', () => {
     render(<ClientBatchView pipeline={mkPipeline([selectedVideo, recordedVideo])} />)
-    expect(screen.getAllByTestId('brief')).toHaveLength(2)
-    // filter to "Grabados" → only the recorded video's card remains
+    // single-video focus: one card, the first video by default
+    expect(screen.getAllByTestId('brief')).toHaveLength(1)
+    expect(screen.getByText('brief:v-real')).toBeInTheDocument()
+    // filter to "Grabados" → the recorded video becomes the one shown
     fireEvent.click(screen.getByRole('button', { name: /Grabados/ }))
     expect(screen.getAllByTestId('brief')).toHaveLength(1)
     expect(screen.getByText('brief:v-rec')).toBeInTheDocument()
