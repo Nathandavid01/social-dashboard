@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/auth/server'
 import { MemberTaskBoard } from '@/components/team/member-task-board'
 import { MemberUploadHistory } from '@/components/team/member-upload-history'
 import { ClientIdeasRows } from '@/components/ideas/client-ideas-rows'
@@ -16,6 +17,9 @@ interface Props {
 }
 
 export default async function MemberPage({ params }: Props) {
+  // Same gate as the team list — viewing a member's detail (tasks, assigned
+  // videos, upload history) requires team.read; unauthorized clicks 500 cleanly.
+  await requirePermission('team.read')
   const { memberId } = await params
   const supabase = await createClient()
 
