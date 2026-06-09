@@ -4,7 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.29 — 2026-06-08
+## v2.30 — 2026-06-08
+
+### Historial de subidas por persona (perfil del miembro)
+- En el **perfil de cada miembro** (Equipo → persona) ahora hay una sección **"Videos subidos"** con su desglose **Raw · B-roll · Editados**, el **% editado** y **cuándo subió por última vez**.
+- **Filtros de tiempo:** **Todo / Este mes / Esta semana** — para comparar la producción de cada quien por período.
+- Sin migración (usa los datos de subidas que ya existen).
 
 ### Pipeline: filtros que se guardan, estado vacío y accesibilidad
 - **Filtros en la URL:** el filtro de cliente y de persona (incluido "Mis videos") ahora se guardan en la dirección (`?cliente=…&persona=…`), así que puedes **compartir/guardar** una vista filtrada y no se pierde al volver al pipeline. Los cards "Planificados" ahora respetan los mismos filtros.

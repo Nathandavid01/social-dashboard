@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/auth/server'
 import { MemberTaskBoard } from '@/components/team/member-task-board'
+import { MemberUploadHistory } from '@/components/team/member-upload-history'
 import { ClientIdeasRows } from '@/components/ideas/client-ideas-rows'
 import { getAssignedVideosForMember } from '@/lib/actions/content-ideas'
+import { getVideoUploadMetricsByUser } from '@/lib/actions/video-uploads'
 import { Film, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { Task, Profile, Client } from '@/lib/supabase/types'
@@ -14,10 +17,13 @@ interface Props {
 }
 
 export default async function MemberPage({ params }: Props) {
+  // Same gate as the team list — viewing a member's detail (tasks, assigned
+  // videos, upload history) requires team.read; unauthorized clicks 500 cleanly.
+  await requirePermission('team.read')
   const { memberId } = await params
   const supabase = await createClient()
 
-  const [{ data: profile }, { data: tasks }, { data: clients }, { data: teamMembers }, assignedVideos] = await Promise.all([
+  const [{ data: profile }, { data: tasks }, { data: clients }, { data: teamMembers }, assignedVideos, uploadMetrics] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', memberId).single(),
     supabase
       .from('tasks')
@@ -32,6 +38,7 @@ export default async function MemberPage({ params }: Props) {
     supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name').order('full_name'),
     getAssignedVideosForMember(memberId),
+    getVideoUploadMetricsByUser({ userId: memberId }),
   ])
 
   if (!profile) notFound()
@@ -55,6 +62,8 @@ export default async function MemberPage({ params }: Props) {
         teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
         assignedVideoCount={assignedVideos.length}
       />
+
+      <MemberUploadHistory userId={memberId} initial={uploadMetrics[0] ?? null} />
 
       <section className="space-y-2">
         <div className="flex items-center gap-2">
