@@ -6,7 +6,13 @@ const moveBatch = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?
 vi.mock('@/lib/actions/content-ideas', () => ({ moveBatch: (...a: unknown[]) => moveBatch(...a) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const push = vi.fn()
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
+const replace = vi.fn()
+let mockSearch = ''
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push, replace }),
+  usePathname: () => '/pipeline',
+  useSearchParams: () => new URLSearchParams(mockSearch),
+}))
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
@@ -35,6 +41,8 @@ beforeEach(() => {
   moveBatch.mockClear()
   moveBatch.mockResolvedValue({ success: true })
   push.mockClear()
+  replace.mockClear()
+  mockSearch = ''
 })
 
 describe('ContentPipelineBoard — batch model', () => {
@@ -101,6 +109,34 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
+  it('initializes the assignee filter from the URL (?persona=)', () => {
+    mockSearch = 'persona=u1'
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
+    ] as IdeaWithPipeline[]} />)
+    const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
+    expect(cardsText).toContain('Nora Fitness')
+    expect(cardsText).not.toContain('Lumen')
+  })
+
+  it('shows an empty state with a clear-filters action when filters match nothing', () => {
+    mockSearch = 'persona=ghost' // nobody has this assignee
+    render(<ContentPipelineBoard ideas={[idea({ id: '1', assignee: { id: 'u1', full_name: 'María R.' } })]} />)
+    expect(screen.getByText(/ningún batch coincide|no tienes videos asignados/i)).toBeInTheDocument()
+    const clear = screen.getByRole('button', { name: /quitar filtros/i })
+    fireEvent.click(clear)
+    // After clearing, the batch is visible again.
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+  })
+
+  it('exposes the scroll region as a keyboard-focusable, labelled group', () => {
+    render(<ContentPipelineBoard ideas={[idea()]} />)
+    const el = document.querySelector('[data-testid="pipeline-scroll"]') as HTMLElement
+    expect(el.getAttribute('tabindex')).toBe('0')
+    expect(el.getAttribute('aria-label')).toMatch(/flechas/i)
+  })
+
   it('shows the per-client status badge and the per-video status breakdown', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
       idea({ id: '1', status: 'producida', client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'], status: 'paused' } }),
@@ -160,11 +196,13 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getAllByText('Planificado')).toHaveLength(2)
   })
 
-  it('opens the client batch overlay when a planned card is clicked', () => {
+  it('opens the client batch overlay when a planned card is clicked', async () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('nd')
+    // Let the async openClientBatch state update settle (avoids act() warnings).
+    await screen.findByTestId('batch-overlay')
   })
 })
 

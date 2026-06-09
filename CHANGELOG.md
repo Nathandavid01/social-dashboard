@@ -4,7 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.28 — 2026-06-08
+## v2.29 — 2026-06-08
+
+### Pipeline: filtros que se guardan, estado vacío y accesibilidad
+- **Filtros en la URL:** el filtro de cliente y de persona (incluido "Mis videos") ahora se guardan en la dirección (`?cliente=…&persona=…`), así que puedes **compartir/guardar** una vista filtrada y no se pierde al volver al pipeline. Los cards "Planificados" ahora respetan los mismos filtros.
+- **Estado vacío claro:** si un filtro no calza con nada, en vez de columnas vacías sale un mensaje ("Ningún batch coincide…" / "No tienes videos asignados…") con un botón **Quitar filtros**.
+- **Accesibilidad del tablero:** el área de columnas es enfocable con teclado y se desplaza con las **flechas** (←/→/Home/End); los botones de mover lote aparecen al enfocar con teclado (antes solo con el mouse).
 
 ### Más señal en los conteos de videos subidos (Equipo)
 - **Última subida:** cada miembro muestra **"última subida hace X días"** con color (verde reciente / ámbar / rojo si lleva mucho sin subir) para detectar a quién se le quedó parado el trabajo.

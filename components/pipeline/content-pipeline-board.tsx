@@ -1,6 +1,7 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
@@ -45,13 +46,44 @@ const CLIENT_STATUS: Record<string, { label: string; cls: string }> = {
   inactive: { label: 'Inactivo', cls: 'bg-muted text-muted-foreground' },
 }
 
-/** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+/**
+ * Global content pipeline — one card per CLIENT BATCH, colored by its assignee.
+ * Wrapped in Suspense because the inner board reads `useSearchParams()` (filters
+ * persisted in the URL) — Next requires a boundary around that hook.
+ */
+export function ContentPipelineBoard(props: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+  return (
+    <Suspense fallback={null}>
+      <ContentPipelineBoardInner {...props} />
+    </Suspense>
+  )
+}
+
+function ContentPipelineBoardInner({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
   const { user } = useAuth()
   const currentUserId = user?.id ?? null
-  const [clientFilter, setClientFilter] = useState<string | null>(null)
-  const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
+
+  // Filters persist in the URL (?cliente=&persona=) so a filtered board is
+  // bookmarkable/shareable and survives navigation back to /pipeline.
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [clientFilter, setClientFilter] = useState<string | null>(() => searchParams?.get('cliente') ?? null)
+  const [assigneeFilter, setAssigneeFilter] = useState<string | null>(() => searchParams?.get('persona') ?? null)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (clientFilter) params.set('cliente', clientFilter)
+    if (assigneeFilter) params.set('persona', assigneeFilter)
+    const qs = params.toString()
+    const desired = qs ? `${pathname}?${qs}` : pathname
+    const currentQs = searchParams?.toString() ?? ''
+    const current = currentQs ? `${pathname}?${currentQs}` : pathname
+    // Only write when the URL would actually change — avoids a redundant
+    // router.replace (and RSC refetch on this force-dynamic page) on every mount.
+    if (desired !== current) router.replace(desired, { scroll: false })
+  }, [clientFilter, assigneeFilter, pathname, router, searchParams])
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
@@ -116,6 +148,26 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
       return true
     })
   }, [batches, clientFilter, assigneeFilter, search])
+
+  // Planned (empty-slot) cards obey the same filters: hidden under an assignee
+  // filter (they're unassigned), and scoped to the chosen client.
+  const visiblePlanned = useMemo(() => {
+    if (assigneeFilter) return []
+    const q = search.trim().toLowerCase()
+    return plannedClients.filter((p) => {
+      if (clientFilter && p.clientId !== clientFilter) return false
+      if (q && !p.clientName.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [plannedClients, clientFilter, assigneeFilter, search])
+
+  const hasFilter = !!clientFilter || !!assigneeFilter || search.trim().length > 0
+  const emptyFiltered = hasFilter && visible.length === 0 && visiblePlanned.length === 0
+  const clearFilters = useCallback(() => {
+    setClientFilter(null)
+    setAssigneeFilter(null)
+    setSearch('')
+  }, [])
 
   const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
 
@@ -238,22 +290,52 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
         </p>
       </div>
 
-      {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}
+      {/* Columns — drag anywhere on the board to pan horizontally (grab cursor).
+          Keyboard: the region is focusable and arrow keys scroll it. */}
       <div
         ref={scrollRef}
         data-testid="pipeline-scroll"
+        tabIndex={0}
+        role="group"
+        aria-label="Tablero del pipeline — usa las flechas para desplazar las columnas"
         onMouseDown={onPanDown}
         onMouseMove={onPanMove}
         onMouseUp={endPan}
         onMouseLeave={endPan}
         onClickCapture={onPanClickCapture}
-        className={cn('flex-1 overflow-x-auto overflow-y-hidden', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
+        onKeyDown={(e) => {
+          const el = scrollRef.current
+          if (!el) return
+          const step = 320
+          if (e.key === 'ArrowRight') { el.scrollLeft += step; e.preventDefault() }
+          else if (e.key === 'ArrowLeft') { el.scrollLeft -= step; e.preventDefault() }
+          else if (e.key === 'Home') { el.scrollLeft = 0; e.preventDefault() }
+          else if (e.key === 'End') { el.scrollLeft = el.scrollWidth; e.preventDefault() }
+        }}
+        className={cn('flex-1 overflow-x-auto overflow-y-hidden outline-none focus-visible:ring-2 focus-visible:ring-primary/40', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
       >
-        <div className="flex h-full min-w-max gap-3 p-4">
-          {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={openClientBatch} />
-          ))}
-        </div>
+        {emptyFiltered ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+            <div className="grid h-12 w-12 place-items-center rounded-full bg-muted">
+              <Search className="h-5 w-5 text-muted-foreground" aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {assigneeFilter === currentUserId && currentUserId ? 'No tienes videos asignados con estos filtros' : 'Ningún batch coincide con los filtros'}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Ajusta o quita los filtros para ver más.</p>
+            </div>
+            <button onClick={clearFilters} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted">
+              <X className="h-3.5 w-3.5" /> Quitar filtros
+            </button>
+          </div>
+        ) : (
+          <div className="flex h-full min-w-max gap-3 p-4">
+            {BATCH_STAGES.map((stage) => (
+              <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
@@ -374,7 +456,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
 
   return (
     <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
-      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
+      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
         <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(batch, -1) }} />
         <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(batch, 1) }} />
       </div>
