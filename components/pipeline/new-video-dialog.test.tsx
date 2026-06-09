@@ -54,4 +54,30 @@ describe('NewVideoDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /nuevo video/i }))
     expect(screen.getByRole('button', { name: /^crear$/i })).toBeDisabled()
   })
+
+  it('offers a format per network with sensible defaults selected', () => {
+    render(<NewVideoDialog clients={clients} />)
+    fireEvent.click(screen.getByRole('button', { name: /nuevo video/i }))
+    expect(screen.getByText('Formato por red')).toBeInTheDocument()
+    expect(screen.getByLabelText('Instagram')).toBeChecked()
+    expect(screen.getByLabelText('TikTok')).toBeChecked()
+    expect(screen.getByLabelText('LinkedIn')).not.toBeChecked()
+    expect((screen.getByLabelText('Formato Instagram') as HTMLSelectElement).value).toBe('reel')
+  })
+
+  it('sends the selected per-network formats on create', async () => {
+    render(<NewVideoDialog clients={clients} />)
+    fireEvent.click(screen.getByRole('button', { name: /nuevo video/i }))
+    const selects = screen.getAllByLabelText('select')
+    fireEvent.change(selects[0], { target: { value: 'c1' } })
+    fireEvent.change(screen.getByPlaceholderText(/título/i), { target: { value: 'Rutina' } })
+    fireEvent.click(screen.getByRole('button', { name: /^crear$/i }))
+    await waitFor(() =>
+      expect(createContentIdeaManual).toHaveBeenCalledWith(
+        expect.objectContaining({
+          platformFormats: expect.objectContaining({ instagram: 'reel', tiktok: 'video', facebook: 'reel' }),
+        }),
+      ),
+    )
+  })
 })

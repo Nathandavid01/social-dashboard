@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.29 — 2026-06-08
+
+### Formato por red al crear un video
+- Al crear un **Nuevo video** ahora eliges el **formato para cada red** (Instagram → Reel/Carrusel/Imagen/Historia, TikTok → Video/Foto, Facebook → Reel/Imagen/Historia/Video, LinkedIn → Publicación/Video/Documento).
+- Un check por red incluye/excluye esa red para el video; el caption sigue siendo **uno solo para todas**. No cambia a dónde se publica (eso viene del cliente), solo el formato.
+- ⚠️ **Requiere migración:** aplicar `supabase/migrations/0034_platform_formats.sql` en Supabase (añade la columna `platform_formats`). Hasta aplicarla, los formatos se guardan en blanco sin romper nada.
+
 ## v2.28 — 2026-06-08
 
 ### Un video a la vez en el lote

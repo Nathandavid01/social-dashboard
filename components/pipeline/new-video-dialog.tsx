@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/lib/hooks/use-toast'
+import { platformLabels } from '@/lib/utils'
 import { createContentIdeaManual } from '@/lib/actions/content-ideas'
-import type { ContentIdeaType } from '@/lib/supabase/types'
+import { PLATFORM_FORMATS, defaultFormatFor, defaultPlatformFormats } from '@/lib/utils/platform-formats'
+import type { ContentIdeaType, SocialPlatform } from '@/lib/supabase/types'
 
 const TYPES: { value: ContentIdeaType; label: string }[] = [
   { value: 'R', label: 'Reel' },
@@ -17,6 +19,8 @@ const TYPES: { value: ContentIdeaType; label: string }[] = [
   { value: 'C', label: 'Carrusel' },
   { value: 'S', label: 'Story' },
 ]
+
+const NETWORKS: SocialPlatform[] = ['instagram', 'tiktok', 'facebook', 'linkedin']
 
 /**
  * "Nuevo video" — creates a content_idea (lands in the Title/Idea column).
@@ -41,16 +45,29 @@ export function NewVideoDialog({
   const [clientId, setClientId] = useState(defaultClientId)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<ContentIdeaType>('R')
+  // Per-network format: a network present in the map = selected for this video.
+  const [formats, setFormats] = useState<Record<string, string>>(() =>
+    defaultPlatformFormats(['instagram', 'tiktok', 'facebook']),
+  )
   const [pending, setPending] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+
+  function toggleNetwork(p: SocialPlatform, on: boolean) {
+    setFormats((f) => {
+      const next = { ...f }
+      if (on) next[p] = next[p] ?? defaultFormatFor(p)
+      else delete next[p]
+      return next
+    })
+  }
 
   const canCreate = !!clientId && title.trim().length > 0 && !pending
 
   async function create() {
     if (!canCreate) return
     setPending(true)
-    const res = await createContentIdeaManual({ clientId, contentType: type, title: title.trim() })
+    const res = await createContentIdeaManual({ clientId, contentType: type, title: title.trim(), platformFormats: formats })
     setPending(false)
     if ('error' in res && res.error) {
       toast({ title: 'No se pudo crear', description: res.error, variant: 'destructive' })
@@ -104,6 +121,43 @@ export function NewVideoDialog({
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Formato por red — un mismo caption va a todas, el formato puede variar */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Formato por red</p>
+              <div className="divide-y divide-border rounded-md border border-border">
+                {NETWORKS.map((p) => {
+                  const on = p in formats
+                  return (
+                    <div key={p} className="flex items-center justify-between gap-2 px-3 py-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={(e) => toggleNetwork(p, e.target.checked)}
+                          aria-label={platformLabels[p]}
+                        />
+                        {platformLabels[p]}
+                      </label>
+                      {on ? (
+                        <select
+                          value={formats[p]}
+                          onChange={(e) => setFormats((f) => ({ ...f, [p]: e.target.value }))}
+                          aria-label={`Formato ${platformLabels[p]}`}
+                          className="h-8 rounded-md border border-border bg-background px-2 text-xs"
+                        >
+                          {PLATFORM_FORMATS[p].map((f) => (
+                            <option key={f.value} value={f.value}>{f.label}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>

@@ -286,6 +286,8 @@ export async function createContentIdeaManual(input: {
   title: string
   hook?: string | null
   visualBrief?: string | null
+  /** Per-network post format, e.g. { instagram: 'reel', tiktok: 'video' }. */
+  platformFormats?: Record<string, string> | null
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -298,6 +300,7 @@ export async function createContentIdeaManual(input: {
       title: input.title,
       hook: input.hook ?? null,
       visual_brief: input.visualBrief ?? null,
+      platform_formats: input.platformFormats ?? {},
       created_by: user?.id ?? null,
     })
     .select()

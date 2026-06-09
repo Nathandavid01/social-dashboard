@@ -394,6 +394,8 @@ export interface ContentIdea {
   model: string | null
   generated_caption: string | null
   caption_platform: string | null
+  /** Per-network post format, e.g. { instagram: 'reel', tiktok: 'video' }. */
+  platform_formats: Record<string, string> | null
   caption_generated_at: string | null
   published_at: string | null
   approval_status: IdeaApprovalStatus
