@@ -28,7 +28,7 @@ export function CaptionFilters({
   return (
     <div className="flex gap-2">
       <Select value={filterIndustry} onValueChange={onIndustryChange}>
-        <SelectTrigger className="w-[160px] h-8 text-xs">
+        <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
           <SelectValue placeholder="Industria" />
         </SelectTrigger>
         <SelectContent>

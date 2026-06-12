@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.31 — 2026-06-12
+
+- **App instalable (PWA):** ahora puedes instalar el dashboard en tu teléfono o computadora como una app (ícono propio, pantalla completa). Funciona con un service worker que además muestra una página "Sin conexión" cuando no hay internet y carga más rápido los recursos estáticos.
+- **Íconos PNG:** íconos nuevos en PNG para que el ícono se vea bien en iPhone (pantalla de inicio) y Android.
+- **Mejor en celulares:** los filtros (Captions, Grabaciones, Publicados, Metricool) ya no se cortan en pantallas pequeñas y las tarjetas de resumen se apilan en una columna en teléfonos.
+
 ## v2.30 — 2026-06-08
 
 ### Historial de subidas por persona (perfil del miembro)
