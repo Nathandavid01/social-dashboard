@@ -114,7 +114,7 @@ export function ScheduleChecker() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
-            <SelectTrigger className="w-[160px] h-8 text-xs">
+            <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -124,7 +124,7 @@ export function ScheduleChecker() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-[150px] h-8 text-xs">
+            <SelectTrigger className="h-8 w-full text-xs sm:w-[150px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

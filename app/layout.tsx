@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { PwaRegister } from "@/components/shared/pwa-register";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,11 +21,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
       { url: "/icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/icons/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" },
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
 };
@@ -55,6 +57,7 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        <PwaRegister />
       </body>
     </html>
   );
