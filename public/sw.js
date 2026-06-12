@@ -2,7 +2,9 @@
  * Strategy: network-first for page navigations (offline fallback),
  * cache-first for immutable static assets. Never caches API/auth/Supabase calls.
  */
-const CACHE_VERSION = 'nmedia-v1'
+// Keep in sync with APP_VERSION (lib/version.ts) on every release: a changed
+// byte here is what makes the browser reinstall the SW and refresh the precache.
+const CACHE_VERSION = 'nmedia-v2.31'
 const OFFLINE_URL = '/offline'
 const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png']
 

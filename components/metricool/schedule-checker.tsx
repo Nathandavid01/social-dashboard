@@ -124,7 +124,7 @@ export function ScheduleChecker() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-[150px] h-8 text-xs">
+            <SelectTrigger className="h-8 w-full text-xs sm:w-[150px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

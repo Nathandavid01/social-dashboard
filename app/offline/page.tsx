@@ -6,8 +6,7 @@ export default function OfflinePage() {
       <div className="text-5xl">📡</div>
       <h1 className="text-2xl font-semibold">Sin conexión</h1>
       <p className="max-w-sm text-sm text-muted-foreground">
-        No hay conexión a internet. Verifica tu red y vuelve a intentar — el dashboard se recargará
-        automáticamente cuando regrese la conexión.
+        No hay conexión a internet. Verifica tu red y toca Reintentar cuando regrese la conexión.
       </p>
       <a
         href="/home"
