@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.32 — 2026-06-12
+
+- **Logo nuevo:** ícono de la app rediseñado — una "N" dorada sobre negro (estilo Nate Media). Se ve en la pantalla de inicio del teléfono, la pestaña del navegador y al instalar la app.
+
 ## v2.31 — 2026-06-12
 
 - **App instalable (PWA):** ahora puedes instalar el dashboard en tu teléfono o computadora como una app (ícono propio, pantalla completa). Funciona con un service worker que además muestra una página "Sin conexión" cuando no hay internet y carga más rápido los recursos estáticos.
