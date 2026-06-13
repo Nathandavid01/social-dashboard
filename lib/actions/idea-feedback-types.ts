@@ -32,7 +32,12 @@ export interface ApprovedIdea {
   rationale: string | null
   theme: string | null
   created_at: string
-  client?: { id: string; name: string } | null
+  /** Caption + Metricool draft state (idea_lab_feedback, migration 0035). */
+  generated_caption: string | null
+  caption_platform: string | null
+  metricool_post_id: number | null
+  metricool_scheduled_for: string | null
+  client?: { id: string; name: string; metricool_blog_id: string | null } | null
 }
 
 /** Recent approvals/rejections fed back into generation (the learning loop). */

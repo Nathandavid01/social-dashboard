@@ -47,7 +47,7 @@ export async function getApprovedIdeas(limit = 100): Promise<ApprovedIdea[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('idea_lab_feedback')
-    .select('*, client:clients!idea_lab_feedback_client_id_fkey(id, name)')
+    .select('*, client:clients!idea_lab_feedback_client_id_fkey(id, name, metricool_blog_id)')
     .eq('verdict', 'approved')
     .order('created_at', { ascending: false })
     .limit(limit)
