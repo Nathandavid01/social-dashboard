@@ -33,14 +33,14 @@ export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCoun
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-60 p-0">
-        <div className="flex items-center gap-2 px-6 py-5 border-b border-border">
+      <SheetContent side="left" className="flex w-60 flex-col p-0">
+        <div className="flex shrink-0 items-center gap-2 px-6 py-5 border-b border-border">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Zap className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="font-bold text-lg tracking-tight">NMedia</span>
         </div>
-        <nav className="px-3 py-4 space-y-1">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {allowed.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             const badge =

@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.33 — 2026-06-13
+
+- **Menú móvil ahora hace scroll:** el menú lateral en celular (el cajón que se abre con el botón ☰) no dejaba ver los últimos ítems (Verificación, Automatización, Configuración) porque la lista se cortaba sin poder hacer scroll. Ahora el encabezado queda fijo y la lista de enlaces se desplaza, así alcanzas todas las secciones.
+
 ## v2.32 — 2026-06-12
 
 - **Logo nuevo:** ícono de la app rediseñado — una "N" dorada sobre negro (estilo Nate Media). Se ve en la pantalla de inicio del teléfono, la pestaña del navegador y al instalar la app.
