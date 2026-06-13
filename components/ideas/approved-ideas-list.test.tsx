@@ -17,7 +17,11 @@ const idea: ApprovedIdea = {
   rationale: 'Convierte porque crea urgencia',
   theme: null,
   created_at: '2026-06-07T00:00:00Z',
-  client: { id: 'c1', name: "Joe's Gym" },
+  generated_caption: null,
+  caption_platform: null,
+  metricool_post_id: null,
+  metricool_scheduled_for: null,
+  client: { id: 'c1', name: "Joe's Gym", metricool_blog_id: 'blog-1' },
 }
 
 describe('ApprovedIdeasList', () => {
