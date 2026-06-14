@@ -8,7 +8,7 @@ import { createDraftPost } from '@/lib/metricool/post'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
-import { approvedIdeaSendReadiness, buildScheduledDateTime } from '@/lib/utils/idea-lab-send-core'
+import { approvedIdeaSendReadiness, buildScheduledDateTime, quickSendMediaOptions } from '@/lib/utils/idea-lab-send-core'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 
@@ -292,15 +292,21 @@ export async function generateQuickCaption(input: {
   }
 }
 
-/** Send a standalone caption to Metricool as a scheduled draft (no DB write). */
+/**
+ * Send a standalone caption to Metricool (no DB write). With a video (`mediaUrl`,
+ * a permanent public URL) it attaches the media and AUTO-PUBLISHES a real
+ * scheduled post; without a video it stays a scheduled draft. Posts to the
+ * client's configured platforms (the same caption for all of them).
+ */
 export async function sendQuickCaptionToMetricool(input: {
   clientId: string
   caption: string
   date: string
   time?: string | null
-  platform?: string
   contentType?: string | null
-}): Promise<{ ok?: true; error?: string; scheduledFor?: string }> {
+  /** Permanent public URL of an uploaded video (from getQuickUploadUrl). */
+  mediaUrl?: string | null
+}): Promise<{ ok?: true; error?: string; scheduledFor?: string; autoPublished?: boolean }> {
   try {
     await requirePermission('posting.publish')
   } catch (err) {
@@ -330,6 +336,7 @@ export async function sendQuickCaptionToMetricool(input: {
   if (!readiness.ready) return { error: readiness.reason }
 
   const platforms = resolvePlatforms(c.platforms, c.default_platforms)
+  const media = quickSendMediaOptions(input.mediaUrl)
 
   try {
     await createDraftPost(
@@ -338,9 +345,9 @@ export async function sendQuickCaptionToMetricool(input: {
       platforms,
       undefined,
       scheduledFor,
-      { contentType: input.contentType ?? null },
+      { ...media, contentType: input.contentType ?? null },
     )
-    return { ok: true, scheduledFor }
+    return { ok: true, scheduledFor, autoPublished: media.autoPublish }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al enviar a Metricool' }
   }

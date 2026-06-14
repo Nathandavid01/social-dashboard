@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
-import { r2Client, r2Bucket, isR2Configured, r2PublicUrl } from '@/lib/integrations/r2'
+import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 function slugify(name: string): string {
@@ -41,6 +41,46 @@ export async function getR2UploadUrl(input: {
       { expiresIn: 60 * 60 }, // 1h to complete the upload
     )
     return { url, key }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Error generando URL de subida' }
+  }
+}
+
+/**
+ * Standalone upload for the "Caption rápido" flow — a video NOT tied to an
+ * approved idea. Mints a presigned PUT URL and returns the PERMANENT public URL
+ * (Metricool fetches media by URL). The key is placed under an `/edited/` segment
+ * so the public Cloudflare Worker serves it (it only exposes `/edited/` objects).
+ * Nothing is persisted in our DB — Metricool itself is the record, like the rest
+ * of the quick-caption flow.
+ */
+export async function getQuickUploadUrl(input: {
+  clientId: string
+  fileName: string
+  contentType: string
+}): Promise<{ url?: string; key?: string; publicUrl?: string; error?: string }> {
+  try {
+    await requirePermission('posting.publish')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const client = r2Client()
+  if (!client || !isR2Configured()) return { error: 'R2 no está configurado (falta R2_ACCOUNT_ID).' }
+  if (!isR2PublicConfigured()) {
+    return { error: 'Acceso público de R2 no configurado (falta R2_PUBLIC_BASE_URL).' }
+  }
+
+  const key = `quick/${input.clientId || 'misc'}/edited/${Date.now()}-${slugify(input.fileName)}`
+  const publicUrl = r2PublicUrl(key)
+  if (!publicUrl) return { error: 'No se pudo construir la URL pública del video.' }
+
+  try {
+    const url = await getSignedUrl(
+      client,
+      new PutObjectCommand({ Bucket: r2Bucket(), Key: key, ContentType: input.contentType }),
+      { expiresIn: 60 * 60 },
+    )
+    return { url, key, publicUrl }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error generando URL de subida' }
   }

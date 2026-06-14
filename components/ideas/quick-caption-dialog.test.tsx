@@ -5,6 +5,9 @@ vi.mock('@/lib/actions/idea-lab-captions', () => ({
   generateQuickCaption: vi.fn(async () => ({ ok: true, caption: 'x' })),
   sendQuickCaptionToMetricool: vi.fn(async () => ({ ok: true, scheduledFor: '2026-06-15T10:00:00' })),
 }))
+vi.mock('@/lib/actions/idea-videos-r2', () => ({
+  getQuickUploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k', publicUrl: 'https://pub/k' })),
+}))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: () => true }))
 
@@ -37,5 +40,31 @@ describe('QuickCaptionDialog', () => {
     expect(screen.getByText(/borrador programado/i)).toBeInTheDocument()
     // No client/caption chosen yet → cannot send.
     expect(screen.getByRole('button', { name: /Enviar a Metricool/i })).toBeDisabled()
+  })
+
+  it('has no per-platform dropdown — one caption goes to all the client networks', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    // The old platform selector (showed "Instagram" / had a LinkedIn option) is gone.
+    expect(screen.queryByText('Instagram')).toBeNull()
+    expect(screen.queryByText('LinkedIn')).toBeNull()
+  })
+
+  it('offers a video upload control', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    expect(screen.getByText(/subir video/i)).toBeInTheDocument()
+  })
+
+  it('shows the selected video file name and lets you remove it', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['data'], 'reel-final.mp4', { type: 'video/mp4' })
+    Object.defineProperty(fileInput, 'files', { value: [file], configurable: true })
+    fireEvent.change(fileInput)
+    expect(screen.getByText('reel-final.mp4')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /quitar video/i }))
+    expect(screen.queryByText('reel-final.mp4')).toBeNull()
   })
 })

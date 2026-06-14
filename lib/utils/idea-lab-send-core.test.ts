@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { approvedIdeaSendReadiness, buildScheduledDateTime } from './idea-lab-send-core'
+import { approvedIdeaSendReadiness, buildScheduledDateTime, quickSendMediaOptions } from './idea-lab-send-core'
+
+describe('quickSendMediaOptions', () => {
+  it('attaches the video and auto-publishes when a media URL is given', () => {
+    expect(quickSendMediaOptions('https://v.nmedia.dev/quick/c1/edited/1-x.mp4')).toEqual({
+      mediaUrls: ['https://v.nmedia.dev/quick/c1/edited/1-x.mp4'],
+      autoPublish: true,
+    })
+  })
+  it('falls back to a plain scheduled draft when there is no video', () => {
+    expect(quickSendMediaOptions()).toEqual({ autoPublish: false })
+    expect(quickSendMediaOptions(null)).toEqual({ autoPublish: false })
+    expect(quickSendMediaOptions('   ')).toEqual({ autoPublish: false })
+  })
+})
 
 describe('approvedIdeaSendReadiness', () => {
   const ok = { generated_caption: 'Hola mundo', metricool_post_id: null }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle } from 'lucide-react'
+import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle, Upload, Film, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
+import { getQuickUploadUrl } from '@/lib/actions/idea-videos-r2'
 
 export interface QuickCaptionClient {
   id: string
@@ -45,12 +46,14 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [open, setOpen] = useState(false)
   const [clientId, setClientId] = useState('')
   const [contentType, setContentType] = useState('P')
-  const [platform, setPlatform] = useState('instagram')
   const [topic, setTopic] = useState('')
   const [caption, setCaption] = useState('')
+  const [video, setVideo] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [date, setDate] = useState(tomorrowISO())
   const [time, setTime] = useState('10:00')
   const [sentInfo, setSentInfo] = useState<string | null>(null)
+  const [autoPublished, setAutoPublished] = useState(false)
 
   const [isGenerating, startGenerate] = useTransition()
   const [isSending, startSend] = useTransition()
@@ -61,17 +64,19 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   function reset() {
     setClientId('')
     setContentType('P')
-    setPlatform('instagram')
     setTopic('')
     setCaption('')
+    setVideo(null)
+    setUploading(false)
     setDate(tomorrowISO())
     setTime('10:00')
     setSentInfo(null)
+    setAutoPublished(false)
   }
 
   function generate() {
     startGenerate(async () => {
-      const res = await generateQuickCaption({ clientId, topic, platform })
+      const res = await generateQuickCaption({ clientId, topic })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
@@ -82,11 +87,39 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
 
   function send() {
     startSend(async () => {
-      const res = await sendQuickCaptionToMetricool({ clientId, caption, date, time, platform, contentType })
-      if (res.error) toast({ title: 'No se pudo enviar', description: res.error, variant: 'destructive' })
-      else {
+      // With a video: upload it straight to R2 first, then send its public URL to
+      // Metricool so it attaches the media and auto-publishes.
+      let mediaUrl: string | null = null
+      if (video) {
+        setUploading(true)
+        const up = await getQuickUploadUrl({ clientId, fileName: video.name, contentType: video.type || 'video/mp4' })
+        if (up.error || !up.url || !up.publicUrl) {
+          setUploading(false)
+          toast({ title: 'No se pudo subir el video', description: up.error ?? 'Error de subida', variant: 'destructive' })
+          return
+        }
+        try {
+          const put = await fetch(up.url, { method: 'PUT', body: video, headers: { 'Content-Type': video.type || 'video/mp4' } })
+          if (!put.ok) throw new Error(`Subida falló (HTTP ${put.status})`)
+        } catch (err) {
+          setUploading(false)
+          toast({ title: 'No se pudo subir el video', description: err instanceof Error ? err.message : 'Error de subida', variant: 'destructive' })
+          return
+        }
+        mediaUrl = up.publicUrl
+        setUploading(false)
+      }
+
+      const res = await sendQuickCaptionToMetricool({ clientId, caption, date, time, contentType, mediaUrl })
+      if (res.error) {
+        toast({ title: 'No se pudo enviar', description: res.error, variant: 'destructive' })
+      } else {
         setSentInfo(formatScheduled(res.scheduledFor ?? null) ?? 'Programado')
-        toast({ title: 'Enviado a Metricool', description: 'Quedó como borrador programado.' })
+        setAutoPublished(!!res.autoPublished)
+        toast({
+          title: res.autoPublished ? 'Enviado a Metricool — se publicará solo' : 'Enviado a Metricool',
+          description: res.autoPublished ? 'El video se publicará automáticamente en la fecha elegida.' : 'Quedó como borrador programado.',
+        })
       }
     })
   }
@@ -109,7 +142,8 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
         <DialogHeader>
           <DialogTitle>Caption rápido</DialogTitle>
           <DialogDescription>
-            Para emergencias e imprevistos: genera un caption y envíalo a Metricool sin pasar por una idea aprobada.
+            Para emergencias e imprevistos: sube un video, genera un caption y publícalo en Metricool — el mismo caption
+            va a todas las redes del cliente, sin pasar por una idea aprobada.
           </DialogDescription>
         </DialogHeader>
 
@@ -117,7 +151,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-2 text-sm text-green-600">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Enviado a Metricool · {sentInfo} (borrador programado).</span>
+              <span>Enviado a Metricool · {sentInfo}{autoPublished ? ' — se publicará automáticamente.' : ' (borrador programado).'}</span>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={reset}>
@@ -174,35 +208,22 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               />
             </label>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={platform} onValueChange={setPlatform}>
-                <SelectTrigger className="h-8 w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="facebook">Facebook</SelectItem>
-                  <SelectItem value="linkedin">LinkedIn</SelectItem>
-                </SelectContent>
-              </Select>
-              {canGenerate && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={generate}
-                  disabled={isGenerating || !clientId || !topic.trim()}
-                  className="transition-transform hover:scale-105"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                  )}
-                  {caption ? 'Regenerar' : 'Generar con IA'}
-                </Button>
-              )}
-            </div>
+            {canGenerate && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={generate}
+                disabled={isGenerating || !clientId || !topic.trim()}
+                className="self-start transition-transform hover:scale-105"
+              >
+                {isGenerating ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                {caption ? 'Regenerar' : 'Generar con IA'}
+              </Button>
+            )}
 
             <Textarea
               value={caption}
@@ -211,6 +232,37 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               placeholder="Genera el caption con IA o escríbelo aquí…"
               className="resize-none text-sm leading-relaxed"
             />
+
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Video (opcional — se publica a todas las redes)</span>
+              {video ? (
+                <div className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Film className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{video.name}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setVideo(null)}
+                    aria-label="Quitar video"
+                    className="shrink-0 text-muted-foreground transition hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted/40 hover:text-foreground">
+                  <Upload className="h-4 w-4 shrink-0" />
+                  Subir video
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => setVideo(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              )}
+            </div>
 
             <div className="flex flex-wrap items-end gap-2 border-t pt-3">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -233,7 +285,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                   ) : (
                     <Send className="mr-1.5 h-3.5 w-3.5" />
                   )}
-                  Enviar a Metricool
+                  {uploading ? 'Subiendo video…' : video ? 'Publicar en Metricool' : 'Enviar a Metricool'}
                 </Button>
               )}
             </div>
@@ -242,6 +294,11 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 Este cliente no tiene Metricool configurado, no se puede programar.
+              </p>
+            ) : video ? (
+              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+                El video + caption se publicará automáticamente a las redes del cliente en la fecha y hora elegidas.
               </p>
             ) : (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

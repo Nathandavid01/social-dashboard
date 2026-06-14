@@ -35,6 +35,23 @@ export function approvedIdeaSendReadiness(
   return { ready: true }
 }
 
+export interface MetricoolMediaOptions {
+  /** Public media URLs to attach (the uploaded video). Omitted when none. */
+  mediaUrls?: string[]
+  /** With a video attached we auto-publish a REAL scheduled post; a caption-only
+   *  quick post stays a draft for the team to finalize in Metricool. */
+  autoPublish: boolean
+}
+
+/**
+ * Decide how a quick-caption post reaches Metricool based on whether a video was
+ * uploaded: video → attach it + auto-publish; no video → plain scheduled draft.
+ */
+export function quickSendMediaOptions(mediaUrl?: string | null): MetricoolMediaOptions {
+  const v = mediaUrl?.trim()
+  return v ? { mediaUrls: [v], autoPublish: true } : { autoPublish: false }
+}
+
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const TIME_RE = /^(\d{1,2}):(\d{2})$/
 
