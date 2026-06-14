@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, bucketIdeasByStage, adjacentBatchStage, batchProgress, BATCH_STAGES,
 } from './content-batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -63,6 +63,24 @@ describe('groupIntoBatches', () => {
   it('unassigned batch has a null assignee', () => {
     const batches = groupIntoBatches([idea()] as IdeaWithPipeline[])
     expect(batches[0].assignee).toBeNull()
+  })
+})
+
+describe('bucketIdeasByStage — one card per video (not per client)', () => {
+  it('buckets each active video into its own stage column', () => {
+    const out = bucketIdeasByStage([
+      idea({ id: '1', client_id: 'c1', hook: 'h' }),           // title
+      idea({ id: '2', client_id: 'c1', status: 'grabada' }),   // video (same client, separate card)
+      idea({ id: '3', client_id: 'c2', status: 'publicada' }), // publication
+    ] as IdeaWithPipeline[])
+    expect(out.title.map((i) => i.id)).toEqual(['1'])
+    expect(out.video.map((i) => i.id)).toEqual(['2'])
+    expect(out.publication.map((i) => i.id)).toEqual(['3'])
+    expect(Object.keys(out)).toEqual(BATCH_STAGES.map((s) => s.key))
+  })
+  it('excludes discarded videos', () => {
+    const out = bucketIdeasByStage([idea({ status: 'descartada' })] as IdeaWithPipeline[])
+    expect(Object.values(out).flat()).toHaveLength(0)
   })
 })
 

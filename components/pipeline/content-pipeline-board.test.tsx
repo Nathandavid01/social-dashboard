@@ -14,9 +14,11 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(mockSearch),
 }))
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
-const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
-vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
-vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
+// Per-video detail sheet (opened on card click). Mock keeps the DOM minimal.
+vi.mock('@/components/clients/profile/idea-detail-sheet', () => ({
+  IdeaDetailSheet: ({ ideaId, open }: { ideaId: string | null; open: boolean }) =>
+    open ? <div data-testid="idea-sheet">{ideaId}</div> : null,
+}))
 
 import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
 import { AuthProvider } from '@/lib/context/auth-context'
@@ -45,66 +47,82 @@ beforeEach(() => {
   mockSearch = ''
 })
 
-describe('ContentPipelineBoard — batch model', () => {
+describe('ContentPipelineBoard — per-video model', () => {
   it('renders all 7 columns with Idea first and Title second', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
     expect(headings).toEqual(['Idea', 'Title', 'Caption', 'Video', 'Edited', 'Approval', 'Publication'])
   })
 
-  it('shows one batch card per client (not per video)', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
-    const cards = container.querySelectorAll('article')
-    expect(cards).toHaveLength(1)
-    expect(cards[0].textContent).toContain('Nora Fitness')
-    expect(cards[0].textContent).toMatch(/3 videos en el batch/i)
-  })
-
-  it('places the batch in the column of its least-advanced video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
-    // least advanced is grabada → Video column (4th section)
-    const videoCol = container.querySelectorAll('section')[3]
-    expect(videoCol.textContent).toContain('Nora Fitness')
-  })
-
-  it('shows the assignee filter and filters by person', () => {
+  it('shows one card per VIDEO, not per client (3 videos of one client → 3 cards)', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
-      idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
+      idea({ id: '1', title: 'Video A' }),
+      idea({ id: '2', title: 'Video B' }),
+      idea({ id: '3', title: 'Video C' }),
+    ]} />)
+    const cards = container.querySelectorAll('article')
+    expect(cards).toHaveLength(3)
+    const text = Array.from(cards).map((c) => c.textContent).join('|')
+    expect(text).toContain('Video A')
+    expect(text).toContain('Video B')
+    expect(text).toContain('Video C')
+  })
+
+  it('places each video in the column of ITS OWN stage', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', status: 'producida', title: 'Editado YA' }),  // edited → col index 4
+      idea({ id: '2', status: 'grabada', title: 'Grabado YA' }),    // video → col index 3
+    ]} />)
+    const sections = container.querySelectorAll('section')
+    expect(sections[3].textContent).toContain('Grabado YA')
+    expect(sections[4].textContent).toContain('Editado YA')
+  })
+
+  it('shows the client name and content-type on each video card', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', content_type: 'R', title: 'Mi Reel' })]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Mi Reel')
+    expect(card.textContent).toContain('Nora Fitness')
+    expect(card.textContent).toMatch(/reel/i)
+  })
+
+  it('filters videos by assignee', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: 'V1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '2', title: 'V2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} />)
     expect(screen.getByText(/asignado a/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /maría r/i }))
     const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
-    expect(cardsText).toContain('Nora Fitness')
-    expect(cardsText).not.toContain('Lumen')
+    expect(cardsText).toContain('V1')
+    expect(cardsText).not.toContain('V2')
   })
 
-  it('builds an assignee chip for a NON-dominant assignee (not just the batch owner)', () => {
-    // One client batch: 2 videos for María (dominant) + 1 for Diego (non-dominant).
+  it('builds a chip for every assignee that has a video', () => {
     render(<ContentPipelineBoard ideas={[
-      idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
-      idea({ id: '2', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
-      idea({ id: '3', client_id: 'c1', assignee: { id: 'u2', full_name: 'Diego V.' } }),
+      idea({ id: '1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '2', assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} />)
-    // Diego has a clickable chip even though he's not the batch's dominant owner.
+    expect(screen.getByRole('button', { name: /maría r/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /diego v/i })).toBeInTheDocument()
   })
 
-  it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
+  it('shows an "Atrasado" badge on a video card with an overdue deadline', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
-      idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
+      idea({ id: '1', status: 'grabada', deadline: '2020-01-01' }),
     ] as IdeaWithPipeline[]} />)
     const card = container.querySelector('article')!
     expect(card.textContent).toContain('Atrasado')
   })
 
-  it('moves the whole batch forward, persisting all its videos', async () => {
+  it('moves a SINGLE video forward (persists only that video)', async () => {
     render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
-    fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
-    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'title'))
+    const fwd = screen.getAllByRole('button', { name: /mover video adelante/i })[0]
+    fireEvent.click(fwd)
+    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1'], 'title'))
   })
 
-  it('shows "Sin asignar" for an unassigned batch', () => {
+  it('shows "Sin asignar" for an unassigned video', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
@@ -112,21 +130,19 @@ describe('ContentPipelineBoard — batch model', () => {
   it('initializes the assignee filter from the URL (?persona=)', () => {
     mockSearch = 'persona=u1'
     const { container } = render(<ContentPipelineBoard ideas={[
-      idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
+      idea({ id: '1', title: 'V1', assignee: { id: 'u1', full_name: 'María R.' } }),
+      idea({ id: '2', title: 'V2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} />)
     const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
-    expect(cardsText).toContain('Nora Fitness')
-    expect(cardsText).not.toContain('Lumen')
+    expect(cardsText).toContain('V1')
+    expect(cardsText).not.toContain('V2')
   })
 
   it('shows an empty state with a clear-filters action when filters match nothing', () => {
-    mockSearch = 'persona=ghost' // nobody has this assignee
+    mockSearch = 'persona=ghost'
     render(<ContentPipelineBoard ideas={[idea({ id: '1', assignee: { id: 'u1', full_name: 'María R.' } })]} />)
-    expect(screen.getByText(/ningún batch coincide|no tienes videos asignados/i)).toBeInTheDocument()
-    const clear = screen.getByRole('button', { name: /quitar filtros/i })
-    fireEvent.click(clear)
-    // After clearing, the batch is visible again.
+    expect(screen.getByText(/ningún video coincide|no tienes videos asignados/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /quitar filtros/i }))
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 
@@ -137,21 +153,10 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(el.getAttribute('aria-label')).toMatch(/flechas/i)
   })
 
-  it('shows the per-client status badge and the per-video status breakdown', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[
-      idea({ id: '1', status: 'producida', client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'], status: 'paused' } }),
-      idea({ id: '2', status: 'grabada', client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'], status: 'paused' } }),
-    ] as IdeaWithPipeline[]} />)
-    const card = container.querySelector('article')!
-    expect(card.textContent).toContain('Pausado')           // client status badge
-    expect(card.textContent).toMatch(/Edición\s*1/)          // one video in Edición
-    expect(card.textContent).toMatch(/Video\s*1/)            // one video in Video
-  })
-
-  it('"Mis videos" filters to batches that have a video assigned to the current user', () => {
+  it('"Mis videos" filters to videos assigned to the current user', () => {
     const ideas = [
-      idea({ id: '1', client_id: 'c1', assignee: { id: 'me', full_name: 'Yo' } }),
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'other', full_name: 'Otro' } }),
+      idea({ id: '1', title: 'Mio', assignee: { id: 'me', full_name: 'Yo' } }),
+      idea({ id: '2', title: 'Ajeno', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'other', full_name: 'Otro' } }),
     ] as IdeaWithPipeline[]
     const { container } = render(
       <AuthProvider value={{ user: { id: 'me', email: 'me@x.com' }, profile: null, role: 'owner' }}>
@@ -160,17 +165,16 @@ describe('ContentPipelineBoard — batch model', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: /mis videos/i }))
     const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
-    expect(cardsText).toContain('Nora Fitness')
-    expect(cardsText).not.toContain('Lumen')
+    expect(cardsText).toContain('Mio')
+    expect(cardsText).not.toContain('Ajeno')
   })
 
-  it('opens the client batch overlay in place on card click (no navigation)', async () => {
-    getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+  it('opens the per-video detail sheet on card click (no navigation)', async () => {
+    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: 'vid-9', title: 'Click me' })]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('c9')
+    const sheet = await screen.findByTestId('idea-sheet')
+    expect(sheet.textContent).toBe('vid-9')
     expect(push).not.toHaveBeenCalled()
-    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
   })
 })
 
@@ -195,18 +199,9 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getAllByText('15 por idear')).toHaveLength(2)
     expect(screen.getAllByText('Planificado')).toHaveLength(2)
   })
-
-  it('opens the client batch overlay when a planned card is clicked', async () => {
-    getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
-    fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('nd')
-    // Let the async openClientBatch state update settle (avoids act() warnings).
-    await screen.findByTestId('batch-overlay')
-  })
 })
 
-describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', () => {
+describe('ContentPipelineBoard — client dropdown filter', () => {
   const twoClients = [
     idea({ id: '1', client_id: 'c1' }),
     idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null } }),
@@ -228,7 +223,6 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
     const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
     expect(cardsText).toContain('Lumen')
     expect(cardsText).not.toContain('Nora Fitness')
-    // trigger now reflects the selection and the list is closed
     expect(screen.getByRole('button', { name: 'Lumen' })).toBeInTheDocument()
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
@@ -243,7 +237,7 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
     expect(cardsText).toContain('Lumen')
   })
 
-  it('still shows the batches/publicados stats line', () => {
+  it('still shows the videos/publicados stats line', () => {
     render(<ContentPipelineBoard ideas={twoClients} />)
     expect(screen.getByText(/publicados/i)).toBeInTheDocument()
   })
@@ -261,7 +255,7 @@ describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => 
     expect(el.className).not.toContain('cursor-grabbing')
 
     fireEvent.mouseDown(el, { button: 0, clientX: 300 })
-    fireEvent.mouseMove(el, { clientX: 260 }) // moved 40px ≥ threshold
+    fireEvent.mouseMove(el, { clientX: 260 })
     expect(el.className).toContain('cursor-grabbing')
 
     fireEvent.mouseUp(el)

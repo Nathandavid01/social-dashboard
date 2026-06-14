@@ -132,6 +132,19 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
   return batches.sort((a, b) => a.clientName.localeCompare(b.clientName))
 }
 
+/**
+ * Per-VIDEO board: each active idea bucketed into its OWN pipeline-stage column
+ * (one card per video, not per client). Discarded videos are excluded.
+ */
+export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStageKey, IdeaWithPipeline[]> {
+  const out = { idea: [], title: [], caption: [], video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, IdeaWithPipeline[]>
+  for (const i of ideas) {
+    if (i.status === 'descartada') continue
+    out[ideaStage(i)].push(i)
+  }
+  return out
+}
+
 /** Batches bucketed by their column. */
 export function bucketBatches(batches: ClientBatch[]): Record<BatchStageKey, ClientBatch[]> {
   const out = { idea: [], title: [], caption: [], video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
