@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
+import { defaultScheduleDate, scheduleMinDate, nowMinuteInPostTZ } from '@/lib/utils/idea-lab-send-core'
 import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
 import { getQuickUploadUrl } from '@/lib/actions/idea-videos-r2'
 
@@ -19,12 +20,6 @@ export interface QuickCaptionClient {
   id: string
   name: string
   metricool_blog_id: string | null
-}
-
-function tomorrowISO(): string {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  return d.toISOString().slice(0, 10)
 }
 
 function formatScheduled(s: string | null): string | null {
@@ -52,7 +47,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [video, setVideo] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [mode, setMode] = useState<'draft' | 'autopublish'>('draft')
-  const [date, setDate] = useState(tomorrowISO())
+  const [date, setDate] = useState(defaultScheduleDate())
   const [time, setTime] = useState('10:00')
   const [sentInfo, setSentInfo] = useState<string | null>(null)
   const [autoPublished, setAutoPublished] = useState(false)
@@ -62,6 +57,12 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
 
   const selected = clients.find((c) => c.id === clientId)
   const hasMetricool = !!selected?.metricool_blog_id?.trim()
+  const minDate = scheduleMinDate()
+  const dateIsPast = !!date && date < minDate
+  // Auto-publish can't be in the past (Metricool would publish at once / error).
+  // Same-day-but-earlier-time only matters for auto-publish; drafts are exempt.
+  const timeIsPast =
+    mode === 'autopublish' && !dateIsPast && !!date && !!time && `${date}T${time}` < nowMinuteInPostTZ()
 
   function reset() {
     setClientId('')
@@ -71,7 +72,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
     setVideo(null)
     setUploading(false)
     setMode('draft')
-    setDate(tomorrowISO())
+    setDate(defaultScheduleDate())
     setTime('10:00')
     setSentInfo(null)
     setAutoPublished(false)
@@ -290,7 +291,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
             <div className="flex flex-wrap items-end gap-2 border-t pt-3">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Fecha
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+                <Input type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Hora
@@ -300,7 +301,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 <Button
                   size="sm"
                   onClick={send}
-                  disabled={isSending || !clientId || !caption.trim() || !hasMetricool}
+                  disabled={isSending || !clientId || !caption.trim() || !hasMetricool || !date || dateIsPast || timeIsPast}
                   className="transition-transform hover:scale-105"
                 >
                   {isSending ? (
@@ -317,6 +318,16 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 Este cliente no tiene Metricool configurado, no se puede programar.
+              </p>
+            ) : dateIsPast ? (
+              <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                La fecha ya pasó; elige hoy o una fecha futura.
+              </p>
+            ) : timeIsPast ? (
+              <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                La hora ya pasó; elige una fecha y hora futuras para autopublicar.
               </p>
             ) : mode === 'autopublish' ? (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

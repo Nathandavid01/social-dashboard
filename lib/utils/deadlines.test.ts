@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deadlineStatus, addDaysISO, todayISO, deadlineTone, worstDeadlineStatus } from './deadlines'
+import { deadlineStatus, addDaysISO, todayISO, todayISOInTimeZone, deadlineTone, worstDeadlineStatus } from './deadlines'
 
 describe('todayISO', () => {
   it('uses local calendar parts (no UTC off-by-one near midnight)', () => {
@@ -20,6 +20,19 @@ describe('addDaysISO', () => {
   })
   it('supports negative offsets', () => {
     expect(addDaysISO('2026-06-01', -1)).toBe('2026-05-31')
+  })
+})
+
+describe('todayISOInTimeZone', () => {
+  it('returns the calendar day in the given zone, not the runtime zone', () => {
+    // 2026-06-15 02:00 UTC = 2026-06-14 22:00 in Puerto Rico (UTC-4). The PR
+    // calendar day is still the 14th even though UTC has rolled to the 15th.
+    const instant = new Date('2026-06-15T02:00:00Z')
+    expect(todayISOInTimeZone('America/Puerto_Rico', instant)).toBe('2026-06-14')
+    expect(todayISOInTimeZone('UTC', instant)).toBe('2026-06-15')
+  })
+  it('formats as YYYY-MM-DD with zero-padding', () => {
+    expect(todayISOInTimeZone('UTC', new Date('2026-01-03T12:00:00Z'))).toBe('2026-01-03')
   })
 })
 

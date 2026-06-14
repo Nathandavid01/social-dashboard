@@ -8,7 +8,7 @@ import { createDraftPost } from '@/lib/metricool/post'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
-import { approvedIdeaSendReadiness, buildScheduledDateTime, quickSendMediaOptions } from '@/lib/utils/idea-lab-send-core'
+import { approvedIdeaSendReadiness, autopublishTimeError, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError } from '@/lib/utils/idea-lab-send-core'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
 
@@ -156,6 +156,8 @@ export async function sendApprovedIdeaToMetricool(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
+  const dateErr = scheduleDateError(schedule.date)
+  if (dateErr) return { error: dateErr }
   const scheduledFor = buildScheduledDateTime(schedule.date, schedule.time)
   if (!scheduledFor) return { error: 'Elige una fecha válida para programar.' }
 
@@ -316,8 +318,14 @@ export async function sendQuickCaptionToMetricool(input: {
   }
 
   if (!input.clientId) return { error: 'Elige un cliente.' }
+  const dateErr = scheduleDateError(input.date)
+  if (dateErr) return { error: dateErr }
   const scheduledFor = buildScheduledDateTime(input.date, input.time)
   if (!scheduledFor) return { error: 'Elige una fecha válida para programar.' }
+  // Auto-publish must be in the future (a past datetime publishes immediately /
+  // errors). Drafts are exempt — a past-dated draft is harmless.
+  const timeErr = autopublishTimeError(scheduledFor, !!input.autoPublish)
+  if (timeErr) return { error: timeErr }
 
   const supabase = await createClient()
   const { data: client } = await supabase
