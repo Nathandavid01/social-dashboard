@@ -50,6 +50,17 @@ describe('QuickCaptionDialog', () => {
     expect(screen.queryByText('LinkedIn')).toBeNull()
   })
 
+  it('lets you choose between draft and auto-publish (defaults to draft)', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    // Default → scheduled draft.
+    expect(screen.getByText(/borrador programado/i)).toBeInTheDocument()
+    // Switch to auto-publish → helper text changes.
+    fireEvent.click(screen.getByRole('button', { name: /publicar automáticamente/i }))
+    expect(screen.getByText(/se publicará automáticamente/i)).toBeInTheDocument()
+    expect(screen.queryByText(/borrador programado/i)).toBeNull()
+  })
+
   it('offers a video upload control', () => {
     render(<QuickCaptionDialog clients={clients} />)
     fireEvent.click(screen.getByText('Caption rápido'))

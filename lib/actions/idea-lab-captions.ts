@@ -306,6 +306,8 @@ export async function sendQuickCaptionToMetricool(input: {
   contentType?: string | null
   /** Permanent public URL of an uploaded video (from getQuickUploadUrl). */
   mediaUrl?: string | null
+  /** true = auto-publish a real scheduled post; false/omitted = scheduled draft. */
+  autoPublish?: boolean
 }): Promise<{ ok?: true; error?: string; scheduledFor?: string; autoPublished?: boolean }> {
   try {
     await requirePermission('posting.publish')
@@ -336,7 +338,7 @@ export async function sendQuickCaptionToMetricool(input: {
   if (!readiness.ready) return { error: readiness.reason }
 
   const platforms = resolvePlatforms(c.platforms, c.default_platforms)
-  const media = quickSendMediaOptions(input.mediaUrl)
+  const media = quickSendMediaOptions(input.mediaUrl, input.autoPublish)
 
   try {
     await createDraftPost(

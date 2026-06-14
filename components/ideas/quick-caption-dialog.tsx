@@ -9,6 +9,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
@@ -50,6 +51,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [caption, setCaption] = useState('')
   const [video, setVideo] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [mode, setMode] = useState<'draft' | 'autopublish'>('draft')
   const [date, setDate] = useState(tomorrowISO())
   const [time, setTime] = useState('10:00')
   const [sentInfo, setSentInfo] = useState<string | null>(null)
@@ -68,6 +70,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
     setCaption('')
     setVideo(null)
     setUploading(false)
+    setMode('draft')
     setDate(tomorrowISO())
     setTime('10:00')
     setSentInfo(null)
@@ -110,7 +113,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
         setUploading(false)
       }
 
-      const res = await sendQuickCaptionToMetricool({ clientId, caption, date, time, contentType, mediaUrl })
+      const res = await sendQuickCaptionToMetricool({ clientId, caption, date, time, contentType, mediaUrl, autoPublish: mode === 'autopublish' })
       if (res.error) {
         toast({ title: 'No se pudo enviar', description: res.error, variant: 'destructive' })
       } else {
@@ -264,6 +267,26 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               )}
             </div>
 
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Al programar</span>
+              <div className="inline-flex w-fit rounded-md border p-0.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setMode('draft')}
+                  className={cn('rounded px-3 py-1.5 transition', mode === 'draft' ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')}
+                >
+                  Borrador
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('autopublish')}
+                  className={cn('rounded px-3 py-1.5 transition', mode === 'autopublish' ? 'bg-primary font-medium text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
+                >
+                  Publicar automáticamente
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-end gap-2 border-t pt-3">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Fecha
@@ -285,7 +308,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                   ) : (
                     <Send className="mr-1.5 h-3.5 w-3.5" />
                   )}
-                  {uploading ? 'Subiendo video…' : video ? 'Publicar en Metricool' : 'Enviar a Metricool'}
+                  {uploading ? 'Subiendo video…' : mode === 'autopublish' ? 'Publicar en Metricool' : 'Enviar a Metricool'}
                 </Button>
               )}
             </div>
@@ -295,10 +318,10 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 Este cliente no tiene Metricool configurado, no se puede programar.
               </p>
-            ) : video ? (
+            ) : mode === 'autopublish' ? (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-                El video + caption se publicará automáticamente a las redes del cliente en la fecha y hora elegidas.
+                Se publicará automáticamente a las redes del cliente en la fecha y hora elegidas{video ? ' (con el video adjunto)' : ''}.
               </p>
             ) : (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

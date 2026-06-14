@@ -2,16 +2,19 @@ import { describe, it, expect } from 'vitest'
 import { approvedIdeaSendReadiness, buildScheduledDateTime, quickSendMediaOptions } from './idea-lab-send-core'
 
 describe('quickSendMediaOptions', () => {
-  it('attaches the video and auto-publishes when a media URL is given', () => {
-    expect(quickSendMediaOptions('https://v.nmedia.dev/quick/c1/edited/1-x.mp4')).toEqual({
-      mediaUrls: ['https://v.nmedia.dev/quick/c1/edited/1-x.mp4'],
-      autoPublish: true,
-    })
+  const url = 'https://v.nmedia.dev/quick/c1/edited/1-x.mp4'
+
+  it('attaches the video when a media URL is given', () => {
+    expect(quickSendMediaOptions(url, false)).toEqual({ mediaUrls: [url], autoPublish: false })
+    expect(quickSendMediaOptions(url, true)).toEqual({ mediaUrls: [url], autoPublish: true })
   })
-  it('falls back to a plain scheduled draft when there is no video', () => {
+  it('omits media when there is no video, keeping the chosen publish mode', () => {
+    expect(quickSendMediaOptions(null, true)).toEqual({ autoPublish: true })
+    expect(quickSendMediaOptions('   ', false)).toEqual({ autoPublish: false })
+  })
+  it('defaults to a draft (autoPublish=false) when the mode is not given', () => {
+    expect(quickSendMediaOptions(url)).toEqual({ mediaUrls: [url], autoPublish: false })
     expect(quickSendMediaOptions()).toEqual({ autoPublish: false })
-    expect(quickSendMediaOptions(null)).toEqual({ autoPublish: false })
-    expect(quickSendMediaOptions('   ')).toEqual({ autoPublish: false })
   })
 })
 

@@ -44,12 +44,14 @@ export interface MetricoolMediaOptions {
 }
 
 /**
- * Decide how a quick-caption post reaches Metricool based on whether a video was
- * uploaded: video → attach it + auto-publish; no video → plain scheduled draft.
+ * Build the Metricool media options for a quick-caption post. Attaches the video
+ * (when a media URL is given) and applies the user's explicit choice between a
+ * scheduled DRAFT (autoPublish=false) and AUTO-PUBLISH. Media and publish mode
+ * are independent — a draft can carry a video, and a caption can auto-publish.
  */
-export function quickSendMediaOptions(mediaUrl?: string | null): MetricoolMediaOptions {
+export function quickSendMediaOptions(mediaUrl?: string | null, autoPublish = false): MetricoolMediaOptions {
   const v = mediaUrl?.trim()
-  return v ? { mediaUrls: [v], autoPublish: true } : { autoPublish: false }
+  return { ...(v ? { mediaUrls: [v] } : {}), autoPublish: !!autoPublish }
 }
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
