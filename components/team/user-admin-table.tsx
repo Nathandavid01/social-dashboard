@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { RoleSelector } from '@/components/team/role-selector'
+import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
 import type { Profile, UserStatus } from '@/lib/supabase/types'
 
@@ -20,10 +21,13 @@ export function UserAdminTable({
   return (
     <section className="rounded-xl border bg-card">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b p-4">
-        <h2 className="text-base font-bold tracking-tight">Usuarios y permisos</h2>
-        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
-          {users.length} {users.length === 1 ? 'usuario' : 'usuarios'}
-        </span>
+        <div className="flex min-w-0 items-baseline gap-2">
+          <h2 className="text-base font-bold tracking-tight">Usuarios y permisos</h2>
+          <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+            {users.length} {users.length === 1 ? 'usuario' : 'usuarios'}
+          </span>
+        </div>
+        <CreateUserDialog />
       </div>
       <div className="divide-y">
         {users.map((u) => (

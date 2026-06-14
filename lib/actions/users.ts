@@ -2,10 +2,62 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { assertOwner } from '@/lib/auth/server'
-import type { UserStatus } from '@/lib/supabase/types'
+import { validateNewUser } from '@/lib/utils/user-admin-core'
+import type { UserRole, UserStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
+
+/**
+ * Owner-only: create a brand-new team user with a role (= their permission set)
+ * and a temporary password they change on first login. Uses the service-role
+ * admin API to create the auth user (email pre-confirmed), then sets the chosen
+ * role on the profile the signup trigger created. The same table lets the owner
+ * change a user's role/permissions afterward via RoleSelector.
+ */
+export async function createTeamUser(input: {
+  email: string
+  fullName: string
+  role: UserRole
+  password: string
+}): Promise<{ ok?: true; userId?: string; error?: string }> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const valid = validateNewUser(input)
+  if (!valid.ok) return { error: valid.error }
+
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' }
+
+  const email = input.email.trim().toLowerCase()
+  const fullName = input.fullName.trim()
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: input.password,
+    email_confirm: true,
+    user_metadata: { full_name: fullName },
+  })
+  if (error) return { error: error.message }
+  const userId = data.user?.id
+  if (!userId) return { error: 'No se pudo crear el usuario.' }
+
+  // The handle_new_user trigger inserts the profile with the default role; set
+  // the chosen role + name with the admin client (RLS-free, just-created row).
+  const { error: updErr } = await admin
+    .from('profiles')
+    .update({ role: input.role, full_name: fullName, status: 'active', updated_at: new Date().toISOString() })
+    .eq('id', userId)
+  if (updErr) return { error: updErr.message }
+
+  revalidatePath('/team')
+  return { ok: true, userId }
+}
 
 /** Owner-only: edit a member's display name and org title. */
 export async function updateUserProfile(

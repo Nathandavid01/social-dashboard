@@ -5,6 +5,7 @@ import type { Profile } from '@/lib/supabase/types'
 
 vi.mock('@/lib/actions/users', () => ({ updateUserProfile: vi.fn(), setUserStatus: vi.fn() }))
 vi.mock('@/components/team/role-selector', () => ({ RoleSelector: () => <div data-testid="role-selector" /> }))
+vi.mock('@/components/team/create-user-dialog', () => ({ CreateUserDialog: () => <div data-testid="create-user" /> }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 
 const users = [
