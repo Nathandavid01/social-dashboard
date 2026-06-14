@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import type { ApprovedIdea } from '@/lib/actions/idea-feedback-types'
 
 vi.mock('@/lib/actions/idea-lab-captions', () => ({
@@ -47,5 +47,16 @@ describe('ApprovedIdeasCaptions', () => {
     render(<ApprovedIdeasCaptions ideas={[idea({ metricool_post_id: 99, metricool_scheduled_for: '2026-06-15T10:00:00' })]} />)
     expect(screen.getByText(/Enviado a Metricool/)).toBeInTheDocument()
     expect(screen.queryByText('Enviar a Metricool')).toBeNull()
+  })
+
+  it('disables send and warns when the chosen date is in the past', () => {
+    render(<ApprovedIdeasCaptions ideas={[idea({ generated_caption: 'Listo para publicar' })]} />)
+    const sendBtn = screen.getByRole('button', { name: /Enviar a Metricool/i })
+    // Default date is tomorrow → sendable.
+    expect(sendBtn).not.toBeDisabled()
+    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement
+    fireEvent.change(dateInput, { target: { value: '2020-01-01' } })
+    expect(sendBtn).toBeDisabled()
+    expect(screen.getByText(/fecha ya pasó/i)).toBeInTheDocument()
   })
 })

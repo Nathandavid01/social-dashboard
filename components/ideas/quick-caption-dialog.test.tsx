@@ -61,6 +61,14 @@ describe('QuickCaptionDialog', () => {
     expect(screen.queryByText(/borrador programado/i)).toBeNull()
   })
 
+  it('limits the date picker to today or later (min set)', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement
+    expect(dateInput).toBeTruthy()
+    expect(dateInput.getAttribute('min')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+
   it('offers a video upload control', () => {
     render(<QuickCaptionDialog clients={clients} />)
     fireEvent.click(screen.getByText('Caption rápido'))

@@ -4,6 +4,51 @@
  * readiness logic is unit-testable without mocking Supabase/Metricool.
  */
 
+import { addDaysISO, todayISOInTimeZone } from './deadlines'
+
+/** Timezone Metricool publishes in — the calendar day we anchor scheduling to. */
+export const POST_TZ = 'America/Puerto_Rico'
+
+/** Today in the posting timezone (the earliest schedulable day). */
+export function scheduleMinDate(now: Date = new Date()): string {
+  return todayISOInTimeZone(POST_TZ, now)
+}
+
+/** Default value for the schedule date picker — tomorrow in the posting timezone. */
+export function defaultScheduleDate(now: Date = new Date()): string {
+  return addDaysISO(scheduleMinDate(now), 1)
+}
+
+/** Current minute as "YYYY-MM-DDTHH:MM" in the posting timezone (same-day time checks). */
+export function nowMinuteInPostTZ(now: Date = new Date()): string {
+  const time = new Intl.DateTimeFormat('en-GB', {
+    timeZone: POST_TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(now)
+  return `${todayISOInTimeZone(POST_TZ, now)}T${time}`
+}
+
+/**
+ * For an AUTO-PUBLISH post the full datetime must not be in the past — Metricool
+ * would publish immediately or reject it. Drafts are exempt (a past-dated draft
+ * is harmless and gets finalized by hand). Minute-precision "YYYY-MM-DDTHH:MM"
+ * lexicographic compare (fixed width ⇒ chronological). `scheduledFor` is the
+ * "YYYY-MM-DDTHH:MM:SS" string from buildScheduledDateTime.
+ */
+export function autopublishTimeError(
+  scheduledFor: string,
+  autoPublish: boolean,
+  nowMinute: string = nowMinuteInPostTZ(),
+): string | null {
+  if (!autoPublish) return null
+  if (scheduledFor.slice(0, 16) < nowMinute) {
+    return 'La hora ya pasó; elige una fecha y hora futuras para autopublicar.'
+  }
+  return null
+}
+
 export interface SendableApprovedIdea {
   generated_caption: string | null
   /** Set once we've sent the draft — the idempotency guard. */
@@ -78,4 +123,21 @@ export function buildScheduledDateTime(
   if (!date || !DATE_RE.test(date.trim())) return null
   const t = normalizeTime(time) ?? '10:00'
   return `${date.trim()}T${t}:00`
+}
+
+/**
+ * Validate a user-picked schedule date. Returns a Spanish error string, or null
+ * when the date is OK. Rejects missing/malformed dates AND any date before today
+ * — you can schedule for today or later, never the past (a past date would land
+ * the post in the past on the calendar, or for an auto-publish post trigger an
+ * immediate publish / Metricool error). Date-only "YYYY-MM-DD" string compare,
+ * never `toISOString()` (which shifts the day at night for users west of UTC).
+ */
+export function scheduleDateError(
+  date: string | null | undefined,
+  today: string = scheduleMinDate(),
+): string | null {
+  if (!date || !DATE_RE.test(date.trim())) return 'Elige una fecha válida para programar.'
+  if (date.trim() < today) return 'La fecha ya pasó; elige hoy o una fecha futura.'
+  return null
 }

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
+import { defaultScheduleDate, scheduleMinDate } from '@/lib/utils/idea-lab-send-core'
 import {
   generateApprovedIdeaCaption,
   saveApprovedIdeaCaption,
@@ -18,13 +19,6 @@ import {
 } from '@/lib/actions/idea-lab-captions'
 
 const TYPE_LABEL: Record<ContentIdeaType, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
-
-/** Local "YYYY-MM-DD" for the default date picker value (tomorrow). */
-function tomorrowISO(): string {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  return d.toISOString().slice(0, 10)
-}
 
 /** "2026-06-15T10:00:00" → "15 jun 2026, 10:00" for the sent badge. */
 function formatScheduled(s: string | null): string | null {
@@ -61,7 +55,7 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
 
   const [caption, setCaption] = useState(idea.generated_caption ?? '')
   const [platform, setPlatform] = useState(idea.caption_platform ?? 'instagram')
-  const [date, setDate] = useState(tomorrowISO())
+  const [date, setDate] = useState(defaultScheduleDate())
   const [time, setTime] = useState('10:00')
 
   const [sentInfo, setSentInfo] = useState<string | null>(
@@ -76,6 +70,8 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
   const hasMetricool = !!idea.client?.metricool_blog_id?.trim()
   const savedCaption = idea.generated_caption ?? ''
   const dirty = caption.trim() !== savedCaption.trim()
+  const minDate = scheduleMinDate()
+  const dateIsPast = !!date && date < minDate
 
   function generate() {
     startGenerate(async () => {
@@ -188,7 +184,7 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
             <div className="flex flex-wrap items-end gap-2">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Fecha
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+                <Input type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Hora
@@ -198,7 +194,7 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
                 <Button
                   size="sm"
                   onClick={send}
-                  disabled={isSending || !caption.trim() || !hasMetricool}
+                  disabled={isSending || !caption.trim() || !hasMetricool || !date || dateIsPast}
                   className="transition-transform hover:scale-105"
                 >
                   {isSending ? (
@@ -216,7 +212,13 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
                 Este cliente no tiene Metricool configurado, no se puede programar.
               </p>
             )}
-            {hasMetricool && (
+            {hasMetricool && dateIsPast && (
+              <p className="mt-2 flex items-center gap-1.5 text-[11px] text-amber-600">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                La fecha ya pasó; elige hoy o una fecha futura.
+              </p>
+            )}
+            {hasMetricool && !dateIsPast && (
               <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <CalendarClock className="h-3.5 w-3.5 shrink-0" />
                 Se crea como borrador programado — adjunta el diseño y aprueba dentro de Metricool.

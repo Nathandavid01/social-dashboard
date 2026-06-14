@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.34 — 2026-06-14
+
+- **Fecha de programación más confiable (Captions → Metricool):** al programar un caption —en **Ideas aprobadas** o en **Caption rápido**— la fecha por defecto ("mañana") ya no se corría un día de más cuando programabas de noche (se calculaba en horario UTC). Ahora usa el día local correcto.
+- **No se puede programar en el pasado:** el calendario se limita a **hoy en adelante**, el botón de enviar se desactiva y aparece un aviso si la fecha quedó vencida. Para **autopublicar** (Caption rápido con video) también se bloquea una **hora ya pasada** del mismo día — así un post nunca se publica solo con fecha/hora vencida.
+
 ## v2.33 — 2026-06-13
 
 - **Menú móvil ahora hace scroll:** el menú lateral en celular (el cajón que se abre con el botón ☰) no dejaba ver los últimos ítems (Verificación, Automatización, Configuración) porque la lista se cortaba sin poder hacer scroll. Ahora el encabezado queda fijo y la lista de enlaces se desplaza, así alcanzas todas las secciones.

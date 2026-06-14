@@ -25,6 +25,23 @@ export function addDaysISO(isoDate: string, days: number): string {
   return todayISO(new Date(y, m - 1, d + days))
 }
 
+/**
+ * Today's "YYYY-MM-DD" calendar day in a specific IANA timezone — use this (not
+ * `todayISO()`) when the calendar day must be anchored to a fixed place rather
+ * than the runtime's local zone. Server code runs in UTC (Vercel), so plain
+ * `todayISO()` is a day ahead of Puerto Rico at night; anchoring to the post's
+ * timezone keeps the schedulable "today"/"tomorrow" consistent on client+server.
+ */
+export function todayISOInTimeZone(timeZone: string, now: Date = new Date()): string {
+  // en-CA formats dates as YYYY-MM-DD.
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now)
+}
+
 /** How urgent a video's deadline is, relative to `today`. Days-soon window = 2. */
 export function deadlineStatus(
   deadline: string | null | undefined,
