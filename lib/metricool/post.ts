@@ -24,28 +24,40 @@ function getServerConfig(): MetricoolServerConfig | null {
 }
 
 /**
- * Per-network "post as a Reel" hints for a Metricool scheduler post.
+ * Maps an idea `content_type` (R/P/C/S) to the per-network publish FORMAT so the
+ * post shows up on the social network as the SAME kind the idea was planned as.
+ * Returns the `*Data` objects Metricool uses to pick the format, scoped to the
+ * networks the post actually targets (`instagramData`/`facebookData.type` accept
+ * POST | REEL | STORY per Metricool's API):
+ *   - R (Reel)     → IG `{ type: 'REEL', showReelOnFeed: true }`, FB `{ type: 'REEL' }`
+ *   - S (Story)    → IG/FB `{ type: 'STORY' }`
+ *   - P (Post)     → IG/FB `{ type: 'POST' }` (plain feed post)
+ *   - C (Carousel) → IG/FB `{ type: 'POST' }` (a carousel is a POST with >1 media)
+ *   - TikTok: videos are native; there's no format flag, so nothing is added.
  *
- * Only applies to Reel ideas (`content_type === 'R'`). Returns the `*Data`
- * objects Metricool uses to pick the publish FORMAT, scoped to the networks the
- * post actually targets:
- *   - Facebook: `facebookData.type = 'REEL'` makes it a Reel instead of a plain
- *     video post (confirmed by Metricool's API docs — type is POST | REEL).
- *   - Instagram: `instagramData.type = 'REEL'` + `showReelOnFeed` (Instagram only
- *     publishes single videos as Reels via the API, so this is the natural shape).
- *   - TikTok: videos are native; there is no Reel flag, so nothing is added.
- *
- * Anything non-Reel (Post/Carousel/Story) returns `{}` — no format override.
+ * An unknown/null content_type returns `{}` (no override) — backwards compatible.
  */
-export function reelFormatData(
+const CONTENT_TYPE_TO_FORMAT: Record<string, 'REEL' | 'STORY' | 'POST'> = {
+  R: 'REEL',
+  S: 'STORY',
+  P: 'POST',
+  C: 'POST',
+}
+
+export function postFormatData(
   contentType: string | null | undefined,
   platforms: string[],
 ): Record<string, unknown> {
-  if (contentType !== 'R') return {}
+  const format = contentType ? CONTENT_TYPE_TO_FORMAT[contentType] : undefined
+  if (!format) return {}
   const networks = new Set(platforms.map((p) => p.toLowerCase()))
   const data: Record<string, unknown> = {}
-  if (networks.has('instagram')) data.instagramData = { type: 'REEL', showReelOnFeed: true }
-  if (networks.has('facebook')) data.facebookData = { type: 'REEL' }
+  if (networks.has('instagram')) {
+    // Instagram only publishes single videos as Reels via the API; showReelOnFeed
+    // surfaces the Reel on the grid too.
+    data.instagramData = format === 'REEL' ? { type: 'REEL', showReelOnFeed: true } : { type: format }
+  }
+  if (networks.has('facebook')) data.facebookData = { type: format }
   return data
 }
 
@@ -61,7 +73,8 @@ export async function createDraftPost(
     /** When true, schedule a REAL post (draft:false + autoPublish) that goes
      *  live by itself at publicationDate; otherwise create a draft to finalize. */
     autoPublish?: boolean
-    /** Idea content_type ('R' = Reel). Drives the per-network Reel format hints. */
+    /** Idea content_type (R/P/C/S). Drives the per-network publish format so the
+     *  post matches the planned type (Reel/Story/Post/Carousel) on the network. */
     contentType?: string | null
   },
 ): Promise<MetricoolDraftResponse> {
@@ -73,7 +86,7 @@ export async function createDraftPost(
   const networks = (platforms && platforms.length > 0 ? platforms : ['instagram', 'facebook', 'tiktok'])
     .map((p) => p.toLowerCase())
   const providers = networks.map((network) => ({ network }))
-  const reelData = reelFormatData(opts?.contentType, networks)
+  const formatData = postFormatData(opts?.contentType, networks)
 
   // Metricool wants a naive local datetime + a timezone (it publishes at that
   // wall-clock in `timezone`). Pass a planned naive datetime ("YYYY-MM-DDTHH:MM")
@@ -96,7 +109,7 @@ export async function createDraftPost(
   url.searchParams.set('userId', config.userId)
   url.searchParams.set('blogId', effectiveBlogId)
 
-  const send = (includeReel: boolean) =>
+  const send = (includeFormat: boolean) =>
     fetch(url.toString(), {
       method: 'POST',
       signal: AbortSignal.timeout(15_000), // bound the round-trip so a hung Metricool can't block approval
@@ -112,16 +125,16 @@ export async function createDraftPost(
         publicationDate,
         ...(mediaUrls.length > 0 ? { media: mediaUrls } : {}),
         ...(driveLink ? { firstCommentText: driveLink } : {}),
-        ...(includeReel ? reelData : {}),
+        ...(includeFormat ? formatData : {}),
       }),
     })
 
-  const hasReelHints = Object.keys(reelData).length > 0
-  let res = await send(hasReelHints)
-  // The Reel format hints are best-effort: if Metricool rejects them (some
-  // accounts/networks don't accept a format override via the API), never let
-  // that block the publish — retry once as a plain video post.
-  if (!res.ok && hasReelHints) {
+  const hasFormatHints = Object.keys(formatData).length > 0
+  let res = await send(hasFormatHints)
+  // The format hints are best-effort: if Metricool rejects them (some accounts/
+  // networks don't accept a format override via the API), never let that block
+  // the publish — retry once without the format override.
+  if (!res.ok && hasFormatHints) {
     res = await send(false)
   }
 
