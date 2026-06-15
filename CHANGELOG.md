@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.35 — 2026-06-14
+
+- **Registro público deshabilitado:** ya no cualquiera puede crear su cuenta desde la pantalla de registro. Las cuentas nuevas las crea un administrador en **Equipo → Usuarios y permisos** (botón "Crear usuario", con rol/permisos), controlando quién entra.
+- **Cambio de contraseña self-service:** cada usuario puede cambiar su propia contraseña desde su cuenta, sin depender de un administrador.
+
 ## v2.34 — 2026-06-14
 
 - **Fecha de programación más confiable (Captions → Metricool):** al programar un caption —en **Ideas aprobadas** o en **Caption rápido**— la fecha por defecto ("mañana") ya no se corría un día de más cuando programabas de noche (se calculaba en horario UTC). Ahora usa el día local correcto.
