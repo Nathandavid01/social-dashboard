@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assertOwner } from '@/lib/auth/server'
 import { validateNewUser } from '@/lib/utils/user-admin-core'
+import { AREAS } from '@/lib/auth/areas'
 import type { UserRole, UserStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
@@ -88,6 +89,36 @@ export async function updateUserProfile(
   if (error) return { error: error.message }
 
   revalidatePath('/team')
+  return { ok: true }
+}
+
+/**
+ * Owner-only: set the per-user area access list. Pass `null` to clear the
+ * restriction (the user falls back to their role defaults). Any unknown hrefs
+ * are dropped so only real areas are ever stored.
+ */
+export async function setUserAreaAccess(userId: string, hrefs: string[] | null): Promise<Result> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  let value: string[] | null = null
+  if (hrefs !== null) {
+    const valid = new Set(AREAS.map((a) => a.href))
+    value = Array.from(new Set(hrefs.filter((h) => valid.has(h))))
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('profiles')
+    .update({ area_access: value, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/team')
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
 

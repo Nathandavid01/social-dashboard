@@ -18,7 +18,7 @@ export default async function TeamPage() {
   const nowIso = new Date().toISOString()
 
   const [{ data: profiles }, { data: allTasks }, uploadMetrics, pendingApprovals] = await Promise.all([
-    supabase.from('profiles').select('id, full_name, email, role, status, title, avatar_url').order('full_name'),
+    supabase.from('profiles').select('id, full_name, email, role, status, title, avatar_url, area_access').order('full_name'),
     supabase
       .from('tasks')
       .select('id, title, status, priority, due_at, type, assignee_id, client:clients(id, name)')

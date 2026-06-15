@@ -22,6 +22,9 @@ export interface Profile {
   status: UserStatus
   approval_status: UserApprovalStatus
   title: string | null
+  /** Admin-granted areas the user may reach (list of area hrefs). null = no
+   * per-user restriction → role defaults apply. See lib/auth/areas.ts. */
+  area_access?: string[] | null
   nav_preferences?: NavPreferences
   created_at: string
   updated_at: string

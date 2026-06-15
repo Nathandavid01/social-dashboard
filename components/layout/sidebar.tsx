@@ -20,6 +20,8 @@ interface SidebarProps {
   videoReviewCount?: number
   planningPendingCount?: number
   navPreferences?: NavPreferences
+  /** Admin-granted areas (null = no restriction → role defaults). */
+  areaAccess?: string[] | null
 }
 
 const DEFAULT_HREFS = navItems.map((n) => n.href)
@@ -40,6 +42,7 @@ export function Sidebar({
   videoReviewCount = 0,
   planningPendingCount = 0,
   navPreferences,
+  areaAccess = null,
 }: SidebarProps) {
   const pathname = usePathname()
   const { role } = useAuth()
@@ -48,8 +51,9 @@ export function Sidebar({
   const [isPending, startTransition] = useTransition()
   const [editing, setEditing] = useState(false)
 
-  // Hide items the current role cannot access (independent of user prefs).
-  const allowedItems = useMemo(() => visibleNavItems(role), [role])
+  // Hide items the user cannot access: role permissions AND the admin-granted
+  // per-user area list (independent of user prefs).
+  const allowedItems = useMemo(() => visibleNavItems(role, areaAccess), [role, areaAccess])
   const allowedHrefs = useMemo(() => new Set(allowedItems.map((n) => n.href)), [allowedItems])
 
   // Local working copy during edit mode (optimistic)

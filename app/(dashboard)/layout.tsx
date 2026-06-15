@@ -96,6 +96,7 @@ export default async function DashboardLayout({
           videoReviewCount={videoReviewCount ?? 0}
           planningPendingCount={planningPendingCount}
           navPreferences={profile?.nav_preferences}
+          areaAccess={profile?.area_access ?? null}
         />
         <SidebarAwareContent>
           <Topbar

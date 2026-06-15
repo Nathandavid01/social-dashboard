@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { RoleSelector } from '@/components/team/role-selector'
+import { AreaAccessDialog } from '@/components/team/area-access-dialog'
 import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
 import type { Profile, UserStatus } from '@/lib/supabase/types'
@@ -91,6 +92,11 @@ function UserRow({ user, isSelf }: { user: Profile; isSelf: boolean }) {
       <span className="min-w-0 shrink-0 truncate text-xs text-muted-foreground sm:w-44">{user.email}</span>
       <div className="flex shrink-0 items-center gap-2">
         <RoleSelector userId={user.id} userName={user.full_name ?? user.email} currentRole={user.role} />
+        <AreaAccessDialog
+          userId={user.id}
+          userName={user.full_name ?? user.email}
+          currentAccess={user.area_access ?? null}
+        />
         <Button
           size="sm"
           variant={inactive ? 'outline' : 'ghost'}
