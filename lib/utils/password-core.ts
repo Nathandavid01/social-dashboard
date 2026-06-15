@@ -14,6 +14,17 @@ export interface PasswordChangeInput {
 
 export type PasswordChangeValidation = { ok: true } | { ok: false; error: string }
 
+/**
+ * Pure validation for an ADMIN-set password (creating a user or resetting
+ * someone's password): only the length rule applies — no current/confirm.
+ */
+export function validateNewPassword(password: string | null | undefined): PasswordChangeValidation {
+  if (!password || password.length < MIN_PASSWORD_LENGTH) {
+    return { ok: false, error: `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.` }
+  }
+  return { ok: true }
+}
+
 export function validatePasswordChange(input: Partial<PasswordChangeInput>): PasswordChangeValidation {
   const current = input.current ?? ''
   const next = input.next ?? ''

@@ -5,10 +5,36 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assertOwner } from '@/lib/auth/server'
 import { validateNewUser } from '@/lib/utils/user-admin-core'
+import { validateNewPassword } from '@/lib/utils/password-core'
 import { AREAS } from '@/lib/auth/areas'
 import type { UserRole, UserStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
+
+/**
+ * Owner-only: reset another user's password to a new (temporary) one. For when
+ * someone forgets their password — they can't use the self-service change (that
+ * needs them logged in), so an admin sets a new temp password to share. Uses the
+ * service-role admin API. The user changes it again from their account.
+ */
+export async function resetUserPassword(userId: string, password: string): Promise<Result> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const valid = validateNewPassword(password)
+  if (!valid.ok) return { error: valid.error }
+
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' }
+
+  const { error } = await admin.auth.admin.updateUserById(userId, { password })
+  if (error) return { error: error.message }
+
+  revalidatePath('/settings/users')
+  return { ok: true }
+}
 
 /**
  * Owner-only: create a brand-new team user with a role (= their permission set)

@@ -1,7 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { validatePasswordChange } from './password-core'
+import { validatePasswordChange, validateNewPassword } from './password-core'
 
 const ok = { current: 'oldpass123', next: 'newpass456', confirm: 'newpass456' }
+
+describe('validateNewPassword (admin-set / reset)', () => {
+  it('accepts a password of at least 8 chars', () => {
+    expect(validateNewPassword('secret12')).toEqual({ ok: true })
+  })
+  it('rejects a short or empty password', () => {
+    expect(validateNewPassword('short').ok).toBe(false)
+    expect(validateNewPassword('').ok).toBe(false)
+    expect(validateNewPassword(null).ok).toBe(false)
+    expect(validateNewPassword(undefined).ok).toBe(false)
+  })
+})
 
 describe('validatePasswordChange', () => {
   it('accepts a valid change', () => {

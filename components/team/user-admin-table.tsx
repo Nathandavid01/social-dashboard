@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { RoleSelector } from '@/components/team/role-selector'
 import { AreaAccessDialog } from '@/components/team/area-access-dialog'
+import { ResetPasswordDialog } from '@/components/team/reset-password-dialog'
 import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
 import type { Profile, UserStatus } from '@/lib/supabase/types'
@@ -98,6 +99,7 @@ function UserRow({ user, isSelf }: { user: Profile; isSelf: boolean }) {
           currentAccess={user.area_access ?? null}
           role={user.role}
         />
+        <ResetPasswordDialog userId={user.id} userName={user.full_name ?? user.email} />
         <Button
           size="sm"
           variant={inactive ? 'outline' : 'ghost'}

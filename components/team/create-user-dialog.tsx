@@ -11,18 +11,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/lib/hooks/use-toast'
 import { createTeamUser } from '@/lib/actions/users'
+import { makeTempPassword } from '@/lib/utils/temp-password'
 import { ASSIGNABLE_ROLES, ROLE_LABEL, ROLE_DESCRIPTION } from '@/lib/auth/permissions'
 import type { UserRole } from '@/lib/supabase/types'
-
-/** A readable temporary password (the new user changes it on first login). */
-function makeTempPassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
-  const buf = typeof crypto !== 'undefined' && crypto.getRandomValues
-    ? crypto.getRandomValues(new Uint32Array(10))
-    : Array.from({ length: 10 }, (_, i) => i * 7 + 11)
-  const body = Array.from(buf, (n) => chars[n % chars.length]).join('')
-  return `Nm${body}9!`
-}
 
 export function CreateUserDialog() {
   const router = useRouter()
