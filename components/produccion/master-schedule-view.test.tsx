@@ -3,10 +3,17 @@
  * cadence from production_schedules as a clean clients × days grid with R/P
  * pills and a weekly total per client.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
-import { MasterScheduleView } from './master-schedule-view'
 import type { ProductionSchedule } from '@/lib/supabase/types'
+
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+const upsert = vi.fn(async () => ({ error: null }))
+vi.mock('@/lib/actions/production', () => ({
+  upsertProductionSchedules: (...a: unknown[]) => upsert(...(a as [])),
+}))
+
+import { MasterScheduleView } from './master-schedule-view'
 
 function sched(clientId: string, name: string, day: number, type: 'R' | 'P'): ProductionSchedule {
   return {
@@ -31,7 +38,10 @@ const schedules: ProductionSchedule[] = [
   sched('c2', 'Tierra Nueva', 4, 'R'),
 ]
 
-beforeEach(() => cleanup())
+beforeEach(() => {
+  cleanup()
+  upsert.mockClear()
+})
 
 describe('MasterScheduleView (live cadence)', () => {
   it('renders a row per client with its name', () => {
@@ -63,6 +73,28 @@ describe('MasterScheduleView (live cadence)', () => {
   it('renders an empty state when there are no schedules', () => {
     render(<MasterScheduleView schedules={[]} />)
     expect(screen.getByText(/sin cadencia/i)).toBeInTheDocument()
+  })
+
+  it('is read-only by default: day cells are not buttons', () => {
+    render(<MasterScheduleView schedules={schedules} />)
+    expect(screen.queryByRole('button', { name: /casita vieja lun/i })).not.toBeInTheDocument()
+  })
+
+  it('with canEdit, clicking a day cell cycles it and auto-saves that client', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    const user = userEvent.setup()
+    render(<MasterScheduleView schedules={schedules} canEdit />)
+
+    // Tierra Nueva currently has only Jue-R. Click its Lun cell → empty becomes R.
+    await user.click(screen.getByRole('button', { name: /tierra nueva lun/i }))
+    expect(upsert).toHaveBeenCalledTimes(1)
+    const [clientId, rows] = upsert.mock.calls[0] as unknown as [string, { day_of_week: number; content_type: string }[]]
+    expect(clientId).toBe('c2')
+    // now Lun-R + Jue-R
+    expect(rows).toEqual([
+      { day_of_week: 1, content_type: 'R' },
+      { day_of_week: 4, content_type: 'R' },
+    ])
   })
 
   it('summarizes total clients and weekly R/P counts', () => {

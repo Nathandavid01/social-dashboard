@@ -1,11 +1,14 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useTransition } from 'react'
+import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { upsertProductionSchedules } from '@/lib/actions/production'
+import { cycleCadence, dayMapToSchedules, type DayCadence } from '@/lib/utils/cadence-core'
 import type { ProductionSchedule, ProductionContentType } from '@/lib/supabase/types'
 
 // Live weekly production cadence, grouped per client from production_schedules.
-// R = Reel, P = Post (the content_type bound to each client per day of week).
+// R = Reel, P = Post. With canEdit, cells cycle empty→R→P→empty and auto-save.
 const DAYS = [
   { num: 1, short: 'Lun' },
   { num: 2, short: 'Mar' },
@@ -16,21 +19,12 @@ const DAYS = [
   { num: 7, short: 'Dom' },
 ]
 
-interface ClientRow {
-  clientId: string
-  name: string
-  days: Map<number, ProductionContentType[]>
-  total: number
-}
-
 function Pill({ type }: { type: ProductionContentType }) {
   return (
     <span
       className={cn(
         'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-bold leading-none',
-        type === 'R'
-          ? 'bg-indigo-600 text-white'
-          : 'bg-amber-500 text-zinc-900',
+        type === 'R' ? 'bg-indigo-600 text-white' : 'bg-amber-500 text-zinc-900',
       )}
     >
       {type}
@@ -38,32 +32,63 @@ function Pill({ type }: { type: ProductionContentType }) {
   )
 }
 
-export function MasterScheduleView({ schedules }: { schedules: ProductionSchedule[] }) {
-  const rows = useMemo<ClientRow[]>(() => {
-    const byClient = new Map<string, ClientRow>()
+interface ClientMeta {
+  clientId: string
+  name: string
+}
+
+export function MasterScheduleView({
+  schedules,
+  canEdit = false,
+}: {
+  schedules: ProductionSchedule[]
+  canEdit?: boolean
+}) {
+  const { toast } = useToast()
+  const [, startTransition] = useTransition()
+
+  const clients = useMemo<ClientMeta[]>(() => {
+    const seen = new Map<string, string>()
     for (const s of schedules) {
-      const name = s.client?.name ?? 'Sin nombre'
-      let row = byClient.get(s.client_id)
-      if (!row) {
-        row = { clientId: s.client_id, name, days: new Map(), total: 0 }
-        byClient.set(s.client_id, row)
-      }
-      const list = row.days.get(s.day_of_week) ?? []
-      list.push(s.content_type)
-      row.days.set(s.day_of_week, list)
-      row.total += 1
+      if (!seen.has(s.client_id)) seen.set(s.client_id, s.client?.name ?? 'Sin nombre')
     }
-    return Array.from(byClient.values()).sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    return Array.from(seen.entries())
+      .map(([clientId, name]) => ({ clientId, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
   }, [schedules])
 
-  const totalR = schedules.filter((s) => s.content_type === 'R').length
-  const totalP = schedules.filter((s) => s.content_type === 'P').length
+  // clientId -> { day -> type }, the working (optimistic) state.
+  const [maps, setMaps] = useState<Record<string, Record<number, DayCadence>>>(() => {
+    const m: Record<string, Record<number, DayCadence>> = {}
+    for (const s of schedules) {
+      ;(m[s.client_id] ??= {})[s.day_of_week] = s.content_type
+    }
+    return m
+  })
 
-  if (rows.length === 0) {
+  const totalR = Object.values(maps).reduce((n, m) => n + Object.values(m).filter((t) => t === 'R').length, 0)
+  const totalP = Object.values(maps).reduce((n, m) => n + Object.values(m).filter((t) => t === 'P').length, 0)
+
+  function clickCell(clientId: string, day: number) {
+    if (!canEdit) return
+    setMaps((prev) => {
+      const cm = { ...(prev[clientId] ?? {}) }
+      cm[day] = cycleCadence(cm[day] ?? null)
+      const next = { ...prev, [clientId]: cm }
+      startTransition(async () => {
+        // Full replace per client (existingDays non-empty forces delete+insert).
+        const res = await upsertProductionSchedules(clientId, dayMapToSchedules(cm), [1, 2, 3, 4, 5, 6, 7])
+        if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      })
+      return next
+    })
+  }
+
+  if (clients.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-        Sin cadencia configurada. Usa <span className="font-medium text-foreground">Horarios</span> para asignar
-        los días y tipos (R/P) de cada cliente.
+        Sin cadencia configurada. Asígnala desde el perfil de cada cliente (pestaña <span className="font-medium text-foreground">Calendario</span>)
+        o con el botón <span className="font-medium text-foreground">Horarios</span>.
       </div>
     )
   }
@@ -72,9 +97,8 @@ export function MasterScheduleView({ schedules }: { schedules: ProductionSchedul
 
   return (
     <div className="space-y-4">
-      {/* Summary + legend */}
       <div data-testid="summary" className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-        <span><span className="font-semibold text-foreground">{rows.length}</span> clientes</span>
+        <span><span className="font-semibold text-foreground">{clients.length}</span> clientes</span>
         <span><span className="font-semibold text-foreground">{totalR}</span> reels / semana</span>
         <span><span className="font-semibold text-foreground">{totalP}</span> posts / semana</span>
         <div className="ml-auto flex items-center gap-3">
@@ -83,51 +107,61 @@ export function MasterScheduleView({ schedules }: { schedules: ProductionSchedul
         </div>
       </div>
 
+      {canEdit && (
+        <p className="text-xs text-muted-foreground">Toca una celda para alternar <span className="font-medium">R → P → vacío</span>. Se guarda automáticamente.</p>
+      )}
+
       <div className="overflow-x-auto rounded-xl border border-border">
-        {/* Header */}
         <div className={cn(cols, 'min-w-[760px] border-b border-border bg-muted/50')}>
           <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cliente</div>
           {DAYS.map((d) => (
-            <div key={d.num} className="border-l border-border px-2 py-2 text-center text-xs font-semibold text-muted-foreground">
-              {d.short}
-            </div>
+            <div key={d.num} className="border-l border-border px-2 py-2 text-center text-xs font-semibold text-muted-foreground">{d.short}</div>
           ))}
           <div className="border-l border-border px-2 py-2 text-center text-xs font-semibold text-muted-foreground">Total</div>
         </div>
 
-        {/* Rows */}
-        {rows.map((row, idx) => (
-          <div
-            key={row.clientId}
-            data-row
-            className={cn(cols, 'min-w-[760px] border-b border-border last:border-b-0', idx % 2 === 0 ? 'bg-background' : 'bg-muted/10')}
-          >
-            <div className="flex items-center px-3 py-2">
-              <span className="truncate text-xs font-medium text-foreground">{row.name}</span>
-            </div>
-            {DAYS.map((d) => (
-              <div
-                key={d.num}
-                data-testid={`cell-${d.num}`}
-                className="flex min-h-[38px] items-center justify-center gap-1 border-l border-border px-1.5 py-1.5"
-              >
-                {(row.days.get(d.num) ?? []).map((t, i) => (
-                  <Pill key={i} type={t} />
-                ))}
-              </div>
-            ))}
+        {clients.map((c, idx) => {
+          const dm = maps[c.clientId] ?? {}
+          const total = DAYS.reduce((n, d) => n + (dm[d.num] ? 1 : 0), 0)
+          return (
             <div
-              data-testid="total"
-              className="flex items-center justify-center border-l border-border px-2 py-1.5 text-xs font-bold text-foreground"
+              key={c.clientId}
+              data-row
+              className={cn(cols, 'min-w-[760px] border-b border-border last:border-b-0', idx % 2 === 0 ? 'bg-background' : 'bg-muted/10')}
             >
-              {row.total}
+              <div className="flex items-center px-3 py-2">
+                <span className="truncate text-xs font-medium text-foreground">{c.name}</span>
+              </div>
+              {DAYS.map((d) => {
+                const t = dm[d.num] ?? null
+                const inner = t ? <Pill type={t} /> : canEdit ? <span className="text-muted-foreground/30">·</span> : null
+                return (
+                  <div key={d.num} data-testid={`cell-${d.num}`} className="border-l border-border">
+                    {canEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => clickCell(c.clientId, d.num)}
+                        aria-label={`${c.name} ${d.short}`}
+                        className="flex min-h-[38px] w-full items-center justify-center px-1.5 py-1.5 transition-colors hover:bg-muted/60"
+                      >
+                        {inner}
+                      </button>
+                    ) : (
+                      <div className="flex min-h-[38px] items-center justify-center px-1.5 py-1.5">{inner}</div>
+                    )}
+                  </div>
+                )
+              })}
+              <div data-testid="total" className="flex items-center justify-center border-l border-border px-2 py-1.5 text-xs font-bold text-foreground">
+                {total}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <p className="text-[11px] text-muted-foreground">
-        Cadencia semanal fija por cliente · <span className="font-medium">R</span> = Reel · <span className="font-medium">P</span> = Post
+        Cadencia semanal por cliente · <span className="font-medium">R</span> = Reel · <span className="font-medium">P</span> = Post
       </p>
     </div>
   )
