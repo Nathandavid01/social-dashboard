@@ -2,7 +2,7 @@
  * Pure logic for importing Metricool brands as dashboard clients. Decides which
  * Metricool brands are NOT yet represented in the clients table, so the owner
  * only sees the ones worth adding. Matched by Metricool blog id (the `id`) or by
- * a case-insensitive client name. Kept Supabase-free for unit testing.
+ * a loosely-normalized client name. Kept Supabase-free for unit testing.
  */
 export interface BrandLike {
   id: string
@@ -15,7 +15,18 @@ export interface ClientLike {
   metricool_blog_id?: string | null
 }
 
-const norm = (s: string) => s.trim().toLowerCase()
+// Loose name match: lowercase, strip accents, treat & like "and", drop
+// punctuation — so "Beyond PVC Cabinets & Closets" matches the client
+// "Beyond PVC Cabinets and Closets" and accents/apostrophes don't split them.
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
 
 export function diffImportableBrands(brands: BrandLike[], clients: ClientLike[]): BrandLike[] {
   const linkedIds = new Set(

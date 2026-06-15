@@ -31,8 +31,17 @@ export async function getImportableMetricoolBrands(): Promise<{ brands?: BrandLi
   const supabase = await createClient()
   const { data: clients } = await supabase.from('clients').select('name, metricool_blog_id')
 
+  // Metricool brands expose the display name as `label` (not `name`); skip
+  // deleted/demo brands.
+  const mapped = (profiles ?? [])
+    .filter((p) => !(p as Record<string, unknown>).deleted && !(p as Record<string, unknown>).isDemo)
+    .map((p) => {
+      const r = p as Record<string, unknown>
+      return { id: String(p.id), name: String(r.label ?? r.title ?? p.name ?? '').trim() }
+    })
+
   const brands = diffImportableBrands(
-    (profiles ?? []).map((p) => ({ id: String(p.id), name: p.name, provider: p.provider })),
+    mapped,
     (clients ?? []) as { name: string; metricool_blog_id: string | null }[],
   )
   return { brands }

@@ -38,4 +38,17 @@ describe('diffImportableBrands', () => {
     const out = diffImportableBrands([{ id: '1', name: 'Zeta' }, { id: '2', name: 'Alfa' }], [])
     expect(out.map((b) => b.name)).toEqual(['Alfa', 'Zeta'])
   })
+
+  it('matches names loosely (& vs and, accents, punctuation) to avoid duplicates', () => {
+    const existing = [{ name: 'Beyond PVC Cabinets and Closets', metricool_blog_id: null }, { name: 'La Güira', metricool_blog_id: null }]
+    const out = diffImportableBrands(
+      [
+        { id: '1', name: 'Beyond PVC Cabinets & Closets' }, // & ~ and → existing
+        { id: '2', name: 'La Guira' }, // accent → existing
+        { id: '3', name: 'Brand Nuevo' }, // genuinely new
+      ],
+      existing,
+    )
+    expect(out.map((b) => b.name)).toEqual(['Brand Nuevo'])
+  })
 })
