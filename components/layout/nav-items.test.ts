@@ -7,6 +7,23 @@ import { navItems, visibleNavItems } from './nav-items'
  * the role satisfies it. Owner ('*') sees everything; a null role (logged out)
  * sees only the ungated items.
  */
+describe('navItems source', () => {
+  it('excludes deep-link (nav:false) areas like /inbox and /alerts', () => {
+    const hrefs = navItems.map((n) => n.href)
+    expect(hrefs).not.toContain('/inbox')
+    expect(hrefs).not.toContain('/alerts')
+    expect(hrefs).not.toContain('/operations')
+    expect(hrefs).not.toContain('/planning')
+  })
+
+  it('includes /home and the regular nav areas', () => {
+    const hrefs = navItems.map((n) => n.href)
+    expect(hrefs).toContain('/home')
+    expect(hrefs).toContain('/clients')
+    expect(hrefs).toContain('/settings/users')
+  })
+})
+
 describe('visibleNavItems', () => {
   it('owner sees every nav item', () => {
     expect(visibleNavItems('owner')).toHaveLength(navItems.length)

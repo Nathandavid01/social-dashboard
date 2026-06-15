@@ -19,6 +19,9 @@ export interface Area {
   label: string
   /** Role permission that the area maps to (its "read" gate). */
   permission?: Permission
+  /** Show in the sidebar nav. Defaults to true; false = gated/manageable but
+   * reached only via deep links (e.g. /inbox, /alerts), not the sidebar. */
+  nav?: boolean
 }
 
 /** Restricted areas. `/home` is intentionally excluded — it's the mandatory landing. */
@@ -42,6 +45,13 @@ export const AREAS: Area[] = [
   { href: '/automation',         label: 'Automatización',  permission: 'automation.read' },
   { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles' },
   { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit' },
+  // Reached via deep links (notifications, home cards, command palette), not the
+  // sidebar — gated and manageable all the same. No permission = open by role
+  // default (preserves their current ungated behavior); restrictable per-user.
+  { href: '/inbox',              label: 'Bandeja',         nav: false },
+  { href: '/alerts',             label: 'Alertas',         nav: false },
+  { href: '/operations',         label: 'Operaciones',     nav: false },
+  { href: '/planning',           label: 'Planificación',   nav: false },
 ]
 
 /** Prefixes every authenticated user can always reach, never restrictable. */
@@ -104,4 +114,15 @@ export function areaGrantsPermission(
   if (areaAccess == null) return false
   const reachable = effectiveAreaHrefs(role, areaAccess)
   return AREAS.some((a) => a.permission === perm && reachable.has(a.href))
+}
+
+/**
+ * Drop any stored hrefs that no longer match a registered area (e.g. a feature
+ * that was deleted) and de-duplicate, so removed features fall out of a user's
+ * grant automatically. `null` (no restriction) is preserved as-is.
+ */
+export function normalizeAreaAccess(areaAccess: string[] | null | undefined): string[] | null {
+  if (areaAccess == null) return null
+  const valid = new Set(AREAS.map((a) => a.href))
+  return Array.from(new Set(areaAccess.filter((h) => valid.has(h))))
 }

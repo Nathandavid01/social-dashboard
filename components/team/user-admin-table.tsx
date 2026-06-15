@@ -96,6 +96,7 @@ function UserRow({ user, isSelf }: { user: Profile; isSelf: boolean }) {
           userId={user.id}
           userName={user.full_name ?? user.email}
           currentAccess={user.area_access ?? null}
+          role={user.role}
         />
         <Button
           size="sm"

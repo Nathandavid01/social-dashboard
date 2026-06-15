@@ -60,7 +60,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
 
 export const navItems: NavItem[] = [
   { href: '/home', label: 'Inicio', icon: Home },
-  ...AREAS.map((a) => ({
+  ...AREAS.filter((a) => a.nav !== false).map((a) => ({
     href: a.href,
     label: a.label,
     icon: ICON_BY_HREF[a.href] ?? Home,

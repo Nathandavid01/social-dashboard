@@ -14,26 +14,36 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/lib/hooks/use-toast'
 import { setUserAreaAccess } from '@/lib/actions/users'
-import { AREAS } from '@/lib/auth/areas'
+import { AREAS, effectiveAreaHrefs, normalizeAreaAccess } from '@/lib/auth/areas'
 import { cn } from '@/lib/utils'
+import type { UserRole } from '@/lib/supabase/types'
 
 export function AreaAccessDialog({
   userId,
   userName,
   currentAccess,
+  role,
 }: {
   userId: string
   userName: string
   /** null = no restriction (role defaults). Array = explicit allowed area hrefs. */
   currentAccess: string[] | null
+  /** The user's role — used to pre-fill the checklist with what they can reach today. */
+  role: UserRole | null
 }) {
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [restricted, setRestricted] = useState(currentAccess !== null)
-  const [selected, setSelected] = useState<Set<string>>(new Set(currentAccess ?? []))
 
-  const isRestricted = currentAccess !== null
+  const normalized = normalizeAreaAccess(currentAccess)
+  const isRestricted = normalized !== null
+  // Pre-fill with what the user can reach today: their stored grant when
+  // restricted, or their current role-based areas when unrestricted — so the
+  // admin adjusts from the real starting point ("los permisos que tengo ahora").
+  const baseline = normalized ?? Array.from(effectiveAreaHrefs(role, null))
+
+  const [restricted, setRestricted] = useState(isRestricted)
+  const [selected, setSelected] = useState<Set<string>>(new Set(baseline))
 
   function toggle(href: string) {
     setSelected((prev) => {
@@ -72,7 +82,7 @@ export function AreaAccessDialog({
           title="Configurar áreas a las que puede acceder"
         >
           <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />
-          {isRestricted ? `Áreas (${currentAccess!.length})` : 'Áreas'}
+          {isRestricted ? `Áreas (${normalized!.length})` : 'Áreas'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">

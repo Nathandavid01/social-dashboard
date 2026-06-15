@@ -6,6 +6,7 @@ import {
   effectiveAreaHrefs,
   canAccessPath,
   areaGrantsPermission,
+  normalizeAreaAccess,
 } from './areas'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -94,6 +95,40 @@ describe('canAccessPath', () => {
 
   it('allows unknown routes (api/detail not mapped to an area)', () => {
     expect(canAccessPath('/some/api/thing', role, [])).toBe(true)
+  })
+})
+
+describe('normalizeAreaAccess', () => {
+  it('keeps null (no restriction) as null', () => {
+    expect(normalizeAreaAccess(null)).toBeNull()
+    expect(normalizeAreaAccess(undefined)).toBeNull()
+  })
+
+  it('drops hrefs that no longer match a registered area (deleted features)', () => {
+    expect(normalizeAreaAccess(['/clients', '/deleted-feature', '/team'])).toEqual(['/clients', '/team'])
+  })
+
+  it('de-duplicates', () => {
+    expect(normalizeAreaAccess(['/clients', '/clients'])).toEqual(['/clients'])
+  })
+
+  it('a grant of only-removed areas collapses to an empty list', () => {
+    expect(normalizeAreaAccess(['/old-a', '/old-b'])).toEqual([])
+  })
+})
+
+describe('deep-link areas are gated but hidden from nav', () => {
+  it('registers /inbox, /alerts, /operations, /planning as areas with nav:false', () => {
+    for (const href of ['/inbox', '/alerts', '/operations', '/planning']) {
+      const area = AREAS.find((a) => a.href === href)
+      expect(area, `${href} should be a registered area`).toBeDefined()
+      expect(area!.nav).toBe(false)
+    }
+  })
+
+  it('still enforces them: a restricted user without the grant is blocked', () => {
+    expect(canAccessPath('/inbox', 'editor', ['/clients'])).toBe(false)
+    expect(canAccessPath('/inbox', 'editor', ['/inbox'])).toBe(true)
   })
 })
 
