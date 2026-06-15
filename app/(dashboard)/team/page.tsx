@@ -3,7 +3,9 @@ import { requirePermission } from '@/lib/auth/server'
 import { RoleGate } from '@/components/auth/role-gate'
 import { TeamOverview } from '@/components/team/team-overview'
 import { UserAdminTable } from '@/components/team/user-admin-table'
+import { PendingApprovals } from '@/components/team/pending-approvals'
 import { getVideoUploadMetricsByUser } from '@/lib/actions/video-uploads'
+import { getPendingApprovals } from '@/lib/actions/approvals'
 import type { Task, Profile } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +17,7 @@ export default async function TeamPage() {
 
   const nowIso = new Date().toISOString()
 
-  const [{ data: profiles }, { data: allTasks }, uploadMetrics] = await Promise.all([
+  const [{ data: profiles }, { data: allTasks }, uploadMetrics, pendingApprovals] = await Promise.all([
     supabase.from('profiles').select('id, full_name, email, role, status, title, avatar_url').order('full_name'),
     supabase
       .from('tasks')
@@ -25,6 +27,7 @@ export default async function TeamPage() {
       .order('priority', { ascending: true })
       .order('due_at', { ascending: true }),
     getVideoUploadMetricsByUser(),
+    getPendingApprovals(),
   ])
 
   // Build per-member task lists
@@ -53,6 +56,7 @@ export default async function TeamPage() {
   return (
     <div className="space-y-6">
       <RoleGate perm="team.assign_roles">
+        {pendingApprovals.length > 0 && <PendingApprovals pending={pendingApprovals} />}
         <UserAdminTable users={(profiles ?? []) as Profile[]} currentUserId={user?.id ?? ''} />
       </RoleGate>
       <TeamOverview

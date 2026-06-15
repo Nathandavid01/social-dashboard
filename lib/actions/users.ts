@@ -49,9 +49,16 @@ export async function createTeamUser(input: {
 
   // The handle_new_user trigger inserts the profile with the default role; set
   // the chosen role + name with the admin client (RLS-free, just-created row).
+  // Owner-created users skip the approval queue — the owner vouches for them.
   const { error: updErr } = await admin
     .from('profiles')
-    .update({ role: input.role, full_name: fullName, status: 'active', updated_at: new Date().toISOString() })
+    .update({
+      role: input.role,
+      full_name: fullName,
+      status: 'active',
+      approval_status: 'approved',
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', userId)
   if (updErr) return { error: updErr.message }
 

@@ -1,5 +1,6 @@
 export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'team_member'
 export type UserStatus = 'active' | 'inactive'
+export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type ClientStatus = 'active' | 'paused' | 'onboarding'
 export type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
@@ -19,6 +20,7 @@ export interface Profile {
   avatar_url: string | null
   role: UserRole
   status: UserStatus
+  approval_status: UserApprovalStatus
   title: string | null
   nav_preferences?: NavPreferences
   created_at: string
