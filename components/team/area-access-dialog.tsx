@@ -54,6 +54,16 @@ export function AreaAccessDialog({
     })
   }
 
+  // Always (re)start from the current saved state when the dialog opens, so a
+  // previous cancel or an external change doesn't leave stale selections.
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      setRestricted(isRestricted)
+      setSelected(new Set(baseline))
+    }
+    setOpen(next)
+  }
+
   function save() {
     startTransition(async () => {
       const value = restricted ? Array.from(selected) : null
@@ -73,7 +83,7 @@ export function AreaAccessDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           size="sm"

@@ -137,12 +137,19 @@ export async function setUserAreaAccess(userId: string, hrefs: string[] | null):
   }
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({ area_access: value, updated_at: new Date().toISOString() })
     .eq('id', userId)
+    .select('id')
   if (error) return { error: error.message }
+  // RLS can silently filter the row (0 updated, no error) if the caller lacks
+  // permission — surface that instead of pretending it saved.
+  if (!data || data.length === 0) {
+    return { error: 'No se pudo guardar el acceso (sin permiso para editar este usuario).' }
+  }
 
+  revalidatePath('/settings/users')
   revalidatePath('/team')
   revalidatePath('/', 'layout')
   return { ok: true }
