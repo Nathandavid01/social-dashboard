@@ -40,7 +40,7 @@ export function ProduccionClient({ schedules, tasks, reviewTasks, myTasks, profi
 
   const tabs: { id: Tab; label: string; badge?: number }[] = [
     { id: 'calendario', label: 'Calendario' },
-    { id: 'master', label: 'Calendario Master' },
+    { id: 'master', label: 'Cadencia' },
     { id: 'asignaciones', label: 'Asignaciones' },
     {
       id: 'mi_lista',
@@ -168,7 +168,7 @@ export function ProduccionClient({ schedules, tasks, reviewTasks, myTasks, profi
       )}
 
       {tab === 'master' && (
-        <MasterScheduleView />
+        <MasterScheduleView schedules={schedules} />
       )}
 
       {tab === 'asignaciones' && (

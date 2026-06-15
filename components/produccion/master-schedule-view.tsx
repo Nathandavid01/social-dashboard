@@ -1,158 +1,133 @@
 'use client'
 
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import type { ProductionSchedule, ProductionContentType } from '@/lib/supabase/types'
 
-// Master production schedule extracted from PDF
-// R = Recording (Grabación), P = Production/Editing
-// day_of_week: 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
-type DayEntry = { day: number; type: 'R' | 'P' }
+// Live weekly production cadence, grouped per client from production_schedules.
+// R = Reel, P = Post (the content_type bound to each client per day of week).
+const DAYS = [
+  { num: 1, short: 'Lun' },
+  { num: 2, short: 'Mar' },
+  { num: 3, short: 'Mié' },
+  { num: 4, short: 'Jue' },
+  { num: 5, short: 'Vie' },
+  { num: 6, short: 'Sáb' },
+  { num: 7, short: 'Dom' },
+]
 
-interface ClientSchedule {
+interface ClientRow {
+  clientId: string
   name: string
-  days: DayEntry[]
+  days: Map<number, ProductionContentType[]>
+  total: number
 }
 
-const MASTER_SCHEDULE: ClientSchedule[] = [
-  { name: 'Arasibo Steakhouse', days: [{ day: 2, type: 'R' }, { day: 4, type: 'R' }, { day: 6, type: 'R' }] },
-  { name: 'Arte Digital', days: [{ day: 1, type: 'P' }, { day: 2, type: 'R' }, { day: 3, type: 'P' }, { day: 4, type: 'R' }, { day: 5, type: 'P' }, { day: 6, type: 'R' }] },
-  { name: 'Auto Ksero', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }, { day: 6, type: 'P' }] },
-  { name: 'Beyond PVC', days: [{ day: 2, type: 'R' }, { day: 3, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Buena Vida', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Casita Vieja', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Codepola', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Comida', days: [{ day: 2, type: 'P' }, { day: 4, type: 'P' }, { day: 6, type: 'P' }] },
-  { name: 'Dorado Del Mar Club', days: [{ day: 2, type: 'R' }, { day: 4, type: 'R' }] },
-  { name: "Dorta's Pizza", days: [{ day: 2, type: 'R' }, { day: 5, type: 'R' }, { day: 6, type: 'P' }] },
-  { name: 'Dr. Rodríguez', days: [{ day: 1, type: 'R' }, { day: 3, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'El Capi', days: [{ day: 2, type: 'R' }, { day: 4, type: 'R' }, { day: 6, type: 'R' }] },
-  { name: 'El Cuarto Bate', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Go Kart', days: [{ day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'La Gira', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'La Rambla Tapas y Vino', days: [{ day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Long y Cerrajero', days: [{ day: 2, type: 'R' }] },
-  { name: 'Lucky Pet', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Lumavi', days: [{ day: 1, type: 'R' }, { day: 2, type: 'R' }, { day: 3, type: 'R' }, { day: 4, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Mia Pizzería', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: "Nana's", days: [{ day: 1, type: 'P' }, { day: 3, type: 'R' }, { day: 6, type: 'R' }] },
-  { name: 'New York', days: [{ day: 3, type: 'R' }, { day: 6, type: 'R' }] },
-  { name: 'Personal Truco', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Predator Gaming Center', days: [{ day: 2, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Pro y Amilia', days: [{ day: 1, type: 'R' }, { day: 2, type: 'P' }, { day: 3, type: 'R' }, { day: 4, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Quantika', days: [{ day: 2, type: 'R' }, { day: 4, type: 'P' }, { day: 6, type: 'R' }] },
-  { name: 'Restaurco', days: [{ day: 1, type: 'R' }, { day: 2, type: 'R' }, { day: 4, type: 'R' }, { day: 5, type: 'R' }] },
-  { name: 'Rotonda', days: [{ day: 2, type: 'R' }, { day: 3, type: 'P' }, { day: 4, type: 'R' }, { day: 5, type: 'P' }, { day: 6, type: 'R' }] },
-  { name: 'Sanguit', days: [{ day: 2, type: 'R' }, { day: 4, type: 'R' }, { day: 6, type: 'P' }] },
-  { name: 'Shooters', days: [{ day: 2, type: 'R' }, { day: 4, type: 'R' }] },
-  { name: 'Speedy Net', days: [{ day: 1, type: 'R' }, { day: 3, type: 'P' }, { day: 5, type: 'R' }] },
-  { name: 'Tierra Nueva', days: [{ day: 4, type: 'R' }] },
-  { name: 'Titorios', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 4, type: 'R' }] },
-  { name: 'VID Bonilla Seguros', days: [{ day: 2, type: 'R' }, { day: 3, type: 'P' }, { day: 4, type: 'R' }] },
-  { name: 'VSS Properties', days: [{ day: 2, type: 'R' }, { day: 6, type: 'R' }] },
-  { name: 'Windmar', days: [{ day: 1, type: 'R' }, { day: 3, type: 'R' }, { day: 5, type: 'R' }] },
-]
-
-const DAYS = [
-  { num: 1, short: 'Lun', full: 'Lunes' },
-  { num: 2, short: 'Mar', full: 'Martes' },
-  { num: 3, short: 'Mié', full: 'Miércoles' },
-  { num: 4, short: 'Jue', full: 'Jueves' },
-  { num: 5, short: 'Vie', full: 'Viernes' },
-  { num: 6, short: 'Sáb', full: 'Sábado' },
-]
-
-export function MasterScheduleView() {
-  // Count entries per day for the footer
-  const dailyTotals = DAYS.map(d =>
-    MASTER_SCHEDULE.reduce((sum, c) => sum + c.days.filter(e => e.day === d.num).length, 0)
+function Pill({ type }: { type: ProductionContentType }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-bold leading-none',
+        type === 'R'
+          ? 'bg-indigo-600 text-white'
+          : 'bg-amber-500 text-zinc-900',
+      )}
+    >
+      {type}
+    </span>
   )
+}
 
-  const totalR = MASTER_SCHEDULE.reduce((sum, c) => sum + c.days.filter(e => e.type === 'R').length, 0)
-  const totalP = MASTER_SCHEDULE.reduce((sum, c) => sum + c.days.filter(e => e.type === 'P').length, 0)
+export function MasterScheduleView({ schedules }: { schedules: ProductionSchedule[] }) {
+  const rows = useMemo<ClientRow[]>(() => {
+    const byClient = new Map<string, ClientRow>()
+    for (const s of schedules) {
+      const name = s.client?.name ?? 'Sin nombre'
+      let row = byClient.get(s.client_id)
+      if (!row) {
+        row = { clientId: s.client_id, name, days: new Map(), total: 0 }
+        byClient.set(s.client_id, row)
+      }
+      const list = row.days.get(s.day_of_week) ?? []
+      list.push(s.content_type)
+      row.days.set(s.day_of_week, list)
+      row.total += 1
+    }
+    return Array.from(byClient.values()).sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  }, [schedules])
+
+  const totalR = schedules.filter((s) => s.content_type === 'R').length
+  const totalP = schedules.filter((s) => s.content_type === 'P').length
+
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+        Sin cadencia configurada. Usa <span className="font-medium text-foreground">Horarios</span> para asignar
+        los días y tipos (R/P) de cada cliente.
+      </div>
+    )
+  }
+
+  const cols = 'grid grid-cols-[190px_repeat(7,1fr)_64px]'
 
   return (
     <div className="space-y-4">
-      {/* Legend + summary */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-        <span><span className="font-semibold text-foreground">{MASTER_SCHEDULE.length}</span> clientes</span>
-        <span><span className="font-semibold text-foreground">{totalR}</span> sesiones de grabación / semana</span>
-        <span><span className="font-semibold text-foreground">{totalP}</span> sesiones de producción / semana</span>
-        <div className="flex items-center gap-3 ml-auto">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-7 h-4 rounded-sm bg-yellow-100 border border-yellow-300 text-[9px] font-bold text-yellow-800 flex items-center justify-center leading-none text-center">R</span>
-            Grabación
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-7 h-4 rounded-sm bg-zinc-900 border border-zinc-700 text-[9px] font-bold text-yellow-300 flex items-center justify-center leading-none text-center">P</span>
-            Producción
-          </span>
+      {/* Summary + legend */}
+      <div data-testid="summary" className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+        <span><span className="font-semibold text-foreground">{rows.length}</span> clientes</span>
+        <span><span className="font-semibold text-foreground">{totalR}</span> reels / semana</span>
+        <span><span className="font-semibold text-foreground">{totalP}</span> posts / semana</span>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="flex items-center gap-1.5"><Pill type="R" /> Reel</span>
+          <span className="flex items-center gap-1.5"><Pill type="P" /> Post</span>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="rounded-xl border border-border overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-border">
         {/* Header */}
-        <div className="grid grid-cols-[180px_repeat(6,1fr)] bg-muted/50 border-b border-border min-w-[640px]">
-          <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Cliente
-          </div>
-          {DAYS.map(d => (
-            <div key={d.num} className="px-2 py-2 text-center border-l border-border">
-              <div className="text-xs font-semibold text-muted-foreground">{d.short}</div>
+        <div className={cn(cols, 'min-w-[760px] border-b border-border bg-muted/50')}>
+          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cliente</div>
+          {DAYS.map((d) => (
+            <div key={d.num} className="border-l border-border px-2 py-2 text-center text-xs font-semibold text-muted-foreground">
+              {d.short}
             </div>
           ))}
+          <div className="border-l border-border px-2 py-2 text-center text-xs font-semibold text-muted-foreground">Total</div>
         </div>
 
-        {/* Client rows */}
-        {MASTER_SCHEDULE.map((client, idx) => {
-          const dayMap = new Map(client.days.map(e => [e.day, e.type]))
-          return (
-            <div
-              key={client.name}
-              className={cn(
-                'grid grid-cols-[180px_repeat(6,1fr)] border-b border-border last:border-b-0 min-w-[640px]',
-                idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'
-              )}
-            >
-              <div className="px-3 py-2 flex items-center">
-                <span className="text-xs font-medium text-foreground truncate">{client.name}</span>
-              </div>
-              {DAYS.map(d => {
-                const type = dayMap.get(d.num)
-                return (
-                  <div key={d.num} className="border-l border-border px-1.5 py-1.5 flex items-center justify-center min-h-[40px]">
-                    {type && (
-                      <span className={cn(
-                        'rounded-md px-2 py-0.5 text-[11px] font-bold leading-tight',
-                        type === 'R'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
-                          : 'bg-zinc-900 text-yellow-300 dark:bg-zinc-700'
-                      )}>
-                        {type}
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
+        {/* Rows */}
+        {rows.map((row, idx) => (
+          <div
+            key={row.clientId}
+            data-row
+            className={cn(cols, 'min-w-[760px] border-b border-border last:border-b-0', idx % 2 === 0 ? 'bg-background' : 'bg-muted/10')}
+          >
+            <div className="flex items-center px-3 py-2">
+              <span className="truncate text-xs font-medium text-foreground">{row.name}</span>
             </div>
-          )
-        })}
-      </div>
-
-      {/* Footer totals */}
-      <div className="grid grid-cols-[180px_repeat(6,1fr)] rounded-lg border border-border overflow-hidden text-xs min-w-[640px]">
-        <div className="bg-muted/50 px-3 py-2 font-semibold text-muted-foreground">Total diario</div>
-        {dailyTotals.map((total, i) => (
-          <div key={i} className={cn(
-            'border-l border-border px-2 py-2 text-center font-semibold',
-            total > 0 ? 'bg-primary/5 text-primary' : 'bg-muted/30 text-muted-foreground'
-          )}>
-            {total || '—'}
+            {DAYS.map((d) => (
+              <div
+                key={d.num}
+                data-testid={`cell-${d.num}`}
+                className="flex min-h-[38px] items-center justify-center gap-1 border-l border-border px-1.5 py-1.5"
+              >
+                {(row.days.get(d.num) ?? []).map((t, i) => (
+                  <Pill key={i} type={t} />
+                ))}
+              </div>
+            ))}
+            <div
+              data-testid="total"
+              className="flex items-center justify-center border-l border-border px-2 py-1.5 text-xs font-bold text-foreground"
+            >
+              {row.total}
+            </div>
           </div>
         ))}
       </div>
 
       <p className="text-[11px] text-muted-foreground">
-        Horario fijo semanal · <span className="font-medium">R</span> = Grabación · <span className="font-medium">P</span> = Producción/Edición
+        Cadencia semanal fija por cliente · <span className="font-medium">R</span> = Reel · <span className="font-medium">P</span> = Post
       </p>
     </div>
   )
