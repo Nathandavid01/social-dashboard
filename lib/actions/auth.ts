@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { notifyOwnersOfSignup } from '@/lib/actions/approvals'
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
@@ -23,37 +22,47 @@ export async function signIn(formData: FormData) {
   redirect('/pipeline')
 }
 
-export async function signUp(formData: FormData) {
+/**
+ * Public self-registration is disabled. Accounts are created only from inside
+ * the app by an admin (Equipo → Crear usuario, see lib/actions/users.ts). This
+ * stub stays so nothing imports a missing symbol, but it never creates a user.
+ */
+export async function signUp(_formData: FormData) {
+  return { error: 'El registro está deshabilitado. Pide a un administrador que cree tu cuenta.' }
+}
+
+/**
+ * Self-service password change for a logged-in user. Re-verifies the current
+ * password (via a sign-in check) before updating — no email required, so it
+ * works for admin-created users replacing their temporary password. Validation
+ * mirrors validatePasswordChange (lib/utils/password-core.ts).
+ */
+export async function updatePassword(input: {
+  current: string
+  next: string
+  confirm: string
+}): Promise<{ ok?: true; error?: string }> {
+  const { validatePasswordChange } = await import('@/lib/utils/password-core')
+  const valid = validatePasswordChange(input)
+  if (!valid.ok) return { error: valid.error }
+
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user?.email) return { error: 'No autenticado.' }
 
-  const fullName = formData.get('full_name') as string
-  const email = formData.get('email') as string
+  // Confirm identity by re-checking the current password.
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: input.current,
+  })
+  if (signInError) return { error: 'La contraseña actual es incorrecta.' }
 
-  const data = {
-    email,
-    password: formData.get('password') as string,
-    options: {
-      data: {
-        full_name: fullName,
-      },
-    },
-  }
+  const { error } = await supabase.auth.updateUser({ password: input.next })
+  if (error) return { error: error.message }
 
-  const { data: signUpData, error } = await supabase.auth.signUp(data)
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  // New self-signups land as 'pending' (see the handle_new_user trigger) and
-  // must be approved by an owner before they can enter the dashboard. Let the
-  // owners know there's someone to review.
-  if (signUpData.user) {
-    await notifyOwnersOfSignup({ id: signUpData.user.id, fullName, email }).catch(() => {})
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/pending')
+  return { ok: true }
 }
 
 export async function signOut() {

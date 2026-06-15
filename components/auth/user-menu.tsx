@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
-import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles } from 'lucide-react'
+import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -131,6 +131,12 @@ export function UserMenu() {
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/account/security">
+            <KeyRound className="mr-2 h-4 w-4" />
+            Cambiar contraseña
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/settings/metricool">
             <Activity className="mr-2 h-4 w-4" />

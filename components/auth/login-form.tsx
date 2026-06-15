@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useFormStatus } from 'react-dom'
-import Link from 'next/link'
 import { signIn } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,12 +48,6 @@ export function LoginForm() {
             <Input id="password" name="password" type="password" required />
           </div>
           <SubmitButton />
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-primary hover:underline font-medium">
-              Sign up
-            </Link>
-          </p>
         </form>
       </CardContent>
     </Card>
