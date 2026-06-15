@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CalendarClock, Clock } from 'lucide-react'
+import { CalendarClock, Clock, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Client } from '@/lib/supabase/types'
+import { createClient } from '@/lib/supabase/server'
+import { CadenceEditor } from '@/components/produccion/cadence-editor'
+import type { Client, ProductionContentType } from '@/lib/supabase/types'
 import { getClientPostedDates } from '@/lib/utils/client-posted-dates'
 import {
   computeScheduleSlots,
@@ -33,6 +35,13 @@ function fmtDate(iso: string): string {
 
 export async function ScheduleTab({ client }: { client: Client }) {
   const postingDays = client.posting_days ?? []
+
+  const supabase = await createClient()
+  const { data: cadenceRows } = await supabase
+    .from('production_schedules')
+    .select('day_of_week, content_type')
+    .eq('client_id', client.id)
+  const cadence = (cadenceRows ?? []) as { day_of_week: number; content_type: ProductionContentType }[]
 
   const ref = new Date()
   const monthStart = new Date(ref.getFullYear(), ref.getMonth(), 1)
@@ -71,7 +80,24 @@ export async function ScheduleTab({ client }: { client: Client }) {
   ].filter((g) => g.slots.length > 0)
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CalendarDays className="h-4 w-4" /> Cadencia de producción
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Días que este cliente debe postear y el tipo de cada día —{' '}
+            <span className="font-medium text-indigo-600">R = Reel</span> ·{' '}
+            <span className="font-medium text-amber-600">P = Post</span>.
+          </p>
+          <CadenceEditor clientId={client.id} initialSchedules={cadence} />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardHeader className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pb-3">
           <CardTitle className="flex min-w-0 items-center gap-2 text-base">
@@ -145,6 +171,7 @@ export async function ScheduleTab({ client }: { client: Client }) {
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
