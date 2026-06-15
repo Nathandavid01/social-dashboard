@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { navItems } from './nav-items'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu, Zap } from 'lucide-react'
 import { useAuth } from '@/lib/context/auth-context'
@@ -33,7 +33,8 @@ export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCoun
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="flex w-60 flex-col p-0">
+      <SheetContent side="left" aria-describedby={undefined} className="flex w-60 flex-col p-0">
+        <SheetTitle className="sr-only">Navegación</SheetTitle>
         <div className="flex shrink-0 items-center gap-2 px-6 py-5 border-b border-border">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Zap className="h-4 w-4 text-primary-foreground" />
