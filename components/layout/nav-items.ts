@@ -18,6 +18,7 @@ import {
   Rocket,
   Lightbulb,
   Settings,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -53,6 +54,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/published': Globe,
   '/schedule-check': ClipboardCheck,
   '/automation': Zap,
+  '/settings/users': UserCog,
   '/settings/workflow': Settings,
 }
 
