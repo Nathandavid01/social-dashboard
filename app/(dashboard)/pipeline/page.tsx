@@ -5,6 +5,7 @@ import { computePostingTargets } from '@/lib/utils/posting-cadence'
 import { resolveInterval } from '@/lib/utils/recording-window'
 import { planSessions, shouldPlanForClient } from '@/lib/utils/planned-sessions'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
+import { MetricoolAutoSync } from '@/components/pipeline/metricool-auto-sync'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +21,12 @@ export default async function PipelinePage() {
 
   const plannedClients = await buildPlannedClients(ideas)
 
-  return <ContentPipelineBoard ideas={ideas} plannedClients={plannedClients} />
+  return (
+    <>
+      <MetricoolAutoSync />
+      <ContentPipelineBoard ideas={ideas} plannedClients={plannedClients} />
+    </>
+  )
 }
 
 /**
