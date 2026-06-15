@@ -6,8 +6,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v2.35 — 2026-06-14
 
-- **Registro público deshabilitado:** ya no cualquiera puede crear su cuenta desde la pantalla de registro. Las cuentas nuevas las crea un administrador en **Equipo → Usuarios y permisos** (botón "Crear usuario", con rol/permisos), controlando quién entra.
-- **Cambio de contraseña self-service:** cada usuario puede cambiar su propia contraseña desde su cuenta, sin depender de un administrador.
+- **Registro público deshabilitado:** ya no cualquiera puede crear su cuenta desde la pantalla de inicio de sesión. Las cuentas nuevas las crea un administrador **desde adentro de la app**, controlando quién entra.
+- **Gestión de usuarios en Configuración → Usuarios:** un solo lugar (solo administradores) para crear cuentas, asignar rol (Owner/Supervisor/Editor/Videógrafo) y controlar permisos. **Equipo** queda como vista del equipo con un enlace a este panel.
+- **Permisos por área por usuario:** el administrador define a qué secciones de la app puede entrar cada persona, independientemente de su rol. Las áreas no permitidas se ocultan del menú **y** se bloquean por URL (si la escriben a mano, se les redirige a Inicio). El Owner nunca queda bloqueado.
+- **Aprobación de cuentas:** infraestructura para que cuentas nuevas queden "pendientes" hasta que un Owner las apruebe con un rol (queda lista por si se reactiva el auto-registro).
+- **Cambio de contraseña self-service:** cada usuario cambia su propia contraseña desde **menú de usuario → Cambiar contraseña**, sin depender de un administrador ni de correos.
 
 ## v2.34 — 2026-06-14
 
