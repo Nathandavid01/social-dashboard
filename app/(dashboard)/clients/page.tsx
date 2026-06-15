@@ -5,6 +5,8 @@ import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Users } from 'lucide-react'
+import { RoleGate } from '@/components/auth/role-gate'
+import { ImportMetricoolButton } from '@/components/clients/import-metricool-button'
 
 export default async function ClientsPage() {
   const clients = await getClients()
@@ -17,12 +19,17 @@ export default async function ClientsPage() {
         title="Clients"
         description={`${clients.length} client${clients.length !== 1 ? 's' : ''} total`}
         action={
-          <Button asChild>
-            <Link href="/clients/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Client
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <RoleGate perm="clients.create">
+              <ImportMetricoolButton />
+            </RoleGate>
+            <Button asChild>
+              <Link href="/clients/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Client
+              </Link>
+            </Button>
+          </div>
         }
       />
 
