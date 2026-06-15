@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.38 — 2026-06-15
+
+- **Cadencia semanal por cliente, en vivo:** la pestaña **Producción → Cadencia** ahora muestra la parrilla real de cada cliente (clientes × días, con píldoras **R = Reel** y **P = Post** y un **Total** semanal), leída directo de la base de datos en vez de una lista fija desactualizada. Se cargó la cadencia actual de **36 clientes** (114 publicaciones/semana), así que cada cliente ya tiene su frecuencia atada. Edítala desde el botón **Horarios**.
+
 ## v2.37 — 2026-06-14
 
 - **Arreglo: las áreas/permisos de usuario ahora SÍ se guardan.** La base de datos había perdido la regla de seguridad que permite al administrador editar el perfil de **otros** usuarios, así que al asignar áreas (o cambiar rol/estado) parecía guardarse pero no cambiaba nada. Restaurada la regla; ahora el administrador puede definir a qué secciones entra cada persona y se persiste correctamente. Además, si alguna vez una edición no tiene permiso, ahora se avisa con un error claro en vez de fingir que se guardó.
