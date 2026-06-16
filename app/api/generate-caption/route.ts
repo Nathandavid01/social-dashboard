@@ -1,15 +1,13 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
-
-const CAPTION_MODEL = 'claude-sonnet-4-6'
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { generateCaptionText, captionConfigError, captionModelId } from '@/lib/llm/caption-llm'
 
 export async function POST(req: NextRequest) {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY is not configured on the server' }, { status: 500 })
+    const configError = captionConfigError(process.env)
+    if (configError) {
+      return NextResponse.json({ error: configError }, { status: 500 })
     }
 
     const {
@@ -75,13 +73,7 @@ RULES:
 - Do NOT include any explanation, title, or label — output ONLY the caption text itself
 - Do NOT add "[Caption]" or "Here is your caption:" — just the raw caption`
 
-    const message = await anthropic.messages.create({
-      model: CAPTION_MODEL,
-      max_tokens: 1200,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const caption = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
+    const caption = await generateCaptionText(prompt, { maxTokens: 1200 })
 
     // Persist to saved_captions (best effort — don't fail the request if it errors)
     if (caption) {
@@ -96,7 +88,7 @@ RULES:
           platform: platform ?? null,
           caption,
           examples_used: examples.length,
-          model: CAPTION_MODEL,
+          model: captionModelId(process.env),
         })
       } catch (err) {
         console.warn('[generate-caption] persist failed (non-fatal):', err instanceof Error ? err.message : err)

@@ -1,11 +1,9 @@
 'use server'
 
-import Anthropic from '@anthropic-ai/sdk'
 import { createDraftPost } from '@/lib/metricool/post'
 import { createClient } from '@/lib/supabase/server'
 import type { Client, VideoReview } from '@/lib/supabase/types'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { generateCaptionText, captionModelId } from '@/lib/llm/caption-llm'
 
 export interface ProcessResult {
   success: boolean
@@ -39,7 +37,7 @@ async function fetchMetricoolExamples(metricoolBlogId?: string | null): Promise<
   }
 }
 
-// ── Generate caption with Claude ─────────────────────────────────────────────
+// ── Generate caption (provider chosen by CAPTION_PROVIDER) ───────────────────
 
 async function generateCaption(
   title: string,
@@ -78,13 +76,7 @@ RULES:
 - Include: hook that grabs attention, body that adds value, clear call to action, hashtags
 - Do NOT include any explanation, title, or label — output ONLY the caption text itself`
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1200,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  return message.content[0].type === 'text' ? message.content[0].text.trim() : ''
+  return generateCaptionText(prompt, { maxTokens: 1200 })
 }
 
 // ── Process a video review → generate caption → save + Metricool draft ───────
@@ -120,7 +112,7 @@ export async function processVideoReview(videoReviewId: string): Promise<Process
       video_title: videoReview.title,
       caption,
       examples_used: examples.length,
-      model: 'claude-sonnet-4-6',
+      model: captionModelId(process.env),
       generated_by: user?.id ?? null,
     })
 
