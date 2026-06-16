@@ -48,6 +48,8 @@ export async function generateCaptionText(
     const detail = await res.text().catch(() => '')
     throw new Error(`Grok API ${res.status}: ${detail.slice(0, 300)}`)
   }
-  const json = await res.json()
+  // Guard against a 200 with a non-JSON body (proxy/edge HTML error page):
+  // parseGrokResponse(null) → '' → caller surfaces "La IA no devolvió caption".
+  const json = await res.json().catch(() => null)
   return parseGrokResponse(json)
 }
