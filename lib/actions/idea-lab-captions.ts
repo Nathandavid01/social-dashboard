@@ -1,6 +1,5 @@
 'use server'
 
-import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
@@ -9,8 +8,7 @@ import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { approvedIdeaSendReadiness, autopublishTimeError, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError } from '@/lib/utils/idea-lab-send-core'
-
-const CAPTION_MODEL = 'claude-sonnet-4-6'
+import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 
 /** Shape of the client fields we read for caption voice + Metricool routing. */
 type FeedbackClient = {
@@ -44,9 +42,8 @@ export async function generateApprovedIdeaCaption(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return { error: 'ANTHROPIC_API_KEY no está configurado en el servidor.' }
-  }
+  const configError = captionConfigError(process.env)
+  if (configError) return { error: configError }
 
   const supabase = await createClient()
   const { data: idea } = await supabase
@@ -82,17 +79,7 @@ export async function generateApprovedIdeaCaption(
   })
 
   try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    const res = await anthropic.messages.create({
-      model: CAPTION_MODEL,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    })
-    const caption = res.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('')
-      .trim()
+    const caption = await generateCaptionText(prompt)
 
     if (!caption) return { error: 'La IA no devolvió caption' }
 
@@ -239,9 +226,8 @@ export async function generateQuickCaption(input: {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return { error: 'ANTHROPIC_API_KEY no está configurado en el servidor.' }
-  }
+  const configError = captionConfigError(process.env)
+  if (configError) return { error: configError }
   if (!input.clientId) return { error: 'Elige un cliente.' }
   if (!input.topic || input.topic.trim().length === 0) {
     return { error: 'Escribe de qué trata el caption.' }
@@ -276,17 +262,7 @@ export async function generateQuickCaption(input: {
   })
 
   try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    const res = await anthropic.messages.create({
-      model: CAPTION_MODEL,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    })
-    const caption = res.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('')
-      .trim()
+    const caption = await generateCaptionText(prompt)
     if (!caption) return { error: 'La IA no devolvió caption' }
     return { ok: true, caption }
   } catch (err) {

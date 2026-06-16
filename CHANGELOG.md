@@ -4,7 +4,9 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.39 — 2026-06-15
+## v2.40 — 2026-06-16
+
+- **Los captions ahora los escribe Grok (xAI) en vez de Claude.** Misma calidad de redacción (mismo prompt, misma voz de marca y mismos ejemplos reales del cliente de Metricool), pero más rápido y mucho más económico por caption. Aplica en todos los lugares donde se genera caption: ideas, ideas aprobadas, caption rápido y la automatización de videos aprobados. Si en algún momento se prefiere volver a Claude, se cambia con una sola variable (`CAPTION_PROVIDER=claude`) — sin tocar código. *(El chat y la generación de ideas siguen usando Claude.)*
 
 - **Edita la cadencia de cada cliente tú mismo:** define qué días postea cada cliente y el tipo de cada día (**R = Reel** / **P = Post**) sin depender de nadie. Está en **dos lugares**: en el **perfil del cliente → Calendario** (tocas los días) y en **Producción → Cadencia**, donde ahora la parrilla es **clickeable** (tocas una celda para alternar R → P → vacío y se guarda solo).
 - **Importar clientes de Metricool:** en **Clientes**, el botón **"Importar de Metricool"** lista las marcas conectadas en Metricool que aún no son clientes y las crea en un clic (con su *blog id* enlazado) — sin retipear.
