@@ -34,7 +34,7 @@ export default async function ClientsPage() {
       />
 
       {clients.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="max-w-xs">
           <Card>
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
