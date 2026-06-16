@@ -126,7 +126,7 @@ export function ClientTable({ clients }: ClientTableProps) {
           />
         )
       ) : (
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="hidden overflow-hidden rounded-lg border border-border md:block">
           <Table>
             <TableHeader>
               <TableRow>
@@ -175,60 +175,53 @@ export function ClientTable({ clients }: ClientTableProps) {
                     <StatusBadge status={client.status} />
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={isPending}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}/batch`}>
-                            <Clapperboard className="mr-2 h-4 w-4" />
-                            Lote de videos
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}?tab=captions`}>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Ver captions
-                          </Link>
-                        </DropdownMenuItem>
-                        {client.metricool_blog_id && (
-                          <DropdownMenuItem asChild>
-                            <Link href={`/published?blogId=${client.metricool_blog_id}`}>
-                              <Globe className="mr-2 h-4 w-4" />
-                              Ver publicados
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive cursor-pointer"
-                          onClick={() => setDeleteTarget({ id: client.id, name: client.name })}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <ClientActions
+                      client={client}
+                      isPending={isPending}
+                      onDelete={() => setDeleteTarget({ id: client.id, name: client.name })}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {/* Mobile: card list (the table hides most columns on small screens) */}
+      {filtered.length > 0 && (
+        <div className="space-y-2 md:hidden">
+          {filtered.map((client) => (
+            <div key={client.id} className="flex items-start justify-between gap-2 rounded-lg border border-border p-3">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <Link href={`/clients/${client.id}`} className="font-medium hover:text-primary">
+                  {client.name}
+                </Link>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <StatusBadge status={client.status} />
+                  <PlatformBadges platforms={client.platforms} />
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  {client.industry && <span>{client.industry}</span>}
+                  {client.metricool_blog_id && (
+                    <span className="inline-flex items-center gap-1 text-yellow-600">
+                      <Zap className="h-3 w-3 text-yellow-500" /> Metricool
+                    </span>
+                  )}
+                  {client.brand_voice && (
+                    <span className="inline-flex items-center gap-1 text-purple-600">
+                      <Brain className="h-3 w-3 text-purple-500" /> IA
+                    </span>
+                  )}
+                </div>
+              </div>
+              <ClientActions
+                client={client}
+                isPending={isPending}
+                onDelete={() => setDeleteTarget({ id: client.id, name: client.name })}
+              />
+            </div>
+          ))}
         </div>
       )}
 
@@ -243,5 +236,68 @@ export function ClientTable({ clients }: ClientTableProps) {
         onConfirm={confirmDelete}
       />
     </div>
+  )
+}
+
+/** The per-client actions menu, shared by the desktop table and the mobile cards. */
+function ClientActions({
+  client,
+  isPending,
+  onDelete,
+}: {
+  client: Client
+  isPending: boolean
+  onDelete: () => void
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" disabled={isPending} className="shrink-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/clients/${client.id}`}>
+            <Eye className="mr-2 h-4 w-4" />
+            Ver
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/clients/${client.id}/batch`}>
+            <Clapperboard className="mr-2 h-4 w-4" />
+            Lote de videos
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/clients/${client.id}/edit`}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/clients/${client.id}?tab=captions`}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Ver captions
+          </Link>
+        </DropdownMenuItem>
+        {client.metricool_blog_id && (
+          <DropdownMenuItem asChild>
+            <Link href={`/published?blogId=${client.metricool_blog_id}`}>
+              <Globe className="mr-2 h-4 w-4" />
+              Ver publicados
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive cursor-pointer"
+          onClick={onDelete}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Eliminar
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

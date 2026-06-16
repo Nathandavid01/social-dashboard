@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.43 — 2026-06-16
+
+Más usabilidad, ahora en celular y en consistencia de idioma:
+
+- **Clientes se ve bien en celular.** La lista de clientes ahora muestra **tarjetas** en pantallas pequeñas (nombre, estado, plataformas, si tiene Metricool/IA y el menú de acciones) en vez de una tabla que escondía casi todas las columnas. En pantalla grande sigue igual, como tabla.
+- **Todo en español.** Se tradujeron textos que habían quedado en inglés en la sección de Clientes: el título "Clients" → **Clientes**, "Add Client" → **Agregar cliente**, los estados **Activo/Pausado**, y los encabezados de crear/editar cliente.
+- **Detalle:** la tarjeta de "Activos" ya no aparece cuando todavía no tienes clientes (antes mostraba "Activos 0", que parecía un error).
+
 ## v2.42 — 2026-06-16
 
 Tanda de mejoras para que la app se sienta más fácil y confiable de usar:

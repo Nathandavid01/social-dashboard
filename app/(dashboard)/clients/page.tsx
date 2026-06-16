@@ -16,8 +16,8 @@ export default async function ClientsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Clients"
-        description={`${clients.length} client${clients.length !== 1 ? 's' : ''} total`}
+        title="Clientes"
+        description={`${clients.length} cliente${clients.length !== 1 ? 's' : ''} en total`}
         action={
           <div className="flex items-center gap-2">
             <RoleGate perm="clients.create">
@@ -26,26 +26,28 @@ export default async function ClientsPage() {
             <Button asChild>
               <Link href="/clients/new">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Client
+                Agregar cliente
               </Link>
             </Button>
           </div>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardContent className="pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Activos</p>
-                <p className="text-2xl font-bold">{active}</p>
+      {clients.length > 0 && (
+        <div className="max-w-xs">
+          <Card>
+            <CardContent className="pt-5 pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Activos</p>
+                  <p className="text-2xl font-bold">{active}</p>
+                </div>
+                <Users className="h-5 w-5 text-muted-foreground" />
               </div>
-              <Users className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <ClientTable clients={clients} />
     </div>

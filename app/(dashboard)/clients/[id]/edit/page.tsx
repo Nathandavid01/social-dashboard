@@ -21,7 +21,7 @@ export default async function EditClientPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`Edit ${client.name}`} description="Update client information" />
+      <PageHeader title={`Editar ${client.name}`} description="Actualiza la información del cliente" />
       <ClientForm client={client} teamMembers={teamMembers ?? []} />
     </div>
   )
