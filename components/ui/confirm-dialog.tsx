@@ -38,7 +38,9 @@ export function ConfirmDialog({
   onConfirm: () => void
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    // While an action is in flight, ignore close requests (Esc / overlay / X)
+    // so the user can't dismiss the dialog mid-delete.
+    <Dialog open={open} onOpenChange={(o) => { if (loading && !o) return; onOpenChange(o) }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
