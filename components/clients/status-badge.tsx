@@ -3,8 +3,8 @@ import { cn, statusColors } from '@/lib/utils'
 import type { ClientStatus } from '@/lib/supabase/types'
 
 const statusLabels: Record<ClientStatus, string> = {
-  active: 'Active',
-  paused: 'Paused',
+  active: 'Activo',
+  paused: 'Pausado',
   onboarding: 'Onboarding',
 }
 

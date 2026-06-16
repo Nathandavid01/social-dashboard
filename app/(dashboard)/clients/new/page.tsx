@@ -11,7 +11,7 @@ export default async function NewClientPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Add Client" description="Create a new client account" />
+      <PageHeader title="Agregar cliente" description="Crea una nueva cuenta de cliente" />
       <ClientForm teamMembers={teamMembers ?? []} />
     </div>
   )
