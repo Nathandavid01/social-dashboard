@@ -54,6 +54,12 @@ describe('ContentPipelineBoard — per-video model', () => {
     expect(headings).toEqual(['Idea', 'Title', 'Caption', 'Video', 'Edited', 'Approval', 'Publication'])
   })
 
+  it('shows a first-run state (not 7 empty columns) when there are no videos at all', () => {
+    render(<ContentPipelineBoard ideas={[]} plannedClients={[]} />)
+    expect(screen.getByText(/Aún no hay videos en el pipeline/)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2, name: 'Idea' })).toBeNull()
+  })
+
   it('shows one card per VIDEO, not per client (3 videos of one client → 3 cards)', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
       idea({ id: '1', title: 'Video A' }),

@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.45 — 2026-06-16
+
+- **El tablero (Content Pipeline) ahora da la bienvenida cuando está vacío.** Si todavía no hay ningún video, en vez de mostrar 7 columnas con un "—" (que parecía roto), aparece un mensaje claro que explica el flujo (idea → título → caption → grabación → edición → aprobación → publicación) con un botón para **crear el primer video**.
+
 ## v2.44 — 2026-06-16
 
 - **El Idea Lab te muestra que está trabajando.** Mientras la IA genera ideas (que puede tardar unos segundos), el panel de resultados ahora muestra **tarjetas "fantasma" animadas** y un texto *"Generando N ideas con IA…"*, en vez de quedarse con la pantalla vacía como si no pasara nada.
