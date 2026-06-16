@@ -49,6 +49,25 @@ describe('ApprovedIdeasCaptions', () => {
     expect(screen.queryByText('Enviar a Metricool')).toBeNull()
   })
 
+  it('shows the cadence notice and defaults the schedule date to the cadence day', () => {
+    render(
+      <ApprovedIdeasCaptions
+        ideas={[idea({ generated_caption: 'Listo' })]}
+        nextPostByClient={{
+          c1: {
+            notice: '📅 El próximo Reel de Joe’s Gym se publicará el viernes en Instagram.',
+            dateISO: '2099-12-31',
+            typeLabels: ['Reel'],
+            platformLabels: ['Instagram'],
+          },
+        }}
+      />,
+    )
+    expect(screen.getByText(/se publicará el viernes en Instagram/)).toBeInTheDocument()
+    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement
+    expect(dateInput.value).toBe('2099-12-31')
+  })
+
   it('disables send and warns when the chosen date is in the past', () => {
     render(<ApprovedIdeasCaptions ideas={[idea({ generated_caption: 'Listo para publicar' })]} />)
     const sendBtn = screen.getByRole('button', { name: /Enviar a Metricool/i })
