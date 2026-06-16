@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Sparkles, Loader2, Save, Send, CheckCircle2, CalendarClock, AlertTriangle } from 'lucide-react'
 import type { ApprovedIdea } from '@/lib/actions/idea-feedback-types'
+import type { NextAutopostNotice } from '@/lib/actions/next-autopost'
 import type { ContentIdeaType } from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,7 +29,13 @@ function formatScheduled(s: string | null): string | null {
   return d.toLocaleString('es', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-export function ApprovedIdeasCaptions({ ideas }: { ideas: ApprovedIdea[] }) {
+export function ApprovedIdeasCaptions({
+  ideas,
+  nextPostByClient = {},
+}: {
+  ideas: ApprovedIdea[]
+  nextPostByClient?: Record<string, NextAutopostNotice>
+}) {
   if (ideas.length === 0) {
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed text-center text-muted-foreground">
@@ -42,20 +49,25 @@ export function ApprovedIdeasCaptions({ ideas }: { ideas: ApprovedIdea[] }) {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {ideas.map((idea) => (
-        <ApprovedIdeaCaptionCard key={idea.id} idea={idea} />
+        <ApprovedIdeaCaptionCard
+          key={idea.id}
+          idea={idea}
+          nextPost={idea.client_id ? nextPostByClient[idea.client_id] : undefined}
+        />
       ))}
     </div>
   )
 }
 
-function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
+function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextPost?: NextAutopostNotice }) {
   const canGenerate = useHasPermission('captions.use')
   const canSend = useHasPermission('posting.publish')
   const { toast } = useToast()
 
   const [caption, setCaption] = useState(idea.generated_caption ?? '')
   const [platform, setPlatform] = useState(idea.caption_platform ?? 'instagram')
-  const [date, setDate] = useState(defaultScheduleDate())
+  // Default the schedule date to the client's next cadence day when known.
+  const [date, setDate] = useState(nextPost?.dateISO ?? defaultScheduleDate())
   const [time, setTime] = useState('10:00')
 
   const [sentInfo, setSentInfo] = useState<string | null>(
@@ -170,6 +182,14 @@ function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
           {isSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
           Guardar caption
         </Button>
+      )}
+
+      {/* When/where this video is scheduled to publish (from the client's cadence) */}
+      {!alreadySent && nextPost && (
+        <p className="mt-3 flex items-start gap-1.5 rounded-md bg-primary/5 p-2 text-[11px] leading-relaxed text-muted-foreground">
+          <CalendarClock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+          <span>{nextPost.notice}</span>
+        </p>
       )}
 
       {/* Schedule + send */}

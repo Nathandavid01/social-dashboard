@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.41 — 2026-06-16
+
+- **Sabes cuándo se va a publicar cada video, justo antes de enviarlo.** En **Ideas Aprobadas → Captions y Metricool**, cada idea ahora muestra un aviso (escrito por la IA) con **cuándo y dónde** se publicará su próximo contenido según la **cadencia del cliente** — p. ej. *"📅 El Reel de La Placita Café se publicará el viernes 20 de junio en Instagram, Facebook y TikTok."* Además, la **fecha de programación se rellena sola** con ese próximo día de cadencia, así no hay que adivinarla. (El aviso se cachea por día, así que no gasta API de más.)
+
 ## v2.40 — 2026-06-16
 
 - **Los captions ahora los escribe Grok (xAI) en vez de Claude.** Misma calidad de redacción (mismo prompt, misma voz de marca y mismos ejemplos reales del cliente de Metricool), pero más rápido y mucho más económico por caption. Aplica en todos los lugares donde se genera caption: ideas, ideas aprobadas, caption rápido y la automatización de videos aprobados. Si en algún momento se prefiere volver a Claude, se cambia con una sola variable (`CAPTION_PROVIDER=claude`) — sin tocar código. *(El chat y la generación de ideas siguen usando Claude.)*

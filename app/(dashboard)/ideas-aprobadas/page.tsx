@@ -1,5 +1,6 @@
 import { requirePermission } from '@/lib/auth/server'
 import { getApprovedIdeas } from '@/lib/actions/idea-feedback'
+import { getNextAutopostNotices, type NextAutopostNotice } from '@/lib/actions/next-autopost'
 import { getClients } from '@/lib/actions/clients'
 import { PageHeader } from '@/components/shared/page-header'
 import { ApprovedIdeasList } from '@/components/ideas/approved-ideas-list'
@@ -19,6 +20,15 @@ export default async function IdeasAprobadasPage() {
   } catch {
     // Table not yet migrated (0033) — show the empty state instead of erroring.
     ideas = []
+  }
+
+  // "When/where will this publish" notice per client (from their cadence), so
+  // each card can show it + pre-fill the schedule date. Best-effort.
+  let nextPostByClient: Record<string, NextAutopostNotice> = {}
+  try {
+    nextPostByClient = await getNextAutopostNotices(ideas.map((i) => i.client_id))
+  } catch {
+    nextPostByClient = {}
   }
 
   // Clients for the standalone "Caption rápido" launcher.
@@ -53,7 +63,7 @@ export default async function IdeasAprobadasPage() {
               <QuickCaptionDialog clients={clients} />
             </div>
           </div>
-          <ApprovedIdeasCaptions ideas={ideas} />
+          <ApprovedIdeasCaptions ideas={ideas} nextPostByClient={nextPostByClient} />
         </TabsContent>
       </Tabs>
     </div>
