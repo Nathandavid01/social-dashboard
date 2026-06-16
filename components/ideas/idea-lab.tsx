@@ -373,7 +373,22 @@ export function IdeaLab({ clients }: Props) {
 
       {/* Results */}
       <div className="space-y-3">
-        {ideas.length === 0 ? (
+        {generating ? (
+          <>
+            {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
+              <div key={i} className="rounded-lg border p-4 animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
+                <div className="h-4 w-2/3 rounded bg-muted" />
+                <div className="mt-3 h-3 w-full rounded bg-muted" />
+                <div className="mt-2 h-3 w-5/6 rounded bg-muted" />
+                <div className="mt-2 h-3 w-1/2 rounded bg-muted" />
+              </div>
+            ))}
+            <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Generando {count} ideas con IA…
+            </p>
+          </>
+        ) : ideas.length === 0 ? (
           <div className="flex h-full min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed text-center text-muted-foreground">
             <Sparkles className="h-8 w-8 mb-2 opacity-40" />
             <p className="text-sm">Tus ideas aparecerán aquí.</p>
