@@ -214,13 +214,13 @@ function ContentPipelineBoardInner({ ideas, plannedClients = [] }: { ideas: Idea
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative hidden sm:block">
+          <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar videos, clientes, personas…" className="h-8 w-52 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar videos, clientes…" className="h-8 w-40 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none sm:w-52" />
           </div>
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={videos.length} value={clientFilter} onChange={setClientFilter} />
-          <HeaderButton icon={Filter} label="Filtros" />
-          <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
+          <HeaderButton icon={Filter} label="Filtros" disabled title="Próximamente" />
+          <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} disabled title="Próximamente" />
           <NewVideoDialog clients={clients} />
         </div>
       </header>
@@ -398,7 +398,7 @@ const VideoCard = memo(function VideoCard({ video, stage, onMove, onOpen }: { vi
 
   return (
     <article onClick={() => onOpen(video.id)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
-      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
         <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(video, -1) }} />
         <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(video, 1) }} />
       </div>
@@ -454,7 +454,7 @@ const VideoCard = memo(function VideoCard({ video, stage, onMove, onOpen }: { vi
 function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: (e: React.MouseEvent) => void }) {
   const Icon = dir === 1 ? ChevronRight : ChevronLeft
   return (
-    <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover video adelante' : 'Mover video atrás'} className="grid h-5 w-5 place-items-center rounded border border-border bg-background/80 text-muted-foreground backdrop-blur-sm transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30">
+    <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover video adelante' : 'Mover video atrás'} className="grid h-7 w-7 place-items-center rounded border border-border bg-background/80 text-muted-foreground backdrop-blur-sm transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30 sm:h-6 sm:w-6">
       <Icon className="h-3.5 w-3.5" />
     </button>
   )
@@ -602,9 +602,13 @@ function ClientFilterDropdown({
   )
 }
 
-function HeaderButton({ icon: Icon, label, trailing: Trailing }: { icon: typeof Filter; label: string; trailing?: typeof ChevronDown }) {
+function HeaderButton({ icon: Icon, label, trailing: Trailing, disabled, title }: { icon: typeof Filter; label: string; trailing?: typeof ChevronDown; disabled?: boolean; title?: string }) {
   return (
-    <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground">
+    <button
+      disabled={disabled}
+      title={title}
+      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-muted/40 disabled:hover:text-muted-foreground"
+    >
       <Icon className="h-3.5 w-3.5" />
       <span className="hidden md:inline">{label}</span>
       {Trailing && <Trailing className="h-3 w-3 opacity-60" />}

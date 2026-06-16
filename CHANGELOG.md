@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.42 — 2026-06-16
+
+Tanda de mejoras para que la app se sienta más fácil y confiable de usar:
+
+- **Confirmación bonita antes de borrar (ya no el cuadro feo del navegador).** Eliminar un cliente o una idea ahora abre un diálogo claro con tono de advertencia y botón rojo, en español — en vez del `confirm()` gris del sistema operativo. Borrar una idea además **avisa con un toast** cuando termina (antes no decía nada).
+- **Pantalla de "sin clientes" con acción.** Cuando no hay clientes, ahora ves un botón **"Agregar cliente"** (y si filtraste y no hay resultados, un **"Limpiar filtros"**) — en vez de una pantalla vacía sin salida.
+- **El tablero (Content Pipeline) funciona en celular/tablet.** Los botones para **mover un video** entre etapas ahora se ven y se pueden tocar en pantallas táctiles (antes solo aparecían al pasar el mouse, imposible en celular), y la **búsqueda** ya no se esconde en móvil.
+- **Detalles pulidos:** los botones "Filtros" y "Agrupar" (que aún no hacen nada) ahora se ven deshabilitados con "Próximamente" en vez de parecer rotos; se arregló una caja de texto que se veía oscura en modo claro al asignar a producción; y copiar un brief ya no falla en silencio si el navegador bloquea el portapapeles.
+
 ## v2.41 — 2026-06-16
 
 - **Sabes cuándo se va a publicar cada video, justo antes de enviarlo.** En **Ideas Aprobadas → Captions y Metricool**, cada idea ahora muestra un aviso (escrito por la IA) con **cuándo y dónde** se publicará su próximo contenido según la **cadencia del cliente** — p. ej. *"📅 El Reel de La Placita Café se publicará el viernes 20 de junio en Instagram, Facebook y TikTok."* Además, la **fecha de programación se rellena sola** con ese próximo día de cadencia, así no hay que adivinarla. (El aviso se cachea por día, así que no gasta API de más.)
