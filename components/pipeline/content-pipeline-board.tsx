@@ -2,7 +2,7 @@
 
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Search, Filter, LayoutGrid, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
+import { Search, Filter, LayoutGrid, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { BATCH_STAGES, ideaStage, adjacentBatchStage, batchProgress, type BatchStageKey } from '@/lib/utils/content-batches'
@@ -135,6 +135,8 @@ function ContentPipelineBoardInner({ ideas, plannedClients = [] }: { ideas: Idea
 
   const hasFilter = !!clientFilter || !!assigneeFilter || search.trim().length > 0
   const emptyFiltered = hasFilter && visible.length === 0 && visiblePlanned.length === 0
+  // Truly empty board (nothing in the system, no filter applied) → first-run state.
+  const boardEmpty = !hasFilter && videos.length === 0 && plannedClients.length === 0
   const clearFilters = useCallback(() => {
     setClientFilter(null)
     setAssigneeFilter(null)
@@ -281,7 +283,18 @@ function ContentPipelineBoardInner({ ideas, plannedClients = [] }: { ideas: Idea
         }}
         className={cn('flex-1 overflow-x-auto overflow-y-hidden outline-none focus-visible:ring-2 focus-visible:ring-primary/40', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
       >
-        {emptyFiltered ? (
+        {boardEmpty ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+            <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-primary/20 to-amber-600/20">
+              <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Aún no hay videos en el pipeline</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Crea tu primer video y avanza por las etapas: idea → título → caption → grabación → edición → aprobación → publicación.</p>
+            </div>
+            <NewVideoDialog clients={clients} />
+          </div>
+        ) : emptyFiltered ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
             <div className="grid h-12 w-12 place-items-center rounded-full bg-muted">
               <Search className="h-5 w-5 text-muted-foreground" aria-hidden />
