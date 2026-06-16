@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   Video, Plus, CheckCircle2, Circle, Trash2, Loader2,
   ChevronDown, ChevronUp, AlertTriangle,
@@ -43,6 +44,7 @@ function IdeaRow({
   onDelete: (id: string) => void
 }) {
   const [isPending, startTransition] = useTransition()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const { toast } = useToast()
   const isRecorded = idea.status === 'grabada'
 
@@ -57,8 +59,13 @@ function IdeaRow({
   function handleDelete() {
     startTransition(async () => {
       const result = await deleteContentIdea(idea.id)
-      if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+      if (result && 'error' in result && result.error) {
+        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        return
+      }
+      setConfirmOpen(false)
       onDelete(idea.id)
+      toast({ title: 'Idea eliminada' })
     })
   }
 
@@ -89,12 +96,24 @@ function IdeaRow({
         {isRecorded && <p className="text-[10px] text-green-600 mt-0.5 font-medium">En buffer</p>}
       </div>
       <button
-        onClick={handleDelete}
+        onClick={() => setConfirmOpen(true)}
         disabled={isPending}
-        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+        aria-label="Eliminar idea"
+        className="grid h-7 w-7 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-destructive sm:h-6 sm:w-6 sm:opacity-0 sm:group-hover:opacity-100"
       >
-        <Trash2 className="h-3 w-3" />
+        <Trash2 className="h-3.5 w-3.5" />
       </button>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="¿Eliminar esta idea?"
+        description={`Se borrará "${idea.title}" permanentemente. No se puede deshacer.`}
+        confirmLabel="Eliminar"
+        destructive
+        loading={isPending}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }

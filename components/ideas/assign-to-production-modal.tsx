@@ -121,7 +121,7 @@ export function AssignToProductionModal({ idea, profiles, onClose, onAssigned }:
             </Select>
           </div>
 
-          <div className="rounded-md bg-black/50 border border-white/10 px-3 py-2 text-xs text-white/90">
+          <div className="rounded-md bg-muted/50 border border-border px-3 py-2 text-xs text-muted-foreground">
             Se creará una tarea de producción con el brief visual de la idea como notas. Cuando se publique, esta idea se marcará como <strong>Publicada</strong> automáticamente.
           </div>
 

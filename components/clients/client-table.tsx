@@ -31,9 +31,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard, UserPlus, Users } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
-import { Users } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface ClientTableProps {
   clients: Client[]
@@ -43,6 +43,7 @@ export function ClientTable({ clients }: ClientTableProps) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isPending, startTransition] = useTransition()
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const { toast } = useToast()
 
   const filtered = clients.filter((c) => {
@@ -51,14 +52,16 @@ export function ClientTable({ clients }: ClientTableProps) {
     return matchSearch && matchStatus
   })
 
-  function handleDelete(id: string, name: string) {
-    if (!confirm(`¿Eliminar "${name}"? Esto no se puede deshacer.`)) return
+  function confirmDelete() {
+    if (!deleteTarget) return
+    const { id, name } = deleteTarget
     startTransition(async () => {
       const result = await deleteClient(id)
       if (result.error) {
         toast({ title: 'Error', description: result.error, variant: 'destructive' })
       } else {
         toast({ title: 'Cliente eliminado', description: `${name} ha sido eliminado.` })
+        setDeleteTarget(null)
       }
     })
   }
@@ -90,11 +93,38 @@ export function ClientTable({ clients }: ClientTableProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="Sin clientes"
-          description="Ajusta los filtros o agrega un nuevo cliente."
-        />
+        clients.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="Aún no tienes clientes"
+            description="Agrega tu primer cliente para empezar a planificar y publicar su contenido."
+            action={
+              <Button asChild>
+                <Link href="/clients/new">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Agregar cliente
+                </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <EmptyState
+            icon={Search}
+            title="Sin resultados"
+            description="Ningún cliente coincide con tu búsqueda o filtros."
+            action={
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearch('')
+                  setStatusFilter('all')
+                }}
+              >
+                Limpiar filtros
+              </Button>
+            }
+          />
+        )
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <Table>
@@ -187,7 +217,7 @@ export function ClientTable({ clients }: ClientTableProps) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive cursor-pointer"
-                          onClick={() => handleDelete(client.id, client.name)}
+                          onClick={() => setDeleteTarget({ id: client.id, name: client.name })}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Eliminar
@@ -201,6 +231,17 @@ export function ClientTable({ clients }: ClientTableProps) {
           </Table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        title={`¿Eliminar a ${deleteTarget?.name ?? ''}?`}
+        description="Esto borra el cliente y su información asociada. No se puede deshacer."
+        confirmLabel="Eliminar"
+        destructive
+        loading={isPending}
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }
