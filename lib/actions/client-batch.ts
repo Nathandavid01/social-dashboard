@@ -74,21 +74,34 @@ export async function updateClientBatchConfig(
   return { ok: true }
 }
 
+export interface ClientBatchOpenOptions {
+  /** Opened from a planned card — provision one video and show its workflow only. */
+  fromPlanned?: boolean
+  publishDate?: string | null
+  publishLabel?: string | null
+}
+
 /**
  * Everything the Client Batch view needs, fetched in one call so the pipeline
  * board can open it as an in-place overlay (no navigation). Returns null when
  * the client doesn't exist.
  *
- * Auto-provisions the next single video (idempotent) when the client has none yet,
- * so opening a client shows one real editable card instead of bulk-creating the
- * whole session. Respects an explicit videos_per_batch override when set.
+ * When `fromPlanned`, provisions the next single video (idempotent) and skips
+ * the multi-slot "videos por crear" grid so the user lands on that video's flow.
  */
-export async function getClientBatchData(clientId: string): Promise<ClientBatchData | null> {
-  await ensureBatchVideos(clientId)
+export async function getClientBatchData(
+  clientId: string,
+  opts?: ClientBatchOpenOptions,
+): Promise<ClientBatchData | null> {
+  if (opts?.fromPlanned) {
+    await ensureBatchVideos(clientId, { count: 1, publishDate: opts.publishDate ?? null })
+  } else {
+    await ensureBatchVideos(clientId)
+  }
   const pipeline = await getClientVideoBatch(clientId)
   if (!pipeline) return null
   const [plannedSlots, config, members] = await Promise.all([
-    pipeline.videos.length === 0 ? buildPlannedSlots(clientId) : Promise.resolve([]),
+    !opts?.fromPlanned && pipeline.videos.length === 0 ? buildPlannedSlots(clientId) : Promise.resolve([]),
     getClientBatchConfig(clientId),
     getTeamMembers(),
   ])
@@ -103,7 +116,10 @@ export async function getClientBatchData(clientId: string): Promise<ClientBatchD
  * the cadence (title "Video 1", status idea). Returns how many it created. RLS
  * applies, so a viewer without create permission simply gets 0 created.
  */
-export async function ensureBatchVideos(clientId: string): Promise<{ created: number }> {
+export async function ensureBatchVideos(
+  clientId: string,
+  opts?: { count?: number; publishDate?: string | null },
+): Promise<{ created: number }> {
   const supabase = await createClient()
 
   const { data: existing } = await supabase
@@ -125,14 +141,15 @@ export async function ensureBatchVideos(clientId: string): Promise<{ created: nu
   if (postingDays.length === 0) return { created: 0 }
 
   const { videosPerBatch } = await getClientBatchConfig(clientId)
-  // One video at a time unless the client has an explicit batch-size override.
-  const sessionSize = videosPerBatch ?? 1
+  const sessionSize = opts?.count ?? videosPerBatch ?? 1
   if (sessionSize === 0) return { created: 0 }
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const slots = planSlots(postingDays, sessionSize, new Date())
+  const slots = opts?.publishDate
+    ? [{ index: 0, date: opts.publishDate }]
+    : planSlots(postingDays, sessionSize, new Date())
   const rows = slots.map((s, i) => ({
     client_id: clientId,
     content_type: 'R',

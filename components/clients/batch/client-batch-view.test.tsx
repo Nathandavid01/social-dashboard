@@ -67,12 +67,14 @@ const selectedVideo = mkVideo({
   visual_brief: 'Carrusel de 4-5 slides tipo elige tu plan.',
   caption_angle: 'Tono juguetón y cercano.',
   hashtags_suggestion: '#612cigarlounge #arecibo #loungepr',
+  generated_caption: 'Caption de prueba para desbloquear grabación.',
 })
 const recordedVideo = mkVideo({
   id: 'v-rec',
   content_type: 'R',
   title: 'Cómo encender un cigarro como un pro',
   hook: 'Paso a paso para encender bien tu cigarro',
+  generated_caption: 'Caption lista.',
   videos: { raw: [rawFile()], broll: [], edited: [] },
 })
 
@@ -123,6 +125,21 @@ describe('ClientBatchView', () => {
   it('shows the current video recorded/por-grabar status', () => {
     // the first (shown) video has no recording yet
     expect(screen.getAllByText('Por grabar').length).toBeGreaterThan(0)
+  })
+  it('shows the focused single-video flow when opened from a planned card', () => {
+    cleanup()
+    render(
+      <ClientBatchView
+        pipeline={mkPipeline([selectedVideo])}
+        singleVideoMode
+        plannedPublishLabel="Lun 9 jun"
+      />,
+    )
+    expect(screen.getByText(/Flujo del próximo video/i)).toBeInTheDocument()
+    expect(screen.getByText(/Publicación · Lun 9 jun/i)).toBeInTheDocument()
+    expect(screen.getByText('Este video')).toBeInTheDocument()
+    expect(screen.queryByText(/Videos de este lote/i)).not.toBeInTheDocument()
+    expect(screen.getAllByTestId('brief')).toHaveLength(1)
   })
 })
 

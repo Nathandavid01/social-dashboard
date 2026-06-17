@@ -85,7 +85,7 @@ describe('ContentPipelineBoard — batch model', () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('c9')
+    expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
     expect(push).not.toHaveBeenCalled()
     expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
   })
@@ -120,7 +120,11 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('nd')
+    expect(getClientBatchData).toHaveBeenCalledWith('nd', {
+      fromPlanned: true,
+      publishDate: '2026-06-08',
+      publishLabel: 'Lun 8 jun',
+    })
   })
 })
 

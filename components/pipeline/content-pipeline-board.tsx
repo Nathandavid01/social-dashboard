@@ -7,7 +7,7 @@ import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
-import { getClientBatchData, type ClientBatchData } from '@/lib/actions/client-batch'
+import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
@@ -58,26 +58,29 @@ export function ContentPipelineBoard({
 
   // In-place full-screen overlay of a client's batch view (no navigation).
   const [openClientId, setOpenClientId] = useState<string | null>(null)
+  const [openOptions, setOpenOptions] = useState<ClientBatchOpenOptions | null>(null)
   const [batchData, setBatchData] = useState<ClientBatchData | null>(null)
   const [batchLoading, setBatchLoading] = useState(false)
 
-  const openClientBatch = useCallback(async (clientId: string) => {
+  const openClientBatch = useCallback(async (clientId: string, opts?: ClientBatchOpenOptions) => {
     setOpenClientId(clientId)
+    setOpenOptions(opts ?? null)
     setBatchData(null)
     setBatchLoading(true)
-    const data = await getClientBatchData(clientId)
+    const data = await getClientBatchData(clientId, opts)
     setBatchData(data)
     setBatchLoading(false)
   }, [])
   const closeBatch = useCallback(() => {
     setOpenClientId(null)
+    setOpenOptions(null)
     setBatchData(null)
   }, [])
   const refetchBatch = useCallback(async () => {
     if (!openClientId) return
-    const data = await getClientBatchData(openClientId)
+    const data = await getClientBatchData(openClientId, openOptions ?? undefined)
     setBatchData(data)
-  }, [openClientId])
+  }, [openClientId, openOptions])
 
   const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
 
@@ -261,6 +264,8 @@ export function ContentPipelineBoard({
               plannedSlots={batchData.plannedSlots}
               config={batchData.config}
               members={batchData.members}
+              singleVideoMode={openOptions?.fromPlanned}
+              plannedPublishLabel={openOptions?.publishLabel ?? undefined}
               onClose={closeBatch}
               onChanged={refetchBatch}
             />
@@ -271,7 +276,7 @@ export function ContentPipelineBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -300,7 +305,15 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
 }
 
 /** Visual-only card: the client's next planned video (one slot, not a full session batch). */
-function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient; session: PlannedSession; onOpen: (clientId: string) => void }) {
+function PlannedSessionCard({
+  client,
+  session,
+  onOpen,
+}: {
+  client: PlannedClient
+  session: PlannedSession
+  onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void
+}) {
   const isSingle = session.total <= 1
   const daysSinceStart = client.createdAt ? calendarDaysSince(client.createdAt) : null
   const daysInRow = client.inColumnSince ? calendarDaysSince(client.inColumnSince) : daysSinceStart
@@ -312,7 +325,13 @@ function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient
         : 'Lleno'
   return (
     <article
-      onClick={() => onOpen(client.clientId)}
+      onClick={() =>
+        onOpen(client.clientId, {
+          fromPlanned: true,
+          publishDate: session.publishDate ?? null,
+          publishLabel: session.publishDate ? session.label : null,
+        })
+      }
       className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-border bg-card transition-all hover:border-foreground/30 hover:bg-muted"
       style={{ boxShadow: 'inset 3px 0 0 0 #3b82f6' }}
     >

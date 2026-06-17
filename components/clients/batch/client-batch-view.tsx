@@ -44,6 +44,8 @@ export function ClientBatchView({
   plannedSlots = [],
   config = { batchLabel: null, videosPerBatch: null },
   members = [],
+  singleVideoMode = false,
+  plannedPublishLabel,
   onClose,
   onChanged,
 }: {
@@ -51,6 +53,9 @@ export function ClientBatchView({
   plannedSlots?: PlannedSlot[]
   config?: BatchConfig
   members?: TeamMember[]
+  /** Focus on one video's idea → caption → recording flow (from a planned card). */
+  singleVideoMode?: boolean
+  plannedPublishLabel?: string
   /** When set, the view is an in-place overlay — shows a close button. */
   onClose?: () => void
   /** Called after a create/upload so an overlay can refetch its data. */
@@ -169,6 +174,12 @@ export function ClientBatchView({
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {singleVideoMode && plannedPublishLabel && (
+                <>
+                  <span>Publicación · {plannedPublishLabel}</span>
+                  <span className="text-muted-foreground/50">·</span>
+                </>
+              )}
               {client.industry && <span>{client.industry}</span>}
               {client.platforms?.length > 0 && (
                 <>
@@ -181,14 +192,16 @@ export function ClientBatchView({
         </div>
 
         {/* editable batch summary: LOTE / cantidad / ENCARGADO */}
-        <BatchSummaryBar
-          clientId={client.id}
-          videosCount={videos.length}
-          config={config}
-          members={members}
-          assignee={client.assignee}
-          onChanged={refresh}
-        />
+        {!singleVideoMode && (
+          <BatchSummaryBar
+            clientId={client.id}
+            videosCount={videos.length}
+            config={config}
+            members={members}
+            assignee={client.assignee}
+            onChanged={refresh}
+          />
+        )}
       </div>
 
       {/* stepper */}
@@ -204,9 +217,15 @@ export function ClientBatchView({
           </span>
           <div className="flex flex-col">
             <span className="text-[13px] font-semibold text-foreground">
-              Este lote está en la etapa {hint.stageLabel}
+              {singleVideoMode
+                ? 'Flujo del próximo video'
+                : `Este lote está en la etapa ${hint.stageLabel}`}
             </span>
-            <span className="text-xs text-muted-foreground">{hint.tip}</span>
+            <span className="text-xs text-muted-foreground">
+              {singleVideoMode
+                ? 'Define la idea, escribe el caption y graba — en ese orden.'
+                : hint.tip}
+            </span>
           </div>
         </div>
       </div>
@@ -217,21 +236,25 @@ export function ClientBatchView({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">
-                {videos.length === 0 && plannedSlots.length > 0 ? 'Videos por crear' : 'Videos de este lote'}
+                {singleVideoMode ? 'Este video' : videos.length === 0 && plannedSlots.length > 0 ? 'Videos por crear' : 'Videos de este lote'}
               </h2>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                {videos.length > 0 ? videos.length : plannedSlots.length}
-              </span>
+              {!singleVideoMode && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                  {videos.length > 0 ? videos.length : plannedSlots.length}
+                </span>
+              )}
             </div>
-            <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
-              <Button size="sm" className="gap-1.5">
-                <Plus className="h-3.5 w-3.5" aria-hidden />
-                Nuevo video
-              </Button>
-            </NewVideoDialog>
+            {!singleVideoMode && (
+              <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
+                <Button size="sm" className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
+                  Nuevo video
+                </Button>
+              </NewVideoDialog>
+            )}
           </div>
 
-          {videos.length > 0 && (
+          {!singleVideoMode && videos.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {([
                 { key: 'all', label: 'Todos', count: videos.length, dot: '' },
@@ -258,42 +281,44 @@ export function ClientBatchView({
 
           {videos.length > 0 ? (
             (() => {
-              const current = Math.min(sel, Math.max(0, shownVideos.length - 1))
-              const v = shownVideos[current]
+              const focusVideos = singleVideoMode ? videos.slice(0, 1) : shownVideos
+              const current = singleVideoMode ? 0 : Math.min(sel, Math.max(0, focusVideos.length - 1))
+              const v = focusVideos[current]
               const navBtn = 'grid h-7 w-7 place-items-center rounded-md border border-border text-muted-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-30'
               return (
                 <div className="flex flex-col gap-4">
-                  {/* navegador: un video a la vez */}
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <button type="button" aria-label="Video anterior" disabled={current === 0} onClick={() => setSel(Math.max(0, current - 1))} className={navBtn}>
-                        <ChevronLeft className="h-4 w-4" aria-hidden />
-                      </button>
-                      <div className="flex flex-wrap items-center gap-1">
-                        {shownVideos.map((sv, i) => (
-                          <button
-                            key={sv.id}
-                            type="button"
-                            aria-label={`Ir al video ${i + 1}`}
-                            aria-current={i === current}
-                            onClick={() => setSel(i)}
-                            className={cn(
-                              'grid h-7 w-7 place-items-center rounded-md border text-xs font-semibold tabular-nums transition',
-                              i === current ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground hover:bg-muted',
-                            )}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
+                  {!singleVideoMode && focusVideos.length > 1 && (
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <button type="button" aria-label="Video anterior" disabled={current === 0} onClick={() => setSel(Math.max(0, current - 1))} className={navBtn}>
+                          <ChevronLeft className="h-4 w-4" aria-hidden />
+                        </button>
+                        <div className="flex flex-wrap items-center gap-1">
+                          {shownVideos.map((sv, i) => (
+                            <button
+                              key={sv.id}
+                              type="button"
+                              aria-label={`Ir al video ${i + 1}`}
+                              aria-current={i === current}
+                              onClick={() => setSel(i)}
+                              className={cn(
+                                'grid h-7 w-7 place-items-center rounded-md border text-xs font-semibold tabular-nums transition',
+                                i === current ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground hover:bg-muted',
+                              )}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                        <button type="button" aria-label="Video siguiente" disabled={current >= shownVideos.length - 1} onClick={() => setSel(Math.min(shownVideos.length - 1, current + 1))} className={navBtn}>
+                          <ChevronRight className="h-4 w-4" aria-hidden />
+                        </button>
                       </div>
-                      <button type="button" aria-label="Video siguiente" disabled={current >= shownVideos.length - 1} onClick={() => setSel(Math.min(shownVideos.length - 1, current + 1))} className={navBtn}>
-                        <ChevronRight className="h-4 w-4" aria-hidden />
-                      </button>
+                      <span className="text-xs text-muted-foreground">
+                        Video {current + 1} de {shownVideos.length}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      Video {current + 1} de {shownVideos.length}
-                    </span>
-                  </div>
+                  )}
                   {v && (
                     <VideoWorkCard
                       video={v}
@@ -306,6 +331,18 @@ export function ClientBatchView({
                 </div>
               )
             })()
+          ) : singleVideoMode ? (
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card py-14 text-center">
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Crea el video para empezar el flujo: idea, caption y grabación.
+              </p>
+              <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
+                <Button size="sm" className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
+                  Crear video
+                </Button>
+              </NewVideoDialog>
+            </div>
           ) : plannedSlots.length > 0 ? (
             <>
               <p className="-mt-1 text-xs text-muted-foreground">
