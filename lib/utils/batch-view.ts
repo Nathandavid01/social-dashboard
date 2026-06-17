@@ -61,6 +61,8 @@ export interface BatchVideoSlots {
 /** One video card = a content_idea plus its uploaded media grouped by kind. */
 export interface BatchVideo extends ContentIdea {
   videos: BatchVideoSlots
+  /** Person assigned to this video (via its production task). null = unassigned. */
+  assignee?: { id: string; full_name: string | null; avatar_url: string | null } | null
 }
 
 const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) as Record<

@@ -1,0 +1,4 @@
+
+# Secretos cifrados con git-crypt — solo legibles con la llave compartida
+.env.local filter=git-crypt diff=git-crypt
+.env*.local filter=git-crypt diff=git-crypt

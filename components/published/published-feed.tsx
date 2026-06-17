@@ -503,7 +503,7 @@ function PublishedFeedInner({ clients, initialBlogId }: { clients: Client[]; ini
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-wrap">
             <Select value={selectedBlogId} onValueChange={setSelectedBlogId}>
-              <SelectTrigger className="w-[200px] h-8 text-xs">
+              <SelectTrigger className="h-8 w-full text-xs sm:w-[200px]">
                 <SelectValue placeholder="Todos los clientes" />
               </SelectTrigger>
               <SelectContent>

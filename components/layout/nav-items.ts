@@ -17,11 +17,12 @@ import {
   CalendarClock,
   Rocket,
   Lightbulb,
-  History,
   Settings,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
+import { AREAS, effectiveAreaHrefs } from '@/lib/auth/areas'
 import type { UserRole } from '@/lib/supabase/types'
 
 export interface NavItem {
@@ -32,34 +33,54 @@ export interface NavItem {
   permission?: Permission
 }
 
+/** Icon per area href. AREAS (lib/auth/areas.ts) is the single source of truth for
+ * the destinations themselves; the sidebar just attaches an icon to each. */
+const ICON_BY_HREF: Record<string, LucideIcon> = {
+  '/home': Home,
+  '/runway': Rocket,
+  '/idea-lab': Lightbulb,
+  '/ideas-aprobadas': CheckCircle2,
+  '/pipeline': KanbanSquare,
+  '/video-reviews': Film,
+  '/posting': Send,
+  '/team': UserSquare2,
+  '/produccion': Clapperboard,
+  '/recording-calendar': Camera,
+  '/clients': Users,
+  '/clients/cadence': CalendarClock,
+  '/calendar': Calendar,
+  '/performance': BarChart3,
+  '/efficiency': Gauge,
+  '/published': Globe,
+  '/schedule-check': ClipboardCheck,
+  '/automation': Zap,
+  '/settings/users': UserCog,
+  '/settings/workflow': Settings,
+}
+
 export const navItems: NavItem[] = [
-  { href: '/home',                label: 'Inicio',          icon: Home },
-  { href: '/runway',              label: 'Runway',          icon: Rocket,          permission: 'runway.read' },
-  { href: '/idea-lab',            label: 'Lab de Ideas',    icon: Lightbulb,       permission: 'ideas.edit' },
-  { href: '/ideas-aprobadas',     label: 'Ideas Aprobadas', icon: CheckCircle2,    permission: 'ideas.read' },
-  { href: '/pipeline',            label: 'Pipeline',        icon: KanbanSquare,    permission: 'planning.read' },
-  { href: '/video-reviews',       label: 'Video QC',        icon: Film,            permission: 'video_reviews.read' },
-  { href: '/posting',             label: 'Posting',         icon: Send,            permission: 'posting.read' },
-  { href: '/team',                label: 'Equipo',          icon: UserSquare2,     permission: 'team.read' },
-  { href: '/actividad',           label: 'Actividad',       icon: History,         permission: 'activity.read' },
-  { href: '/produccion',          label: 'Producción',      icon: Clapperboard,    permission: 'production.read' },
-  { href: '/recording-calendar',  label: 'Grabación',       icon: Camera,          permission: 'recording.read' },
-  { href: '/clients',             label: 'Clientes',        icon: Users,           permission: 'clients.read' },
-  { href: '/clients/cadence',     label: 'Cadencia',        icon: CalendarClock,   permission: 'clients.read' },
-  { href: '/calendar',            label: 'Calendario',      icon: Calendar },
-  { href: '/performance',         label: 'Rendimiento',     icon: BarChart3,       permission: 'performance.read' },
-  { href: '/efficiency',          label: 'Eficiencia',      icon: Gauge,           permission: 'efficiency.read' },
-  { href: '/published',           label: 'Publicados',      icon: Globe,           permission: 'metricool.read' },
-  { href: '/schedule-check',      label: 'Verificación',    icon: ClipboardCheck,  permission: 'tasks.read.all' },
-  { href: '/automation',          label: 'Automatización',  icon: Zap,             permission: 'automation.read' },
-  { href: '/settings/workflow',   label: 'Configuración',   icon: Settings,        permission: 'settings.edit' },
+  { href: '/home', label: 'Inicio', icon: Home },
+  ...AREAS.filter((a) => a.nav !== false).map((a) => ({
+    href: a.href,
+    label: a.label,
+    icon: ICON_BY_HREF[a.href] ?? Home,
+    permission: a.permission,
+  })),
 ]
 
 /**
- * Nav items the given role may see: an item shows when it has no `permission`
- * gate, or the role satisfies it (owner satisfies everything). Used by the
- * sidebar to hide routes the role can't access.
+ * Nav items the user may see. `/home` is always shown; otherwise the user must
+ * be able to reach the area. With no `areaAccess` argument this stays a pure
+ * role filter (backwards-compatible). When `areaAccess` is provided it honors
+ * the per-user admin grant (null grant → role defaults; owners see everything).
  */
-export function visibleNavItems(role: UserRole | null | undefined): NavItem[] {
-  return navItems.filter((n) => !n.permission || hasPermission(role, n.permission))
+export function visibleNavItems(
+  role: UserRole | null | undefined,
+  areaAccess?: string[] | null,
+): NavItem[] {
+  if (areaAccess === undefined) {
+    return navItems.filter((n) => !n.permission || hasPermission(role, n.permission))
+  }
+  const reachable = effectiveAreaHrefs(role, areaAccess)
+  return navItems.filter((n) => n.href === '/home' || reachable.has(n.href))
 }

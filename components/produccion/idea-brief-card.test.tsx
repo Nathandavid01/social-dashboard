@@ -52,4 +52,14 @@ describe('IdeaBriefCard', () => {
     fireEvent.blur(input)
     await waitFor(() => expect(updateIdeaDates).toHaveBeenCalledWith('i1', { publish_date: '2026-06-10' }))
   })
+
+  it('persists the deadline (fecha límite) via updateIdeaDates', async () => {
+    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" deadline={null} />)
+    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
+    fireEvent.click(screen.getByRole('button', { name: /editar fecha límite/i }))
+    const input = screen.getByLabelText('Fecha límite')
+    fireEvent.change(input, { target: { value: '2026-06-15' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(updateIdeaDates).toHaveBeenCalledWith('i1', { deadline: '2026-06-15' }))
+  })
 })

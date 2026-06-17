@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils'
 import { Plus, Settings, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/lib/hooks/use-toast'
+import { useAuth } from '@/lib/context/auth-context'
+import { hasPermission } from '@/lib/auth/permissions'
 
 type Tab = 'calendario' | 'asignaciones' | 'mi_lista' | 'revision' | 'master'
 
@@ -31,6 +33,8 @@ interface Props {
 export function ProduccionClient({ schedules, tasks, reviewTasks, myTasks, profiles, clients, currentWeekStart }: Props) {
   const router = useRouter()
   const { toast } = useToast()
+  const { role } = useAuth()
+  const canEditCadence = hasPermission(role, 'production.edit')
   const [tab, setTab] = useState<Tab>('calendario')
   const [showSpecialRequest, setShowSpecialRequest] = useState(false)
   const [showManageSchedules, setShowManageSchedules] = useState(false)
@@ -40,7 +44,7 @@ export function ProduccionClient({ schedules, tasks, reviewTasks, myTasks, profi
 
   const tabs: { id: Tab; label: string; badge?: number }[] = [
     { id: 'calendario', label: 'Calendario' },
-    { id: 'master', label: 'Calendario Master' },
+    { id: 'master', label: 'Cadencia' },
     { id: 'asignaciones', label: 'Asignaciones' },
     {
       id: 'mi_lista',
@@ -168,7 +172,7 @@ export function ProduccionClient({ schedules, tasks, reviewTasks, myTasks, profi
       )}
 
       {tab === 'master' && (
-        <MasterScheduleView />
+        <MasterScheduleView schedules={schedules} canEdit={canEditCadence} />
       )}
 
       {tab === 'asignaciones' && (

@@ -2,14 +2,15 @@
 
 import { useState, type ReactNode } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LayoutGrid, Palette, FileSignature, DollarSign, FolderOpen, CheckSquare, Sparkles, MessageSquareText } from 'lucide-react'
+import { LayoutGrid, CalendarClock, Palette, FileSignature, DollarSign, FolderOpen, CheckSquare, Sparkles, MessageSquareText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type ClientTabKey = 'overview' | 'brand' | 'contract' | 'billing' | 'assets' | 'tasks' | 'content' | 'captions'
+export type ClientTabKey = 'overview' | 'schedule' | 'brand' | 'contract' | 'billing' | 'assets' | 'tasks' | 'content' | 'captions'
 
 interface Props {
   defaultTab?: ClientTabKey
   overview: ReactNode
+  schedule: ReactNode
   brand: ReactNode
   contract: ReactNode
   billing: ReactNode
@@ -21,6 +22,7 @@ interface Props {
 
 const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] = [
   { key: 'overview', label: 'Resumen',    icon: LayoutGrid },
+  { key: 'schedule', label: 'Calendario', icon: CalendarClock },
   { key: 'brand',    label: 'Marca',      icon: Palette },
   { key: 'contract', label: 'Contrato',   icon: FileSignature },
   { key: 'billing',  label: 'Pagos',      icon: DollarSign },
@@ -33,6 +35,7 @@ const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] 
 export function ClientTabs({
   defaultTab = 'overview',
   overview,
+  schedule,
   brand,
   contract,
   billing,
@@ -73,6 +76,9 @@ export function ClientTabs({
 
       <TabsContent value="overview" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
         {overview}
+      </TabsContent>
+      <TabsContent value="schedule" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+        {schedule}
       </TabsContent>
       <TabsContent value="brand" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
         {brand}

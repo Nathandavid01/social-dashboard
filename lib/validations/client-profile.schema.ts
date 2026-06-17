@@ -34,6 +34,21 @@ const emailMaybe = z
   .transform((v) => (v === '' ? null : v ?? null))
   .refine((v) => v === null || v === undefined || /.+@.+\..+/.test(v), 'Email inválido')
 
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/ // HH:MM 24h
+
+const timeMaybe = z
+  .string()
+  .nullable()
+  .optional()
+  .or(z.literal(''))
+  .transform((v) => (v === '' ? null : v ?? null))
+  .refine((v) => v === null || TIME_RE.test(v), 'Hora inválida (HH:MM 24h)')
+
+const postingScheduleSchema = z
+  .record(z.string().regex(/^[0-6]$/, 'Día inválido (0-6)'), z.string().regex(TIME_RE, 'Hora inválida (HH:MM 24h)'))
+  .nullable()
+  .optional()
+
 export const clientProfilePatchSchema = z
   .object({
     owner_name: text200,
@@ -43,6 +58,8 @@ export const clientProfilePatchSchema = z
     logo_url: z.string().nullable().optional(),
     logo_dark_url: z.string().nullable().optional(),
     posting_days: z.array(z.number().int().min(0).max(6)).max(7).optional(),
+    posting_time: timeMaybe,
+    posting_schedule: postingScheduleSchema,
     video_threshold: z.union([z.number().int().min(0).max(500), z.string()]).optional().transform((v) => {
       if (v === undefined || v === '') return undefined
       const n = typeof v === 'string' ? parseInt(v, 10) : v

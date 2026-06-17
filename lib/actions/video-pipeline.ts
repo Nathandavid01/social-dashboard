@@ -21,6 +21,8 @@ export interface PipelineVideoSlots {
 /** One "video" card = a content_idea plus its uploaded media, grouped by kind. */
 export interface PipelineVideo extends ContentIdea {
   videos: PipelineVideoSlots
+  /** Person this video is assigned to (via its production task). null = unassigned. */
+  assignee?: { id: string; full_name: string | null; avatar_url: string | null } | null
 }
 
 /** A client with its pipeline videos and read-only brand-kit assets. */
@@ -160,7 +162,11 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
       .select(
         `
         *,
-        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*)
+        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
+        production_task:production_tasks!content_ideas_production_task_id_fkey(
+          id,
+          assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)
+        )
       `,
       )
       .eq('client_id', clientId)
@@ -187,15 +193,21 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
 
   const videos: PipelineVideo[] = []
   for (const raw of ideasRes.data ?? []) {
-    const row = raw as unknown as ContentIdea & { videos?: ContentIdeaVideo[] | null }
+    const row = raw as unknown as ContentIdea & {
+      videos?: ContentIdeaVideo[] | null
+      production_task?: { assigned_to?: { id: string; full_name: string | null; avatar_url: string | null } | null } | null
+    }
     const slots = emptySlots()
     for (const v of row.videos ?? []) {
       const kind = v.kind as ContentIdeaVideoKind
       if (!(kind in slots)) continue
       slots[kind].push(v)
     }
-    const { videos: _joined, ...idea } = row
-    videos.push({ ...(idea as ContentIdea), videos: slots })
+    // PostgREST types a to-one join as an object|array; normalize to one.
+    const task = Array.isArray(row.production_task) ? row.production_task[0] : row.production_task
+    const assignee = task?.assigned_to ?? null
+    const { videos: _joined, production_task: _task, ...idea } = row
+    videos.push({ ...(idea as ContentIdea), videos: slots, assignee })
   }
 
   // PostgREST types the to-one assignee join as an array; normalize to one object.

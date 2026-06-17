@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { updateIdeaStatus, deleteContentIdea } from '@/lib/actions/content-ideas'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useToast } from '@/lib/hooks/use-toast'
 import {
   Film,
@@ -63,7 +64,8 @@ interface IdeaCardProps {
 export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCardProps) {
   const { toast } = useToast()
   const [expanded, setExpanded] = useState(false)
-  const [, startTransition] = useTransition()
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const clientName = idea.client?.name ?? clients.find((c) => c.id === idea.client_id)?.name ?? '—'
   const typeCfg = TYPE_CONFIG[idea.content_type]
@@ -84,10 +86,15 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
   }
 
   function handleDelete() {
-    if (!confirm('¿Eliminar esta idea?')) return
     startTransition(async () => {
-      await deleteContentIdea(idea.id)
+      const result = await deleteContentIdea(idea.id)
+      if (result && 'error' in result && result.error) {
+        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        return
+      }
+      setConfirmDeleteOpen(false)
       onDelete(idea.id)
+      toast({ title: 'Idea eliminada' })
     })
   }
 
@@ -102,8 +109,16 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
       idea.hashtags_suggestion && `\n## Hashtags\n${idea.hashtags_suggestion}`,
       idea.rationale && `\n## Por qué\n${idea.rationale}`,
     ].filter(Boolean).join('\n')
-    await navigator.clipboard.writeText(text)
-    toast({ title: 'Brief copiado al portapapeles' })
+    try {
+      await navigator.clipboard.writeText(text)
+      toast({ title: 'Brief copiado al portapapeles' })
+    } catch {
+      toast({
+        title: 'No se pudo copiar',
+        description: 'Tu navegador bloqueó el portapapeles.',
+        variant: 'destructive',
+      })
+    }
   }
 
   return (
@@ -148,7 +163,7 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
                 <Trash2 className="mr-2 h-3.5 w-3.5" /> Descartar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={() => setConfirmDeleteOpen(true)} className="text-destructive focus:text-destructive">
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
                 Eliminar permanentemente
               </DropdownMenuItem>
@@ -245,6 +260,17 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
           </Button>
         </div>
       </CardContent>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title="¿Eliminar esta idea?"
+        description="Se borrará permanentemente y no se puede deshacer. Si solo quieres quitarla del flujo, usa “Descartar”."
+        confirmLabel="Eliminar"
+        destructive
+        loading={isPending}
+        onConfirm={handleDelete}
+      />
     </Card>
   )
 }

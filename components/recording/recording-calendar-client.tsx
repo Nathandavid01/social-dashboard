@@ -508,7 +508,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           )}
         </div>
         <Select value={filterVideographer} onValueChange={setFilterVideographer}>
-          <SelectTrigger className="h-8 w-[160px] text-xs">
+          <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
             <SelectValue placeholder="Todos los videógrafos" />
           </SelectTrigger>
           <SelectContent>
@@ -517,7 +517,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </SelectContent>
         </Select>
         <Select value={filterClient} onValueChange={setFilterClient}>
-          <SelectTrigger className="h-8 w-[160px] text-xs">
+          <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
             <SelectValue placeholder="Todos los clientes" />
           </SelectTrigger>
           <SelectContent>

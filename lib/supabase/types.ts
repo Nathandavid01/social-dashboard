@@ -1,5 +1,6 @@
 export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'team_member'
 export type UserStatus = 'active' | 'inactive'
+export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type ClientStatus = 'active' | 'paused' | 'onboarding'
 export type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
@@ -19,7 +20,11 @@ export interface Profile {
   avatar_url: string | null
   role: UserRole
   status: UserStatus
+  approval_status: UserApprovalStatus
   title: string | null
+  /** Admin-granted areas the user may reach (list of area hrefs). null = no
+   * per-user restriction → role defaults apply. See lib/auth/areas.ts. */
+  area_access?: string[] | null
   nav_preferences?: NavPreferences
   created_at: string
   updated_at: string
@@ -404,6 +409,8 @@ export interface ContentIdea {
   submitted_at: string | null
   recording_date: string | null
   publish_date: string | null
+  /** User-settable due date (fecha límite) for the video's work. null = none. */
+  deadline: string | null
   metricool_post_id: number | null
   metricool_uuid: string | null
   posted_at: string | null
@@ -421,7 +428,7 @@ export interface ContentIdea {
 export interface IdeaWithPipeline extends ContentIdea {
   recordingScheduled: boolean
   videos: ContentIdeaVideo[]
-  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms'>>) | null
+  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms' | 'status'>>) | null
   /** Person the linked production task is assigned to (null when unassigned).
    * avatar_url is optional so optimistic updates (from a name-only profile list)
    * still type-check; the fetched data includes it. */

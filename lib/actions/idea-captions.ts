@@ -1,6 +1,5 @@
 'use server'
 
-import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
@@ -9,8 +8,7 @@ import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
-
-const CAPTION_MODEL = 'claude-sonnet-4-6'
+import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 
 /**
  * Generate a caption for a specific idea, grounded in the idea's hook +
@@ -26,9 +24,8 @@ export async function generateIdeaCaption(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return { error: 'ANTHROPIC_API_KEY no está configurado en el servidor.' }
-  }
+  const configError = captionConfigError(process.env)
+  if (configError) return { error: configError }
 
   const supabase = await createClient()
   const { data: idea } = await supabase
@@ -81,17 +78,7 @@ export async function generateIdeaCaption(
   })
 
   try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    const res = await anthropic.messages.create({
-      model: CAPTION_MODEL,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    })
-    const caption = res.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('')
-      .trim()
+    const caption = await generateCaptionText(prompt)
 
     if (!caption) return { error: 'La IA no devolvió caption' }
 

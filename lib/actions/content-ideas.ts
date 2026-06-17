@@ -58,7 +58,7 @@ export async function getIdeacionPipeline(filter?: {
     .from('content_ideas')
     .select(`
       *,
-      client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms),
+      client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms, status),
       recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status),
       videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
       production_task:production_tasks!content_ideas_production_task_id_fkey(
@@ -220,19 +220,20 @@ export async function updateIdeaStatus(id: string, status: ContentIdeaStatus) {
 // ── Inline date editing (recording / publish) ────────────────────────────────
 
 /**
- * Update an idea's recording and/or publish dates inline.
+ * Update an idea's recording, publish and/or deadline dates inline.
  * Pass `null` for a field to clear it. Omit a field to leave it unchanged.
  * Dates are date-only strings ('YYYY-MM-DD').
  */
 export async function updateIdeaDates(
   ideaId: string,
-  dates: { recording_date?: string | null; publish_date?: string | null },
+  dates: { recording_date?: string | null; publish_date?: string | null; deadline?: string | null },
 ) {
   const supabase = await createClient()
 
-  const patch: { recording_date?: string | null; publish_date?: string | null } = {}
+  const patch: { recording_date?: string | null; publish_date?: string | null; deadline?: string | null } = {}
   if ('recording_date' in dates) patch.recording_date = dates.recording_date || null
   if ('publish_date' in dates) patch.publish_date = dates.publish_date || null
+  if ('deadline' in dates) patch.deadline = dates.deadline || null
   if (Object.keys(patch).length === 0) return { success: true }
 
   const { error } = await supabase.from('content_ideas').update(patch).eq('id', ideaId)
@@ -241,6 +242,10 @@ export async function updateIdeaDates(
   await logIdeaActivity(supabase, { ideaId, action: 'status_changed', metadata: { dates: patch } })
   revalidatePath('/planning')
   revalidatePath('/recording-calendar')
+  revalidatePath('/pipeline')
+  // The deadline editor + badge live on the client batch view too — revalidate it
+  // so an inline date edit isn't left stale until a full reload.
+  revalidatePath('/clients/[id]/batch', 'page')
   return { success: true }
 }
 

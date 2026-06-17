@@ -4,42 +4,127 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.29 — 2026-06-08
+## v2.46 — 2026-06-16
 
-### Formato por red al crear un video
-- Al crear un **Nuevo video** ahora eliges el **formato para cada red** (Instagram → Reel/Carrusel/Imagen/Historia, TikTok → Video/Foto, Facebook → Reel/Imagen/Historia/Video, LinkedIn → Publicación/Video/Documento).
-- Un check por red incluye/excluye esa red para el video; el caption sigue siendo **uno solo para todas**. No cambia a dónde se publica (eso viene del cliente), solo el formato.
-- ⚠️ **Requiere migración:** aplicar `supabase/migrations/0034_platform_formats.sql` en Supabase (añade la columna `platform_formats`). Hasta aplicarla, los formatos se guardan en blanco sin romper nada.
+### Pipeline: tarjetas planificadas y flujo idea → caption → grabación
+- Las **tarjetas planificadas** muestran el **logo del cliente**, días desde el inicio y días en la fila actual, con un estilo distinto (borde punteado celeste, sin barra lateral).
+- Al hacer clic en una tarjeta planificada se abre el **flujo de un solo video** (idea → caption → grabación) con la fecha de publicación ya calculada.
+- El **caption** solo se genera cuando la idea tiene **hook y brief visual** completos; el tablero se actualiza al guardar.
+- **Nuevo video** lista todos los clientes activos con el estado de su pipeline.
 
-## v2.28 — 2026-06-08
+# v2.45 — 2026-06-16
 
-### Un video a la vez en el lote
-- La vista de lote ahora se trabaja **un video a la vez**: en lugar de mostrar todas las tarjetas juntas, hay un **navegador** (números + flechas + "Video X de N") y se ve **una sola tarjeta** enfocada.
-- Saltas entre videos con un clic; al filtrar por estado (Todos / Por grabar / Grabados) el navegador se reinicia al primero.
-- Menos ruido y más foco para escribir la idea, el caption y subir la grabación de cada video.
+- **El tablero (Content Pipeline) ahora da la bienvenida cuando está vacío.** Si todavía no hay ningún video, en vez de mostrar 7 columnas con un "—" (que parecía roto), aparece un mensaje claro que explica el flujo (idea → título → caption → grabación → edición → aprobación → publicación) con un botón para **crear el primer video**.
 
-## v2.27 — 2026-06-08
+## v2.44 — 2026-06-16
 
-### Aprobar el video desde el lote
-- En cada tarjeta de video del lote ahora aparece el **botón de aprobación**: según el estado del video, deja **enviar a revisión**, **aprobar** (con confirmación que muestra el cliente, para no aprobar el video equivocado) o **pedir cambios**.
-- Solo quien tiene permiso de aprobar (owner / supervisor) ve las acciones; el resto ve un aviso de "sin permiso".
-- Una vez aprobado, la tarjeta lo muestra como **Aprobado** y queda listo para publicarse en su fecha.
+- **El Idea Lab te muestra que está trabajando.** Mientras la IA genera ideas (que puede tardar unos segundos), el panel de resultados ahora muestra **tarjetas "fantasma" animadas** y un texto *"Generando N ideas con IA…"*, en vez de quedarse con la pantalla vacía como si no pasara nada.
 
-## v2.26 — 2026-06-08
+## v2.43 — 2026-06-16
 
-### Una sola caption para todas las redes
-- El caption de cada video deja de ser **por plataforma**: ahora escribes **una sola caption** que se publica igual en **todas las redes del cliente** (Instagram, TikTok, Facebook…).
-- En el editor desaparece el selector de plataforma; en su lugar dice **"Una caption para todas las redes"** con los íconos de las redes del cliente.
-- La **generación con IA** crea la caption pensada exactamente para las redes a las que se va a publicar (las mismas que usa la publicación a Metricool), no para una sola.
-- Cambio **sin migración de base de datos**: la columna anterior se conserva y queda en blanco (no afectaba a qué redes se publica — eso siempre vino del cliente).
+Más usabilidad, ahora en celular y en consistencia de idioma:
+
+- **Clientes se ve bien en celular.** La lista de clientes ahora muestra **tarjetas** en pantallas pequeñas (nombre, estado, plataformas, si tiene Metricool/IA y el menú de acciones) en vez de una tabla que escondía casi todas las columnas. En pantalla grande sigue igual, como tabla.
+- **Todo en español.** Se tradujeron textos que habían quedado en inglés en la sección de Clientes: el título "Clients" → **Clientes**, "Add Client" → **Agregar cliente**, los estados **Activo/Pausado**, y los encabezados de crear/editar cliente.
+- **Detalle:** la tarjeta de "Activos" ya no aparece cuando todavía no tienes clientes (antes mostraba "Activos 0", que parecía un error).
+
+## v2.42 — 2026-06-16
+
+Tanda de mejoras para que la app se sienta más fácil y confiable de usar:
+
+- **Confirmación bonita antes de borrar (ya no el cuadro feo del navegador).** Eliminar un cliente o una idea ahora abre un diálogo claro con tono de advertencia y botón rojo, en español — en vez del `confirm()` gris del sistema operativo. Borrar una idea además **avisa con un toast** cuando termina (antes no decía nada).
+- **Pantalla de "sin clientes" con acción.** Cuando no hay clientes, ahora ves un botón **"Agregar cliente"** (y si filtraste y no hay resultados, un **"Limpiar filtros"**) — en vez de una pantalla vacía sin salida.
+- **El tablero (Content Pipeline) funciona en celular/tablet.** Los botones para **mover un video** entre etapas ahora se ven y se pueden tocar en pantallas táctiles (antes solo aparecían al pasar el mouse, imposible en celular), y la **búsqueda** ya no se esconde en móvil.
+- **Detalles pulidos:** los botones "Filtros" y "Agrupar" (que aún no hacen nada) ahora se ven deshabilitados con "Próximamente" en vez de parecer rotos; se arregló una caja de texto que se veía oscura en modo claro al asignar a producción; y copiar un brief ya no falla en silencio si el navegador bloquea el portapapeles.
+
+## v2.41 — 2026-06-16
+
+- **Sabes cuándo se va a publicar cada video, justo antes de enviarlo.** En **Ideas Aprobadas → Captions y Metricool**, cada idea ahora muestra un aviso (escrito por la IA) con **cuándo y dónde** se publicará su próximo contenido según la **cadencia del cliente** — p. ej. *"📅 El Reel de La Placita Café se publicará el viernes 20 de junio en Instagram, Facebook y TikTok."* Además, la **fecha de programación se rellena sola** con ese próximo día de cadencia, así no hay que adivinarla. (El aviso se cachea por día, así que no gasta API de más.)
+
+## v2.40 — 2026-06-16
+
+- **Los captions ahora los escribe Grok (xAI) en vez de Claude.** Misma calidad de redacción (mismo prompt, misma voz de marca y mismos ejemplos reales del cliente de Metricool), pero más rápido y mucho más económico por caption. Aplica en todos los lugares donde se genera caption: ideas, ideas aprobadas, caption rápido y la automatización de videos aprobados. Si en algún momento se prefiere volver a Claude, se cambia con una sola variable (`CAPTION_PROVIDER=claude`) — sin tocar código. *(El chat y la generación de ideas siguen usando Claude.)*
+
+- **Edita la cadencia de cada cliente tú mismo:** define qué días postea cada cliente y el tipo de cada día (**R = Reel** / **P = Post**) sin depender de nadie. Está en **dos lugares**: en el **perfil del cliente → Calendario** (tocas los días) y en **Producción → Cadencia**, donde ahora la parrilla es **clickeable** (tocas una celda para alternar R → P → vacío y se guarda solo).
+- **Importar clientes de Metricool:** en **Clientes**, el botón **"Importar de Metricool"** lista las marcas conectadas en Metricool que aún no son clientes y las crea en un clic (con su *blog id* enlazado) — sin retipear.
+
+## v2.38 — 2026-06-15
+
+- **Cadencia semanal por cliente, en vivo:** la pestaña **Producción → Cadencia** ahora muestra la parrilla real de cada cliente (clientes × días, con píldoras **R = Reel** y **P = Post** y un **Total** semanal), leída directo de la base de datos en vez de una lista fija desactualizada. Se cargó la cadencia actual de **36 clientes** (114 publicaciones/semana), así que cada cliente ya tiene su frecuencia atada. Edítala desde el botón **Horarios**.
+
+## v2.37 — 2026-06-14
+
+- **Arreglo: las áreas/permisos de usuario ahora SÍ se guardan.** La base de datos había perdido la regla de seguridad que permite al administrador editar el perfil de **otros** usuarios, así que al asignar áreas (o cambiar rol/estado) parecía guardarse pero no cambiaba nada. Restaurada la regla; ahora el administrador puede definir a qué secciones entra cada persona y se persiste correctamente. Además, si alguna vez una edición no tiene permiso, ahora se avisa con un error claro en vez de fingir que se guardó.
+
+## v2.36 — 2026-06-14
+
+- **El formato del post ahora coincide con el tipo de la idea:** al programar/publicar desde el Lab de Ideas (o el caption rápido), el video se sube a la red social con el **formato correcto según el tipo planeado** — Reel como Reel, Story como Story, Post/Carrusel como publicación de feed — en Instagram y Facebook. Antes solo el Reel se enviaba con su formato; Story y Post salían como video plano. Si la red rechaza el formato, se reintenta sin él para no bloquear la publicación.
+
+## v2.35 — 2026-06-14
+
+- **Registro público deshabilitado:** ya no cualquiera puede crear su cuenta desde la pantalla de inicio de sesión. Las cuentas nuevas las crea un administrador **desde adentro de la app**, controlando quién entra.
+- **Gestión de usuarios en Configuración → Usuarios:** un solo lugar (solo administradores) para crear cuentas, asignar rol (Owner/Supervisor/Editor/Videógrafo) y controlar permisos. **Equipo** queda como vista del equipo con un enlace a este panel.
+- **Permisos por área por usuario:** el administrador define a qué secciones de la app puede entrar cada persona, independientemente de su rol. Las áreas no permitidas se ocultan del menú **y** se bloquean por URL (si la escriben a mano, se les redirige a Inicio). El Owner nunca queda bloqueado.
+- **Aprobación de cuentas:** infraestructura para que cuentas nuevas queden "pendientes" hasta que un Owner las apruebe con un rol (queda lista por si se reactiva el auto-registro).
+- **Cambio de contraseña self-service:** cada usuario cambia su propia contraseña desde **menú de usuario → Cambiar contraseña**, sin depender de un administrador ni de correos.
+
+## v2.34 — 2026-06-14
+
+- **Fecha de programación más confiable (Captions → Metricool):** al programar un caption —en **Ideas aprobadas** o en **Caption rápido**— la fecha por defecto ("mañana") ya no se corría un día de más cuando programabas de noche (se calculaba en horario UTC). Ahora usa el día local correcto.
+- **No se puede programar en el pasado:** el calendario se limita a **hoy en adelante**, el botón de enviar se desactiva y aparece un aviso si la fecha quedó vencida. Para **autopublicar** (Caption rápido con video) también se bloquea una **hora ya pasada** del mismo día — así un post nunca se publica solo con fecha/hora vencida.
+
+## v2.33 — 2026-06-13
+
+- **Menú móvil ahora hace scroll:** el menú lateral en celular (el cajón que se abre con el botón ☰) no dejaba ver los últimos ítems (Verificación, Automatización, Configuración) porque la lista se cortaba sin poder hacer scroll. Ahora el encabezado queda fijo y la lista de enlaces se desplaza, así alcanzas todas las secciones.
+
+## v2.32 — 2026-06-12
+
+- **Logo nuevo:** ícono de la app rediseñado — una "N" dorada sobre negro (estilo Nate Media). Se ve en la pantalla de inicio del teléfono, la pestaña del navegador y al instalar la app.
+
+## v2.31 — 2026-06-12
+
+- **App instalable (PWA):** ahora puedes instalar el dashboard en tu teléfono o computadora como una app (ícono propio, pantalla completa). Funciona con un service worker que además muestra una página "Sin conexión" cuando no hay internet y carga más rápido los recursos estáticos.
+- **Íconos PNG:** íconos nuevos en PNG para que el ícono se vea bien en iPhone (pantalla de inicio) y Android.
+- **Mejor en celulares:** los filtros (Captions, Grabaciones, Publicados, Metricool) ya no se cortan en pantallas pequeñas y las tarjetas de resumen se apilan en una columna en teléfonos.
+
+## v2.30 — 2026-06-08
+
+### Historial de subidas por persona (perfil del miembro)
+- En el **perfil de cada miembro** (Equipo → persona) ahora hay una sección **"Videos subidos"** con su desglose **Raw · B-roll · Editados**, el **% editado** y **cuándo subió por última vez**.
+- **Filtros de tiempo:** **Todo / Este mes / Esta semana** — para comparar la producción de cada quien por período.
+- Sin migración (usa los datos de subidas que ya existen).
+
+### Pipeline: filtros que se guardan, estado vacío y accesibilidad
+- **Filtros en la URL:** el filtro de cliente y de persona (incluido "Mis videos") ahora se guardan en la dirección (`?cliente=…&persona=…`), así que puedes **compartir/guardar** una vista filtrada y no se pierde al volver al pipeline. Los cards "Planificados" ahora respetan los mismos filtros.
+- **Estado vacío claro:** si un filtro no calza con nada, en vez de columnas vacías sale un mensaje ("Ningún batch coincide…" / "No tienes videos asignados…") con un botón **Quitar filtros**.
+- **Accesibilidad del tablero:** el área de columnas es enfocable con teclado y se desplaza con las **flechas** (←/→/Home/End); los botones de mover lote aparecen al enfocar con teclado (antes solo con el mouse).
+
+### Más señal en los conteos de videos subidos (Equipo)
+- **Última subida:** cada miembro muestra **"última subida hace X días"** con color (verde reciente / ámbar / rojo si lleva mucho sin subir) para detectar a quién se le quedó parado el trabajo.
+- **Ratio de edición:** badge **"Editado X%"** (editados ÷ raw) — cuánto de lo grabado realmente se editó.
+- **Leaderboard:** medalla 🥇/🥈/🥉 para los tres que más videos han subido.
+- Sin migración (usa `uploaded_at` que ya se guarda).
+
+### Mejoras al pipeline y a las fechas límite (auditoría con equipo de agentes)
+- **Fechas límite visibles en el tablero:** cada tarjeta de cliente en el pipeline muestra ahora un badge **Atrasado/Pronto** con la urgencia del video más apremiante del lote — se ve sin abrir el cliente.
+- **Filtro por fecha límite** en el lote: además de Por grabar/Grabados, puedes filtrar **Atrasados / Pronto** para atacar primero lo urgente.
+- **Filtro "Asignado a" arreglado:** ahora aparece un chip para **cada** persona con un video en el lote (antes solo salía el dueño mayoritario, así que alguien con pocos videos no podía filtrarse aunque "Mis videos" sí lo mostrara).
+- **Fecha límite en "Mi Lista":** los videos asignados muestran el badge **Atrasado/Pronto** consistente (antes solo un aviso de "pronto").
+- **Fix de refresco:** editar una fecha en el lote ahora revalida la vista del cliente (el badge ya no se queda viejo hasta recargar).
+
+### Fechas límite por video + cuántos videos subió cada persona
+- **Fecha límite (deadline) por video:** ahora puedes ponerle una **fecha límite** a cada video (en la tarjeta de "La idea", junto a la fecha de publicación). En el lote aparece un **badge de urgencia**: **Atrasado** (rojo) si la fecha ya pasó, **Pronto** (ámbar) si vence en ≤2 días — y desaparece cuando el video se publica. Las fechas son por día (sin hora) para que no se corran por zona horaria.
+- **Videos subidos por persona:** en **Equipo**, cada miembro muestra cuántos videos ha subido, separados en **Raw · B-roll · Editados** (+ total), para ver de un vistazo la producción de cada quien. No requiere migración (usa el `uploaded_by` que ya se guarda en cada archivo).
+- **Nota:** la fecha límite necesita la migración `0034_content_idea_deadline.sql` aplicada para poder **guardarse** (ver/leer funciona igual antes). Los conteos de subidas funcionan sin migración.
 
 ## v2.25 — 2026-06-08
 
-### Página "Actividad" — quién hizo qué
-- Nueva página **Actividad** en el menú lateral: un **registro en vivo** de todo lo que hace el equipo sobre los videos (grabar, generar/editar caption, subir video, cambiar estado, aprobar, publicar a Metricool, asignar a producción).
-- Cada línea dice **quién**, **qué hizo** (en español claro) y **dónde** (título del video · cliente), con la **hora relativa** ("hace 5 min").
-- **Filtro por persona** con el conteo de acciones de cada una, para que cada quien vea su propio aporte de un vistazo.
-- Visible para owner, supervisor, editor y videógrafo (permiso `activity.read`).
+### Pipeline más claro, asignación por persona, aprobación en el lote y Reels
+- **Estado a la vista en el pipeline:** cada tarjeta de cliente muestra ahora su **estado de cuenta** (Activo / Pausado / Onboarding) y un **desglose del estado de sus videos** (cuántos van en Idea, Título, Caption, Video, Edición, Aprobación, Publicación) — todo sin abrir el cliente.
+- **"Mis videos":** filtro nuevo en el pipeline para ver de un toque los lotes que tienen algún video asignado a ti. El filtro por persona ahora calza si **cualquiera** de los videos del lote es de esa persona (antes solo miraba al dueño mayoritario). Cada tarjeta de video muestra a quién está asignado y resalta **"Asignado a ti"** cuando te toca.
+- **Aprobar dentro del lote:** cuando un video tiene su **versión editada subida**, aparece un botón de **Aprobación** en su tarjeta (para todos los clientes). Aprobar ahí dispara la **auto-publicación a Metricool**, igual que en la tabla de QC.
+- **Formato Reel:** si el video es un **Reel** (`content_type = R`), ahora se publica con el **formato Reel** en Instagram y Facebook (TikTok ya es video nativo). Si Metricool rechazara el formato, se reintenta una vez como video normal para que la publicación nunca se rompa.
+- **Nota:** la auto-publicación al aprobar requiere la migración `0032_idea_posting.sql` aplicada (ver handoff). Sin ella, la aprobación funciona igual; solo no dispara el post.
 
 ## v2.24 — 2026-06-07
 

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { requirePermission } from '@/lib/auth/server'
 import type { ProductionContentType, ProductionPriority, ProductionTaskStatus } from '@/lib/supabase/types'
 
 // ── Schedules ────────────────────────────────────────────────────────────────
@@ -27,6 +28,11 @@ export async function upsertProductionSchedules(
   schedules: { day_of_week: number; content_type: ProductionContentType; assigned_editor_id?: string | null; assigned_designer_id?: string | null }[],
   existingDays?: number[]
 ) {
+  try {
+    await requirePermission('production.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
   const supabase = await createClient()
 
   // Remove all existing schedules for this client if we're doing a full replace

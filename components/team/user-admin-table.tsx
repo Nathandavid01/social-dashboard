@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { RoleSelector } from '@/components/team/role-selector'
+import { AreaAccessDialog } from '@/components/team/area-access-dialog'
+import { ResetPasswordDialog } from '@/components/team/reset-password-dialog'
+import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
 import type { Profile, UserStatus } from '@/lib/supabase/types'
 
@@ -20,10 +23,13 @@ export function UserAdminTable({
   return (
     <section className="rounded-xl border bg-card">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b p-4">
-        <h2 className="text-base font-bold tracking-tight">Usuarios y permisos</h2>
-        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
-          {users.length} {users.length === 1 ? 'usuario' : 'usuarios'}
-        </span>
+        <div className="flex min-w-0 items-baseline gap-2">
+          <h2 className="text-base font-bold tracking-tight">Usuarios y permisos</h2>
+          <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+            {users.length} {users.length === 1 ? 'usuario' : 'usuarios'}
+          </span>
+        </div>
+        <CreateUserDialog />
       </div>
       <div className="divide-y">
         {users.map((u) => (
@@ -87,6 +93,13 @@ function UserRow({ user, isSelf }: { user: Profile; isSelf: boolean }) {
       <span className="min-w-0 shrink-0 truncate text-xs text-muted-foreground sm:w-44">{user.email}</span>
       <div className="flex shrink-0 items-center gap-2">
         <RoleSelector userId={user.id} userName={user.full_name ?? user.email} currentRole={user.role} />
+        <AreaAccessDialog
+          userId={user.id}
+          userName={user.full_name ?? user.email}
+          currentAccess={user.area_access ?? null}
+          role={user.role}
+        />
+        <ResetPasswordDialog userId={user.id} userName={user.full_name ?? user.email} />
         <Button
           size="sm"
           variant={inactive ? 'outline' : 'ghost'}

@@ -2,10 +2,96 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { assertOwner } from '@/lib/auth/server'
-import type { UserStatus } from '@/lib/supabase/types'
+import { validateNewUser } from '@/lib/utils/user-admin-core'
+import { validateNewPassword } from '@/lib/utils/password-core'
+import { AREAS } from '@/lib/auth/areas'
+import type { UserRole, UserStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
+
+/**
+ * Owner-only: reset another user's password to a new (temporary) one. For when
+ * someone forgets their password — they can't use the self-service change (that
+ * needs them logged in), so an admin sets a new temp password to share. Uses the
+ * service-role admin API. The user changes it again from their account.
+ */
+export async function resetUserPassword(userId: string, password: string): Promise<Result> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const valid = validateNewPassword(password)
+  if (!valid.ok) return { error: valid.error }
+
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' }
+
+  const { error } = await admin.auth.admin.updateUserById(userId, { password })
+  if (error) return { error: error.message }
+
+  revalidatePath('/settings/users')
+  return { ok: true }
+}
+
+/**
+ * Owner-only: create a brand-new team user with a role (= their permission set)
+ * and a temporary password they change on first login. Uses the service-role
+ * admin API to create the auth user (email pre-confirmed), then sets the chosen
+ * role on the profile the signup trigger created. The same table lets the owner
+ * change a user's role/permissions afterward via RoleSelector.
+ */
+export async function createTeamUser(input: {
+  email: string
+  fullName: string
+  role: UserRole
+  password: string
+}): Promise<{ ok?: true; userId?: string; error?: string }> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const valid = validateNewUser(input)
+  if (!valid.ok) return { error: valid.error }
+
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' }
+
+  const email = input.email.trim().toLowerCase()
+  const fullName = input.fullName.trim()
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: input.password,
+    email_confirm: true,
+    user_metadata: { full_name: fullName },
+  })
+  if (error) return { error: error.message }
+  const userId = data.user?.id
+  if (!userId) return { error: 'No se pudo crear el usuario.' }
+
+  // The handle_new_user trigger inserts the profile with the default role; set
+  // the chosen role + name with the admin client (RLS-free, just-created row).
+  // Owner-created users skip the approval queue — the owner vouches for them.
+  const { error: updErr } = await admin
+    .from('profiles')
+    .update({
+      role: input.role,
+      full_name: fullName,
+      status: 'active',
+      approval_status: 'approved',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+  if (updErr) return { error: updErr.message }
+
+  revalidatePath('/team')
+  return { ok: true, userId }
+}
 
 /** Owner-only: edit a member's display name and org title. */
 export async function updateUserProfile(
@@ -29,6 +115,43 @@ export async function updateUserProfile(
   if (error) return { error: error.message }
 
   revalidatePath('/team')
+  return { ok: true }
+}
+
+/**
+ * Owner-only: set the per-user area access list. Pass `null` to clear the
+ * restriction (the user falls back to their role defaults). Any unknown hrefs
+ * are dropped so only real areas are ever stored.
+ */
+export async function setUserAreaAccess(userId: string, hrefs: string[] | null): Promise<Result> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  let value: string[] | null = null
+  if (hrefs !== null) {
+    const valid = new Set(AREAS.map((a) => a.href))
+    value = Array.from(new Set(hrefs.filter((h) => valid.has(h))))
+  }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ area_access: value, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select('id')
+  if (error) return { error: error.message }
+  // RLS can silently filter the row (0 updated, no error) if the caller lacks
+  // permission — surface that instead of pretending it saved.
+  if (!data || data.length === 0) {
+    return { error: 'No se pudo guardar el acceso (sin permiso para editar este usuario).' }
+  }
+
+  revalidatePath('/settings/users')
+  revalidatePath('/team')
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
 

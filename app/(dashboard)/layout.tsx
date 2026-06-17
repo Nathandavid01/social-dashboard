@@ -13,6 +13,7 @@ import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getCurrentRole } from '@/lib/auth/server'
+import { resolveApprovalRedirect } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 export default async function DashboardLayout({
@@ -42,6 +43,16 @@ export default async function DashboardLayout({
     if (profile && profile.status === 'inactive') {
       await supabase.auth.signOut()
       redirect('/login?deactivated=1')
+    }
+
+    // Accounts awaiting approval (or rejected) can't enter the dashboard. Pending
+    // users see the waiting screen; rejected users get signed out at /login.
+    const approvalRedirect = resolveApprovalRedirect(profile)
+    if (approvalRedirect) {
+      if (profile?.approval_status === 'rejected') {
+        await supabase.auth.signOut()
+      }
+      redirect(approvalRedirect)
     }
   }
 
@@ -89,6 +100,7 @@ export default async function DashboardLayout({
           videoReviewCount={videoReviewCount ?? 0}
           planningPendingCount={planningPendingCount}
           navPreferences={profile?.nav_preferences}
+          areaAccess={profile?.area_access ?? null}
         />
         <SidebarAwareContent>
           <Topbar
