@@ -21,7 +21,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, created_at, platforms, status, posting_days, posting_time, metricool_blog_id')
+      .select('id, name, logo_url, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
   ])
@@ -57,7 +57,7 @@ export default async function PipelinePage() {
  */
 function buildPlannedClients(
   ideas: Awaited<ReturnType<typeof getIdeacionPipeline>>,
-  activeClients: { id: string; name: string; logo_url: string | null; created_at: string; platforms: string[] | null; status: string; posting_days: number[] | null; posting_time?: string | null; metricool_blog_id?: string | null }[],
+  activeClients: { id: string; name: string; logo_url: string | null; created_at: string; updated_at: string; platforms: string[] | null; status: string; posting_days: number[] | null; posting_time?: string | null; metricool_blog_id?: string | null }[],
 ): PlannedClient[] {
   // Count active (non-discarded) ideas per client to know who has started.
   const activeIdeasByClient = new Map<string, number>()
@@ -80,6 +80,7 @@ function buildPlannedClients(
       clientName: c.name,
       logoUrl: c.logo_url,
       createdAt: c.created_at,
+      inColumnSince: c.updated_at,
       platforms: (c.platforms ?? []) as SocialPlatform[],
       sessions: [nextVideo],
     })

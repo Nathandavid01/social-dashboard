@@ -23,8 +23,10 @@ export interface PlannedClient {
   clientId: string
   clientName: string
   logoUrl?: string | null
-  /** When the client was created — used to show days waiting without a first video. */
+  /** When the client was created — days since onboarding. */
   createdAt?: string | null
+  /** Last client update — proxy for when they entered this pipeline row. */
+  inColumnSince?: string | null
   platforms?: SocialPlatform[]
   sessions: PlannedSession[]
 }
@@ -300,10 +302,11 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
 /** Visual-only card: the client's next planned video (one slot, not a full session batch). */
 function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient; session: PlannedSession; onOpen: (clientId: string) => void }) {
   const isSingle = session.total <= 1
-  const daysWaiting = client.createdAt ? calendarDaysSince(client.createdAt) : null
-  const waitingLabel =
-    daysWaiting !== null
-      ? `Lleva ${formatDaysElapsedEs(daysWaiting)}`
+  const daysSinceStart = client.createdAt ? calendarDaysSince(client.createdAt) : null
+  const daysInRow = client.inColumnSince ? calendarDaysSince(client.inColumnSince) : daysSinceStart
+  const timingLabel =
+    daysSinceStart !== null
+      ? `${formatDaysElapsedEs(daysSinceStart)} desde inicio · ${formatDaysElapsedEs(daysInRow ?? 0)} en esta fila`
       : session.empty > 0
         ? (isSingle ? 'Por idear' : `${session.empty} por idear`)
         : 'Lleno'
@@ -347,9 +350,15 @@ function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient
           <div className="flex items-center gap-1.5 [&_svg]:h-3.5 [&_svg]:w-3.5">
             {client.platforms && client.platforms.length > 0 && <PlatformBadges platforms={client.platforms.slice(0, 4)} />}
           </div>
-          <span className="text-[10px] text-muted-foreground" title={client.createdAt ? `Cliente desde ${client.createdAt.slice(0, 10)}` : undefined}>
-            {waitingLabel}
-            {daysWaiting !== null && session.empty > 0 ? ' · Por idear' : ''}
+          <span
+            className="text-[10px] text-muted-foreground"
+            title={
+              client.createdAt
+                ? `Cliente desde ${client.createdAt.slice(0, 10)}${client.inColumnSince ? ` · En esta fila desde ${client.inColumnSince.slice(0, 10)}` : ''}`
+                : undefined
+            }
+          >
+            {timingLabel}
           </span>
         </div>
       </div>

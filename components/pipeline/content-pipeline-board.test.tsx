@@ -97,7 +97,8 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
       clientId: 'nd',
       clientName: 'Nathandavidts._',
       logoUrl: 'https://cdn.example/nd-logo.png',
-      createdAt: '2026-06-08',
+      createdAt: '2026-05-15',
+      inColumnSince: '2026-06-14',
       platforms: ['instagram'],
       sessions: [
         { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
@@ -109,8 +110,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
     expect(screen.getByText(/Publicación · Lun 8 jun/)).toBeInTheDocument()
-    expect(screen.getByText(/Lleva \d+ día/)).toBeInTheDocument()
-    expect(screen.getByText(/Por idear/)).toBeInTheDocument()
+    expect(screen.getByText(/desde inicio · .* en esta fila/)).toBeInTheDocument()
     expect(screen.getByText('Planificado')).toBeInTheDocument()
     const thumb = container.querySelector('article img[alt=""]') as HTMLImageElement | null
     expect(thumb?.src).toContain('nd-logo.png')
