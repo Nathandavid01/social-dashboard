@@ -2,13 +2,14 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, type BatchStageKey, type ClientBatch } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
+import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
 import { NewVideoDialog } from './new-video-dialog'
@@ -21,6 +22,9 @@ type Idea = IdeaWithPipeline
 export interface PlannedClient {
   clientId: string
   clientName: string
+  logoUrl?: string | null
+  /** When the client was created — used to show days waiting without a first video. */
+  createdAt?: string | null
   platforms?: SocialPlatform[]
   sessions: PlannedSession[]
 }
@@ -35,11 +39,13 @@ export function ContentPipelineBoard({
   ideas,
   plannedClients = [],
   allClients = [],
+  clientCadence = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
   /** Every active client — used by "Nuevo video" so you can pick any account. */
   allClients?: { id: string; name: string }[]
+  clientCadence?: Record<string, ClientCadence>
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -72,6 +78,11 @@ export function ContentPipelineBoard({
   }, [openClientId])
 
   const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
+
+  const pipelineByClient = useMemo(
+    () => buildClientPipelineIndex(ideas, clientCadence),
+    [ideas, clientCadence],
+  )
 
   const clients = useMemo(
     () => batches.map((b) => ({ id: b.clientId, name: b.clientName })).sort((a, b) => a.name.localeCompare(b.name)),
@@ -183,7 +194,11 @@ export function ContentPipelineBoard({
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <NewVideoDialog clients={allClients.length > 0 ? allClients : clients} />
+          <NewVideoDialog
+            clients={allClients.length > 0 ? allClients : clients}
+            pipelineByClient={pipelineByClient}
+            clientCadence={clientCadence}
+          />
         </div>
       </header>
 
@@ -282,9 +297,16 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
   )
 }
 
-/** Visual-only card: a planned recording session with empty slots waiting for ideas. */
+/** Visual-only card: the client's next planned video (one slot, not a full session batch). */
 function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient; session: PlannedSession; onOpen: (clientId: string) => void }) {
-  const slots = Math.min(session.total, 24) // cap the drawn boxes; count stays exact
+  const isSingle = session.total <= 1
+  const daysWaiting = client.createdAt ? calendarDaysSince(client.createdAt) : null
+  const waitingLabel =
+    daysWaiting !== null
+      ? `Lleva ${formatDaysElapsedEs(daysWaiting)}`
+      : session.empty > 0
+        ? (isSingle ? 'Por idear' : `${session.empty} por idear`)
+        : 'Lleno'
   return (
     <article
       onClick={() => onOpen(client.clientId)}
@@ -293,37 +315,71 @@ function PlannedSessionCard({ client, session, onOpen }: { client: PlannedClient
     >
       <div className="space-y-2.5 p-3 pl-3.5">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-muted text-[12px] font-bold text-muted-foreground">{client.clientName.slice(0, 1).toUpperCase()}</span>
+          <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-7 w-7 text-[10px]" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{client.clientName}</p>
-            <p className="truncate text-[10px] text-muted-foreground">{session.label} · {session.total} video{session.total === 1 ? '' : 's'}</p>
+            <p className="truncate text-[10px] text-muted-foreground">
+              {isSingle
+                ? (session.publishDate ? `Publicación · ${session.label}` : '1 video')
+                : `${session.label} · ${session.total} video${session.total === 1 ? '' : 's'}`}
+            </p>
           </div>
           <span className="shrink-0 rounded-full border border-dashed border-border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80">Planificado</span>
         </div>
 
-        {/* empty slot grid (visual placeholders, no DB rows) */}
-        <div className="grid grid-cols-6 gap-1">
-          {Array.from({ length: slots }).map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                'h-6 rounded-[5px] border',
-                i < session.filled ? 'border-transparent bg-cyan-500/30' : 'border-dashed border-border bg-muted/40',
-              )}
-            />
-          ))}
-        </div>
+        {isSingle ? (
+          <PipelineVideoThumb name={client.clientName} logoUrl={client.logoUrl} />
+        ) : (
+          <div className="grid grid-cols-6 gap-1">
+            {Array.from({ length: Math.min(session.total, 24) }).map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  'h-6 rounded-[5px] border',
+                  i < session.filled ? 'border-transparent bg-cyan-500/30' : 'border-dashed border-border bg-muted/40',
+                )}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center justify-between gap-2 pt-0.5">
           <div className="flex items-center gap-1.5 [&_svg]:h-3.5 [&_svg]:w-3.5">
             {client.platforms && client.platforms.length > 0 && <PlatformBadges platforms={client.platforms.slice(0, 4)} />}
           </div>
-          <span className="text-[10px] text-muted-foreground">
-            {session.empty > 0 ? `${session.empty} por idear` : 'Lleno'}
+          <span className="text-[10px] text-muted-foreground" title={client.createdAt ? `Cliente desde ${client.createdAt.slice(0, 10)}` : undefined}>
+            {waitingLabel}
+            {daysWaiting !== null && session.empty > 0 ? ' · Por idear' : ''}
           </span>
         </div>
       </div>
     </article>
+  )
+}
+
+/** Video-frame strip: real thumb when available, otherwise the client logo / initials. */
+function PipelineVideoThumb({
+  name,
+  logoUrl,
+  thumbUrl,
+}: {
+  name: string
+  logoUrl?: string | null
+  thumbUrl?: string | null
+}) {
+  const src = thumbUrl ?? logoUrl
+  if (src) {
+    return (
+      <div className="relative h-[42px] overflow-hidden rounded-md border border-border bg-muted/40">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      </div>
+    )
+  }
+  return (
+    <div className="grid h-[42px] place-items-center rounded-md border border-dashed border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+      {name.slice(0, 2)}
+    </div>
   )
 }
 

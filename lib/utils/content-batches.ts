@@ -1,4 +1,12 @@
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import {
+  countMetricoolScheduled,
+  findNextNewVideoSlot,
+  findNextQueuePublish,
+  formatScheduledPublish,
+  type ClientCadence,
+  type PublishSlotInfo,
+} from '@/lib/utils/client-pipeline-publish'
 
 /**
  * The board works in CLIENT BATCHES, not single videos: when you work a client
@@ -19,6 +27,116 @@ export const BATCH_STAGES = [
 
 export type BatchStageKey = (typeof BATCH_STAGES)[number]['key']
 const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) as Record<BatchStageKey, number>
+
+/** Spanish labels for pipeline stages (shared with batch view + Nuevo video dialog). */
+export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
+  idea: 'Idea',
+  title: 'Título',
+  caption: 'Caption',
+  video: 'Video',
+  edited: 'Edición',
+  approval: 'Aprobación',
+  publication: 'Publicación',
+}
+
+export type { ClientCadence, PublishSlotInfo } from '@/lib/utils/client-pipeline-publish'
+
+export interface ClientPipelineVideoSummary {
+  id: string
+  title: string
+  stage: BatchStageKey
+  stageLabel: string
+  inMetricool: boolean
+  publishLabel: string | null
+}
+
+export interface ClientPipelineSummary {
+  total: number
+  published: number
+  batchStage: BatchStageKey
+  batchStageLabel: string
+  metricoolScheduled: number
+  hasMetricool: boolean
+  nextPublish: PublishSlotInfo | null
+  nextNewVideo: PublishSlotInfo | null
+  videos: ClientPipelineVideoSummary[]
+}
+
+function ideaTitle(idea: IdeaWithPipeline): string {
+  const t = idea.title?.trim() || idea.hook?.trim()
+  return t || 'Sin título'
+}
+
+function summarizeActiveIdeas(active: IdeaWithPipeline[], cadence: ClientCadence = {}): ClientPipelineSummary {
+  const stage = batchStage(active)
+  const published = active.filter((i) => i.published_at || i.status === 'publicada').length
+  const videos = active
+    .map((i) => {
+      const s = ideaStage(i)
+      const inMetricool = i.metricool_post_id != null && !(i.published_at || i.status === 'publicada')
+      return {
+        id: i.id,
+        title: ideaTitle(i),
+        stage: s,
+        stageLabel: STAGE_LABEL_ES[s],
+        inMetricool,
+        publishLabel: i.publish_date
+          ? formatScheduledPublish(i.publish_date, cadence.postingTime)
+          : null,
+      }
+    })
+    .sort((a, b) => STAGE_INDEX[a.stage] - STAGE_INDEX[b.stage] || a.title.localeCompare(b.title))
+  return {
+    total: active.length,
+    published,
+    batchStage: stage,
+    batchStageLabel: STAGE_LABEL_ES[stage],
+    metricoolScheduled: countMetricoolScheduled(active),
+    hasMetricool: !!(cadence.metricoolBlogId && cadence.metricoolBlogId.trim()),
+    nextPublish: findNextQueuePublish(active, cadence),
+    nextNewVideo: findNextNewVideoSlot(active.length, cadence),
+    videos,
+  }
+}
+
+/** Per-client pipeline snapshot for the Nuevo video picker. */
+export function buildClientPipelineIndex(
+  ideas: IdeaWithPipeline[],
+  clientCadence: Record<string, ClientCadence> = {},
+): Record<string, ClientPipelineSummary> {
+  const byClient = new Map<string, IdeaWithPipeline[]>()
+  for (const i of ideas) {
+    const cid = i.client?.id ?? i.client_id
+    if (!cid) continue
+    const arr = byClient.get(cid) ?? []
+    arr.push(i)
+    byClient.set(cid, arr)
+  }
+  const out: Record<string, ClientPipelineSummary> = {}
+  for (const [clientId, list] of Array.from(byClient.entries())) {
+    const active = list.filter((i) => i.status !== 'descartada')
+    if (active.length === 0) continue
+    out[clientId] = summarizeActiveIdeas(active, clientCadence[clientId] ?? {})
+  }
+  return out
+}
+
+/** Pipeline snapshot for a client with no videos yet — still shows next cadence slot. */
+export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientPipelineSummary | null {
+  const nextNewVideo = findNextNewVideoSlot(0, cadence)
+  if (!nextNewVideo && !cadence.metricoolBlogId) return null
+  return {
+    total: 0,
+    published: 0,
+    batchStage: 'idea',
+    batchStageLabel: STAGE_LABEL_ES.idea,
+    metricoolScheduled: 0,
+    hasMetricool: !!(cadence.metricoolBlogId && cadence.metricoolBlogId.trim()),
+    nextPublish: null,
+    nextNewVideo,
+    videos: [],
+  }
+}
 
 const filled = (s?: string | null) => !!s && s.trim().length > 0
 

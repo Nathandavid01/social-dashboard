@@ -1,4 +1,11 @@
 import type { ContentIdea, ContentIdeaVideo } from '@/lib/supabase/types'
+import type { ClientCadence, ClientPipelineSummary } from '@/lib/utils/content-batches'
+import {
+  countMetricoolScheduled,
+  findNextNewVideoSlot,
+  findNextQueuePublish,
+  formatScheduledPublish,
+} from '@/lib/utils/client-pipeline-publish'
 
 /**
  * Helpers for the full-screen Client Batch view (clients/[id]/batch).
@@ -154,4 +161,47 @@ export function batchHint(videos: BatchVideo[]): { stageLabel: string; tip: stri
     publication: 'Programa o publica los videos aprobados. ¡Este lote está casi listo!',
   }
   return { stageLabel: STAGE_LABEL_ES[stage], tip: tips[stage] }
+}
+
+function batchVideoTitle(v: BatchVideo): string {
+  const t = v.title?.trim() || v.hook?.trim()
+  return t || 'Sin título'
+}
+
+/** Pipeline snapshot for Nuevo video when opened from a client's batch view. */
+export function summarizeBatchVideos(
+  videos: BatchVideo[],
+  cadence: ClientCadence = {},
+): ClientPipelineSummary | null {
+  const active = videos.filter((v) => v.status !== 'descartada')
+  if (active.length === 0) return null
+  const stage = batchStageKey(active)
+  const published = active.filter((v) => v.published_at || v.status === 'publicada').length
+  const items = active
+    .map((v) => {
+      const s = videoStageKey(v)
+      const inMetricool = v.metricool_post_id != null && !(v.published_at || v.status === 'publicada')
+      return {
+        id: v.id,
+        title: batchVideoTitle(v),
+        stage: s,
+        stageLabel: STAGE_LABEL_ES[s],
+        inMetricool,
+        publishLabel: v.publish_date
+          ? formatScheduledPublish(v.publish_date, cadence.postingTime)
+          : null,
+      }
+    })
+    .sort((a, b) => STAGE_INDEX[a.stage] - STAGE_INDEX[b.stage] || a.title.localeCompare(b.title))
+  return {
+    total: active.length,
+    published,
+    batchStage: stage,
+    batchStageLabel: STAGE_LABEL_ES[stage],
+    metricoolScheduled: countMetricoolScheduled(active),
+    hasMetricool: !!(cadence.metricoolBlogId && cadence.metricoolBlogId.trim()),
+    nextPublish: findNextQueuePublish(active, cadence),
+    nextNewVideo: findNextNewVideoSlot(active.length, cadence),
+    videos: items,
+  }
 }

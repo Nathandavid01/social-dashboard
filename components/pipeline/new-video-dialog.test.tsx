@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import { NewVideoDialog } from './new-video-dialog'
+import type { ClientPipelineSummary } from '@/lib/utils/content-batches'
 
 const refresh = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
@@ -79,5 +80,49 @@ describe('NewVideoDialog', () => {
         }),
       ),
     )
+  })
+
+  it('shows pipeline status when a client with videos is selected', () => {
+    const pipelineByClient: Record<string, ClientPipelineSummary> = {
+      c1: {
+        total: 2,
+        published: 0,
+        batchStage: 'caption',
+        batchStageLabel: 'Caption',
+        metricoolScheduled: 1,
+        hasMetricool: true,
+        nextPublish: {
+          title: 'Reel verano',
+          whenLabel: '20 jun 2026 · 10:00',
+          inMetricool: true,
+        },
+        nextNewVideo: {
+          title: null,
+          whenLabel: '25 jun 2026 · 10:00',
+          inMetricool: false,
+          isCadenceSlot: true,
+        },
+        videos: [
+          { id: 'v1', title: 'Reel verano', stage: 'caption', stageLabel: 'Caption', inMetricool: true, publishLabel: '20 jun 2026 · 10:00' },
+          { id: 'v2', title: 'Tips gym', stage: 'video', stageLabel: 'Video', inMetricool: false, publishLabel: null },
+        ],
+      },
+    }
+    render(<NewVideoDialog clients={clients} pipelineByClient={pipelineByClient} />)
+    fireEvent.click(screen.getByRole('button', { name: /nuevo video/i }))
+    fireEvent.change(screen.getAllByLabelText('select')[0], { target: { value: 'c1' } })
+    expect(screen.getByText(/2 videos en el batch/i)).toBeInTheDocument()
+    expect(screen.getByText(/programado en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/Próxima publicación/i)).toBeInTheDocument()
+    expect(screen.getByText(/Si creas un video ahora/i)).toBeInTheDocument()
+    expect(screen.getAllByText('Reel verano').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Tips gym')).toBeInTheDocument()
+  })
+
+  it('shows empty state when the client has no videos in the pipeline', () => {
+    render(<NewVideoDialog clients={clients} pipelineByClient={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: /nuevo video/i }))
+    fireEvent.change(screen.getAllByLabelText('select')[0], { target: { value: 'c2' } })
+    expect(screen.getByText(/no tiene videos en el pipeline/i)).toBeInTheDocument()
   })
 })

@@ -96,21 +96,24 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     {
       clientId: 'nd',
       clientName: 'Nathandavidts._',
+      logoUrl: 'https://cdn.example/nd-logo.png',
+      createdAt: '2026-06-08',
       platforms: ['instagram'],
       sessions: [
-        { index: 0, label: 'Sesión 1', total: 15, filled: 0, empty: 15 },
-        { index: 1, label: 'Sesión 2', total: 15, filled: 0, empty: 15 },
+        { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
       ],
     },
   ]
 
-  it('renders one planned card per session with empty-slot counts', () => {
-    render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
-    expect(screen.getAllByText('Nathandavidts._')).toHaveLength(2)
-    expect(screen.getByText(/Sesión 1 · 15 videos/)).toBeInTheDocument()
-    expect(screen.getByText(/Sesión 2 · 15 videos/)).toBeInTheDocument()
-    expect(screen.getAllByText('15 por idear')).toHaveLength(2)
-    expect(screen.getAllByText('Planificado')).toHaveLength(2)
+  it('renders one planned card per client for the next single video', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
+    expect(screen.getByText(/Publicación · Lun 8 jun/)).toBeInTheDocument()
+    expect(screen.getByText(/Lleva \d+ día/)).toBeInTheDocument()
+    expect(screen.getByText(/Por idear/)).toBeInTheDocument()
+    expect(screen.getByText('Planificado')).toBeInTheDocument()
+    const thumb = container.querySelector('article img[alt=""]') as HTMLImageElement | null
+    expect(thumb?.src).toContain('nd-logo.png')
   })
 
   it('opens the client batch overlay when a planned card is clicked', () => {

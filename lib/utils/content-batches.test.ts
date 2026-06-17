@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, BATCH_STAGES,
 } from './content-batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -63,6 +63,27 @@ describe('groupIntoBatches', () => {
   it('unassigned batch has a null assignee', () => {
     const batches = groupIntoBatches([idea()] as IdeaWithPipeline[])
     expect(batches[0].assignee).toBeNull()
+  })
+})
+
+describe('buildClientPipelineIndex', () => {
+  it('summarizes active videos per client for the Nuevo video picker', () => {
+    const index = buildClientPipelineIndex([
+      idea({ id: '1', client_id: 'c1', title: 'Reel A', hook: 'h' }),
+      idea({ id: '2', client_id: 'c1', title: 'Reel B', status: 'grabada' }),
+    ] as IdeaWithPipeline[])
+    expect(index.c1.total).toBe(2)
+    expect(index.c1.batchStageLabel).toBe('Título')
+    expect(index.c1.videos.map((v) => v.title)).toEqual(['Reel A', 'Reel B'])
+    expect(index.c1.videos[0].stageLabel).toBe('Título')
+    expect(index.c1.videos[1].stageLabel).toBe('Video')
+    expect(index.c1.metricoolScheduled).toBe(0)
+    expect(index.c1.nextNewVideo).toBeNull()
+  })
+
+  it('omits clients with only discarded videos', () => {
+    const index = buildClientPipelineIndex([idea({ status: 'descartada' })] as IdeaWithPipeline[])
+    expect(index).toEqual({})
   })
 })
 

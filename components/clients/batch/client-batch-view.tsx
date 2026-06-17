@@ -12,6 +12,7 @@ import {
   batchHint,
   buildStepper,
   cardStatus,
+  summarizeBatchVideos,
   type BatchVideo,
 } from '@/lib/utils/batch-view'
 import type { PlannedSlot } from '@/lib/utils/planned-sessions'
@@ -59,6 +60,18 @@ export function ClientBatchView({
   const { client } = pipeline
   const videos = pipeline.videos as BatchVideo[]
   const clientForDialog = [{ id: client.id, name: client.name }]
+  const clientCadence = useMemo(
+    () => ({
+      postingTime: client.posting_time ?? null,
+      postingDays: (client.posting_days ?? []) as number[],
+      metricoolBlogId: client.metricool_blog_id ?? null,
+    }),
+    [client],
+  )
+  const pipelineByClient = useMemo(() => {
+    const summary = summarizeBatchVideos(videos, clientCadence)
+    return summary ? { [client.id]: summary } : {}
+  }, [videos, client.id, clientCadence])
   const refresh = onChanged ?? (() => router.refresh())
 
   const stepper = useMemo(() => buildStepper(videos), [videos])
@@ -210,7 +223,7 @@ export function ClientBatchView({
                 {videos.length > 0 ? videos.length : plannedSlots.length}
               </span>
             </div>
-            <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+            <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
               <Button size="sm" className="gap-1.5">
                 <Plus className="h-3.5 w-3.5" aria-hidden />
                 Nuevo video
@@ -306,7 +319,7 @@ export function ClientBatchView({
                     index={slot.index}
                     dayLabel={formatSlotDay(slot.date)}
                     action={
-                      <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+                      <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
                         <Button variant="secondary" size="sm" className="w-full gap-1.5">
                           <Plus className="h-3.5 w-3.5" aria-hidden />
                           Crear video
@@ -326,7 +339,7 @@ export function ClientBatchView({
               <p className="max-w-xs text-xs text-muted-foreground">
                 Crea el primer video para empezar a trabajar el contenido de {client.name}.
               </p>
-              <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} onCreated={refresh}>
+              <NewVideoDialog clients={clientForDialog} defaultClientId={client.id} pipelineByClient={pipelineByClient} clientCadence={{ [client.id]: clientCadence }} onCreated={refresh}>
                 <Button size="sm" className="mt-1 gap-1.5">
                   <Plus className="h-3.5 w-3.5" aria-hidden />
                   Nuevo video

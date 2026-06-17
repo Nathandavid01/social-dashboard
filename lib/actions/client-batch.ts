@@ -79,8 +79,9 @@ export async function updateClientBatchConfig(
  * board can open it as an in-place overlay (no navigation). Returns null when
  * the client doesn't exist.
  *
- * Auto-provisions the batch's videos (idempotent) so opening a client shows the
- * real, editable video cards for the session instead of empty placeholders.
+ * Auto-provisions the next single video (idempotent) when the client has none yet,
+ * so opening a client shows one real editable card instead of bulk-creating the
+ * whole session. Respects an explicit videos_per_batch override when set.
  */
 export async function getClientBatchData(clientId: string): Promise<ClientBatchData | null> {
   await ensureBatchVideos(clientId)
@@ -98,8 +99,8 @@ export async function getClientBatchData(clientId: string): Promise<ClientBatchD
  * Idempotently create the session's videos for a client that hasn't started.
  *
  * Only acts when the client is active, has a posting cadence, and has NO active
- * content_ideas yet — then it creates one content_idea per session slot, dated by
- * the cadence (title "Video N", status idea). Returns how many it created. RLS
+ * content_ideas yet — then it creates one content_idea for the next slot, dated by
+ * the cadence (title "Video 1", status idea). Returns how many it created. RLS
  * applies, so a viewer without create permission simply gets 0 created.
  */
 export async function ensureBatchVideos(clientId: string): Promise<{ created: number }> {
@@ -123,14 +124,9 @@ export async function ensureBatchVideos(clientId: string): Promise<{ created: nu
   const postingDays = (client.posting_days ?? []) as number[]
   if (postingDays.length === 0) return { created: 0 }
 
-  const sessions = planSessions({
-    monthlyTarget: computePostingTargets(postingDays).perMonth,
-    perWeek: postingDays.length,
-    intervalWeeks: resolveInterval(null),
-    ideasCount: 0,
-  })
   const { videosPerBatch } = await getClientBatchConfig(clientId)
-  const sessionSize = videosPerBatch ?? (sessions[0]?.total ?? 0)
+  // One video at a time unless the client has an explicit batch-size override.
+  const sessionSize = videosPerBatch ?? 1
   if (sessionSize === 0) return { created: 0 }
 
   const {

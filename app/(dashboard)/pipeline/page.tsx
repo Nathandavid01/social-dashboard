@@ -1,10 +1,9 @@
 import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
-import { computePostingTargets } from '@/lib/utils/posting-cadence'
-import { resolveInterval } from '@/lib/utils/recording-window'
-import { planSessions, shouldPlanForClient } from '@/lib/utils/planned-sessions'
+import { shouldPlanForClient, planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
+import type { ClientCadence } from '@/lib/utils/content-batches'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -22,13 +21,23 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, platforms, status, posting_days')
+      .select('id, name, logo_url, created_at, platforms, status, posting_days, posting_time, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
   ])
 
   const activeClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
   const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
+  const clientCadence: Record<string, ClientCadence> = Object.fromEntries(
+    activeClients.map((c) => [
+      c.id,
+      {
+        postingTime: c.posting_time ?? null,
+        postingDays: (c.posting_days ?? []) as number[],
+        metricoolBlogId: c.metricool_blog_id ?? null,
+      },
+    ]),
+  )
   const plannedClients = buildPlannedClients(ideas, activeClients)
 
   return (
@@ -36,6 +45,7 @@ export default async function PipelinePage() {
       ideas={ideas}
       plannedClients={plannedClients}
       allClients={allClients}
+      clientCadence={clientCadence}
     />
   )
 }
@@ -47,7 +57,7 @@ export default async function PipelinePage() {
  */
 function buildPlannedClients(
   ideas: Awaited<ReturnType<typeof getIdeacionPipeline>>,
-  activeClients: { id: string; name: string; platforms: string[] | null; status: string; posting_days: number[] | null }[],
+  activeClients: { id: string; name: string; logo_url: string | null; created_at: string; platforms: string[] | null; status: string; posting_days: number[] | null; posting_time?: string | null; metricool_blog_id?: string | null }[],
 ): PlannedClient[] {
   // Count active (non-discarded) ideas per client to know who has started.
   const activeIdeasByClient = new Map<string, number>()
@@ -63,18 +73,15 @@ function buildPlannedClients(
     if (!shouldPlanForClient({ status: c.status, postingDaysLength: postingDays.length, activeIdeasCount })) {
       continue
     }
-    const sessions = planSessions({
-      monthlyTarget: computePostingTargets(postingDays).perMonth,
-      perWeek: postingDays.length,
-      intervalWeeks: resolveInterval(null),
-      ideasCount: 0,
-    })
-    if (sessions.length === 0) continue
+    const nextVideo = planNextVideoSlot(postingDays, new Date())
+    if (!nextVideo) continue
     planned.push({
       clientId: c.id,
       clientName: c.name,
+      logoUrl: c.logo_url,
+      createdAt: c.created_at,
       platforms: (c.platforms ?? []) as SocialPlatform[],
-      sessions,
+      sessions: [nextVideo],
     })
   }
   return planned

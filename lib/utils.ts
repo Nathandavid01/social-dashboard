@@ -50,6 +50,21 @@ export function formatRelative(date: string | Date) {
   return formatDistanceToNow(new Date(date), { addSuffix: true })
 }
 
+/** Whole calendar days between two dates (local midnight, inclusive of start day). */
+export function calendarDaysSince(from: string | Date, to: Date = new Date()): number {
+  const start = new Date(from)
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+  const endDay = new Date(to.getFullYear(), to.getMonth(), to.getDate())
+  return Math.max(0, Math.round((endDay.getTime() - startDay.getTime()) / 86_400_000))
+}
+
+/** Short Spanish label for how long something has been waiting (0 → "hoy"). */
+export function formatDaysElapsedEs(days: number): string {
+  if (days <= 0) return 'hoy'
+  if (days === 1) return '1 día'
+  return `${days} días`
+}
+
 export const platformColors: Record<SocialPlatform, string> = {
   instagram: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
   facebook: 'bg-blue-500/10 text-blue-500 border-blue-500/20',

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { planSessions, shouldPlanForClient, nextPostingDates, planSlots } from './planned-sessions'
+import { planSessions, shouldPlanForClient, nextPostingDates, planSlots, planNextVideoSlot } from './planned-sessions'
 
 describe('nextPostingDates', () => {
   it('returns the next N daily dates from `from` inclusive', () => {
@@ -41,6 +41,19 @@ describe('shouldPlanForClient', () => {
   })
   it('does not plan when the client already has ideas (real batch shows instead)', () => {
     expect(shouldPlanForClient({ status: 'active', postingDaysLength: 7, activeIdeasCount: 3 })).toBe(false)
+  })
+})
+
+describe('planNextVideoSlot', () => {
+  it('returns a single-video planned card on the next posting day', () => {
+    const from = new Date(2026, 5, 8) // Monday
+    const slot = planNextVideoSlot([1, 4], from)
+    expect(slot).toMatchObject({ total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' })
+    expect(slot?.label).toBe('Lun 8 jun')
+  })
+
+  it('returns null when there is no posting cadence', () => {
+    expect(planNextVideoSlot([], new Date())).toBeNull()
   })
 })
 

@@ -19,6 +19,35 @@ export interface PlannedSession {
   filled: number
   /** Slots still waiting for an idea to be made. */
   empty: number
+  /** ISO publish date for a single-video planned card (optional). */
+  publishDate?: string
+}
+
+const WEEKDAY_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const MONTH_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+
+/** "Lun 9 jun" from ISO YYYY-MM-DD (local date, no TZ shift). */
+export function formatPlannedPublishLabel(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return `${WEEKDAY_ES[date.getDay()]} ${d} ${MONTH_ES[m - 1]}`
+}
+
+/**
+ * One planned card = the client's next single video slot (not the whole month/session).
+ * Used on the global pipeline board so each client shows one upcoming publication.
+ */
+export function planNextVideoSlot(postingDays: number[], from: Date = new Date()): PlannedSession | null {
+  const [nextDate] = nextPostingDates(postingDays, 1, from)
+  if (!nextDate) return null
+  return {
+    index: 0,
+    label: formatPlannedPublishLabel(nextDate),
+    total: 1,
+    filled: 0,
+    empty: 1,
+    publishDate: nextDate,
+  }
 }
 
 /**
