@@ -16,11 +16,28 @@ export const revalidate = 0
  */
 export default async function PipelinePage() {
   await requirePermission('planning.read')
-  const ideas = await getIdeacionPipeline({ limit: 400 })
+  const supabase = await createClient()
 
-  const plannedClients = await buildPlannedClients(ideas)
+  const [ideas, { data: activeClientsRaw, error: clientsError }] = await Promise.all([
+    getIdeacionPipeline({ limit: 400 }),
+    supabase
+      .from('clients')
+      .select('id, name, platforms, status, posting_days')
+      .eq('status', 'active')
+      .order('name'),
+  ])
 
-  return <ContentPipelineBoard ideas={ideas} plannedClients={plannedClients} />
+  const activeClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
+  const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
+  const plannedClients = buildPlannedClients(ideas, activeClients)
+
+  return (
+    <ContentPipelineBoard
+      ideas={ideas}
+      plannedClients={plannedClients}
+      allClients={allClients}
+    />
+  )
 }
 
 /**
@@ -28,18 +45,10 @@ export default async function PipelinePage() {
  * cadence that hasn't started yet. Clients already being worked keep their real
  * batch card, so nothing shows twice (see shouldPlanForClient).
  */
-async function buildPlannedClients(
+function buildPlannedClients(
   ideas: Awaited<ReturnType<typeof getIdeacionPipeline>>,
-): Promise<PlannedClient[]> {
-  const supabase = await createClient()
-  // NOTE: recording_interval_weeks (migration 0029) isn't applied in prod yet, so
-  // we don't select it — we use the default interval. Read it here once it lands.
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id, name, platforms, status, posting_days')
-    .eq('status', 'active')
-  if (error || !data) return []
-
+  activeClients: { id: string; name: string; platforms: string[] | null; status: string; posting_days: number[] | null }[],
+): PlannedClient[] {
   // Count active (non-discarded) ideas per client to know who has started.
   const activeIdeasByClient = new Map<string, number>()
   for (const i of ideas) {
@@ -48,7 +57,7 @@ async function buildPlannedClients(
   }
 
   const planned: PlannedClient[] = []
-  for (const c of data) {
+  for (const c of activeClients) {
     const postingDays = (c.posting_days ?? []) as number[]
     const activeIdeasCount = activeIdeasByClient.get(c.id) ?? 0
     if (!shouldPlanForClient({ status: c.status, postingDaysLength: postingDays.length, activeIdeasCount })) {

@@ -100,14 +100,18 @@ export function NewVideoDialog({
             <DialogTitle>Nuevo video</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <Select value={clientId} onValueChange={setClientId}>
+            <Select value={clientId || undefined} onValueChange={setClientId}>
               <SelectTrigger aria-label="Cliente">
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
-              <SelectContent>
-                {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
+              <SelectContent className="max-h-60">
+                {clients.length === 0 ? (
+                  <p className="px-2 py-1.5 text-sm text-muted-foreground">No hay clientes activos</p>
+                ) : (
+                  clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título del video" />

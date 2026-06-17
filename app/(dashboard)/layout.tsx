@@ -12,6 +12,7 @@ import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
+import { getCurrentRole } from '@/lib/auth/server'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 export default async function DashboardLayout({
@@ -26,13 +27,16 @@ export default async function DashboardLayout({
   let role: UserRole | null = null
 
   if (user) {
+    // Backfills profile if the signup trigger never ran.
+    const ensuredRole = await getCurrentRole()
+
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
     profile = data as Profile | null
-    role = profile?.role ?? null
+    role = profile?.role ?? ensuredRole
 
     // Deactivated accounts are locked out of the entire dashboard.
     if (profile && profile.status === 'inactive') {

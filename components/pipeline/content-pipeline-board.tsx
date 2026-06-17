@@ -31,7 +31,16 @@ const STAGE_DOT: Record<BatchStageKey, string> = {
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Idea[]; plannedClients?: PlannedClient[] }) {
+export function ContentPipelineBoard({
+  ideas,
+  plannedClients = [],
+  allClients = [],
+}: {
+  ideas: Idea[]
+  plannedClients?: PlannedClient[]
+  /** Every active client — used by "Nuevo video" so you can pick any account. */
+  allClients?: { id: string; name: string }[]
+}) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -174,7 +183,7 @@ export function ContentPipelineBoard({ ideas, plannedClients = [] }: { ideas: Id
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <NewVideoDialog clients={clients} />
+          <NewVideoDialog clients={allClients.length > 0 ? allClients : clients} />
         </div>
       </header>
 
