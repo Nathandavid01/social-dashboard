@@ -21,6 +21,7 @@ export function ClientLogo({
       <img
         src={logoUrl}
         alt={name ?? 'Cliente'}
+        referrerPolicy="no-referrer"
         className={cn('shrink-0 rounded-lg border object-contain bg-background p-0.5', className ?? 'h-11 w-11')}
       />
     )

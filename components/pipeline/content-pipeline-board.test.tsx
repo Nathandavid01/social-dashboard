@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const moveBatch = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
@@ -62,9 +62,15 @@ describe('ContentPipelineBoard — batch model', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
       idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
-    ] as IdeaWithPipeline[]} />)
+    ] as IdeaWithPipeline[]} teamMembers={[
+      { id: 'u1', name: 'María R.' },
+      { id: 'u2', name: 'Diego V.' },
+      { id: 'u3', name: 'Nathan Torres' },
+    ]} />)
     expect(screen.getByText(/asignado a/i)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /maría r/i }))
+    const assigneeRow = screen.getByText(/asignado a/i).closest('div')!
+    fireEvent.click(within(assigneeRow).getByRole('button', { name: /^Todos$/i }))
+    fireEvent.click(screen.getByRole('option', { name: /María R\./i }))
     const cardsText = Array.from(container.querySelectorAll('article')).map((c) => c.textContent).join('|')
     expect(cardsText).toContain('Nora Fitness')
     expect(cardsText).not.toContain('Lumen')
@@ -103,6 +109,8 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
       sessions: [
         { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
       ],
+      nextStage: 'idea',
+      stepAssignee: { id: 'u1', name: 'Ana Torres' },
     },
   ]
 
@@ -115,6 +123,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getByText('Planificado')).toBeInTheDocument()
     const thumb = container.querySelector('article img[alt=""]') as HTMLImageElement | null
     expect(thumb?.src).toContain('nd-logo.png')
+    expect(screen.getByText('Ana Torres')).toBeInTheDocument()
   })
 
   it('opens the client batch overlay when a planned card is clicked', () => {

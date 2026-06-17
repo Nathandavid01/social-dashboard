@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { parsePipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import type {
   ClientWorkflowProgress,
   WorkflowSettings,
@@ -19,6 +20,7 @@ const DEFAULT_SETTINGS: WorkflowSettings = {
     { slug: 'ideas',       name: 'Tener ideas listas',         required: true },
     { slug: 'rescheduled', name: 'Reagendar después de grabar', required: true },
   ],
+  pipeline_step_assignees: {},
 }
 
 export async function getWorkflowSettings(): Promise<WorkflowSettings> {
@@ -36,6 +38,7 @@ export async function getWorkflowSettings(): Promise<WorkflowSettings> {
     ideas_multiplier: Number(data.ideas_multiplier ?? 2),
     require_rescheduling: data.require_rescheduling ?? true,
     steps: Array.isArray(data.steps) ? data.steps : DEFAULT_SETTINGS.steps,
+    pipeline_step_assignees: parsePipelineStepAssignees(data.pipeline_step_assignees),
   }
 }
 

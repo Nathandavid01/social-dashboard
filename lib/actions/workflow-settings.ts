@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { assertOwner } from '@/lib/auth/server'
+import { BATCH_STAGES } from '@/lib/utils/content-batches'
+
+const stageKeys = BATCH_STAGES.map((s) => s.key) as [string, ...string[]]
 
 const patchSchema = z.object({
   weekly_planning_enabled: z.boolean().optional(),
@@ -11,6 +14,7 @@ const patchSchema = z.object({
   min_ideas_per_session: z.number().int().min(0).max(50).optional(),
   ideas_multiplier: z.number().min(0).max(10).optional(),
   require_rescheduling: z.boolean().optional(),
+  pipeline_step_assignees: z.record(z.enum(stageKeys), z.string().uuid()).optional(),
 })
 
 export type WorkflowSettingsPatch = z.input<typeof patchSchema>
@@ -38,5 +42,6 @@ export async function updateWorkflowSettings(input: WorkflowSettingsPatch): Prom
   revalidatePath('/settings/workflow')
   revalidatePath('/planning')
   revalidatePath('/home')
+  revalidatePath('/pipeline')
   return { ok: true }
 }

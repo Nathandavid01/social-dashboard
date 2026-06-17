@@ -1,5 +1,7 @@
 export type WorkflowStepStatus = 'agendar' | 'ideas' | 'reagendar' | 'listo'
 
+import type { PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
+
 export interface WorkflowSettings {
   weekly_planning_enabled: boolean
   scheduling_window_days: number
@@ -7,6 +9,7 @@ export interface WorkflowSettings {
   ideas_multiplier: number
   require_rescheduling: boolean
   steps: { slug: string; name: string; required: boolean }[]
+  pipeline_step_assignees: PipelineStepAssignees
 }
 
 export interface ClientWorkflowProgress {

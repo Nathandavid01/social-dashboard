@@ -99,7 +99,7 @@ async function metricoolFetch<T>(
 ): Promise<T> {
   const url = new URL(`${METRICOOL_BASE_URL}${endpoint}`)
   url.searchParams.set('userId', config.userId)
-  url.searchParams.set('blogId', config.blogId)
+  if (config.blogId) url.searchParams.set('blogId', config.blogId)
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -121,6 +121,27 @@ async function metricoolFetch<T>(
 }
 
 // --- API Methods ---
+
+/** All Metricool brands (simpleProfiles) — no blogId filter (needed for per-client logos). */
+export async function getAllSimpleProfiles(
+  userToken: string,
+  userId?: string,
+): Promise<PublicBlog[]> {
+  const url = new URL(`${METRICOOL_BASE_URL}/admin/simpleProfiles`)
+  if (userId) url.searchParams.set('userId', userId)
+
+  const response = await fetch(url.toString(), {
+    headers: { 'X-Mc-Auth': userToken },
+    next: { revalidate: 300 },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Metricool API error: ${response.status} ${response.statusText}`)
+  }
+
+  const json = (await response.json()) as PublicBlog[] | { data?: PublicBlog[] }
+  return Array.isArray(json) ? json : (json.data ?? [])
+}
 
 export async function getProfiles(config: MetricoolConfig): Promise<PublicBlog[]> {
   return metricoolFetch<PublicBlog[]>('/admin/simpleProfiles', config)

@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition 
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
@@ -28,6 +28,10 @@ export interface PlannedClient {
   /** Last client update — proxy for when they entered this pipeline row. */
   inColumnSince?: string | null
   platforms?: SocialPlatform[]
+  /** Pipeline column this planned slot is waiting in (always idea for now). */
+  nextStage?: BatchStageKey
+  /** Team member configured in settings for `nextStage`. */
+  stepAssignee?: { id: string; name: string } | null
   sessions: PlannedSession[]
 }
 
@@ -42,12 +46,15 @@ export function ContentPipelineBoard({
   plannedClients = [],
   allClients = [],
   clientCadence = {},
+  teamMembers = [],
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
   /** Every active client — used by "Nuevo video" so you can pick any account. */
   allClients?: { id: string; name: string }[]
   clientCadence?: Record<string, ClientCadence>
+  /** All active team members — powers the "Asignado a" filter (not just people on batches). */
+  teamMembers?: { id: string; name: string }[]
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -100,19 +107,36 @@ export function ContentPipelineBoard({
   }, [batches])
   const team = useMemo(() => {
     const m = new Map<string, { id: string; name: string }>()
-    for (const b of batches) if (b.assignee) m.set(b.assignee.id, b.assignee)
+    for (const p of teamMembers) m.set(p.id, p)
+    for (const b of batches) if (b.assignee && !m.has(b.assignee.id)) m.set(b.assignee.id, b.assignee)
     return Array.from(m.values()).sort((a, b) => a.name.localeCompare(b.name))
+  }, [batches, teamMembers])
+  const assigneeCounts = useMemo(() => {
+    const m: Record<string, number> = { unassigned: 0 }
+    for (const b of batches) {
+      if (b.assignee?.id) m[b.assignee.id] = (m[b.assignee.id] ?? 0) + 1
+      else m.unassigned += 1
+    }
+    return m
   }, [batches])
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
     return batches.filter((b) => {
       if (clientFilter && b.clientId !== clientFilter) return false
-      if (assigneeFilter && b.assignee?.id !== assigneeFilter) return false
+      if (assigneeFilter === 'unassigned') {
+        if (b.assignee) return false
+      } else if (assigneeFilter && b.assignee?.id !== assigneeFilter) return false
       if (q && !(`${b.clientName} ${b.assignee?.name ?? ''}`.toLowerCase().includes(q))) return false
       return true
     })
   }, [batches, clientFilter, assigneeFilter, search])
+
+  const visiblePlanned = useMemo(() => {
+    if (!assigneeFilter) return plannedClients
+    if (assigneeFilter === 'unassigned') return plannedClients.filter((p) => !p.stepAssignee)
+    return plannedClients.filter((p) => p.stepAssignee?.id === assigneeFilter)
+  }, [plannedClients, assigneeFilter])
 
   const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
 
@@ -207,20 +231,16 @@ export function ContentPipelineBoard({
         </div>
       </header>
 
-      {/* Assignee filter — color = person · with batch/publicados stats on the right */}
+      {/* Assignee filter — any active team member · batch stats on the right */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
         <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
-        <button onClick={() => setAssigneeFilter(null)} className={cn('rounded-full border px-3 py-1 text-[11px] font-medium transition', assigneeFilter === null ? 'border-white/20 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60')}>Todos</button>
-        {team.map((p) => {
-          const a = userAccent(p.id)
-          const on = assigneeFilter === p.id
-          return (
-            <button key={p.id} onClick={() => setAssigneeFilter(on ? null : p.id)} className={cn('inline-flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-2.5 text-[11px] transition', on ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')} style={{ borderColor: on ? a.dot : 'rgba(255,255,255,0.06)', backgroundColor: on ? a.soft : 'transparent' }}>
-              <span className="grid h-[18px] w-[18px] place-items-center rounded-full text-[9px] font-bold text-black" style={{ backgroundColor: a.dot }}>{p.name.slice(0, 1).toUpperCase()}</span>
-              {p.name}
-            </button>
-          )
-        })}
+        <AssigneeFilterDropdown
+          members={team}
+          counts={assigneeCounts}
+          total={batches.length}
+          value={assigneeFilter}
+          onChange={setAssigneeFilter}
+        />
         <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
           <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
         </p>
@@ -239,7 +259,7 @@ export function ContentPipelineBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? plannedClients : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>
@@ -374,6 +394,31 @@ function PlannedSessionCard({
           </div>
         )}
 
+        {(client.nextStage || client.stepAssignee) && (
+          <div className="flex items-center gap-1.5 rounded-md bg-muted/40 px-2 py-1.5">
+            {client.stepAssignee ? (
+              <>
+                <span
+                  className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-sky-500/15 text-[9px] font-bold text-sky-700 dark:text-sky-300"
+                  aria-hidden
+                >
+                  {client.stepAssignee.name.slice(0, 1).toUpperCase()}
+                </span>
+                <p className="min-w-0 truncate text-[10px] text-muted-foreground">
+                  Le toca a <span className="font-semibold text-foreground">{client.stepAssignee.name}</span>
+                  {client.nextStage ? ` · ${STAGE_LABEL_ES[client.nextStage]}` : ''}
+                </p>
+              </>
+            ) : (
+              <p className="text-[10px] text-muted-foreground">
+                Sin responsable
+                {client.nextStage ? ` · ${STAGE_LABEL_ES[client.nextStage]}` : ''}
+                <span className="text-muted-foreground/70"> — asígnalo en Configuración</span>
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-2 pt-0.5">
           <div className="flex items-center gap-1.5 [&_svg]:h-3.5 [&_svg]:w-3.5">
             {client.platforms && client.platforms.length > 0 && <PlatformBadges platforms={client.platforms.slice(0, 4)} />}
@@ -409,7 +454,7 @@ function PipelineVideoThumb({
     return (
       <div className="relative h-[42px] overflow-hidden rounded-lg border border-border/60 bg-muted/30 ring-1 ring-inset ring-white/5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+        <img src={src} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
       </div>
     )
   }
@@ -486,6 +531,190 @@ function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; o
     <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover batch adelante' : 'Mover batch atrás'} className="grid h-5 w-5 place-items-center rounded border border-border bg-background/80 text-muted-foreground backdrop-blur-sm transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30">
       <Icon className="h-3.5 w-3.5" />
     </button>
+  )
+}
+
+/** Searchable assignee picker — lists every active team member, not only batch owners. */
+function AssigneeFilterDropdown({
+  members,
+  counts,
+  total,
+  value,
+  onChange,
+}: {
+  members: { id: string; name: string }[]
+  counts: Record<string, number>
+  total: number
+  value: string | null
+  onChange: (id: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const selected =
+    value === 'unassigned'
+      ? { id: 'unassigned', name: 'Sin asignar' }
+      : value
+        ? members.find((m) => m.id === value) ?? null
+        : null
+  const label = selected ? selected.name : 'Todos'
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return q ? members.filter((m) => m.name.toLowerCase().includes(q)) : members
+  }, [members, query])
+
+  function choose(id: string | null) {
+    onChange(id)
+    setOpen(false)
+    setQuery('')
+  }
+
+  return (
+    <div ref={ref} className="relative inline-flex items-center">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          'inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-md border px-2.5 text-xs transition',
+          value
+            ? 'border-primary/40 bg-primary/10 text-foreground'
+            : 'border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
+        )}
+      >
+        {selected && selected.id !== 'unassigned' ? (
+          <span
+            className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[9px] font-bold text-black"
+            style={{ backgroundColor: userAccent(selected.id).dot }}
+          >
+            {selected.name.slice(0, 1).toUpperCase()}
+          </span>
+        ) : (
+          <Users className="h-3.5 w-3.5 shrink-0" />
+        )}
+        <span className="truncate">{label}</span>
+        <ChevronDown className={cn('h-3 w-3 shrink-0 opacity-60 transition', open && 'rotate-180')} />
+      </button>
+
+      {value && (
+        <button
+          type="button"
+          aria-label="Quitar filtro de persona"
+          onClick={() => choose(null)}
+          className="ml-1 grid h-6 w-6 shrink-0 place-items-center rounded-md border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {open && (
+        <div className="absolute left-0 top-full z-30 mt-1.5 w-72 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+          <div className="relative border-b border-border p-2">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar persona…"
+              className="h-8 w-full rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none"
+            />
+          </div>
+          <ul role="listbox" className="max-h-72 overflow-y-auto p-1">
+            <li>
+              <button
+                type="button"
+                role="option"
+                aria-selected={value === null}
+                onClick={() => choose(null)}
+                className={cn(
+                  'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs transition',
+                  value === null ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {value === null ? <Check className="h-3.5 w-3.5 shrink-0 text-primary" /> : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3b82f6]" />}
+                  Todos
+                </span>
+                <span className="shrink-0 tabular-nums opacity-60">{total}</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                role="option"
+                aria-selected={value === 'unassigned'}
+                onClick={() => choose('unassigned')}
+                className={cn(
+                  'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs transition',
+                  value === 'unassigned' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {value === 'unassigned' ? <Check className="h-3.5 w-3.5 shrink-0 text-primary" /> : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/50" />}
+                  Sin asignar
+                </span>
+                <span className="shrink-0 tabular-nums opacity-60">{counts.unassigned ?? 0}</span>
+              </button>
+            </li>
+            {filtered.map((m) => {
+              const on = value === m.id
+              const a = userAccent(m.id)
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={on}
+                    onClick={() => choose(m.id)}
+                    className={cn(
+                      'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs transition',
+                      on ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                    )}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      {on ? (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
+                      ) : (
+                        <span
+                          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-[8px] font-bold text-black"
+                          style={{ backgroundColor: a.dot }}
+                        >
+                          {m.name.slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <span className="truncate">{m.name}</span>
+                    </span>
+                    <span className="shrink-0 tabular-nums opacity-60">{counts[m.id] ?? 0}</span>
+                  </button>
+                </li>
+              )
+            })}
+            {filtered.length === 0 && (
+              <li className="px-2.5 py-3 text-center text-[11px] text-muted-foreground/60">Sin resultados</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }
 
