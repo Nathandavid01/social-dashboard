@@ -109,7 +109,8 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
   it('renders one planned card per client for the next single video', () => {
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
-    expect(screen.getByText(/Publicación · Lun 8 jun/)).toBeInTheDocument()
+    expect(screen.getByText('Lun 8 jun')).toBeInTheDocument()
+    expect(screen.getByText('Próxima publicación')).toBeInTheDocument()
     expect(screen.getByText(/desde inicio · .* en esta fila/)).toBeInTheDocument()
     expect(screen.getByText('Planificado')).toBeInTheDocument()
     const thumb = container.querySelector('article img[alt=""]') as HTMLImageElement | null

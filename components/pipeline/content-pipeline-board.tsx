@@ -332,21 +332,30 @@ function PlannedSessionCard({
           publishLabel: session.publishDate ? session.label : null,
         })
       }
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-border bg-card transition-all hover:border-foreground/30 hover:bg-muted"
-      style={{ boxShadow: 'inset 3px 0 0 0 #3b82f6' }}
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
     >
-      <div className="space-y-2.5 p-3 pl-3.5">
+      <div className="space-y-2.5 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <span className="inline-flex items-center rounded-md bg-sky-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-400">
+            Planificado
+          </span>
+          {session.publishDate && isSingle && (
+            <span className="truncate text-[10px] font-medium text-sky-600/90 dark:text-sky-400/90">
+              {session.label}
+            </span>
+          )}
+        </div>
+
         <div className="flex items-center gap-2.5">
-          <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-7 w-7 text-[10px]" />
+          <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-8 w-8 text-[10px] ring-1 ring-border/60" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{client.clientName}</p>
             <p className="truncate text-[10px] text-muted-foreground">
               {isSingle
-                ? (session.publishDate ? `Publicación · ${session.label}` : '1 video')
+                ? (session.publishDate ? 'Próxima publicación' : '1 video por idear')
                 : `${session.label} · ${session.total} video${session.total === 1 ? '' : 's'}`}
             </p>
           </div>
-          <span className="shrink-0 rounded-full border border-dashed border-border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80">Planificado</span>
         </div>
 
         {isSingle ? (
@@ -398,14 +407,14 @@ function PipelineVideoThumb({
   const src = thumbUrl ?? logoUrl
   if (src) {
     return (
-      <div className="relative h-[42px] overflow-hidden rounded-md border border-border bg-muted/40">
+      <div className="relative h-[42px] overflow-hidden rounded-lg border border-border/60 bg-muted/30 ring-1 ring-inset ring-white/5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" className="h-full w-full object-cover" />
+        <img src={src} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
       </div>
     )
   }
   return (
-    <div className="grid h-[42px] place-items-center rounded-md border border-dashed border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+    <div className="grid h-[42px] place-items-center rounded-lg border border-dashed border-border/70 bg-muted/30 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
       {name.slice(0, 2)}
     </div>
   )
