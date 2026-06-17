@@ -141,5 +141,6 @@ export async function saveIdeaCaption(
 
   revalidatePath(`/produccion/idea/${ideaId}`)
   revalidatePath('/planning')
+  revalidatePath('/pipeline')
   return { ok: true }
 }
