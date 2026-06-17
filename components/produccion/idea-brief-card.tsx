@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Lightbulb, Eye, Camera, Sparkles, Hash, CalendarCheck, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
 import { InlineEdit } from '@/components/shared/inline-edit'
@@ -13,6 +13,13 @@ interface Props {
   captionAngle?: string | null
   hashtags?: string | null
   publishDate?: string | null
+  /** Fired after a brief field is saved so parents can unlock caption/recording UI. */
+  onBriefUpdated?: (fields: {
+    hook?: string | null
+    visual_brief?: string | null
+    caption_angle?: string | null
+    hashtags_suggestion?: string | null
+  }) => void
 }
 
 /**
@@ -20,9 +27,38 @@ interface Props {
  * caption angle, hashtags). Collapses once the idea is generated. Each field is
  * an InlineEdit that persists immediately.
  */
-export function IdeaBriefCard({ ideaId, hook, visualBrief, captionAngle, hashtags, publishDate }: Props) {
-  const generated = !!(hook && visualBrief)
+export function IdeaBriefCard({
+  ideaId,
+  hook,
+  visualBrief,
+  captionAngle,
+  hashtags,
+  publishDate,
+  onBriefUpdated,
+}: Props) {
+  const [hookVal, setHookVal] = useState(hook ?? '')
+  const [visualVal, setVisualVal] = useState(visualBrief ?? '')
+  const [angleVal, setAngleVal] = useState(captionAngle ?? '')
+  const [tagsVal, setTagsVal] = useState(hashtags ?? '')
+
+  useEffect(() => {
+    setHookVal(hook ?? '')
+    setVisualVal(visualBrief ?? '')
+    setAngleVal(captionAngle ?? '')
+    setTagsVal(hashtags ?? '')
+  }, [ideaId, hook, visualBrief, captionAngle, hashtags])
+
+  const generated = !!(hookVal && visualVal)
   const [open, setOpen] = useState(!generated)
+
+  async function saveBrief(
+    fields: { hook?: string | null; visual_brief?: string | null; caption_angle?: string | null; hashtags_suggestion?: string | null },
+    local: () => void,
+  ) {
+    await updateIdeaBrief(ideaId, fields)
+    local()
+    onBriefUpdated?.(fields)
+  }
 
   return (
     <Card id="stage-idea" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300">
@@ -54,23 +90,23 @@ export function IdeaBriefCard({ ideaId, hook, visualBrief, captionAngle, hashtag
           </EditableField>
 
           <EditableField icon={Eye} label="Hook">
-            <InlineEdit label="Hook" value={hook} placeholder="Añadir hook…"
-              onSave={(v) => updateIdeaBrief(ideaId, { hook: v })} />
+            <InlineEdit label="Hook" value={hookVal} placeholder="Añadir hook…"
+              onSave={(v) => saveBrief({ hook: v }, () => setHookVal(v))} />
           </EditableField>
 
           <EditableField icon={Camera} label="Brief visual (para el editor)">
-            <InlineEdit type="textarea" label="Brief visual (para el editor)" value={visualBrief} placeholder="Añadir brief visual…"
-              onSave={(v) => updateIdeaBrief(ideaId, { visual_brief: v })} />
+            <InlineEdit type="textarea" label="Brief visual (para el editor)" value={visualVal} placeholder="Añadir brief visual…"
+              onSave={(v) => saveBrief({ visual_brief: v }, () => setVisualVal(v))} />
           </EditableField>
 
           <EditableField icon={Sparkles} label="Ángulo del caption">
-            <InlineEdit type="textarea" label="Ángulo del caption" value={captionAngle} placeholder="Añadir ángulo…"
-              onSave={(v) => updateIdeaBrief(ideaId, { caption_angle: v })} />
+            <InlineEdit type="textarea" label="Ángulo del caption" value={angleVal} placeholder="Añadir ángulo…"
+              onSave={(v) => saveBrief({ caption_angle: v }, () => setAngleVal(v))} />
           </EditableField>
 
           <EditableField icon={Hash} label="Hashtags sugeridos">
-            <InlineEdit label="Hashtags sugeridos" value={hashtags} placeholder="Añadir hashtags…" mono
-              onSave={(v) => updateIdeaBrief(ideaId, { hashtags_suggestion: v })} />
+            <InlineEdit label="Hashtags sugeridos" value={tagsVal} placeholder="Añadir hashtags…" mono
+              onSave={(v) => saveBrief({ hashtags_suggestion: v }, () => setTagsVal(v))} />
           </EditableField>
         </CardContent>
       )}

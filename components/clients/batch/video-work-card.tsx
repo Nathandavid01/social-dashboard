@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Check, Film } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
@@ -33,6 +34,20 @@ export function VideoWorkCard({
   const recorded = isRecorded(video)
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
+
+  const [hook, setHook] = useState(video.hook ?? '')
+  const [visualBrief, setVisualBrief] = useState(video.visual_brief ?? '')
+  const [captionAngle, setCaptionAngle] = useState(video.caption_angle ?? '')
+  const [hashtags, setHashtags] = useState(video.hashtags_suggestion ?? '')
+  const [savedCaption, setSavedCaption] = useState(video.generated_caption ?? '')
+
+  useEffect(() => {
+    setHook(video.hook ?? '')
+    setVisualBrief(video.visual_brief ?? '')
+    setCaptionAngle(video.caption_angle ?? '')
+    setHashtags(video.hashtags_suggestion ?? '')
+    setSavedCaption(video.generated_caption ?? '')
+  }, [video.id, video.hook, video.visual_brief, video.caption_angle, video.hashtags_suggestion, video.generated_caption])
 
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
@@ -71,21 +86,32 @@ export function VideoWorkCard({
       {/* idea — editable inline (gancho, brief, ángulo, hashtags, fecha) */}
       <IdeaBriefCard
         ideaId={video.id}
-        hook={video.hook}
-        visualBrief={video.visual_brief}
-        captionAngle={video.caption_angle}
-        hashtags={video.hashtags_suggestion}
+        hook={hook}
+        visualBrief={visualBrief}
+        captionAngle={captionAngle}
+        hashtags={hashtags}
         publishDate={video.publish_date}
+        onBriefUpdated={(fields) => {
+          if ('hook' in fields) setHook(fields.hook ?? '')
+          if ('visual_brief' in fields) setVisualBrief(fields.visual_brief ?? '')
+          if ('caption_angle' in fields) setCaptionAngle(fields.caption_angle ?? '')
+          if ('hashtags_suggestion' in fields) setHashtags(fields.hashtags_suggestion ?? '')
+        }}
       />
 
-      {/* caption — editable inline + AI */}
+      {/* caption — from idea, before recording */}
       <IdeaCaptionEditor
         ideaId={video.id}
-        initialCaption={video.generated_caption}
+        initialCaption={savedCaption}
         platforms={platforms}
+        hook={hook}
+        visualBrief={visualBrief}
+        captionAngle={captionAngle}
+        hashtags={hashtags}
+        onSaved={setSavedCaption}
       />
 
-      {/* grabación — raw / b-roll / edited uploads to R2 */}
+      {/* grabación — unlocked once caption is saved */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
           <Film className="h-3 w-3 text-amber-500" aria-hidden />
@@ -93,7 +119,13 @@ export function VideoWorkCard({
             Grabación
           </span>
         </div>
-        <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
+        {savedCaption.trim() ? (
+          <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
+        ) : (
+          <p className="rounded-lg border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground">
+            Guarda el caption basado en la idea antes de grabar. Así tendrás claro qué decir frente a cámara.
+          </p>
+        )}
       </div>
 
       {/* aprobación — enviar a revisión / aprobar / pedir cambios según el estado */}

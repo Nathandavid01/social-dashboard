@@ -38,10 +38,24 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
-  it('offers AI generation when the user has captions.use', () => {
+  it('offers AI generation when the user has captions.use and idea is ready', () => {
     mockRole = 'editor'
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} />)
-    expect(screen.getByRole('button', { name: /generar con ia/i })).toBeInTheDocument()
+    render(
+      <IdeaCaptionEditor
+        ideaId="i1"
+        initialCaption={null}
+        hook="Gancho"
+        visualBrief="Brief visual"
+      />,
+    )
+    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeInTheDocument()
+  })
+
+  it('disables AI generation until hook and visual brief exist', () => {
+    mockRole = 'editor'
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo hook" />)
+    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
+    expect(screen.getByText(/completa el hook y el brief visual/i)).toBeInTheDocument()
   })
 
   it('shows the client platform badges when provided', () => {

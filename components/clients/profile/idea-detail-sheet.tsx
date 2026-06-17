@@ -5,9 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Badge } from '@/components/ui/badge'
 import { getIdeaDetailBundle, type IdeaDetailBundle } from '@/lib/actions/content-ideas'
 import { IdeaProgressBar } from '@/components/produccion/idea-progress-bar'
-import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
-import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
-import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { IdeaStudioCompact } from '@/components/produccion/idea-studio'
 import { IdeaActivityTimeline } from '@/components/produccion/idea-activity-timeline'
 
 const TYPE_LABEL: Record<string, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
@@ -71,19 +69,7 @@ export function IdeaDetailSheet({ ideaId, open, onOpenChange }: Props) {
             </SheetHeader>
 
             <IdeaProgressBar progress={bundle.progress} />
-            <IdeaBriefCard
-              ideaId={idea.id}
-              hook={idea.hook}
-              visualBrief={idea.visual_brief}
-              captionAngle={idea.caption_angle}
-              hashtags={idea.hashtags_suggestion}
-              publishDate={idea.publish_date}
-            />
-            <IdeaCaptionEditor
-              ideaId={idea.id}
-              initialCaption={idea.generated_caption}
-            />
-            <IdeaVideoPanel ideaId={idea.id} ideaTitle={idea.title} videos={bundle.videos} />
+            <IdeaStudioCompact ideaId={idea.id} idea={idea} videos={bundle.videos} />
             <IdeaActivityTimeline activities={bundle.activity} />
           </div>
         ) : null}

@@ -12,6 +12,7 @@ export interface StyleExample {
 export interface IdeaCaptionPromptInput {
   title: string
   hook?: string | null
+  visualBrief?: string | null
   captionAngle?: string | null
   hashtags?: string | null
   client?: {
@@ -34,7 +35,7 @@ const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
 
 /** Build the full prompt sent to the model for a single idea's caption. */
 export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
-  const { title, hook, captionAngle, hashtags, examples } = input
+  const { title, hook, visualBrief, captionAngle, hashtags, examples } = input
   const c = input.client ?? {}
 
   const nets = (input.platforms ?? []).filter((p) => filled(p))
@@ -59,6 +60,7 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
   const ideaLines = [
     `- Título: ${title}`,
     filled(hook) && `- Hook: ${hook}`,
+    filled(visualBrief) && `- Brief visual (qué grabar): ${visualBrief}`,
     filled(captionAngle) && `- Ángulo del caption: ${captionAngle}`,
     filled(hashtags) && `- Hashtags sugeridos: ${hashtags}`,
   ]
@@ -81,6 +83,7 @@ ${ideaLines}
 ${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${examplesBlock}
 
 TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
+El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
 ${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)

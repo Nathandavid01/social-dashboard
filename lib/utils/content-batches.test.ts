@@ -22,7 +22,8 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 describe('ideaStage', () => {
   it('maps data to a pipeline stage (idea → publication)', () => {
     expect(ideaStage(idea())).toBe('idea')
-    expect(ideaStage(idea({ hook: 'h' }))).toBe('title')
+    expect(ideaStage(idea({ hook: 'h' }))).toBe('idea')
+    expect(ideaStage(idea({ hook: 'h', visual_brief: 'v' }))).toBe('caption')
     expect(ideaStage(idea({ generated_caption: 'c' }))).toBe('caption')
     expect(ideaStage(idea({ status: 'grabada' }))).toBe('video')
     expect(ideaStage(idea({ status: 'producida' }))).toBe('edited')
@@ -33,7 +34,7 @@ describe('ideaStage', () => {
 
 describe('batchStage — moves together (least advanced active video)', () => {
   it('sits at the least-advanced video', () => {
-    expect(batchStage([idea({ status: 'producida' }), idea({ hook: 'h' }), idea({ status: 'grabada' })])).toBe('title')
+    expect(batchStage([idea({ status: 'producida' }), idea({ hook: 'h' }), idea({ status: 'grabada' })])).toBe('idea')
   })
   it('is publication only when every active video is published', () => {
     expect(batchStage([idea({ status: 'publicada' }), idea({ status: 'publicada' })])).toBe('publication')
@@ -53,7 +54,7 @@ describe('groupIntoBatches', () => {
     const nora = batches.find((b) => b.clientId === 'c1')!
     expect(nora.total).toBe(2)
     expect(nora.assignee).toEqual({ id: 'a', name: 'Ana' })
-    expect(nora.stage).toBe('title') // least advanced of {title, video}
+    expect(nora.stage).toBe('idea') // least advanced of {idea, video}
     expect(batches.find((b) => b.clientId === 'c2')!.stage).toBe('publication')
   })
   it('excludes clients whose videos are all discarded', () => {
@@ -73,9 +74,9 @@ describe('buildClientPipelineIndex', () => {
       idea({ id: '2', client_id: 'c1', title: 'Reel B', status: 'grabada' }),
     ] as IdeaWithPipeline[])
     expect(index.c1.total).toBe(2)
-    expect(index.c1.batchStageLabel).toBe('Título')
+    expect(index.c1.batchStageLabel).toBe('Idea')
     expect(index.c1.videos.map((v) => v.title)).toEqual(['Reel A', 'Reel B'])
-    expect(index.c1.videos[0].stageLabel).toBe('Título')
+    expect(index.c1.videos[0].stageLabel).toBe('Idea')
     expect(index.c1.videos[1].stageLabel).toBe('Video')
     expect(index.c1.metricoolScheduled).toBe(0)
     expect(index.c1.nextNewVideo).toBeNull()

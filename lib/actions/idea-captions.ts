@@ -7,6 +7,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
+import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 
 const CAPTION_MODEL = 'claude-sonnet-4-6'
@@ -32,11 +33,15 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
+    .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
     .eq('id', ideaId)
     .single()
 
   if (!idea) return { error: 'Idea no encontrada' }
+
+  if (!isIdeaReadyForCaption(idea)) {
+    return { error: 'Completa el hook y el brief visual de la idea antes de generar el caption.' }
+  }
 
   const client = (idea.client ?? {}) as {
     name?: string
@@ -61,6 +66,7 @@ export async function generateIdeaCaption(
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
     hook: idea.hook,
+    visualBrief: idea.visual_brief,
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,
     platforms,
@@ -103,6 +109,7 @@ export async function generateIdeaCaption(
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
+    revalidatePath('/pipeline')
     return { ok: true, caption }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al generar caption' }

@@ -1,4 +1,5 @@
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import {
   countMetricoolScheduled,
   findNextNewVideoSlot,
@@ -147,7 +148,7 @@ export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.status === 'producida') return 'edited'
   if (idea.status === 'grabada') return 'video'
   if (filled(idea.generated_caption)) return 'caption'
-  if (filled(idea.hook) || filled(idea.visual_brief)) return 'title'
+  if (isIdeaReadyForCaption(idea)) return 'caption'
   return 'idea'
 }
 

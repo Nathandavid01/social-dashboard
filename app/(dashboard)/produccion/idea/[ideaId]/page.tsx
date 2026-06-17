@@ -5,11 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  ArrowLeft, Sparkles, Palette, Scissors, History,
+  ArrowLeft, Palette, History,
 } from 'lucide-react'
-import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
-import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
-import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { IdeaStudio } from '@/components/produccion/idea-studio'
 import { ClientAssetsDownload } from '@/components/produccion/client-assets-download'
 import { PipelineTimeline, type TimelineStage } from '@/components/produccion/pipeline-timeline'
 import { IdeaProgressBar } from '@/components/produccion/idea-progress-bar'
@@ -92,46 +90,11 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
       {/* Overall progress + what's missing */}
       <IdeaProgressBar progress={progress} />
 
-      {/* Stage 1: Idea brief (collapsible once generated) */}
-      <IdeaBriefCard
-        ideaId={ideaId}
-        hook={idea.hook}
-        visualBrief={idea.visual_brief}
-        captionAngle={idea.caption_angle}
-        hashtags={idea.hashtags_suggestion}
-        publishDate={idea.publish_date}
-      />
-
-      {/* Stage 2: Caption */}
-      <Card id="stage-caption" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="h-4 w-4 text-primary" /> Caption
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <IdeaCaptionEditor
-            ideaId={ideaId}
-            initialCaption={idea.generated_caption}
-          />
-        </CardContent>
-      </Card>
+      <IdeaStudio ideaId={ideaId} idea={idea} videos={vids} publicEnabled={isR2PublicConfigured()} />
 
       <div className="grid gap-5 lg:grid-cols-2">
-        {/* Stage 3: Material crudo + b-rolls + editado */}
-        <Card id="stage-material" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Scissors className="h-4 w-4 text-cyan-500" /> Material de video
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos as ContentIdeaVideo[]} publicEnabled={isR2PublicConfigured()} />
-          </CardContent>
-        </Card>
-
-        {/* Stage 4: Client assets to download */}
-        <Card id="stage-assets" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
+        {/* Client assets to download */}
+        <Card id="stage-assets" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300 lg:col-span-2" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Palette className="h-4 w-4 text-pink-500" /> Assets del cliente

@@ -1,4 +1,5 @@
 import type { ContentIdea, ContentIdeaVideo } from '@/lib/supabase/types'
+import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import type { ClientCadence, ClientPipelineSummary } from '@/lib/utils/content-batches'
 import {
   countMetricoolScheduled,
@@ -82,7 +83,7 @@ export function videoStageKey(v: BatchVideo): BatchStageKey {
   if (v.status === 'producida' || hasEdited(v)) return 'edited'
   if (v.status === 'grabada' || v.recording_date != null || hasRaw(v)) return 'video'
   if (filled(v.generated_caption)) return 'caption'
-  if (filled(v.hook) || filled(v.visual_brief)) return 'title'
+  if (isIdeaReadyForCaption(v)) return 'caption'
   return 'idea'
 }
 
@@ -151,9 +152,9 @@ export function slotStatus(count: number, optional = false): SlotStatus {
 export function batchHint(videos: BatchVideo[]): { stageLabel: string; tip: string } {
   const stage = batchStageKey(videos)
   const tips: Record<BatchStageKey, string> = {
-    idea: 'Define el gancho y la idea visual de cada video para avanzar a Título.',
-    title: 'Completa el título y el brief de cada video para avanzar a Caption.',
-    caption: 'Escribe el caption de cada video para avanzar a Video.',
+    idea: 'Define el hook y el brief visual de cada video. El caption sale de esa idea.',
+    title: 'Completa el título de cada video si aún falta.',
+    caption: 'Escribe el caption basado en la idea — así sabrás qué grabar. Luego sube el video.',
     video:
       'Sube el archivo grabado (raw) de cada video. Cuando todos tengan su grabación, el lote avanza a Edición.',
     edited: 'Sube la versión editada de cada video para enviarla a Aprobación.',

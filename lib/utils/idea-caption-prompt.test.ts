@@ -40,6 +40,12 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).not.toContain('CAPTIONS DE REFERENCIA')
   })
 
+  it('includes the visual brief when provided', () => {
+    const p = buildIdeaCaptionPrompt({ ...base, hook: 'Gancho', visualBrief: 'Grabar en la cocina' })
+    expect(p).toContain('- Brief visual (qué grabar): Grabar en la cocina')
+    expect(p).toMatch(/alinearse con el hook y el brief visual/i)
+  })
+
   it('includes the hook only when provided', () => {
     expect(buildIdeaCaptionPrompt({ ...base, hook: 'Gancho fuerte' })).toContain('- Hook: Gancho fuerte')
     expect(buildIdeaCaptionPrompt(base)).not.toContain('- Hook:')

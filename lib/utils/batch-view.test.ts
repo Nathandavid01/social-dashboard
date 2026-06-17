@@ -87,12 +87,13 @@ describe('videoStageKey', () => {
   it('is "idea" with no content', () => {
     expect(videoStageKey(mk())).toBe('idea')
   })
-  it('is "title" once hook or visual_brief is filled', () => {
-    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('title')
-    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('title')
+  it('is "caption" once hook and visual_brief are filled (idea ready)', () => {
+    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('idea')
+    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('idea')
+    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('caption')
   })
   it('is "caption" once a caption is generated', () => {
-    expect(videoStageKey(mk({ hook: 'g', generated_caption: 'texto' }))).toBe('caption')
+    expect(videoStageKey(mk({ hook: 'g', visual_brief: 'b', generated_caption: 'texto' }))).toBe('caption')
   })
   it('is "video" when a raw file is uploaded (even if status not advanced)', () => {
     expect(videoStageKey(mk({ generated_caption: 'c', videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('video')
@@ -120,10 +121,9 @@ describe('batchStageKey', () => {
   it('returns the LEAST-advanced active video stage (videos move together)', () => {
     const videos = [
       mk({ id: 'a', status: 'grabada' }), // video
-      mk({ id: 'b', hook: 'g' }), // title
-      mk({ id: 'c', published_at: '2026-06-20' }), // publication
+      mk({ id: 'b', hook: 'g' }), // idea (partial)
     ]
-    expect(batchStageKey(videos)).toBe('title')
+    expect(batchStageKey(videos)).toBe('idea')
   })
   it('ignores discarded videos', () => {
     const videos = [
