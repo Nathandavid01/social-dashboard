@@ -34,7 +34,7 @@ type FeedbackClient = {
  */
 export async function generateApprovedIdeaCaption(
   feedbackId: string,
-  platform = 'instagram',
+  _platform?: string,
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -49,7 +49,7 @@ export async function generateApprovedIdeaCaption(
   const { data: idea } = await supabase
     .from('idea_lab_feedback')
     .select(
-      'id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id)',
+      'id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms)',
     )
     .eq('id', feedbackId)
     .single()
@@ -61,13 +61,14 @@ export async function generateApprovedIdeaCaption(
   // Pull the client's recently published captions from Metricool so the model
   // imitates their real style (best-effort — returns [] if unavailable).
   const examples = await fetchClientStyleExamples(client.metricool_blog_id ?? undefined)
+  const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
     hook: idea.hook,
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,
-    platform,
+    platforms,
     examples,
     client: {
       name: client.name,
@@ -87,7 +88,7 @@ export async function generateApprovedIdeaCaption(
       .from('idea_lab_feedback')
       .update({
         generated_caption: caption,
-        caption_platform: platform,
+        caption_platform: null,
         caption_generated_at: new Date().toISOString(),
       })
       .eq('id', feedbackId)
@@ -233,24 +234,24 @@ export async function generateQuickCaption(input: {
     return { error: 'Escribe de qué trata el caption.' }
   }
 
-  const platform = input.platform ?? 'instagram'
   const supabase = await createClient()
   const { data: client } = await supabase
     .from('clients')
-    .select('name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id')
+    .select('name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms')
     .eq('id', input.clientId)
     .single()
   if (!client) return { error: 'Cliente no encontrado' }
 
   const c = client as FeedbackClient
   const examples = await fetchClientStyleExamples(c.metricool_blog_id ?? undefined)
+  const platforms = resolvePlatforms(c.platforms, c.default_platforms)
 
   const prompt = buildIdeaCaptionPrompt({
     title: input.topic.trim(),
     hook: null,
     captionAngle: null,
     hashtags: null,
-    platform,
+    platforms,
     examples,
     client: {
       name: c.name,
