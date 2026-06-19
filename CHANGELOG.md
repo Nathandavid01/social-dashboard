@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.53 — 2026-06-19
+
+### Los clientes suben sus propios videos (link mágico) — Fase 1
+- Nueva página pública **`/subir/<id-del-cliente>`**: el cliente abre el link desde su celular, **graba o elige un video**, escoge **formato (Reel/Post)**, **tipo de contenido** (promoción, testimonio, detrás de cámara…), un **brief opcional** y la **fecha deseada**, y lo envía.
+- El video crudo sube directo a **Cloudflare R2** y aparece solo en el **pipeline del equipo** como una idea con su material adjunto — para editar **sin tener que ir a grabar**.
+- Sin login para el cliente (el id del link es el acceso por ahora) y sin migración: reusa el almacenamiento R2 y el pipeline existentes.
+- (Próximo paso: token real por cliente + botón "Copiar link de subida" en el perfil del cliente, y luego envolverlo como app iOS con Capacitor.)
+
 ## v2.52 — 2026-06-19
 
 ### Áreas: panel desplegable debajo de cada persona
