@@ -38,11 +38,13 @@ export default async function ClientReportPage({
   params,
   searchParams,
 }: {
-  params: { id: string }
-  searchParams?: { days?: string }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ days?: string }>
 }) {
-  const days = Number(searchParams?.days) || 30
-  const report = await getClientReport(params.id, days)
+  const { id } = await params
+  const { days: daysParam } = await searchParams
+  const days = Number(daysParam) || 30
+  const report = await getClientReport(id, days)
   if (!report) notFound()
 
   const { client, summary, posts, metricoolConfigured } = report
