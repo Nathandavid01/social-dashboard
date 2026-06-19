@@ -490,7 +490,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
         <div className="flex items-center gap-2.5">
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-black" style={{ backgroundColor: a.dot }}>{batch.clientName.slice(0, 1).toUpperCase()}</span>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
+            <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
               {dlt.label && (
                 <span className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold leading-none whitespace-nowrap', dlt.className)}>

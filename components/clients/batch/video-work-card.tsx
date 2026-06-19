@@ -5,13 +5,6 @@ import { Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
 import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-
-const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-/** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
-function fmtDeadline(iso: string): string {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${d} ${MES_ES[(m ?? 1) - 1]}`
-}
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
@@ -19,6 +12,13 @@ import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ApprovalButton } from '@/components/produccion/approval-button'
 import type { SocialPlatform } from '@/lib/supabase/types'
+
+const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+/** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
+function fmtDeadline(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} ${MES_ES[(m ?? 1) - 1]}`
+}
 
 /**
  * A full work card for one video of the batch: its idea and caption are editable
