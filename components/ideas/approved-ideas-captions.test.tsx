@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-<<<<<<< Updated upstream
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
-=======
-import { render, screen, cleanup } from '@testing-library/react'
->>>>>>> Stashed changes
 import type { ApprovedIdea } from '@/lib/actions/idea-feedback-types'
 
 vi.mock('@/lib/actions/idea-lab-captions', () => ({
@@ -52,7 +48,6 @@ describe('ApprovedIdeasCaptions', () => {
     expect(screen.getByText(/Enviado a Metricool/)).toBeInTheDocument()
     expect(screen.queryByText('Enviar a Metricool')).toBeNull()
   })
-<<<<<<< Updated upstream
 
   it('shows the cadence notice and defaults the schedule date to the cadence day', () => {
     render(
@@ -83,6 +78,4 @@ describe('ApprovedIdeasCaptions', () => {
     expect(sendBtn).toBeDisabled()
     expect(screen.getByText(/fecha ya pasó/i)).toBeInTheDocument()
   })
-=======
->>>>>>> Stashed changes
 })

@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest'
-<<<<<<< Updated upstream
 import { approvedIdeaSendReadiness, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError, scheduleMinDate, defaultScheduleDate, nowMinuteInPostTZ, autopublishTimeError } from './idea-lab-send-core'
 import { addDaysISO } from './deadlines'
 
@@ -19,9 +18,6 @@ describe('quickSendMediaOptions', () => {
     expect(quickSendMediaOptions()).toEqual({ autoPublish: false })
   })
 })
-=======
-import { approvedIdeaSendReadiness, buildScheduledDateTime } from './idea-lab-send-core'
->>>>>>> Stashed changes
 
 describe('approvedIdeaSendReadiness', () => {
   const ok = { generated_caption: 'Hola mundo', metricool_post_id: null }
@@ -71,7 +67,6 @@ describe('buildScheduledDateTime', () => {
     expect(buildScheduledDateTime('2026-06-15', 'noon')).toBe('2026-06-15T10:00:00')
   })
 })
-<<<<<<< Updated upstream
 
 describe('scheduleDateError', () => {
   const today = '2026-06-14'
@@ -138,5 +133,3 @@ describe('schedule defaults (posting timezone)', () => {
     expect(defaultScheduleDate(instant)).toBe('2026-06-15')
   })
 })
-=======
->>>>>>> Stashed changes
