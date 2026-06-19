@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText } from 'lucide-react'
+import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText, BarChart3 } from 'lucide-react'
 import { formatDate, taskStatusColors } from '@/lib/utils'
 import { ClientHero } from '@/components/clients/profile/client-hero'
 import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
@@ -197,9 +197,17 @@ export default async function ClientDetailPage({
             {recentPosts.length > 0 && ` (${recentPosts.length})`}
           </CardTitle>
           {client.metricool_blog_id && (
-            <Link href={`/published?blogId=${client.metricool_blog_id}`} className="ml-auto text-xs text-primary hover:underline">
-              Ver todos →
-            </Link>
+            <div className="ml-auto flex items-center gap-3">
+              <Link
+                href={`/clients/${id}/reporte`}
+                className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/15"
+              >
+                <BarChart3 className="h-3.5 w-3.5" /> Reporte
+              </Link>
+              <Link href={`/published?blogId=${client.metricool_blog_id}`} className="text-xs text-primary hover:underline">
+                Ver todos →
+              </Link>
+            </div>
           )}
         </CardHeader>
         <CardContent>

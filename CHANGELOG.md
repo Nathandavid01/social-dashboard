@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.63 — 2026-06-19
+
+### Reporte de desempeño por cliente
+- Nuevo **reporte profesional por cliente** (botón **Reporte** en el perfil del cliente → `/clients/[id]/reporte`): muestra las **publicaciones** del período (Instagram + Facebook) con su **alcance, impresiones, me gusta, comentarios, compartidos, guardados y reproducciones** por post, más KPIs arriba (personas alcanzadas, impresiones, interacciones, # de publicaciones).
+- Marca el **post de mayor alcance**, se puede ver a **7 / 30 / 90 días**, y trae botón **Imprimir / PDF** para compartirlo con el cliente. Diseño tipo documento (limpio, imprimible).
+- Datos en vivo de Metricool (server-side, token nunca expuesto). Sin migración.
+
 ## v2.62 — 2026-06-19
 
 ### Captions: calificar 👍/👎 para que aprendan (learning loop · fase 2)
