@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.60 — 2026-06-19
+
+### El contador de alcance ahora SÍ trae datos reales (~9.6M)
+- Se corrigió de dónde se lee el reach: antes pegaba a `/stats/posts` (solo cuenta lo publicado *vía* Metricool → venía vacío). Ahora usa **`/stats/aggregations/{red}`** (Instagram/Facebook/TikTok), que es el **alcance real de las cuentas**. Con tus 62 clientes da **~9.6M personas alcanzadas** (12 meses) en vez de quedar oculto.
+- Solo cuenta **reach real** (Instagram `reach`, Facebook reach único cuando existe) — no impresiones, para que el número sea honesto.
+- El cron diario de Metricool ahora **precalienta** ese total, así el login lo muestra al instante sin recalcular 60+ cuentas en cada visita.
+
 ## v2.59 — 2026-06-19
 
 ### Contador del login: honesto + diagnóstico
