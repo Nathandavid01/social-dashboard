@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.75 — 2026-06-19
+
+### Reporte: descarga rápida de PDF + logos de Instagram/Facebook
+- Nuevo botón **"Descargar PDF"** que baja el reporte en **un clic** (sin pasar por el diálogo de imprimir). Las imágenes (logo del cliente y miniaturas de los posts) salen en el PDF gracias a un proxy interno.
+- En el reporte ahora se ven los **logos reales de Instagram y Facebook** (en las publicaciones destacadas y en el split por red) en vez del texto "IG/FB".
+
 ## v2.74 — 2026-06-19
 
 ### Onboarding guiado: navegación hacia atrás + editar pasos

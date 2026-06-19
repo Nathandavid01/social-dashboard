@@ -17,6 +17,7 @@ import { deltaPct, deltaTone, formatDelta } from '@/lib/utils/report-delta-core'
 import { reachByNetwork, reachTimeline, topPosts } from '@/lib/utils/report-insights-core'
 import type { ClientReport } from '@/lib/actions/client-report'
 import { WeeklyReachChart, NetworkSplitBar } from './report-charts'
+import { NetworkIcon } from './network-icons'
 import { AudienceSection } from './audience-section'
 import { ActionPlanSection } from './action-plan-section'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,12 @@ import { cn } from '@/lib/utils'
 function fmtRange(start: string, end: string): string {
   const p = (s: string) => `${s.slice(6, 8)}/${s.slice(4, 6)}/${s.slice(0, 4)}`
   return `${p(start)} – ${p(end)}`
+}
+
+/** Route external images through our same-origin proxy so the PDF capture can read them. */
+function proxied(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  return url.startsWith('http') ? `/api/img-proxy?u=${encodeURIComponent(url)}` : url
 }
 
 function renderInsight(text: string) {
@@ -63,12 +70,12 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
   const featured = topPosts(posts, 3)
 
   return (
-    <div className="mx-auto max-w-4xl rounded-2xl border bg-white p-8 text-zinc-900 shadow-sm print:border-0 print:shadow-none sm:p-10">
+    <div id="report-document" className="mx-auto max-w-4xl rounded-2xl border bg-white p-8 text-zinc-900 shadow-sm print:border-0 print:shadow-none sm:p-10">
       <header className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-6">
         <div className="flex items-center gap-4">
           {client.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={client.logoUrl} alt={client.name} className="h-14 w-14 rounded-xl object-cover" />
+            <img src={proxied(client.logoUrl)} alt={client.name} className="h-14 w-14 rounded-xl object-cover" />
           ) : (
             <div className="grid h-14 w-14 place-items-center rounded-xl bg-zinc-100 text-lg font-bold text-zinc-400">
               {client.name.slice(0, 2).toUpperCase()}
@@ -185,8 +192,6 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
 }
 
 function FeaturedPost({ post, rank }: { post: ReportPost; rank: number }) {
-  const net =
-    post.network === 'instagram' ? { label: 'IG', cls: 'bg-pink-100 text-pink-600' } : { label: 'FB', cls: 'bg-blue-100 text-blue-600' }
   const metrics = [
     { label: 'Alcance', value: post.reach },
     { label: 'Interacciones', value: post.engagement },
@@ -198,14 +203,14 @@ function FeaturedPost({ post, rank }: { post: ReportPost; rank: number }) {
       <div className="relative aspect-square w-full bg-zinc-100">
         {post.thumbnail ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.thumbnail} alt="" className="h-full w-full object-cover" />
+          <img src={proxied(post.thumbnail)} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center text-zinc-300">
             <ImageIcon className="h-8 w-8" />
           </div>
         )}
-        <span className={cn('absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-bold shadow-sm', net.cls)}>
-          {net.label} · {post.type}
+        <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-zinc-700 shadow-sm">
+          <NetworkIcon network={post.network} size={12} /> {post.type}
         </span>
         {rank === 1 && (
           <span className="absolute right-2 top-2 rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 shadow-sm">
