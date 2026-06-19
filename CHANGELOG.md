@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.72 — 2026-06-19
+
+### Selector de cliente escribible (buscador)
+- En **Caption rápido**, el selector de **Cliente** ahora es un **buscador**: escribes parte del nombre y filtra al instante (con decenas de clientes ya no hay que scrollear una lista larga). Muestra el nombre elegido, marca cuáles no tienen Metricool, y dice "Sin resultados" si no encuentra.
+- Componente reutilizable (`ClientCombobox`) para usarlo en otros selectores de cliente más adelante.
+
 ## v2.71 — 2026-06-19
 
 ### "Caption rápido" ahora también aprende

@@ -9,6 +9,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ClientCombobox } from '@/components/clients/client-combobox'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
@@ -204,19 +205,12 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Cliente
-                <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Elige cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {!c.metricool_blog_id?.trim() ? ' (sin Metricool)' : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ClientCombobox
+                  clients={clients.map((c) => ({ id: c.id, name: c.metricool_blog_id?.trim() ? c.name : `${c.name} (sin Metricool)` }))}
+                  value={clientId}
+                  onChange={setClientId}
+                  placeholder="Escribe o elige cliente"
+                />
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Formato
