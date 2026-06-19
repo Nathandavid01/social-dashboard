@@ -5,6 +5,9 @@ vi.mock('@/lib/actions/idea-lab-captions', () => ({
   generateQuickCaption: vi.fn(async () => ({ ok: true, caption: 'x' })),
   sendQuickCaptionToMetricool: vi.fn(async () => ({ ok: true, scheduledFor: '2026-06-15T10:00:00' })),
 }))
+vi.mock('@/lib/actions/caption-feedback', () => ({
+  rateCaption: vi.fn(async () => ({ ok: true })),
+}))
 vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getQuickUploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k', publicUrl: 'https://pub/k' })),
 }))
@@ -67,6 +70,14 @@ describe('QuickCaptionDialog', () => {
     const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement
     expect(dateInput).toBeTruthy()
     expect(dateInput.getAttribute('min')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+
+  it('hides the feedback + rating controls until there is a caption', () => {
+    render(<QuickCaptionDialog clients={clients} />)
+    fireEvent.click(screen.getByText('Caption rápido'))
+    // No caption generated yet → no "Ajustar con feedback" / 👍 / 👎.
+    expect(screen.queryByText(/ajustar con feedback/i)).toBeNull()
+    expect(screen.queryByRole('button', { name: /me gusta/i })).toBeNull()
   })
 
   it('offers a video upload control', () => {
