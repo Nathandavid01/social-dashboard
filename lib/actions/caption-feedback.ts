@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { detectRecurringFeedback } from '@/lib/utils/caption-learning'
 
 /**
  * Rate a generated caption 👍 (1) or 👎 (-1) with an optional note (fase 2 of the
@@ -53,5 +54,94 @@ export async function rateCaption(input: {
   revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/planning')
   revalidatePath('/pipeline')
+  return { ok: true }
+}
+
+/**
+ * Per-client caption-learning stats for the editor's transparency chip:
+ * how many APPROVED + 👍 captions inform generation, plus recurring 👎 notes
+ * worth turning into a standing rule. Best-effort: any error → zeros (so the UI
+ * just hides the chip; works before migration 0041 too).
+ */
+export async function getCaptionLearningStats(
+  ideaId: string,
+): Promise<{ approved: number; loved: number; rejected: number; suggestions: { phrase: string; count: number }[] }> {
+  const empty = { approved: 0, loved: 0, rejected: 0, suggestions: [] as { phrase: string; count: number }[] }
+  try {
+    await requirePermission('captions.use')
+  } catch {
+    return empty
+  }
+  try {
+    const supabase = await createClient()
+    const { data: idea } = await supabase.from('content_ideas').select('client_id').eq('id', ideaId).maybeSingle()
+    const clientId = (idea as { client_id?: string | null } | null)?.client_id
+    if (!clientId) return empty
+
+    const [approvedRes, lovedRes, rejectedRes, notesRes] = await Promise.all([
+      supabase
+        .from('content_ideas')
+        .select('id', { count: 'exact', head: true })
+        .eq('client_id', clientId)
+        .eq('approval_status', 'approved')
+        .not('generated_caption', 'is', null),
+      supabase.from('caption_feedback').select('id', { count: 'exact', head: true }).eq('client_id', clientId).eq('rating', 1),
+      supabase.from('caption_feedback').select('id', { count: 'exact', head: true }).eq('client_id', clientId).eq('rating', -1),
+      supabase
+        .from('caption_feedback')
+        .select('note')
+        .eq('client_id', clientId)
+        .eq('rating', -1)
+        .not('note', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(50),
+    ])
+
+    const notes = ((notesRes.data ?? []) as { note: string | null }[]).map((r) => r.note)
+    return {
+      approved: approvedRes.count ?? 0,
+      loved: lovedRes.count ?? 0,
+      rejected: rejectedRes.count ?? 0,
+      suggestions: detectRecurringFeedback(notes),
+    }
+  } catch {
+    return empty
+  }
+}
+
+/**
+ * Append a recurring 👎 reason to the client's caption rules (clients.caption_notes)
+ * so the generator treats it as a standing constraint. Idempotent-ish: skips if the
+ * rule text is already present. Gated by clients.brand.edit (it edits brand config).
+ */
+export async function appendClientCaptionRule(
+  ideaId: string,
+  rule: string,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('clients.brand.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const text = rule?.trim()
+  if (!text) return { error: 'Regla vacía.' }
+
+  const supabase = await createClient()
+  const { data: idea } = await supabase
+    .from('content_ideas')
+    .select('client_id, client:clients(caption_notes)')
+    .eq('id', ideaId)
+    .maybeSingle()
+  const clientId = (idea as { client_id?: string | null } | null)?.client_id
+  if (!clientId) return { error: 'Cliente no encontrado.' }
+
+  const current = ((idea as { client?: { caption_notes?: string | null } } | null)?.client?.caption_notes ?? '').trim()
+  if (current.toLowerCase().includes(text.toLowerCase())) return { ok: true } // already a rule
+  const next = current ? `${current}\n- ${text}` : `- ${text}`
+
+  const { error } = await supabase.from('clients').update({ caption_notes: next }).eq('id', clientId)
+  if (error) return { error: error.message }
+
+  revalidatePath(`/produccion/idea/${ideaId}`)
   return { ok: true }
 }

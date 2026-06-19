@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.64 — 2026-06-19
+
+### Captions: el loop de aprendizaje ahora se ve y se auto-mejora
+- En el editor de caption aparece un indicador **"La IA está aprendiendo de N captions de este cliente"** (aprobados + 👍, y cuántos rechazados evita) — para que el equipo vea que el sistema mejora con su uso.
+- **Sugerencia de regla automática:** cuando un motivo de 👎 se repite (p. ej. "menos emojis" 3×), el editor ofrece **"Agregar a reglas"** con un clic, que lo guarda en las reglas del cliente (`caption_notes`) para que la IA lo respete siempre. Gated por `clients.brand.edit`.
+- Todo best-effort y sin migración: si aún no hay datos, simplemente no aparece. (Los conteos de 👍/👎 se llenan cuando se aplique la migración `0041`.)
+
 ## v2.63 — 2026-06-19
 
 ### Reporte de desempeño por cliente
