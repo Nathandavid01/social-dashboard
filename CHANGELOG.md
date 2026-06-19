@@ -4,11 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.51 — 2026-06-19
+## v2.52 — 2026-06-19
 
 ### Áreas: panel desplegable debajo de cada persona
 - En **Usuarios y permisos**, configurar las **áreas** de una persona ya no abre una ventana modal: ahora el botón **"Áreas"** despliega un **panel justo debajo de su tarjeta** (con una flechita que indica abierto/cerrado).
 - Mismo control de siempre: **Acceso completo (según el rol)** o **restringir a áreas específicas** con una lista de casillas. Guardar cierra el panel.
+
+## v2.51 — 2026-06-19
+
+### Feedback al generador de captions con IA
+- En el editor de caption ahora puedes **"Regenerar con feedback"**: le dices a la IA qué cambiar ("más corto", "menos emojis", "más llamado a la acción", "tono más formal") y reescribe el caption aplicando tu instrucción, sin perder el mensaje central ni el estilo del cliente.
+- La IA recibe tu **feedback + el intento anterior**, así mejora sobre lo que ya había en vez de empezar de cero.
+- (Próximo paso sugerido: que el feedback recurrente se aprenda por cliente, como el learning loop del Idea Lab.)
 
 ## v2.50 — 2026-06-19
 
@@ -17,6 +24,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Nueva **barra de búsqueda** (por nombre o email) y **filtro por rol** (Todos · Owners · Supervisores · Editores) para encontrar gente al instante.
 - Las acciones de edición se ordenaron: cambiar **rol** y **áreas** y **resetear contraseña** siguen a un toque; **editar nombre/título** y **activar/desactivar** pasaron a un menú **⋮** por persona (en vez de cajas de texto siempre visibles).
 - Cuando un filtro no encuentra a nadie, se muestra un **estado vacío** claro.
+
+## v2.49 — 2026-06-19
 
 ### Fecha límite restaurada (se había perdido en un merge)
 - Vuelve el **editor de fecha límite** en la tarjeta "La idea" (junto a la fecha de publicación) — se había caído al integrar otra rama.

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb } from 'lucide-react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -40,6 +40,7 @@ export function IdeaCaptionEditor({
 }: Props) {
   const canUse = useHasPermission('captions.use')
   const [caption, setCaption] = useState(initialCaption ?? '')
+  const [feedback, setFeedback] = useState('')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
@@ -65,6 +66,21 @@ export function IdeaCaptionEditor({
         setCaption(res.caption)
         onSaved?.(res.caption)
         toast({ title: 'Caption generado desde la idea' })
+      }
+    })
+  }
+
+  function regenerateWithFeedback() {
+    const fb = feedback.trim()
+    if (!fb) return
+    startGenerate(async () => {
+      const res = await generateIdeaCaption(ideaId, { feedback: fb, previousCaption: caption })
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else if (res.caption) {
+        setCaption(res.caption)
+        onSaved?.(res.caption)
+        setFeedback('')
+        toast({ title: 'Caption regenerado con tu feedback' })
       }
     })
   }
@@ -153,6 +169,32 @@ export function IdeaCaptionEditor({
         className="resize-none text-sm leading-relaxed"
         disabled={!ideaReady}
       />
+
+      {/* Feedback loop: tell the AI what to change and it rewrites the caption */}
+      {canUse && caption && (
+        <div className="space-y-1.5 rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
+          <p className="flex items-center gap-1.5 text-[11px] font-medium text-foreground/80">
+            <Wand2 className="h-3 w-3 text-primary" aria-hidden />
+            Ajustar con feedback
+          </p>
+          <Textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            rows={2}
+            placeholder="Dile a la IA qué cambiar: más corto, menos emojis, más llamado a la acción, tono más formal…"
+            className="resize-none text-xs"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={regenerateWithFeedback}
+            disabled={isGenerating || !feedback.trim()}
+          >
+            {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+            Regenerar con feedback
+          </Button>
+        </div>
+      )}
 
       {dirty && (
         <Button size="sm" onClick={save} disabled={isSaving || !ideaReady}>

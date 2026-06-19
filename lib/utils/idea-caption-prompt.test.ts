@@ -72,4 +72,29 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).toMatch(/todas las redes/i)
     expect(p).not.toMatch(/REDES:\s*\n/)
   })
+
+  it('injects user feedback + the previous caption when revising', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      feedback: 'Más corto y sin emojis',
+      previousCaption: 'Caption viejo largo ✨✨✨',
+    })
+    expect(p).toContain('FEEDBACK DEL EQUIPO')
+    expect(p).toContain('Más corto y sin emojis')
+    expect(p).toContain('CAPTION ANTERIOR')
+    expect(p).toContain('Caption viejo largo ✨✨✨')
+    expect(p).toMatch(/Aplica el FEEDBACK DEL EQUIPO/)
+  })
+
+  it('omits the feedback block entirely when no feedback is given', () => {
+    const p = buildIdeaCaptionPrompt(base)
+    expect(p).not.toContain('FEEDBACK DEL EQUIPO')
+    expect(p).not.toContain('CAPTION ANTERIOR')
+  })
+
+  it('includes feedback even without a previous caption (no CAPTION ANTERIOR section)', () => {
+    const p = buildIdeaCaptionPrompt({ ...base, feedback: 'Más llamado a la acción' })
+    expect(p).toContain('Más llamado a la acción')
+    expect(p).not.toContain('CAPTION ANTERIOR')
+  })
 })
