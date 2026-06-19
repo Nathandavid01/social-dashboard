@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { createDraftPost } from '@/lib/metricool/post'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
+import { fetchApprovedCaptionExamples } from '@/lib/integrations/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { approvedIdeaSendReadiness, autopublishTimeError, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError } from '@/lib/utils/idea-lab-send-core'
@@ -49,7 +50,7 @@ export async function generateApprovedIdeaCaption(
   const { data: idea } = await supabase
     .from('idea_lab_feedback')
     .select(
-      'id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms)',
+      'id, client_id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms)',
     )
     .eq('id', feedbackId)
     .single()
@@ -58,9 +59,11 @@ export async function generateApprovedIdeaCaption(
 
   const client = (idea.client ?? {}) as FeedbackClient
 
-  // Pull the client's recently published captions from Metricool so the model
-  // imitates their real style (best-effort — returns [] if unavailable).
-  const examples = await fetchClientStyleExamples(client.metricool_blog_id ?? undefined)
+  // Metricool real-style examples + the team's APPROVED captions (learning loop).
+  const [examples, approvedExamples] = await Promise.all([
+    fetchClientStyleExamples(client.metricool_blog_id ?? undefined),
+    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id, { excludeId: feedbackId }),
+  ])
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   const prompt = buildIdeaCaptionPrompt({
@@ -70,6 +73,7 @@ export async function generateApprovedIdeaCaption(
     hashtags: idea.hashtags_suggestion,
     platforms,
     examples,
+    approvedExamples,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,
