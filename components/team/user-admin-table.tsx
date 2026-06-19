@@ -134,7 +134,7 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
   const inactive = user.status === 'inactive'
-  const displayName = user.full_name ?? user.email
+  const displayName = user.full_name?.trim() || user.email
 
   function toggleStatus() {
     const next: UserStatus = inactive ? 'active' : 'inactive'
