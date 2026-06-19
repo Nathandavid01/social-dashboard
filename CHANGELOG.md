@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.65 — 2026-06-19
+
+### Crea tu avatar (al iniciar sesión)
+- Al entrar, si todavía no tienes **foto de perfil**, aparece un **creador de avatar**: elige uno **generado** (6 estilos: ilustrado, cartoon, abstracto, glass, geométrico, iniciales — con botón **Aleatorio**) o **sube tu foto**.
+- Es **opcional** ("Más tarde") y **vuelve a preguntar en cada inicio de sesión hasta que pongas uno**. Cuando lo eliges, deja de preguntar.
+
 ## v2.64 — 2026-06-19
 
 ### Captions: el loop de aprendizaje ahora se ve y se auto-mejora

@@ -2,8 +2,26 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { isAllowedAvatarUrl } from '@/lib/utils/avatar-core'
 
 const AVATARS_BUCKET = 'avatars'
+
+/** Set a generated (DiceBear) avatar URL for the current user. */
+export async function setAvatarUrl(url: string): Promise<{ ok?: true; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  if (!isAllowedAvatarUrl(url)) return { error: 'URL de avatar no permitida' }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: url, updated_at: new Date().toISOString() })
+    .eq('id', user.id)
+  if (error) return { error: error.message }
+
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
 
 export async function uploadAvatar(formData: FormData): Promise<{ ok?: true; url?: string; error?: string }> {
   const supabase = await createClient()
