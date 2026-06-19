@@ -200,7 +200,7 @@ export default async function ClientDetailPage({
           {client.metricool_blog_id && (
             <div className="ml-auto flex items-center gap-3">
               <Link
-                href={`/clients/${id}/reporte`}
+                href={`/reportes?type=cliente&clientId=${id}`}
                 className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/15"
               >
                 <BarChart3 className="h-3.5 w-3.5" /> Reporte

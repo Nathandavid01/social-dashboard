@@ -1,16 +1,28 @@
 'use server'
 
+<<<<<<< Updated upstream
+=======
+import Anthropic from '@anthropic-ai/sdk'
+>>>>>>> Stashed changes
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { createDraftPost } from '@/lib/metricool/post'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
+<<<<<<< Updated upstream
 import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
 import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { approvedIdeaSendReadiness, autopublishTimeError, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError } from '@/lib/utils/idea-lab-send-core'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
+=======
+import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
+import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
+import { approvedIdeaSendReadiness, buildScheduledDateTime } from '@/lib/utils/idea-lab-send-core'
+
+const CAPTION_MODEL = 'claude-sonnet-4-6'
+>>>>>>> Stashed changes
 
 /** Shape of the client fields we read for caption voice + Metricool routing. */
 type FeedbackClient = {
@@ -36,7 +48,11 @@ type FeedbackClient = {
  */
 export async function generateApprovedIdeaCaption(
   feedbackId: string,
+<<<<<<< Updated upstream
   _platform?: string,
+=======
+  platform = 'instagram',
+>>>>>>> Stashed changes
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -44,14 +60,24 @@ export async function generateApprovedIdeaCaption(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
+<<<<<<< Updated upstream
   const configError = captionConfigError(process.env)
   if (configError) return { error: configError }
+=======
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { error: 'ANTHROPIC_API_KEY no está configurado en el servidor.' }
+  }
+>>>>>>> Stashed changes
 
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('idea_lab_feedback')
     .select(
+<<<<<<< Updated upstream
       'id, client_id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms)',
+=======
+      'id, title, hook, caption_angle, hashtags_suggestion, content_type, client:clients!idea_lab_feedback_client_id_fkey(name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id)',
+>>>>>>> Stashed changes
     )
     .eq('id', feedbackId)
     .single()
@@ -60,6 +86,7 @@ export async function generateApprovedIdeaCaption(
 
   const client = (idea.client ?? {}) as FeedbackClient
 
+<<<<<<< Updated upstream
   // Learning loop (best-effort, parallel): Metricool style + approved captions + 👍/👎 ratings.
   const clientId = (idea as { client_id?: string | null }).client_id
   const [examples, approved, ratings] = await Promise.all([
@@ -69,16 +96,26 @@ export async function generateApprovedIdeaCaption(
   ])
   const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+=======
+  // Pull the client's recently published captions from Metricool so the model
+  // imitates their real style (best-effort — returns [] if unavailable).
+  const examples = await fetchClientStyleExamples(client.metricool_blog_id ?? undefined)
+>>>>>>> Stashed changes
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
     hook: idea.hook,
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,
+<<<<<<< Updated upstream
     platforms,
     examples,
     approvedExamples,
     avoidExamples: ratings.avoid,
+=======
+    platform,
+    examples,
+>>>>>>> Stashed changes
     client: {
       name: client.name,
       brandVoice: client.brand_voice,
@@ -89,7 +126,21 @@ export async function generateApprovedIdeaCaption(
   })
 
   try {
+<<<<<<< Updated upstream
     const caption = await generateCaptionText(prompt)
+=======
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const res = await anthropic.messages.create({
+      model: CAPTION_MODEL,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    const caption = res.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+      .trim()
+>>>>>>> Stashed changes
 
     if (!caption) return { error: 'La IA no devolvió caption' }
 
@@ -97,7 +148,11 @@ export async function generateApprovedIdeaCaption(
       .from('idea_lab_feedback')
       .update({
         generated_caption: caption,
+<<<<<<< Updated upstream
         caption_platform: null,
+=======
+        caption_platform: platform,
+>>>>>>> Stashed changes
         caption_generated_at: new Date().toISOString(),
       })
       .eq('id', feedbackId)
@@ -153,8 +208,11 @@ export async function sendApprovedIdeaToMetricool(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
+<<<<<<< Updated upstream
   const dateErr = scheduleDateError(schedule.date)
   if (dateErr) return { error: dateErr }
+=======
+>>>>>>> Stashed changes
   const scheduledFor = buildScheduledDateTime(schedule.date, schedule.time)
   if (!scheduledFor) return { error: 'Elige una fecha válida para programar.' }
 
@@ -236,31 +294,52 @@ export async function generateQuickCaption(input: {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
+<<<<<<< Updated upstream
   const configError = captionConfigError(process.env)
   if (configError) return { error: configError }
+=======
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { error: 'ANTHROPIC_API_KEY no está configurado en el servidor.' }
+  }
+>>>>>>> Stashed changes
   if (!input.clientId) return { error: 'Elige un cliente.' }
   if (!input.topic || input.topic.trim().length === 0) {
     return { error: 'Escribe de qué trata el caption.' }
   }
 
+<<<<<<< Updated upstream
   const supabase = await createClient()
   const { data: client } = await supabase
     .from('clients')
     .select('name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id, platforms, default_platforms')
+=======
+  const platform = input.platform ?? 'instagram'
+  const supabase = await createClient()
+  const { data: client } = await supabase
+    .from('clients')
+    .select('name, brand_voice, caption_language, default_cta, caption_notes, metricool_blog_id')
+>>>>>>> Stashed changes
     .eq('id', input.clientId)
     .single()
   if (!client) return { error: 'Cliente no encontrado' }
 
   const c = client as FeedbackClient
   const examples = await fetchClientStyleExamples(c.metricool_blog_id ?? undefined)
+<<<<<<< Updated upstream
   const platforms = resolvePlatforms(c.platforms, c.default_platforms)
+=======
+>>>>>>> Stashed changes
 
   const prompt = buildIdeaCaptionPrompt({
     title: input.topic.trim(),
     hook: null,
     captionAngle: null,
     hashtags: null,
+<<<<<<< Updated upstream
     platforms,
+=======
+    platform,
+>>>>>>> Stashed changes
     examples,
     client: {
       name: c.name,
@@ -272,7 +351,21 @@ export async function generateQuickCaption(input: {
   })
 
   try {
+<<<<<<< Updated upstream
     const caption = await generateCaptionText(prompt)
+=======
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const res = await anthropic.messages.create({
+      model: CAPTION_MODEL,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    const caption = res.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+      .trim()
+>>>>>>> Stashed changes
     if (!caption) return { error: 'La IA no devolvió caption' }
     return { ok: true, caption }
   } catch (err) {
@@ -280,23 +373,33 @@ export async function generateQuickCaption(input: {
   }
 }
 
+<<<<<<< Updated upstream
 /**
  * Send a standalone caption to Metricool (no DB write). With a video (`mediaUrl`,
  * a permanent public URL) it attaches the media and AUTO-PUBLISHES a real
  * scheduled post; without a video it stays a scheduled draft. Posts to the
  * client's configured platforms (the same caption for all of them).
  */
+=======
+/** Send a standalone caption to Metricool as a scheduled draft (no DB write). */
+>>>>>>> Stashed changes
 export async function sendQuickCaptionToMetricool(input: {
   clientId: string
   caption: string
   date: string
   time?: string | null
+<<<<<<< Updated upstream
   contentType?: string | null
   /** Permanent public URL of an uploaded video (from getQuickUploadUrl). */
   mediaUrl?: string | null
   /** true = auto-publish a real scheduled post; false/omitted = scheduled draft. */
   autoPublish?: boolean
 }): Promise<{ ok?: true; error?: string; scheduledFor?: string; autoPublished?: boolean }> {
+=======
+  platform?: string
+  contentType?: string | null
+}): Promise<{ ok?: true; error?: string; scheduledFor?: string }> {
+>>>>>>> Stashed changes
   try {
     await requirePermission('posting.publish')
   } catch (err) {
@@ -304,6 +407,7 @@ export async function sendQuickCaptionToMetricool(input: {
   }
 
   if (!input.clientId) return { error: 'Elige un cliente.' }
+<<<<<<< Updated upstream
   const dateErr = scheduleDateError(input.date)
   if (dateErr) return { error: dateErr }
   const scheduledFor = buildScheduledDateTime(input.date, input.time)
@@ -312,6 +416,10 @@ export async function sendQuickCaptionToMetricool(input: {
   // errors). Drafts are exempt — a past-dated draft is harmless.
   const timeErr = autopublishTimeError(scheduledFor, !!input.autoPublish)
   if (timeErr) return { error: timeErr }
+=======
+  const scheduledFor = buildScheduledDateTime(input.date, input.time)
+  if (!scheduledFor) return { error: 'Elige una fecha válida para programar.' }
+>>>>>>> Stashed changes
 
   const supabase = await createClient()
   const { data: client } = await supabase
@@ -332,7 +440,10 @@ export async function sendQuickCaptionToMetricool(input: {
   if (!readiness.ready) return { error: readiness.reason }
 
   const platforms = resolvePlatforms(c.platforms, c.default_platforms)
+<<<<<<< Updated upstream
   const media = quickSendMediaOptions(input.mediaUrl, input.autoPublish)
+=======
+>>>>>>> Stashed changes
 
   try {
     await createDraftPost(
@@ -341,9 +452,15 @@ export async function sendQuickCaptionToMetricool(input: {
       platforms,
       undefined,
       scheduledFor,
+<<<<<<< Updated upstream
       { ...media, contentType: input.contentType ?? null },
     )
     return { ok: true, scheduledFor, autoPublished: media.autoPublish }
+=======
+      { contentType: input.contentType ?? null },
+    )
+    return { ok: true, scheduledFor }
+>>>>>>> Stashed changes
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al enviar a Metricool' }
   }

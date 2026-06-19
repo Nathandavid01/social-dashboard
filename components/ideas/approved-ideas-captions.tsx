@@ -3,7 +3,10 @@
 import { useState, useTransition } from 'react'
 import { Sparkles, Loader2, Save, Send, CheckCircle2, CalendarClock, AlertTriangle } from 'lucide-react'
 import type { ApprovedIdea } from '@/lib/actions/idea-feedback-types'
+<<<<<<< Updated upstream
 import type { NextAutopostNotice } from '@/lib/actions/next-autopost'
+=======
+>>>>>>> Stashed changes
 import type { ContentIdeaType } from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,7 +15,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
+<<<<<<< Updated upstream
 import { defaultScheduleDate, scheduleMinDate } from '@/lib/utils/idea-lab-send-core'
+=======
+>>>>>>> Stashed changes
 import {
   generateApprovedIdeaCaption,
   saveApprovedIdeaCaption,
@@ -21,6 +27,16 @@ import {
 
 const TYPE_LABEL: Record<ContentIdeaType, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
 
+<<<<<<< Updated upstream
+=======
+/** Local "YYYY-MM-DD" for the default date picker value (tomorrow). */
+function tomorrowISO(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
+>>>>>>> Stashed changes
 /** "2026-06-15T10:00:00" → "15 jun 2026, 10:00" for the sent badge. */
 function formatScheduled(s: string | null): string | null {
   if (!s) return null
@@ -29,6 +45,7 @@ function formatScheduled(s: string | null): string | null {
   return d.toLocaleString('es', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
+<<<<<<< Updated upstream
 export function ApprovedIdeasCaptions({
   ideas,
   nextPostByClient = {},
@@ -36,6 +53,9 @@ export function ApprovedIdeasCaptions({
   ideas: ApprovedIdea[]
   nextPostByClient?: Record<string, NextAutopostNotice>
 }) {
+=======
+export function ApprovedIdeasCaptions({ ideas }: { ideas: ApprovedIdea[] }) {
+>>>>>>> Stashed changes
   if (ideas.length === 0) {
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed text-center text-muted-foreground">
@@ -49,25 +69,37 @@ export function ApprovedIdeasCaptions({
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {ideas.map((idea) => (
+<<<<<<< Updated upstream
         <ApprovedIdeaCaptionCard
           key={idea.id}
           idea={idea}
           nextPost={idea.client_id ? nextPostByClient[idea.client_id] : undefined}
         />
+=======
+        <ApprovedIdeaCaptionCard key={idea.id} idea={idea} />
+>>>>>>> Stashed changes
       ))}
     </div>
   )
 }
 
+<<<<<<< Updated upstream
 function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextPost?: NextAutopostNotice }) {
+=======
+function ApprovedIdeaCaptionCard({ idea }: { idea: ApprovedIdea }) {
+>>>>>>> Stashed changes
   const canGenerate = useHasPermission('captions.use')
   const canSend = useHasPermission('posting.publish')
   const { toast } = useToast()
 
   const [caption, setCaption] = useState(idea.generated_caption ?? '')
   const [platform, setPlatform] = useState(idea.caption_platform ?? 'instagram')
+<<<<<<< Updated upstream
   // Default the schedule date to the client's next cadence day when known.
   const [date, setDate] = useState(nextPost?.dateISO ?? defaultScheduleDate())
+=======
+  const [date, setDate] = useState(tomorrowISO())
+>>>>>>> Stashed changes
   const [time, setTime] = useState('10:00')
 
   const [sentInfo, setSentInfo] = useState<string | null>(
@@ -82,8 +114,11 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
   const hasMetricool = !!idea.client?.metricool_blog_id?.trim()
   const savedCaption = idea.generated_caption ?? ''
   const dirty = caption.trim() !== savedCaption.trim()
+<<<<<<< Updated upstream
   const minDate = scheduleMinDate()
   const dateIsPast = !!date && date < minDate
+=======
+>>>>>>> Stashed changes
 
   function generate() {
     startGenerate(async () => {
@@ -184,6 +219,7 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
         </Button>
       )}
 
+<<<<<<< Updated upstream
       {/* When/where this video is scheduled to publish (from the client's cadence) */}
       {!alreadySent && nextPost && (
         <p className="mt-3 flex items-start gap-1.5 rounded-md bg-primary/5 p-2 text-[11px] leading-relaxed text-muted-foreground">
@@ -192,6 +228,8 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
         </p>
       )}
 
+=======
+>>>>>>> Stashed changes
       {/* Schedule + send */}
       <div className="mt-3 border-t pt-3">
         {alreadySent ? (
@@ -204,7 +242,11 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
             <div className="flex flex-wrap items-end gap-2">
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Fecha
+<<<<<<< Updated upstream
                 <Input type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+=======
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+>>>>>>> Stashed changes
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Hora
@@ -214,7 +256,11 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
                 <Button
                   size="sm"
                   onClick={send}
+<<<<<<< Updated upstream
                   disabled={isSending || !caption.trim() || !hasMetricool || !date || dateIsPast}
+=======
+                  disabled={isSending || !caption.trim() || !hasMetricool}
+>>>>>>> Stashed changes
                   className="transition-transform hover:scale-105"
                 >
                   {isSending ? (
@@ -232,6 +278,7 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
                 Este cliente no tiene Metricool configurado, no se puede programar.
               </p>
             )}
+<<<<<<< Updated upstream
             {hasMetricool && dateIsPast && (
               <p className="mt-2 flex items-center gap-1.5 text-[11px] text-amber-600">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
@@ -239,6 +286,9 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
               </p>
             )}
             {hasMetricool && !dateIsPast && (
+=======
+            {hasMetricool && (
+>>>>>>> Stashed changes
               <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <CalendarClock className="h-3.5 w-3.5 shrink-0" />
                 Se crea como borrador programado — adjunta el diseño y aprueba dentro de Metricool.

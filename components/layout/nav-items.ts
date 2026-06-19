@@ -19,6 +19,7 @@ import {
   Lightbulb,
   Settings,
   UserCog,
+  FileBarChart,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -50,6 +51,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/clients/cadence': CalendarClock,
   '/calendar': Calendar,
   '/performance': BarChart3,
+  '/reportes': FileBarChart,
   '/efficiency': Gauge,
   '/published': Globe,
   '/schedule-check': ClipboardCheck,
