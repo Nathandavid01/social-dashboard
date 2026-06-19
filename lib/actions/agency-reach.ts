@@ -120,7 +120,9 @@ async function computeAgencyReach(): Promise<number | null> {
 }
 
 /** Cached once per day. Returns null if Metricool isn't configured or errors. */
-export const getAgencyReach = unstable_cache(computeAgencyReach, ['agency-reach-v1'], {
+// v2: bumped after switching the data source to /stats/aggregations so the old
+// (empty) cached value is abandoned and recomputed fresh.
+export const getAgencyReach = unstable_cache(computeAgencyReach, ['agency-reach-v2'], {
   revalidate: 86400,
 })
 

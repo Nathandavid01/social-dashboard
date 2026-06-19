@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.61 — 2026-06-19
+
+### El alcance real aparece de inmediato
+- Se invalidó el cache viejo del contador de alcance (tenía guardado el valor vacío anterior), para que el login muestre el total real (~9.6M) sin esperar 24h.
+
 ## v2.60 — 2026-06-19
 
 ### El contador de alcance ahora SÍ trae datos reales (~9.6M)
