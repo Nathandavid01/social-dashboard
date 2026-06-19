@@ -1,29 +1,20 @@
 /**
- * Pure helpers to total "personas alcanzadas" (reach) from Metricool post
- * stats. No network here so it's unit-testable; the server action feeds it the
- * raw /stats/posts arrays.
+ * Pure helpers to read "personas alcanzadas" (reach) from Metricool's
+ * /stats/aggregations/{network} response. Instagram exposes a clean `reach`;
+ * Facebook only reports impressions (page_impressions_unique = true reach when
+ * present). No network here so it's unit-testable.
  */
 
-export interface ReachPost {
-  reach?: number | null
-  impressions?: number | null
-  plays?: number | null
-}
+/** Keys that represent true unique reach, in preference order. */
+export const REACH_KEYS = ['reach', 'page_impressions_unique', 'reach_unique'] as const
 
-/**
- * Reach for a single post. Prefer real reach; fall back to impressions, then
- * plays (some networks only report one of them). Never negative.
- */
-export function postReach(p: ReachPost): number {
-  const v = p.reach ?? p.impressions ?? p.plays ?? 0
-  return Number.isFinite(v) && v > 0 ? Math.floor(v as number) : 0
-}
-
-/** Sum reach across a /stats/posts array. Tolerant of non-array / junk input. */
-export function sumPostReach(posts: unknown): number {
-  if (!Array.isArray(posts)) return 0
-  return posts.reduce<number>(
-    (acc, p) => acc + (p && typeof p === 'object' ? postReach(p as ReachPost) : 0),
-    0,
-  )
+/** First positive reach value from an aggregation object, else 0. */
+export function pickReach(agg: unknown, keys: readonly string[] = REACH_KEYS): number {
+  if (!agg || typeof agg !== 'object') return 0
+  const o = agg as Record<string, unknown>
+  for (const k of keys) {
+    const v = o[k]
+    if (typeof v === 'number' && Number.isFinite(v) && v > 0) return Math.floor(v)
+  }
+  return 0
 }

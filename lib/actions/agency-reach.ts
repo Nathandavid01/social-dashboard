@@ -1,7 +1,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
-import { sumPostReach } from '@/lib/utils/reach-core'
+import { pickReach } from '@/lib/utils/reach-core'
 
 // Total "personas alcanzadas" across every Metricool account we operate, for the
 // login counter. Server-only: uses the Metricool team token (never shipped to
@@ -24,14 +24,20 @@ function ymd(d: Date): string {
   return `${y}${m}${day}`
 }
 
-async function blogReach(
+// Account-level reach lives in /stats/aggregations/{network} (NOT /stats/posts,
+// which only lists posts published THROUGH Metricool). Instagram exposes a clean
+// `reach`; we sum true reach across the networks that report it.
+const NETWORKS = ['instagram', 'facebook', 'tiktok'] as const
+
+async function networkReach(
   userToken: string,
   userId: string,
   blogId: string,
+  network: string,
   start: string,
   end: string,
-): Promise<{ blogId: string; reach: number; ok: boolean }> {
-  const url = new URL(`${METRICOOL_BASE}/stats/posts`)
+): Promise<{ reach: number; ok: boolean }> {
+  const url = new URL(`${METRICOOL_BASE}/stats/aggregations/${network}`)
   url.searchParams.set('userId', userId)
   url.searchParams.set('blogId', blogId)
   url.searchParams.set('start', start)
@@ -39,12 +45,29 @@ async function blogReach(
   try {
     const res = await fetch(url.toString(), {
       headers: { 'X-Mc-Auth': userToken },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(6000),
     })
-    if (!res.ok) return { blogId, reach: 0, ok: false }
-    return { blogId, reach: sumPostReach(await res.json()), ok: true }
+    if (!res.ok) return { reach: 0, ok: false }
+    return { reach: pickReach(await res.json()), ok: true }
   } catch {
-    return { blogId, reach: 0, ok: false } // one slow/broken account never breaks the total
+    return { reach: 0, ok: false }
+  }
+}
+
+async function blogReach(
+  userToken: string,
+  userId: string,
+  blogId: string,
+  start: string,
+  end: string,
+): Promise<{ blogId: string; reach: number; ok: boolean }> {
+  const parts = await Promise.all(
+    NETWORKS.map((n) => networkReach(userToken, userId, blogId, n, start, end)),
+  )
+  return {
+    blogId,
+    reach: parts.reduce((a, p) => a + p.reach, 0),
+    ok: parts.some((p) => p.ok), // one slow/broken account never breaks the total
   }
 }
 

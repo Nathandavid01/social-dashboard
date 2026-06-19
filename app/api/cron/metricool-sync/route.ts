@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runMetricoolPublishedSync } from '@/lib/metricool/sync'
+import { getAgencyReach } from '@/lib/actions/agency-reach'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -21,5 +22,10 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await runMetricoolPublishedSync()
-  return NextResponse.json(result)
+
+  // Warm the daily reach cache so the login counter reads it instantly (and
+  // doesn't recompute 60+ accounts on a visitor's request). Best-effort.
+  const reach = await getAgencyReach().catch(() => null)
+
+  return NextResponse.json({ ...result, reachWarmed: reach })
 }
