@@ -8,34 +8,44 @@ import { selectApprovedExamples, type ApprovedCaptionRow } from '@/lib/utils/cap
  *   - content_ideas (approval_status = 'approved')
  *   - idea_lab_feedback (verdict = 'approved', from the Idea Lab flow)
  *
- * Best-effort: Supabase errors surface as null data (e.g. before migration 0035
- * for idea_lab_feedback.generated_caption) and simply contribute nothing, so the
- * other source still works and caption generation never breaks.
+ * Best-effort: each source is independent and Supabase errors surface as null
+ * data (not a throw), so one source failing never kills the other and caption
+ * generation never breaks.
+ *
+ * `excludeId` skips the row currently being generated for, so an already-approved
+ * idea never feeds its own caption back as an example.
  */
 export async function fetchApprovedCaptionExamples(
   supabase: SupabaseClient,
   clientId: string | null | undefined,
-  limit = 6,
+  opts?: { excludeId?: string | null; limit?: number },
 ): Promise<string[]> {
   if (!clientId) return []
+  const limit = opts?.limit ?? 6
+  const excludeId = opts?.excludeId
   try {
+    let ideasQuery = supabase
+      .from('content_ideas')
+      .select('generated_caption, caption_generated_at')
+      .eq('client_id', clientId)
+      .eq('approval_status', 'approved')
+      .not('generated_caption', 'is', null)
+    let labQuery = supabase
+      .from('idea_lab_feedback')
+      .select('generated_caption, created_at')
+      .eq('client_id', clientId)
+      .eq('verdict', 'approved')
+      .not('generated_caption', 'is', null)
+    // A caption id is unique across tables, so excluding from both is safe (the
+    // non-matching table just no-ops).
+    if (excludeId) {
+      ideasQuery = ideasQuery.neq('id', excludeId)
+      labQuery = labQuery.neq('id', excludeId)
+    }
+
     const [ideas, lab] = await Promise.all([
-      supabase
-        .from('content_ideas')
-        .select('generated_caption, caption_generated_at')
-        .eq('client_id', clientId)
-        .eq('approval_status', 'approved')
-        .not('generated_caption', 'is', null)
-        .order('caption_generated_at', { ascending: false })
-        .limit(12),
-      supabase
-        .from('idea_lab_feedback')
-        .select('generated_caption, created_at')
-        .eq('client_id', clientId)
-        .eq('verdict', 'approved')
-        .not('generated_caption', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(12),
+      ideasQuery.order('caption_generated_at', { ascending: false }).limit(12),
+      labQuery.order('created_at', { ascending: false }).limit(12),
     ])
 
     const rows: ApprovedCaptionRow[] = [

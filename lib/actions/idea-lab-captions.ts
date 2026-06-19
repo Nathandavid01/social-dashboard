@@ -62,7 +62,7 @@ export async function generateApprovedIdeaCaption(
   // Metricool real-style examples + the team's APPROVED captions (learning loop).
   const [examples, approvedExamples] = await Promise.all([
     fetchClientStyleExamples(client.metricool_blog_id ?? undefined),
-    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id),
+    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id, { excludeId: feedbackId }),
   ])
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 

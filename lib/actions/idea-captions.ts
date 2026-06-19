@@ -64,7 +64,7 @@ export async function generateIdeaCaption(
   // the captions the team already APPROVED (the learning loop) — both best-effort.
   const [examples, approvedExamples] = await Promise.all([
     fetchClientStyleExamples(client.metricool_blog_id ?? undefined),
-    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id),
+    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id, { excludeId: idea.id }),
   ])
 
   const prompt = buildIdeaCaptionPrompt({
