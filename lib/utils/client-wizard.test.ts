@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { WIZARD_STEPS, wizardProgress, canCreateClient, nextStepKey } from './client-wizard'
+import { WIZARD_STEPS, wizardProgress, canCreateClient, nextStepKey, prevStepKey } from './client-wizard'
 
 describe('client wizard step model', () => {
   it('starts with datos (required) and ends with listo', () => {
@@ -31,5 +31,11 @@ describe('client wizard step model', () => {
     expect(nextStepKey('datos')).toBe('metricool')
     expect(nextStepKey('voz')).toBe('listo')
     expect(nextStepKey('listo')).toBeNull()
+  })
+
+  it('prevStepKey walks backwards and stops at the start', () => {
+    expect(prevStepKey('metricool')).toBe('datos')
+    expect(prevStepKey('listo')).toBe('voz')
+    expect(prevStepKey('datos')).toBeNull()
   })
 })

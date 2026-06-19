@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.74 — 2026-06-19
+
+### Onboarding guiado: navegación hacia atrás + editar pasos
+- El asistente de **Agregar cliente** ya no es solo hacia adelante: ahora tiene botón **"Atrás"** en cada paso, los **chips del progreso son clickeables** (saltas a cualquier paso para revisar/corregir) y desde el resumen final puedes **"Volver a revisar"**.
+- Si vuelves al paso 1 después de crear el cliente, el botón cambia a **"Guardar y continuar"** (edita en vez de duplicar). Hace que el flujo se sienta como un wizard de verdad, no una vía de una sola dirección.
+
 ## v2.73 — 2026-06-19
 
 ### Reporte de cliente: Audiencia + Plan de acción (datos reales)
