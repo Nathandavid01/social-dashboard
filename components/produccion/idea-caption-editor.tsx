@@ -82,6 +82,7 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
+        setRated(null)
         onSaved?.(res.caption)
         toast({ title: 'Caption generado desde la idea' })
       }
@@ -96,6 +97,7 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
+        setRated(null)
         onSaved?.(res.caption)
         setFeedback('')
         toast({ title: 'Caption regenerado con tu feedback' })
@@ -177,7 +179,7 @@ export function IdeaCaptionEditor({
 
       <Textarea
         value={caption}
-        onChange={(e) => setCaption(e.target.value)}
+        onChange={(e) => { setCaption(e.target.value); setRated(null) }}
         rows={8}
         placeholder={
           ideaReady

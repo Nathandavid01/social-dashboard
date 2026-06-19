@@ -34,6 +34,26 @@ export function selectApprovedExamples(rows: ApprovedCaptionRow[], limit = 6): s
   return kept.slice(0, limit).map((k) => k.text)
 }
 
+/**
+ * Merge 👍-loved captions AHEAD of plain-approved ones, deduped (case/whitespace),
+ * blanks/too-short dropped, capped. Loved lead because an explicit 👍 is the
+ * strongest positive signal. Order is preserved exactly (no recency tricks).
+ */
+export function mergeApprovedAndLoved(loved: string[], approved: string[], limit = 6): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of [...loved, ...approved]) {
+    const text = (raw ?? '').trim()
+    if (text.length < 20) continue
+    const key = text.toLowerCase().replace(/\s+/g, ' ')
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(text)
+    if (out.length >= limit) break
+  }
+  return out
+}
+
 export interface AvoidCaptionRow {
   text: string | null
   note?: string | null

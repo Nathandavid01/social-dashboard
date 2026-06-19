@@ -6,7 +6,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { createDraftPost } from '@/lib/metricool/post'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
-import { selectApprovedExamples } from '@/lib/utils/caption-learning'
+import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { approvedIdeaSendReadiness, autopublishTimeError, buildScheduledDateTime, quickSendMediaOptions, scheduleDateError } from '@/lib/utils/idea-lab-send-core'
@@ -67,9 +67,7 @@ export async function generateApprovedIdeaCaption(
     fetchApprovedCaptionExamples(supabase, clientId, { excludeId: feedbackId }),
     fetchCaptionFeedbackForPrompt(supabase, clientId),
   ])
-  const approvedExamples = selectApprovedExamples(
-    [...ratings.loved, ...approved].map((t, i) => ({ text: t, recency: String(1_000_000 - i) })),
-  )
+  const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   const prompt = buildIdeaCaptionPrompt({

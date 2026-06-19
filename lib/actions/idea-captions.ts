@@ -6,7 +6,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
-import { selectApprovedExamples } from '@/lib/utils/caption-learning'
+import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
@@ -70,9 +70,7 @@ export async function generateIdeaCaption(
     fetchCaptionFeedbackForPrompt(supabase, clientId),
   ])
   // 👍-rated captions are the strongest positive signal → lead the approved list.
-  const approvedExamples = selectApprovedExamples(
-    [...ratings.loved, ...approved].map((t, i) => ({ text: t, recency: String(1_000_000 - i) })),
-  )
+  const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
