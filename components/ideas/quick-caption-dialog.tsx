@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+<<<<<<< Updated upstream
 import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle, Upload, Film, X } from 'lucide-react'
+=======
+import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle } from 'lucide-react'
+>>>>>>> Stashed changes
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,12 +13,18 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+<<<<<<< Updated upstream
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { defaultScheduleDate, scheduleMinDate, nowMinuteInPostTZ } from '@/lib/utils/idea-lab-send-core'
 import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
 import { getQuickUploadUrl } from '@/lib/actions/idea-videos-r2'
+=======
+import { useToast } from '@/lib/hooks/use-toast'
+import { useHasPermission } from '@/components/auth/role-gate'
+import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
+>>>>>>> Stashed changes
 
 export interface QuickCaptionClient {
   id: string
@@ -22,6 +32,15 @@ export interface QuickCaptionClient {
   metricool_blog_id: string | null
 }
 
+<<<<<<< Updated upstream
+=======
+function tomorrowISO(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
+>>>>>>> Stashed changes
 function formatScheduled(s: string | null): string | null {
   if (!s) return null
   const d = new Date(s)
@@ -42,6 +61,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [open, setOpen] = useState(false)
   const [clientId, setClientId] = useState('')
   const [contentType, setContentType] = useState('P')
+<<<<<<< Updated upstream
   const [topic, setTopic] = useState('')
   const [caption, setCaption] = useState('')
   const [video, setVideo] = useState<File | null>(null)
@@ -51,22 +71,34 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [time, setTime] = useState('10:00')
   const [sentInfo, setSentInfo] = useState<string | null>(null)
   const [autoPublished, setAutoPublished] = useState(false)
+=======
+  const [platform, setPlatform] = useState('instagram')
+  const [topic, setTopic] = useState('')
+  const [caption, setCaption] = useState('')
+  const [date, setDate] = useState(tomorrowISO())
+  const [time, setTime] = useState('10:00')
+  const [sentInfo, setSentInfo] = useState<string | null>(null)
+>>>>>>> Stashed changes
 
   const [isGenerating, startGenerate] = useTransition()
   const [isSending, startSend] = useTransition()
 
   const selected = clients.find((c) => c.id === clientId)
   const hasMetricool = !!selected?.metricool_blog_id?.trim()
+<<<<<<< Updated upstream
   const minDate = scheduleMinDate()
   const dateIsPast = !!date && date < minDate
   // Auto-publish can't be in the past (Metricool would publish at once / error).
   // Same-day-but-earlier-time only matters for auto-publish; drafts are exempt.
   const timeIsPast =
     mode === 'autopublish' && !dateIsPast && !!date && !!time && `${date}T${time}` < nowMinuteInPostTZ()
+=======
+>>>>>>> Stashed changes
 
   function reset() {
     setClientId('')
     setContentType('P')
+<<<<<<< Updated upstream
     setTopic('')
     setCaption('')
     setVideo(null)
@@ -76,11 +108,23 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
     setTime('10:00')
     setSentInfo(null)
     setAutoPublished(false)
+=======
+    setPlatform('instagram')
+    setTopic('')
+    setCaption('')
+    setDate(tomorrowISO())
+    setTime('10:00')
+    setSentInfo(null)
+>>>>>>> Stashed changes
   }
 
   function generate() {
     startGenerate(async () => {
+<<<<<<< Updated upstream
       const res = await generateQuickCaption({ clientId, topic })
+=======
+      const res = await generateQuickCaption({ clientId, topic, platform })
+>>>>>>> Stashed changes
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
@@ -91,6 +135,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
 
   function send() {
     startSend(async () => {
+<<<<<<< Updated upstream
       // With a video: upload it straight to R2 first, then send its public URL to
       // Metricool so it attaches the media and auto-publishes.
       let mediaUrl: string | null = null
@@ -124,6 +169,13 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
           title: res.autoPublished ? 'Enviado a Metricool — se publicará solo' : 'Enviado a Metricool',
           description: res.autoPublished ? 'El video se publicará automáticamente en la fecha elegida.' : 'Quedó como borrador programado.',
         })
+=======
+      const res = await sendQuickCaptionToMetricool({ clientId, caption, date, time, platform, contentType })
+      if (res.error) toast({ title: 'No se pudo enviar', description: res.error, variant: 'destructive' })
+      else {
+        setSentInfo(formatScheduled(res.scheduledFor ?? null) ?? 'Programado')
+        toast({ title: 'Enviado a Metricool', description: 'Quedó como borrador programado.' })
+>>>>>>> Stashed changes
       }
     })
   }
@@ -146,8 +198,12 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
         <DialogHeader>
           <DialogTitle>Caption rápido</DialogTitle>
           <DialogDescription>
+<<<<<<< Updated upstream
             Para emergencias e imprevistos: sube un video, genera un caption y publícalo en Metricool — el mismo caption
             va a todas las redes del cliente, sin pasar por una idea aprobada.
+=======
+            Para emergencias e imprevistos: genera un caption y envíalo a Metricool sin pasar por una idea aprobada.
+>>>>>>> Stashed changes
           </DialogDescription>
         </DialogHeader>
 
@@ -155,7 +211,11 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-2 text-sm text-green-600">
               <CheckCircle2 className="h-5 w-5" />
+<<<<<<< Updated upstream
               <span>Enviado a Metricool · {sentInfo}{autoPublished ? ' — se publicará automáticamente.' : ' (borrador programado).'}</span>
+=======
+              <span>Enviado a Metricool · {sentInfo} (borrador programado).</span>
+>>>>>>> Stashed changes
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={reset}>
@@ -212,6 +272,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               />
             </label>
 
+<<<<<<< Updated upstream
             {canGenerate && (
               <Button
                 size="sm"
@@ -228,6 +289,37 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 {caption ? 'Regenerar' : 'Generar con IA'}
               </Button>
             )}
+=======
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger className="h-8 w-32 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                </SelectContent>
+              </Select>
+              {canGenerate && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={generate}
+                  disabled={isGenerating || !clientId || !topic.trim()}
+                  className="transition-transform hover:scale-105"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {caption ? 'Regenerar' : 'Generar con IA'}
+                </Button>
+              )}
+            </div>
+>>>>>>> Stashed changes
 
             <Textarea
               value={caption}
@@ -237,6 +329,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               className="resize-none text-sm leading-relaxed"
             />
 
+<<<<<<< Updated upstream
             <div className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Video (opcional — se publica a todas las redes)</span>
               {video ? (
@@ -292,6 +385,12 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Fecha
                 <Input type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+=======
+            <div className="flex flex-wrap items-end gap-2 border-t pt-3">
+              <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                Fecha
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40 text-xs" />
+>>>>>>> Stashed changes
               </label>
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 Hora
@@ -301,7 +400,11 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 <Button
                   size="sm"
                   onClick={send}
+<<<<<<< Updated upstream
                   disabled={isSending || !clientId || !caption.trim() || !hasMetricool || !date || dateIsPast || timeIsPast}
+=======
+                  disabled={isSending || !clientId || !caption.trim() || !hasMetricool}
+>>>>>>> Stashed changes
                   className="transition-transform hover:scale-105"
                 >
                   {isSending ? (
@@ -309,7 +412,11 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                   ) : (
                     <Send className="mr-1.5 h-3.5 w-3.5" />
                   )}
+<<<<<<< Updated upstream
                   {uploading ? 'Subiendo video…' : mode === 'autopublish' ? 'Publicar en Metricool' : 'Enviar a Metricool'}
+=======
+                  Enviar a Metricool
+>>>>>>> Stashed changes
                 </Button>
               )}
             </div>
@@ -319,6 +426,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 Este cliente no tiene Metricool configurado, no se puede programar.
               </p>
+<<<<<<< Updated upstream
             ) : dateIsPast ? (
               <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
@@ -334,6 +442,8 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
                 <CalendarClock className="h-3.5 w-3.5 shrink-0" />
                 Se publicará automáticamente a las redes del cliente en la fecha y hora elegidas{video ? ' (con el video adjunto)' : ''}.
               </p>
+=======
+>>>>>>> Stashed changes
             ) : (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <CalendarClock className="h-3.5 w-3.5 shrink-0" />

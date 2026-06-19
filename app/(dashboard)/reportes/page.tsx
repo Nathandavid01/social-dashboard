@@ -8,6 +8,7 @@ import { AgencyReportDocument } from '@/components/reportes/agency-report-docume
 import { PrintButton } from '@/components/clients/report/print-button'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export default async function ReportesPage({
   searchParams,

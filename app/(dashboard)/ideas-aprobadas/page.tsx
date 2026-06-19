@@ -1,6 +1,9 @@
 import { requirePermission } from '@/lib/auth/server'
 import { getApprovedIdeas } from '@/lib/actions/idea-feedback'
+<<<<<<< Updated upstream
 import { getNextAutopostNotices, type NextAutopostNotice } from '@/lib/actions/next-autopost'
+=======
+>>>>>>> Stashed changes
 import { getClients } from '@/lib/actions/clients'
 import { PageHeader } from '@/components/shared/page-header'
 import { ApprovedIdeasList } from '@/components/ideas/approved-ideas-list'
@@ -22,6 +25,7 @@ export default async function IdeasAprobadasPage() {
     ideas = []
   }
 
+<<<<<<< Updated upstream
   // "When/where will this publish" notice per client (from their cadence), so
   // each card can show it + pre-fill the schedule date. Best-effort.
   let nextPostByClient: Record<string, NextAutopostNotice> = {}
@@ -31,6 +35,8 @@ export default async function IdeasAprobadasPage() {
     nextPostByClient = {}
   }
 
+=======
+>>>>>>> Stashed changes
   // Clients for the standalone "Caption rápido" launcher.
   let clients: QuickCaptionClient[] = []
   try {
@@ -63,7 +69,11 @@ export default async function IdeasAprobadasPage() {
               <QuickCaptionDialog clients={clients} />
             </div>
           </div>
+<<<<<<< Updated upstream
           <ApprovedIdeasCaptions ideas={ideas} nextPostByClient={nextPostByClient} />
+=======
+          <ApprovedIdeasCaptions ideas={ideas} />
+>>>>>>> Stashed changes
         </TabsContent>
       </Tabs>
     </div>

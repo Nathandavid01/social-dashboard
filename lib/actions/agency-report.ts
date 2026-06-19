@@ -1,5 +1,6 @@
 import 'server-only'
-import { createClient } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { requirePermission } from '@/lib/auth/server'
 import {
   aggregateClientMetrics,
@@ -8,6 +9,15 @@ import {
   type AgencyRow,
   type AgencyTotals,
 } from '@/lib/utils/agency-report-core'
+
+// Service role (cookie-free) so the heavy compute can be cached across users —
+// the agency overview is the same for everyone who can see it.
+function admin() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+}
 
 const METRICOOL_BASE = 'https://app.metricool.com/api'
 
@@ -52,12 +62,8 @@ export interface AgencyReport {
   metricoolConfigured: boolean
 }
 
-/** Agency-wide overview: every client ranked by reach + impressions, over the window. */
-export async function getAgencyReport(periodDays = 30): Promise<AgencyReport> {
-  await requirePermission('metricool.read')
-
-  const days = [7, 30, 90].includes(periodDays) ? periodDays : 30
-  const supabase = await createClient()
+async function computeAgencyReport(days: number): Promise<AgencyReport> {
+  const supabase = admin()
   const { data } = await supabase
     .from('clients')
     .select('id, name, metricool_blog_id')
@@ -90,4 +96,15 @@ export async function getAgencyReport(periodDays = 30): Promise<AgencyReport> {
 
   const ranked = rankByReach(rows)
   return { ...base, rows: ranked, totals: agencyTotals(ranked), metricoolConfigured: true }
+}
+
+// Cached per-period for 1h so opening the report is instant and doesn't re-hit
+// ~2×N Metricool endpoints on every view.
+const cachedAgencyReport = unstable_cache(computeAgencyReport, ['agency-report-v1'], { revalidate: 3600 })
+
+/** Agency-wide overview: every client ranked by reach + impressions, over the window. */
+export async function getAgencyReport(periodDays = 30): Promise<AgencyReport> {
+  await requirePermission('metricool.read')
+  const days = [7, 30, 90].includes(periodDays) ? periodDays : 30
+  return cachedAgencyReport(days)
 }
