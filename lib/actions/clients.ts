@@ -97,6 +97,26 @@ export async function updateClient(id: string, values: ClientFormValues) {
   return { success: true }
 }
 
+/** One-click "Activar cliente" from the onboarding checklist — flips status to
+ *  active so the pipeline auto-provisions and auto-publish can fire. */
+export async function activateClient(id: string) {
+  try {
+    await requirePermission('clients.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const supabase = await createSupabaseClient()
+  const { error } = await supabase
+    .from('clients')
+    .update({ status: 'active', updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/clients')
+  revalidatePath(`/clients/${id}`)
+  revalidatePath('/pipeline')
+  return { success: true }
+}
+
 export async function deleteClient(id: string) {
   // Borrar un cliente arrastra payments, assets, ideas, tareas, sesiones —
   // operación destructiva, restringida a owner.
