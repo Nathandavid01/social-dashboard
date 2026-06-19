@@ -7,6 +7,7 @@ Tracked work not yet done. Each is implemented **test-first (TDD)** when unblock
 Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelknmfudcvrzz` → SQL Editor.
 - [ ] **`0032_idea_posting.sql`** — columnas Metricool en `content_ideas` (auto-publish al aprobar). Sin esto, aprobar funciona pero no postea.
 - [ ] **`0034_content_idea_deadline.sql`** — columna `content_ideas.deadline` (fecha límite por video). Sin esto, ver/leer funciona; **guardar** una fecha límite falla.
+- [ ] **`0041_caption_feedback.sql`** — tabla `caption_feedback` (rating 👍/👎 por caption, learning loop fase 2). Sin esto, generar captions funciona; **guardar un voto** 👍/👎 falla. La aplica Eric desde su computadora (donde están las credenciales).
 
 ## Idea detail page (`/produccion/idea/[ideaId]`)
 - [x] Make the **"La idea"** section collapsible (collapse once generated). — `IdeaBriefCard`
