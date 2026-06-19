@@ -35,7 +35,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen w-full bg-background lg:grid lg:grid-cols-[1.05fr_1fr] xl:grid-cols-[1.15fr_1fr]">
       {/* Brand showcase — always dark (Nate Media negro + dorado) */}
-      <aside className="relative hidden overflow-hidden bg-zinc-950 p-10 text-zinc-100 lg:flex lg:flex-col lg:justify-between xl:p-14">
+      <aside className="relative hidden overflow-hidden bg-zinc-950 p-10 text-zinc-100 lg:flex lg:flex-col lg:justify-center lg:gap-12 xl:p-14">
         {/* decorative gold glow + faint grid (animated) */}
         <div aria-hidden className="pointer-events-none absolute inset-0 motion-reduce:[&_*]:!animate-none">
           <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-primary/20 blur-3xl motion-safe:animate-aurora1" />
@@ -89,8 +89,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <LiveReachCounter realReach={realReach} />
         </div>
 
-        {/* bottom: legal */}
-        <p className="relative text-xs text-zinc-500">
+        {/* bottom: legal — pinned so the brand block can center cleanly */}
+        <p className="relative text-xs text-zinc-500 lg:absolute lg:inset-x-10 lg:bottom-8 xl:inset-x-14">
           © 2026 Nate Media · Hecho para agencias que se toman en serio su contenido.
         </p>
       </aside>

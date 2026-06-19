@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.57 — 2026-06-19
+
+### Login: panel de marca centrado
+- En la pantalla de login, el contenido de la columna izquierda (logo, titular, beneficios y contador) ahora aparece **centrado verticalmente** como un bloque, en vez de repartido arriba/abajo. El aviso legal queda anclado al pie.
+
 ## v2.56 — 2026-06-19
 
 ### El contador del login ahora muestra el alcance REAL de Metricool
