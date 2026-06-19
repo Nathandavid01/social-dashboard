@@ -47,3 +47,9 @@ export function nextStepKey(key: WizardStepKey): WizardStepKey | null {
   const i = WIZARD_STEPS.findIndex((s) => s.key === key)
   return i >= 0 && i < WIZARD_STEPS.length - 1 ? WIZARD_STEPS[i + 1].key : null
 }
+
+/** Key of the step before `key` (null if it's the first). */
+export function prevStepKey(key: WizardStepKey): WizardStepKey | null {
+  const i = WIZARD_STEPS.findIndex((s) => s.key === key)
+  return i > 0 ? WIZARD_STEPS[i - 1].key : null
+}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import {
-  Check, ChevronRight, Loader2, Search, Sparkles, CalendarDays, Megaphone, MessageSquareText, PartyPopper, Rocket, ArrowRight,
+  Check, ChevronRight, ChevronLeft, Loader2, Search, Sparkles, CalendarDays, Megaphone, MessageSquareText, PartyPopper, Rocket, ArrowRight,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/lib/hooks/use-toast'
 import { createClient, updateClient } from '@/lib/actions/clients'
 import { setClientPostingDays } from '@/lib/actions/posting-days'
-import { WIZARD_STEPS, wizardProgress, canCreateClient, nextStepKey, type WizardStepKey } from '@/lib/utils/client-wizard'
+import { WIZARD_STEPS, wizardProgress, canCreateClient, nextStepKey, prevStepKey, type WizardStepKey } from '@/lib/utils/client-wizard'
 import type { ClientFormValues } from '@/lib/validations/client.schema'
 import type { Profile, SocialPlatform } from '@/lib/supabase/types'
 
@@ -68,6 +68,14 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
   const goNext = () => {
     const n = nextStepKey(step)
     if (n) setStep(n)
+  }
+  const goBack = () => {
+    const p = prevStepKey(step)
+    if (p) setStep(p)
+  }
+  // Free navigation among steps once the client exists (you can revisit/fix any step).
+  const goStep = (key: WizardStepKey) => {
+    if (clientId || key === 'datos') setStep(key)
   }
 
   function togglePlatform(p: SocialPlatform) {
@@ -149,16 +157,21 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
             const activeIdx = WIZARD_STEPS.findIndex((x) => x.key === step)
             const done = i < activeIdx
             const active = s.key === step
+            // Once the client exists you can jump to any step to review/fix it.
+            const clickable = !!clientId || s.key === 'datos'
             return (
-              <span
+              <button
                 key={s.key}
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                type="button"
+                disabled={!clickable}
+                onClick={() => goStep(s.key)}
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
                   active ? 'bg-primary/15 text-primary' : done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
-                }`}
+                } ${clickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
               >
                 {done ? <Check className="h-3 w-3" /> : null}
                 {s.title}
-              </span>
+              </button>
             )
           })}
         </div>
@@ -219,9 +232,10 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                 </div>
               </div>
               <div className="flex justify-end pt-1">
-                <Button onClick={createAndContinue} disabled={!canCreateClient(values) || isPending}>
+                {/* Revisiting datos after creation saves edits; first time it creates. */}
+                <Button onClick={clientId ? saveAndContinue : createAndContinue} disabled={!canCreateClient(values) || isPending}>
                   {isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-1.5 h-4 w-4" />}
-                  Crear y continuar
+                  {clientId ? 'Guardar y continuar' : 'Crear y continuar'}
                 </Button>
               </div>
             </>
@@ -251,7 +265,7 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                 )}
                 <p className="text-xs text-muted-foreground">Sin esto el cliente funciona, pero no se auto-publica ni trae métricas.</p>
               </div>
-              <StepNav onSkip={goNext} onSave={saveAndContinue} isPending={isPending} />
+              <StepNav onBack={goBack} onSkip={goNext} onSave={saveAndContinue} isPending={isPending} />
             </>
           )}
 
@@ -275,7 +289,7 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                 </div>
                 <p className="text-xs text-muted-foreground">El pipeline usa esto para programar y sugerir cuándo grabar/publicar.</p>
               </div>
-              <StepNav onSkip={goNext} onSave={saveCadenceAndContinue} isPending={isPending} saveLabel={days.length ? 'Guardar y seguir' : 'Seguir'} />
+              <StepNav onBack={goBack} onSkip={goNext} onSave={saveCadenceAndContinue} isPending={isPending} saveLabel={days.length ? 'Guardar y seguir' : 'Seguir'} />
             </>
           )}
 
@@ -299,7 +313,7 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                 <Label htmlFor="rules">Reglas a seguir</Label>
                 <Textarea id="rules" rows={2} value={values.caption_notes ?? ''} onChange={(e) => set('caption_notes', e.target.value)} placeholder="Nunca menciones precios; evita …" className="resize-none" />
               </div>
-              <StepNav onSkip={goNext} onSave={saveAndContinue} isPending={isPending} />
+              <StepNav onBack={goBack} onSkip={goNext} onSave={saveAndContinue} isPending={isPending} />
             </>
           )}
 
@@ -328,6 +342,9 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                   <Link href={clientId ? `/clients/${clientId}` : '/clients'}>Ir al cliente <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
                 </Button>
               </div>
+              <button type="button" onClick={goBack} className="mx-auto mt-1 flex items-center text-xs text-muted-foreground hover:text-foreground">
+                <ChevronLeft className="mr-1 h-3.5 w-3.5" /> Volver a revisar
+              </button>
             </div>
           )}
         </CardContent>
@@ -336,12 +353,17 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
   )
 }
 
-function StepNav({ onSkip, onSave, isPending, saveLabel = 'Guardar y seguir' }: { onSkip: () => void; onSave: () => void; isPending: boolean; saveLabel?: string }) {
+function StepNav({ onBack, onSkip, onSave, isPending, saveLabel = 'Guardar y seguir' }: { onBack: () => void; onSkip: () => void; onSave: () => void; isPending: boolean; saveLabel?: string }) {
   return (
     <div className="flex items-center justify-between pt-1">
-      <Button variant="ghost" onClick={onSkip} disabled={isPending} className="text-muted-foreground">
-        Saltar por ahora
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" onClick={onBack} disabled={isPending} className="text-muted-foreground">
+          <ChevronLeft className="mr-1 h-4 w-4" /> Atrás
+        </Button>
+        <Button variant="ghost" onClick={onSkip} disabled={isPending} className="text-muted-foreground">
+          Saltar por ahora
+        </Button>
+      </div>
       <Button onClick={onSave} disabled={isPending}>
         {isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-1.5 h-4 w-4" />}
         {saveLabel}

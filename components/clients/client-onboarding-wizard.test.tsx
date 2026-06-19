@@ -59,4 +59,15 @@ describe('ClientOnboardingWizard', () => {
     fireEvent.click(skip) // metricool → cadencia
     expect(await screen.findByText(/qué días se publica/i)).toBeInTheDocument()
   })
+
+  it('lets you go back to a previous step (and step 1 becomes "Guardar")', async () => {
+    render(<ClientOnboardingWizard teamMembers={members} />)
+    fireEvent.change(screen.getByPlaceholderText(/sofá & co/i), { target: { value: 'Acme' } })
+    fireEvent.click(screen.getByLabelText('Instagram'))
+    fireEvent.click(screen.getByRole('button', { name: /crear y continuar/i }))
+    // On the Metricool step now → go back.
+    fireEvent.click(await screen.findByRole('button', { name: /atrás/i }))
+    // Back on Datos; since the client exists, the primary button now saves.
+    expect(await screen.findByRole('button', { name: /guardar y continuar/i })).toBeInTheDocument()
+  })
 })
