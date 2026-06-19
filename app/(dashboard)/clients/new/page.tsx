@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { ClientForm } from '@/components/clients/client-form'
+import { ClientOnboardingWizard } from '@/components/clients/client-onboarding-wizard'
 import { PageHeader } from '@/components/shared/page-header'
+import { requirePermission } from '@/lib/auth/server'
 
 export default async function NewClientPage() {
+  await requirePermission('clients.create')
   const supabase = await createClient()
   const { data: teamMembers } = await supabase
     .from('profiles')
@@ -11,8 +13,8 @@ export default async function NewClientPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Agregar cliente" description="Crea una nueva cuenta de cliente" />
-      <ClientForm teamMembers={teamMembers ?? []} />
+      <PageHeader title="Agregar cliente" description="Te guiamos paso a paso hasta dejarlo listo para automatizar" />
+      <ClientOnboardingWizard teamMembers={teamMembers ?? []} />
     </div>
   )
 }

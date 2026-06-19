@@ -4,12 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.70 — 2026-06-19
+
+### Onboarding de cliente guiado paso a paso
+- **"Agregar cliente" ahora es un asistente guiado** (en vez de un formulario largo de una sola pantalla): te lleva paso a paso con barra de progreso hasta dejar el cliente **listo para automatizar**.
+- Pasos: **1) Datos** (nombre, redes, idioma, encargado) → crea el cliente · **2) Conectar Metricool** (con buscador de cuentas) · **3) Días de posteo** · **4) Voz de marca** (voz, CTA, hashtags, reglas) · **5) Resumen** con lo que quedó configurado.
+- Cada paso explica **para qué sirve**, los opcionales se pueden **"Saltar por ahora"**, y al final ofrece **crear el primer lote de videos** o ir al perfil. Usa las acciones reales (createClient, días de posteo, voz) — nada paralelo. Sin migración.
+
 ## v2.69 — 2026-06-19
 
 ### Reporte de cliente más profesional: gráficas + IA + top posts
 - El reporte del cliente ahora es **más visual y ejecutivo**: en vez de la lista larga de posts, muestra **gráfica de alcance en el tiempo**, **split por red (Instagram/Facebook)** y solo las **3 publicaciones destacadas**.
 - Nuevo **"Resumen del estratega" (IA)**: un análisis en lenguaje natural de **lo que logramos**, **qué está funcionando** y **hacia dónde va la estrategia** — escrito con la data real (alcance, deltas, mejor formato). Si la IA no está disponible, usa un resumen determinístico con los números.
-
 
 ## v2.68 — 2026-06-19
 

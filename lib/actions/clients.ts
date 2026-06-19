@@ -63,15 +63,20 @@ export async function createClient(values: ClientFormValues) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const { error } = await supabase.from('clients').insert({
-    ...parsed.data,
-    created_by: user.id,
-  })
+  const { data: created, error } = await supabase
+    .from('clients')
+    .insert({
+      ...parsed.data,
+      created_by: user.id,
+    })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
 
   revalidatePath('/clients')
-  return { success: true }
+  // Return the id so the onboarding wizard can keep configuring this client.
+  return { success: true, id: created?.id as string | undefined }
 }
 
 export async function updateClient(id: string, values: ClientFormValues) {
