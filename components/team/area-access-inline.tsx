@@ -10,9 +10,9 @@ import { cn } from '@/lib/utils'
 import type { UserRole } from '@/lib/supabase/types'
 
 /**
- * Inline version of the area-access editor — rendered in a collapsible panel
- * below a user card (instead of a modal dialog). Same logic as
- * AreaAccessDialog: full access (role defaults) vs an explicit per-area grant.
+ * Area-access editor rendered in a collapsible panel below a user card
+ * (instead of a modal). Full access (role defaults) vs an explicit per-area
+ * grant; saves via setUserAreaAccess.
  */
 export function AreaAccessPanel({
   userId,
