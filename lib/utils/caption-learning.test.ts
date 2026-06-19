@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { selectApprovedExamples } from './caption-learning'
+import { selectApprovedExamples, selectAvoidExamples, mergeApprovedAndLoved } from './caption-learning'
 
 describe('selectApprovedExamples', () => {
   it('returns [] for no rows', () => {
@@ -39,5 +39,54 @@ describe('selectApprovedExamples', () => {
     }))
     expect(selectApprovedExamples(rows)).toHaveLength(6)
     expect(selectApprovedExamples(rows, 3)).toHaveLength(3)
+  })
+})
+
+describe('mergeApprovedAndLoved', () => {
+  const loved = ['LOVED uno con largo más que suficiente', 'LOVED dos con largo más que suficiente']
+  const approved = ['APROBADO uno con largo más que suficiente', 'APROBADO dos con largo más que suficiente']
+
+  it('puts loved FIRST (the #1 loved leads) and keeps order', () => {
+    const out = mergeApprovedAndLoved(loved, approved)
+    expect(out[0]).toBe(loved[0]) // the top loved must lead — regression guard for the lexicographic bug
+    expect(out[1]).toBe(loved[1])
+    expect(out[2]).toBe(approved[0])
+  })
+
+  it('the #1 loved survives even when the list exceeds the cap', () => {
+    const manyApproved = Array.from({ length: 20 }, (_, i) => `APROBADO número ${i} con largo suficiente`)
+    const out = mergeApprovedAndLoved(['LOVED líder con largo suficiente', ...[]], manyApproved, 6)
+    expect(out).toHaveLength(6)
+    expect(out[0]).toBe('LOVED líder con largo suficiente')
+  })
+
+  it('dedups loved vs approved (same caption rated 👍 and approved appears once)', () => {
+    const dup = 'Mismo caption aprobado y con pulgar arriba, largo ok'
+    const out = mergeApprovedAndLoved([dup], [dup])
+    expect(out.filter((t) => t === dup)).toHaveLength(1)
+  })
+})
+
+describe('selectAvoidExamples', () => {
+  it('returns rejected captions with their note, newest first, capped at 4', () => {
+    const rows = Array.from({ length: 6 }, (_, i) => ({
+      text: `Caption rechazado número ${i} con largo suficiente`,
+      note: i % 2 ? 'demasiados emojis' : null,
+      recency: `2026-06-${String(i + 1).padStart(2, '0')}`,
+    }))
+    const out = selectAvoidExamples(rows)
+    expect(out).toHaveLength(4)
+    expect(out[0].text).toContain('número 5') // newest
+    expect(out[0].note).toBe('demasiados emojis')
+  })
+
+  it('drops blanks/short and dedups, normalizing empty notes to null', () => {
+    const out = selectAvoidExamples([
+      { text: 'corto', note: 'x' },
+      { text: 'Caption rechazado válido y suficientemente largo', note: '   ' },
+      { text: 'caption rechazado  válido y suficientemente largo', note: 'dup' },
+    ])
+    expect(out).toHaveLength(1)
+    expect(out[0].note).toBeNull()
   })
 })

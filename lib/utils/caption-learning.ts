@@ -33,3 +33,55 @@ export function selectApprovedExamples(rows: ApprovedCaptionRow[], limit = 6): s
   kept.sort((a, b) => (a.recency < b.recency ? 1 : a.recency > b.recency ? -1 : 0))
   return kept.slice(0, limit).map((k) => k.text)
 }
+
+/**
+ * Merge 👍-loved captions AHEAD of plain-approved ones, deduped (case/whitespace),
+ * blanks/too-short dropped, capped. Loved lead because an explicit 👍 is the
+ * strongest positive signal. Order is preserved exactly (no recency tricks).
+ */
+export function mergeApprovedAndLoved(loved: string[], approved: string[], limit = 6): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of [...loved, ...approved]) {
+    const text = (raw ?? '').trim()
+    if (text.length < 20) continue
+    const key = text.toLowerCase().replace(/\s+/g, ' ')
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(text)
+    if (out.length >= limit) break
+  }
+  return out
+}
+
+export interface AvoidCaptionRow {
+  text: string | null
+  note?: string | null
+  recency?: string | null
+}
+
+/**
+ * Captions the team rated 👎 (with the reason, when given) for the "avoid this"
+ * block. Same hygiene as the approved selection: dedup, drop blanks/too-short,
+ * newest-first, cap (smaller — negative signal needs fewer examples).
+ */
+export function selectAvoidExamples(
+  rows: AvoidCaptionRow[],
+  limit = 4,
+): { text: string; note: string | null }[] {
+  const seen = new Set<string>()
+  const kept: { text: string; note: string | null; recency: string }[] = []
+
+  for (const r of rows) {
+    const text = (r.text ?? '').trim()
+    if (text.length < 20) continue
+    const key = text.toLowerCase().replace(/\s+/g, ' ')
+    if (seen.has(key)) continue
+    seen.add(key)
+    const note = (r.note ?? '').trim()
+    kept.push({ text, note: note || null, recency: r.recency ?? '' })
+  }
+
+  kept.sort((a, b) => (a.recency < b.recency ? 1 : a.recency > b.recency ? -1 : 0))
+  return kept.slice(0, limit).map(({ text, note }) => ({ text, note }))
+}

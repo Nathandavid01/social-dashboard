@@ -113,4 +113,22 @@ describe('buildIdeaCaptionPrompt', () => {
     const p = buildIdeaCaptionPrompt(base)
     expect(p).not.toContain('CAPTIONS QUE EL EQUIPO YA APROBÓ')
   })
+
+  it('injects rejected captions (with their reason) as the "avoid" signal', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      avoidExamples: [
+        { text: 'Caption rechazado con demasiados emojis 🔥🔥🔥', note: 'demasiados emojis' },
+        { text: 'Otro caption rechazado muy largo y aburrido', note: null },
+      ],
+    })
+    expect(p).toContain('CAPTIONS QUE EL EQUIPO RECHAZÓ')
+    expect(p).toContain('Caption rechazado con demasiados emojis 🔥🔥🔥')
+    expect(p).toContain('(motivo: demasiados emojis)')
+    expect(p).toMatch(/EVITA el estilo/)
+  })
+
+  it('omits the avoid block when there are none', () => {
+    expect(buildIdeaCaptionPrompt(base)).not.toContain('CAPTIONS QUE EL EQUIPO RECHAZÓ')
+  })
 })

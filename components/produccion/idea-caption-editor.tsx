@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2 } from 'lucide-react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-captions'
+import { rateCaption } from '@/lib/actions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
 import type { SocialPlatform } from '@/lib/supabase/types'
@@ -43,8 +44,25 @@ export function IdeaCaptionEditor({
   const [feedback, setFeedback] = useState('')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
+  const [isRating, startRate] = useTransition()
+  const [rated, setRated] = useState<1 | -1 | null>(null)
+  const [showNote, setShowNote] = useState(false)
+  const [ratingNote, setRatingNote] = useState('')
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+
+  function rate(value: 1 | -1, note?: string) {
+    startRate(async () => {
+      const res = await rateCaption({ ideaId, rating: value, captionText: caption, note })
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else {
+        setRated(value)
+        setShowNote(false)
+        setRatingNote('')
+        toast({ title: value === 1 ? '👍 Guardado — la IA aprenderá de esto' : '👎 Anotado — la IA lo evitará' })
+      }
+    })
+  }
 
   const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief })
   const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle })
@@ -64,6 +82,7 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
+        setRated(null)
         onSaved?.(res.caption)
         toast({ title: 'Caption generado desde la idea' })
       }
@@ -78,6 +97,7 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
+        setRated(null)
         onSaved?.(res.caption)
         setFeedback('')
         toast({ title: 'Caption regenerado con tu feedback' })
@@ -159,7 +179,7 @@ export function IdeaCaptionEditor({
 
       <Textarea
         value={caption}
-        onChange={(e) => setCaption(e.target.value)}
+        onChange={(e) => { setCaption(e.target.value); setRated(null) }}
         rows={8}
         placeholder={
           ideaReady
@@ -193,6 +213,51 @@ export function IdeaCaptionEditor({
             {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
             Regenerar con feedback
           </Button>
+        </div>
+      )}
+
+      {/* Rating loop (fase 2): 👍/👎 + nota → la IA aprende qué imitar y qué evitar */}
+      {canUse && caption && (
+        <div className="space-y-2 border-t border-border/60 pt-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-medium text-muted-foreground">¿Qué tal este caption? La IA aprende de tu voto.</span>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isRating}
+              onClick={() => rate(1)}
+              className={rated === 1 ? 'border-emerald-500/50 text-emerald-500' : ''}
+            >
+              <ThumbsUp className="mr-1.5 h-3.5 w-3.5" /> Me gusta
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isRating}
+              onClick={() => setShowNote((v) => !v)}
+              className={rated === -1 ? 'border-red-500/50 text-red-400' : ''}
+            >
+              <ThumbsDown className="mr-1.5 h-3.5 w-3.5" /> No es
+            </Button>
+            {rated && <span className="text-[11px] text-emerald-500">¡Gracias! Guardado.</span>}
+          </div>
+          {showNote && (
+            <div className="flex flex-col gap-1.5">
+              <Textarea
+                value={ratingNote}
+                onChange={(e) => setRatingNote(e.target.value)}
+                rows={2}
+                placeholder="¿Qué estuvo mal? (opcional) — p. ej. demasiados emojis, muy genérico, tono equivocado…"
+                className="resize-none text-xs"
+              />
+              <div>
+                <Button size="sm" disabled={isRating} onClick={() => rate(-1, ratingNote)}>
+                  {isRating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="mr-1.5 h-3.5 w-3.5" />}
+                  Enviar voto
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
