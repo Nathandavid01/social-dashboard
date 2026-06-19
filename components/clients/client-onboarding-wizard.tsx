@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Check, ChevronRight, Loader2, Search, Sparkles, CalendarDays, Megaphone, MessageSquareText, PartyPopper, Rocket, ArrowRight,
@@ -55,7 +54,6 @@ const EMPTY: ClientFormValues = {
 }
 
 export function ClientOnboardingWizard({ teamMembers }: Props) {
-  const router = useRouter()
   const { toast } = useToast()
   const [step, setStep] = useState<WizardStepKey>('datos')
   const [values, setValues] = useState<ClientFormValues>(EMPTY)
@@ -238,7 +236,7 @@ export function ClientOnboardingWizard({ teamMembers }: Props) {
                     <SelectTrigger><SelectValue placeholder="Seleccionar cuenta" /></SelectTrigger>
                     <SelectContent>
                       {blogs.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>{b.name} <span className="ml-1 text-xs text-muted-foreground">({b.id})</span></SelectItem>
+                        <SelectItem key={b.id} value={b.id}>{b.name} ({b.id})</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
