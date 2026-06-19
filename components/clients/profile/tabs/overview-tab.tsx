@@ -7,6 +7,8 @@ import { ColorSwatches } from '../color-swatches'
 import { VideoThresholdCard } from '../video-threshold-card'
 import { ClientRunwayWidget } from '@/components/runway/client-runway-widget'
 import { CalendarDays, User, Users, Palette, Video } from 'lucide-react'
+import { ClientOnboardingCard } from '../../client-onboarding-card'
+import { clientOnboardingStatus } from '@/lib/utils/client-onboarding'
 import type { Client } from '@/lib/supabase/types'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
 
@@ -16,8 +18,25 @@ interface Props {
 }
 
 export function OverviewTab({ client, pipeline }: Props) {
+  const hasVideos =
+    !!pipeline && pipeline.ideas + pipeline.porGrabar + pipeline.porEditar + pipeline.porPublicar > 0
+  const onboarding = clientOnboardingStatus({
+    status: client.status,
+    metricool_blog_id: client.metricool_blog_id,
+    posting_days: client.posting_days,
+    brand_voice: client.brand_voice,
+    hasVideos,
+  })
+
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* Onboarding checklist — visible only while setup is incomplete */}
+      {!onboarding.complete && (
+        <div className="md:col-span-2 xl:col-span-3">
+          <ClientOnboardingCard clientId={client.id} status={onboarding} />
+        </div>
+      )}
+
       {/* Pipeline spans full width on mobile, half on md, full on xl */}
       <div className="md:col-span-2 xl:col-span-3">
         {pipeline && <PipelineCard data={pipeline} title="Pipeline de contenido" linkable clientId={client.id} />}

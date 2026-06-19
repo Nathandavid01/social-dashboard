@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.48 — 2026-06-19
+
+### Onboarding de cliente más simple e intuitivo
+- **Tarjeta "Listo para automatizar"** en el perfil del cliente: una checklist en vivo (activo · Metricool · días de posteo · voz de marca · primer lote) que muestra **qué falta** con un atajo directo a cada cosa. Desaparece cuando el cliente queda 100% configurado.
+- **Activar en un clic** desde la checklist (ya no hay que ir a editar para sacarlo de "onboarding").
+- **Clientes nuevos nacen "Activos"** por defecto, así el pipeline y la auto-publicación funcionan desde el inicio (antes nacían en "onboarding" y había que activarlos a mano).
+
 ## v2.47 — 2026-06-16
 
 ### Login rediseñado (negro + dorado Nate Media)

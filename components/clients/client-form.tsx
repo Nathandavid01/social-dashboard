@@ -53,7 +53,9 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
       name: client?.name ?? '',
       industry: client?.industry ?? '',
       platforms: client?.platforms ?? [],
-      status: client?.status ?? 'onboarding',
+      // New clients default to "active" so the pipeline + automations work right
+      // away (antes nacían en "onboarding" y había que activarlos a mano).
+      status: client?.status ?? 'active',
       assigned_to: client?.assigned_to ?? null,
       notes: client?.notes ?? '',
       brand_voice: client?.brand_voice ?? '',
