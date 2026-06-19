@@ -3,6 +3,23 @@ import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
+/** Block obvious SSRF targets (loopback / private / link-local / metadata). */
+function isBlockedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase()
+  if (h === 'localhost' || h.endsWith('.local') || h === 'metadata.google.internal') return true
+  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
+  if (m) {
+    const a = Number(m[1])
+    const b = Number(m[2])
+    if (a === 0 || a === 127 || a === 10) return true
+    if (a === 192 && b === 168) return true
+    if (a === 172 && b >= 16 && b <= 31) return true
+    if (a === 169 && b === 254) return true
+  }
+  if (h === '::1' || h.startsWith('fe80') || h.startsWith('fc') || h.startsWith('fd')) return true
+  return false
+}
+
 /**
  * Same-origin image proxy so report thumbnails (Instagram/Facebook CDN, which
  * don't send CORS headers) can be read by html2canvas when exporting the PDF.
@@ -25,6 +42,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse('URL inválida', { status: 400 })
   }
   if (url.protocol !== 'https:') return new NextResponse('Solo https', { status: 400 })
+  if (isBlockedHost(url.hostname)) return new NextResponse('Host no permitido', { status: 400 })
 
   try {
     const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) })
