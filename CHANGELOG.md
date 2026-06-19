@@ -4,7 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.46 — 2026-06-16
+## v2.47 — 2026-06-16
+
+### Login rediseñado (negro + dorado Nate Media)
+- Pantalla de inicio de sesión nivel **agencia profesional**: layout **split-screen** con un panel de marca a la izquierda (monograma N dorado, propuesta de valor y 3 beneficios) y el formulario a la derecha.
+- Formulario en **español** con inputs con íconos, mostrar/ocultar contraseña, estado de carga y errores claros.
+- En móvil se apila con la marca arriba. Nuevo componente reutilizable **`NateLogo`** (monograma de marca).
+- Reemplaza el login genérico "AgencyFlow / Welcome back" por la identidad real de Nate Media.
 
 ### Pipeline: tarjetas planificadas y flujo idea → caption → grabación
 - Las **tarjetas planificadas** muestran el **logo del cliente**, días desde el inicio y días en la fila actual, con un estilo distinto (borde punteado celeste, sin barra lateral).
