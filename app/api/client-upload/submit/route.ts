@@ -32,6 +32,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Faltan datos de la subida' }, { status: 400 })
   }
 
+  // The key must be one we just minted for THIS client (presign scopes every
+  // object under client-uploads/<clientId>/…). Rejects a spoofed/foreign key.
+  if (!body.key.startsWith(`client-uploads/${body.clientId}/`)) {
+    return NextResponse.json({ error: 'Archivo inválido' }, { status: 400 })
+  }
+
   const form = {
     format: body.format ?? '',
     theme: body.theme ?? '',

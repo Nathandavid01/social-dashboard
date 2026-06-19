@@ -28,6 +28,10 @@ describe('client-upload-core', () => {
       expect(validateClientUpload({ ...base, desiredDate: '2026/06/19' }).ok).toBe(false)
       expect(validateClientUpload({ ...base, desiredDate: '2026-06-19' }).ok).toBe(true)
     })
+
+    it('rejects an over-long brief', () => {
+      expect(validateClientUpload({ ...base, brief: 'x'.repeat(2001) }).ok).toBe(false)
+    })
   })
 
   describe('helpers', () => {

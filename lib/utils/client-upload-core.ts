@@ -49,12 +49,18 @@ export function formatLabel(f: string): string {
   return CONTENT_FORMATS.find((x) => x.value === f)?.label ?? f
 }
 
+/** Upper bound on the free-text brief, enforced client- and server-side. */
+export const MAX_BRIEF_LENGTH = 2000
+
 /** Validate the client's selections before we touch the network. */
 export function validateClientUpload(form: ClientUploadForm): { ok: boolean; error?: string } {
   if (!isValidFormat(form.format)) return { ok: false, error: 'Escoge un formato (Reel o Post).' }
   if (!isValidTheme(form.theme)) return { ok: false, error: 'Escoge el tipo de contenido.' }
   if (form.desiredDate && !/^\d{4}-\d{2}-\d{2}$/.test(form.desiredDate)) {
     return { ok: false, error: 'La fecha deseada no es válida.' }
+  }
+  if (form.brief.length > MAX_BRIEF_LENGTH) {
+    return { ok: false, error: 'El mensaje es demasiado largo.' }
   }
   return { ok: true }
 }
