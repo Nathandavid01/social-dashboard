@@ -25,6 +25,13 @@
     --input: 0 0% 90%;
     --ring: 43 80% 46%;
     --radius: 0.625rem;
+    /* Semantic status colors (light) */
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 55%;
+    --info-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -48,6 +55,13 @@
     --border: 0 0% 12%;
     --input: 0 0% 14%;
     --ring: 43 80% 52%;
+    /* Semantic status colors (dark) */
+    --success: 142 65% 45%;
+    --success-foreground: 0 0% 7%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 7%;
+    --info: 217 91% 62%;
+    --info-foreground: 0 0% 7%;
   }
 
   /* Improve native date inputs in dark mode (reduce blue browser accents) */
