@@ -132,6 +132,6 @@ describe('IdeaCaptionEditor — caption único', () => {
     render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)
     const btn = await screen.findByRole('button', { name: /agregar a reglas/i })
     fireEvent.click(btn)
-    await waitFor(() => expect(appendClientCaptionRule).toHaveBeenCalledWith('i1', 'menos emojis'))
+    await waitFor(() => expect(appendClientCaptionRule).toHaveBeenCalledWith({ ideaId: 'i1' }, 'menos emojis'))
   })
 })
