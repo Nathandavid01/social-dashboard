@@ -229,6 +229,9 @@ export async function generateQuickCaption(input: {
   clientId: string
   topic: string
   platform?: string
+  /** Revise a prior attempt: instructions + the caption being revised. */
+  feedback?: string | null
+  previousCaption?: string | null
 }): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -252,7 +255,13 @@ export async function generateQuickCaption(input: {
   if (!client) return { error: 'Cliente no encontrado' }
 
   const c = client as FeedbackClient
-  const examples = await fetchClientStyleExamples(c.metricool_blog_id ?? undefined)
+  // Same learning loop as the pipeline: Metricool style + approved captions + 👍/👎 ratings.
+  const [examples, approved, ratings] = await Promise.all([
+    fetchClientStyleExamples(c.metricool_blog_id ?? undefined),
+    fetchApprovedCaptionExamples(supabase, input.clientId),
+    fetchCaptionFeedbackForPrompt(supabase, input.clientId),
+  ])
+  const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
   const platforms = resolvePlatforms(c.platforms, c.default_platforms)
 
   const prompt = buildIdeaCaptionPrompt({
@@ -262,6 +271,10 @@ export async function generateQuickCaption(input: {
     hashtags: null,
     platforms,
     examples,
+    approvedExamples,
+    avoidExamples: ratings.avoid,
+    feedback: input.feedback ?? null,
+    previousCaption: input.previousCaption ?? null,
     client: {
       name: c.name,
       brandVoice: c.brand_voice,
