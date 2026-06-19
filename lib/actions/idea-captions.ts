@@ -97,7 +97,9 @@ export async function generateIdeaCaption(
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
-    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length, revised: !!opts?.feedback } })
+    // Persist the feedback text too (not just a bool) so a future per-client
+    // learning loop can mine recurring instructions ("siempre menos emojis").
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length, revised: !!opts?.feedback, feedback: opts?.feedback?.trim() || null } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
