@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.55 — 2026-06-19
+
+### Nuevo login: logo radar + contador de alcance en vivo
+- **Login rediseñado** (negro + dorado): el panel de marca ahora tiene un **logo tipo radar / torre de control** (monograma N dorado con barrido animado) y un wordmark más grande.
+- **Contador histórico en vivo** de *personas alcanzadas en todas las cuentas que operamos* — sube al cargar y sigue contando en tiempo real (respeta `prefers-reduced-motion`).
+- No cambia nada del flujo funcional de login (formulario, `signIn`, Supabase) — solo la presentación.
+
 ## v2.54 — 2026-06-19
 
 ### Captions que aprenden de cada cliente (learning loop)

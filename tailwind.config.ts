@@ -63,10 +63,25 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        aurora1: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(48px, 36px) scale(1.18)" },
+        },
+        aurora2: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(-40px, -30px) scale(1.12)" },
+        },
+        grid: {
+          from: { backgroundPosition: "0 0" },
+          to: { backgroundPosition: "38px 38px" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        aurora1: "aurora1 19s ease-in-out infinite",
+        aurora2: "aurora2 24s ease-in-out infinite",
+        grid: "grid 7s linear infinite",
       },
     },
   },
