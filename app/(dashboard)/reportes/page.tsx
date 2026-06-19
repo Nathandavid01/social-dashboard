@@ -9,6 +9,7 @@ import { ReportSelector } from '@/components/reportes/report-selector'
 import { ClientReportDocument } from '@/components/reportes/client-report-document'
 import { AgencyReportDocument } from '@/components/reportes/agency-report-document'
 import { PrintButton } from '@/components/clients/report/print-button'
+import { DownloadPdfButton } from '@/components/reportes/download-pdf-button'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -29,11 +30,17 @@ export default async function ReportesPage({
   const clients = (data ?? []) as { id: string; name: string }[]
 
   let body: React.ReactNode
+  let pdfName = 'Reporte Nate Media'
+  let hasDoc = false
   if (type === 'agencia') {
+    pdfName = 'Reporte de agencia'
+    hasDoc = true
     body = <AgencyReportDocument report={await getAgencyReport(days)} />
   } else if (clientId) {
     const report = await getClientReport(clientId, days, { compare: true })
     if (report) {
+      pdfName = `Reporte ${report.client.name}`
+      hasDoc = true
       let insights = ''
       if (report.metricoolConfigured && report.posts.length > 0) {
         const best = topPosts(report.posts, 1)[0]
@@ -81,7 +88,12 @@ export default async function ReportesPage({
 
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <ReportSelector type={type} clientId={clientId} days={days} clients={clients} />
-        <PrintButton />
+        {hasDoc && (
+          <div className="flex items-center gap-2">
+            <PrintButton />
+            <DownloadPdfButton targetId="report-document" fileName={`${pdfName}.pdf`} />
+          </div>
+        )}
       </div>
 
       {body}

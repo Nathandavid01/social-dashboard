@@ -19,7 +19,7 @@ export function AgencyReportDocument({ report }: { report: AgencyReport }) {
   ]
 
   return (
-    <div className="mx-auto max-w-4xl rounded-2xl border bg-white p-8 text-zinc-900 shadow-sm print:border-0 print:shadow-none sm:p-10">
+    <div id="report-document" className="mx-auto max-w-4xl rounded-2xl border bg-white p-8 text-zinc-900 shadow-sm print:border-0 print:shadow-none sm:p-10">
       <header className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-amber-600">Resumen de agencia</p>

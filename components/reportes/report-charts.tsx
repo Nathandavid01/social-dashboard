@@ -1,5 +1,6 @@
 import { formatCompact } from '@/lib/utils/client-report-core'
 import type { ReachBucket } from '@/lib/utils/report-insights-core'
+import { InstagramIcon, FacebookIcon } from './network-icons'
 
 /** Weekly reach bar chart — pure CSS, prints cleanly. */
 export function WeeklyReachChart({ data }: { data: ReachBucket[] }) {
@@ -43,12 +44,12 @@ export function NetworkSplitBar({ instagram, facebook }: { instagram: number; fa
           </div>
           <div className="mt-3 flex items-center justify-between text-xs">
             <span className="inline-flex items-center gap-1.5 text-zinc-600">
-              <span className="h-2.5 w-2.5 rounded-full bg-pink-500" /> Instagram
+              <InstagramIcon size={14} /> Instagram
               <span className="font-bold tabular-nums">{igPct}%</span>
               <span className="text-zinc-400">({formatCompact(instagram)})</span>
             </span>
             <span className="inline-flex items-center gap-1.5 text-zinc-600">
-              <span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Facebook
+              <FacebookIcon size={14} /> Facebook
               <span className="font-bold tabular-nums">{fbPct}%</span>
               <span className="text-zinc-400">({formatCompact(facebook)})</span>
             </span>
