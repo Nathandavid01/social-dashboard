@@ -39,6 +39,7 @@ export const AREAS: Area[] = [
   { href: '/clients/cadence',    label: 'Cadencia',        permission: 'clients.read' },
   { href: '/calendar',           label: 'Calendario' },
   { href: '/performance',        label: 'Rendimiento',     permission: 'performance.read' },
+  { href: '/reportes',           label: 'Reportes',        permission: 'metricool.read' },
   { href: '/efficiency',         label: 'Eficiencia',      permission: 'efficiency.read' },
   { href: '/published',          label: 'Publicados',      permission: 'metricool.read' },
   { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all' },

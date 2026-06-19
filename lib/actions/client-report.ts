@@ -9,6 +9,7 @@ import {
   type ReportPost,
   type ReportSummary,
 } from '@/lib/utils/client-report-core'
+import { previousWindow } from '@/lib/utils/report-delta-core'
 
 const METRICOOL_BASE = 'https://app.metricool.com/api'
 
@@ -45,6 +46,25 @@ async function fetchList(
   }
 }
 
+async function loadPosts(
+  userToken: string,
+  userId: string,
+  blogId: string,
+  start: string,
+  end: string,
+): Promise<ReportPost[]> {
+  const [igPosts, igReels, fbPosts] = await Promise.all([
+    fetchList(userToken, userId, blogId, 'instagram/posts', start, end),
+    fetchList(userToken, userId, blogId, 'instagram/reels', start, end),
+    fetchList(userToken, userId, blogId, 'facebook/posts', start, end),
+  ])
+  return sortPostsByDate([
+    ...igPosts.map((p) => normalizeInstagramPost(p, 'post')),
+    ...igReels.map((p) => normalizeInstagramPost(p, 'reel')),
+    ...fbPosts.map((p) => normalizeFacebookPost(p)),
+  ])
+}
+
 export interface ClientReport {
   client: { id: string; name: string; logoUrl: string | null }
   periodDays: number
@@ -52,15 +72,21 @@ export interface ClientReport {
   end: string
   posts: ReportPost[]
   summary: ReportSummary
+  /** Summary of the immediately-prior window, when comparison was requested. */
+  previousSummary: ReportSummary | null
   metricoolConfigured: boolean
 }
 
 /**
- * Professional per-client report: the posts published in the window and the
- * reach/impact they had. Gated on metricool.read; reads the client via RLS and
- * the published posts from Metricool with the team token (server-side only).
+ * Per-client report: posts published in the window + the reach/impact they had.
+ * Gated on metricool.read; client read via RLS, posts via the team Metricool
+ * token (server-side only). With `compare`, also returns the prior window's KPIs.
  */
-export async function getClientReport(clientId: string, periodDays = 30): Promise<ClientReport | null> {
+export async function getClientReport(
+  clientId: string,
+  periodDays = 30,
+  opts: { compare?: boolean } = {},
+): Promise<ClientReport | null> {
   await requirePermission('metricool.read')
 
   const days = [7, 30, 90].includes(periodDays) ? periodDays : 30
@@ -72,8 +98,9 @@ export async function getClientReport(clientId: string, periodDays = 30): Promis
     .maybeSingle()
   if (!client) return null
 
-  const end = ymd(new Date())
-  const start = ymd(new Date(Date.now() - days * 24 * 60 * 60 * 1000))
+  const now = Date.now()
+  const end = ymd(new Date(now))
+  const start = ymd(new Date(now - days * 24 * 60 * 60 * 1000))
   const base = {
     client: { id: client.id as string, name: client.name as string, logoUrl: (client.logo_url as string) ?? null },
     periodDays: days,
@@ -84,21 +111,18 @@ export async function getClientReport(clientId: string, periodDays = 30): Promis
   const userToken = process.env.METRICOOL_TOKEN
   const userId = process.env.METRICOOL_USER_ID
   if (!client.metricool_blog_id || !userToken || !userId) {
-    return { ...base, posts: [], summary: summarizeReport([]), metricoolConfigured: false }
+    return { ...base, posts: [], summary: summarizeReport([]), previousSummary: null, metricoolConfigured: false }
   }
 
   const blogId = String(client.metricool_blog_id)
-  const [igPosts, igReels, fbPosts] = await Promise.all([
-    fetchList(userToken, userId, blogId, 'instagram/posts', start, end),
-    fetchList(userToken, userId, blogId, 'instagram/reels', start, end),
-    fetchList(userToken, userId, blogId, 'facebook/posts', start, end),
-  ])
+  const posts = await loadPosts(userToken, userId, blogId, start, end)
 
-  const posts = sortPostsByDate([
-    ...igPosts.map((p) => normalizeInstagramPost(p, 'post')),
-    ...igReels.map((p) => normalizeInstagramPost(p, 'reel')),
-    ...fbPosts.map((p) => normalizeFacebookPost(p)),
-  ])
+  let previousSummary: ReportSummary | null = null
+  if (opts.compare) {
+    const prev = previousWindow(days, now)
+    const prevPosts = await loadPosts(userToken, userId, blogId, ymd(new Date(prev.start)), ymd(new Date(prev.end)))
+    previousSummary = summarizeReport(prevPosts)
+  }
 
-  return { ...base, posts, summary: summarizeReport(posts), metricoolConfigured: true }
+  return { ...base, posts, summary: summarizeReport(posts), previousSummary, metricoolConfigured: true }
 }

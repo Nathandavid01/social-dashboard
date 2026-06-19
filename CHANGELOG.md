@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.67 — 2026-06-19
+
+### Nueva sección "Reportes" (elige el tipo)
+- Nueva sección **Reportes** en el menú, con un **selector**: eliges el **tipo de reporte**, el **cliente** y el **período** (7 / 30 / 90 días).
+- **Reporte de cliente**: ahora muestra los KPIs (alcance, impresiones, interacciones, posts) **con comparación vs el período anterior** (↑/↓ %) además de la lista de publicaciones.
+- **Resumen de agencia**: ranking de **todos los clientes por alcance** (con barra e impresiones) y los totales de la agencia.
+- Todo imprimible / PDF. El botón "Reporte" del perfil del cliente ahora abre esta sección.
+
 ## v2.66 — 2026-06-19
 
 ### Link de subida con el nombre del cliente
