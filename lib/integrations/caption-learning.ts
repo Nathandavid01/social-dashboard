@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { selectApprovedExamples, type ApprovedCaptionRow } from '@/lib/utils/caption-learning'
+import { selectApprovedExamples, selectAvoidExamples, type ApprovedCaptionRow } from '@/lib/utils/caption-learning'
 
 /**
  * A client's APPROVED captions, to feed back into the generator as the exact
@@ -60,5 +60,37 @@ export async function fetchApprovedCaptionExamples(
     return selectApprovedExamples(rows, limit)
   } catch {
     return []
+  }
+}
+
+/**
+ * Explicit 👍/👎 caption ratings for a client (fase 2). Returns the loved
+ * captions (rating=1) as positive examples and the rejected ones (rating=-1,
+ * with their note) as the "avoid" signal. Best-effort: returns empty on any
+ * error (e.g. before migration 0041) so generation never breaks.
+ */
+export async function fetchCaptionFeedbackForPrompt(
+  supabase: SupabaseClient,
+  clientId: string | null | undefined,
+): Promise<{ loved: string[]; avoid: { text: string; note: string | null }[] }> {
+  if (!clientId) return { loved: [], avoid: [] }
+  try {
+    const { data } = await supabase
+      .from('caption_feedback')
+      .select('caption_text, rating, note, created_at')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+      .limit(40)
+
+    const rows = (data ?? []) as { caption_text: string | null; rating: number; note: string | null; created_at: string | null }[]
+    const loved = selectApprovedExamples(
+      rows.filter((r) => r.rating === 1).map((r) => ({ text: r.caption_text, recency: r.created_at })),
+    )
+    const avoid = selectAvoidExamples(
+      rows.filter((r) => r.rating === -1).map((r) => ({ text: r.caption_text, note: r.note, recency: r.created_at })),
+    )
+    return { loved, avoid }
+  } catch {
+    return { loved: [], avoid: [] }
   }
 }

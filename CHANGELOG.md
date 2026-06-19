@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.62 — 2026-06-19
+
+### Captions: calificar 👍/👎 para que aprendan (learning loop · fase 2)
+- En el editor de caption ahora puedes **calificar** cada caption con **👍 Me gusta** o **👎 No es** (con una nota opcional de qué estuvo mal).
+- El generador usa esas calificaciones por cliente: los **👍 pesan como el mejor ejemplo a imitar** (por encima de los aprobados y de Metricool), y los **👎 (con su motivo) le dicen qué evitar**. Mientras más calificas, más se afina a la voz del cliente.
+- Aplica en ambos generadores (ideas planificadas e Ideas Aprobadas). **Requiere la migración `0041_caption_feedback.sql`**; degrada seguro hasta aplicarla (la generación sigue funcionando; solo el voto avisa con error).
+
 ## v2.61 — 2026-06-19
 
 ### El alcance real aparece de inmediato

@@ -33,3 +33,35 @@ export function selectApprovedExamples(rows: ApprovedCaptionRow[], limit = 6): s
   kept.sort((a, b) => (a.recency < b.recency ? 1 : a.recency > b.recency ? -1 : 0))
   return kept.slice(0, limit).map((k) => k.text)
 }
+
+export interface AvoidCaptionRow {
+  text: string | null
+  note?: string | null
+  recency?: string | null
+}
+
+/**
+ * Captions the team rated 👎 (with the reason, when given) for the "avoid this"
+ * block. Same hygiene as the approved selection: dedup, drop blanks/too-short,
+ * newest-first, cap (smaller — negative signal needs fewer examples).
+ */
+export function selectAvoidExamples(
+  rows: AvoidCaptionRow[],
+  limit = 4,
+): { text: string; note: string | null }[] {
+  const seen = new Set<string>()
+  const kept: { text: string; note: string | null; recency: string }[] = []
+
+  for (const r of rows) {
+    const text = (r.text ?? '').trim()
+    if (text.length < 20) continue
+    const key = text.toLowerCase().replace(/\s+/g, ' ')
+    if (seen.has(key)) continue
+    seen.add(key)
+    const note = (r.note ?? '').trim()
+    kept.push({ text, note: note || null, recency: r.recency ?? '' })
+  }
+
+  kept.sort((a, b) => (a.recency < b.recency ? 1 : a.recency > b.recency ? -1 : 0))
+  return kept.slice(0, limit).map(({ text, note }) => ({ text, note }))
+}

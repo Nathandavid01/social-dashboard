@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
-import { fetchApprovedCaptionExamples } from '@/lib/integrations/caption-learning'
+import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
+import { selectApprovedExamples } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
@@ -60,12 +61,18 @@ export async function generateIdeaCaption(
   // platforms it will be published to (same resolution the publisher uses).
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
-  // Pull the client's recently published captions from Metricool (real style) AND
-  // the captions the team already APPROVED (the learning loop) — both best-effort.
-  const [examples, approvedExamples] = await Promise.all([
+  // Learning loop (best-effort, all parallel): Metricool real style + the team's
+  // APPROVED captions + explicit 👍/👎 ratings for this client.
+  const clientId = (idea as { client_id?: string | null }).client_id
+  const [examples, approved, ratings] = await Promise.all([
     fetchClientStyleExamples(client.metricool_blog_id ?? undefined),
-    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id, { excludeId: idea.id }),
+    fetchApprovedCaptionExamples(supabase, clientId, { excludeId: idea.id }),
+    fetchCaptionFeedbackForPrompt(supabase, clientId),
   ])
+  // 👍-rated captions are the strongest positive signal → lead the approved list.
+  const approvedExamples = selectApprovedExamples(
+    [...ratings.loved, ...approved].map((t, i) => ({ text: t, recency: String(1_000_000 - i) })),
+  )
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
@@ -76,6 +83,7 @@ export async function generateIdeaCaption(
     platforms,
     examples,
     approvedExamples,
+    avoidExamples: ratings.avoid,
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
     client: {

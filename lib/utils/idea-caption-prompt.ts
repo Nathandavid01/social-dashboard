@@ -34,6 +34,11 @@ export interface IdeaCaptionPromptInput {
    * standard to match — weighted above the Metricool reference examples.
    */
   approvedExamples?: string[]
+  /**
+   * Captions the team rated 👎 for this client (with the reason, when given) —
+   * the "do NOT write like this" signal.
+   */
+  avoidExamples?: { text: string; note?: string | null }[]
   /** User instructions to revise a prior attempt ("más corto", "menos emojis", "más CTA"). */
   feedback?: string | null
   /** The previous caption being revised — shown to the model so it improves on it. */
@@ -95,6 +100,19 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       ? '- Da MÁXIMA prioridad al estilo de los CAPTIONS QUE EL EQUIPO YA APROBÓ — el equipo ya validó que así es como suena este cliente\n'
       : ''
 
+  // Negative signal: captions the team rated 👎 (with the reason when given).
+  const avoid = (input.avoidExamples ?? []).filter((a) => filled(a?.text))
+  const avoidBlock =
+    avoid.length > 0
+      ? `CAPTIONS QUE EL EQUIPO RECHAZÓ PARA ESTE CLIENTE (NO escribas así — aprende del error):\n\n${avoid
+          .map((a, i) => `--- Rechazado ${i + 1}${filled(a.note) ? ` (motivo: ${a.note!.trim()})` : ''} ---\n${a.text.trim()}`)
+          .join('\n\n')}\n\n`
+      : ''
+  const avoidBullet =
+    avoid.length > 0
+      ? '- EVITA el estilo/los errores de los CAPTIONS QUE EL EQUIPO RECHAZÓ\n'
+      : ''
+
   // When the user gives feedback on a prior attempt, show that attempt + the
   // instructions so the model revises instead of starting from scratch.
   const feedbackBlock = filled(input.feedback)
@@ -116,11 +134,11 @@ REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
-${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${approvedBlock}${feedbackBlock}${examplesBlock}
+${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
 TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
 El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
-${approvedBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
+${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`

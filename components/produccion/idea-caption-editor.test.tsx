@@ -18,6 +18,10 @@ vi.mock('@/lib/actions/idea-captions', () => ({
   generateIdeaCaption: (...a: unknown[]) => generateIdeaCaption(...(a as [])),
   saveIdeaCaption: (...a: unknown[]) => saveIdeaCaption(...(a as [])),
 }))
+const rateCaption = vi.fn(async () => ({ ok: true as const }))
+vi.mock('@/lib/actions/caption-feedback', () => ({
+  rateCaption: (...a: unknown[]) => rateCaption(...(a as [])),
+}))
 
 let mockRole: UserRole | null = 'editor'
 vi.mock('@/lib/context/auth-context', () => ({
@@ -85,5 +89,27 @@ describe('IdeaCaptionEditor — caption único', () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" />)
     expect(screen.queryByRole('button', { name: /regenerar con feedback/i })).not.toBeInTheDocument()
+  })
+
+  it('rates a caption 👍 with one click (rating=1)', async () => {
+    mockRole = 'editor'
+    rateCaption.mockClear()
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" />)
+    fireEvent.click(screen.getByRole('button', { name: /me gusta/i }))
+    await waitFor(() =>
+      expect(rateCaption).toHaveBeenCalledWith({ ideaId: 'i1', rating: 1, captionText: 'Caption a calificar', note: undefined }),
+    )
+  })
+
+  it('rates 👎 with a note after revealing the note box', async () => {
+    mockRole = 'editor'
+    rateCaption.mockClear()
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" />)
+    fireEvent.click(screen.getByRole('button', { name: /no es/i }))
+    fireEvent.change(screen.getByPlaceholderText(/qué estuvo mal/i), { target: { value: 'demasiados emojis' } })
+    fireEvent.click(screen.getByRole('button', { name: /enviar voto/i }))
+    await waitFor(() =>
+      expect(rateCaption).toHaveBeenCalledWith({ ideaId: 'i1', rating: -1, captionText: 'Caption a calificar', note: 'demasiados emojis' }),
+    )
   })
 })
