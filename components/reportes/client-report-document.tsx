@@ -3,18 +3,22 @@ import {
   Heart,
   BarChart3,
   Users,
+  UserPlus,
   TrendingUp,
   ArrowUp,
   ArrowDown,
   Minus,
   Sparkles,
   Trophy,
+  type LucideIcon,
 } from 'lucide-react'
 import { formatCompact, type ReportPost } from '@/lib/utils/client-report-core'
 import { deltaPct, deltaTone, formatDelta } from '@/lib/utils/report-delta-core'
 import { reachByNetwork, reachTimeline, topPosts } from '@/lib/utils/report-insights-core'
 import type { ClientReport } from '@/lib/actions/client-report'
 import { WeeklyReachChart, NetworkSplitBar } from './report-charts'
+import { AudienceSection } from './audience-section'
+import { ActionPlanSection } from './action-plan-section'
 import { cn } from '@/lib/utils'
 
 function fmtRange(start: string, end: string): string {
@@ -44,12 +48,16 @@ function renderInsight(text: string) {
 export function ClientReportDocument({ report, insights }: { report: ClientReport; insights: string }) {
   const { client, summary, posts, previousSummary, metricoolConfigured } = report
   const prev = previousSummary
-  const kpis = [
+  const kpis: { label: string; value: number; prev: number | undefined; icon: LucideIcon }[] = [
     { label: 'Personas alcanzadas', value: summary.reach, prev: prev?.reach, icon: Users },
     { label: 'Impresiones', value: summary.impressions, prev: prev?.impressions, icon: BarChart3 },
     { label: 'Interacciones', value: summary.engagement, prev: prev?.engagement, icon: Heart },
     { label: 'Publicaciones', value: summary.posts, prev: prev?.posts, icon: TrendingUp },
   ]
+  if (report.followers > 0) {
+    kpis.push({ label: 'Seguidores', value: report.followers, prev: undefined, icon: UserPlus })
+  }
+  const kpiCols = kpis.length >= 5 ? 'md:grid-cols-5' : 'md:grid-cols-4'
   const net = reachByNetwork(posts)
   const timeline = reachTimeline(posts, report.periodDays, Date.now())
   const featured = topPosts(posts, 3)
@@ -87,9 +95,10 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
       ) : (
         <>
           {/* KPIs with period-over-period deltas */}
-          <section className="grid grid-cols-2 gap-3 py-6 md:grid-cols-4">
+          <section className={cn('grid grid-cols-2 gap-3 py-6', kpiCols)}>
             {kpis.map((k) => {
-              const d = prev != null ? deltaPct(k.value, k.prev) : null
+              const hasPrev = prev != null && k.prev != null
+              const d = hasPrev ? deltaPct(k.value, k.prev) : null
               const tone = deltaTone(d)
               return (
                 <div key={k.label} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
@@ -99,7 +108,7 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
                   </div>
                   <div className="flex items-end justify-between gap-2">
                     <p className="text-2xl font-extrabold tracking-tight tabular-nums">{formatCompact(k.value)}</p>
-                    {prev != null && (
+                    {hasPrev && (
                       <span
                         className={cn(
                           'inline-flex items-center gap-0.5 text-xs font-semibold',
@@ -138,6 +147,9 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
             <NetworkSplitBar instagram={net.instagram} facebook={net.facebook} />
           </section>
 
+          {/* Audience (real Metricool demographics) */}
+          {report.demographics && <AudienceSection demo={report.demographics} followers={report.followers} />}
+
           {/* Featured posts */}
           <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-zinc-500">
             <Trophy className="h-4 w-4 text-amber-500" /> Publicaciones destacadas
@@ -149,6 +161,17 @@ export function ClientReportDocument({ report, insights }: { report: ClientRepor
               {featured.map((p, i) => (
                 <FeaturedPost key={`${p.network}-${p.timestamp}-${i}`} post={p} rank={i + 1} />
               ))}
+            </div>
+          )}
+
+          {/* Action plan — concrete, data-backed recommendations */}
+          {report.recommendations.length > 0 && (
+            <div className="mt-6">
+              <ActionPlanSection
+                recommendations={report.recommendations}
+                clientName={client.name}
+                clientId={client.id}
+              />
             </div>
           )}
         </>
