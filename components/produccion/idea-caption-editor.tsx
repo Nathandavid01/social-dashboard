@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { useState, useTransition, useEffect, useCallback } from 'react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2, ThumbsUp, ThumbsDown, GraduationCap, BookPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-captions'
-import { rateCaption } from '@/lib/actions/caption-feedback'
+import { rateCaption, getCaptionLearningStats, appendClientCaptionRule } from '@/lib/actions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
 import type { SocialPlatform } from '@/lib/supabase/types'
@@ -49,7 +49,21 @@ export function IdeaCaptionEditor({
   const [showNote, setShowNote] = useState(false)
   const [ratingNote, setRatingNote] = useState('')
   const [copied, setCopied] = useState(false)
+  const canEditRules = useHasPermission('clients.brand.edit')
+  const [stats, setStats] = useState<{ approved: number; loved: number; rejected: number; suggestions: { phrase: string; count: number }[] } | null>(null)
+  const [isAddingRule, startAddRule] = useTransition()
   const { toast } = useToast()
+
+  // Transparency: how much this client's history already informs generation.
+  const loadStats = useCallback(() => {
+    getCaptionLearningStats(ideaId).then(setStats).catch(() => {})
+  }, [ideaId])
+  useEffect(() => {
+    if (canUse && caption) loadStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canUse, ideaId])
+
+  const learnedCount = (stats?.approved ?? 0) + (stats?.loved ?? 0)
 
   function rate(value: 1 | -1, note?: string) {
     startRate(async () => {
@@ -60,6 +74,18 @@ export function IdeaCaptionEditor({
         setShowNote(false)
         setRatingNote('')
         toast({ title: value === 1 ? '👍 Guardado — la IA aprenderá de esto' : '👎 Anotado — la IA lo evitará' })
+        loadStats() // refresh the chip + suggestions after a vote
+      }
+    })
+  }
+
+  function addRule(phrase: string) {
+    startAddRule(async () => {
+      const res = await appendClientCaptionRule(ideaId, phrase)
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else {
+        toast({ title: '✅ Agregado a las reglas del cliente' })
+        setStats((s) => (s ? { ...s, suggestions: s.suggestions.filter((x) => x.phrase !== phrase) } : s))
       }
     })
   }
@@ -258,6 +284,32 @@ export function IdeaCaptionEditor({
               </div>
             </div>
           )}
+
+          {/* Transparency: this client's history already feeding the generator */}
+          {learnedCount > 0 && (
+            <p className="flex items-center gap-1.5 text-[11px] text-primary/90">
+              <GraduationCap className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+              La IA está aprendiendo de <strong>{learnedCount}</strong> caption{learnedCount === 1 ? '' : 's'} de este cliente
+              {stats && stats.rejected > 0 ? ` (y evita ${stats.rejected} rechazado${stats.rejected === 1 ? '' : 's'})` : ''}.
+            </p>
+          )}
+
+          {/* Auto-rule: a 👎 reason that keeps repeating → offer to make it a standing rule */}
+          {canEditRules &&
+            stats?.suggestions.map((s) => (
+              <div
+                key={s.phrase}
+                className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/25 bg-amber-500/[0.06] px-2.5 py-2"
+              >
+                <span className="text-[11px] text-foreground/80">
+                  El equipo repite <strong>«{s.phrase}»</strong> ({s.count}×). ¿Hacerla regla fija del cliente?
+                </span>
+                <Button size="sm" variant="outline" disabled={isAddingRule} onClick={() => addRule(s.phrase)} className="ml-auto">
+                  {isAddingRule ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <BookPlus className="mr-1.5 h-3.5 w-3.5" />}
+                  Agregar a reglas
+                </Button>
+              </div>
+            ))}
         </div>
       )}
 

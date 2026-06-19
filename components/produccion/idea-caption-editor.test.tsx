@@ -19,8 +19,12 @@ vi.mock('@/lib/actions/idea-captions', () => ({
   saveIdeaCaption: (...a: unknown[]) => saveIdeaCaption(...(a as [])),
 }))
 const rateCaption = vi.fn(async () => ({ ok: true as const }))
+const getCaptionLearningStats = vi.fn(async () => ({ approved: 0, loved: 0, rejected: 0, suggestions: [] as { phrase: string; count: number }[] }))
+const appendClientCaptionRule = vi.fn(async () => ({ ok: true as const }))
 vi.mock('@/lib/actions/caption-feedback', () => ({
   rateCaption: (...a: unknown[]) => rateCaption(...(a as [])),
+  getCaptionLearningStats: (...a: unknown[]) => getCaptionLearningStats(...(a as [])),
+  appendClientCaptionRule: (...a: unknown[]) => appendClientCaptionRule(...(a as [])),
 }))
 
 let mockRole: UserRole | null = 'editor'
@@ -111,5 +115,23 @@ describe('IdeaCaptionEditor — caption único', () => {
     await waitFor(() =>
       expect(rateCaption).toHaveBeenCalledWith({ ideaId: 'i1', rating: -1, captionText: 'Caption a calificar', note: 'demasiados emojis' }),
     )
+  })
+
+  it('shows the transparency chip from learning stats', async () => {
+    mockRole = 'editor'
+    getCaptionLearningStats.mockResolvedValueOnce({ approved: 4, loved: 2, rejected: 1, suggestions: [] })
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)
+    expect(await screen.findByText(/aprendiendo de/i)).toBeInTheDocument()
+    expect(screen.getByText('6')).toBeInTheDocument() // approved 4 + loved 2
+  })
+
+  it('offers to make a recurring 👎 reason a client rule and calls the action', async () => {
+    mockRole = 'editor'
+    getCaptionLearningStats.mockResolvedValueOnce({ approved: 0, loved: 0, rejected: 3, suggestions: [{ phrase: 'menos emojis', count: 3 }] })
+    appendClientCaptionRule.mockClear()
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)
+    const btn = await screen.findByRole('button', { name: /agregar a reglas/i })
+    fireEvent.click(btn)
+    await waitFor(() => expect(appendClientCaptionRule).toHaveBeenCalledWith('i1', 'menos emojis'))
   })
 })

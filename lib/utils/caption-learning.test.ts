@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { selectApprovedExamples, selectAvoidExamples, mergeApprovedAndLoved } from './caption-learning'
+import { selectApprovedExamples, selectAvoidExamples, mergeApprovedAndLoved, detectRecurringFeedback } from './caption-learning'
 
 describe('selectApprovedExamples', () => {
   it('returns [] for no rows', () => {
@@ -64,6 +64,29 @@ describe('mergeApprovedAndLoved', () => {
     const dup = 'Mismo caption aprobado y con pulgar arriba, largo ok'
     const out = mergeApprovedAndLoved([dup], [dup])
     expect(out.filter((t) => t === dup)).toHaveLength(1)
+  })
+})
+
+describe('detectRecurringFeedback', () => {
+  it('flags a note repeated ≥2 times (case/space-insensitive), most frequent first', () => {
+    const out = detectRecurringFeedback([
+      'Menos emojis',
+      'menos  emojis',
+      'menos emojis',
+      'Más llamado a la acción',
+      'mas llamado a la accion', // distinct (no accent normalization) — not counted with the above
+    ])
+    expect(out[0]).toEqual({ phrase: 'Menos emojis', count: 3 })
+  })
+
+  it('ignores notes seen only once and blanks/too-short', () => {
+    const out = detectRecurringFeedback(['único', '  ', null, 'ok'])
+    expect(out).toEqual([])
+  })
+
+  it('caps the number of suggestions', () => {
+    const notes = ['aaa', 'aaa', 'bbb', 'bbb', 'ccc', 'ccc', 'ddd', 'ddd']
+    expect(detectRecurringFeedback(notes, { limit: 2 })).toHaveLength(2)
   })
 })
 

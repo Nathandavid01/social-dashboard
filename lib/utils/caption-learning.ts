@@ -54,6 +54,33 @@ export function mergeApprovedAndLoved(loved: string[], approved: string[], limit
   return out
 }
 
+/**
+ * Find 👎 feedback notes that REPEAT for a client (e.g. "menos emojis" written 3
+ * times) — the signal that it should become a standing rule in caption_notes.
+ * Normalizes (lowercase, collapse whitespace), counts, keeps those ≥ minCount,
+ * most-frequent first. Returns the first-seen original casing as the phrase.
+ */
+export function detectRecurringFeedback(
+  notes: (string | null | undefined)[],
+  opts?: { minCount?: number; limit?: number },
+): { phrase: string; count: number }[] {
+  const minCount = opts?.minCount ?? 2
+  const limit = opts?.limit ?? 3
+  const counts = new Map<string, { phrase: string; count: number }>()
+  for (const raw of notes) {
+    const text = (raw ?? '').trim()
+    if (text.length < 3) continue
+    const key = text.toLowerCase().replace(/\s+/g, ' ')
+    const entry = counts.get(key)
+    if (entry) entry.count++
+    else counts.set(key, { phrase: text, count: 1 })
+  }
+  return Array.from(counts.values())
+    .filter((e) => e.count >= minCount)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+}
+
 export interface AvoidCaptionRow {
   text: string | null
   note?: string | null
