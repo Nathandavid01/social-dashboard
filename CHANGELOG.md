@@ -4,13 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.71 — 2026-06-19
+## v2.72 — 2026-06-19
 
 ### Reporte de cliente: Audiencia + Plan de acción (datos reales)
 - **Audiencia** (de Metricool): **género**, **edad** y **top ubicaciones** de quién te sigue, más el **conteo de seguidores** como KPI. Le muestra al cliente *a quién* está llegando.
 - **Tu plan del próximo mes**: recomendaciones concretas y **respaldadas por tus números reales** — formato ganador, **mejor hora para publicar** (Metricool), guardados y **clics al enlace** generados — con un botón para que el cliente **suba su material**.
 - Todo aterrizado solo en datos que Metricool sí entrega; degrada suave si una red no los reporta.
 
+## v2.71 — 2026-06-19
+
+### "Caption rápido" ahora también aprende
+- En el modal **Caption rápido** (emergencias) ahora puedes **ajustar con feedback** ("más corto", "menos emojis"…) y **regenerar**, y calificar el resultado con **👍 / 👎** (con nota opcional) — igual que en el pipeline.
+- Esos votos alimentan el **mismo learning loop por cliente** (los 👍 como ejemplo a imitar, los 👎 como qué evitar). Y al revés: el caption rápido ahora **usa** los captions aprobados + las calificaciones del cliente al generar (antes ignoraba todo eso).
+- Como el caption rápido no tiene "idea" en la base, la calificación se guarda **por cliente** directamente. Requiere la migración `0041` para guardar votos; degrada seguro sin ella.
 
 ## v2.70 — 2026-06-19
 

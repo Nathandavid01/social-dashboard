@@ -15,7 +15,10 @@ import { detectRecurringFeedback } from '@/lib/utils/caption-learning'
  * and we surface it to the UI as a toast — reads degrade to [] elsewhere.
  */
 export async function rateCaption(input: {
-  ideaId: string
+  /** Rate a pipeline caption (resolves the client from the idea). */
+  ideaId?: string
+  /** Rate a standalone "caption rápido" directly by client (no idea row). */
+  clientId?: string
   rating: 1 | -1
   captionText: string
   note?: string | null
@@ -29,21 +32,27 @@ export async function rateCaption(input: {
   const text = input.captionText?.trim()
   if (!text) return { error: 'No hay caption que calificar.' }
   if (input.rating !== 1 && input.rating !== -1) return { error: 'Calificación inválida.' }
+  if (!input.ideaId && !input.clientId) return { error: 'Falta el cliente o la idea.' }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   // Resolve the client this caption belongs to (so the rating feeds that
-  // client's learning loop).
-  const { data: idea } = await supabase
-    .from('content_ideas')
-    .select('client_id')
-    .eq('id', input.ideaId)
-    .maybeSingle()
+  // client's learning loop). A quick caption passes clientId directly; a
+  // pipeline caption resolves it from the idea.
+  let clientId = input.clientId ?? null
+  if (!clientId && input.ideaId) {
+    const { data: idea } = await supabase
+      .from('content_ideas')
+      .select('client_id')
+      .eq('id', input.ideaId)
+      .maybeSingle()
+    clientId = (idea as { client_id?: string | null } | null)?.client_id ?? null
+  }
 
   const { error } = await supabase.from('caption_feedback').insert({
-    client_id: (idea as { client_id?: string | null } | null)?.client_id ?? null,
-    idea_id: input.ideaId,
+    client_id: clientId,
+    idea_id: input.ideaId ?? null,
     caption_text: text,
     rating: input.rating,
     note: input.note?.trim() || null,
@@ -51,7 +60,7 @@ export async function rateCaption(input: {
   })
   if (error) return { error: error.message }
 
-  revalidatePath(`/produccion/idea/${input.ideaId}`)
+  if (input.ideaId) revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/planning')
   revalidatePath('/pipeline')
   return { ok: true }
