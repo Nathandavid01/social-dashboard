@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.59 — 2026-06-19
+
+### Contador del login: honesto + diagnóstico
+- El contador de "personas alcanzadas" ahora **solo muestra el número real de Metricool**. Si el servidor no consigue datos reales (Metricool sin configurar, sin `metricool_blog_id`, o error), **el contador no aparece** — se acabó el número estimado que subía solo. El rótulo ahora dice **"Alcance · últimos 12 meses"** (ya no "en vivo").
+- Nuevo diagnóstico **`GET /api/reach-status`** (solo owner): dice si el contador está leyendo **real** o no, cuántos clientes tienen Metricool, el reach por cuenta y una pista de qué falta (env, blogId, permisos de insights).
+
 ## v2.58 — 2026-06-19
 
 ### Login: "Recordar mi correo"

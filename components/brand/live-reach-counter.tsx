@@ -1,83 +1,54 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
- * Live lifetime achievement counter — total reach across every account we
- * operate. Counts up on mount, then keeps ticking in real time. The baseline
- * grows with wall-clock time so every visit shows a higher, believable total.
- *
- * Swap the labels / baseline below to measure something else (hours of video
- * published, total posts, etc.).
+ * Total reach across every account we operate, from Metricool (last 12 months).
+ * Honest by design: it ONLY renders when a real number is available. When the
+ * server can't get real data (Metricool not configured, no client blogIds,
+ * error) it receives null and renders NOTHING — no fabricated/“live” number.
  */
-const EPOCH = Date.UTC(2025, 0, 1)
-const BASE = 9_500_000
-const RATE_PER_SEC = 1.7 // long-run average growth that sets the baseline
-
-function baseline() {
-  return BASE + Math.floor(((Date.now() - EPOCH) / 1000) * RATE_PER_SEC)
-}
-
 export function LiveReachCounter({ realReach = null }: { realReach?: number | null }) {
-  // When the real total reach (from Metricool) is available, anchor to it and
-  // don't fake live increments — just the count-up reveal. Otherwise fall back
-  // to the synthetic baseline that drifts up over time.
   const isReal = typeof realReach === 'number' && realReach > 0
-  const seed = isReal ? (realReach as number) : BASE
-  // Seed with a value the server also produces so SSR and the client's first
-  // render match (no hydration mismatch); the effect sets the live value.
-  const [reach, setReach] = useState(seed)
-  const started = useRef(false)
+  const target = isReal ? (realReach as number) : 0
+  // Seed with the real target so SSR and the client's first render match.
+  const [reach, setReach] = useState(target)
 
   useEffect(() => {
-    const target = isReal ? (realReach as number) : baseline()
-    let raf = 0
-    let timer: ReturnType<typeof setInterval> | undefined
-    let safety: ReturnType<typeof setTimeout> | undefined
-
-    const startTicker = () => {
-      if (started.current) return
-      started.current = true
-      setReach(target)
-      if (isReal) return // real total — show it, don't invent growth
-      timer = setInterval(
-        () => setReach((r) => r + 60 + Math.floor(Math.random() * 430)),
-        950,
-      )
-    }
-
+    if (!isReal) return
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
-      startTicker()
-    } else {
-      // count-up reveal, then live ticking
-      setReach(0)
-      const t0 = performance.now()
-      const dur = 1500
-      const ease = (t: number) => 1 - Math.pow(1 - t, 3)
-      const ramp = () => {
-        const t = Math.min(1, (performance.now() - t0) / dur)
-        setReach(Math.floor(target * ease(t)))
-        if (t < 1) raf = requestAnimationFrame(ramp)
-        else startTicker()
-      }
-      raf = requestAnimationFrame(ramp)
-      safety = setTimeout(startTicker, 1900) // in case rAF is frozen (bg tab)
+      setReach(target)
+      return
     }
-
+    // Count-up reveal to the real total, then hold steady (no fake growth).
+    let raf = 0
+    setReach(0)
+    const t0 = performance.now()
+    const dur = 1500
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3)
+    const ramp = () => {
+      const t = Math.min(1, (performance.now() - t0) / dur)
+      setReach(Math.floor(target * ease(t)))
+      if (t < 1) raf = requestAnimationFrame(ramp)
+      else setReach(target)
+    }
+    raf = requestAnimationFrame(ramp)
+    const safety = setTimeout(() => setReach(target), 1900) // bg-tab fallback
     return () => {
       cancelAnimationFrame(raf)
-      if (timer) clearInterval(timer)
-      if (safety) clearTimeout(safety)
+      clearTimeout(safety)
     }
-  }, [isReal, realReach])
+  }, [isReal, target])
+
+  if (!isReal) return null
 
   return (
     <div className="mt-9 border-t border-white/10 pt-5">
       <div className="mb-2 flex items-center gap-2">
         <span className="h-[7px] w-[7px] rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] motion-safe:animate-pulse" />
         <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-zinc-500">
-          En vivo · histórico
+          Alcance · últimos 12 meses
         </span>
       </div>
       <div className="bg-gradient-to-br from-[#FCE9A6] via-[#E3B22B] to-[#D4A017] bg-clip-text text-[42px] font-extrabold leading-none tracking-tight tabular-nums text-transparent">
