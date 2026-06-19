@@ -19,7 +19,9 @@ function baseline() {
 }
 
 export function LiveReachCounter() {
-  const [reach, setReach] = useState(baseline)
+  // Seed with a constant so SSR and the client's first render match (no
+  // hydration mismatch); the effect immediately sets the real live value.
+  const [reach, setReach] = useState(BASE)
   const started = useRef(false)
 
   useEffect(() => {
