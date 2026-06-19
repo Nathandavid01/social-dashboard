@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.56 — 2026-06-19
+
+### El contador del login ahora muestra el alcance REAL de Metricool
+- El **contador de "personas alcanzadas"** del login dejó de ser una estimación: ahora suma el **reach real** de las publicaciones de **todas las cuentas que operamos** (últimos 12 meses), leído de la API de Metricool en el servidor.
+- Se calcula **cacheado 1×/día** (no recalcula en cada login) y con timeout: si Metricool no está configurado o tarda, cae suave al contador anterior sin romper el login. El token de Metricool nunca llega al navegador.
+- Cuando hay número real, el contador hace su animación de subida y se queda en el total real (ya no inventa crecimiento en vivo).
+
 ## v2.55 — 2026-06-19
 
 ### Nuevo login: logo radar + contador de alcance en vivo
