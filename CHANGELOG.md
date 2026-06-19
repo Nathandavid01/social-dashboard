@@ -4,12 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.74 — 2026-06-19
+## v2.75 — 2026-06-19
 
 ### Reporte: descarga rápida de PDF + logos de Instagram/Facebook
 - Nuevo botón **"Descargar PDF"** que baja el reporte en **un clic** (sin pasar por el diálogo de imprimir). Las imágenes (logo del cliente y miniaturas de los posts) salen en el PDF gracias a un proxy interno.
 - En el reporte ahora se ven los **logos reales de Instagram y Facebook** (en las publicaciones destacadas y en el split por red) en vez del texto "IG/FB".
 
+## v2.74 — 2026-06-19
+
+### Onboarding guiado: navegación hacia atrás + editar pasos
+- El asistente de **Agregar cliente** ya no es solo hacia adelante: ahora tiene botón **"Atrás"** en cada paso, los **chips del progreso son clickeables** (saltas a cualquier paso para revisar/corregir) y desde el resumen final puedes **"Volver a revisar"**.
+- Si vuelves al paso 1 después de crear el cliente, el botón cambia a **"Guardar y continuar"** (edita en vez de duplicar). Hace que el flujo se sienta como un wizard de verdad, no una vía de una sola dirección.
 
 ## v2.73 — 2026-06-19
 
