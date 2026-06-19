@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useTransition, useEffect, useCallback } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, Wand2, ThumbsUp, ThumbsDown, GraduationCap, BookPlus } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-captions'
-import { rateCaption, getCaptionLearningStats, appendClientCaptionRule } from '@/lib/actions/caption-feedback'
+import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
 import type { SocialPlatform } from '@/lib/supabase/types'
@@ -41,54 +41,10 @@ export function IdeaCaptionEditor({
 }: Props) {
   const canUse = useHasPermission('captions.use')
   const [caption, setCaption] = useState(initialCaption ?? '')
-  const [feedback, setFeedback] = useState('')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
-  const [isRating, startRate] = useTransition()
-  const [rated, setRated] = useState<1 | -1 | null>(null)
-  const [showNote, setShowNote] = useState(false)
-  const [ratingNote, setRatingNote] = useState('')
   const [copied, setCopied] = useState(false)
-  const canEditRules = useHasPermission('clients.brand.edit')
-  const [stats, setStats] = useState<{ approved: number; loved: number; rejected: number; suggestions: { phrase: string; count: number }[] } | null>(null)
-  const [isAddingRule, startAddRule] = useTransition()
   const { toast } = useToast()
-
-  // Transparency: how much this client's history already informs generation.
-  const loadStats = useCallback(() => {
-    getCaptionLearningStats(ideaId).then(setStats).catch(() => {})
-  }, [ideaId])
-  useEffect(() => {
-    if (canUse && caption) loadStats()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUse, ideaId])
-
-  const learnedCount = (stats?.approved ?? 0) + (stats?.loved ?? 0)
-
-  function rate(value: 1 | -1, note?: string) {
-    startRate(async () => {
-      const res = await rateCaption({ ideaId, rating: value, captionText: caption, note })
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else {
-        setRated(value)
-        setShowNote(false)
-        setRatingNote('')
-        toast({ title: value === 1 ? '👍 Guardado — la IA aprenderá de esto' : '👎 Anotado — la IA lo evitará' })
-        loadStats() // refresh the chip + suggestions after a vote
-      }
-    })
-  }
-
-  function addRule(phrase: string) {
-    startAddRule(async () => {
-      const res = await appendClientCaptionRule(ideaId, phrase)
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else {
-        toast({ title: '✅ Agregado a las reglas del cliente' })
-        setStats((s) => (s ? { ...s, suggestions: s.suggestions.filter((x) => x.phrase !== phrase) } : s))
-      }
-    })
-  }
 
   const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief })
   const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle })
@@ -108,24 +64,20 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
-        setRated(null)
         onSaved?.(res.caption)
         toast({ title: 'Caption generado desde la idea' })
       }
     })
   }
 
-  function regenerateWithFeedback() {
-    const fb = feedback.trim()
-    if (!fb) return
+  function regenerateWithFeedback(fb: string) {
+    if (!fb.trim()) return
     startGenerate(async () => {
       const res = await generateIdeaCaption(ideaId, { feedback: fb, previousCaption: caption })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
-        setRated(null)
         onSaved?.(res.caption)
-        setFeedback('')
         toast({ title: 'Caption regenerado con tu feedback' })
       }
     })
@@ -205,7 +157,7 @@ export function IdeaCaptionEditor({
 
       <Textarea
         value={caption}
-        onChange={(e) => { setCaption(e.target.value); setRated(null) }}
+        onChange={(e) => setCaption(e.target.value)}
         rows={8}
         placeholder={
           ideaReady
@@ -216,102 +168,8 @@ export function IdeaCaptionEditor({
         disabled={!ideaReady}
       />
 
-      {/* Feedback loop: tell the AI what to change and it rewrites the caption */}
-      {canUse && caption && (
-        <div className="space-y-1.5 rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
-          <p className="flex items-center gap-1.5 text-[11px] font-medium text-foreground/80">
-            <Wand2 className="h-3 w-3 text-primary" aria-hidden />
-            Ajustar con feedback
-          </p>
-          <Textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            rows={2}
-            placeholder="Dile a la IA qué cambiar: más corto, menos emojis, más llamado a la acción, tono más formal…"
-            className="resize-none text-xs"
-          />
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={regenerateWithFeedback}
-            disabled={isGenerating || !feedback.trim()}
-          >
-            {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
-            Regenerar con feedback
-          </Button>
-        </div>
-      )}
-
-      {/* Rating loop (fase 2): 👍/👎 + nota → la IA aprende qué imitar y qué evitar */}
-      {canUse && caption && (
-        <div className="space-y-2 border-t border-border/60 pt-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-medium text-muted-foreground">¿Qué tal este caption? La IA aprende de tu voto.</span>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={isRating}
-              onClick={() => rate(1)}
-              className={rated === 1 ? 'border-emerald-500/50 text-emerald-500' : ''}
-            >
-              <ThumbsUp className="mr-1.5 h-3.5 w-3.5" /> Me gusta
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={isRating}
-              onClick={() => setShowNote((v) => !v)}
-              className={rated === -1 ? 'border-red-500/50 text-red-400' : ''}
-            >
-              <ThumbsDown className="mr-1.5 h-3.5 w-3.5" /> No es
-            </Button>
-            {rated && <span className="text-[11px] text-emerald-500">¡Gracias! Guardado.</span>}
-          </div>
-          {showNote && (
-            <div className="flex flex-col gap-1.5">
-              <Textarea
-                value={ratingNote}
-                onChange={(e) => setRatingNote(e.target.value)}
-                rows={2}
-                placeholder="¿Qué estuvo mal? (opcional) — p. ej. demasiados emojis, muy genérico, tono equivocado…"
-                className="resize-none text-xs"
-              />
-              <div>
-                <Button size="sm" disabled={isRating} onClick={() => rate(-1, ratingNote)}>
-                  {isRating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="mr-1.5 h-3.5 w-3.5" />}
-                  Enviar voto
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Transparency: this client's history already feeding the generator */}
-          {learnedCount > 0 && (
-            <p className="flex items-center gap-1.5 text-[11px] text-primary/90">
-              <GraduationCap className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
-              La IA está aprendiendo de <strong>{learnedCount}</strong> caption{learnedCount === 1 ? '' : 's'} de este cliente
-              {stats && stats.rejected > 0 ? ` (y evita ${stats.rejected} rechazado${stats.rejected === 1 ? '' : 's'})` : ''}.
-            </p>
-          )}
-
-          {/* Auto-rule: a 👎 reason that keeps repeating → offer to make it a standing rule */}
-          {canEditRules &&
-            stats?.suggestions.map((s) => (
-              <div
-                key={s.phrase}
-                className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/25 bg-amber-500/[0.06] px-2.5 py-2"
-              >
-                <span className="text-[11px] text-foreground/80">
-                  El equipo repite <strong>«{s.phrase}»</strong> ({s.count}×). ¿Hacerla regla fija del cliente?
-                </span>
-                <Button size="sm" variant="outline" disabled={isAddingRule} onClick={() => addRule(s.phrase)} className="ml-auto">
-                  {isAddingRule ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <BookPlus className="mr-1.5 h-3.5 w-3.5" />}
-                  Agregar a reglas
-                </Button>
-              </div>
-            ))}
-        </div>
-      )}
+      {/* THE shared caption feedback module — same everywhere captions are made. */}
+      <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
 
       {dirty && (
         <Button size="sm" onClick={save} disabled={isSaving || !ideaReady}>

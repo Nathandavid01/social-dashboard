@@ -37,6 +37,7 @@ type FeedbackClient = {
 export async function generateApprovedIdeaCaption(
   feedbackId: string,
   _platform?: string,
+  opts?: { feedback?: string | null; previousCaption?: string | null },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -79,6 +80,8 @@ export async function generateApprovedIdeaCaption(
     examples,
     approvedExamples,
     avoidExamples: ratings.avoid,
+    feedback: opts?.feedback ?? null,
+    previousCaption: opts?.previousCaption ?? null,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,

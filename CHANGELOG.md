@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.76 — 2026-06-19
+
+### El feedback de captions es ahora UN módulo, igual en todas partes
+- Se unificó todo el feedback de captions (ajustar con feedback + regenerar, **👍/👎** con nota, indicador "la IA está aprendiendo de N", y "agregar a reglas") en **un solo módulo reutilizable** que se ve y funciona **idéntico** en **todas** las pantallas donde se hace un caption.
+- Ahora también aparece en **Caption rápido** (que antes no tenía el indicador de aprendizaje) y en **Ideas Aprobadas** (que **no tenía ningún feedback**: ahora puedes ajustar con feedback y calificar 👍/👎 ahí también).
+- Como es un módulo, **cualquier pantalla de captions futura lo hereda automáticamente** — siempre el mismo flujo de aprendizaje por cliente. Funciona por `idea` o por `cliente` según el contexto. (Los votos requieren la migración `0041`.)
+
 ## v2.75 — 2026-06-19
 
 ### Reporte: descarga rápida de PDF + logos de Instagram/Facebook

@@ -18,6 +18,7 @@ import {
   saveApprovedIdeaCaption,
   sendApprovedIdeaToMetricool,
 } from '@/lib/actions/idea-lab-captions'
+import { CaptionFeedback } from '@/components/captions/caption-feedback'
 
 const TYPE_LABEL: Record<ContentIdeaType, string> = { R: 'Reel', P: 'Post', C: 'Carrusel', S: 'Story' }
 
@@ -93,6 +94,19 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
         setCaption(res.caption)
         idea.generated_caption = res.caption // keep "dirty" accurate after generating
         toast({ title: 'Caption generado' })
+      }
+    })
+  }
+
+  function regenerateWithFeedback(fb: string) {
+    if (!fb.trim()) return
+    startGenerate(async () => {
+      const res = await generateApprovedIdeaCaption(idea.id, platform, { feedback: fb, previousCaption: caption })
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else if (res.caption) {
+        setCaption(res.caption)
+        idea.generated_caption = res.caption
+        toast({ title: 'Caption regenerado con tu feedback' })
       }
     })
   }
@@ -176,6 +190,11 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
         placeholder="Genera el caption con IA o escríbelo aquí…"
         className="mt-3 resize-none text-sm leading-relaxed"
       />
+
+      {/* THE shared caption feedback module — idéntico en todas las pantallas. */}
+      <div className="mt-3">
+        <CaptionFeedback caption={caption} target={{ clientId: idea.client_id ?? undefined }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
+      </div>
 
       {dirty && (
         <Button size="sm" variant="ghost" onClick={save} disabled={isSaving} className="mt-2 self-start">

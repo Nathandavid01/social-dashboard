@@ -7,6 +7,8 @@ vi.mock('@/lib/actions/idea-lab-captions', () => ({
 }))
 vi.mock('@/lib/actions/caption-feedback', () => ({
   rateCaption: vi.fn(async () => ({ ok: true })),
+  getCaptionLearningStats: vi.fn(async () => ({ approved: 0, loved: 0, rejected: 0, suggestions: [] })),
+  appendClientCaptionRule: vi.fn(async () => ({ ok: true })),
 }))
 vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getQuickUploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k', publicUrl: 'https://pub/k' })),

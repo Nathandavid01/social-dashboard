@@ -66,14 +66,31 @@ export async function rateCaption(input: {
   return { ok: true }
 }
 
+/** Target for the shared caption module: a pipeline idea, or a client directly. */
+export type CaptionTarget = { ideaId?: string; clientId?: string }
+
+/** Resolve the client a caption belongs to from either an ideaId or a direct clientId. */
+async function resolveClientId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  target: CaptionTarget,
+): Promise<string | null> {
+  if (target.clientId) return target.clientId
+  if (target.ideaId) {
+    const { data } = await supabase.from('content_ideas').select('client_id').eq('id', target.ideaId).maybeSingle()
+    return (data as { client_id?: string | null } | null)?.client_id ?? null
+  }
+  return null
+}
+
 /**
- * Per-client caption-learning stats for the editor's transparency chip:
+ * Per-client caption-learning stats for the transparency chip:
  * how many APPROVED + 👍 captions inform generation, plus recurring 👎 notes
- * worth turning into a standing rule. Best-effort: any error → zeros (so the UI
- * just hides the chip; works before migration 0041 too).
+ * worth turning into a standing rule. Works for ANY caption surface (pipeline
+ * idea or quick/client). Best-effort: any error → zeros (so the UI just hides
+ * the chip; works before migration 0041 too).
  */
 export async function getCaptionLearningStats(
-  ideaId: string,
+  target: CaptionTarget,
 ): Promise<{ approved: number; loved: number; rejected: number; suggestions: { phrase: string; count: number }[] }> {
   const empty = { approved: 0, loved: 0, rejected: 0, suggestions: [] as { phrase: string; count: number }[] }
   try {
@@ -83,8 +100,7 @@ export async function getCaptionLearningStats(
   }
   try {
     const supabase = await createClient()
-    const { data: idea } = await supabase.from('content_ideas').select('client_id').eq('id', ideaId).maybeSingle()
-    const clientId = (idea as { client_id?: string | null } | null)?.client_id
+    const clientId = await resolveClientId(supabase, target)
     if (!clientId) return empty
 
     const [approvedRes, lovedRes, rejectedRes, notesRes] = await Promise.all([
@@ -124,7 +140,7 @@ export async function getCaptionLearningStats(
  * rule text is already present. Gated by clients.brand.edit (it edits brand config).
  */
 export async function appendClientCaptionRule(
-  ideaId: string,
+  target: CaptionTarget,
   rule: string,
 ): Promise<{ ok?: true; error?: string }> {
   try {
@@ -136,21 +152,18 @@ export async function appendClientCaptionRule(
   if (!text) return { error: 'Regla vacía.' }
 
   const supabase = await createClient()
-  const { data: idea } = await supabase
-    .from('content_ideas')
-    .select('client_id, client:clients(caption_notes)')
-    .eq('id', ideaId)
-    .maybeSingle()
-  const clientId = (idea as { client_id?: string | null } | null)?.client_id
+  const clientId = await resolveClientId(supabase, target)
   if (!clientId) return { error: 'Cliente no encontrado.' }
 
-  const current = ((idea as { client?: { caption_notes?: string | null } } | null)?.client?.caption_notes ?? '').trim()
+  const { data: client } = await supabase.from('clients').select('caption_notes').eq('id', clientId).maybeSingle()
+  const current = ((client as { caption_notes?: string | null } | null)?.caption_notes ?? '').trim()
   if (current.toLowerCase().includes(text.toLowerCase())) return { ok: true } // already a rule
   const next = current ? `${current}\n- ${text}` : `- ${text}`
 
   const { error } = await supabase.from('clients').update({ caption_notes: next }).eq('id', clientId)
   if (error) return { error: error.message }
 
-  revalidatePath(`/produccion/idea/${ideaId}`)
+  if (target.ideaId) revalidatePath(`/produccion/idea/${target.ideaId}`)
+  revalidatePath(`/clients/${clientId}`)
   return { ok: true }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle, Upload, Film, X, Wand2, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Sparkles, Loader2, Send, Zap, CheckCircle2, CalendarClock, AlertTriangle, Upload, Film, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,7 +15,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { defaultScheduleDate, scheduleMinDate, nowMinuteInPostTZ } from '@/lib/utils/idea-lab-send-core'
 import { generateQuickCaption, sendQuickCaptionToMetricool } from '@/lib/actions/idea-lab-captions'
-import { rateCaption } from '@/lib/actions/caption-feedback'
+import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import { getQuickUploadUrl } from '@/lib/actions/idea-videos-r2'
 
 export interface QuickCaptionClient {
@@ -53,14 +53,9 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
   const [time, setTime] = useState('10:00')
   const [sentInfo, setSentInfo] = useState<string | null>(null)
   const [autoPublished, setAutoPublished] = useState(false)
-  const [feedback, setFeedback] = useState('')
-  const [rated, setRated] = useState<1 | -1 | null>(null)
-  const [showNote, setShowNote] = useState(false)
-  const [ratingNote, setRatingNote] = useState('')
 
   const [isGenerating, startGenerate] = useTransition()
   const [isSending, startSend] = useTransition()
-  const [isRating, startRate] = useTransition()
 
   const selected = clients.find((c) => c.id === clientId)
   const hasMetricool = !!selected?.metricool_blog_id?.trim()
@@ -83,10 +78,6 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
     setTime('10:00')
     setSentInfo(null)
     setAutoPublished(false)
-    setFeedback('')
-    setRated(null)
-    setShowNote(false)
-    setRatingNote('')
   }
 
   function generate(opts?: { feedback?: string }) {
@@ -100,25 +91,7 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
-        setRated(null)
-        if (opts?.feedback) setFeedback('')
         toast({ title: opts?.feedback ? 'Caption regenerado con tu feedback' : 'Caption generado' })
-      }
-    })
-  }
-
-  // 👍/👎 feed the same per-client learning loop as the pipeline (by clientId,
-  // since a quick caption has no idea row).
-  function rate(value: 1 | -1, note?: string) {
-    if (!clientId || !caption) return
-    startRate(async () => {
-      const res = await rateCaption({ clientId, rating: value, captionText: caption, note })
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else {
-        setRated(value)
-        setShowNote(false)
-        setRatingNote('')
-        toast({ title: value === 1 ? '👍 Guardado — la IA aprenderá de esto' : '👎 Anotado — la IA lo evitará' })
       }
     })
   }
@@ -258,60 +231,15 @@ export function QuickCaptionDialog({ clients }: { clients: QuickCaptionClient[] 
 
             <Textarea
               value={caption}
-              onChange={(e) => { setCaption(e.target.value); setRated(null) }}
+              onChange={(e) => setCaption(e.target.value)}
               rows={7}
               placeholder="Genera el caption con IA o escríbelo aquí…"
               className="resize-none text-sm leading-relaxed"
             />
 
-            {/* Feedback al generador (mismo learning loop que el pipeline) */}
-            {canGenerate && caption && (
-              <div className="space-y-2 rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
-                <p className="flex items-center gap-1.5 text-[11px] font-medium text-foreground/80">
-                  <Wand2 className="h-3 w-3 text-primary" aria-hidden /> Ajustar con feedback
-                </p>
-                <Textarea
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  rows={2}
-                  placeholder="Dile a la IA qué cambiar: más corto, menos emojis, más llamado a la acción…"
-                  className="resize-none text-xs"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => generate({ feedback })}
-                  disabled={isGenerating || !feedback.trim()}
-                >
-                  {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
-                  Regenerar con feedback
-                </Button>
-                <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-2">
-                  <span className="text-[11px] font-medium text-muted-foreground">¿Qué tal quedó? La IA aprende de tu voto.</span>
-                  <Button size="sm" variant="outline" disabled={isRating} onClick={() => rate(1)} className={rated === 1 ? 'border-emerald-500/50 text-emerald-500' : ''}>
-                    <ThumbsUp className="mr-1.5 h-3.5 w-3.5" /> Me gusta
-                  </Button>
-                  <Button size="sm" variant="outline" disabled={isRating} onClick={() => setShowNote((v) => !v)} className={rated === -1 ? 'border-red-500/50 text-red-400' : ''}>
-                    <ThumbsDown className="mr-1.5 h-3.5 w-3.5" /> No es
-                  </Button>
-                  {rated && <span className="text-[11px] text-emerald-500">¡Gracias! Guardado.</span>}
-                </div>
-                {showNote && (
-                  <div className="flex flex-col gap-1.5">
-                    <Textarea
-                      value={ratingNote}
-                      onChange={(e) => setRatingNote(e.target.value)}
-                      rows={2}
-                      placeholder="¿Qué estuvo mal? (opcional) — p. ej. demasiados emojis, muy genérico…"
-                      className="resize-none text-xs"
-                    />
-                    <Button size="sm" disabled={isRating} onClick={() => rate(-1, ratingNote)} className="self-start">
-                      {isRating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ThumbsDown className="mr-1.5 h-3.5 w-3.5" />}
-                      Enviar voto
-                    </Button>
-                  </div>
-                )}
-              </div>
+            {/* THE shared caption feedback module — idéntico al del pipeline. */}
+            {clientId && (
+              <CaptionFeedback caption={caption} target={{ clientId }} onRegenerate={(fb) => generate({ feedback: fb })} isGenerating={isGenerating} />
             )}
 
             <div className="flex flex-col gap-1.5">
