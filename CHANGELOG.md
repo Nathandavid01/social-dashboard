@@ -4,7 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.49 — 2026-06-19
+## v2.50 — 2026-06-19
+
+### Usuarios y permisos: vista moderna en tarjetas
+- **Usuarios y permisos** se rediseñó de una tabla densa a una **lista de tarjetas** más fácil de leer: cada persona muestra su **avatar con inicial** (color según el rol), nombre, email/título, su **rol**, sus **áreas**, y un **estado Activo/Inactivo** claro.
+- Nueva **barra de búsqueda** (por nombre o email) y **filtro por rol** (Todos · Owners · Supervisores · Editores) para encontrar gente al instante.
+- Las acciones de edición se ordenaron: cambiar **rol** y **áreas** y **resetear contraseña** siguen a un toque; **editar nombre/título** y **activar/desactivar** pasaron a un menú **⋮** por persona (en vez de cajas de texto siempre visibles).
+- Cuando un filtro no encuentra a nadie, se muestra un **estado vacío** claro.
 
 ### Fecha límite restaurada (se había perdido en un merge)
 - Vuelve el **editor de fecha límite** en la tarjeta "La idea" (junto a la fecha de publicación) — se había caído al integrar otra rama.

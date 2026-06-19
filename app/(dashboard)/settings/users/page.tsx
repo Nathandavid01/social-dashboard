@@ -26,7 +26,7 @@ export default async function SettingsUsersPage() {
       <div>
         <h1 className="text-xl font-bold tracking-tight">Usuarios y permisos</h1>
         <p className="text-sm text-muted-foreground">
-          Crea cuentas, asigna roles y controla a qué áreas puede entrar cada persona.
+          Gestiona las cuentas de tu equipo: roles, áreas y acceso a cada sección.
         </p>
       </div>
       {pendingApprovals.length > 0 && <PendingApprovals pending={pendingApprovals} />}
