@@ -1,9 +1,10 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
+import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
@@ -473,6 +474,10 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const thumbs = Math.min(3, batch.total)
   const more = batch.total - thumbs
 
+  // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
+  // can triage urgency from the board without opening each client.
+  const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
+
   return (
     <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
@@ -485,7 +490,15 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
         <div className="flex items-center gap-2.5">
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-black" style={{ backgroundColor: a.dot }}>{batch.clientName.slice(0, 1).toUpperCase()}</span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
+              {dlt.label && (
+                <span className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold leading-none whitespace-nowrap', dlt.className)}>
+                  <Flag className="h-2.5 w-2.5" aria-hidden />
+                  {dlt.label}
+                </span>
+              )}
+            </div>
             <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Lightbulb, Eye, Camera, Sparkles, Hash, CalendarCheck, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
+import { Lightbulb, Eye, Camera, Sparkles, Hash, CalendarCheck, Flag, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaBrief, updateIdeaDates } from '@/lib/actions/content-ideas'
 
@@ -13,6 +13,7 @@ interface Props {
   captionAngle?: string | null
   hashtags?: string | null
   publishDate?: string | null
+  deadline?: string | null
   /** Fired after a brief field is saved so parents can unlock caption/recording UI. */
   onBriefUpdated?: (fields: {
     hook?: string | null
@@ -34,6 +35,7 @@ export function IdeaBriefCard({
   captionAngle,
   hashtags,
   publishDate,
+  deadline,
   onBriefUpdated,
 }: Props) {
   const [hookVal, setHookVal] = useState(hook ?? '')
@@ -86,6 +88,16 @@ export function IdeaBriefCard({
               value={publishDate ? publishDate.slice(0, 10) : ''}
               placeholder="Sin fecha"
               onSave={(v) => updateIdeaDates(ideaId, { publish_date: v || null })}
+            />
+          </EditableField>
+
+          <EditableField icon={Flag} label="Fecha límite">
+            <InlineEdit
+              type="date"
+              label="Fecha límite"
+              value={deadline ? deadline.slice(0, 10) : ''}
+              placeholder="Sin fecha límite"
+              onSave={(v) => updateIdeaDates(ideaId, { deadline: v || null })}
             />
           </EditableField>
 

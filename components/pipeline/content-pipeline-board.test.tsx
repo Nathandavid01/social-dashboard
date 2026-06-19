@@ -87,6 +87,13 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
+  it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
+    ] as IdeaWithPipeline[]} />)
+    expect(container.querySelector('article')!.textContent).toContain('Atrasado')
+  })
+
   it('opens the client batch overlay in place on card click (no navigation)', async () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)

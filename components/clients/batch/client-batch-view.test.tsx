@@ -192,3 +192,19 @@ describe('ClientBatchView filters + encargado', () => {
     expect(screen.getAllByText('Sin asignar').length).toBeGreaterThan(0)
   })
 })
+
+describe('VideoWorkCard deadline badge (fecha límite)', () => {
+  afterEach(() => cleanup())
+
+  it('shows "Atrasado" for a past deadline', () => {
+    const overdue = mkVideo({ id: 'o1', status: 'grabada', deadline: '2020-01-01' })
+    render(<ClientBatchView pipeline={mkPipeline([overdue])} />)
+    expect(screen.getByText(/Atrasado/)).toBeInTheDocument()
+  })
+
+  it('hides the badge once the video is published (via published_at only)', () => {
+    const published = mkVideo({ id: 'p1', status: 'grabada', published_at: '2026-01-01', deadline: '2020-01-01' })
+    render(<ClientBatchView pipeline={mkPipeline([published])} />)
+    expect(screen.queryByText(/Atrasado/)).toBeNull()
+  })
+})
