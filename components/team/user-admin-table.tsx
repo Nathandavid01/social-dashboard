@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { MoreVertical, Pencil, Loader2, UserCheck, UserX, Search } from 'lucide-react'
+import { MoreVertical, Pencil, Loader2, UserCheck, UserX, Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,10 +22,11 @@ import {
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { RoleSelector } from '@/components/team/role-selector'
-import { AreaAccessDialog } from '@/components/team/area-access-dialog'
+import { AreaAccessPanel } from '@/components/team/area-access-inline'
 import { ResetPasswordDialog } from '@/components/team/reset-password-dialog'
 import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
+import { normalizeAreaAccess } from '@/lib/auth/areas'
 import type { Profile, UserRole, UserStatus } from '@/lib/supabase/types'
 
 // Role filter chips. Mirrors the segmented control in the design; the three
@@ -133,8 +134,10 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
+  const [areasOpen, setAreasOpen] = useState(false)
   const inactive = user.status === 'inactive'
   const displayName = user.full_name?.trim() || user.email
+  const areaGrant = normalizeAreaAccess(user.area_access ?? null)
 
   function toggleStatus() {
     const next: UserStatus = inactive ? 'active' : 'inactive'
@@ -148,10 +151,11 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:border-border/80',
+        'rounded-xl border bg-card transition-colors hover:border-border/80',
         inactive && 'opacity-60',
       )}
     >
+      <div className="flex flex-wrap items-center gap-3 p-3">
       <div
         className={cn(
           'grid h-11 w-11 shrink-0 place-items-center rounded-full border text-sm font-bold',
@@ -173,12 +177,18 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
       </div>
 
       <RoleSelector userId={user.id} userName={displayName} currentRole={user.role} />
-      <AreaAccessDialog
-        userId={user.id}
-        userName={displayName}
-        currentAccess={user.area_access ?? null}
-        role={user.role}
-      />
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-8 whitespace-nowrap"
+        aria-expanded={areasOpen}
+        onClick={() => setAreasOpen((o) => !o)}
+        title="Configurar áreas a las que puede acceder"
+      >
+        <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />
+        {areaGrant ? `Áreas (${areaGrant.length})` : 'Áreas'}
+        <ChevronDown className={cn('ml-1 h-3.5 w-3.5 transition-transform', areasOpen && 'rotate-180')} />
+      </Button>
       <ResetPasswordDialog userId={user.id} userName={displayName} />
 
       <span
@@ -231,6 +241,18 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
       </DropdownMenu>
 
       <EditProfileDialog user={user} open={editOpen} onOpenChange={setEditOpen} />
+      </div>
+      {areasOpen && (
+        <div className="border-t p-3">
+          <AreaAccessPanel
+            userId={user.id}
+            userName={displayName}
+            currentAccess={user.area_access ?? null}
+            role={user.role}
+            onClose={() => setAreasOpen(false)}
+          />
+        </div>
+      )}
     </div>
   )
 }

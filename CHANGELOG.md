@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.51 — 2026-06-19
+
+### Áreas: panel desplegable debajo de cada persona
+- En **Usuarios y permisos**, configurar las **áreas** de una persona ya no abre una ventana modal: ahora el botón **"Áreas"** despliega un **panel justo debajo de su tarjeta** (con una flechita que indica abierto/cerrado).
+- Mismo control de siempre: **Acceso completo (según el rol)** o **restringir a áreas específicas** con una lista de casillas. Guardar cierra el panel.
+
 ## v2.50 — 2026-06-19
 
 ### Usuarios y permisos: vista moderna en tarjetas
