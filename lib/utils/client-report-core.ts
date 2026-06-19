@@ -21,6 +21,7 @@ export interface ReportPost {
   saved: number
   views: number
   engagement: number
+  clicks: number
 }
 
 function num(v: unknown): number {
@@ -53,6 +54,7 @@ export function normalizeInstagramPost(raw: unknown, kind: 'post' | 'reel'): Rep
     saved,
     views: num(get(raw, 'views')) || num(get(raw, 'videoViews')),
     engagement: num(get(raw, 'interactions')) || likes + comments + shares + saved,
+    clicks: num(get(raw, 'clicks')),
   }
 }
 
@@ -75,6 +77,7 @@ export function normalizeFacebookPost(raw: unknown): ReportPost {
     saved: 0,
     views: num(get(raw, 'videoViews')),
     engagement: num(get(raw, 'engagement')) || likes + comments + shares,
+    clicks: num(get(raw, 'clicks')) || num(get(raw, 'linkclicks')),
   }
 }
 
@@ -88,6 +91,8 @@ export interface ReportSummary {
   impressions: number
   engagement: number
   views: number
+  saved: number
+  clicks: number
   byNetwork: { instagram: number; facebook: number }
   /** engagement / reach, 0..1; 0 when no reach. */
   engagementRate: number
@@ -100,6 +105,8 @@ export function summarizeReport(posts: ReportPost[]): ReportSummary {
   let impressions = 0
   let engagement = 0
   let views = 0
+  let saved = 0
+  let clicks = 0
   let instagram = 0
   let facebook = 0
   let topPostIndex = -1
@@ -109,6 +116,8 @@ export function summarizeReport(posts: ReportPost[]): ReportSummary {
     impressions += p.impressions
     engagement += p.engagement
     views += p.views
+    saved += p.saved
+    clicks += p.clicks
     if (p.network === 'instagram') instagram += 1
     else facebook += 1
     if (p.reach > topReach) {
@@ -122,6 +131,8 @@ export function summarizeReport(posts: ReportPost[]): ReportSummary {
     impressions,
     engagement,
     views,
+    saved,
+    clicks,
     byNetwork: { instagram, facebook },
     engagementRate: reach > 0 ? engagement / reach : 0,
     topPostIndex: posts.length ? topPostIndex : -1,

@@ -26,6 +26,7 @@ function post(p: Partial<ReportPost>): ReportPost {
     saved: 0,
     views: 0,
     engagement: 0,
+    clicks: 0,
     ...p,
   }
 }

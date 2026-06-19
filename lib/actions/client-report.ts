@@ -9,9 +9,41 @@ import {
   type ReportPost,
   type ReportSummary,
 } from '@/lib/utils/client-report-core'
-import { previousWindow } from '@/lib/utils/report-delta-core'
+import { previousWindow, deltaPct } from '@/lib/utils/report-delta-core'
+import { topContentType } from '@/lib/utils/report-insights-core'
+import { buildDemographics, type Demographics } from '@/lib/utils/demographics-core'
+import { parseBestTime, buildRecommendations, type Recommendation } from '@/lib/utils/action-plan-core'
 
 const METRICOOL_BASE = 'https://app.metricool.com/api'
+
+function numKey(o: unknown, k: string): number {
+  const v = o && typeof o === 'object' ? (o as Record<string, unknown>)[k] : undefined
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v) : 0
+}
+
+/** GET a Metricool endpoint that returns a JSON object (aggregations, demographics). */
+async function fetchObj(
+  userToken: string,
+  userId: string,
+  blogId: string,
+  path: string,
+  params: Record<string, string> = {},
+): Promise<unknown> {
+  const url = new URL(`${METRICOOL_BASE}/stats/${path}`)
+  url.searchParams.set('userId', userId)
+  url.searchParams.set('blogId', blogId)
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
+  try {
+    const res = await fetch(url.toString(), {
+      headers: { 'X-Mc-Auth': userToken },
+      signal: AbortSignal.timeout(7000),
+    })
+    if (!res.ok) return {}
+    return await res.json()
+  } catch {
+    return {}
+  }
+}
 
 function ymd(d: Date): string {
   const y = d.getFullYear()
@@ -74,6 +106,12 @@ export interface ClientReport {
   summary: ReportSummary
   /** Summary of the immediately-prior window, when comparison was requested. */
   previousSummary: ReportSummary | null
+  /** Audience follower count (IG + FB), 0 when unavailable. */
+  followers: number
+  /** Audience demographics (IG-primary), null when unavailable. */
+  demographics: Demographics | null
+  /** Data-backed recommendations for the next period. */
+  recommendations: Recommendation[]
   metricoolConfigured: boolean
 }
 
@@ -108,14 +146,31 @@ export async function getClientReport(
     end,
   }
 
+  const empty = {
+    posts: [],
+    summary: summarizeReport([]),
+    previousSummary: null,
+    followers: 0,
+    demographics: null,
+    recommendations: [],
+  }
   const userToken = process.env.METRICOOL_TOKEN
   const userId = process.env.METRICOOL_USER_ID
   if (!client.metricool_blog_id || !userToken || !userId) {
-    return { ...base, posts: [], summary: summarizeReport([]), previousSummary: null, metricoolConfigured: false }
+    return { ...base, ...empty, metricoolConfigured: false }
   }
 
   const blogId = String(client.metricool_blog_id)
-  const posts = await loadPosts(userToken, userId, blogId, start, end)
+  // Posts + audience (followers, demographics) + best time, all in parallel.
+  const [posts, igAgg, fbAgg, genderMap, ageMap, cityMap, bestTimeMap] = await Promise.all([
+    loadPosts(userToken, userId, blogId, start, end),
+    fetchObj(userToken, userId, blogId, 'aggregations/instagram', { start, end }),
+    fetchObj(userToken, userId, blogId, 'aggregations/facebook', { start, end }),
+    fetchObj(userToken, userId, blogId, 'gender/instagram'),
+    fetchObj(userToken, userId, blogId, 'age/instagram'),
+    fetchObj(userToken, userId, blogId, 'city/instagram'),
+    fetchObj(userToken, userId, blogId, 'besttimes/instagram', { start, end }),
+  ])
 
   let previousSummary: ReportSummary | null = null
   if (opts.compare) {
@@ -124,5 +179,27 @@ export async function getClientReport(
     previousSummary = summarizeReport(prevPosts)
   }
 
-  return { ...base, posts, summary: summarizeReport(posts), previousSummary, metricoolConfigured: true }
+  const summary = summarizeReport(posts)
+  const followers = numKey(igAgg, 'Followers') + numKey(fbAgg, 'pageFollows')
+  const demo = buildDemographics(genderMap, ageMap, cityMap)
+  const recommendations = buildRecommendations({
+    winningFormat: topContentType(posts) === '—' ? null : topContentType(posts),
+    bestTime: parseBestTime(bestTimeMap),
+    clicks: summary.clicks,
+    saves: summary.saved,
+    reachDeltaPct: previousSummary ? deltaPct(summary.reach, previousSummary.reach) : null,
+    posts: summary.posts,
+    periodDays: days,
+  })
+
+  return {
+    ...base,
+    posts,
+    summary,
+    previousSummary,
+    followers,
+    demographics: demo.hasData ? demo : null,
+    recommendations,
+    metricoolConfigured: true,
+  }
 }
