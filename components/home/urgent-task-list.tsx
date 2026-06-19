@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, CircleDot, Circle, Ban, ArrowRight } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import type { Task } from '@/lib/supabase/types'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const statusConfig = {
   pending: { label: 'Pendiente', icon: Circle, color: 'text-muted-foreground' },
@@ -39,7 +40,7 @@ export function UrgentTaskList({ tasks, title, emptyMsg, linkHref }: UrgentTaskL
     startTransition(async () => {
       const result = await updateTaskStatus(taskId, 'completed')
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: 'Tarea completada', description: taskTitle })
       }

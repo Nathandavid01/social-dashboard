@@ -20,6 +20,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { sendCaptionToDraft } from '@/lib/actions/metricool'
 import type { Client } from '@/lib/supabase/types'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const platforms = ['Instagram', 'TikTok', 'Facebook', 'Twitter/X', 'LinkedIn', 'YouTube'] as const
 
@@ -254,7 +255,7 @@ function CaptionGeneratorInner() {
         selectedClient?.platforms ?? undefined
       )
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         setDraftSent(true)
         setTimeout(() => setDraftSent(false), 3000)

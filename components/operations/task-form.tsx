@@ -31,6 +31,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface TaskFormProps {
   open: boolean
@@ -102,7 +103,7 @@ export function TaskForm({ open, onOpenChange, clients, teamMembers, task, defau
         ? await updateTask(task.id, values, collaborators)
         : await createTask(values, collaborators)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       toast({ title: isEdit ? 'Tarea actualizada' : 'Tarea creada' })

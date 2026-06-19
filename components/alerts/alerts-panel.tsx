@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/lib/hooks/use-toast'
 import { BellOff, Plus } from 'lucide-react'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface AlertsPanelProps {
   initialAlerts: Alert[]
@@ -46,7 +47,7 @@ export function AlertsPanel({ initialAlerts }: AlertsPanelProps) {
     startTransition(async () => {
       const result = await createAlert({ title: title.trim(), message: message.trim() || undefined, severity })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       toast({ title: 'Alerta creada', description: 'Visible para todo el equipo' })

@@ -28,6 +28,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { cn, formatDueDate } from '@/lib/utils'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const taskTypeLabels: Record<string, string> = {
   content_creation: 'Contenido',
@@ -60,7 +61,7 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
     startTransition(async () => {
       const result = await updateTaskStatus(task.id, status)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       }
     })
   }
@@ -70,7 +71,7 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
     startTransition(async () => {
       const result = await deleteTask(task.id)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       }
     })
   }
@@ -81,7 +82,7 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
     startTransition(async () => {
       const result = await updateTask(task.id, { due_at: new Date(value).toISOString() })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       }
     })
   }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { statusClasses } from '@/lib/utils/status-color'
 import type { LucideIcon } from 'lucide-react'
 
 interface KpiCardProps {
@@ -14,9 +15,9 @@ interface KpiCardProps {
 
 const highlightMap = {
   default: 'text-primary',
-  success: 'text-green-500',
-  warning: 'text-yellow-500',
-  danger: 'text-red-500',
+  success: statusClasses('success').text,
+  warning: statusClasses('warning').text,
+  danger: statusClasses('danger').text,
 }
 
 export function KpiCard({

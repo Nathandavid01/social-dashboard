@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import Link from 'next/link'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface VideoReviewItem {
   id: string
@@ -74,7 +75,7 @@ export function AutomationPanel() {
         setExpandedResult(reviewId)
         toast({ title: 'Caption generado ✓', description: `"${title}" → Borrador en Metricool` })
       } else {
-        toast({ title: 'Error', description: result.error || 'Falló la generación', variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error) || 'Falló la generación', variant: 'destructive' })
       }
     } catch {
       toast({ title: 'Error', description: 'Request failed', variant: 'destructive' })

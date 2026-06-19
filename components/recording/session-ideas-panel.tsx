@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { friendlyError } from '@/lib/utils/error-message'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ function AddIdeaForm({
         hook: hook.trim() || null,
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       if (result.idea) {
@@ -155,7 +156,7 @@ function IdeaRow({
   function toggleLinked() {
     startTransition(async () => {
       const result = await assignIdeaToSession(idea.id, isLinked ? null : sessionId)
-      if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+      if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
       onUpdate({ ...idea, recording_session_id: isLinked ? null : sessionId })
     })
   }
@@ -164,7 +165,7 @@ function IdeaRow({
     if (!isLinked) return // Can only mark recorded if linked to this session
     startTransition(async () => {
       const result = await markIdeaRecorded(idea.id, !isRecorded)
-      if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+      if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
       onUpdate({ ...idea, status: isRecorded ? 'idea' : 'grabada' })
       if (!isRecorded) toast({ title: '¡Video grabado! Agregado al buffer ✓' })
     })

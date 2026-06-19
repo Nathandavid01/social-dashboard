@@ -34,6 +34,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard, UserPlus, Users } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface ClientTableProps {
   clients: Client[]
@@ -58,7 +59,7 @@ export function ClientTable({ clients }: ClientTableProps) {
     startTransition(async () => {
       const result = await deleteClient(id)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: 'Cliente eliminado', description: `${name} ha sido eliminado.` })
         setDeleteTarget(null)
