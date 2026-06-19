@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.69 — 2026-06-19
+
+### Reporte de cliente más profesional: gráficas + IA + top posts
+- El reporte del cliente ahora es **más visual y ejecutivo**: en vez de la lista larga de posts, muestra **gráfica de alcance en el tiempo**, **split por red (Instagram/Facebook)** y solo las **3 publicaciones destacadas**.
+- Nuevo **"Resumen del estratega" (IA)**: un análisis en lenguaje natural de **lo que logramos**, **qué está funcionando** y **hacia dónde va la estrategia** — escrito con la data real (alcance, deltas, mejor formato). Si la IA no está disponible, usa un resumen determinístico con los números.
+
+
 ## v2.68 — 2026-06-19
 
 ### Hotfix: build roto por marcadores de conflicto

@@ -1,32 +1,47 @@
 import {
   Image as ImageIcon,
-  Eye,
-  BarChart3,
   Heart,
-  MessageCircle,
-  Share2,
-  Bookmark,
+  BarChart3,
   Users,
   TrendingUp,
   ArrowUp,
   ArrowDown,
   Minus,
+  Sparkles,
+  Trophy,
 } from 'lucide-react'
 import { formatCompact, type ReportPost } from '@/lib/utils/client-report-core'
 import { deltaPct, deltaTone, formatDelta } from '@/lib/utils/report-delta-core'
+import { reachByNetwork, reachTimeline, topPosts } from '@/lib/utils/report-insights-core'
 import type { ClientReport } from '@/lib/actions/client-report'
+import { WeeklyReachChart, NetworkSplitBar } from './report-charts'
 import { cn } from '@/lib/utils'
 
-function fmtDate(ms: number): string {
-  if (!ms) return ''
-  return new Date(ms).toLocaleDateString('es-PR', { day: '2-digit', month: 'short', year: 'numeric' })
-}
 function fmtRange(start: string, end: string): string {
   const p = (s: string) => `${s.slice(6, 8)}/${s.slice(4, 6)}/${s.slice(0, 4)}`
   return `${p(start)} – ${p(end)}`
 }
 
-export function ClientReportDocument({ report }: { report: ClientReport }) {
+function renderInsight(text: string) {
+  return text
+    .split(/\n{2,}/)
+    .filter((p) => p.trim())
+    .map((para, i) => (
+      <p key={i} className="text-sm leading-relaxed text-zinc-700">
+        {para.split(/(\*\*[^*]+\*\*)/).map((seg, j) =>
+          seg.startsWith('**') && seg.endsWith('**') ? (
+            <strong key={j} className="font-bold text-zinc-900">
+              {seg.slice(2, -2)}
+            </strong>
+          ) : (
+            <span key={j}>{seg}</span>
+          ),
+        )}
+      </p>
+    ))
+}
+
+export function ClientReportDocument({ report, insights }: { report: ClientReport; insights: string }) {
   const { client, summary, posts, previousSummary, metricoolConfigured } = report
   const prev = previousSummary
   const kpis = [
@@ -35,6 +50,9 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
     { label: 'Interacciones', value: summary.engagement, prev: prev?.engagement, icon: Heart },
     { label: 'Publicaciones', value: summary.posts, prev: prev?.posts, icon: TrendingUp },
   ]
+  const net = reachByNetwork(posts)
+  const timeline = reachTimeline(posts, report.periodDays, Date.now())
+  const featured = topPosts(posts, 3)
 
   return (
     <div className="mx-auto max-w-4xl rounded-2xl border bg-white p-8 text-zinc-900 shadow-sm print:border-0 print:shadow-none sm:p-10">
@@ -68,6 +86,7 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
         </p>
       ) : (
         <>
+          {/* KPIs with period-over-period deltas */}
           <section className="grid grid-cols-2 gap-3 py-6 md:grid-cols-4">
             {kpis.map((k) => {
               const d = prev != null ? deltaPct(k.value, k.prev) : null
@@ -101,25 +120,36 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
               )
             })}
           </section>
-          {prev != null && (
-            <p className="-mt-3 mb-3 text-xs text-zinc-400">▲▼ comparado con el período anterior de igual duración.</p>
+
+          {/* AI executive summary */}
+          {insights.trim() && (
+            <section className="mb-6 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-amber-500" />
+                <h2 className="text-sm font-bold uppercase tracking-wide text-amber-700">Resumen del estratega</h2>
+              </div>
+              <div className="space-y-2">{renderInsight(insights)}</div>
+            </section>
           )}
 
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-zinc-500">Publicaciones ({posts.length})</h2>
-            <span className="text-xs text-zinc-400">
-              {summary.byNetwork.instagram} Instagram · {summary.byNetwork.facebook} Facebook
-            </span>
-          </div>
+          {/* Graphics */}
+          <section className="mb-6 grid gap-3 md:grid-cols-2">
+            <WeeklyReachChart data={timeline} />
+            <NetworkSplitBar instagram={net.instagram} facebook={net.facebook} />
+          </section>
 
-          {posts.length === 0 ? (
-            <p className="py-10 text-center text-sm text-zinc-500">No hubo publicaciones en este período.</p>
+          {/* Featured posts */}
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-zinc-500">
+            <Trophy className="h-4 w-4 text-amber-500" /> Publicaciones destacadas
+          </h2>
+          {featured.length === 0 ? (
+            <p className="py-8 text-center text-sm text-zinc-500">No hubo publicaciones en este período.</p>
           ) : (
-            <ul className="space-y-3">
-              {posts.map((p, i) => (
-                <PostRow key={`${p.network}-${p.timestamp}-${i}`} post={p} top={i === summary.topPostIndex} />
+            <div className="grid gap-3 sm:grid-cols-3">
+              {featured.map((p, i) => (
+                <FeaturedPost key={`${p.network}-${p.timestamp}-${i}`} post={p} rank={i + 1} />
               ))}
-            </ul>
+            </div>
           )}
         </>
       )}
@@ -131,59 +161,46 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
   )
 }
 
-function PostRow({ post, top }: { post: ReportPost; top: boolean }) {
+function FeaturedPost({ post, rank }: { post: ReportPost; rank: number }) {
   const net =
-    post.network === 'instagram'
-      ? { label: 'IG', cls: 'bg-pink-100 text-pink-600' }
-      : { label: 'FB', cls: 'bg-blue-100 text-blue-600' }
-  const metrics: { icon: typeof Eye; value: number; label: string }[] = [
-    { icon: Users, value: post.reach, label: 'alcance' },
-    { icon: BarChart3, value: post.impressions, label: 'impresiones' },
-    { icon: Heart, value: post.likes, label: 'me gusta' },
-    { icon: MessageCircle, value: post.comments, label: 'comentarios' },
-    { icon: Share2, value: post.shares, label: 'compartidos' },
-    { icon: Bookmark, value: post.saved, label: 'guardados' },
-    { icon: Eye, value: post.views, label: 'reproducciones' },
+    post.network === 'instagram' ? { label: 'IG', cls: 'bg-pink-100 text-pink-600' } : { label: 'FB', cls: 'bg-blue-100 text-blue-600' }
+  const metrics = [
+    { label: 'Alcance', value: post.reach },
+    { label: 'Interacciones', value: post.engagement },
+    { label: 'Me gusta', value: post.likes },
   ].filter((m) => m.value > 0)
 
   return (
-    <li className={cn('flex gap-4 rounded-xl border p-3', top ? 'border-amber-300 bg-amber-50' : 'border-zinc-200 bg-white')}>
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+    <div className={cn('overflow-hidden rounded-xl border', rank === 1 ? 'border-amber-300' : 'border-zinc-200')}>
+      <div className="relative aspect-square w-full bg-zinc-100">
         {post.thumbnail ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={post.thumbnail} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center text-zinc-300">
-            <ImageIcon className="h-6 w-6" />
+            <ImageIcon className="h-8 w-8" />
           </div>
         )}
-        <span className={cn('absolute left-1 top-1 rounded px-1 py-0.5 text-[9px] font-bold leading-none shadow-sm', net.cls)}>
-          {net.label}
+        <span className={cn('absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-bold shadow-sm', net.cls)}>
+          {net.label} · {post.type}
         </span>
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-            {post.type}
+        {rank === 1 && (
+          <span className="absolute right-2 top-2 rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 shadow-sm">
+            #1
           </span>
-          {top && (
-            <span className="rounded bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">
-              Top alcance
-            </span>
-          )}
-          <span className="text-xs text-zinc-400">{fmtDate(post.timestamp)}</span>
-        </div>
-        <p className="mt-1 line-clamp-2 text-sm text-zinc-700">{post.content || '(sin texto)'}</p>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        )}
+      </div>
+      <div className="space-y-2 p-3">
+        <p className="line-clamp-2 text-xs text-zinc-600">{post.content || '(sin texto)'}</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
           {metrics.map((m) => (
-            <span key={m.label} className="inline-flex items-center gap-1 text-xs text-zinc-600" title={m.label}>
-              <m.icon className="h-3.5 w-3.5 text-zinc-400" />
-              <span className="font-semibold tabular-nums">{formatCompact(m.value)}</span>
-            </span>
+            <div key={m.label} className="text-[11px]">
+              <span className="font-bold tabular-nums text-zinc-900">{formatCompact(m.value)}</span>{' '}
+              <span className="text-zinc-400">{m.label}</span>
+            </div>
           ))}
         </div>
       </div>
-    </li>
+    </div>
   )
 }
