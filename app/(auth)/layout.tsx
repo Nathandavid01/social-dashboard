@@ -1,6 +1,16 @@
 import { Clapperboard, CheckCircle2, BarChart3 } from 'lucide-react'
 import { NateLogo } from '@/components/shared/nate-logo'
 import { LiveReachCounter } from '@/components/brand/live-reach-counter'
+import { getAgencyReach } from '@/lib/actions/agency-reach'
+
+// Don't let the (cold-cache) Metricool aggregation block the login render —
+// fall back to the synthetic counter if it's slow.
+async function reachWithTimeout(): Promise<number | null> {
+  return Promise.race([
+    getAgencyReach().catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+  ])
+}
 
 const FEATURES = [
   {
@@ -20,7 +30,8 @@ const FEATURES = [
   },
 ] as const
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const realReach = await reachWithTimeout()
   return (
     <div className="min-h-screen w-full bg-background lg:grid lg:grid-cols-[1.05fr_1fr] xl:grid-cols-[1.15fr_1fr]">
       {/* Brand showcase — always dark (Nate Media negro + dorado) */}
@@ -75,7 +86,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             ))}
           </ul>
 
-          <LiveReachCounter />
+          <LiveReachCounter realReach={realReach} />
         </div>
 
         {/* bottom: legal */}

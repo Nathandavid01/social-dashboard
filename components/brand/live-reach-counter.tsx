@@ -18,14 +18,19 @@ function baseline() {
   return BASE + Math.floor(((Date.now() - EPOCH) / 1000) * RATE_PER_SEC)
 }
 
-export function LiveReachCounter() {
-  // Seed with a constant so SSR and the client's first render match (no
-  // hydration mismatch); the effect immediately sets the real live value.
-  const [reach, setReach] = useState(BASE)
+export function LiveReachCounter({ realReach = null }: { realReach?: number | null }) {
+  // When the real total reach (from Metricool) is available, anchor to it and
+  // don't fake live increments — just the count-up reveal. Otherwise fall back
+  // to the synthetic baseline that drifts up over time.
+  const isReal = typeof realReach === 'number' && realReach > 0
+  const seed = isReal ? (realReach as number) : BASE
+  // Seed with a value the server also produces so SSR and the client's first
+  // render match (no hydration mismatch); the effect sets the live value.
+  const [reach, setReach] = useState(seed)
   const started = useRef(false)
 
   useEffect(() => {
-    const target = baseline()
+    const target = isReal ? (realReach as number) : baseline()
     let raf = 0
     let timer: ReturnType<typeof setInterval> | undefined
     let safety: ReturnType<typeof setTimeout> | undefined
@@ -34,6 +39,7 @@ export function LiveReachCounter() {
       if (started.current) return
       started.current = true
       setReach(target)
+      if (isReal) return // real total — show it, don't invent growth
       timer = setInterval(
         () => setReach((r) => r + 60 + Math.floor(Math.random() * 430)),
         950,
@@ -64,7 +70,7 @@ export function LiveReachCounter() {
       if (timer) clearInterval(timer)
       if (safety) clearTimeout(safety)
     }
-  }, [])
+  }, [isReal, realReach])
 
   return (
     <div className="mt-9 border-t border-white/10 pt-5">
