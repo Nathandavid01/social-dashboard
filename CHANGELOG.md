@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.66 — 2026-06-19
+
+### Link de subida con el nombre del cliente
+- El link para que el cliente suba sus videos ahora puede usar **su nombre** en vez del id largo: p. ej. **`/subir/primer-round-oficial`**. Los links viejos con id (UUID) **siguen funcionando**.
+- Nuevo botón **"Link de subida"** en el perfil del cliente: lo copia listo para enviárselo. (Si dos clientes tuvieran el mismo nombre, ese link queda ambiguo y no abre — usar el de id; lo ideal a futuro es un token propio.)
+
 ## v2.65 — 2026-06-19
 
 ### Crea tu avatar (al iniciar sesión)
