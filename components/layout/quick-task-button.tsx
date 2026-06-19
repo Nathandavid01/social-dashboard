@@ -20,6 +20,7 @@ import {
 import { Plus, CheckCircle2, Zap, ChevronDown, ChevronUp } from 'lucide-react'
 import { createTask } from '@/lib/actions/tasks'
 import { useToast } from '@/lib/hooks/use-toast'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface Client {
   id: string
@@ -105,7 +106,7 @@ export function QuickTaskButton() {
       })
 
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         setDone(true)
         toast({ title: 'Tarea creada', description: title.trim() })

@@ -39,6 +39,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths, parseISO } from 'date-fns'
+import { friendlyError } from '@/lib/utils/error-message'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -108,7 +109,7 @@ function AddTaskDialog({ open, onClose, memberId, clients, teamMembers, defaultD
         priority: Number(priority) as 1 | 2 | 3,
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: 'Tarea creada' })
         setTitle(''); setPriority('2'); setClientId('none'); setCollaborators([]); setDueAt(''); setDescription('')
@@ -451,7 +452,7 @@ export function MemberTaskBoard({ member, initialTasks, clients, teamMembers, as
     setTasks((prev) => prev.filter((t) => t.id !== taskId))
     startTransition(async () => {
       const result = await deleteTask(taskId)
-      if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+      if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
     })
   }
 

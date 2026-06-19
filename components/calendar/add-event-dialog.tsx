@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -72,7 +73,7 @@ export function AddEventDialog({
     startTransition(async () => {
       const result = await createEvent(values)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       toast({ title: 'Event created' })
