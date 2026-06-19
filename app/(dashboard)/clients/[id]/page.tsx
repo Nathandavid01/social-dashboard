@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText, BarChart3 } from 'lucide-react'
 import { formatDate, taskStatusColors } from '@/lib/utils'
 import { ClientHero } from '@/components/clients/profile/client-hero'
+import { UploadLinkButton } from '@/components/clients/upload-link-button'
 import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
 import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
 import { fetchClientCaptions } from '@/lib/utils/client-captions'
@@ -260,6 +261,7 @@ export default async function ClientDetailPage({
             <Pencil className="mr-1.5 h-3.5 w-3.5" /> Editar campos base
           </Link>
         </Button>
+        <UploadLinkButton clientName={client.name} clientId={id} />
         <span className="ml-auto self-center text-xs text-muted-foreground">Creado {formatDate(client.created_at)}</span>
       </div>
 
