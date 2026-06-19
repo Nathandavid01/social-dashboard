@@ -4,7 +4,6 @@
  * readiness logic is unit-testable without mocking Supabase/Metricool.
  */
 
-<<<<<<< Updated upstream
 import { addDaysISO, todayISOInTimeZone } from './deadlines'
 
 /** Timezone Metricool publishes in — the calendar day we anchor scheduling to. */
@@ -50,8 +49,6 @@ export function autopublishTimeError(
   return null
 }
 
-=======
->>>>>>> Stashed changes
 export interface SendableApprovedIdea {
   generated_caption: string | null
   /** Set once we've sent the draft — the idempotency guard. */
@@ -83,7 +80,6 @@ export function approvedIdeaSendReadiness(
   return { ready: true }
 }
 
-<<<<<<< Updated upstream
 export interface MetricoolMediaOptions {
   /** Public media URLs to attach (the uploaded video). Omitted when none. */
   mediaUrls?: string[]
@@ -103,8 +99,6 @@ export function quickSendMediaOptions(mediaUrl?: string | null, autoPublish = fa
   return { ...(v ? { mediaUrls: [v] } : {}), autoPublish: !!autoPublish }
 }
 
-=======
->>>>>>> Stashed changes
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const TIME_RE = /^(\d{1,2}):(\d{2})$/
 
@@ -130,7 +124,6 @@ export function buildScheduledDateTime(
   const t = normalizeTime(time) ?? '10:00'
   return `${date.trim()}T${t}:00`
 }
-<<<<<<< Updated upstream
 
 /**
  * Validate a user-picked schedule date. Returns a Spanish error string, or null
@@ -148,5 +141,3 @@ export function scheduleDateError(
   if (date.trim() < today) return 'La fecha ya pasó; elige hoy o una fecha futura.'
   return null
 }
-=======
->>>>>>> Stashed changes

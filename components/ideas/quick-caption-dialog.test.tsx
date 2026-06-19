@@ -5,12 +5,9 @@ vi.mock('@/lib/actions/idea-lab-captions', () => ({
   generateQuickCaption: vi.fn(async () => ({ ok: true, caption: 'x' })),
   sendQuickCaptionToMetricool: vi.fn(async () => ({ ok: true, scheduledFor: '2026-06-15T10:00:00' })),
 }))
-<<<<<<< Updated upstream
 vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getQuickUploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k', publicUrl: 'https://pub/k' })),
 }))
-=======
->>>>>>> Stashed changes
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: () => true }))
 
@@ -44,7 +41,6 @@ describe('QuickCaptionDialog', () => {
     // No client/caption chosen yet → cannot send.
     expect(screen.getByRole('button', { name: /Enviar a Metricool/i })).toBeDisabled()
   })
-<<<<<<< Updated upstream
 
   it('has no per-platform dropdown — one caption goes to all the client networks', () => {
     render(<QuickCaptionDialog clients={clients} />)
@@ -90,6 +86,4 @@ describe('QuickCaptionDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /quitar video/i }))
     expect(screen.queryByText('reel-final.mp4')).toBeNull()
   })
-=======
->>>>>>> Stashed changes
 })

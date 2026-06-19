@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.68 — 2026-06-19
+
+### Hotfix: build roto por marcadores de conflicto
+- Se quitaron marcadores de conflicto de git (de un `git stash pop` que se coló a `main`) en 8 archivos de Ideas/Captions que rompían la compilación. Sin cambios de comportamiento (se conservó el código ya publicado).
+
 ## v2.67 — 2026-06-19
 
 ### Nueva sección "Reportes" (elige el tipo)
