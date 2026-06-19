@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { ClientForm } from '@/components/clients/client-form'
+import { ClientOnboardingWizard } from '@/components/clients/client-onboarding-wizard'
 import { PageHeader } from '@/components/shared/page-header'
 
 export default async function NewClientPage() {
@@ -11,8 +11,8 @@ export default async function NewClientPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Agregar cliente" description="Crea una nueva cuenta de cliente" />
-      <ClientForm teamMembers={teamMembers ?? []} />
+      <PageHeader title="Agregar cliente" description="Te guiamos paso a paso hasta dejarlo listo para automatizar" />
+      <ClientOnboardingWizard teamMembers={teamMembers ?? []} />
     </div>
   )
 }
