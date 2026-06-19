@@ -8,6 +8,7 @@ import { ChatBubble } from '@/components/chat/chat-bubble'
 import { Toaster } from '@/components/ui/toaster'
 import { CommandPalette } from '@/components/shared/command-palette'
 import { RequestNotifier } from '@/components/shared/request-notifier'
+import { AvatarSetupGate } from '@/components/account/avatar-setup-gate'
 import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
@@ -120,6 +121,7 @@ export default async function DashboardLayout({
         <CommandPalette />
         <RequestNotifier />
         <VideoReviewNotifier />
+        <AvatarSetupGate />
       </div>
     </DashboardProviders>
   )
