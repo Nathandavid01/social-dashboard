@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.54 — 2026-06-19
+
+### Captions que aprenden de cada cliente (learning loop)
+- El generador de captions ahora **estudia los captions que el equipo ya aprobó para ese cliente** y los usa como **el estándar exacto a igualar** — con más peso que los ejemplos de Metricool. Mientras más captions apruebas, más se acerca al estilo del cliente.
+- Toma los aprobados de **ambos lados** (pipeline `content_ideas` + Ideas Aprobadas del Idea Lab), sin duplicados y priorizando los más recientes.
+- Aplica en **todas** las generaciones (ideas planificadas e ideas aprobadas). Best-effort: si no hay aprobados aún, genera como antes. Sin migración.
+- (Fase 2 sugerida: rating 👍/👎 explícito por caption para una señal aún más limpia.)
+
 ## v2.53 — 2026-06-19
 
 ### Los clientes suben sus propios videos (link mágico) — Fase 1
