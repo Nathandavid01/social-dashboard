@@ -17,6 +17,9 @@ import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
  */
 export async function generateIdeaCaption(
   ideaId: string,
+  /** Optional feedback to revise a prior attempt — the user's instructions
+   *  ("más corto", "menos emojis") + the caption being revised. */
+  opts?: { feedback?: string | null; previousCaption?: string | null },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -68,6 +71,8 @@ export async function generateIdeaCaption(
     hashtags: idea.hashtags_suggestion,
     platforms,
     examples,
+    feedback: opts?.feedback ?? null,
+    previousCaption: opts?.previousCaption ?? null,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,
@@ -92,7 +97,9 @@ export async function generateIdeaCaption(
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
-    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length } })
+    // Persist the feedback text too (not just a bool) so a future per-client
+    // learning loop can mine recurring instructions ("siempre menos emojis").
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length, revised: !!opts?.feedback, feedback: opts?.feedback?.trim() || null } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')

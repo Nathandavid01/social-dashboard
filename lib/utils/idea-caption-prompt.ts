@@ -29,6 +29,10 @@ export interface IdeaCaptionPromptInput {
   platforms?: string[]
   /** Past published captions for this client, pulled from Metricool, to imitate. */
   examples: StyleExample[]
+  /** User instructions to revise a prior attempt ("más corto", "menos emojis", "más CTA"). */
+  feedback?: string | null
+  /** The previous caption being revised — shown to the model so it improves on it. */
+  previousCaption?: string | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -72,6 +76,19 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       ? '- Imita el tono, el largo, el uso de emojis y el formato de hashtags de los CAPTIONS DE REFERENCIA de arriba\n'
       : ''
 
+  // When the user gives feedback on a prior attempt, show that attempt + the
+  // instructions so the model revises instead of starting from scratch.
+  const feedbackBlock = filled(input.feedback)
+    ? `FEEDBACK DEL EQUIPO SOBRE EL INTENTO ANTERIOR (aplica estos cambios al reescribir):\n${input.feedback!.trim()}\n\n${
+        filled(input.previousCaption)
+          ? `CAPTION ANTERIOR (mejóralo según el feedback, no lo copies tal cual):\n${input.previousCaption!.trim()}\n\n`
+          : ''
+      }`
+    : ''
+  const feedbackBullet = filled(input.feedback)
+    ? '- Aplica el FEEDBACK DEL EQUIPO de arriba manteniendo el mensaje central de la idea\n'
+    : ''
+
   return `Eres un copywriter profesional de redes sociales para NMedia PR, agencia de marketing puertorriqueña. Escribes captions que rinden bien en Instagram, TikTok y Facebook.
 
 CLIENTE: ${filled(c.name) ? c.name : 'cliente'}
@@ -80,11 +97,11 @@ REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
-${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${examplesBlock}
+${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${feedbackBlock}${examplesBlock}
 
 TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
 El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
-${imitationBullet}- Engancha en la primera línea
+${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`
