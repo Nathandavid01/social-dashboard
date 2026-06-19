@@ -97,4 +97,20 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).toContain('Más llamado a la acción')
     expect(p).not.toContain('CAPTION ANTERIOR')
   })
+
+  it('injects the team-approved captions as the standard to match (learning loop)', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      approvedExamples: ['Caption aprobado uno con largo suficiente', 'Caption aprobado dos con largo suficiente'],
+    })
+    expect(p).toContain('CAPTIONS QUE EL EQUIPO YA APROBÓ PARA ESTE CLIENTE')
+    expect(p).toContain('Caption aprobado uno con largo suficiente')
+    expect(p).toContain('Caption aprobado dos con largo suficiente')
+    expect(p).toMatch(/MÁXIMA prioridad/)
+  })
+
+  it('omits the approved block when there are none', () => {
+    const p = buildIdeaCaptionPrompt(base)
+    expect(p).not.toContain('CAPTIONS QUE EL EQUIPO YA APROBÓ')
+  })
 })

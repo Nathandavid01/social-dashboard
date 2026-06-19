@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
+import { fetchApprovedCaptionExamples } from '@/lib/integrations/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
@@ -33,7 +34,7 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
+    .select('id, client_id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
     .eq('id', ideaId)
     .single()
 
@@ -59,9 +60,12 @@ export async function generateIdeaCaption(
   // platforms it will be published to (same resolution the publisher uses).
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
-  // Pull the client's recently published captions from Metricool so the model
-  // imitates their real style (best-effort — returns [] if unavailable).
-  const examples = await fetchClientStyleExamples(client.metricool_blog_id ?? undefined)
+  // Pull the client's recently published captions from Metricool (real style) AND
+  // the captions the team already APPROVED (the learning loop) — both best-effort.
+  const [examples, approvedExamples] = await Promise.all([
+    fetchClientStyleExamples(client.metricool_blog_id ?? undefined),
+    fetchApprovedCaptionExamples(supabase, (idea as { client_id?: string | null }).client_id),
+  ])
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
@@ -71,6 +75,7 @@ export async function generateIdeaCaption(
     hashtags: idea.hashtags_suggestion,
     platforms,
     examples,
+    approvedExamples,
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
     client: {
