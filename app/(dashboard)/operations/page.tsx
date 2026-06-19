@@ -4,6 +4,7 @@ import { getTasks } from '@/lib/actions/tasks'
 import { TaskFeed } from '@/components/operations/task-feed'
 import { ClientRequestsPanel } from '@/components/operations/client-requests-panel'
 import { PageHeader } from '@/components/shared/page-header'
+import { TableSkeleton } from '@/components/shared/skeletons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
@@ -118,7 +119,7 @@ export default async function OperationsPage() {
 
       <ClientRequestsPanel initialRequests={clientRequests} />
 
-      <Suspense fallback={<div className="h-64 rounded-xl border border-border animate-pulse bg-muted/30" />}>
+      <Suspense fallback={<TableSkeleton rows={6} />}>
         <TaskFeed
           initialTasks={tasks}
           clients={clients ?? []}

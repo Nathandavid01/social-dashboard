@@ -36,6 +36,7 @@ import {
   Clapperboard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const TYPE_CONFIG = {
   R: { label: 'Reel', icon: Film, color: 'bg-pink-100 text-pink-700 border-pink-200' },
@@ -77,7 +78,7 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
     startTransition(async () => {
       const result = await updateIdeaStatus(idea.id, status)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       onUpdate({ ...idea, status })
@@ -89,7 +90,7 @@ export function IdeaCard({ idea, clients, onUpdate, onDelete, onAssign }: IdeaCa
     startTransition(async () => {
       const result = await deleteContentIdea(idea.id)
       if (result && 'error' in result && result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       setConfirmDeleteOpen(false)

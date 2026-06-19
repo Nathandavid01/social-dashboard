@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { friendlyError } from '@/lib/utils/error-message'
 import {
   Video, Plus, CheckCircle2, Circle, Trash2, Loader2,
   ChevronDown, ChevronUp, AlertTriangle,
@@ -51,7 +52,7 @@ function IdeaRow({
   function toggleRecorded() {
     startTransition(async () => {
       const result = await markIdeaRecorded(idea.id, !isRecorded)
-      if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+      if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
       onUpdate({ ...idea, status: isRecorded ? 'idea' : 'grabada' })
     })
   }
@@ -60,7 +61,7 @@ function IdeaRow({
     startTransition(async () => {
       const result = await deleteContentIdea(idea.id)
       if (result && 'error' in result && result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       setConfirmOpen(false)
@@ -131,7 +132,7 @@ function AddIdeaForm({ clientId, onAdded }: { clientId: string; onAdded: (idea: 
     if (!title.trim()) return
     startTransition(async () => {
       const result = await createContentIdeaManual({ clientId, contentType, title: title.trim() })
-      if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+      if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
       if (result.idea) onAdded(result.idea)
       setTitle('')
       toast({ title: 'Idea agregada ✓' })

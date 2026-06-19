@@ -24,6 +24,7 @@ import Link from 'next/link'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import type { PostingQueueItem } from '@/lib/actions/posting'
 import type { PostingDraft as PostingDraftType } from '@/lib/supabase/types'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface PostingCardProps {
   item: PostingQueueItem
@@ -110,7 +111,7 @@ export function PostingCard({ item, onSent, readonly = false }: PostingCardProps
         platforms,
       })
       if (result.error) {
-        toast({ title: 'Error al enviar', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error al enviar', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       toast({ title: 'Borrador creado en Metricool', description: format(new Date(scheduledFor), 'PPP p') })

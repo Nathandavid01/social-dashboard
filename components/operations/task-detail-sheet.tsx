@@ -36,6 +36,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { TaskStatusBadge } from './task-status-badge'
 import { cn, formatDueDate } from '@/lib/utils'
 import { format } from 'date-fns'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const taskTypeLabels: Record<string, string> = {
   content_creation: 'Creación de Contenido',
@@ -105,7 +106,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
     startTransition(async () => {
       const result = await updateTaskStatus(task!.id, status)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         onTaskUpdated?.()
       }
@@ -121,7 +122,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
     startTransition(async () => {
       const result = await updateTask(task!.id, { title: titleDraft.trim() })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         onTaskUpdated?.()
       }
@@ -134,7 +135,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
     startTransition(async () => {
       const result = await updateTask(task!.id, { due_at: new Date(value).toISOString() })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         onTaskUpdated?.()
       }
@@ -146,7 +147,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
     startTransition(async () => {
       const result = await deleteTask(task!.id)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         onClose()
         onTaskUpdated?.()
@@ -161,7 +162,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
     const result = await addTaskComment(task!.id, draft)
     if (result.error) {
       setNewComment(draft)
-      toast({ title: 'Error', description: result.error, variant: 'destructive' })
+      toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
     } else {
       const { comments: updated } = await getTaskComments(task!.id)
       setComments(updated as Comment[])
@@ -171,7 +172,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
   async function handleDeleteComment(commentId: string) {
     const result = await deleteTaskComment(commentId)
     if (result.error) {
-      toast({ title: 'Error', description: result.error, variant: 'destructive' })
+      toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
     } else {
       setComments((prev) => prev.filter((c) => c.id !== commentId))
     }
@@ -243,7 +244,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
                   onValueChange={(v) => {
                     startTransition(async () => {
                       const result = await updateTask(task!.id, { priority: Number(v) as 1 | 2 | 3 })
-                      if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+                      if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
                       else onTaskUpdated?.()
                     })
                   }}
@@ -300,7 +301,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
                     onValueChange={(v) => {
                       startTransition(async () => {
                         const result = await updateTask(task!.id, { assignee_id: v === 'unassigned' ? null : v })
-                        if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+                        if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
                         else onTaskUpdated?.()
                       })
                     }}
@@ -415,7 +416,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
                         if (descDraft === (task.description ?? '')) return
                         startTransition(async () => {
                           const result = await updateTask(task!.id, { description: descDraft || undefined })
-                          if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+                          if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
                           else onTaskUpdated?.()
                         })
                       }}
@@ -465,7 +466,7 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
                   startTransition(async () => {
                     const result = await duplicateTask(task!.id)
                     if (result.error) {
-                      toast({ title: 'Error', description: result.error, variant: 'destructive' })
+                      toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
                     } else {
                       toast({ title: 'Tarea duplicada', description: 'Aparece en el board como pendiente.' })
                       onTaskUpdated?.()

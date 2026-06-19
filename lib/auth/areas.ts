@@ -44,6 +44,7 @@ export const AREAS: Area[] = [
   { href: '/published',          label: 'Publicados',      permission: 'metricool.read' },
   { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all' },
   { href: '/automation',         label: 'Automatización',  permission: 'automation.read' },
+  { href: '/actividad',          label: 'Actividad',       permission: 'activity.read' },
   { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles' },
   { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit' },
   // Reached via deep links (notifications, home cards, command palette), not the

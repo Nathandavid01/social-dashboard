@@ -21,6 +21,7 @@ import {
 import { Send, Loader2, Calendar, User } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { assignIdeaToProductionTask } from '@/lib/actions/content-ideas'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface Props {
   idea: ContentIdea
@@ -62,7 +63,7 @@ export function AssignToProductionModal({ idea, profiles, onClose, onAssigned }:
         weekStart: getMondayOfWeek(publishDate),
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
       toast({ title: 'Idea asignada a producción', description: 'Verás la tarea en /produccion' })

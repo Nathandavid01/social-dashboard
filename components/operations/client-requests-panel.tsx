@@ -23,6 +23,7 @@ import { Inbox, MoreHorizontal, CheckCircle2, Eye, X, ArrowRight, Clock, Externa
 import type { ClientRequest } from '@/lib/supabase/types'
 import { convertRequestToTask, updateRequestStatus } from '@/lib/actions/client-requests'
 import { useToast } from '@/lib/hooks/use-toast'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const urgencyConfig = {
   urgent: { label: '🔴 Urgente', badge: 'bg-red-500/10 text-red-500 border-red-500/20' },
@@ -72,7 +73,7 @@ export function ClientRequestsPanel({ initialRequests, showHistory = false }: Pr
     startTransition(async () => {
       const result = await updateRequestStatus(id, status)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status } : r))
         if (selected?.id === id) { setSelected((s) => s ? { ...s, status } : null); setNotes(null) }
@@ -85,7 +86,7 @@ export function ClientRequestsPanel({ initialRequests, showHistory = false }: Pr
     startTransition(async () => {
       const result = await convertRequestToTask(request.id)
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         setRequests((prev) => prev.map((r) => r.id === request.id ? { ...r, status: 'converted', task_id: result.taskId ?? null } : r))
         setSelected(null)
@@ -304,7 +305,7 @@ export function ClientRequestsPanel({ initialRequests, showHistory = false }: Pr
                         startTransition(async () => {
                           const result = await updateRequestStatus(selected.id, selected.status, effectiveNotes)
                           if (result.error) {
-                            toast({ title: 'Error', description: result.error, variant: 'destructive' })
+                            toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
                           } else {
                             setRequests((prev) => prev.map((r) => r.id === selected.id ? { ...r, notes: effectiveNotes } : r))
                             setNotes(null)

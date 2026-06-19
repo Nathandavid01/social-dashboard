@@ -17,6 +17,7 @@ import {
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn, formatDueDate } from '@/lib/utils'
 import { Clock, Flag, CheckCircle2, ArrowUpDown, ArrowUp, ArrowDown, PlayCircle, AlertCircle, Circle, X } from 'lucide-react'
+import { friendlyError } from '@/lib/utils/error-message'
 
 type SortKey = 'title' | 'status' | 'priority' | 'due_at' | 'type'
 type SortDir = 'asc' | 'desc'
@@ -89,7 +90,7 @@ export function TaskListView({ tasks, onOpenDetail }: TaskListViewProps) {
   function handleStatusChange(taskId: string, status: string) {
     startTransition(async () => {
       const result = await updateTaskStatus(taskId, status)
-      if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+      if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
     })
   }
 

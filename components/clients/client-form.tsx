@@ -29,6 +29,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { RefreshCw } from 'lucide-react'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
   { value: 'instagram', label: 'Instagram' },
@@ -74,7 +75,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
         : await createClient(values)
 
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
 

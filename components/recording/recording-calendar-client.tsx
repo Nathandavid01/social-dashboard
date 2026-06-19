@@ -64,6 +64,7 @@ import {
   isSameDay,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { friendlyError } from '@/lib/utils/error-message'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -139,13 +140,13 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
       }
       if (editing) {
         const result = await updateRecordingSession(editing.id, values)
-        if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+        if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
         onSaved({ ...editing, ...values, client, videographer })
       } else {
         const result = await createRecordingSession(values)
-        if (result.error) { toast({ title: 'Error', description: result.error, variant: 'destructive' }); return }
+        if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
         // Optimistic: create a temp session object
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
@@ -444,7 +445,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     setSessions((prev) => prev.filter((s) => s.id !== id))
     startTransition(async () => {
       const result = await deleteRecordingSession(id)
-      if (result.error) toast({ title: 'Error', description: result.error, variant: 'destructive' })
+      if (result.error) toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
     })
   }
 

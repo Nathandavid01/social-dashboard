@@ -22,6 +22,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Film, Link2 } from 'lucide-react'
+import { friendlyError } from '@/lib/utils/error-message'
 
 interface SubmitVideoFormProps {
   open: boolean
@@ -47,7 +48,7 @@ export function SubmitVideoForm({ open, onClose, clients }: SubmitVideoFormProps
         general_notes: notes || null,
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: 'Video enviado para revisión' })
         setTitle('')

@@ -31,6 +31,7 @@ import {
   User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const STATUS_CONFIG = {
   submitted: { label: 'Pendiente', color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
@@ -78,7 +79,7 @@ export function ReviewSheet({ review, open, onClose }: ReviewSheetProps) {
         general_notes: generalNotes || null,
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: friendlyMsg ?? 'Estado actualizado' })
         if (status === 'approved' || status === 'revision_needed') onClose()
@@ -95,7 +96,7 @@ export function ReviewSheet({ review, open, onClose }: ReviewSheetProps) {
         general_notes: generalNotes || null,
       })
       if (result.error) {
-        toast({ title: 'Error', description: result.error, variant: 'destructive' })
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
       } else {
         toast({ title: 'Notas guardadas' })
       }
