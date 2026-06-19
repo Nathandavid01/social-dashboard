@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.58 — 2026-06-19
+
+### Login: "Recordar mi correo"
+- El login ahora tiene un check **"Recordar mi correo"**: la próxima vez que entres, tu correo aparece **ya escrito** (solo el correo, nunca la contraseña). Se guarda en tu navegador; si lo desmarcas, se borra.
+
 ## v2.57 — 2026-06-19
 
 ### Login: panel de marca centrado
