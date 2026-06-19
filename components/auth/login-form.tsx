@@ -1,20 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
 import { signIn } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+const REMEMBER_KEY = 'nm_remember_email'
+
+function safeStorage(): Storage | null {
+  try {
+    const ls = typeof window !== 'undefined' ? window.localStorage : null
+    // Guard against partial/broken stubs (some test envs) and privacy modes.
+    if (
+      ls &&
+      typeof ls.getItem === 'function' &&
+      typeof ls.setItem === 'function' &&
+      typeof ls.removeItem === 'function'
+    ) {
+      return ls
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [pending, setPending] = useState(false)
+  const [email, setEmail] = useState('')
+  const [remember, setRemember] = useState(true)
+
+  // Prefill the remembered email on the client only (avoids SSR mismatch).
+  useEffect(() => {
+    const saved = safeStorage()?.getItem(REMEMBER_KEY)
+    if (saved) {
+      setEmail(saved)
+      setRemember(true)
+    }
+  }, [])
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    // Persist BEFORE the action — on success signIn redirects, so code after
+    // the await may not run.
+    const store = safeStorage()
+    if (store) {
+      if (remember && email.trim()) store.setItem(REMEMBER_KEY, email.trim())
+      else store.removeItem(REMEMBER_KEY)
+    }
+
     setError(null)
     setPending(true)
     try {
@@ -55,6 +95,8 @@ export function LoginForm() {
               autoComplete="email"
               placeholder="tu@natemedia.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="h-11 pl-9"
             />
           </div>
@@ -83,6 +125,16 @@ export function LoginForm() {
             </button>
           </div>
         </div>
+
+        <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            className="h-4 w-4 rounded border-input accent-primary"
+          />
+          Recordar mi correo
+        </label>
 
         <Button type="submit" className="h-11 w-full text-sm font-semibold shadow-sm shadow-primary/20" disabled={pending}>
           {pending ? (
