@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Check, Film } from 'lucide-react'
+import { Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
+import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
+
+const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+/** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
+function fmtDeadline(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} ${MES_ES[(m ?? 1) - 1]}`
+}
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
@@ -34,6 +42,11 @@ export function VideoWorkCard({
   const recorded = isRecorded(video)
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
+
+  // published_at also suppresses the badge (the auto-post path may set it without
+  // flipping status to 'publicada').
+  const dl = deadlineStatus(video.deadline, video.status, undefined, video.published_at)
+  const dlTone = deadlineTone(dl)
 
   const [hook, setHook] = useState(video.hook ?? '')
   const [visualBrief, setVisualBrief] = useState(video.visual_brief ?? '')
@@ -68,19 +81,30 @@ export function VideoWorkCard({
             </span>
           </div>
         </div>
-        <span
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold',
-            recorded ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500',
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold',
+              recorded ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500',
+            )}
+          >
+            {recorded ? (
+              <Check className="h-2.5 w-2.5" aria-hidden />
+            ) : (
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
+            )}
+            {status.label}
+          </span>
+          {video.deadline && (
+            <span
+              className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap', dlTone.className)}
+              title={`Fecha límite: ${fmtDeadline(video.deadline)}`}
+            >
+              <Flag className="h-3 w-3" aria-hidden />
+              {dlTone.label ? `${dlTone.label} · ` : ''}{fmtDeadline(video.deadline)}
+            </span>
           )}
-        >
-          {recorded ? (
-            <Check className="h-2.5 w-2.5" aria-hidden />
-          ) : (
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
-          )}
-          {status.label}
-        </span>
+        </div>
       </header>
 
       {/* idea — editable inline (gancho, brief, ángulo, hashtags, fecha) */}
@@ -91,6 +115,7 @@ export function VideoWorkCard({
         captionAngle={captionAngle}
         hashtags={hashtags}
         publishDate={video.publish_date}
+        deadline={video.deadline}
         onBriefUpdated={(fields) => {
           if ('hook' in fields) setHook(fields.hook ?? '')
           if ('visual_brief' in fields) setVisualBrief(fields.visual_brief ?? '')

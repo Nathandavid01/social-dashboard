@@ -4,7 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v2.48 — 2026-06-19
+## v2.49 — 2026-06-19
+
+### Fecha límite restaurada (se había perdido en un merge)
+- Vuelve el **editor de fecha límite** en la tarjeta "La idea" (junto a la fecha de publicación) — se había caído al integrar otra rama.
+- Vuelve el **badge Atrasado/Pronto** en la tarjeta de cada video del lote **y** en las tarjetas del pipeline (urgencia visible sin abrir el cliente).
+- Arreglados de paso 2 tests que estaban rojos en `main` (el de fecha límite y un fixture de `client-video-section`); `tsc` queda limpio.
 
 ### Onboarding de cliente más simple e intuitivo
 - **Tarjeta "Listo para automatizar"** en el perfil del cliente: una checklist en vivo (activo · Metricool · días de posteo · voz de marca · primer lote) que muestra **qué falta** con un atajo directo a cada cosa. Desaparece cuando el cliente queda 100% configurado.
