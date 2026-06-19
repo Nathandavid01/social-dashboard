@@ -48,11 +48,14 @@ export function CaptionFeedback({ caption, target, onRegenerate, isGenerating }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetKey])
 
-  // Fetch transparency stats when the target changes (and there's a caption).
+  // Fetch transparency stats when the target changes OR a caption first appears
+  // (hasCaption in deps so the chip shows immediately on the first generate;
+  // editing text nonempty→nonempty won't refetch).
+  const hasCaption = !!caption
   useEffect(() => {
-    if (canUse && caption) loadStats()
+    if (canUse && hasCaption) loadStats()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUse, targetKey])
+  }, [canUse, targetKey, hasCaption])
 
   // A new/edited caption invalidates the previous vote indicator.
   useEffect(() => {

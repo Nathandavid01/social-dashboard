@@ -192,9 +192,11 @@ function ApprovedIdeaCaptionCard({ idea, nextPost }: { idea: ApprovedIdea; nextP
       />
 
       {/* THE shared caption feedback module — idéntico en todas las pantallas. */}
-      <div className="mt-3">
-        <CaptionFeedback caption={caption} target={{ clientId: idea.client_id ?? undefined }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
-      </div>
+      {idea.client_id && (
+        <div className="mt-3">
+          <CaptionFeedback caption={caption} target={{ clientId: idea.client_id }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
+        </div>
+      )}
 
       {dirty && (
         <Button size="sm" variant="ghost" onClick={save} disabled={isSaving} className="mt-2 self-start">
