@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.81 — 2026-06-21
+
+- **"Borrar todo" los horarios de un cliente ahora pide confirmación clara.** En **Producción → Horarios**, el botón que borra *todos* los horarios de un cliente usaba el cuadro gris del navegador; ahora abre el diálogo de confirmación en español que **nombra al cliente** ("Se eliminarán todos los horarios de …"), con botón rojo, bloqueo mientras borra y **toast** al terminar. Es la acción más peligrosa del módulo, así que ahora está mejor protegida.
+
 ## v2.80 — 2026-06-21
 
 - **Borrar una tarea en Operaciones ahora pide confirmación bonita.** La tarjeta de tarea en **Operaciones** usaba el cuadro gris del navegador para eliminar; ahora abre el diálogo de confirmación en español (botón rojo, bloqueo mientras borra) y **avisa con un toast** al terminar. Igual que en Producción.
