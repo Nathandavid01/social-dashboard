@@ -6,6 +6,9 @@ import { upsertProductionSchedules, deleteClientSchedules } from '@/lib/actions/
 import type { ProductionContentType, Profile } from '@/lib/supabase/types'
 import { X, Loader2, Trash2, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useToast } from '@/lib/hooks/use-toast'
+import { friendlyError } from '@/lib/utils/error-message'
 
 const DAYS = [
   { num: 1, label: 'Lunes' },
@@ -54,6 +57,8 @@ export function ManageSchedulesModal({ clients, profiles, existingSchedules, onC
   const [days, setDays] = useState<DayConfig[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const { toast } = useToast()
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -112,11 +117,16 @@ export function ManageSchedulesModal({ clients, profiles, existingSchedules, onC
 
   const deleteAll = async () => {
     if (!selectedClientId) return
-    if (!confirm('¿Eliminar todos los horarios de este cliente?')) return
     setDeleting(true)
-    await deleteClientSchedules(selectedClientId)
+    const res = await deleteClientSchedules(selectedClientId)
     setDeleting(false)
+    if (res?.error) {
+      toast({ title: 'Error', description: friendlyError(res.error), variant: 'destructive' })
+      return
+    }
     setDays([])
+    setConfirmOpen(false)
+    toast({ title: 'Horarios eliminados' })
     router.refresh()
   }
 
@@ -167,7 +177,7 @@ export function ManageSchedulesModal({ clients, profiles, existingSchedules, onC
                 <div className="flex items-center gap-2">
                   {hasExisting && (
                     <button
-                      onClick={deleteAll}
+                      onClick={() => setConfirmOpen(true)}
                       disabled={deleting}
                       className="text-xs text-destructive hover:text-destructive/80 flex items-center gap-1 transition-colors"
                     >
@@ -293,6 +303,19 @@ export function ManageSchedulesModal({ clients, profiles, existingSchedules, onC
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={(o) => { if (!deleting) setConfirmOpen(o) }}
+        title="Eliminar todos los horarios"
+        description={selectedClient
+          ? `Se eliminarán todos los horarios de ${selectedClient.name}. Esta acción no se puede deshacer.`
+          : 'Esta acción no se puede deshacer.'}
+        confirmLabel="Eliminar todo"
+        destructive
+        loading={deleting}
+        onConfirm={deleteAll}
+      />
     </div>
   )
 }
