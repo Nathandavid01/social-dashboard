@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { StatusBadge } from './status-badge'
 import { updateTaskStatus, updateTaskNotes, reassignTask, deleteProductionTask } from '@/lib/actions/production'
 import type { ProductionTask, ProductionTaskStatus, Profile } from '@/lib/supabase/types'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useToast } from '@/lib/hooks/use-toast'
+import { friendlyError } from '@/lib/utils/error-message'
 import { ChevronDown, Trash2, FileText } from 'lucide-react'
 
 const STATUS_FLOW: ProductionTaskStatus[] = ['pendiente', 'en_edicion', 'en_revision', 'revisiones', 'aprobado', 'publicado']
@@ -31,6 +34,9 @@ export function ProductionTaskCard({ task, profiles = [], showClient = true, onU
   const [editingNotes, setEditingNotes] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleting, startDelete] = useTransition()
+  const { toast } = useToast()
 
   const currentIdx = STATUS_FLOW.indexOf(status)
 
@@ -58,10 +64,17 @@ export function ProductionTaskCard({ task, profiles = [], showClient = true, onU
     onUpdate?.()
   }
 
-  const del = async () => {
-    if (!confirm('¿Eliminar esta tarea?')) return
-    await deleteProductionTask(task.id)
-    onUpdate?.()
+  const del = () => {
+    startDelete(async () => {
+      const res = await deleteProductionTask(task.id)
+      if (res?.error) {
+        toast({ title: 'Error', description: friendlyError(res.error), variant: 'destructive' })
+        return
+      }
+      toast({ title: 'Tarea eliminada' })
+      setConfirmOpen(false)
+      onUpdate?.()
+    })
   }
 
   const publishDate = new Date(task.publish_date + 'T12:00:00')
@@ -191,15 +204,27 @@ export function ProductionTaskCard({ task, profiles = [], showClient = true, onU
               </button>
             )}
             <button
-              onClick={del}
+              onClick={() => setConfirmOpen(true)}
               className="ml-auto p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors"
               title="Eliminar"
+              aria-label="Eliminar tarea"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Eliminar tarea"
+        description="Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        destructive
+        loading={deleting}
+        onConfirm={del}
+      />
     </div>
   )
 }
