@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { ProductionSchedule, ProductionTask, Profile } from '@/lib/supabase/types'
 import { generateProductionTasks, updateScheduleAssignment } from '@/lib/actions/production'
 import { cn } from '@/lib/utils'
+import { todayISO } from '@/lib/utils/deadlines'
 import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from 'lucide-react'
 import { StatusBadge } from './status-badge'
 
@@ -199,7 +200,7 @@ export function ProductionCalendar({ schedules, initialTasks, profiles, currentW
             Cliente
           </div>
           {DAYS.map((day, i) => {
-            const isToday = weekDates[i].toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)
+            const isToday = todayISO(weekDates[i]) === todayISO()
             return (
               <div key={day} className={cn(
                 'px-2 py-2 text-center border-l border-border',
@@ -258,7 +259,7 @@ export function ProductionCalendar({ schedules, initialTasks, profiles, currentW
                 {/* Day cells */}
                 {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => {
                   const cells = dayCells.get(dayNum) ?? []
-                  const isTodayCol = weekDates[dayNum - 1].toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)
+                  const isTodayCol = todayISO(weekDates[dayNum - 1]) === todayISO()
                   return (
                     <div key={dayNum} className={cn('border-l border-border px-1.5 py-1.5 flex flex-col gap-1 min-h-[44px]', isTodayCol && 'bg-primary/5')}>
                       {cells.map((cell) => {
@@ -339,7 +340,7 @@ export function ProductionCalendar({ schedules, initialTasks, profiles, currentW
         <div className="grid grid-cols-[200px_repeat(7,1fr)] rounded-lg border border-border overflow-hidden text-xs">
           <div className="bg-muted/50 px-3 py-2 font-semibold text-muted-foreground">Total diario</div>
           {dailyTotals.map((total, i) => {
-            const isTodayFoot = weekDates[i].toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)
+            const isTodayFoot = todayISO(weekDates[i]) === todayISO()
             return (
               <div key={i} className={cn(
                 'border-l border-border px-2 py-2 text-center font-semibold',

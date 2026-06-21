@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.79 — 2026-06-21
+
+- **El calendario de Producción resalta el día de hoy correctamente de noche.** El recuadro/columna de "hoy" en **Producción → Calendario** se calculaba en horario UTC, así que después de las 8pm (hora de Puerto Rico) el resaltado saltaba al día siguiente. Ahora se ancla al día local, así que "hoy" es hoy a cualquier hora.
+
 ## v2.78 — 2026-06-21
 
 - **Borrar una tarea de Producción ahora pide confirmación bonita.** La tarjeta de tarea en **Producción** usaba el cuadro gris del navegador (`confirm()`) para eliminar; ahora abre el diálogo de confirmación en español con botón rojo, bloquea el cierre mientras borra y **avisa con un toast** ("Tarea eliminada" o un error claro). Mismo patrón que el resto de la app.
