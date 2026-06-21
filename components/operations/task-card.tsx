@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   MoreHorizontal,
   Clock,
@@ -50,6 +51,7 @@ interface TaskCardProps {
 export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
   const [isPending, startTransition] = useTransition()
   const [editingDue, setEditingDue] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const dueDateRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
@@ -67,12 +69,14 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
   }
 
   function handleDelete() {
-    if (!confirm('¿Eliminar esta tarea?')) return
     startTransition(async () => {
       const result = await deleteTask(task.id)
       if (result.error) {
         toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+        return
       }
+      toast({ title: 'Tarea eliminada' })
+      setConfirmOpen(false)
     })
   }
 
@@ -88,6 +92,7 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
   }
 
   return (
+    <>
     <Card
       className={cn('transition-opacity group/card cursor-pointer hover:shadow-md', isPending && 'opacity-60')}
       onClick={() => onOpenDetail?.(task)}
@@ -235,7 +240,7 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive cursor-pointer"
-                onClick={handleDelete}
+                onClick={(e) => { e.stopPropagation(); setConfirmOpen(true) }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Eliminar
@@ -245,5 +250,17 @@ export function TaskCard({ task, onEdit, onOpenDetail }: TaskCardProps) {
         </div>
       </CardContent>
     </Card>
+
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={setConfirmOpen}
+      title="Eliminar tarea"
+      description="Esta acción no se puede deshacer."
+      confirmLabel="Eliminar"
+      destructive
+      loading={isPending}
+      onConfirm={handleDelete}
+    />
+    </>
   )
 }
