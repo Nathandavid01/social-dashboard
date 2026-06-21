@@ -33,11 +33,11 @@ import { Button } from '@/components/ui/button'
 import { friendlyError } from '@/lib/utils/error-message'
 
 const eventSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'El título es obligatorio'),
   client_id: z.string().uuid().optional().nullable(),
   platform: z.enum(['instagram', 'facebook', 'tiktok', 'linkedin']),
   status: z.enum(['draft', 'scheduled', 'published', 'cancelled']),
-  scheduled_at: z.string().min(1, 'Date/time is required'),
+  scheduled_at: z.string().min(1, 'La fecha y hora son obligatorias'),
 })
 
 type EventFormValues = z.infer<typeof eventSchema>
@@ -76,7 +76,7 @@ export function AddEventDialog({
         toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
         return
       }
-      toast({ title: 'Event created' })
+      toast({ title: 'Evento creado' })
       form.reset()
       onOpenChange(false)
     })
@@ -86,7 +86,7 @@ export function AddEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Schedule Content</DialogTitle>
+          <DialogTitle>Programar contenido</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -95,9 +95,9 @@ export function AddEventDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Post description..." {...field} />
+                    <Input placeholder="Descripción del post..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,7 +110,7 @@ export function AddEventDialog({
                 name="platform"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Platform</FormLabel>
+                    <FormLabel>Plataforma</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -134,7 +134,7 @@ export function AddEventDialog({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>Estado</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -142,9 +142,9 @@ export function AddEventDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="draft">Borrador</SelectItem>
+                        <SelectItem value="scheduled">Programado</SelectItem>
+                        <SelectItem value="published">Publicado</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -158,18 +158,18 @@ export function AddEventDialog({
               name="client_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Client</FormLabel>
+                  <FormLabel>Cliente</FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(v === 'none' ? null : v)}
                     defaultValue="none"
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="No client" />
+                        <SelectValue placeholder="Sin cliente" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">No client</SelectItem>
+                      <SelectItem value="none">Sin cliente</SelectItem>
                       {clients.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.name}
@@ -187,7 +187,7 @@ export function AddEventDialog({
               name="scheduled_at"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Scheduled Date & Time</FormLabel>
+                  <FormLabel>Fecha y hora</FormLabel>
                   <FormControl>
                     <Input type="datetime-local" {...field} />
                   </FormControl>
@@ -198,10 +198,10 @@ export function AddEventDialog({
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? 'Saving...' : 'Schedule'}
+                {isPending ? 'Guardando...' : 'Programar'}
               </Button>
             </div>
           </form>
