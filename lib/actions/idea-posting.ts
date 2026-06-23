@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { createDraftPost } from '@/lib/metricool/post'
 import { getR2PublicUrl } from '@/lib/actions/idea-videos-r2'
+import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms } from '@/lib/utils/idea-posting-core'
 
@@ -122,6 +123,16 @@ async function runIdeaPost(
   const pub = await getR2PublicUrl((edited as { id: string }).id)
   if (pub.error || !pub.url) {
     const msg = pub.error ?? 'No se pudo obtener la URL pública del video editado'
+    await releaseClaim(msg)
+    return { error: msg }
+  }
+
+  // Pre-flight the public video the way Metricool's player will (a Range
+  // request expecting 206). Block here instead of silently sending a URL that
+  // makes the preview spin forever. See lib/integrations/video-health.ts.
+  const health = await checkVideoPlayable(pub.url)
+  if (!health.ok) {
+    const msg = `El video no se puede reproducir desde su URL pública: ${health.reason}`
     await releaseClaim(msg)
     return { error: msg }
   }

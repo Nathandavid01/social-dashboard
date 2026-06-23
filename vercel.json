@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/metricool-sync", "schedule": "0 12 * * *" }
+    { "path": "/api/cron/metricool-sync", "schedule": "0 12 * * *" },
+    { "path": "/api/cron/video-health", "schedule": "0 13 * * *" }
   ]
 }
