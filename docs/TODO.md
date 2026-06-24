@@ -43,3 +43,8 @@ Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelkn
 
 ## Responsive
 - [ ] Make the **client profile tabs** (Captions, Contenido, etc.) responsive on small screens.
+
+## Cadencia (home widget — impulsado por Metricool)
+- [x] Widget mide cadencia configurada (posting_days = meta) vs realidad de Metricool (publicado/atrasado/pendiente). Calendario de producción ya NO alimenta el widget.
+- [ ] **Optimización:** cron `app/api/cron/metricool-sync` que escriba un snapshot semanal por cliente a una tabla nueva (req. migración nueva que aplica Nathan en Supabase), para que el widget lea de la DB en vez de barrer Metricool en vivo (~60 llamadas/cargas, hoy mitigado con unstable_cache 10 min).
+- [ ] Considerar mostrar "sin meta" (clientes sin posting_days) con un CTA para configurar su cadencia, ya que publican pero no cuentan para el anillo.

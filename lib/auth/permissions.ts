@@ -54,6 +54,8 @@ export type Permission =
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
+  // Cadence (home posting-cadence widget, read-only)
+  | 'cadence.read'
   // Team & admin
   | 'team.read'
   | 'team.assign_roles'
@@ -90,6 +92,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
     'planning.read', 'planning.act', 'planning.assign', 'planning.move',
+    'cadence.read',
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
@@ -105,7 +108,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'recording.read',
     'posting.read', 'captions.use', 'captions.edit',
     'metricool.read',
-    'weekly_compliance.read', 'activity.read',
+    'weekly_compliance.read', 'cadence.read', 'activity.read',
     'planning.read', 'planning.act', 'planning.move',
     'alerts.read',
   ],
@@ -118,7 +121,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video_reviews.read', 'video_reviews.write', 'video.upload',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete',
-    'weekly_compliance.read', 'activity.read',
+    'weekly_compliance.read', 'cadence.read', 'activity.read',
     'planning.read',
     'alerts.read',
   ],
