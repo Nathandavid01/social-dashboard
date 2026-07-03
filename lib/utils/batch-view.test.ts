@@ -84,16 +84,16 @@ describe('contentTypeLabel', () => {
 })
 
 describe('videoStageKey', () => {
-  it('is "idea" with no content', () => {
-    expect(videoStageKey(mk())).toBe('idea')
+  it('is "video" with no content (pre-edit collapses to Video)', () => {
+    expect(videoStageKey(mk())).toBe('video')
   })
-  it('is "caption" once hook and visual_brief are filled (idea ready)', () => {
-    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('idea')
-    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('idea')
-    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('caption')
+  it('stays "video" through idea/caption prep (collapsed into Video)', () => {
+    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('video')
+    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('video')
+    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('video')
   })
-  it('is "caption" once a caption is generated', () => {
-    expect(videoStageKey(mk({ hook: 'g', visual_brief: 'b', generated_caption: 'texto' }))).toBe('caption')
+  it('stays "video" once a caption is generated (still pre-edit)', () => {
+    expect(videoStageKey(mk({ hook: 'g', visual_brief: 'b', generated_caption: 'texto' }))).toBe('video')
   })
   it('is "video" when a raw file is uploaded (even if status not advanced)', () => {
     expect(videoStageKey(mk({ generated_caption: 'c', videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('video')
@@ -115,15 +115,15 @@ describe('videoStageKey', () => {
 })
 
 describe('batchStageKey', () => {
-  it('returns "idea" for an empty batch', () => {
-    expect(batchStageKey([])).toBe('idea')
+  it('returns "video" for an empty batch', () => {
+    expect(batchStageKey([])).toBe('video')
   })
   it('returns the LEAST-advanced active video stage (videos move together)', () => {
     const videos = [
-      mk({ id: 'a', status: 'grabada' }), // video
-      mk({ id: 'b', hook: 'g' }), // idea (partial)
+      mk({ id: 'a', status: 'producida' }), // edited
+      mk({ id: 'b', status: 'grabada' }), // video
     ]
-    expect(batchStageKey(videos)).toBe('idea')
+    expect(batchStageKey(videos)).toBe('video')
   })
   it('ignores discarded videos', () => {
     const videos = [
@@ -143,19 +143,18 @@ describe('batchStageKey', () => {
 
 describe('buildStepper', () => {
   it('marks earlier stages done, the current stage current, later ones neither', () => {
-    const stepper = buildStepper([mk({ status: 'grabada' })]) // batch at "video"
+    const stepper = buildStepper([mk({ status: 'producida', approval_status: 'submitted' })]) // batch at "approval"
     const byKey = Object.fromEntries(stepper.map((s) => [s.key, s]))
-    expect(byKey.idea.done).toBe(true)
-    expect(byKey.title.done).toBe(true)
-    expect(byKey.caption.done).toBe(true)
-    expect(byKey.video.current).toBe(true)
-    expect(byKey.video.done).toBe(false)
-    expect(byKey.edited.done).toBe(false)
-    expect(byKey.edited.current).toBe(false)
+    expect(byKey.video.done).toBe(true)
+    expect(byKey.edited.done).toBe(true)
+    expect(byKey.approval.current).toBe(true)
+    expect(byKey.approval.done).toBe(false)
+    expect(byKey.publication.done).toBe(false)
+    expect(byKey.publication.current).toBe(false)
   })
   it('uses Spanish labels', () => {
     const labels = buildStepper([]).map((s) => s.label)
-    expect(labels).toEqual(['Idea', 'Título', 'Caption', 'Video', 'Edición', 'Aprobación', 'Publicación'])
+    expect(labels).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
   })
 })
 

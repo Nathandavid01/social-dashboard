@@ -54,7 +54,7 @@ export function PipelineStepAssigneesForm({ initial, members }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Responsables del pipeline (paso a paso)</CardTitle>
         <p className="text-xs text-muted-foreground">
-          Quién hace cada etapa del tablero: Idea → Título → Caption → Video → Edición → Aprobación → Publicación.
+          Quién hace cada etapa del tablero: Video → Edición → Aprobación → Publicación.
           Las tarjetas planificadas muestran al responsable del paso actual.
         </p>
       </CardHeader>

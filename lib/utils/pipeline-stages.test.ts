@@ -14,15 +14,15 @@ function idea(over: Partial<StageInput> = {}): StageInput {
 }
 
 describe('computeStage — furthest milestone reached', () => {
-  it('bare card with only a title → title', () => {
-    expect(computeStage(idea())).toBe('title')
+  it('bare card (pre-edit) → video', () => {
+    expect(computeStage(idea())).toBe('video')
   })
-  it('hook or visual brief filled → idea', () => {
-    expect(computeStage(idea({ hook: 'Un gancho' }))).toBe('idea')
-    expect(computeStage(idea({ visual_brief: 'Plano abierto' }))).toBe('idea')
+  it('hook or visual brief filled → still video (collapsed)', () => {
+    expect(computeStage(idea({ hook: 'Un gancho' }))).toBe('video')
+    expect(computeStage(idea({ visual_brief: 'Plano abierto' }))).toBe('video')
   })
-  it('caption written → caption', () => {
-    expect(computeStage(idea({ hook: 'x', generated_caption: 'Caption listo' }))).toBe('caption')
+  it('caption written → still video (collapsed)', () => {
+    expect(computeStage(idea({ hook: 'x', generated_caption: 'Caption listo' }))).toBe('video')
   })
   it('grabada → video', () => {
     expect(computeStage(idea({ status: 'grabada', generated_caption: 'c' }))).toBe('video')
@@ -42,20 +42,17 @@ describe('computeStage — furthest milestone reached', () => {
 
 describe('adjacentStage', () => {
   it('moves forward and backward', () => {
-    expect(adjacentStage('idea', 1)).toBe('caption')
-    expect(adjacentStage('idea', -1)).toBe('title')
+    expect(adjacentStage('video', 1)).toBe('edited')
+    expect(adjacentStage('edited', -1)).toBe('video')
   })
   it('returns null at the ends', () => {
-    expect(adjacentStage('title', -1)).toBeNull()
+    expect(adjacentStage('video', -1)).toBeNull()
     expect(adjacentStage('publication', 1)).toBeNull()
   })
 })
 
 describe('stageToStatus', () => {
-  it('maps board stages to the persisting base status', () => {
-    expect(stageToStatus('title')).toBe('idea')
-    expect(stageToStatus('idea')).toBe('idea')
-    expect(stageToStatus('caption')).toBe('idea')
+  it('maps the 4 board stages to the persisting base status', () => {
     expect(stageToStatus('video')).toBe('grabada')
     expect(stageToStatus('edited')).toBe('producida')
     expect(stageToStatus('approval')).toBe('producida')
@@ -64,7 +61,7 @@ describe('stageToStatus', () => {
 })
 
 describe('bucketByStage', () => {
-  it('groups cards into the 7 columns and preserves order', () => {
+  it('groups cards into the 4 columns and preserves order', () => {
     const cards = [
       idea({ status: 'publicada' }),
       idea({ hook: 'h' }),
@@ -72,8 +69,7 @@ describe('bucketByStage', () => {
     ]
     const b = bucketByStage(cards)
     expect(b.publication).toHaveLength(1)
-    expect(b.idea).toHaveLength(1)
-    expect(b.title).toHaveLength(1)
+    expect(b.video).toHaveLength(2)
     expect(Object.keys(b)).toEqual(PIPELINE_STAGES.map((s) => s.key))
   })
 })

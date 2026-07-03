@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.82 — 2026-07-02
+
+- **El tablero del pipeline ahora es más corto y práctico: 4 columnas en vez de 7.** El proceso arranca desde el video: **Video → Edición → Aprobación → Publicación**. Todo lo que antes eran columnas separadas de preparación (Idea, Título, Caption) ahora vive dentro de la primera columna **Video** — ahí defines la idea y el caption si faltan y subes la grabación. Así el tablero se lee de un vistazo y el equipo trabaja desde el punto que importa: el video ya grabado y agendado. El chip **"Grabado / Por grabar"** sigue distinguiendo lo que falta grabar dentro de esa columna.
+
 ## v2.81 — 2026-06-21
 
 - **"Borrar todo" los horarios de un cliente ahora pide confirmación clara.** En **Producción → Horarios**, el botón que borra *todos* los horarios de un cliente usaba el cuadro gris del navegador; ahora abre el diálogo de confirmación en español que **nombra al cliente** ("Se eliminarán todos los horarios de …"), con botón rojo, bloqueo mientras borra y **toast** al terminar. Es la acción más peligrosa del módulo, así que ahora está mejor protegida.

@@ -3,9 +3,9 @@ import { parsePipelineStepAssignees, resolveStepAssignee } from './pipeline-step
 
 describe('parsePipelineStepAssignees', () => {
   it('keeps valid stage keys only', () => {
-    expect(parsePipelineStepAssignees({ idea: 'u1', bogus: 'x', title: 'u2' })).toEqual({
-      idea: 'u1',
-      title: 'u2',
+    expect(parsePipelineStepAssignees({ video: 'u1', bogus: 'x', edited: 'u2' })).toEqual({
+      video: 'u1',
+      edited: 'u2',
     })
   })
 
@@ -18,12 +18,12 @@ describe('parsePipelineStepAssignees', () => {
 describe('resolveStepAssignee', () => {
   it('resolves a configured owner', () => {
     expect(
-      resolveStepAssignee('idea', { idea: 'u1' }, { u1: 'Ana Torres' }),
+      resolveStepAssignee('video', { video: 'u1' }, { u1: 'Ana Torres' }),
     ).toEqual({ id: 'u1', name: 'Ana Torres' })
   })
 
   it('returns null when unassigned or profile missing', () => {
-    expect(resolveStepAssignee('idea', {}, { u1: 'Ana' })).toBeNull()
-    expect(resolveStepAssignee('idea', { idea: 'u9' }, { u1: 'Ana' })).toBeNull()
+    expect(resolveStepAssignee('video', {}, { u1: 'Ana' })).toBeNull()
+    expect(resolveStepAssignee('video', { video: 'u9' }, { u1: 'Ana' })).toBeNull()
   })
 })

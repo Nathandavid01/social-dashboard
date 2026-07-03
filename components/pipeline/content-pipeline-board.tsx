@@ -29,7 +29,7 @@ export interface PlannedClient {
   /** Last client update — proxy for when they entered this pipeline row. */
   inColumnSince?: string | null
   platforms?: SocialPlatform[]
-  /** Pipeline column this planned slot is waiting in (always idea for now). */
+  /** Pipeline column this planned slot is waiting in (always video for now). */
   nextStage?: BatchStageKey
   /** Team member configured in settings for `nextStage`. */
   stepAssignee?: { id: string; name: string } | null
@@ -37,8 +37,7 @@ export interface PlannedClient {
 }
 
 const STAGE_DOT: Record<BatchStageKey, string> = {
-  idea: '#3b82f6', title: '#64748b', caption: '#a855f7', video: '#06b6d4',
-  edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
+  video: '#06b6d4', edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
@@ -142,7 +141,7 @@ export function ContentPipelineBoard({
   const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
 
   const byStage = useMemo(() => {
-    const out = { idea: [], title: [], caption: [], video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
+    const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
     for (const b of visible) out[stageOf(b)].push(b)
     return out
   }, [visible, stageOf])
@@ -260,7 +259,7 @@ export function ContentPipelineBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'idea' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>
