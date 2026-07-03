@@ -8,6 +8,7 @@ import {
   cardStatus,
   slotStatus,
   batchHint,
+  videoNextStep,
   type BatchVideo,
 } from './batch-view'
 import type { ContentIdeaVideo } from '@/lib/supabase/types'
@@ -185,5 +186,42 @@ describe('batchHint', () => {
     const hint = batchHint([mk({ status: 'grabada' })])
     expect(hint.stageLabel).toBe('Video')
     expect(hint.tip).toMatch(/raw/i)
+  })
+})
+
+describe('videoNextStep — the single "what to do next" per video', () => {
+  it('walks the happy path in order: caption → edited → review → approve → publish', () => {
+    expect(videoNextStep(mk())).toEqual({ label: 'Siguiente: genera el caption', tone: 'action' })
+    expect(videoNextStep(mk({ generated_caption: 'c' }))).toEqual({
+      label: 'Siguiente: sube el video editado',
+      tone: 'action',
+    })
+    expect(
+      videoNextStep(mk({ generated_caption: 'c', videos: { raw: [], broll: [], edited: [rawFile()] } })),
+    ).toEqual({ label: 'Siguiente: envía a revisión', tone: 'action' })
+    expect(videoNextStep(mk({ approval_status: 'submitted' }))).toEqual({
+      label: 'En revisión — aprueba o pide cambios',
+      tone: 'waiting',
+    })
+    expect(videoNextStep(mk({ approval_status: 'approved' }))).toEqual({
+      label: 'Aprobado — listo para Metricool',
+      tone: 'action',
+    })
+  })
+
+  it('flags requested changes', () => {
+    expect(videoNextStep(mk({ approval_status: 'revision_needed' }))).toEqual({
+      label: 'Cambios pedidos — corrige y reenvía',
+      tone: 'warn',
+    })
+  })
+
+  it('shows scheduled and published end states', () => {
+    expect(videoNextStep(mk({ metricool_post_id: 123 } as Partial<BatchVideo>))).toEqual({
+      label: 'Programado en Metricool',
+      tone: 'done',
+    })
+    expect(videoNextStep(mk({ status: 'publicada' }))).toEqual({ label: 'Publicado', tone: 'done' })
+    expect(videoNextStep(mk({ published_at: '2026-07-01' }))).toEqual({ label: 'Publicado', tone: 'done' })
   })
 })

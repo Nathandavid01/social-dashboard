@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.84 — 2026-07-02
+
+- **El pipeline ahora es más profesional y claro para el equipo.** Tres mejoras en una:
+  - **Publicar a Metricool desde la tarjeta del video.** Una vez aprobado, la tarjeta muestra el botón **"Publicar a Metricool"** (roles con permiso de publicar); al programarse, aparece el badge **"En Metricool"**. Ya no hay que salir del lote para publicar.
+  - **Cada video te dice qué sigue.** La tarjeta muestra una línea de siguiente paso con color según el estado: *"Siguiente: genera el caption"*, *"Sube el video editado"*, *"Envía a revisión"*, *"En revisión"*, *"Cambios pedidos"*, *"Aprobado — listo para Metricool"*, *"Programado en Metricool"* o *"Publicado"*. Nadie se queda adivinando.
+  - **Aprobar ya no es silencioso.** Al aprobar, el aviso te dice si el video **quedó programado en Metricool** o por qué aún no (ej. "Falta el caption") — antes solo decía "estado actualizado" aunque la publicación fallara por debajo.
+- **El tablero habla español.** Las columnas ahora se leen **Video → Edición → Aprobación → Publicación** (antes "Edited/Approval/Publication" en inglés) y el título es **"Pipeline de contenido"**.
+
 ## v2.83 — 2026-07-02
 
 - **Trabajar desde el video ya grabado: caption con AI + grabación sin bloqueo.** En la tarjeta de cada video, la sección de **Grabación** ya no se bloquea hasta guardar el caption — como el video ya está grabado y agendado, puedes subir el archivo y llenar caption/título/idea en cualquier orden. Además, el **caption con AI** (mismo motor y mismo sistema de aprendizaje que el generador de ideas: ejemplos aprobados + 👍/👎 + voz del cliente) ya vive en la tarjeta del video; ahora el **rol Video/videógrafo** también puede **generar y editar** captions, para que quien sube el video pueda dejar el caption listo.

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { cardStatus, contentTypeLabel, isRecorded, type BatchVideo } from '@/lib/utils/batch-view'
+import { cardStatus, contentTypeLabel, isRecorded, videoNextStep, type NextStepTone, type BatchVideo } from '@/lib/utils/batch-view'
 import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
@@ -11,7 +11,22 @@ import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ApprovalButton } from '@/components/produccion/approval-button'
+import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import type { SocialPlatform } from '@/lib/supabase/types'
+
+/** Text + dot color per next-step tone (semantic, not the brand accent). */
+const NEXT_STEP_TONE: Record<NextStepTone, string> = {
+  done: 'text-emerald-600 dark:text-emerald-400',
+  action: 'text-amber-600 dark:text-amber-400',
+  waiting: 'text-sky-600 dark:text-sky-400',
+  warn: 'text-red-600 dark:text-red-400',
+}
+const NEXT_STEP_DOT: Record<NextStepTone, string> = {
+  done: 'bg-emerald-500',
+  action: 'bg-amber-500',
+  waiting: 'bg-sky-500',
+  warn: 'bg-red-500',
+}
 
 const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 /** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
@@ -61,6 +76,9 @@ export function VideoWorkCard({
     setHashtags(video.hashtags_suggestion ?? '')
     setSavedCaption(video.generated_caption ?? '')
   }, [video.id, video.hook, video.visual_brief, video.caption_angle, video.hashtags_suggestion, video.generated_caption])
+
+  // "Qué sigue" reacts to the locally-saved caption without waiting for a refetch.
+  const nextStep = videoNextStep({ ...video, generated_caption: savedCaption || video.generated_caption })
 
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
@@ -147,18 +165,24 @@ export function VideoWorkCard({
         <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
       </div>
 
-      {/* aprobación — enviar a revisión / aprobar / pedir cambios según el estado */}
+      {/* siguiente paso + acciones — revisión / aprobación / publicar a Metricool */}
       <footer className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3">
-        <span className="text-[11px] text-muted-foreground">
-          Cuando el video editado esté listo, envíalo a revisión o apruébalo para publicar.
+        <span className={cn('inline-flex items-center gap-1.5 text-[11px] font-medium', NEXT_STEP_TONE[nextStep.tone])}>
+          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', NEXT_STEP_DOT[nextStep.tone])} aria-hidden />
+          {nextStep.label}
         </span>
-        <ApprovalButton
-          ideaId={video.id}
-          approvalStatus={video.approval_status}
-          clientName={clientName}
-          clientLogoUrl={clientLogoUrl}
-          ideaTitle={video.title}
-        />
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <ApprovalButton
+            ideaId={video.id}
+            approvalStatus={video.approval_status}
+            clientName={clientName}
+            clientLogoUrl={clientLogoUrl}
+            ideaTitle={video.title}
+          />
+          {video.approval_status === 'approved' && !(video.published_at || video.status === 'publicada') && (
+            <PublishToMetricoolButton ideaId={video.id} metricoolPostId={video.metricool_post_id} />
+          )}
+        </div>
       </footer>
     </section>
   )

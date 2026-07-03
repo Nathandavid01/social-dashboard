@@ -63,6 +63,7 @@ const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) a
   number
 >
 
+const filled = (s?: string | null) => !!s && s.trim().length > 0
 const hasRaw = (v: BatchVideo) => v.videos.raw.length > 0
 const hasEdited = (v: BatchVideo) => v.videos.edited.length > 0
 
@@ -130,6 +131,29 @@ export function cardStatus(v: BatchVideo): CardStatus {
   return isRecorded(v)
     ? { key: 'grabado', label: 'Grabado' }
     : { key: 'por_grabar', label: 'Por grabar' }
+}
+
+export type NextStepTone = 'done' | 'action' | 'waiting' | 'warn'
+
+export interface NextStep {
+  label: string
+  tone: NextStepTone
+}
+
+/**
+ * The single "what to do next" line for a video card, in plain Spanish. One
+ * clear next action per state so the team never wonders what's missing:
+ * caption → edited upload → review → approve → Metricool → published.
+ */
+export function videoNextStep(v: BatchVideo): NextStep {
+  if (v.published_at || v.status === 'publicada') return { label: 'Publicado', tone: 'done' }
+  if (v.metricool_post_id != null) return { label: 'Programado en Metricool', tone: 'done' }
+  if (v.approval_status === 'approved') return { label: 'Aprobado — listo para Metricool', tone: 'action' }
+  if (v.approval_status === 'submitted') return { label: 'En revisión — aprueba o pide cambios', tone: 'waiting' }
+  if (v.approval_status === 'revision_needed') return { label: 'Cambios pedidos — corrige y reenvía', tone: 'warn' }
+  if (!filled(v.generated_caption)) return { label: 'Siguiente: genera el caption', tone: 'action' }
+  if (!hasEdited(v)) return { label: 'Siguiente: sube el video editado', tone: 'action' }
+  return { label: 'Siguiente: envía a revisión', tone: 'action' }
 }
 
 export type SlotTone = 'ready' | 'pending' | 'muted'

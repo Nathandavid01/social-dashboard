@@ -44,11 +44,18 @@ export function ApprovalButton({ ideaId, approvalStatus, clientName, clientLogoU
   const [pending, startTransition] = useTransition()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
-  function run(action: () => Promise<{ ok?: true; error?: string }>) {
+  function run(
+    action: () => Promise<{ ok?: true; error?: string; autopost?: { posted: boolean; skipped?: string } | null }>,
+  ) {
     startTransition(async () => {
       const res = await action()
       if (res?.error) {
         toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      } else if (res?.autopost?.posted) {
+        // Approval also scheduled the Metricool post — say so, don't stay silent.
+        toast({ title: 'Aprobado y programado en Metricool', description: 'El video se publicará en su fecha planificada.' })
+      } else if (res?.autopost?.skipped) {
+        toast({ title: 'Aprobado', description: `Aún no va a Metricool: ${res.autopost.skipped}` })
       } else {
         toast({ title: 'Listo', description: 'Estado de aprobación actualizado.' })
       }
