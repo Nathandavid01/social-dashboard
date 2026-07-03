@@ -1,7 +1,7 @@
 /**
- * IdeaBriefCard — the editable "La idea" step-1 card on the idea detail page.
- * Collapses once generated; fields (hook, brief, caption angle, hashtags) and the
- * publish date are editable inline and persist via server actions.
+ * IdeaBriefCard — simplified: ONE question ("¿De qué es este video?") drives
+ * the AI caption; dates/brief/angle/hashtags hide behind "Más detalles
+ * (opcional)". Fields persist via server actions.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
@@ -22,30 +22,43 @@ beforeEach(() => {
   updateIdeaDates.mockClear()
 })
 
-describe('IdeaBriefCard', () => {
-  it('always shows the "La idea" title', () => {
-    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" />)
-    expect(screen.getByText('La idea')).toBeInTheDocument()
+describe('IdeaBriefCard — simple por defecto', () => {
+  it('asks the one question that generates the caption', () => {
+    render(<IdeaBriefCard ideaId="i1" />)
+    expect(screen.getByText('¿De qué es este video?')).toBeInTheDocument()
+    expect(screen.getByText(/la ai escribe el caption/i)).toBeInTheDocument()
   })
 
-  it('starts collapsed when generated (hook + brief), hiding the fields', () => {
-    render(<IdeaBriefCard ideaId="i1" hook="Mi hook" visualBrief="Mi brief" />)
-    expect(screen.queryByText('Mi hook')).toBeNull()
+  it('shows the topic inline (no collapse hiding it)', () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Mi tema" visualBrief="Mi brief" />)
+    expect(screen.getByText('Mi tema')).toBeInTheDocument()
   })
 
-  it('expands and persists an edited field via updateIdeaBrief', async () => {
-    render(<IdeaBriefCard ideaId="i1" hook="Mi hook" visualBrief="Mi brief" />)
-    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
-    fireEvent.click(screen.getByRole('button', { name: /editar hook/i }))
-    const input = screen.getByLabelText('Hook')
-    fireEvent.change(input, { target: { value: 'Nuevo hook' } })
+  it('hides the advanced fields until "Más detalles" is opened', () => {
+    render(<IdeaBriefCard ideaId="i1" />)
+    expect(screen.queryByText(/brief visual/i)).toBeNull()
+    expect(screen.queryByText(/ángulo del caption/i)).toBeNull()
+    expect(screen.queryByText(/fecha límite/i)).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: /más detalles/i }))
+    expect(screen.getAllByText(/brief visual/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/ángulo del caption/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/fecha límite/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/fecha de publicación/i).length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('persists the edited topic via updateIdeaBrief (as the hook)', async () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Viejo tema" />)
+    fireEvent.click(screen.getByRole('button', { name: /editar ¿de qué es este video\?/i }))
+    const input = screen.getByLabelText('¿De qué es este video?')
+    fireEvent.change(input, { target: { value: 'Nuevo tema' } })
     fireEvent.blur(input)
-    await waitFor(() => expect(updateIdeaBrief).toHaveBeenCalledWith('i1', { hook: 'Nuevo hook' }))
+    await waitFor(() => expect(updateIdeaBrief).toHaveBeenCalledWith('i1', { hook: 'Nuevo tema' }))
   })
 
-  it('persists the publish date via updateIdeaDates', async () => {
-    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" publishDate={null} />)
-    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
+  it('persists the publish date via updateIdeaDates (inside Más detalles)', async () => {
+    render(<IdeaBriefCard ideaId="i1" publishDate={null} />)
+    fireEvent.click(screen.getByRole('button', { name: /más detalles/i }))
     fireEvent.click(screen.getByRole('button', { name: /editar fecha de publicación/i }))
     const input = screen.getByLabelText('Fecha de publicación')
     fireEvent.change(input, { target: { value: '2026-06-10' } })
@@ -53,9 +66,9 @@ describe('IdeaBriefCard', () => {
     await waitFor(() => expect(updateIdeaDates).toHaveBeenCalledWith('i1', { publish_date: '2026-06-10' }))
   })
 
-  it('persists the deadline (fecha límite) via updateIdeaDates', async () => {
-    render(<IdeaBriefCard ideaId="i1" hook="h" visualBrief="b" deadline={null} />)
-    fireEvent.click(screen.getByRole('button', { name: /la idea/i })) // expand
+  it('persists the deadline via updateIdeaDates (inside Más detalles)', async () => {
+    render(<IdeaBriefCard ideaId="i1" deadline={null} />)
+    fireEvent.click(screen.getByRole('button', { name: /más detalles/i }))
     fireEvent.click(screen.getByRole('button', { name: /editar fecha límite/i }))
     const input = screen.getByLabelText('Fecha límite')
     fireEvent.change(input, { target: { value: '2026-06-15' } })

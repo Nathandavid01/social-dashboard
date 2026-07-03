@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.88 — 2026-07-03
+
+- **La tarjeta del video ahora es simple: sube el video y di de qué es.** Se acabó la tarjeta gigante. El orden nuevo: **1) Sube el video** (arriba de todo), **2) "¿De qué es este video?"** — con solo eso la AI escribe el caption, igual que en el generador de ideas. Los campos avanzados (brief visual, ángulo, hashtags, fechas) siguen ahí pero recogidos en **"Más detalles (opcional)"**. Ya no hace falta llenar hook + brief visual para generar el caption — basta con decir el tema.
+
 ## v2.87 — 2026-07-02
 
 - **Fix crítico del cron de tarjetas.** En producción, cada corrida del cron veía una copia vieja (en caché) del tablero vacío y volvía a crear TODAS las tarjetas — 4 corridas de prueba crearon 616 duplicadas (ya limpiadas). Ahora el cron lee la base de datos en vivo, sin caché: la primera corrida crea las tarjetas de la semana y las siguientes crean solo lo que falte.

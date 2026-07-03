@@ -113,15 +113,14 @@ export function IdeaCaptionEditor({
             <Lightbulb className="h-3 w-3 text-purple-500" aria-hidden />
             Idea para este caption
           </p>
-          {hook && <p><span className="font-medium text-foreground/70">Hook:</span> {hook}</p>}
+          {hook && <p><span className="font-medium text-foreground/70">De qué es:</span> {hook}</p>}
           {visualBrief && <p><span className="font-medium text-foreground/70">Brief visual:</span> {visualBrief}</p>}
           {captionAngle && <p><span className="font-medium text-foreground/70">Ángulo:</span> {captionAngle}</p>}
           {hashtags && <p className="font-mono text-[11px]">{hashtags}</p>}
         </div>
       ) : (
         <p className="rounded-md border border-dashed border-amber-500/30 bg-amber-500/5 px-2.5 py-2 text-xs text-amber-600 dark:text-amber-400">
-          Completa el hook y el brief visual de la idea antes del caption. Así sabrás qué decir al grabar.
-          {missing.length > 0 && <span className="mt-1 block">Falta: {missing.join(', ')}</span>}
+          Di de qué es el video (arriba) y la AI escribe el caption — igual que en el generador de ideas.
         </p>
       )}
 

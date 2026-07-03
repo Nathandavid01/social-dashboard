@@ -181,7 +181,7 @@ export function batchHint(videos: BatchVideo[]): { stageLabel: string; tip: stri
   const stage = batchStageKey(videos)
   const tips: Record<BatchStageKey, string> = {
     video:
-      'Define la idea y el caption si faltan, y sube el archivo grabado (raw) de cada video. Cuando todos tengan su grabación, el lote avanza a Edición.',
+      'Sube el archivo grabado (raw), di de qué es el video y genera el caption con AI. Cuando todos tengan su grabación, el lote avanza a Edición.',
     edited: 'Sube la versión editada de cada video para enviarla a Aprobación.',
     approval: 'Envía los videos al cliente y espera su aprobación para publicar.',
     publication: 'Programa o publica los videos aprobados. ¡Este lote está casi listo!',
