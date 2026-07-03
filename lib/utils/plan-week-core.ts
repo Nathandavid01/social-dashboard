@@ -1,4 +1,5 @@
 import { nextPostingDates, formatPlannedPublishLabel } from '@/lib/utils/planned-sessions'
+import { addDaysISO } from '@/lib/utils/deadlines'
 
 /**
  * Pure planner for the weekly auto-created cards: for every active client with
@@ -6,8 +7,19 @@ import { nextPostingDates, formatPlannedPublishLabel } from '@/lib/utils/planned
  * coming window — so the card "opens by itself" on the team's board and they
  * only fill in the video, caption and title.
  *
- * Idempotent by design: a date that already has ANY idea for that client
- * (including a discarded one — the team said no) is never re-created.
+ * Two guards make it safe to run daily against real production data:
+ *
+ * 1. EXACT-DATE BLOCK — a date that already has ANY idea for that client
+ *    (including a discarded one: the team said no) is never re-created.
+ * 2. IN-FLIGHT ACCOUNTING — every unpublished active idea the client already
+ *    has (dated or not) consumes one upcoming slot, so a client with a full
+ *    plate gets NO new cards until work ships. This mirrors how the product
+ *    already thinks (findNextNewVideoSlot: a new video takes slot[activeCount])
+ *    and keeps auto-cards from spamming worked clients, dragging their batch
+ *    card back to the Video column, or accumulating without bound.
+ *
+ * Deliberately conservative: dated in-window ideas both block their date AND
+ * count as in-flight, so if anything we create FEWER cards, never more.
  * Dependency-free so the cron logic is fully unit-testable.
  */
 
@@ -32,18 +44,11 @@ export interface PlanWeekInsert {
   status: 'idea'
 }
 
-/** ISO date `days` after `iso` (date-only math, no TZ shift). */
-function addDaysISO(iso: string, days: number): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  const date = new Date(y, m - 1, d + days)
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const dd = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${mm}-${dd}`
-}
-
 export function planWeekInserts(
   clients: PlanWeekClient[],
   existing: PlanWeekExistingIdea[],
+  /** Per-client count of active, unpublished ideas (the in-flight plate). */
+  inFlightByClient: Record<string, number>,
   todayISO: string,
   daysAhead = 7,
 ): PlanWeekInsert[] {
@@ -61,9 +66,13 @@ export function planWeekInserts(
     const days = c.posting_days ?? []
     if (days.length === 0) continue
     // At most one slot per day → daysAhead+1 dates cover the whole window.
-    const dates = nextPostingDates(days, daysAhead + 1, from).filter((date) => date <= endISO)
-    for (const date of dates) {
-      if (taken.has(`${c.id}|${date}`)) continue
+    const openSlots = nextPostingDates(days, daysAhead + 1, from)
+      .filter((date) => date <= endISO)
+      .filter((date) => !taken.has(`${c.id}|${date}`))
+    // The in-flight plate consumes the earliest open slots — only the surplus
+    // becomes new cards. A busy client creates nothing until work ships.
+    const inFlight = Math.max(0, inFlightByClient[c.id] ?? 0)
+    for (const date of openSlots.slice(inFlight)) {
       out.push({
         client_id: c.id,
         publish_date: date,
