@@ -180,7 +180,7 @@ export function VideoWorkCard({
             ideaTitle={video.title}
           />
           {video.approval_status === 'approved' && !(video.published_at || video.status === 'publicada') && (
-            <PublishToMetricoolButton ideaId={video.id} metricoolPostId={video.metricool_post_id} />
+            <PublishToMetricoolButton key={video.id} ideaId={video.id} metricoolPostId={video.metricool_post_id} />
           )}
         </div>
       </footer>

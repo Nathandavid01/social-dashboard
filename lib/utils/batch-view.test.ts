@@ -203,9 +203,21 @@ describe('videoNextStep — the single "what to do next" per video', () => {
       label: 'En revisión — aprueba o pide cambios',
       tone: 'waiting',
     })
+    expect(
+      videoNextStep(
+        mk({ approval_status: 'approved', generated_caption: 'c', videos: { raw: [], broll: [], edited: [rawFile()] } }),
+      ),
+    ).toEqual({ label: 'Aprobado — listo para Metricool', tone: 'action' })
+  })
+
+  it('is honest when an approved video is not actually Metricool-ready', () => {
     expect(videoNextStep(mk({ approval_status: 'approved' }))).toEqual({
-      label: 'Aprobado — listo para Metricool',
-      tone: 'action',
+      label: 'Aprobado — falta el caption para Metricool',
+      tone: 'warn',
+    })
+    expect(videoNextStep(mk({ approval_status: 'approved', generated_caption: 'c' }))).toEqual({
+      label: 'Aprobado — falta el video editado para Metricool',
+      tone: 'warn',
     })
   })
 

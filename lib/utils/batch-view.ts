@@ -148,7 +148,12 @@ export interface NextStep {
 export function videoNextStep(v: BatchVideo): NextStep {
   if (v.published_at || v.status === 'publicada') return { label: 'Publicado', tone: 'done' }
   if (v.metricool_post_id != null) return { label: 'Programado en Metricool', tone: 'done' }
-  if (v.approval_status === 'approved') return { label: 'Aprobado — listo para Metricool', tone: 'action' }
+  if (v.approval_status === 'approved') {
+    // Approval doesn't guarantee Metricool readiness — be honest about what's missing.
+    if (!filled(v.generated_caption)) return { label: 'Aprobado — falta el caption para Metricool', tone: 'warn' }
+    if (!hasEdited(v)) return { label: 'Aprobado — falta el video editado para Metricool', tone: 'warn' }
+    return { label: 'Aprobado — listo para Metricool', tone: 'action' }
+  }
   if (v.approval_status === 'submitted') return { label: 'En revisión — aprueba o pide cambios', tone: 'waiting' }
   if (v.approval_status === 'revision_needed') return { label: 'Cambios pedidos — corrige y reenvía', tone: 'warn' }
   if (!filled(v.generated_caption)) return { label: 'Siguiente: genera el caption', tone: 'action' }

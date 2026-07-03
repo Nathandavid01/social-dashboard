@@ -26,7 +26,11 @@ export function PublishToMetricoolButton({
   const canPublish = useHasPermission('posting.publish')
   const { toast } = useToast()
   const [pending, start] = useTransition()
-  const [posted, setPosted] = useState(metricoolPostId != null)
+  // The prop is the source of truth; local state only upgrades after a publish
+  // from THIS instance. Never seed state from the prop — a reused instance
+  // (e.g. the batch card navigating between videos) would leak it across videos.
+  const [locallyPosted, setLocallyPosted] = useState(false)
+  const posted = metricoolPostId != null || locallyPosted
 
   if (posted) {
     return (
@@ -53,9 +57,9 @@ export function PublishToMetricoolButton({
           if (res?.error) {
             toast({ title: 'No se pudo publicar', description: res.error, variant: 'destructive' })
           } else if (res?.skipped) {
-            toast({ title: 'Aún no está listo', description: res.skipped })
+            toast({ title: 'No se programó', description: res.skipped })
           } else {
-            setPosted(true)
+            setLocallyPosted(true)
             toast({ title: 'Programado en Metricool', description: 'El video se publicará en su fecha planificada.' })
           }
         })

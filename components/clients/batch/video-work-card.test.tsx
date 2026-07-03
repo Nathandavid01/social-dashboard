@@ -95,9 +95,25 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
 
   it('offers "Publicar a Metricool" once approved (for posting.publish roles)', () => {
     mockRole = 'supervisor'
-    render(<VideoWorkCard video={video({ approval_status: 'approved' })} index={0} clientName="Costa Sur Gym" />)
+    render(
+      <VideoWorkCard
+        video={video({
+          approval_status: 'approved',
+          generated_caption: 'listo',
+          videos: { raw: [], broll: [], edited: [{ id: 'e1' }] },
+        } as never)}
+        index={0}
+        clientName="Costa Sur Gym"
+      />,
+    )
     expect(screen.getByRole('button', { name: /publicar a metricool/i })).toBeInTheDocument()
     expect(screen.getByText(/aprobado — listo para metricool/i)).toBeInTheDocument()
+  })
+
+  it('warns when an approved video is missing the caption for Metricool', () => {
+    mockRole = 'supervisor'
+    render(<VideoWorkCard video={video({ approval_status: 'approved', generated_caption: null })} index={0} />)
+    expect(screen.getByText(/aprobado — falta el caption/i)).toBeInTheDocument()
   })
 
   it('shows the "En Metricool" badge instead of the button once scheduled', () => {
