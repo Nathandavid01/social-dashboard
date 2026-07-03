@@ -113,7 +113,8 @@ const RBAC: Record<UserRole, RolePerms> = {
     'alerts.read',
   ],
 
-  // Video / videógrafo — recording-focused, video upload + QC.
+  // Video / videógrafo — recording-focused, video upload + QC. Works from the
+  // already-recorded video, so it can also generate + edit AI captions on the card.
   video: [
     'clients.read', 'clients.assets.upload',
     'tasks.read.own', 'tasks.edit',
@@ -121,6 +122,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video_reviews.read', 'video_reviews.write', 'video.upload',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete',
+    'captions.use', 'captions.edit',
     'weekly_compliance.read', 'cadence.read', 'activity.read',
     'planning.read',
     'alerts.read',

@@ -72,4 +72,12 @@ describe('VideoWorkCard — aprobación en el lote', () => {
     render(<VideoWorkCard video={video({ approval_status: 'submitted' })} index={0} />)
     expect(screen.getByText(/sin permiso para aprobar/i)).toBeInTheDocument()
   })
+
+  it('does not gate recording on a saved caption (video may already be recorded)', () => {
+    mockRole = 'video'
+    render(<VideoWorkCard video={video({ generated_caption: null })} index={0} clientName="Costa Sur Gym" />)
+    // Short pipeline: the video is already recorded/scheduled, so recording is
+    // never blocked behind saving the caption first.
+    expect(screen.queryByText(/antes de grabar/i)).not.toBeInTheDocument()
+  })
 })
