@@ -59,11 +59,17 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeInTheDocument()
   })
 
-  it('disables AI generation until hook and visual brief exist', () => {
+  it('enables AI generation with just the topic (hook) — like the idea generator', () => {
     mockRole = 'editor'
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo hook" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" />)
+    expect(screen.getByRole('button', { name: /generar desde la idea/i })).not.toBeDisabled()
+  })
+
+  it('disables AI generation until the topic exists, asking for it in plain Spanish', () => {
+    mockRole = 'editor'
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} />)
     expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
-    expect(screen.getByText(/completa el hook y el brief visual/i)).toBeInTheDocument()
+    expect(screen.getByText(/di de qué es el video/i)).toBeInTheDocument()
   })
 
   it('shows the client platform badges when provided', () => {

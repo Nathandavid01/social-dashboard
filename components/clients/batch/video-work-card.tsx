@@ -125,7 +125,18 @@ export function VideoWorkCard({
         </div>
       </header>
 
-      {/* idea — editable inline (gancho, brief, ángulo, hashtags, fecha) */}
+      {/* 1) el video — lo primero: súbelo */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-1.5">
+          <Film className="h-3 w-3 text-amber-500" aria-hidden />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Sube el video
+          </span>
+        </div>
+        <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
+      </div>
+
+      {/* 2) de qué es → la AI escribe el caption (igual que el generador de ideas) */}
       <IdeaBriefCard
         ideaId={video.id}
         hook={hook}
@@ -141,8 +152,6 @@ export function VideoWorkCard({
           if ('hashtags_suggestion' in fields) setHashtags(fields.hashtags_suggestion ?? '')
         }}
       />
-
-      {/* caption — from idea, before recording */}
       <IdeaCaptionEditor
         ideaId={video.id}
         initialCaption={savedCaption}
@@ -153,17 +162,6 @@ export function VideoWorkCard({
         hashtags={hashtags}
         onSaved={setSavedCaption}
       />
-
-      {/* grabación — el video ya puede estar grabado y agendado; sin bloqueo por caption */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5">
-          <Film className="h-3 w-3 text-amber-500" aria-hidden />
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Grabación
-          </span>
-        </div>
-        <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
-      </div>
 
       {/* detalle del fallo de publicación — visible para que el equipo sepa QUÉ falló */}
       {video.approval_status === 'approved' && video.metricool_post_id == null && !video.published_at &&

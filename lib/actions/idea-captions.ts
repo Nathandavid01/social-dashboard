@@ -42,7 +42,7 @@ export async function generateIdeaCaption(
   if (!idea) return { error: 'Idea no encontrada' }
 
   if (!isIdeaReadyForCaption(idea)) {
-    return { error: 'Completa el hook y el brief visual de la idea antes de generar el caption.' }
+    return { error: 'Di de qué es el video para generar el caption.' }
   }
 
   const client = (idea.client ?? {}) as {

@@ -26,9 +26,11 @@ describe('computeIdeaProgress', () => {
     ])
   })
 
-  it('idea stage needs both hook and visual_brief', () => {
-    const p = computeIdeaProgress({ idea: { ...baseIdea, visual_brief: null }, videos: [], assetCount: 0 })
-    expect(p.stages.find((s) => s.key === 'idea')!.done).toBe(false)
+  it('idea stage needs only the topic (hook) — visual brief is optional detail', () => {
+    const withHookOnly = computeIdeaProgress({ idea: { ...baseIdea, visual_brief: null }, videos: [], assetCount: 0 })
+    expect(withHookOnly.stages.find((s) => s.key === 'idea')!.done).toBe(true)
+    const noHook = computeIdeaProgress({ idea: { ...baseIdea, hook: null }, videos: [], assetCount: 0 })
+    expect(noHook.stages.find((s) => s.key === 'idea')!.done).toBe(false)
   })
 
   it('treats whitespace-only caption as not done', () => {

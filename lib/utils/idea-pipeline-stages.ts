@@ -52,7 +52,8 @@ export function computeIdeaPipeline(input: {
     videos.some((v) => v.kind === kind && ACTIVE.has(v.status))
 
   const stages: PipelineStage[] = [
-    { key: 'idea', label: 'Idea', done: filled(idea.hook) && filled(idea.visual_brief) },
+    // Hook-only = idea defined (the topic is all the caption needs since v2.88).
+    { key: 'idea', label: 'Idea', done: filled(idea.hook) },
     { key: 'caption', label: 'Caption', done: filled(idea.generated_caption) },
     { key: 'scheduled', label: 'Agendada', done: recordingScheduled || idea.recording_session_id != null },
     { key: 'recorded', label: 'Grabación', done: idea.status === 'grabada' || idea.recording_date != null || activeOf('raw') },

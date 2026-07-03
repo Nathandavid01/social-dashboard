@@ -27,10 +27,13 @@ describe('computeIdeaPipeline', () => {
     ])
   })
 
-  it('idea done needs hook + visual_brief', () => {
+  it('idea done needs only the topic (hook) — visual brief is optional detail', () => {
     expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false }).stages[0].done).toBe(true)
     expect(
       computeIdeaPipeline({ idea: { ...base, visual_brief: null }, videos: [], recordingScheduled: false }).stages[0].done,
+    ).toBe(true)
+    expect(
+      computeIdeaPipeline({ idea: { ...base, hook: null }, videos: [], recordingScheduled: false }).stages[0].done,
     ).toBe(false)
   })
 
