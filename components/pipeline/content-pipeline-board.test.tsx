@@ -37,10 +37,10 @@ beforeEach(() => {
 })
 
 describe('ContentPipelineBoard — batch model', () => {
-  it('renders all 7 columns with Idea first and Title second', () => {
+  it('renders the 4 columns with Video first', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Idea', 'Title', 'Caption', 'Video', 'Edited', 'Approval', 'Publication'])
+    expect(headings).toEqual(['Video', 'Edited', 'Approval', 'Publication'])
   })
 
   it('shows one batch card per client (not per video)', () => {
@@ -53,8 +53,8 @@ describe('ContentPipelineBoard — batch model', () => {
 
   it('places the batch in the column of its least-advanced video', () => {
     const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
-    // least advanced is grabada → Video column (4th section)
-    const videoCol = container.querySelectorAll('section')[3]
+    // least advanced is grabada → Video column (1st section)
+    const videoCol = container.querySelectorAll('section')[0]
     expect(videoCol.textContent).toContain('Nora Fitness')
   })
 
@@ -79,7 +79,7 @@ describe('ContentPipelineBoard — batch model', () => {
   it('moves the whole batch forward, persisting all its videos', async () => {
     render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
-    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'title'))
+    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
   })
 
   it('shows "Sin asignar" for an unassigned batch', () => {
@@ -116,7 +116,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
       sessions: [
         { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
       ],
-      nextStage: 'idea',
+      nextStage: 'video',
       stepAssignee: { id: 'u1', name: 'Ana Torres' },
     },
   ]

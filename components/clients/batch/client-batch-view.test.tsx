@@ -89,11 +89,11 @@ describe('ClientBatchView', () => {
     expect(screen.getByText('Activo')).toBeInTheDocument()
   })
 
-  it('renders the 7-stage stepper in Spanish and marks the current stage with AQUÍ', () => {
-    for (const label of ['Idea', 'Título', 'Caption', 'Video', 'Edición', 'Aprobación', 'Publicación']) {
+  it('renders the 4-stage stepper in Spanish and marks the current stage with AQUÍ', () => {
+    for (const label of ['Video', 'Edición', 'Aprobación', 'Publicación']) {
       expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
-    // Batch sits at "title": one video has only a hook (title), the other is recorded (video).
+    // Batch sits at "video": pre-edit work collapses into the first Video column.
     expect(screen.getByText('AQUÍ')).toBeInTheDocument()
   })
 
