@@ -211,8 +211,8 @@ export function ContentPipelineBoard({
         <div className="flex items-center gap-3">
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-[13px] font-bold text-black shadow-lg shadow-primary/20">N</div>
           <div className="min-w-0">
-            <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Content Pipeline</h1>
-            <p className="text-[11px] text-muted-foreground">Nate Media · batches por cliente</p>
+            <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Pipeline de contenido</h1>
+            <p className="text-[11px] text-muted-foreground">Nate Media · lotes por cliente</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export function ContentPipelineBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={stage.label} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>

@@ -37,10 +37,10 @@ beforeEach(() => {
 })
 
 describe('ContentPipelineBoard — batch model', () => {
-  it('renders the 4 columns with Video first', () => {
+  it('renders the 4 columns in Spanish with Video first', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Video', 'Edited', 'Approval', 'Publication'])
+    expect(headings).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
   })
 
   it('shows one batch card per client (not per video)', () => {
