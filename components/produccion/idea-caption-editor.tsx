@@ -160,8 +160,8 @@ export function IdeaCaptionEditor({
         rows={8}
         placeholder={
           ideaReady
-            ? 'Genera el caption desde la idea o escríbelo aquí antes de grabar…'
-            : 'Primero completa la idea (hook + brief visual)…'
+            ? 'Genera el caption desde la idea o escríbelo aquí…'
+            : 'Primero di de qué es el video…'
         }
         className="resize-none text-sm leading-relaxed"
         disabled={!ideaReady}

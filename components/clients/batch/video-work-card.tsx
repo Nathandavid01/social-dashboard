@@ -130,7 +130,7 @@ export function VideoWorkCard({
         <div className="flex items-center gap-1.5">
           <Film className="h-3 w-3 text-amber-500" aria-hidden />
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            1 · Sube el video
+            Sube el video
           </span>
         </div>
         <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />

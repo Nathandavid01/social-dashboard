@@ -224,7 +224,7 @@ export function ClientBatchView({
             </span>
             <span className="text-xs text-muted-foreground">
               {singleVideoMode
-                ? 'Define la idea, escribe el caption y graba — en ese orden.'
+                ? 'Sube el video, di de qué es y genera el caption con AI.'
                 : hint.tip}
             </span>
           </div>
