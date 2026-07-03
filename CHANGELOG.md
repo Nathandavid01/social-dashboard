@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.83 — 2026-07-02
+
+- **Trabajar desde el video ya grabado: caption con AI + grabación sin bloqueo.** En la tarjeta de cada video, la sección de **Grabación** ya no se bloquea hasta guardar el caption — como el video ya está grabado y agendado, puedes subir el archivo y llenar caption/título/idea en cualquier orden. Además, el **caption con AI** (mismo motor y mismo sistema de aprendizaje que el generador de ideas: ejemplos aprobados + 👍/👎 + voz del cliente) ya vive en la tarjeta del video; ahora el **rol Video/videógrafo** también puede **generar y editar** captions, para que quien sube el video pueda dejar el caption listo.
+
 ## v2.82 — 2026-07-02
 
 - **El tablero del pipeline ahora es más corto y práctico: 4 columnas en vez de 7.** El proceso arranca desde el video: **Video → Edición → Aprobación → Publicación**. Todo lo que antes eran columnas separadas de preparación (Idea, Título, Caption) ahora vive dentro de la primera columna **Video** — ahí defines la idea y el caption si faltan y subes la grabación. Así el tablero se lee de un vistazo y el equipo trabaja desde el punto que importa: el video ya grabado y agendado. El chip **"Grabado / Por grabar"** sigue distinguiendo lo que falta grabar dentro de esa columna.

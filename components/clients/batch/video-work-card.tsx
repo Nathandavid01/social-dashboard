@@ -136,7 +136,7 @@ export function VideoWorkCard({
         onSaved={setSavedCaption}
       />
 
-      {/* grabación — unlocked once caption is saved */}
+      {/* grabación — el video ya puede estar grabado y agendado; sin bloqueo por caption */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
           <Film className="h-3 w-3 text-amber-500" aria-hidden />
@@ -144,13 +144,7 @@ export function VideoWorkCard({
             Grabación
           </span>
         </div>
-        {savedCaption.trim() ? (
-          <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
-        ) : (
-          <p className="rounded-lg border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground">
-            Guarda el caption basado en la idea antes de grabar. Así tendrás claro qué decir frente a cámara.
-          </p>
-        )}
+        <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
       </div>
 
       {/* aprobación — enviar a revisión / aprobar / pedir cambios según el estado */}

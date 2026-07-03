@@ -17,3 +17,22 @@ describe('planning.assign permission (assigning videos to others)', () => {
     expect(hasPermission(null, 'planning.assign')).toBe(false)
   })
 })
+
+describe('captions.use / captions.edit (AI captions on the video card)', () => {
+  it('the video role can generate AND edit captions (works from the recorded video)', () => {
+    expect(hasPermission('video', 'captions.use')).toBe(true)
+    expect(hasPermission('video', 'captions.edit')).toBe(true)
+  })
+
+  it('owner, supervisor and editor keep caption access', () => {
+    for (const role of ['owner', 'supervisor', 'editor'] as const) {
+      expect(hasPermission(role, 'captions.use')).toBe(true)
+      expect(hasPermission(role, 'captions.edit')).toBe(true)
+    }
+  })
+
+  it('a null role has no caption access', () => {
+    expect(hasPermission(null, 'captions.use')).toBe(false)
+    expect(hasPermission(null, 'captions.edit')).toBe(false)
+  })
+})
