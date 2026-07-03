@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.86 — 2026-07-02
+
+- **Las tarjetas de la semana se abren solas.** Un proceso automático corre cada mañana (5:00 AM PR) y crea la tarjeta de video de cada **día de publicación** de cada cliente activo para los próximos 7 días — con su fecha de publicación puesta. El equipo entra al tablero y ya está el trabajo del día esperando: solo falta subir el video, generar el caption y aprobar. Si el equipo descartó una tarjeta, el sistema la respeta y no la vuelve a crear.
+
 ## v2.85 — 2026-07-02
 
 - **Captions con AI para todo el lote en un clic.** En el lote del cliente, el botón **"Generar N captions"** crea el caption de todos los videos que no tienen uno — mismo motor y mismo aprendizaje que siempre (ejemplos aprobados, 👍/👎, voz del cliente). Muestra el progreso (2/8…), sigue aunque uno falle, y al final te dice cuántos salieron y cuáles revisar.
