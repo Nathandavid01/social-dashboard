@@ -24,6 +24,9 @@ vi.mock('@/lib/actions/idea-approval', () => ({
   approveIdea: vi.fn(async () => ({ ok: true as const })),
   requestRevision: vi.fn(async () => ({ ok: true as const })),
 }))
+vi.mock('@/lib/actions/idea-posting', () => ({
+  publishIdeaToMetricool: vi.fn(async () => ({ ok: true as const })),
+}))
 let mockRole: UserRole | null = 'supervisor'
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: mockRole }),
@@ -64,7 +67,8 @@ describe('VideoWorkCard — aprobación en el lote', () => {
   it('shows the approved state once approved', () => {
     mockRole = 'supervisor'
     render(<VideoWorkCard video={video({ approval_status: 'approved' })} index={0} clientName="Costa Sur Gym" />)
-    expect(screen.getByText(/aprobado/i)).toBeInTheDocument()
+    // Both the "Aprobado" badge and the next-step hint mention the approval.
+    expect(screen.getAllByText(/aprobado/i).length).toBeGreaterThanOrEqual(1)
   })
 
   it('explains the lack of permission for non-approvers', () => {
@@ -79,5 +83,49 @@ describe('VideoWorkCard — aprobación en el lote', () => {
     // Short pipeline: the video is already recorded/scheduled, so recording is
     // never blocked behind saving the caption first.
     expect(screen.queryByText(/antes de grabar/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => {
+  it('shows the next-step hint for the video state', () => {
+    mockRole = 'supervisor'
+    render(<VideoWorkCard video={video({ approval_status: 'pending', generated_caption: null })} index={0} />)
+    expect(screen.getByText(/siguiente: genera el caption/i)).toBeInTheDocument()
+  })
+
+  it('offers "Publicar a Metricool" once approved (for posting.publish roles)', () => {
+    mockRole = 'supervisor'
+    render(
+      <VideoWorkCard
+        video={video({
+          approval_status: 'approved',
+          generated_caption: 'listo',
+          videos: { raw: [], broll: [], edited: [{ id: 'e1' }] },
+        } as never)}
+        index={0}
+        clientName="Costa Sur Gym"
+      />,
+    )
+    expect(screen.getByRole('button', { name: /publicar a metricool/i })).toBeInTheDocument()
+    expect(screen.getByText(/aprobado — listo para metricool/i)).toBeInTheDocument()
+  })
+
+  it('warns when an approved video is missing the caption for Metricool', () => {
+    mockRole = 'supervisor'
+    render(<VideoWorkCard video={video({ approval_status: 'approved', generated_caption: null })} index={0} />)
+    expect(screen.getByText(/aprobado — falta el caption/i)).toBeInTheDocument()
+  })
+
+  it('shows the "En Metricool" badge instead of the button once scheduled', () => {
+    mockRole = 'supervisor'
+    render(
+      <VideoWorkCard
+        video={video({ approval_status: 'approved', metricool_post_id: 555 } as never)}
+        index={0}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /publicar a metricool/i })).not.toBeInTheDocument()
+    // Both the "En Metricool" badge and the "Programado en Metricool" hint show.
+    expect(screen.getAllByText(/en metricool/i).length).toBeGreaterThanOrEqual(1)
   })
 })

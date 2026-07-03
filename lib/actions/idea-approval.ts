@@ -3,10 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { maybeAutoPostIdea } from '@/lib/actions/idea-posting'
+import { maybeAutoPostIdea, type AutoPostOutcome } from '@/lib/actions/idea-posting'
 import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 
-type Result = { ok?: true; error?: string }
+type Result = { ok?: true; error?: string; autopost?: AutoPostOutcome }
 
 /**
  * Valid approval transitions (design spec §4):
@@ -96,8 +96,9 @@ export async function approveIdea(ideaId: string): Promise<Result> {
     (current) => `Solo se puede aprobar una idea en revisión (estado actual: "${current}").`,
   )
   // A fully-ready idea (caption + edited video) auto-posts to Metricool on its
-  // planned date. Best-effort — never blocks or fails the approval.
-  if (res.ok) await maybeAutoPostIdea(ideaId)
+  // planned date. Best-effort — never blocks or fails the approval. The outcome
+  // rides back so the UI can say WHETHER it was scheduled (or why not).
+  if (res.ok) return { ...res, autopost: await maybeAutoPostIdea(ideaId) }
   return res
 }
 
