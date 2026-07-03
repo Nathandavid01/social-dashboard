@@ -5,6 +5,7 @@ import { addDaysISO, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { planWeekInserts, type PlanWeekClient, type PlanWeekExistingIdea } from '@/lib/utils/plan-week-core'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 export const maxDuration = 60
 
 /** All schedule math anchors to the posting timezone, never the server's UTC. */
@@ -30,6 +31,16 @@ function admin() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        // CRITICAL: Next patches global fetch and served this route's GET
+        // SELECTs from its Data Cache — every run saw the first run's EMPTY
+        // board and re-created all cards (verified live 2026-07-02: 4 runs =
+        // 4×154 duplicates). Inserts (POST) were never cached, which is why
+        // only reads went stale. Bypass the cache for every supabase call.
+        fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+      },
+    },
   )
 }
 
