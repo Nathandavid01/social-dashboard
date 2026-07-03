@@ -210,6 +210,18 @@ describe('videoNextStep — the single "what to do next" per video', () => {
     ).toEqual({ label: 'Aprobado — listo para Metricool', tone: 'action' })
   })
 
+  it('surfaces a publish failure so the team can retry (posting_error)', () => {
+    expect(
+      videoNextStep(mk({ approval_status: 'approved', posting_error: 'La URL del video no responde' } as Partial<BatchVideo>)),
+    ).toEqual({ label: 'Error al publicar — revisa y reintenta', tone: 'warn' })
+    // A recorded post wins over a stale error (success clears it, but belt-and-suspenders).
+    expect(
+      videoNextStep(
+        mk({ approval_status: 'approved', posting_error: 'viejo', metricool_post_id: 9 } as Partial<BatchVideo>),
+      ),
+    ).toEqual({ label: 'Programado en Metricool', tone: 'done' })
+  })
+
   it('is honest when an approved video is not actually Metricool-ready', () => {
     expect(videoNextStep(mk({ approval_status: 'approved' }))).toEqual({
       label: 'Aprobado — falta el caption para Metricool',

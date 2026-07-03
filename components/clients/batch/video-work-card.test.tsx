@@ -116,6 +116,21 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
     expect(screen.getByText(/aprobado — falta el caption/i)).toBeInTheDocument()
   })
 
+  it('shows the publish error detail with a retry path when posting failed', () => {
+    mockRole = 'supervisor'
+    render(
+      <VideoWorkCard
+        video={video({ approval_status: 'approved', posting_error: 'La URL del video no responde (503)' } as never)}
+        index={0}
+      />,
+    )
+    // The next-step line flags it AND the raw error is visible so the team knows WHAT failed.
+    expect(screen.getByText(/error al publicar — revisa y reintenta/i)).toBeInTheDocument()
+    expect(screen.getByText(/la url del video no responde \(503\)/i)).toBeInTheDocument()
+    // Retry = the same publish button, still available.
+    expect(screen.getByRole('button', { name: /publicar a metricool/i })).toBeInTheDocument()
+  })
+
   it('shows the "En Metricool" badge instead of the button once scheduled', () => {
     mockRole = 'supervisor'
     render(

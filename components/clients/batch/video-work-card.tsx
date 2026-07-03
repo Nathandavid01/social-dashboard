@@ -165,6 +165,14 @@ export function VideoWorkCard({
         <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
       </div>
 
+      {/* detalle del fallo de publicación — visible para que el equipo sepa QUÉ falló */}
+      {video.approval_status === 'approved' && video.metricool_post_id == null && !video.published_at &&
+        !!video.posting_error?.trim() && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
+            <span className="font-semibold">No se pudo publicar:</span> {video.posting_error}
+          </p>
+        )}
+
       {/* siguiente paso + acciones — revisión / aprobación / publicar a Metricool */}
       <footer className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3">
         <span className={cn('inline-flex items-center gap-1.5 text-[11px] font-medium', NEXT_STEP_TONE[nextStep.tone])}>

@@ -64,7 +64,7 @@ async function runIdeaPost(
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, content_type, generated_caption, status, approval_status, published_at, publish_date, metricool_post_id, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
+      'id, title, content_type, generated_caption, status, approval_status, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
     )
     .eq('id', ideaId)
     .single()
@@ -99,6 +99,7 @@ async function runIdeaPost(
       status: idea.status as string | null,
       published_at: idea.published_at as string | null,
       metricool_post_id: (idea.metricool_post_id as number | null) ?? null,
+      posted_at: (idea.posted_at as string | null) ?? null,
     },
     !!edited,
     blogId,
@@ -160,15 +161,24 @@ async function runIdeaPost(
     const postId = res.data?.id ?? null
     const uuid = res.data?.uuid ?? null
 
-    await supabase
-      .from('content_ideas')
-      .update({
-        metricool_post_id: postId,
-        metricool_uuid: uuid,
-        posted_at: new Date().toISOString(),
-        posting_error: null,
-      })
-      .eq('id', ideaId)
+    // The Metricool post EXISTS now — this bookkeeping must stick or a stale-claim
+    // retry (>5 min) could post twice. Retry the UPDATE; on total failure DO NOT
+    // release the claim (posting_started_at keeps blocking retries for 5 min and
+    // the posted_at readiness backstop covers rows where it did persist).
+    let recorded = false
+    for (let attempt = 0; attempt < 3 && !recorded; attempt++) {
+      const { error: recordErr } = await supabase
+        .from('content_ideas')
+        .update({
+          metricool_post_id: postId,
+          metricool_uuid: uuid,
+          posted_at: new Date().toISOString(),
+          posting_error: null,
+        })
+        .eq('id', ideaId)
+      recorded = !recordErr
+      if (!recorded) console.error(`[idea-posting] bookkeeping attempt ${attempt + 1} failed for ${ideaId}:`, recordErr?.message)
+    }
 
     await logIdeaActivity(supabase, {
       ideaId,
