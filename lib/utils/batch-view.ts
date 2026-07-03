@@ -149,6 +149,8 @@ export function videoNextStep(v: BatchVideo): NextStep {
   if (v.published_at || v.status === 'publicada') return { label: 'Publicado', tone: 'done' }
   if (v.metricool_post_id != null) return { label: 'Programado en Metricool', tone: 'done' }
   if (v.approval_status === 'approved') {
+    // A failed publish must be visible — the row records posting_error; surface it.
+    if (filled(v.posting_error)) return { label: 'Error al publicar — revisa y reintenta', tone: 'warn' }
     // Approval doesn't guarantee Metricool readiness — be honest about what's missing.
     if (!filled(v.generated_caption)) return { label: 'Aprobado — falta el caption para Metricool', tone: 'warn' }
     if (!hasEdited(v)) return { label: 'Aprobado — falta el video editado para Metricool', tone: 'warn' }

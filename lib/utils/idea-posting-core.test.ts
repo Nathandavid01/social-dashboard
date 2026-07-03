@@ -7,6 +7,7 @@ const ready: PostableIdea = {
   status: 'producida',
   published_at: null,
   metricool_post_id: null,
+  posted_at: null,
 }
 
 const BLOG = 'blog-1'
@@ -18,6 +19,12 @@ describe('ideaPostReadiness', () => {
 
   it('never re-posts once metricool_post_id is set (idempotency, checked first)', () => {
     const r = ideaPostReadiness({ ...ready, metricool_post_id: 12345 }, true, BLOG)
+    expect(r.ready).toBe(false)
+    expect(r.reason).toMatch(/ya se publicó/i)
+  })
+
+  it('never re-posts once posted_at is set — backstop even if Metricool returned no id', () => {
+    const r = ideaPostReadiness({ ...ready, posted_at: '2026-07-02T10:00:00Z' }, true, BLOG)
     expect(r.ready).toBe(false)
     expect(r.reason).toMatch(/ya se publicó/i)
   })

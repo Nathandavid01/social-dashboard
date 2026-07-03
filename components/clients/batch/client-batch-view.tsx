@@ -20,6 +20,7 @@ import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { BatchConfig, TeamMember } from '@/lib/actions/client-batch'
 import { BatchSummaryBar } from './batch-summary-bar'
 import { BatchStepper } from './batch-stepper'
+import { BatchCaptionsButton } from './batch-captions-button'
 import { VideoWorkCard } from './video-work-card'
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
@@ -255,27 +256,30 @@ export function ClientBatchView({
           </div>
 
           {!singleVideoMode && videos.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {([
-                { key: 'all', label: 'Todos', count: videos.length, dot: '' },
-                { key: 'por_grabar', label: 'Por grabar', count: pendientes, dot: 'bg-amber-500' },
-                { key: 'grabado', label: 'Grabados', count: grabados, dot: 'bg-emerald-500' },
-              ] as const).map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => { setStatusFilter(f.key); setSel(0) }}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
-                    statusFilter === f.key
-                      ? 'border-border bg-muted text-foreground'
-                      : 'border-transparent text-muted-foreground hover:bg-muted/60',
-                  )}
-                >
-                  {f.dot && <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden />}
-                  {f.label}
-                  <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {([
+                  { key: 'all', label: 'Todos', count: videos.length, dot: '' },
+                  { key: 'por_grabar', label: 'Por grabar', count: pendientes, dot: 'bg-amber-500' },
+                  { key: 'grabado', label: 'Grabados', count: grabados, dot: 'bg-emerald-500' },
+                ] as const).map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => { setStatusFilter(f.key); setSel(0) }}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
+                      statusFilter === f.key
+                        ? 'border-border bg-muted text-foreground'
+                        : 'border-transparent text-muted-foreground hover:bg-muted/60',
+                    )}
+                  >
+                    {f.dot && <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden />}
+                    {f.label}
+                    <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+                  </button>
+                ))}
+              </div>
+              <BatchCaptionsButton videos={videos} onDone={refresh} />
             </div>
           )}
 

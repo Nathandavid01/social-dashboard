@@ -11,6 +11,8 @@ export interface PostableIdea {
   published_at: string | null
   /** Set once we've posted — the idempotency guard. */
   metricool_post_id: number | null
+  /** Backstop guard: set on success even if Metricool returned no post id. */
+  posted_at: string | null
 }
 
 export interface PostReadiness {
@@ -34,6 +36,9 @@ export function ideaPostReadiness(
   metricoolBlogId: string | null | undefined,
 ): PostReadiness {
   if (idea.metricool_post_id != null) return { ready: false, reason: 'Ya se publicó en Metricool' }
+  // posted_at is the backstop: a successful post whose Metricool id never came
+  // back (or whose bookkeeping partially failed) must still never re-post.
+  if (idea.posted_at) return { ready: false, reason: 'Ya se publicó en Metricool' }
   if (idea.published_at || idea.status === 'publicada') return { ready: false, reason: 'El video ya está publicado' }
   if (idea.approval_status !== 'approved') return { ready: false, reason: 'El video no está aprobado' }
   if (!idea.generated_caption || idea.generated_caption.trim().length === 0) return { ready: false, reason: 'Falta el caption' }
