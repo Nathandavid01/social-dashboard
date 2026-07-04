@@ -8,6 +8,7 @@ import {
   clientReviewStatusLabel,
   expiryNoticeES,
   authorKindLabel,
+  formatReviewDateES,
   type ClientReviewStatus,
 } from './review-link-core'
 
@@ -119,5 +120,20 @@ describe('authorKindLabel', () => {
   it('labels client and staff in Spanish', () => {
     expect(authorKindLabel('client')).toBe('Cliente')
     expect(authorKindLabel('staff')).toBe('Equipo')
+  })
+})
+
+describe('formatReviewDateES', () => {
+  it('formats an absolute instant in Puerto Rico time (UTC-4)', () => {
+    // 12:00Z → 08:00 AST (PR has no DST)
+    expect(formatReviewDateES('2026-07-04T12:00:00Z')).toBe('04/07/2026 08:00')
+  })
+  it('rolls back the day when the instant is early UTC', () => {
+    // 02:00Z on the 5th → 22:00 AST on the 4th
+    expect(formatReviewDateES('2026-07-05T02:00:00Z')).toBe('04/07/2026 22:00')
+  })
+  it('returns empty string for null/invalid input', () => {
+    expect(formatReviewDateES(null)).toBe('')
+    expect(formatReviewDateES('')).toBe('')
   })
 })
