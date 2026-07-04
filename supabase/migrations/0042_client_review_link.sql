@@ -146,12 +146,16 @@ begin
   update public.content_ideas
      set client_review_status = p_decision,
          client_reviewed_at = now(),
-         client_reviewer_name = nullif(trim(p_name), '')
+         client_reviewer_name = nullif(left(trim(p_name), 120), '')
    where id = v_idea.id;
 
-  insert into public.content_idea_activity (content_idea_id, client_id, user_id, action, metadata)
-  values (v_idea.id, v_idea.client_id, null, 'client_reviewed',
-          jsonb_build_object('decision', p_decision, 'reviewer', nullif(trim(p_name), '')));
+  -- Only log when the vote actually changed — a token holder re-submitting the
+  -- same decision must not amplify the audit log.
+  if v_idea.client_review_status is distinct from p_decision then
+    insert into public.content_idea_activity (content_idea_id, client_id, user_id, action, metadata)
+    values (v_idea.id, v_idea.client_id, null, 'client_reviewed',
+            jsonb_build_object('decision', p_decision, 'reviewer', nullif(left(trim(p_name), 120), '')));
+  end if;
 
   return jsonb_build_object('ok', true, 'status', p_decision);
 end;
@@ -185,7 +189,9 @@ begin
   end if;
 
   insert into public.video_review_comments (content_idea_id, author_kind, author_id, author_name, body)
-  values (v_idea.id, 'client', null, coalesce(nullif(trim(p_name), ''), 'Cliente'), trim(p_body))
+  values (v_idea.id, 'client', null,
+          coalesce(nullif(left(trim(p_name), 120), ''), 'Cliente'),
+          left(trim(p_body), 4000))
   returning id into v_id;
 
   return jsonb_build_object('ok', true, 'id', v_id);
@@ -198,3 +204,7 @@ $$;
 grant execute on function public.get_review_by_token(uuid) to anon, authenticated;
 grant execute on function public.submit_client_review(uuid, text, text) to anon, authenticated;
 grant execute on function public.add_client_review_comment(uuid, text, text) to anon, authenticated;
+
+-- Refresh PostgREST's schema cache so the new RPCs are reachable immediately
+-- (consistent with 0019/0024/0026).
+notify pgrst, 'reload schema';
