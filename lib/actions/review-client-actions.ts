@@ -34,10 +34,18 @@ export async function submitClientReviewAction(
   })
   if (error) return { error: 'No se pudo guardar tu decisión. El link puede haber vencido.' }
 
-  const res = (data ?? {}) as { ok?: boolean; error?: string; status?: string; idea_id?: string }
+  const res = (data ?? {}) as {
+    ok?: boolean
+    error?: string
+    status?: string
+    idea_id?: string
+    changed?: boolean
+  }
   if (!res.ok) return { error: res.error ?? 'No se pudo guardar tu decisión.' }
 
-  if (res.idea_id) {
+  // Only notify when the vote actually changed — a token holder re-submitting the
+  // same decision must not flood the staff bell (mirrors the DB audit-log dedupe).
+  if (res.idea_id && res.changed) {
     await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
   }
   revalidatePath(`/review/${token}`)

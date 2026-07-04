@@ -157,7 +157,10 @@ begin
             jsonb_build_object('decision', p_decision, 'reviewer', nullif(left(trim(p_name), 120), '')));
   end if;
 
-  return jsonb_build_object('ok', true, 'status', p_decision, 'idea_id', v_idea.id);
+  return jsonb_build_object(
+    'ok', true, 'status', p_decision, 'idea_id', v_idea.id,
+    'changed', (v_idea.client_review_status is distinct from p_decision)
+  );
 end;
 $$;
 
