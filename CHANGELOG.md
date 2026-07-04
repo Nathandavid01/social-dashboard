@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.89 — 2026-07-04
+
+- **Base del portal de aprobación del cliente (parte 1 de 4).** Empezamos a construir el flujo de agencia profesional: pronto el equipo podrá copiar un **link de revisión** por video y mandarlo por WhatsApp para que el cliente lo **apruebe, rechace o comente** sin necesidad de cuenta. Esta primera parte es la plomería (aún sin pantalla visible): la lógica del link con vencimiento a 30 días y la base de datos del hilo de comentarios, con un candado de seguridad — el voto del cliente **nunca** publica solo; un humano del equipo da el OK final.
+
 ## v2.88 — 2026-07-03
 
 - **La tarjeta del video ahora es simple: sube el video y di de qué es.** Se acabó la tarjeta gigante. El orden nuevo: **1) Sube el video** (arriba de todo), **2) "¿De qué es este video?"** — con solo eso la AI escribe el caption, igual que en el generador de ideas. Los campos avanzados (brief visual, ángulo, hashtags, fechas) siguen ahí pero recogidos en **"Más detalles (opcional)"**. Ya no hace falta llenar hook + brief visual para generar el caption — basta con decir el tema.
