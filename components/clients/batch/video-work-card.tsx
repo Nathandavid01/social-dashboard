@@ -12,6 +12,7 @@ import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { ApprovalButton } from '@/components/produccion/approval-button'
 import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
+import { ReviewLinkPanel } from '@/components/review/review-link-panel'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 /** Text + dot color per next-step tone (semantic, not the brand accent). */
@@ -162,6 +163,9 @@ export function VideoWorkCard({
         hashtags={hashtags}
         onSaved={setSavedCaption}
       />
+
+      {/* revisión del cliente — copiar link para WhatsApp + voto + hilo (Inc 4) */}
+      <ReviewLinkPanel key={video.id} ideaId={video.id} hasEditedVideo={video.videos.edited.length > 0} />
 
       {/* detalle del fallo de publicación — visible para que el equipo sepa QUÉ falló */}
       {video.approval_status === 'approved' && video.metricool_post_id == null && !video.published_at &&
