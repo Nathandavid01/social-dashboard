@@ -39,7 +39,7 @@ PR → review adversarial → merge → Vercel READY → bump `lib/version.ts` +
 ## Definition of Done (el loop termina cuando TODO esto está ✅ + e2e real verificado)
 - [x] **Inc 1** — Core puro `review-link-core.ts` (expiry, url, canReview, labels ES) TDD verde + migración 0042 (columnas + tabla comentarios) escrita. ✅ PR #83
 - [ ] **Inc 4 recordatorio (seguridad):** el token DEBE generarse con `gen_random_uuid()` / CSPRNG — nunca secuencial ni predecible; todo el modelo `anon`+RPC depende de que sea inadivinable.
-- [ ] **Inc 2** — Página pública `/review/[token]`: carga video+caption+hilo por token (RPC `get_review_by_token`), player, estado de expiración. Helpers de formato testeados + test RTL. **Negativos:** token malo → 404; token expirado → solo lectura.
+- [x] **Inc 2** — Página pública `/review/[token]`: carga video+caption+hilo por token (RPC `get_review_by_token`), player, estado de expiración. Helpers de formato testeados + test RTL. **Negativos:** token malo → 404; token expirado → solo lectura. ✅ PR #84, v2.90
 - [ ] **Inc 3** — Acciones del cliente validadas por token: `submitClientReview(token, decision, name)` + `addReviewComment(token, kind, name, body)` vía RPC. Core de validación pure-tested; escribe estado + comentario; loguea actividad. **Negativo:** un write con token A NO puede mutar el video B (aislamiento).
 - [ ] **Inc 4** — Lado staff en `VideoWorkCard`: botón "Copiar link de revisión" **gateado a que exista video editado** (el Worker R2 solo sirve `/edited/`; sin él el cliente no ve nada) — espeja el gating de `PublishToMetricoolButton`. Genera/regenera token + copia URL para WhatsApp, muestra el voto del cliente + hilo, el staff responde. Voto visible; aprobación interna sigue separada.
 - [ ] **e2e real**: abrir un link de un video real, Rechazar+comentar como cliente, ver el voto+comentario en la tarjeta, responder como staff, Aprobar. Gate ×2.
@@ -47,6 +47,7 @@ PR → review adversarial → merge → Vercel READY → bump `lib/version.ts` +
 
 ## Shipped
 - **Inc 1** (PR #83, v2.89) — core puro `review-link-core.ts` (21 tests TDD) + migración 0042 (columnas review + tabla `video_review_comments` + 3 RPCs SECURITY DEFINER keyed por token). Review adversarial: 0 HIGH; hardening aplicado (notify pgrst, cap de longitud, log solo en cambio real).
+- **Inc 2** (PR #84, v2.90) — página pública `/review/[token]` read-only (video+caption+hilo+expiración), `lib/supabase/public.ts` (anon sin sesión), `getReviewByToken` (RPC + R2 url), +11 tests. Review adversarial: 0 HIGH (caching, boundaries RSC, XSS, 404-paths OK). LOW opcional diferido: recortar payload serializado (no incremental — el RPC anon ya lo devuelve).
 
 <!-- iteración añade: - <inc> (PR #) — una línea -->
 

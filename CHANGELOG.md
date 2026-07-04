@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.91 — 2026-07-04
+
+- **El cliente ya puede Aprobar, Rechazar y Comentar (parte 3 de 4).** En la pantalla de revisión, el cliente pone su nombre (opcional) y toca **Aprobar** o **Rechazar**, y puede dejar **comentarios** en el hilo. Todo queda registrado al instante. Candado de seguridad: el voto del cliente **nunca** publica por su cuenta — solo lo registra para que el equipo dé el OK final. Si el link ya venció, los botones desaparecen y no se aceptan cambios. Falta solo la parte 4: el botón para que el equipo genere y copie el link.
+
 ## v2.90 — 2026-07-04
 
 - **La pantalla que verá el cliente (parte 2 de 4).** Ya existe la página pública `/review/<token>`: cuando abramos un link, el cliente verá el **video final reproduciéndose**, el **caption**, el **hilo de comentarios** y un aviso de **cuándo vence el link** (a los 30 días queda solo de lectura). Un link inválido muestra "página no encontrada". Todavía no hay botones para aprobar/comentar (llegan en la parte 3) ni forma de generar el link (parte 4), así que ningún cliente llega aquí aún — es la pantalla lista para conectarse.

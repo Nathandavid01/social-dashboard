@@ -14,6 +14,13 @@ vi.mock('@/components/shared/nate-logo', () => ({
   NateLogo: () => <span data-testid="logo" />,
 }))
 
+// ReviewActions is interactive (server actions + router); stub it so this stays
+// a display test. It renders a marker only when the link is live (expired=false).
+vi.mock('./review-actions', () => ({
+  ReviewActions: ({ expired }: { expired: boolean }) =>
+    expired ? null : <div data-testid="review-actions" />,
+}))
+
 afterEach(() => cleanup())
 
 function baseReview(over: Partial<ReviewData & { video_url: string | null }> = {}) {
@@ -40,14 +47,14 @@ const NOW = '2026-07-04T12:00:00Z'
 
 describe('ReviewPage', () => {
   it('shows the client name, title and caption', () => {
-    render(<ReviewPage review={baseReview()} nowISO={NOW} />)
+    render(<ReviewPage review={baseReview()} token="tok-1" nowISO={NOW} />)
     expect(screen.getByText('Café Pinto')).toBeInTheDocument()
     expect(screen.getByText('Promo de verano')).toBeInTheDocument()
     expect(screen.getByText(/Aprovecha el especial de julio/)).toBeInTheDocument()
   })
 
   it('renders a video player when a public url is present', () => {
-    const { container } = render(<ReviewPage review={baseReview()} nowISO={NOW} />)
+    const { container } = render(<ReviewPage review={baseReview()} token="tok-1" nowISO={NOW} />)
     const video = container.querySelector('video')
     expect(video).not.toBeNull()
     expect(video).toHaveAttribute('src', 'https://videos.example/edited/idea-1.mp4')
@@ -55,28 +62,40 @@ describe('ReviewPage', () => {
 
   it('shows a fallback instead of a player when the video is not ready', () => {
     const { container } = render(
-      <ReviewPage review={baseReview({ video_url: null, edited_video_key: null })} nowISO={NOW} />,
+      <ReviewPage review={baseReview({ video_url: null, edited_video_key: null })} token="tok-1" nowISO={NOW} />,
     )
     expect(container.querySelector('video')).toBeNull()
     expect(screen.getByText(/El video todavía no está disponible/)).toBeInTheDocument()
   })
 
   it('shows the client review status label', () => {
-    render(<ReviewPage review={baseReview({ client_review_status: 'approved' })} nowISO={NOW} />)
+    render(<ReviewPage review={baseReview({ client_review_status: 'approved' })} token="tok-1" nowISO={NOW} />)
     expect(screen.getByText('Aprobado por el cliente')).toBeInTheDocument()
   })
 
   it('shows days-left for a live link', () => {
-    render(<ReviewPage review={baseReview()} nowISO={NOW} />)
+    render(<ReviewPage review={baseReview()} token="tok-1" nowISO={NOW} />)
     expect(screen.getByText(/vence en 30 días/)).toBeInTheDocument()
   })
 
   it('shows a read-only banner once the link is expired', () => {
     render(
-      <ReviewPage review={baseReview({ expires_at: '2026-07-01T12:00:00Z' })} nowISO={NOW} />,
+      <ReviewPage review={baseReview({ expires_at: '2026-07-01T12:00:00Z' })} token="tok-1" nowISO={NOW} />,
     )
     expect(screen.getByText(/venció/)).toBeInTheDocument()
     expect(screen.getByText(/ya no acepta cambios/)).toBeInTheDocument()
+  })
+
+  it('shows the action form on a live link', () => {
+    render(<ReviewPage review={baseReview()} token="tok-1" nowISO={NOW} />)
+    expect(screen.getByTestId('review-actions')).toBeInTheDocument()
+  })
+
+  it('hides the action form once the link is expired', () => {
+    render(
+      <ReviewPage review={baseReview({ expires_at: '2026-07-01T12:00:00Z' })} token="tok-1" nowISO={NOW} />,
+    )
+    expect(screen.queryByTestId('review-actions')).not.toBeInTheDocument()
   })
 
   it('renders the comment thread with author labels', () => {
@@ -98,7 +117,7 @@ describe('ReviewPage', () => {
         },
       ],
     })
-    render(<ReviewPage review={review} nowISO={NOW} />)
+    render(<ReviewPage review={review} token="tok-1" nowISO={NOW} />)
     expect(screen.getByText('Cliente')).toBeInTheDocument()
     expect(screen.getByText('Equipo')).toBeInTheDocument()
     expect(screen.getByText(/suban el volumen/)).toBeInTheDocument()
@@ -106,7 +125,7 @@ describe('ReviewPage', () => {
   })
 
   it('shows an empty state when there are no comments', () => {
-    render(<ReviewPage review={baseReview()} nowISO={NOW} />)
+    render(<ReviewPage review={baseReview()} token="tok-1" nowISO={NOW} />)
     expect(screen.getByText(/Aún no hay comentarios/)).toBeInTheDocument()
   })
 })

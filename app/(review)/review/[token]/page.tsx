@@ -21,5 +21,5 @@ export default async function ReviewLinkPage({
   const review = await getReviewByToken(token)
   if (!review) notFound()
 
-  return <ReviewPage review={review} nowISO={new Date().toISOString()} />
+  return <ReviewPage review={review} token={token} nowISO={new Date().toISOString()} />
 }

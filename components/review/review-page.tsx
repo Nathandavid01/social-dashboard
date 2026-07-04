@@ -1,6 +1,7 @@
 'use client'
 
 import { NateLogo } from '@/components/shared/nate-logo'
+import { ReviewActions } from '@/components/review/review-actions'
 import {
   clientReviewStatusLabel,
   expiryNoticeES,
@@ -25,7 +26,15 @@ const STATUS_TONE: Record<ReviewData['client_review_status'], string> = {
  * lands in Inc 3 — until then no staff can even mint a link (Inc 4), so nothing
  * routes a real client here yet.
  */
-export function ReviewPage({ review, nowISO }: { review: ReviewLoad; nowISO: string }) {
+export function ReviewPage({
+  review,
+  token,
+  nowISO,
+}: {
+  review: ReviewLoad
+  token: string
+  nowISO: string
+}) {
   const expired = isReviewExpired(review.expires_at, nowISO)
   const title = review.title?.trim() || 'Video para revisión'
 
@@ -72,6 +81,9 @@ export function ReviewPage({ review, nowISO }: { review: ReviewLoad; nowISO: str
             )}
           </div>
         </div>
+
+        {/* Aprobar / Rechazar / Comentar (hidden once expired) */}
+        <ReviewActions token={token} currentStatus={review.client_review_status} expired={expired} />
 
         {/* Expiry notice */}
         <p
