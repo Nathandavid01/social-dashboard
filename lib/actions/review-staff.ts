@@ -23,6 +23,9 @@ export type StaffReviewView = {
 
 /** Best-effort public origin for the review link (request host → env → prod). */
 async function resolveBaseUrl(): Promise<string> {
+  // Prefer the explicit site URL: this link is pasted to external clients, so a
+  // preview/alternate domain (or a spoofed x-forwarded-host) must never leak in.
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
   try {
     const h = await headers()
     const host = h.get('x-forwarded-host') ?? h.get('host')
@@ -31,7 +34,7 @@ async function resolveBaseUrl(): Promise<string> {
   } catch {
     // headers() unavailable (e.g. tests) — fall through
   }
-  return process.env.NEXT_PUBLIC_SITE_URL ?? 'https://social-dashboard-zeta-orpin.vercel.app'
+  return 'https://social-dashboard-zeta-orpin.vercel.app'
 }
 
 /**
@@ -57,6 +60,7 @@ export async function generateReviewLink(
     .select('id')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
+    .neq('status', 'archived')
     .limit(1)
   if (!edited || edited.length === 0) {
     return { error: 'Primero sube el video editado; es lo que verá el cliente.' }

@@ -105,7 +105,7 @@ begin
   left join lateral (
     select drive_file_id
     from public.content_idea_videos
-    where idea_id = ci.id and kind = 'edited'
+    where idea_id = ci.id and kind = 'edited' and status <> 'archived'
       and storage_provider = 'r2' and drive_file_id is not null
     order by uploaded_at desc
     limit 1
