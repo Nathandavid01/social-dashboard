@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.93 — 2026-07-04
+
+- **El equipo se entera al instante cuando el cliente aprueba, rechaza o comenta.** Ya no hay que estar revisando la tarjeta: cuando un cliente actúa en su link de revisión, le llega una **notificación a la campana** al encargado del video y a los owners/supervisores — con quién fue, qué video y (si comentó) un adelanto del comentario, con color según el caso (verde aprobado, ámbar cambios, azul comentario). Es best-effort: si algo falla, la acción del cliente igual se guarda.
+
 ## v2.92 — 2026-07-04
 
 - **Ya se puede enviar el video al cliente para que lo apruebe (parte 4 de 4 — completo 🎉).** En la tarjeta del video, cuando ya hay video editado, el equipo ve **"Generar link de revisión"**: lo genera, lo **copia con un clic** y lo pega en WhatsApp. El cliente abre ese link, ve el video y **aprueba, rechaza o comenta** — y el equipo ve **el voto del cliente y todo el hilo** directo en la tarjeta, y puede **responderle** ahí mismo. El link vence a los 30 días (se puede regenerar). Sigue el candado de siempre: la decisión del cliente **no publica sola** — el equipo da el OK final y programa a Metricool.
