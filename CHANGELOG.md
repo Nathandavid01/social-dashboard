@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.90 — 2026-07-04
+
+- **La pantalla que verá el cliente (parte 2 de 4).** Ya existe la página pública `/review/<token>`: cuando abramos un link, el cliente verá el **video final reproduciéndose**, el **caption**, el **hilo de comentarios** y un aviso de **cuándo vence el link** (a los 30 días queda solo de lectura). Un link inválido muestra "página no encontrada". Todavía no hay botones para aprobar/comentar (llegan en la parte 3) ni forma de generar el link (parte 4), así que ningún cliente llega aquí aún — es la pantalla lista para conectarse.
+
 ## v2.89 — 2026-07-04
 
 - **Base del portal de aprobación del cliente (parte 1 de 4).** Empezamos a construir el flujo de agencia profesional: pronto el equipo podrá copiar un **link de revisión** por video y mandarlo por WhatsApp para que el cliente lo **apruebe, rechace o comente** sin necesidad de cuenta. Esta primera parte es la plomería (aún sin pantalla visible): la lógica del link con vencimiento a 30 días y la base de datos del hilo de comentarios, con un candado de seguridad — el voto del cliente **nunca** publica solo; un humano del equipo da el OK final.

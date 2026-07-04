@@ -76,3 +76,53 @@ export function expiryNoticeES(expiresAtISO: string | null, nowISO: string): str
 export function authorKindLabel(kind: ReviewAuthorKind): string {
   return kind === 'client' ? 'Cliente' : 'Equipo'
 }
+
+const REVIEW_TZ = 'America/Puerto_Rico'
+
+/**
+ * Absolute instant → `DD/MM/YYYY HH:MM` in Puerto Rico time. Uses numeric parts
+ * only (via en-CA) so the output is stable across ICU versions — no month-name
+ * variance. Empty string for null/invalid input.
+ */
+export function formatReviewDateES(iso: string | null, tz: string = REVIEW_TZ): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(d)
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? ''
+  const hour = get('hour') === '24' ? '00' : get('hour') // Intl quirk: midnight as 24
+  return `${get('day')}/${get('month')}/${get('year')} ${hour}:${get('minute')}`
+}
+
+/** A single comment in the review thread (shape of the RPC's jsonb). */
+export type ReviewComment = {
+  id: string
+  author_kind: ReviewAuthorKind
+  author_name: string
+  body: string
+  created_at: string
+}
+
+/** The full review payload returned by `get_review_by_token` (migration 0042). */
+export type ReviewData = {
+  idea_id: string
+  title: string | null
+  content_type: string | null
+  caption: string | null
+  publish_date: string | null
+  client_name: string
+  client_review_status: ClientReviewStatus
+  client_reviewer_name: string | null
+  client_reviewed_at: string | null
+  expires_at: string | null
+  edited_video_key: string | null
+  comments: ReviewComment[]
+}
