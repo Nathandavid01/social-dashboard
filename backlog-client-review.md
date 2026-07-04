@@ -37,19 +37,23 @@ PR → review adversarial → merge → Vercel READY → bump `lib/version.ts` +
   Escrita defensivamente (lecturas con `select('*')` degradan si no está aplicada).
 
 ## Definition of Done (el loop termina cuando TODO esto está ✅ + e2e real verificado)
-- [x] **Inc 1** — Core puro `review-link-core.ts` (expiry, url, canReview, labels ES) TDD verde + migración 0042 (columnas + tabla comentarios) escrita. ✅ PR #83
-- [ ] **Inc 4 recordatorio (seguridad):** el token DEBE generarse con `gen_random_uuid()` / CSPRNG — nunca secuencial ni predecible; todo el modelo `anon`+RPC depende de que sea inadivinable.
-- [x] **Inc 2** — Página pública `/review/[token]`: carga video+caption+hilo por token (RPC `get_review_by_token`), player, estado de expiración. Helpers de formato testeados + test RTL. **Negativos:** token malo → 404; token expirado → solo lectura. ✅ PR #84, v2.90
-- [x] **Inc 3** — Acciones del cliente validadas por token: `submitClientReviewAction` + `addClientReviewCommentAction` vía RPC + form `ReviewActions`. Validación doble capa (app+DB); expiración server-side; firewall reforzado. Review adversarial: 0 HIGH. ✅ PR #85, v2.91
-- [ ] **Inc 4** — Lado staff en `VideoWorkCard`: botón "Copiar link de revisión" **gateado a que exista video editado** (el Worker R2 solo sirve `/edited/`; sin él el cliente no ve nada) — espeja el gating de `PublishToMetricoolButton`. Genera/regenera token + copia URL para WhatsApp, muestra el voto del cliente + hilo, el staff responde. Voto visible; aprobación interna sigue separada.
-- [ ] **e2e real**: abrir un link de un video real, Rechazar+comentar como cliente, ver el voto+comentario en la tarjeta, responder como staff, Aprobar. Gate ×2.
-- [ ] Prod: migración 0042 aplicada (SQL Editor `bgqdtfhelknmfudcvrzz`) + `SUPABASE_SERVICE_ROLE_KEY` y `R2_PUBLIC_BASE_URL` verificados en Vercel.
+- [x] **Inc 1** — Core puro `review-link-core.ts` TDD + migración 0042. ✅ PR #83, v2.89
+- [x] **Inc 2** — Página pública `/review/[token]` (video+caption+hilo+expiración; token malo→404, expirado→solo lectura). ✅ PR #84, v2.90
+- [x] **Inc 3** — Acciones del cliente (Aprobar/Rechazar/Comentar) validadas por token, form `ReviewActions`. ✅ PR #85, v2.91
+- [x] **Inc 4** — Lado staff `ReviewLinkPanel` (generar/copiar link gateado a video editado + `posting.publish`, token CSPRNG, voto+hilo+respuesta). ✅ PR #86, v2.92
+- [ ] **e2e real** (gated en 0042 en prod): subir video editado → Generar link → abrir → Rechazar+comentar como cliente → ver voto+comentario en la tarjeta → responder como staff → Aprobar.
+- [ ] Prod: migración 0042 aplicada (SQL Editor `bgqdtfhelknmfudcvrzz`) + `SUPABASE_SERVICE_ROLE_KEY`/`R2_PUBLIC_BASE_URL`/`NEXT_PUBLIC_SITE_URL` en Vercel.
 
-## Shipped
-- **Inc 1** (PR #83, v2.89) — core puro `review-link-core.ts` (21 tests TDD) + migración 0042 (columnas review + tabla `video_review_comments` + 3 RPCs SECURITY DEFINER keyed por token). Review adversarial: 0 HIGH; hardening aplicado (notify pgrst, cap de longitud, log solo en cambio real).
-- **Inc 2** (PR #84, v2.90) — página pública `/review/[token]` read-only (video+caption+hilo+expiración), `lib/supabase/public.ts` (anon sin sesión), `getReviewByToken` (RPC + R2 url), +11 tests. Review adversarial: 0 HIGH (caching, boundaries RSC, XSS, 404-paths OK). LOW opcional diferido: recortar payload serializado (no incremental — el RPC anon ya lo devuelve).
+## Shipped — FEATURE COMPLETO end-to-end (Inc 1–4)
+- **Inc 1** (PR #83, v2.89) — core puro (21 tests) + migración 0042 (columnas + tabla `video_review_comments` + 3 RPCs SECURITY DEFINER keyed por token). Hardening: notify pgrst, caps, log solo en cambio.
+- **Inc 2** (PR #84, v2.90) — página pública read-only, `lib/supabase/public.ts` (anon), `getReviewByToken`. 0 HIGH.
+- **Inc 3** (PR #85, v2.91) — acciones cliente + `ReviewActions`. Validación doble capa, expiración server-side. 0 HIGH.
+- **Inc 4** (PR #86, v2.92) — `ReviewLinkPanel` staff + `review-staff.ts`. 0 HIGH + hardening (excluir archivados, `NEXT_PUBLIC_SITE_URL`).
 
-<!-- iteración añade: - <inc> (PR #) — una línea -->
+## ⚠️ HANDOFF para encender en PROD (lo único que falta)
+1. Aplicar migración `0042` en el SQL Editor (proyecto `bgqdtfhelknmfudcvrzz`) — el MCP no ve el team de Nathan.
+2. Verificar/​setear en Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `R2_PUBLIC_BASE_URL`, `NEXT_PUBLIC_SITE_URL`.
+3. Correr el e2e real de arriba.
 
 ## Rejected (nunca re-proponer — Eric poda aquí con el porqué)
 <!-- - <idea> — <por qué no> -->
