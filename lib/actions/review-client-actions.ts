@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import { normalizeDecision } from '@/lib/utils/review-link-core'
+import { notifyStaffOfClientReview } from '@/lib/actions/review-notify'
 
 export type ClientActionResult = { ok?: true; status?: string; error?: string }
 
@@ -33,9 +34,12 @@ export async function submitClientReviewAction(
   })
   if (error) return { error: 'No se pudo guardar tu decisión. El link puede haber vencido.' }
 
-  const res = (data ?? {}) as { ok?: boolean; error?: string; status?: string }
+  const res = (data ?? {}) as { ok?: boolean; error?: string; status?: string; idea_id?: string }
   if (!res.ok) return { error: res.error ?? 'No se pudo guardar tu decisión.' }
 
+  if (res.idea_id) {
+    await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
+  }
   revalidatePath(`/review/${token}`)
   return { ok: true, status: res.status }
 }
@@ -58,9 +62,12 @@ export async function addClientReviewCommentAction(
   })
   if (error) return { error: 'No se pudo enviar el comentario. El link puede haber vencido.' }
 
-  const res = (data ?? {}) as { ok?: boolean; error?: string }
+  const res = (data ?? {}) as { ok?: boolean; error?: string; idea_id?: string }
   if (!res.ok) return { error: res.error ?? 'No se pudo enviar el comentario.' }
 
+  if (res.idea_id) {
+    await notifyStaffOfClientReview(res.idea_id, 'comment', { reviewerName: name, commentBody: body })
+  }
   revalidatePath(`/review/${token}`)
   return { ok: true }
 }
