@@ -146,7 +146,8 @@ begin
   update public.content_ideas
      set client_review_status = p_decision,
          client_reviewed_at = now(),
-         client_reviewer_name = nullif(left(trim(p_name), 120), '')
+         -- preserve the previously captured name if this (re)vote sends a blank
+         client_reviewer_name = coalesce(nullif(left(trim(p_name), 120), ''), client_reviewer_name)
    where id = v_idea.id;
 
   -- Only log when the vote actually changed — a token holder re-submitting the

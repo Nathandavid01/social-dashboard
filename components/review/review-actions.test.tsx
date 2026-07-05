@@ -110,4 +110,17 @@ describe('ReviewActions', () => {
     expect(screen.getByRole('button', { name: /aprobar/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /rechazar/i })).toBeInTheDocument()
   })
+
+  it('flips to the confirmation banner when the status prop updates in place (no remount)', () => {
+    // Simulates the real flow: same instance, pending -> approved after refresh.
+    const { rerender } = render(
+      <ReviewActions token={TOKEN} currentStatus="pending" expired={false} />,
+    )
+    expect(screen.getByRole('button', { name: /aprobar/i })).toBeInTheDocument()
+    rerender(
+      <ReviewActions token={TOKEN} currentStatus="approved" reviewerName="María" expired={false} />,
+    )
+    expect(screen.getByText('✓ Aprobado por María')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^aprobar$/i })).not.toBeInTheDocument()
+  })
 })

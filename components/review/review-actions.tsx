@@ -41,13 +41,16 @@ export function ReviewActions({
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
-  const [name, setName] = useState('')
+  const [name, setName] = useState(reviewerName?.trim() ?? '')
   const [comment, setComment] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const hasVoted = currentStatus !== 'pending'
-  const [showButtons, setShowButtons] = useState(!hasVoted)
+  // Derive the collapse from the real status (+ an explicit "changing" override)
+  // so there's never a stale/broken banner during the async refresh window.
+  const [changing, setChanging] = useState(false)
+  const showButtons = !hasVoted || changing
 
   if (expired) return null
 
@@ -63,7 +66,7 @@ export function ReviewActions({
         setError(res.error)
         return
       }
-      setShowButtons(false)
+      setChanging(false)
       router.refresh()
     })
   }
@@ -135,7 +138,7 @@ export function ReviewActions({
       ) : (
         <button
           type="button"
-          onClick={() => setShowButtons(true)}
+          onClick={() => setChanging(true)}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
         >
           <Pencil className="h-3.5 w-3.5" /> ¿Cambiar tu decisión?
