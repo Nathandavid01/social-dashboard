@@ -14,6 +14,7 @@ const patchSchema = z.object({
   min_ideas_per_session: z.number().int().min(0).max(50).optional(),
   ideas_multiplier: z.number().min(0).max(10).optional(),
   require_rescheduling: z.boolean().optional(),
+  client_review_autopost_enabled: z.boolean().optional(),
   pipeline_step_assignees: z.record(z.enum(stageKeys), z.string().uuid()).optional(),
 })
 

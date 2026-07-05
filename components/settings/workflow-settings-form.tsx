@@ -21,6 +21,7 @@ const DEFAULTS = {
   min_ideas_per_session: 4,
   ideas_multiplier: 2,
   require_rescheduling: true,
+  client_review_autopost_enabled: true,
 }
 
 export function WorkflowSettingsForm({ initial }: Props) {
@@ -30,6 +31,7 @@ export function WorkflowSettingsForm({ initial }: Props) {
     min_ideas_per_session: initial.min_ideas_per_session,
     ideas_multiplier: initial.ideas_multiplier,
     require_rescheduling: initial.require_rescheduling,
+    client_review_autopost_enabled: initial.client_review_autopost_enabled,
   })
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
@@ -150,7 +152,7 @@ export function WorkflowSettingsForm({ initial }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Reglas</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-2">
           <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/40">
             <input
               type="checkbox"
@@ -163,6 +165,23 @@ export function WorkflowSettingsForm({ initial }: Props) {
               <p className="text-xs text-muted-foreground">
                 Si el cliente tuvo una sesión que ya pasó y no hay una próxima agendada,
                 aparece en estado <strong>Reagendar</strong> hasta que se cree la nueva.
+              </p>
+            </div>
+          </label>
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/40">
+            <input
+              type="checkbox"
+              checked={form.client_review_autopost_enabled}
+              onChange={(e) => setForm({ ...form, client_review_autopost_enabled: e.target.checked })}
+              className="mt-1 h-4 w-4 accent-primary"
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Aprobación del cliente auto-publica el video</p>
+              <p className="text-xs text-muted-foreground">
+                Cuando el cliente aprueba un video en el portal de revisión (<code>/review/&lt;token&gt;</code>),
+                el video pasa automáticamente a <strong>aprobado</strong> internamente y se publica en Metricool
+                para la fecha programada. Desactiva esto si prefieres que un miembro del equipo
+                siempre dé la aprobación interna primero.
               </p>
             </div>
           </label>
