@@ -3,6 +3,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePermission } from '@/lib/auth/server'
 import { createDraftPost } from '@/lib/metricool/post'
 import { getR2PublicUrl } from '@/lib/actions/idea-videos-r2'
@@ -51,6 +52,30 @@ export async function maybeAutoPostIdea(ideaId: string): Promise<AutoPostOutcome
     return { posted: true }
   } catch {
     /* swallow — approval already committed; the failure is recorded on the row */
+    return null
+  }
+}
+
+/**
+ * Best-effort auto-post triggered when the CLIENT approves via the public
+ * `/review/<token>` portal (migration 0043 already advanced approval_status
+ * to 'approved' before this runs). No auth session exists on that path — RLS
+ * on `content_ideas` only allows `authenticated` — so this uses the
+ * service-role admin client instead of the cookie-based one. Safe because
+ * `ideaId` here always comes from the token-scoped `submit_client_review` RPC
+ * result, never straight from client input. Same never-throws contract as
+ * `maybeAutoPostIdea`.
+ */
+export async function autoPostIdeaFromClientApproval(ideaId: string): Promise<AutoPostOutcome> {
+  if (AUTOPOST_ON_APPROVAL_DISABLED) return null
+  try {
+    const supabase = createAdminClient()
+    if (!supabase) return null
+    const res = await runIdeaPost(supabase, ideaId, null)
+    if (res.error) return null
+    if (res.skipped) return { posted: false, skipped: res.skipped }
+    return { posted: true }
+  } catch {
     return null
   }
 }

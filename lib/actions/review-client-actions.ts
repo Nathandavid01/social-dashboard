@@ -4,15 +4,18 @@ import { revalidatePath } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import { normalizeDecision } from '@/lib/utils/review-link-core'
 import { notifyStaffOfClientReview } from '@/lib/actions/review-notify'
+import { autoPostIdeaFromClientApproval } from '@/lib/actions/idea-posting'
 
 export type ClientActionResult = { ok?: true; status?: string; error?: string }
 
 /**
  * Client-side (unauthenticated) actions for the public review link. Both go
- * through the SECURITY DEFINER RPCs of migration 0042, which re-validate the
- * token + expiry IN THE DATABASE and only ever touch the one row that owns the
- * token — this app code cannot reach another video. The client vote lands in
- * `client_review_status`; it NEVER touches `approval_status` (staff firewall).
+ * through the SECURITY DEFINER RPCs of migration 0042/0043, which re-validate
+ * the token + expiry IN THE DATABASE and only ever touch the one row that owns
+ * the token — this app code cannot reach another video. The client vote lands
+ * in `client_review_status`; an Aprobar vote ALSO advances `approval_status`
+ * to 'approved' (migration 0043) — the client's sign-off IS the approval that
+ * unblocks the pipeline. Rechazar never touches `approval_status`.
  */
 
 /** Record the client's Aprobar / Rechazar decision. */
@@ -40,6 +43,7 @@ export async function submitClientReviewAction(
     status?: string
     idea_id?: string
     changed?: boolean
+    pipeline_advanced?: boolean
   }
   if (!res.ok) return { error: res.error ?? 'No se pudo guardar tu decisión.' }
 
@@ -47,6 +51,11 @@ export async function submitClientReviewAction(
   // same decision must not flood the staff bell (mirrors the DB audit-log dedupe).
   if (res.idea_id && res.changed) {
     await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
+  }
+  // The DB only reports pipeline_advanced=true the FIRST time the client
+  // approves (idempotent) — a re-click never re-fires the auto-post.
+  if (res.idea_id && res.pipeline_advanced) {
+    await autoPostIdeaFromClientApproval(res.idea_id)
   }
   revalidatePath(`/review/${token}`)
   return { ok: true, status: res.status }

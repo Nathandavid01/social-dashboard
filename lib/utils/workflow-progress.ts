@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: WorkflowSettings = {
   min_ideas_per_session: 4,
   ideas_multiplier: 2,
   require_rescheduling: true,
+  client_review_autopost_enabled: true,
   steps: [
     { slug: 'scheduled',   name: 'Agendar próxima sesión',     required: true },
     { slug: 'ideas',       name: 'Tener ideas listas',         required: true },
@@ -37,6 +38,7 @@ export async function getWorkflowSettings(): Promise<WorkflowSettings> {
     min_ideas_per_session: data.min_ideas_per_session ?? 4,
     ideas_multiplier: Number(data.ideas_multiplier ?? 2),
     require_rescheduling: data.require_rescheduling ?? true,
+    client_review_autopost_enabled: data.client_review_autopost_enabled ?? true,
     steps: Array.isArray(data.steps) ? data.steps : DEFAULT_SETTINGS.steps,
     pipeline_step_assignees: parsePipelineStepAssignees(data.pipeline_step_assignees),
   }

@@ -8,6 +8,7 @@ export interface WorkflowSettings {
   min_ideas_per_session: number
   ideas_multiplier: number
   require_rescheduling: boolean
+  client_review_autopost_enabled: boolean
   steps: { slug: string; name: string; required: boolean }[]
   pipeline_step_assignees: PipelineStepAssignees
 }
