@@ -83,7 +83,12 @@ export function ReviewPage({
         </div>
 
         {/* Aprobar / Rechazar / Comentar (hidden once expired) */}
-        <ReviewActions token={token} currentStatus={review.client_review_status} expired={expired} />
+        <ReviewActions
+          token={token}
+          currentStatus={review.client_review_status}
+          reviewerName={review.client_reviewer_name}
+          expired={expired}
+        />
 
         {/* Expiry notice */}
         <p

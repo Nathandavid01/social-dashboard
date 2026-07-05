@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.94 — 2026-07-04
+
+- **La página de revisión ahora confirma la decisión del cliente con claridad.** En vez de solo un aviso que desaparece, arriba de los botones sale un banner con el estado: mientras está pendiente dice "Tu opinión sobre este video"; al **aprobar** cambia a **"✓ Aprobaste este video · ¡Gracias!"** (verde), y al **pedir cambios** a **"Pediste cambios · el equipo subirá una nueva versión"** (ámbar) — con el nombre del cliente si lo puso. Una vez que vota, los botones se recogen detrás de un **"¿Cambiar tu decisión?"** (puede cambiarla hasta que venza el link). Se siente como una herramienta de agencia de verdad.
+
 ## v2.93 — 2026-07-04
 
 - **El equipo se entera al instante cuando el cliente aprueba, rechaza o comenta.** Ya no hay que estar revisando la tarjeta: cuando un cliente actúa en su link de revisión, le llega una **notificación a la campana** al encargado del video y a los owners/supervisores — con quién fue, qué video y (si comentó) un adelanto del comentario, con color según el caso (verde aprobado, ámbar cambios, azul comentario). Es best-effort: si algo falla, la acción del cliente igual se guarda.
