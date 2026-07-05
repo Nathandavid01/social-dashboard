@@ -9,6 +9,7 @@ import {
   expiryNoticeES,
   authorKindLabel,
   formatReviewDateES,
+  reviewDecisionSummary,
   type ClientReviewStatus,
 } from './review-link-core'
 
@@ -120,6 +121,41 @@ describe('authorKindLabel', () => {
   it('labels client and staff in Spanish', () => {
     expect(authorKindLabel('client')).toBe('Cliente')
     expect(authorKindLabel('staff')).toBe('Equipo')
+  })
+})
+
+describe('reviewDecisionSummary', () => {
+  it('prompts for a decision while pending', () => {
+    const s = reviewDecisionSummary('pending')
+    expect(s.tone).toBe('neutral')
+    expect(s.headline).toBe('Tu opinión sobre este video')
+    expect(s.sub).toMatch(/Aprueba/)
+  })
+
+  it('confirms an approval with thanks (success)', () => {
+    const s = reviewDecisionSummary('approved')
+    expect(s.tone).toBe('success')
+    expect(s.headline).toBe('✓ Aprobaste este video')
+    expect(s.sub).toMatch(/Gracias/)
+  })
+
+  it('names the reviewer when approved', () => {
+    expect(reviewDecisionSummary('approved', 'María').headline).toBe('✓ Aprobado por María')
+  })
+
+  it('explains next steps when changes are requested (warning)', () => {
+    const s = reviewDecisionSummary('rejected')
+    expect(s.tone).toBe('warning')
+    expect(s.headline).toBe('Pediste cambios')
+    expect(s.sub).toMatch(/nueva versión/)
+  })
+
+  it('names the reviewer when changes requested', () => {
+    expect(reviewDecisionSummary('rejected', 'María').headline).toBe('María pidió cambios')
+  })
+
+  it('ignores a blank reviewer name', () => {
+    expect(reviewDecisionSummary('approved', '  ').headline).toBe('✓ Aprobaste este video')
   })
 })
 

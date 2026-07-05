@@ -87,4 +87,27 @@ describe('ReviewActions', () => {
     )
     expect(refresh).not.toHaveBeenCalled()
   })
+
+  it('shows a neutral prompt banner while pending', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="pending" expired={false} />)
+    expect(screen.getByText('Tu opinión sobre este video')).toBeInTheDocument()
+  })
+
+  it('confirms the decision and hides the buttons once the client has voted', () => {
+    render(
+      <ReviewActions token={TOKEN} currentStatus="approved" reviewerName="María" expired={false} />,
+    )
+    expect(screen.getByText('✓ Aprobado por María')).toBeInTheDocument()
+    // buttons collapsed behind the "change" affordance
+    expect(screen.queryByRole('button', { name: /^aprobar$/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /cambiar tu decisión/i })).toBeInTheDocument()
+  })
+
+  it('re-reveals the buttons when the client wants to change the decision', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="rejected" expired={false} />)
+    expect(screen.getByText('Pediste cambios')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /cambiar tu decisión/i }))
+    expect(screen.getByRole('button', { name: /aprobar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /rechazar/i })).toBeInTheDocument()
+  })
 })

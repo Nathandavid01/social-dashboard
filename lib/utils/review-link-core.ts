@@ -77,6 +77,38 @@ export function authorKindLabel(kind: ReviewAuthorKind): string {
   return kind === 'client' ? 'Cliente' : 'Equipo'
 }
 
+/**
+ * The client-facing headline + subtext for the current review decision, so the
+ * public page can confirm the client's action clearly (not just a fleeting
+ * toast). Names the reviewer when known.
+ */
+export function reviewDecisionSummary(
+  status: ClientReviewStatus,
+  reviewerName?: string | null,
+): { headline: string; sub: string; tone: 'neutral' | 'success' | 'warning' } {
+  const who = reviewerName?.trim()
+  switch (status) {
+    case 'approved':
+      return {
+        headline: who ? `✓ Aprobado por ${who}` : '✓ Aprobaste este video',
+        sub: '¡Gracias! El equipo lo publicará según lo pautado.',
+        tone: 'success',
+      }
+    case 'rejected':
+      return {
+        headline: who ? `${who} pidió cambios` : 'Pediste cambios',
+        sub: 'El equipo revisará tus comentarios y subirá una nueva versión.',
+        tone: 'warning',
+      }
+    default:
+      return {
+        headline: 'Tu opinión sobre este video',
+        sub: 'Aprueba el video o pide cambios. Puedes dejar un comentario.',
+        tone: 'neutral',
+      }
+  }
+}
+
 const REVIEW_TZ = 'America/Puerto_Rico'
 
 /**
