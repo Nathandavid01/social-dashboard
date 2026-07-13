@@ -49,16 +49,24 @@ describe('decideClientVote', () => {
       expect(d.reason).toContain('no está en revisión')
     })
 
-    it('when the video is already back with the editor (revision_needed)', () => {
-      const d = decideClientVote(state({ approvalStatus: 'revision_needed' }))
-      expect(d.post).toBe(false)
-      expect(d.approve).toBe(false)
-    })
-
     // A rejection on a not-submitted video must not bounce it either.
     it('when the client rejects a video that was never submitted', () => {
       const d = decideClientVote(state({ clientReviewStatus: 'rejected', approvalStatus: 'pending' }))
       expect(d.requestRevision).toBe(false)
     })
+
+    // Re-rejecting what's already with the editor would just re-log noise.
+    it('when the client rejects again a video already back with the editor', () => {
+      const d = decideClientVote(state({ clientReviewStatus: 'rejected', approvalStatus: 'revision_needed' }))
+      expect(d).toMatchObject({ approve: false, post: false, requestRevision: false })
+    })
+  })
+
+  // The portal has a "cambiar decisión" affordance, so this path is reachable:
+  // the client rejects, changes their mind, and approves. It must publish —
+  // dead-ending here would show the client "Aprobado" while nothing happens.
+  it('publishes when the client rejects and then changes their mind to approve', () => {
+    const d = decideClientVote(state({ clientReviewStatus: 'approved', approvalStatus: 'revision_needed' }))
+    expect(d).toEqual({ approve: true, requestRevision: false, post: true })
   })
 })

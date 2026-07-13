@@ -3,7 +3,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { createDraftPost } from '@/lib/metricool/post'
-import { getR2PublicUrl } from '@/lib/actions/idea-videos-r2'
+import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms } from '@/lib/utils/idea-posting-core'
@@ -31,9 +31,17 @@ export async function runIdeaPost(
   if (!idea) return { error: 'Idea no encontrada' }
 
   // Most-recent non-archived edited video in R2 (the thing we attach).
+  //
+  // We select the R2 key HERE, with the caller's client, and build the public URL
+  // from it below — instead of calling `getR2PublicUrl`, which builds its own
+  // session-scoped client. That mattered: on the client-vote path there IS no
+  // session (the review link is anonymous), `content_idea_videos` has no RLS
+  // policy for `anon`, so the lookup would come back empty and every real
+  // client's approval would fail to publish — while still working for a logged-in
+  // staffer testing it. Resolve it with the client we were handed.
   const { data: edited } = await supabase
     .from('content_idea_videos')
-    .select('id')
+    .select('id, drive_file_id, storage_provider, kind')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
     .eq('storage_provider', 'r2')
@@ -88,13 +96,17 @@ export async function runIdeaPost(
       .eq('id', ideaId)
   }
 
-  // Public, permanent URL for the edited video (only edited videos are public).
-  const pub = await getR2PublicUrl((edited as { id: string }).id)
-  if (pub.error || !pub.url) {
-    const msg = pub.error ?? 'No se pudo obtener la URL pública del video editado'
+  // Public, permanent URL for the edited video. Only `edited` videos are ever
+  // exposed publicly — the query above already constrains kind + provider, and
+  // the Cloudflare Worker enforces the same `/edited/` restriction at the edge.
+  const editedVideo = edited as { id: string; drive_file_id: string | null }
+  const publicUrl = editedVideo.drive_file_id ? r2PublicUrl(editedVideo.drive_file_id) : null
+  if (!publicUrl) {
+    const msg = 'No se pudo obtener la URL pública del video editado (¿falta R2_PUBLIC_BASE_URL?)'
     await releaseClaim(msg)
     return { error: msg }
   }
+  const pub = { url: publicUrl }
 
   // Pre-flight the public video the way Metricool's player will (a Range
   // request expecting 206). Block here instead of silently sending a URL that

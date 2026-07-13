@@ -11,6 +11,7 @@ import {
   Link as LinkIcon,
   CheckCircle2,
   RotateCcw,
+  MessageSquare,
 } from 'lucide-react'
 import type { ContentIdeaActivityAction } from '@/lib/supabase/types'
 
@@ -51,6 +52,13 @@ export const ACTION_META: Record<
   // Client decisions from the public review link. These have no `user_id`, so the
   // timeline renders them without an author — the verb has to say who acted.
   sent_to_client: { icon: LinkIcon, tone: 'text-indigo-500', verb: () => 'envió el video al cliente' },
+  // Inserted by the submit_client_review RPC (migration 0042) — it was already
+  // being written with no label, so it fell back to the generic icon.
+  client_reviewed: {
+    icon: MessageSquare,
+    tone: 'text-indigo-500',
+    verb: (m) => `el cliente votó${m.decision === 'approved' ? ': aprobado' : m.decision === 'rejected' ? ': rechazado' : ''}`,
+  },
   approved_by_client: {
     icon: CheckCircle2,
     tone: 'text-green-600',
@@ -73,6 +81,7 @@ export const FALLBACK_ACTION_ICON = History
  * el video"). Without this they'd render as "Alguien el cliente aprobó…".
  */
 const CLIENT_ACTIONS = new Set<ContentIdeaActivityAction>([
+  'client_reviewed',
   'approved_by_client',
   'client_requested_changes',
 ])

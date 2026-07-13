@@ -447,6 +447,7 @@ export type ContentIdeaActivityAction =
   // Decisions taken by the CLIENT on the public review link (user_id is null —
   // the actor is the client, not a profile).
   | 'sent_to_client'
+  | 'client_reviewed'
   | 'approved_by_client'
   | 'client_requested_changes'
 

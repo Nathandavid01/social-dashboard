@@ -42,6 +42,12 @@ export type ClientVoteAutopostOutcome =
 
 export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAutopostOutcome> {
   try {
+    // Checked BEFORE any write: the switch must restore the OLD behavior whole —
+    // vote recorded, staff approves by hand. Checking it after the approval would
+    // leave the human out of the loop while silently not publishing: the worst of
+    // both worlds, and no way back without a revert.
+    if (KILL_SWITCH) return { acted: false, reason: 'Auto-post desactivado (kill switch)' }
+
     const supabase = createAdminClient()
     if (!supabase) return { acted: false, reason: 'Service role no configurado' }
 
@@ -53,17 +59,24 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
       .single()
     if (error || !idea) return { acted: false, reason: 'Idea no encontrada' }
 
+    // The status we based the decision on — every write below is conditioned on it
+    // still being that, so a concurrent vote can't make us act twice.
+    const seenStatus = (idea.approval_status ?? null) as ApprovalStatus
+
     const decision = decideClientVote({
       clientReviewStatus: (idea.client_review_status ?? null) as ClientReviewStatus,
-      approvalStatus: (idea.approval_status ?? null) as ApprovalStatus,
+      approvalStatus: seenStatus,
     })
 
     if (decision.requestRevision) {
-      const { error: updErr } = await supabase
+      const { data: won, error: updErr } = await supabase
         .from('content_ideas')
         .update({ approval_status: 'revision_needed' })
         .eq('id', ideaId)
+        .eq('approval_status', seenStatus ?? 'submitted')
+        .select('id')
       if (updErr) return { acted: false, reason: updErr.message }
+      if (!won || won.length === 0) return { acted: false, reason: 'Otro voto ya lo procesó' }
 
       await logIdeaActivity(supabase, {
         ideaId,
@@ -80,12 +93,21 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
     // The client's yes IS the internal approval. `approved_by` stays null — that
     // column is a profiles FK and the approver here is the client, not a user;
     // the activity log below is what records who really approved it.
-    const { error: updErr } = await supabase
+    //
+    // The `.eq('approval_status', ...)` is a compare-and-set: it re-checks the
+    // status we decided on, atomically, at write time. `.select()` tells us
+    // whether we actually won — two concurrent votes both pass `decideClientVote`
+    // (they read the same row), but only one updates a row. The loser must stop
+    // here or it would double-log the approval. (The posting claim downstream is
+    // what makes a double-POST impossible; this guards the audit trail.)
+    const { data: won, error: updErr } = await supabase
       .from('content_ideas')
       .update({ approval_status: 'approved', approved_at: new Date().toISOString() })
       .eq('id', ideaId)
-      .eq('approval_status', 'submitted') // guard the race: only the submitted row
+      .eq('approval_status', seenStatus ?? 'submitted')
+      .select('id')
     if (updErr) return { acted: false, reason: updErr.message }
+    if (!won || won.length === 0) return { acted: false, reason: 'Otro voto ya lo procesó' }
 
     await logIdeaActivity(supabase, {
       ideaId,
@@ -94,9 +116,9 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
       metadata: { source: 'review_link' },
     })
 
-    if (!decision.post || KILL_SWITCH) {
+    if (!decision.post) {
       revalidateStaffViews(ideaId)
-      return { acted: true, approved: true, revisionRequested: false, posted: false, skipped: 'Auto-post desactivado' }
+      return { acted: true, approved: true, revisionRequested: false, posted: false, skipped: 'Sin auto-post' }
     }
 
     // Same engine as the manual button — including the atomic claim that makes

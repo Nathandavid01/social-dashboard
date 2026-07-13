@@ -48,15 +48,18 @@ const NOOP = (reason: string): ClientVoteDecision => ({
  *  - Only a real 'approved' / 'rejected' vote acts; 'pending' is a no-op.
  *  - An ALREADY-approved video is never re-approved and never re-posted here
  *    (the posting layer has its own idempotency claim, but we don't even knock).
- *  - We only act on a video the staff actually SENT to the client
- *    ('submitted'). A video still in 'pending' was never sent for review, and
- *    one in 'revision_needed' is already back with the editor — in both cases a
- *    stray vote on an old link must not publish anything.
+ *  - We only act on a video the staff actually PUT in front of the client:
+ *    'submitted' (link sent) or 'revision_needed' (they rejected it, and the
+ *    portal lets them change their mind — that re-approval must publish, not
+ *    dead-end silently). A video still in 'pending' was never sent for review,
+ *    so a stray vote on an old link must not publish anything.
  *
  * Note we deliberately do NOT check caption / edited video / blog_id here:
  * `ideaPostReadiness` owns that and refuses with a precise reason. Duplicating
  * it would let the two drift apart.
  */
+const CLIENT_HOLDS_IT: ApprovalStatus[] = ['submitted', 'revision_needed']
+
 export function decideClientVote(state: ClientVoteState): ClientVoteDecision {
   const { clientReviewStatus, approvalStatus } = state
 
@@ -68,11 +71,13 @@ export function decideClientVote(state: ClientVoteState): ClientVoteDecision {
     return NOOP('El video ya estaba aprobado')
   }
 
-  if (approvalStatus !== 'submitted') {
+  if (!CLIENT_HOLDS_IT.includes(approvalStatus)) {
     return NOOP('El video no está en revisión del cliente')
   }
 
   if (clientReviewStatus === 'rejected') {
+    // Already back with the editor — don't re-bounce it (and don't re-log).
+    if (approvalStatus === 'revision_needed') return NOOP('El video ya está con el editor')
     return { approve: false, requestRevision: true, post: false }
   }
 
