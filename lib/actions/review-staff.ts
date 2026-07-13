@@ -86,7 +86,19 @@ export async function generateReviewLink(
     .update({
       review_token: token,
       review_token_expires_at: expiresAt,
-      ...(submitting ? { approval_status: 'submitted', submitted_at: new Date().toISOString() } : {}),
+      // A new link is a NEW ask, so the old vote must not ride along: it belonged
+      // to the old link. Leaving it would make the re-send inert — the client
+      // would open the fresh link, see their stale "✓ Aprobado", get no buttons,
+      // and no decision could ever come back. Only reset when we're actually
+      // re-submitting (an already-approved video keeps its state untouched).
+      ...(submitting
+        ? {
+            approval_status: 'submitted',
+            submitted_at: new Date().toISOString(),
+            client_review_status: 'pending',
+            client_reviewed_at: null,
+          }
+        : {}),
     })
     .eq('id', ideaId)
   if (error) return { error: 'No se pudo generar el link (¿migración 0042 aplicada?).' }

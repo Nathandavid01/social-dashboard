@@ -86,6 +86,7 @@ export function ReviewPage({
         <ReviewActions
           token={token}
           currentStatus={review.client_review_status}
+          scheduled={review.scheduled ?? false}
           reviewerName={review.client_reviewer_name}
           expired={expired}
         />

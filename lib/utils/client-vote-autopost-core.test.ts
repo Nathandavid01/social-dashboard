@@ -32,10 +32,10 @@ describe('decideClientVote', () => {
       expect(d.approve).toBe(false)
     })
 
-    // The posting layer is idempotent on its own, but re-approving would also
-    // re-stamp approved_at and re-notify. Stop before we knock.
-    it('when the video is already approved (no double-approve, no double-post)', () => {
-      const d = decideClientVote(state({ approvalStatus: 'approved' }))
+    // A REJECTION on an already-approved video: nothing to do (the lock in the
+    // RPC refuses it anyway once the post is scheduled).
+    it('when the video is already approved and the client rejects', () => {
+      const d = decideClientVote(state({ approvalStatus: 'approved', clientReviewStatus: 'rejected' }))
       expect(d).toMatchObject({ approve: false, post: false, requestRevision: false })
       expect(d.reason).toContain('ya estaba aprobado')
     })
@@ -60,6 +60,14 @@ describe('decideClientVote', () => {
       const d = decideClientVote(state({ clientReviewStatus: 'rejected', approvalStatus: 'revision_needed' }))
       expect(d).toMatchObject({ approve: false, post: false, requestRevision: false })
     })
+  })
+
+  // Retry: the first publish attempt failed (Metricool down / caption missing),
+  // so the client clicks Aprobar again. We must NOT re-approve (no re-stamping,
+  // no re-logging) but we MUST re-attempt the post — it's their only retry.
+  it('retries the post (without re-approving) when an approved client re-votes approve', () => {
+    const d = decideClientVote(state({ approvalStatus: 'approved', clientReviewStatus: 'approved' }))
+    expect(d).toEqual({ approve: false, requestRevision: false, post: true })
   })
 
   // The portal has a "cambiar decisión" affordance, so this path is reachable:

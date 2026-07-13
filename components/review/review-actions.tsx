@@ -43,11 +43,14 @@ export function ReviewActions({
   currentStatus,
   reviewerName,
   expired,
+  scheduled = false,
 }: {
   token: string
   currentStatus: ClientReviewStatus
   reviewerName?: string | null
   expired: boolean
+  /** The approval already put the video in Metricool's queue → the vote is locked. */
+  scheduled?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -57,8 +60,8 @@ export function ReviewActions({
   const [notice, setNotice] = useState<string | null>(null)
 
   const hasVoted = currentStatus !== 'pending'
-  // Approving is final (it schedules the post). Rejecting stays changeable.
-  const canChange = canClientChangeVote(currentStatus)
+  // Locked only once the approval really scheduled the post — see canClientChangeVote.
+  const canChange = canClientChangeVote(currentStatus, scheduled)
   // Derive the collapse from the real status (+ an explicit "changing" override)
   // so there's never a stale/broken banner during the async refresh window.
   const [changing, setChanging] = useState(false)

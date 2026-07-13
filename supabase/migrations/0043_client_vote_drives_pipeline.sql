@@ -8,6 +8,11 @@
 --      the staff actually sent. Without this, every link minted before v2.95
 --      would be inert: the client votes and nothing happens.
 
+-- ⚠️ The function body below is SUPERSEDED by 0044 (which adds the approval
+-- lock). Apply 0043 then 0044, in order. Do NOT re-apply 0043 on its own
+-- afterwards: it is a `create or replace` and would silently restore the
+-- un-locked function while the portal keeps hiding the buttons.
+
 -- ── a) Lock the row before deciding whether the vote changed ──────────────────
 --
 -- The original read (0042) was a plain SELECT: two votes landing together both

@@ -125,14 +125,20 @@ describe('ReviewActions', () => {
   })
 
   // Approving is irreversible: the video is already scheduled in Metricool.
-  it('offers NO way to change the vote once approved, and says why', () => {
-    render(<ReviewActions token={TOKEN} currentStatus="approved" expired={false} />)
+  it('offers NO way to change the vote once approved AND scheduled, and says why', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="approved" scheduled expired={false} />)
     expect(screen.queryByText(/cambiar tu decisión/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /aprobar/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /rechazar/i })).not.toBeInTheDocument()
     expect(screen.getByText(/no se\s+puede cambiar/i)).toBeInTheDocument()
     // Commenting is the one channel that still reaches the team.
     expect(screen.getByRole('button', { name: /enviar comentario/i })).toBeInTheDocument()
+  })
+
+  // Publishing failed → nothing is scheduled → don't lock them out.
+  it('still lets them change an approval that never got scheduled', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="approved" scheduled={false} expired={false} />)
+    expect(screen.getByText(/cambiar tu decisión/i)).toBeInTheDocument()
   })
 
   it('still lets a client who REJECTED change their mind', () => {

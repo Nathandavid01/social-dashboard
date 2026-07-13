@@ -45,19 +45,23 @@ export function canClientDecide(input: { expiresAtISO: string | null; nowISO: st
 /**
  * Can the client still CHANGE a vote they already cast?
  *
- * No, once they approved. Approving schedules the video in Metricool, and we do
- * not pull a scheduled post back down — so offering "cambiar decisión" after an
- * approval would promise something we can't honor. They comment instead, and the
- * staff acts.
+ * Not once their approval actually put the video in Metricool's queue: we don't
+ * pull a scheduled post back down, so offering an "undo" would promise something
+ * we can't honor. They comment instead, and the staff acts.
  *
- * A rejection stays changeable: the video never left the agency, so a client who
- * changes their mind to "approved" still gets it published.
+ * The lock hangs on the post EXISTING (`scheduled`), not merely on the vote being
+ * 'approved' — those come apart for real: Metricool is down, the caption is
+ * missing, the kill switch is on. In those cases the video is still entirely in
+ * our hands, so locking the client out (and telling them it "quedó programado")
+ * would be both false and cruel. Let them change it; nothing is out there yet.
  *
- * The RPC (migration 0044) enforces this too — this helper only decides what the
- * portal SHOWS. Keep both in step.
+ * A rejection is always changeable: the video never left the agency.
+ *
+ * The RPC (migration 0044) enforces the same rule — this helper only decides what
+ * the portal SHOWS. Keep both in step.
  */
-export function canClientChangeVote(current: ClientReviewStatus): boolean {
-  return current !== 'approved'
+export function canClientChangeVote(current: ClientReviewStatus, scheduled = false): boolean {
+  return !(current === 'approved' && scheduled)
 }
 
 /**
@@ -174,5 +178,9 @@ export type ReviewData = {
   client_reviewed_at: string | null
   expires_at: string | null
   edited_video_key: string | null
+  /** True once the approval really produced a Metricool post. Optional so the
+   * page still renders against a DB where migration 0044 isn't applied yet
+   * (undefined → treated as not scheduled → the client keeps their lever). */
+  scheduled?: boolean
   comments: ReviewComment[]
 }
