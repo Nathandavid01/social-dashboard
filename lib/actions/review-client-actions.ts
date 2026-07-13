@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import { normalizeDecision } from '@/lib/utils/review-link-core'
 import { notifyStaffOfClientReview } from '@/lib/actions/review-notify'
+import { autopostOnClientVote } from '@/lib/actions/review-autopost'
 
 export type ClientActionResult = { ok?: true; status?: string; error?: string }
 
@@ -11,8 +12,13 @@ export type ClientActionResult = { ok?: true; status?: string; error?: string }
  * Client-side (unauthenticated) actions for the public review link. Both go
  * through the SECURITY DEFINER RPCs of migration 0042, which re-validate the
  * token + expiry IN THE DATABASE and only ever touch the one row that owns the
- * token — this app code cannot reach another video. The client vote lands in
- * `client_review_status`; it NEVER touches `approval_status` (staff firewall).
+ * token — this app code cannot reach another video.
+ *
+ * The vote lands in `client_review_status`. Since v2.95 it also DRIVES the
+ * pipeline (`autopostOnClientVote`): approving publishes the video to Metricool
+ * on its planned date, rejecting sends it back to the editor. The old
+ * "staff firewall" — where a human had to re-approve internally — is gone by
+ * product decision; the guards now live in `decideClientVote` + `ideaPostReadiness`.
  */
 
 /** Record the client's Aprobar / Rechazar decision. */
@@ -47,6 +53,10 @@ export async function submitClientReviewAction(
   // same decision must not flood the staff bell (mirrors the DB audit-log dedupe).
   if (res.idea_id && res.changed) {
     await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
+    // The vote now DRIVES the pipeline: an approval publishes the video by
+    // itself, a rejection sends it back to the editor. Gated on `changed` so a
+    // re-submitted vote can't re-trigger it. Never throws — the vote is saved.
+    await autopostOnClientVote(res.idea_id)
   }
   revalidatePath(`/review/${token}`)
   return { ok: true, status: res.status }

@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.95 — 2026-07-13
+
+**El voto del cliente ahora publica el video solo.** Antes, el cliente aprobaba desde su link y alguien del equipo todavía tenía que volver a aprobar por dentro para que el video subiera a Metricool. Ese paso manual se eliminó.
+
+- **Si el cliente aprueba** → el video queda aprobado y **programado automáticamente en Metricool** para su fecha de publicación. Nadie del equipo tiene que tocar nada.
+- **Si el cliente rechaza** → el video vuelve solo a la cola del editor (queda en "cambios pedidos"), con el comentario del cliente en el hilo.
+- **Mandar el link al cliente ahora marca el video como "enviado a revisión"** — antes se quedaba en su estado anterior, así que el equipo no veía que estaba donde el cliente.
+- La línea de tiempo del video muestra las decisiones del cliente ("El cliente aprobó el video", "El cliente pidió cambios") y cuándo se le envió.
+- En el portal, el cliente ahora lee qué hace su clic: aprobar programa el video, y si necesita un cambio después, lo pide por comentario.
+
+Las protecciones se mantienen: un video sin caption, sin editado o de un cliente sin Metricool configurado **no se publica** (se aprueba y el equipo ve el motivo). Sigue siendo imposible publicar dos veces, y un voto sobre un video que el equipo nunca envió no hace nada.
+
 ## v2.94 — 2026-07-04
 
 - **La página de revisión ahora confirma la decisión del cliente con claridad.** En vez de solo un aviso que desaparece, arriba de los botones sale un banner con el estado: mientras está pendiente dice "Tu opinión sobre este video"; al **aprobar** cambia a **"✓ Aprobaste este video · ¡Gracias!"** (verde), y al **pedir cambios** a **"Pediste cambios · el equipo subirá una nueva versión"** (ámbar) — con el nombre del cliente si lo puso. Una vez que vota, los botones se recogen detrás de un **"¿Cambiar tu decisión?"** (puede cambiarla hasta que venza el link). Se siente como una herramienta de agencia de verdad.

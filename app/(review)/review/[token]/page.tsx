@@ -7,6 +7,12 @@ import { getReviewByToken } from '@/lib/actions/review-public'
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
 
+// The client's vote runs the auto-post inline (video health check + the Metricool
+// call). On the default 10s budget a slow Metricool would kill the function
+// mid-flight — possibly AFTER the post was created — leaving the row claimed and
+// the client staring at an error for a vote that was actually saved.
+export const maxDuration = 60
+
 export const metadata: Metadata = {
   title: 'Revisión de contenido | NMedia PR',
   robots: { index: false, follow: false },

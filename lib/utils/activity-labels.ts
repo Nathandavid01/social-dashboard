@@ -1,4 +1,18 @@
-import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History } from 'lucide-react'
+import {
+  Video,
+  Sparkles,
+  Pencil,
+  Upload,
+  Send,
+  Rocket,
+  ClipboardList,
+  ArrowRight,
+  History,
+  Link as LinkIcon,
+  CheckCircle2,
+  RotateCcw,
+  MessageSquare,
+} from 'lucide-react'
 import type { ContentIdeaActivityAction } from '@/lib/supabase/types'
 
 /**
@@ -35,10 +49,46 @@ export const ACTION_META: Record<
     tone: 'text-zinc-500',
     verb: (m) => `cambió el estado${m.status ? ` a “${m.status}”` : ''}`,
   },
+  // Client decisions from the public review link. These have no `user_id`, so the
+  // timeline renders them without an author — the verb has to say who acted.
+  sent_to_client: { icon: LinkIcon, tone: 'text-indigo-500', verb: () => 'envió el video al cliente' },
+  // Inserted by the submit_client_review RPC (migration 0042) — it was already
+  // being written with no label, so it fell back to the generic icon.
+  client_reviewed: {
+    icon: MessageSquare,
+    tone: 'text-indigo-500',
+    verb: (m) => `el cliente votó${m.decision === 'approved' ? ': aprobado' : m.decision === 'rejected' ? ': rechazado' : ''}`,
+  },
+  approved_by_client: {
+    icon: CheckCircle2,
+    tone: 'text-green-600',
+    verb: () => 'el cliente aprobó el video',
+  },
+  client_requested_changes: {
+    icon: RotateCcw,
+    tone: 'text-amber-600',
+    verb: () => 'el cliente pidió cambios',
+  },
 }
 
 /** Fallback icon for unknown/legacy actions. */
 export const FALLBACK_ACTION_ICON = History
+
+/**
+ * Actions performed by the CLIENT (or by the system on their behalf) from the
+ * public review link. They carry no `user_id`, so a timeline must NOT prefix
+ * them with an author — their verb already names the actor ("el cliente aprobó
+ * el video"). Without this they'd render as "Alguien el cliente aprobó…".
+ */
+const CLIENT_ACTIONS = new Set<ContentIdeaActivityAction>([
+  'client_reviewed',
+  'approved_by_client',
+  'client_requested_changes',
+])
+
+export function isClientAction(action: ContentIdeaActivityAction): boolean {
+  return CLIENT_ACTIONS.has(action)
+}
 
 /** Pure: the Spanish verb phrase for an action + its metadata. */
 export function activityVerb(

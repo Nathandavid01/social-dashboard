@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import {
   reviewLinkUrl,
   defaultExpiryISO,
@@ -66,15 +67,42 @@ export async function generateReviewLink(
     return { error: 'Primero sube el video editado; es lo que verá el cliente.' }
   }
 
+  // Sending the link IS submitting the video for review. This has to be recorded:
+  // the client's vote only drives the pipeline for a video the staff actually
+  // sent out (see `decideClientVote`), so a token minted on a `pending` video
+  // would produce a vote that does nothing. An already-`approved` video keeps its
+  // status — re-sending a link must not reopen it.
+  const { data: current } = await supabase
+    .from('content_ideas')
+    .select('approval_status')
+    .eq('id', ideaId)
+    .single()
+  const submitting = (current?.approval_status ?? 'pending') !== 'approved'
+
   const token = randomUUID()
   const expiresAt = defaultExpiryISO(new Date().toISOString(), 30)
   const { error } = await supabase
     .from('content_ideas')
-    .update({ review_token: token, review_token_expires_at: expiresAt })
+    .update({
+      review_token: token,
+      review_token_expires_at: expiresAt,
+      ...(submitting ? { approval_status: 'submitted', submitted_at: new Date().toISOString() } : {}),
+    })
     .eq('id', ideaId)
   if (error) return { error: 'No se pudo generar el link (¿migración 0042 aplicada?).' }
 
+  if (submitting) {
+    const { data: { user } } = await supabase.auth.getUser()
+    await logIdeaActivity(supabase, {
+      ideaId,
+      userId: user?.id ?? null,
+      action: 'sent_to_client',
+      metadata: { expiresAt },
+    })
+  }
+
   revalidatePath('/clients')
+  revalidatePath('/video-reviews')
   return { url: reviewLinkUrl(await resolveBaseUrl(), token), expiresAt }
 }
 
