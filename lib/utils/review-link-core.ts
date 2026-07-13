@@ -43,6 +43,24 @@ export function canClientDecide(input: { expiresAtISO: string | null; nowISO: st
 }
 
 /**
+ * Can the client still CHANGE a vote they already cast?
+ *
+ * No, once they approved. Approving schedules the video in Metricool, and we do
+ * not pull a scheduled post back down — so offering "cambiar decisión" after an
+ * approval would promise something we can't honor. They comment instead, and the
+ * staff acts.
+ *
+ * A rejection stays changeable: the video never left the agency, so a client who
+ * changes their mind to "approved" still gets it published.
+ *
+ * The RPC (migration 0044) enforces this too — this helper only decides what the
+ * portal SHOWS. Keep both in step.
+ */
+export function canClientChangeVote(current: ClientReviewStatus): boolean {
+  return current !== 'approved'
+}
+
+/**
  * Validate a client decision. Only 'approved' | 'rejected' are settable by the
  * client — 'pending' is the initial state and cannot be chosen. Returns null for
  * anything invalid so callers reject the write.

@@ -4,6 +4,7 @@ import {
   defaultExpiryISO,
   isReviewExpired,
   canClientDecide,
+  canClientChangeVote,
   normalizeDecision,
   clientReviewStatusLabel,
   expiryNoticeES,
@@ -171,5 +172,22 @@ describe('formatReviewDateES', () => {
   it('returns empty string for null/invalid input', () => {
     expect(formatReviewDateES(null)).toBe('')
     expect(formatReviewDateES('')).toBe('')
+  })
+})
+
+describe('canClientChangeVote', () => {
+  // Approving schedules the post in Metricool and we don't pull it back down —
+  // so the client must never be offered an undo we can't honor.
+  it('is FINAL once approved', () => {
+    expect(canClientChangeVote('approved')).toBe(false)
+  })
+
+  // A rejected video never left the agency, so changing their mind must still work.
+  it('lets a client who rejected change their mind', () => {
+    expect(canClientChangeVote('rejected')).toBe(true)
+  })
+
+  it('lets a client who has not voted decide', () => {
+    expect(canClientChangeVote('pending')).toBe(true)
   })
 })

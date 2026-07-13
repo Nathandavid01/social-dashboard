@@ -98,9 +98,9 @@ describe('ReviewActions', () => {
       <ReviewActions token={TOKEN} currentStatus="approved" reviewerName="María" expired={false} />,
     )
     expect(screen.getByText('✓ Aprobado por María')).toBeInTheDocument()
-    // buttons collapsed behind the "change" affordance
+    // The buttons are gone — and for an APPROVAL they don't come back (the video
+    // is already scheduled in Metricool). See the "no way to change" test below.
     expect(screen.queryByRole('button', { name: /^aprobar$/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /cambiar tu decisión/i })).toBeInTheDocument()
   })
 
   it('re-reveals the buttons when the client wants to change the decision', () => {
@@ -122,5 +122,26 @@ describe('ReviewActions', () => {
     )
     expect(screen.getByText('✓ Aprobado por María')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^aprobar$/i })).not.toBeInTheDocument()
+  })
+
+  // Approving is irreversible: the video is already scheduled in Metricool.
+  it('offers NO way to change the vote once approved, and says why', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="approved" expired={false} />)
+    expect(screen.queryByText(/cambiar tu decisión/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /aprobar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /rechazar/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/no se\s+puede cambiar/i)).toBeInTheDocument()
+    // Commenting is the one channel that still reaches the team.
+    expect(screen.getByRole('button', { name: /enviar comentario/i })).toBeInTheDocument()
+  })
+
+  it('still lets a client who REJECTED change their mind', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="rejected" expired={false} />)
+    expect(screen.getByText(/cambiar tu decisión/i)).toBeInTheDocument()
+  })
+
+  it('warns that approving cannot be undone BEFORE the client clicks', () => {
+    render(<ReviewActions token={TOKEN} currentStatus="pending" expired={false} />)
+    expect(screen.getByText(/no se puede\s+deshacer/i)).toBeInTheDocument()
   })
 })

@@ -2,12 +2,16 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, X, Send, Pencil } from 'lucide-react'
+import { Check, X, Send, Pencil, Lock } from 'lucide-react'
 import {
   submitClientReviewAction,
   addClientReviewCommentAction,
 } from '@/lib/actions/review-client-actions'
-import { reviewDecisionSummary, type ClientReviewStatus } from '@/lib/utils/review-link-core'
+import {
+  reviewDecisionSummary,
+  canClientChangeVote,
+  type ClientReviewStatus,
+} from '@/lib/utils/review-link-core'
 
 const TONE: Record<'neutral' | 'success' | 'warning', { box: string; head: string }> = {
   neutral: { box: 'border bg-muted/40', head: 'text-foreground' },
@@ -24,8 +28,14 @@ const TONE: Record<'neutral' | 'success' | 'warning', { box: string; head: strin
 /**
  * The client's Aprobar / Rechazar / Comentar controls on the public review page.
  * Leads with a decision-state banner that clearly confirms the client's vote
- * (not just a fleeting toast); once voted, the buttons collapse behind a
- * "cambiar decisión" affordance (re-voting is allowed until the link expires).
+ * (not just a fleeting toast).
+ *
+ * After a REJECTION the buttons collapse behind a "cambiar decisión" affordance.
+ * After an APPROVAL they're gone for good: approving schedules the video in
+ * Metricool and we don't pull a scheduled post back down, so an "undo" would be a
+ * promise we can't keep. Commenting stays open either way. The RPC (migration
+ * 0044) enforces the same rule — these buttons are only the courtesy.
+ *
  * Renders nothing once expired — the DB blocks the writes too.
  */
 export function ReviewActions({
@@ -47,10 +57,12 @@ export function ReviewActions({
   const [notice, setNotice] = useState<string | null>(null)
 
   const hasVoted = currentStatus !== 'pending'
+  // Approving is final (it schedules the post). Rejecting stays changeable.
+  const canChange = canClientChangeVote(currentStatus)
   // Derive the collapse from the real status (+ an explicit "changing" override)
   // so there's never a stale/broken banner during the async refresh window.
   const [changing, setChanging] = useState(false)
-  const showButtons = !hasVoted || changing
+  const showButtons = !hasVoted || (changing && canChange)
 
   if (expired) return null
 
@@ -135,14 +147,15 @@ export function ReviewActions({
             </button>
           </div>
 
-          {/* The vote now has real consequences — say so before they click. */}
+          {/* Approving is irreversible — say so BEFORE the click, not after. */}
           <p className="text-xs leading-relaxed text-muted-foreground">
             Al aprobar, el video queda <strong className="font-medium text-foreground">programado
-            automáticamente</strong> para su fecha de publicación. Si luego necesitas un cambio,
-            escríbenos un comentario aquí abajo y el equipo lo baja.
+            para publicarse</strong> en su fecha, y{' '}
+            <strong className="font-medium text-foreground">la aprobación ya no se puede
+            deshacer</strong>. Si tienes dudas, déjanos un comentario antes de aprobar.
           </p>
         </>
-      ) : (
+      ) : canChange ? (
         <button
           type="button"
           onClick={() => setChanging(true)}
@@ -150,6 +163,16 @@ export function ReviewActions({
         >
           <Pencil className="h-3.5 w-3.5" /> ¿Cambiar tu decisión?
         </button>
+      ) : (
+        // Approved: the video is scheduled. Don't offer a change we can't honor —
+        // point them at the one thing that DOES reach the team.
+        <p className="flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground">
+          <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Ya aprobaste este video y quedó programado para publicarse, así que la decisión no se
+            puede cambiar. ¿Necesitas algo? Escríbenos un comentario aquí abajo.
+          </span>
+        </p>
       )}
 
       {/* Comment (always available) */}
