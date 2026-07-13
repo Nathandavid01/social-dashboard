@@ -67,7 +67,16 @@ export function decideClientVote(state: ClientVoteState): ClientVoteDecision {
     return NOOP('El cliente aún no ha votado')
   }
 
+  // Already approved internally. Don't re-approve (that would re-stamp and
+  // re-log) — but DO let a repeated 'approved' vote re-attempt the post. If the
+  // first attempt failed (Metricool down, caption missing at the time), this
+  // re-click is the client's only retry. It's safe: `ideaPostReadiness` refuses
+  // an idea that already has a `metricool_post_id`/`posted_at`, and the atomic
+  // claim makes a double-post impossible regardless.
   if (approvalStatus === 'approved') {
+    if (clientReviewStatus === 'approved') {
+      return { approve: false, requestRevision: false, post: true }
+    }
     return NOOP('El video ya estaba aprobado')
   }
 

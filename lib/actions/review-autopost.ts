@@ -88,6 +88,23 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
       return { acted: true, approved: false, revisionRequested: true, posted: false }
     }
 
+    // Retry path: the video is already approved and the client re-voted 'approved'
+    // because the first publish attempt failed. Post without re-approving.
+    if (!decision.approve && decision.post) {
+      const retry = await runIdeaPost(supabase, ideaId, null)
+      revalidateStaffViews(ideaId)
+      if (retry.error || retry.skipped) {
+        return {
+          acted: true,
+          approved: false,
+          revisionRequested: false,
+          posted: false,
+          skipped: retry.error ?? retry.skipped,
+        }
+      }
+      return { acted: true, approved: false, revisionRequested: false, posted: true }
+    }
+
     if (!decision.approve) return { acted: false, reason: decision.reason ?? 'Sin acción' }
 
     // The client's yes IS the internal approval. `approved_by` stays null — that

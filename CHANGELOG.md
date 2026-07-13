@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.96 — 2026-07-13
+
+**Aprobar es final.** Cuando el cliente aprueba, el video queda programado en Metricool — y un post programado no se baja solo. Así que ya no le ofrecemos "cambiar tu decisión" después de aprobar: sería prometerle algo que no podemos cumplir.
+
+- El portal **avisa antes del clic**: "al aprobar, el video queda programado para publicarse y la aprobación ya no se puede deshacer".
+- Después de aprobar, el cliente ve por qué está cerrado y se le apunta a lo único que sí llega al equipo: **dejar un comentario**.
+- **Rechazar sigue siendo reversible**: si el cliente rechaza y luego cambia de idea y aprueba, el video se publica normal.
+- El candado está en la base de datos, no solo en los botones: un intento de deshacer la aprobación se rechaza con un mensaje claro. Re-aprobar (un doble clic, un refresh) no da error — no hace nada.
+- **El candado solo se cierra si el video de verdad quedó programado.** Si la publicación falló (Metricool caído, falta el caption), el cliente NO queda encerrado: puede cambiar su decisión, y volver a darle a Aprobar reintenta la publicación. Antes le habríamos dicho "quedó programado" cuando no era cierto.
+- **Reenviar el link al cliente ahora reabre la revisión.** Antes, si el equipo mandaba un link nuevo (por ejemplo con un corte nuevo del video), el voto viejo del cliente seguía pegado: abría el link, veía su "✓ Aprobado" anterior y no tenía botones. El link nuevo era inútil.
+
 ## v2.95 — 2026-07-13
 
 **El voto del cliente ahora publica el video solo.** Antes, el cliente aprobaba desde su link y alguien del equipo todavía tenía que volver a aprobar por dentro para que el video subiera a Metricool. Ese paso manual se eliminó.

@@ -49,14 +49,21 @@ export async function submitClientReviewAction(
   }
   if (!res.ok) return { error: res.error ?? 'No se pudo guardar tu decisión.' }
 
-  // Only notify when the vote actually changed — a token holder re-submitting the
-  // same decision must not flood the staff bell (mirrors the DB audit-log dedupe).
-  if (res.idea_id && res.changed) {
-    await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
-    // The vote now DRIVES the pipeline: an approval publishes the video by
-    // itself, a rejection sends it back to the editor. Gated on `changed` so a
-    // re-submitted vote can't re-trigger it. Never throws — the vote is saved.
-    await autopostOnClientVote(res.idea_id)
+  if (res.idea_id) {
+    // Only notify when the vote actually CHANGED — a token holder re-submitting
+    // the same decision must not flood the staff bell (mirrors the DB dedupe).
+    if (res.changed) {
+      await notifyStaffOfClientReview(res.idea_id, normalized, { reviewerName: name })
+    }
+    // But always re-run the pipeline hook on an approval, even when the vote
+    // didn't change: if the first attempt failed to publish (Metricool down,
+    // caption missing), a re-click is the client's only way to retry — and the
+    // DB only reports `changed: false` on a re-approve. This is safe to repeat:
+    // `decideClientVote` no-ops on an already-approved idea and the atomic claim
+    // on `posting_started_at` makes a double-post impossible.
+    if (res.changed || normalized === 'approved') {
+      await autopostOnClientVote(res.idea_id)
+    }
   }
   revalidatePath(`/review/${token}`)
   return { ok: true, status: res.status }

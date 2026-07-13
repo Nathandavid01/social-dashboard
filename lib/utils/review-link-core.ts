@@ -43,6 +43,28 @@ export function canClientDecide(input: { expiresAtISO: string | null; nowISO: st
 }
 
 /**
+ * Can the client still CHANGE a vote they already cast?
+ *
+ * Not once their approval actually put the video in Metricool's queue: we don't
+ * pull a scheduled post back down, so offering an "undo" would promise something
+ * we can't honor. They comment instead, and the staff acts.
+ *
+ * The lock hangs on the post EXISTING (`scheduled`), not merely on the vote being
+ * 'approved' — those come apart for real: Metricool is down, the caption is
+ * missing, the kill switch is on. In those cases the video is still entirely in
+ * our hands, so locking the client out (and telling them it "quedó programado")
+ * would be both false and cruel. Let them change it; nothing is out there yet.
+ *
+ * A rejection is always changeable: the video never left the agency.
+ *
+ * The RPC (migration 0044) enforces the same rule — this helper only decides what
+ * the portal SHOWS. Keep both in step.
+ */
+export function canClientChangeVote(current: ClientReviewStatus, scheduled = false): boolean {
+  return !(current === 'approved' && scheduled)
+}
+
+/**
  * Validate a client decision. Only 'approved' | 'rejected' are settable by the
  * client — 'pending' is the initial state and cannot be chosen. Returns null for
  * anything invalid so callers reject the write.
@@ -156,5 +178,9 @@ export type ReviewData = {
   client_reviewed_at: string | null
   expires_at: string | null
   edited_video_key: string | null
+  /** True once the approval really produced a Metricool post. Optional so the
+   * page still renders against a DB where migration 0044 isn't applied yet
+   * (undefined → treated as not scheduled → the client keeps their lever). */
+  scheduled?: boolean
   comments: ReviewComment[]
 }

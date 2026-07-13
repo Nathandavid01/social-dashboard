@@ -4,6 +4,7 @@ import {
   defaultExpiryISO,
   isReviewExpired,
   canClientDecide,
+  canClientChangeVote,
   normalizeDecision,
   clientReviewStatusLabel,
   expiryNoticeES,
@@ -171,5 +172,29 @@ describe('formatReviewDateES', () => {
   it('returns empty string for null/invalid input', () => {
     expect(formatReviewDateES(null)).toBe('')
     expect(formatReviewDateES('')).toBe('')
+  })
+})
+
+describe('canClientChangeVote', () => {
+  // Approving schedules the post in Metricool and we don't pull it back down —
+  // so the client must never be offered an undo we can't honor.
+  it('is FINAL once approved AND the post is really scheduled', () => {
+    expect(canClientChangeVote('approved', true)).toBe(false)
+  })
+
+  // The lock hangs on the post existing, not on the vote. If publishing failed
+  // (Metricool down, kill switch, missing caption) nothing is out there — locking
+  // the client out would be both false and cruel.
+  it('still lets them change an approval that never got scheduled', () => {
+    expect(canClientChangeVote('approved', false)).toBe(true)
+  })
+
+  // A rejected video never left the agency, so changing their mind must still work.
+  it('lets a client who rejected change their mind', () => {
+    expect(canClientChangeVote('rejected', false)).toBe(true)
+  })
+
+  it('lets a client who has not voted decide', () => {
+    expect(canClientChangeVote('pending', false)).toBe(true)
   })
 })
