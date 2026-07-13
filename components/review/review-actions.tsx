@@ -134,6 +134,13 @@ export function ReviewActions({
               <X className="h-4 w-4" /> Rechazar
             </button>
           </div>
+
+          {/* The vote now has real consequences — say so before they click. */}
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Al aprobar, el video queda <strong className="font-medium text-foreground">programado
+            automáticamente</strong> para su fecha de publicación. Si luego necesitas un cambio,
+            escríbenos un comentario aquí abajo y el equipo lo baja.
+          </p>
         </>
       ) : (
         <button
