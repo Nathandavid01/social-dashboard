@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { currentUserHas } from '@/lib/auth/server'
+import { effectiveAreaHrefs } from '@/lib/auth/areas'
+import type { UserRole } from '@/lib/supabase/types'
 import { buildMyDay, type MyDay, type OwnedVideo } from '@/lib/utils/my-day-core'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import type { ContentIdeaVideo } from '@/lib/supabase/types'
@@ -41,8 +43,10 @@ export async function getMyDay(): Promise<MyDayResult> {
   if (!profile) return null
   const p = profile as {
     full_name?: string | null
+    role?: UserRole
     status?: string
     approval_status?: string
+    area_access?: string[] | null
     daily_video_capacity?: number | null
   }
   if (
@@ -56,10 +60,17 @@ export async function getMyDay(): Promise<MyDayResult> {
   const capacity = p.daily_video_capacity ?? null
   const firstName = p.full_name?.trim().split(/\s+/)[0] ?? null
   const canApprove = await currentUserHas('video.approve')
+  const canPublish = await currentUserHas('posting.publish')
+
   // Seeing the unowned team pool means seeing every client's titles — that IS the
   // pipeline, and the pipeline is gated. A user restricted out of it must not get
   // the same data through their own landing page.
-  const canSeeTeamPool = await currentUserHas('planning.read')
+  //
+  // This asks the AREA system, not `currentUserHas`: every role in RBAC has
+  // `planning.read`, and `currentUserHas` ORs the role in, so a permission check
+  // here would be true for everybody and gate nothing. `effectiveAreaHrefs` is
+  // what actually honors a per-user `area_access` restriction.
+  const canSeeTeamPool = effectiveAreaHrefs(p.role, p.area_access ?? null).has('/pipeline')
 
   const { data, error } = await supabase
     .from('content_ideas')
@@ -75,8 +86,10 @@ export async function getMyDay(): Promise<MyDayResult> {
     .not('status', 'in', '(publicada,descartada)')
     // Deterministic order: an unordered LIMIT drops an ARBITRARY subset, which
     // would silently hide someone's videos and under-report their count — the one
-    // thing this screen must never do.
+    // thing this screen must never do. `publish_date` repeats and is nullable, so
+    // it can't order on its own; `id` is the tiebreak that makes it total.
     .order('publish_date', { ascending: true, nullsFirst: false })
+    .order('id', { ascending: true })
     .limit(MAX_VIDEOS)
 
   const day = (videos: OwnedVideo[]): MyDay =>
@@ -85,11 +98,20 @@ export async function getMyDay(): Promise<MyDayResult> {
       userId: user.id,
       capacity,
       canApprove,
+      canPublish,
     })
 
   if (error) {
     console.warn('[my-day] fetch failed:', error.message)
     return { day: day([]), firstName }
+  }
+
+  // If we ever hit the cap, work is being dropped and the count silently lies.
+  // Say it out loud in the logs rather than quietly under-reporting.
+  if ((data?.length ?? 0) >= MAX_VIDEOS) {
+    console.warn(
+      `[my-day] hit the ${MAX_VIDEOS}-video cap — some active videos were not considered. Raise MAX_VIDEOS or filter ownership in SQL.`,
+    )
   }
 
   const videos: OwnedVideo[] = (data ?? []).map((row) => {
@@ -107,9 +129,10 @@ export async function getMyDay(): Promise<MyDayResult> {
 
   const built = day(videos)
   // Fell back to the team pool but isn't allowed to see it → show an empty day
-  // rather than every client's content.
+  // rather than every client's content. Mark it `restricted` so the screen says
+  // "no puedes ver el trabajo del equipo" instead of the false "no hay trabajo".
   if (built.scope === 'equipo' && !canSeeTeamPool) {
-    return { day: day([]), firstName }
+    return { day: { ...day([]), restricted: true }, firstName }
   }
   return { day: built, firstName }
 }

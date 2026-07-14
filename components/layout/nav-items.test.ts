@@ -44,3 +44,40 @@ describe('visibleNavItems', () => {
     expect(visibleNavItems(null).some((n) => n.href === '/settings/workflow')).toBe(false)
   })
 })
+
+/**
+ * The `areaAccess` branch — the one the real sidebar always takes, since the
+ * layout always passes a value (null or a list).
+ *
+ * This block exists because of a real regression: the filter used to hardcode
+ * `n.href === '/home'`, so any OTHER always-allowed destination silently
+ * vanished from the sidebar for EVERY role, owner included. `/mi-dia` — the
+ * landing, and the flagship screen — shipped invisible: reachable only by typing
+ * the URL, and gone the moment you clicked anything else. Nothing in the suite
+ * caught it, because nothing exercised this branch.
+ */
+describe('visibleNavItems with an areaAccess grant (the branch the sidebar uses)', () => {
+  const hrefs = (role: Parameters<typeof visibleNavItems>[0], access: string[] | null) =>
+    visibleNavItems(role, access).map((n) => n.href)
+
+  it.each(['owner', 'supervisor', 'editor', 'video', 'team_member'] as const)(
+    'shows the always-allowed destinations to %s (no per-user restriction)',
+    (role) => {
+      expect(hrefs(role, null)).toContain('/mi-dia')
+      expect(hrefs(role, null)).toContain('/home')
+    },
+  )
+
+  it('still shows them to a user locked down to one unrelated area', () => {
+    // Their own day is their own work — there is nothing to authorize.
+    expect(hrefs('editor', ['/clients'])).toContain('/mi-dia')
+    expect(hrefs('editor', ['/clients'])).toContain('/home')
+  })
+
+  it('keeps hiding the areas a restricted user cannot reach', () => {
+    const visible = hrefs('editor', ['/clients'])
+    expect(visible).toContain('/clients')
+    expect(visible).not.toContain('/settings/users')
+    expect(visible).not.toContain('/pipeline')
+  })
+})

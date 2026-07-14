@@ -29,12 +29,13 @@ export type MyDayBucket = 'atrasado' | 'hoy' | 'proximo' | 'esperando'
  * work isn't one thing — a videographer shoots, an editor edits, a supervisor
  * approves. The row shows the kind; the count treats them all as "my hands".
  */
-export type MyDayKind = 'grabar' | 'editar' | 'aprobar' | 'esperar'
+export type MyDayKind = 'grabar' | 'editar' | 'aprobar' | 'publicar' | 'esperar'
 
 export const KIND_LABEL_ES: Record<MyDayKind, string> = {
   grabar: 'Grabar',
   editar: 'Editar',
   aprobar: 'Aprobar',
+  publicar: 'Publicar',
   esperar: 'Esperando',
 }
 
@@ -104,6 +105,10 @@ export type MyDayScope = 'mio' | 'equipo'
 
 export interface MyDay {
   scope: MyDayScope
+  /** They fell back to the team pool but aren't allowed to see it. The screen must
+   * say so — claiming "no hay trabajo" would be the same lie this page exists to
+   * kill, just pointed the other way. */
+  restricted?: boolean
   atrasados: MyDayItem[]
   hoy: MyDayItem[]
   proximos: MyDayItem[]
@@ -137,8 +142,15 @@ export function videoDueDate(v: BatchVideo): string | null {
  * queue and left it out of their count. For everyone else, the same video really
  * is out of their hands.
  */
-export function kindFor(v: BatchVideo, canApprove: boolean): MyDayKind {
-  if (v.approval_status === 'submitted') return canApprove ? 'aprobar' : 'esperar'
+export function kindFor(
+  v: BatchVideo,
+  perms: { canApprove?: boolean; canPublish?: boolean } = {},
+): MyDayKind {
+  if (v.approval_status === 'submitted') return perms.canApprove ? 'aprobar' : 'esperar'
+  // Approved and still not out: what's left is a posting job (or fixing what
+  // blocks it). Calling that "editar" mislabeled it, and pinned it on editors who
+  // don't even have the publish button.
+  if (v.approval_status === 'approved') return perms.canPublish ? 'publicar' : 'esperar'
   if (!isRecorded(v)) return 'grabar'
   return 'editar'
 }
@@ -154,8 +166,12 @@ export function kindFor(v: BatchVideo, canApprove: boolean): MyDayKind {
  *
  * A video with no due date is `proximo`: real, mine, but not claiming a day.
  */
-export function bucketFor(v: BatchVideo, today: string, canApprove = false): MyDayBucket {
-  if (kindFor(v, canApprove) === 'esperar') return 'esperando'
+export function bucketFor(
+  v: BatchVideo,
+  today: string,
+  perms: { canApprove?: boolean; canPublish?: boolean } = {},
+): MyDayBucket {
+  if (kindFor(v, perms) === 'esperar') return 'esperando'
   const due = videoDueDate(v)
   if (!due) return 'proximo'
   if (due < today) return 'atrasado'
@@ -172,7 +188,11 @@ function byDueDate(a: MyDayItem, b: MyDayItem): number {
 }
 
 /** Turn raw videos into day items, dropping what's finished or discarded. */
-function toItems(videos: OwnedVideo[], today: string, canApprove: boolean): MyDayItem[] {
+function toItems(
+  videos: OwnedVideo[],
+  today: string,
+  perms: { canApprove: boolean; canPublish: boolean },
+): MyDayItem[] {
   const items: MyDayItem[] = []
   for (const v of videos) {
     if (v.status === 'descartada') continue
@@ -181,8 +201,8 @@ function toItems(videos: OwnedVideo[], today: string, canApprove: boolean): MyDa
     if (isDone(nextStep)) continue
     items.push({
       video: v,
-      bucket: bucketFor(v, today, canApprove),
-      kind: kindFor(v, canApprove),
+      bucket: bucketFor(v, today, perms),
+      kind: kindFor(v, perms),
       dueDate: videoDueDate(v),
       nextStep,
     })
@@ -208,17 +228,27 @@ export function buildMyDay(
     /** Does this person hold the approve button (`video.approve`)? Decides whether
      * a video in review is their work or someone else's. */
     canApprove?: boolean
+    /** Does this person hold the publish button (`posting.publish`)? */
+    canPublish?: boolean
   },
 ): MyDay {
-  const { today, userId = null, canApprove = false } = opts
+  const { today, userId = null, canApprove = false, canPublish = false } = opts
+  const perms = { canApprove, canPublish }
 
   const mine = userId ? videos.filter((v) => videoOwnerId(v) === userId) : []
   const scope: MyDayScope = mine.length > 0 ? 'mio' : 'equipo'
   // Team view = the UNOWNED work. Someone else's assigned video isn't mine to pick
   // up, and listing it would just recreate the noisy all-videos board.
-  const pool = scope === 'mio' ? mine : videos.filter((v) => videoOwnerId(v) === null)
+  const base = scope === 'mio' ? mine : videos.filter((v) => videoOwnerId(v) === null)
 
-  const items = toItems(pool, today, canApprove)
+  // Approving is a job, not a possession. A video submitted for review needs the
+  // approver's hands whoever OWNS it — leaving it off their day (because an editor
+  // owns the client) is how a review queue goes unattended for a week.
+  const pool = canApprove
+    ? [...base, ...videos.filter((v) => v.approval_status === 'submitted' && !base.includes(v))]
+    : base
+
+  const items = toItems(pool, today, perms)
   const pick = (b: MyDayBucket) => items.filter((i) => i.bucket === b).sort(byDueDate)
   const atrasados = pick('atrasado')
   const hoy = pick('hoy')

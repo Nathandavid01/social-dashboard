@@ -25,6 +25,7 @@ const KIND_STYLE: Record<MyDayKind, string> = {
   grabar: 'border-cyan-500/50 text-cyan-700 dark:text-cyan-400',
   editar: 'border-violet-500/50 text-violet-700 dark:text-violet-400',
   aprobar: 'border-amber-500/50 text-amber-700 dark:text-amber-400',
+  publicar: 'border-green-500/50 text-green-700 dark:text-green-400',
   esperar: 'border-muted text-muted-foreground',
 }
 
@@ -112,7 +113,7 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-balance">
-            {myDayHeadline(load, scope)}
+            {myDayHeadline(load, day.restricted ? 'mio' : scope)}
           </h1>
           {load.over && (
             <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400">
@@ -126,7 +127,7 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
           </p>
         )}
         {/* Never let unassigned work read as "yours". */}
-        {isTeam && !nothingAtAll && (
+        {isTeam && !day.restricted && !nothingAtAll && (
           <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
             <Users className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
@@ -141,11 +142,19 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
       {nothingAtAll ? (
         <EmptyState
           icon={CheckCircle2}
-          title={isTeam ? 'No hay trabajo libre' : 'Estás al día'}
+          title={
+            day.restricted
+              ? 'No tienes videos asignados'
+              : isTeam
+                ? 'No hay trabajo libre'
+                : 'Estás al día'
+          }
           description={
-            isTeam
-              ? 'Todos los videos activos ya tienen dueño. Mira el tablero si quieres ver el panorama.'
-              : 'No tienes videos pendientes. Buen trabajo.'
+            day.restricted
+              ? 'Cuando alguien te asigne un cliente o un video, aparecerá aquí. No tienes acceso al trabajo del equipo.'
+              : isTeam
+                ? 'Todos los videos activos ya tienen dueño. Mira el tablero si quieres ver el panorama.'
+                : 'No tienes videos pendientes. Buen trabajo.'
           }
           action={
             <Link

@@ -9,6 +9,7 @@ import {
   type OwnedVideo,
 } from './my-day-core'
 import type { BatchVideo } from '@/lib/utils/batch-view'
+import type { ContentIdeaVideo } from '@/lib/supabase/types'
 
 const ME = 'user-me'
 const OTHER = 'user-other'
@@ -31,6 +32,10 @@ function video(over: Partial<OwnedVideo> & { id: string }): OwnedVideo {
     ...over,
   } as unknown as OwnedVideo
 }
+
+/** A minimal uploaded edited file — only the fields the logic reads. */
+const editedFile = () =>
+  ({ id: 'f1', kind: 'edited', status: 'uploaded' }) as unknown as ContentIdeaVideo
 
 /** Mine by default, so bucket/capacity tests don't have to say so every time. */
 function mine(over: Partial<OwnedVideo> & { id: string }): OwnedVideo {
@@ -155,6 +160,52 @@ describe('a video waiting for review', () => {
     const day = buildMyDay([inReview('a')], { today: TODAY, userId: ME, canApprove: false })
     expect(day.esperando).toHaveLength(1)
     expect(day.esperando[0].kind).toBe('esperar')
+    expect(day.load.count).toBe(0)
+  })
+
+  // Approving is a JOB, not a possession. If an editor owns the client, the
+  // supervisor still has to approve it — leaving it off their day is how a review
+  // queue goes unattended for a week.
+  it("reaches the approver even when someone ELSE owns the video", () => {
+    const theirs = video({
+      id: 'theirs',
+      approval_status: 'submitted',
+      publish_date: TODAY,
+      client: { id: 'c2', name: 'Otro', industry: null, assigned_to: OTHER },
+    })
+    const day = buildMyDay([mine({ id: 'own', publish_date: TODAY }), theirs], {
+      today: TODAY,
+      userId: ME,
+      canApprove: true,
+    })
+    expect(day.scope).toBe('mio')
+    expect(day.hoy.map((i) => i.video.id).sort()).toEqual(['own', 'theirs'])
+    expect(day.hoy.find((i) => i.video.id === 'theirs')?.kind).toBe('aprobar')
+  })
+})
+
+// An approved video that hasn't gone out yet is a POSTING job, not an editing one.
+// Calling it "editar" mislabeled it and pinned it on editors who don't even have
+// the publish button.
+describe('an approved video that is not out yet', () => {
+  const approved = (id: string) =>
+    mine({
+      id,
+      approval_status: 'approved',
+      generated_caption: 'c',
+      publish_date: TODAY,
+      videos: { raw: [], broll: [], edited: [editedFile()] },
+    })
+
+  it('is a publishing job for whoever holds the publish button', () => {
+    const day = buildMyDay([approved('a')], { today: TODAY, userId: ME, canPublish: true })
+    expect(day.hoy[0].kind).toBe('publicar')
+    expect(day.load.count).toBe(1)
+  })
+
+  it("is not an editor's work — they can't publish it", () => {
+    const day = buildMyDay([approved('a')], { today: TODAY, userId: ME, canPublish: false })
+    expect(day.esperando).toHaveLength(1)
     expect(day.load.count).toBe(0)
   })
 })
