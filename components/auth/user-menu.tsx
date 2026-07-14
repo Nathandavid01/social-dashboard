@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { signOut } from '@/lib/actions/auth'
 import { uploadAvatar, removeAvatar } from '@/lib/actions/avatar'
 import { useAuth } from '@/lib/context/auth-context'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 
 export function UserMenu() {
   const { profile, role } = useAuth()
+  const canReadMetricool = useHasPermission('metricool.read')
   const fileRef = useRef<HTMLInputElement>(null)
   const [optimisticUrl, setOptimisticUrl] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -137,12 +139,16 @@ export function UserMenu() {
             Cambiar contraseña
           </Link>
         </DropdownMenuItem>
+        {/* Gated: the page is behind `metricool.read`, so for a role without it
+            this link just bounced to /home. */}
+        {canReadMetricool && (
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/settings/metricool">
             <Activity className="mr-2 h-4 w-4" />
             Metricool
           </Link>
         </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/changelog">
             <Sparkles className="mr-2 h-4 w-4" />

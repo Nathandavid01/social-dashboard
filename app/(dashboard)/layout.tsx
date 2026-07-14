@@ -12,7 +12,6 @@ import { AvatarSetupGate } from '@/components/account/avatar-setup-gate'
 import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
-import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getCurrentRole } from '@/lib/auth/server'
 import { resolveApprovalRedirect } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
@@ -59,24 +58,10 @@ export default async function DashboardLayout({
 
   const authUser = user ? { id: user.id, email: user.email ?? '' } : null
 
-  const nowIso = new Date().toISOString()
-  const [
-    { count: overdueCount },
-    { count: pendingRequestsCount },
-    { count: videoReviewCount },
-    notifications,
-    unreadCount,
-  ] = await Promise.all([
-    supabase
-      .from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .neq('status', 'completed')
-      .not('due_at', 'is', null)
-      .lt('due_at', nowIso),
-    supabase
-      .from('client_requests')
-      .select('id', { count: 'exact', head: true })
-      .in('status', ['new', 'in_review']),
+  // Only /video-reviews shows a badge in the nav. The counts for /operations,
+  // /inbox and /planning were queried on EVERY page render for badges that could
+  // never paint — those routes are nav:false.
+  const [{ count: videoReviewCount }, notifications, unreadCount] = await Promise.all([
     supabase
       .from('video_reviews')
       .select('id', { count: 'exact', head: true })
@@ -84,8 +69,6 @@ export default async function DashboardLayout({
     getMyNotifications(30),
     getMyUnreadCount(),
   ])
-
-  const { pendingCount: planningPendingCount } = await getWorkflowProgress().catch(() => ({ pendingCount: 0 }))
 
   const currentUserForTopbar = profile
     ? { id: profile.id, full_name: profile.full_name, avatar_url: profile.avatar_url }
@@ -96,17 +79,12 @@ export default async function DashboardLayout({
       <NateTopProgress />
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar
-          overdueCount={overdueCount ?? 0}
-          requestsCount={pendingRequestsCount ?? 0}
           videoReviewCount={videoReviewCount ?? 0}
-          planningPendingCount={planningPendingCount}
           navPreferences={profile?.nav_preferences}
           areaAccess={profile?.area_access ?? null}
         />
         <SidebarAwareContent>
           <Topbar
-            overdueCount={overdueCount ?? 0}
-            requestsCount={pendingRequestsCount ?? 0}
             videoReviewCount={videoReviewCount ?? 0}
             notifications={notifications}
             unreadCount={unreadCount}

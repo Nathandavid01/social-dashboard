@@ -9,6 +9,10 @@ export type AlertSeverity = 'info' | 'warning' | 'error' | 'success'
 export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'cancelled'
 
 export interface NavPreferences {
+  /** Schema version of `order`. Bumped when the DEFAULT sidebar layout changes,
+   * so a saved order from the OLD layout is discarded instead of pinning the user
+   * to a menu that no longer exists. See NAV_PREFS_VERSION. */
+  v?: number
   order?: string[]
   hidden?: string[]
 }

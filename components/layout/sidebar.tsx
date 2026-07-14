@@ -15,10 +15,7 @@ import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {
-  overdueCount?: number
-  requestsCount?: number
   videoReviewCount?: number
-  planningPendingCount?: number
   navPreferences?: NavPreferences
   /** Admin-granted areas (null = no restriction → role defaults). */
   areaAccess?: string[] | null
@@ -26,8 +23,23 @@ interface SidebarProps {
 
 const DEFAULT_HREFS = navItems.map((n) => n.href)
 
+/**
+ * Bump this whenever the DEFAULT sidebar layout changes.
+ *
+ * v2 = the six-section menu. A saved `order` from v1 was a full snapshot of the
+ * OLD flat list — and `toggleHidden` used to save that snapshot even for people
+ * who never reordered anything, just hid one item. Honoring it would pin those
+ * users to the old flat menu forever and they'd never see the sections. So an
+ * order from an older version is dropped; `hidden` (still meaningful) is kept.
+ */
+const NAV_PREFS_VERSION = 2
+
 function applyPreferences(prefs: NavPreferences | undefined) {
-  const order = Array.isArray(prefs?.order) ? prefs!.order!.filter((h) => DEFAULT_HREFS.includes(h)) : []
+  const fromThisLayout = prefs?.v === NAV_PREFS_VERSION
+  const order =
+    fromThisLayout && Array.isArray(prefs?.order)
+      ? prefs!.order!.filter((h) => DEFAULT_HREFS.includes(h))
+      : []
   const hidden = new Set(prefs?.hidden ?? [])
 
   // Ordered list: prefs.order first (filtered to known items), then any new items not in prefs.order, in their default order
@@ -37,10 +49,7 @@ function applyPreferences(prefs: NavPreferences | undefined) {
 }
 
 export function Sidebar({
-  overdueCount = 0,
-  requestsCount = 0,
   videoReviewCount = 0,
-  planningPendingCount = 0,
   navPreferences,
   areaAccess = null,
 }: SidebarProps) {
@@ -103,7 +112,9 @@ export function Sidebar({
 
   function persist(next: { order: string[]; hidden: string[] }) {
     startTransition(async () => {
-      const res = await saveNavPreferences(next)
+      // Stamp the layout version, or the order we just saved would be discarded
+      // as stale on the next load.
+      const res = await saveNavPreferences({ ...next, v: NAV_PREFS_VERSION })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
     })
   }
@@ -113,7 +124,10 @@ export function Sidebar({
     if (nextHidden.has(href)) nextHidden.delete(href)
     else nextHidden.add(href)
     setHidden(nextHidden)
-    persist({ order: orderedHrefs, hidden: Array.from(nextHidden) })
+    // Don't save an order the user never chose: hiding an item used to snapshot
+    // the whole default list, which then read as "custom" forever after.
+    const isDefaultOrder = orderedHrefs.every((h, i) => h === DEFAULT_HREFS[i])
+    persist({ order: isDefaultOrder ? [] : orderedHrefs, hidden: Array.from(nextHidden) })
   }
 
   function reorder(srcHref: string, destHref: string) {

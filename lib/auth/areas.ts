@@ -81,9 +81,14 @@ export const AREAS: Area[] = [
   { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles',  group: 'Equipo' },
   { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit',      group: 'Equipo' },
   // Was reachable by ANY authenticated user: it wasn't in AREAS at all, so
-  // `areaForPath` returned null and `canAccessPath` waved it through. It exposes
-  // the agency's Metricool connection — owner-level settings.
-  { href: '/settings/metricool', label: 'Metricool',       permission: 'settings.edit',      group: 'Equipo' },
+  // `areaForPath` returned null and `canAccessPath` waved it through.
+  //
+  // Gated on `metricool.read`, NOT `settings.edit` (owner-only): this page is
+  // where the Metricool credentials get seeded into the browser's localStorage,
+  // and /schedule-check + /published read them from there. Owner-only would trap
+  // every supervisor on a fresh browser in a loop — Verificación says "ve a
+  // Metricool" and Metricool bounces them to /home.
+  { href: '/settings/metricool', label: 'Metricool',       permission: 'metricool.read',     group: 'Equipo' },
   // Reached via deep links (notifications, home cards, command palette), not the
   // sidebar — gated and manageable all the same. No permission = open by role
   // default (preserves their current ungated behavior); restrictable per-user.

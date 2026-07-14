@@ -12,12 +12,10 @@ import { useAuth } from '@/lib/context/auth-context'
 import { hasPermission } from '@/lib/auth/permissions'
 
 interface MobileNavProps {
-  overdueCount?: number
-  requestsCount?: number
   videoReviewCount?: number
 }
 
-export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCount = 0 }: MobileNavProps) {
+export function MobileNav({ videoReviewCount = 0 }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const { role } = useAuth()
@@ -44,15 +42,12 @@ export function MobileNav({ overdueCount = 0, requestsCount = 0, videoReviewCoun
         <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {allowed.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            // Only /video-reviews is in the nav; /operations and /inbox are
+            // nav:false, so their badges could never render.
             const badge =
-              item.href === '/operations' && overdueCount > 0 ? overdueCount
-              : item.href === '/inbox' && requestsCount > 0 ? requestsCount
-              : item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
+              item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
               : 0
-            const badgeColor =
-              item.href === '/operations' ? 'bg-red-500'
-              : item.href === '/video-reviews' ? 'bg-orange-500'
-              : 'bg-blue-500'
+            const badgeColor = 'bg-orange-500'
             return (
               <Link
                 key={item.href}
