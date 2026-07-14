@@ -1,4 +1,5 @@
 import {
+  Sun,
   Home,
   Users,
   Calendar,
@@ -38,6 +39,7 @@ export interface NavItem {
 /** Icon per area href. AREAS (lib/auth/areas.ts) is the single source of truth for
  * the destinations themselves; the sidebar just attaches an icon to each. */
 const ICON_BY_HREF: Record<string, LucideIcon> = {
+  '/mi-dia': Sun,
   '/home': Home,
   '/runway': Rocket,
   '/idea-lab': Lightbulb,
@@ -63,6 +65,8 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
 }
 
 export const navItems: NavItem[] = [
+  // The landing: what each person has to do today. First, always, for everyone.
+  { href: '/mi-dia', label: 'Mi día', icon: Sun },
   { href: '/home', label: 'Inicio', icon: Home },
   ...AREAS.filter((a) => a.nav !== false).map((a) => ({
     href: a.href,

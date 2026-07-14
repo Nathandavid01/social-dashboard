@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.97 — 2026-07-14
+
+**"Mi día": la pantalla que te dice qué tienes que hacer hoy.** Es lo primero que ves al entrar. Antes el dashboard no sabía cuántos videos tenía cada quien — esa era la razón por la que el equipo seguía en ClickUp.
+
+- **"Tienes 6 videos hoy"**, con lo tuyo ordenado por urgencia: atrasados, para hoy, próximos.
+- **Cada video dice qué le falta** en una línea ("Siguiente: sube el video editado"), sin tener que abrirlo.
+- **El número es honesto.** Lo que está esperando al cliente aparece aparte, en "Esperando a otros", y NO cuenta como trabajo tuyo — no tiene sentido contarte algo que no puedes mover.
+- **Tope diario por persona**, configurable: en Usuarios pones cuántos videos aguanta cada quien y "Mi día" avisa cuando está sobrecargado. En blanco = sin tope.
+- **De quién es cada video:** el responsable del cliente es el responsable de sus videos. Asignas el cliente una vez (en su ficha) y todos sus videos ya tienen dueño, sin tener que asignar uno por uno. Un video suelto se puede reasignar aparte.
+- **Si no tienes nada asignado**, ves el trabajo libre del equipo (los videos que nadie ha tomado), y la pantalla lo dice claramente para que no lo confundas con lo tuyo.
+
+**Arreglo que se nota en todo el tablero:** los videos que todavía no se han grabado decían "Siguiente: genera el caption" — pedían un caption de un video que no existe. Ahora dicen **"Siguiente: graba el video"** y en "Mi día" van a su propia sección "Por grabar", sin ensuciar el conteo de edición.
+
 ## v2.96 — 2026-07-13
 
 **Aprobar es final.** Cuando el cliente aprueba, el video queda programado en Metricool — y un post programado no se baja solo. Así que ya no le ofrecemos "cambiar tu decisión" después de aprobar: sería prometerle algo que no podemos cumplir.

@@ -23,6 +23,7 @@ const DASHBOARD_DIR = join(process.cwd(), 'app', '(dashboard)')
  * route forces a conscious choice — register it as an AREA or add it here.
  */
 const NON_AREA_ROUTES = new Set<string>([
+  '/mi-dia',     // the landing: a person's OWN work — nothing to authorize
   '/home',       // mandatory landing
   '/changelog',  // release notes, everyone
   '/account',    // personal account (e.g. /account/security)

@@ -89,3 +89,15 @@ export function deadlineTone(s: DeadlineStatus): { className: string; label: str
       return { className: 'bg-muted text-muted-foreground border-transparent', label: null }
   }
 }
+
+const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+
+/**
+ * "8 jun" from a date-only "YYYY-MM-DD". Parses the string directly instead of
+ * going through `new Date()` — constructing a Date from a date-only string reads
+ * it as UTC midnight, which renders as the PREVIOUS day west of Greenwich.
+ */
+export function formatDateShortES(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} ${MES_ES[(m ?? 1) - 1]}`
+}

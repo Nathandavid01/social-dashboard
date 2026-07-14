@@ -269,11 +269,22 @@ function EditProfileDialog({
   const { toast } = useToast()
   const [name, setName] = useState(user.full_name ?? '')
   const [title, setTitle] = useState(user.title ?? '')
+  // '' = no ceiling (distinct from '0', which means "take nothing today").
+  const [capacity, setCapacity] = useState(
+    user.daily_video_capacity === null || user.daily_video_capacity === undefined
+      ? ''
+      : String(user.daily_video_capacity),
+  )
   const [isPending, startTransition] = useTransition()
 
   function save() {
+    const raw = capacity.trim()
     startTransition(async () => {
-      const res = await updateUserProfile(user.id, { full_name: name, title })
+      const res = await updateUserProfile(user.id, {
+        full_name: name,
+        title,
+        daily_video_capacity: raw === '' ? null : Number(raw),
+      })
       if (res.error) {
         toast({ title: 'Error', description: res.error, variant: 'destructive' })
       } else {
@@ -288,7 +299,7 @@ function EditProfileDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Editar usuario</DialogTitle>
-          <DialogDescription>Actualiza el nombre y el título de {user.email}.</DialogDescription>
+          <DialogDescription>Actualiza los datos de {user.email}.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-1">
           <label className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -303,6 +314,21 @@ function EditProfileDialog({
               className="h-9"
               placeholder="Título (opcional)"
             />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+            Videos por día que aguanta
+            <Input
+              type="number"
+              min={0}
+              max={50}
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+              className="h-9"
+              placeholder="Sin tope"
+            />
+            <span>
+              En blanco = sin tope. Se usa en “Mi día” para avisarle cuando está sobrecargado.
+            </span>
           </label>
         </div>
         <DialogFooter>

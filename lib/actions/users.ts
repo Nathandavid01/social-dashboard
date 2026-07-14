@@ -96,7 +96,12 @@ export async function createTeamUser(input: {
 /** Owner-only: edit a member's display name and org title. */
 export async function updateUserProfile(
   userId: string,
-  values: { full_name: string; title?: string | null },
+  values: {
+    full_name: string
+    title?: string | null
+    /** Videos per day this person can take. null = no ceiling; 0 = none today. */
+    daily_video_capacity?: number | null
+  },
 ): Promise<Result> {
   try {
     await assertOwner()
@@ -107,14 +112,34 @@ export async function updateUserProfile(
   if (!fullName) return { error: 'El nombre no puede estar vacío.' }
   const title = values.title?.trim() || null
 
+  // Only touch the ceiling when the caller actually passed one, so an older form
+  // that doesn't know about it can't silently wipe it.
+  const patch: Record<string, unknown> = {
+    full_name: fullName,
+    title,
+    updated_at: new Date().toISOString(),
+  }
+  if (values.daily_video_capacity !== undefined) {
+    const cap = values.daily_video_capacity
+    if (cap !== null && (!Number.isInteger(cap) || cap < 0 || cap > 50)) {
+      return { error: 'El tope diario debe ser un número entre 0 y 50 (o vacío).' }
+    }
+    patch.daily_video_capacity = cap
+  }
+
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('profiles')
-    .update({ full_name: fullName, title, updated_at: new Date().toISOString() })
-    .eq('id', userId)
-  if (error) return { error: error.message }
+  const { error } = await supabase.from('profiles').update(patch).eq('id', userId)
+  if (error) {
+    // Before migration 0045 the column doesn't exist — say so instead of a raw
+    // Postgres error, and don't lose the name/title edit the user just made.
+    if (/daily_video_capacity/.test(error.message)) {
+      return { error: 'Falta aplicar la migración 0045 para guardar el tope diario.' }
+    }
+    return { error: error.message }
+  }
 
   revalidatePath('/team')
+  revalidatePath('/mi-dia')
   return { ok: true }
 }
 
