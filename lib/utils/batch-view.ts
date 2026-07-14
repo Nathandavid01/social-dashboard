@@ -158,6 +158,11 @@ export function videoNextStep(v: BatchVideo): NextStep {
   }
   if (v.approval_status === 'submitted') return { label: 'En revisión — aprueba o pide cambios', tone: 'waiting' }
   if (v.approval_status === 'revision_needed') return { label: 'Cambios pedidos — corrige y reenvía', tone: 'warn' }
+  // Nothing has been shot yet — the caption is not the next step, the CAMERA is.
+  // Without this the board tells the team to "genera el caption" for a planned
+  // slot that doesn't exist yet (most of the board, in practice). Checked AFTER
+  // the approval states: a video in review/revision was obviously recorded.
+  if (!isRecorded(v)) return { label: 'Siguiente: graba el video', tone: 'action' }
   if (!filled(v.generated_caption)) return { label: 'Siguiente: genera el caption', tone: 'action' }
   if (!hasEdited(v)) return { label: 'Siguiente: sube el video editado', tone: 'action' }
   return { label: 'Siguiente: envía a revisión', tone: 'action' }

@@ -24,7 +24,8 @@ export interface Area {
   nav?: boolean
 }
 
-/** Restricted areas. `/home` is intentionally excluded — it's the mandatory landing. */
+/** Restricted areas. `/mi-dia` and `/home` are intentionally excluded — everyone
+ * lands there and `/mi-dia` only ever shows a person their OWN work. */
 export const AREAS: Area[] = [
   { href: '/runway',             label: 'Runway',          permission: 'runway.read' },
   { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit' },
@@ -57,7 +58,7 @@ export const AREAS: Area[] = [
 ]
 
 /** Prefixes every authenticated user can always reach, never restrictable. */
-export const ALWAYS_ALLOWED_PREFIXES = ['/home', '/changelog', '/pending']
+export const ALWAYS_ALLOWED_PREFIXES = ['/mi-dia', '/home', '/changelog', '/pending']
 
 function matchesPrefix(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + '/')

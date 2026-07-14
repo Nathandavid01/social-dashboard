@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, videoNextStep, type NextStepTone, type BatchVideo } from '@/lib/utils/batch-view'
-import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
+import { deadlineStatus, deadlineTone, formatDateShortES } from '@/lib/utils/deadlines'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
@@ -27,13 +27,6 @@ const NEXT_STEP_DOT: Record<NextStepTone, string> = {
   action: 'bg-amber-500',
   waiting: 'bg-sky-500',
   warn: 'bg-red-500',
-}
-
-const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-/** "8 jun" from a date-only "YYYY-MM-DD" (no TZ shift). */
-function fmtDeadline(iso: string): string {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${d} ${MES_ES[(m ?? 1) - 1]}`
 }
 
 /**
@@ -117,10 +110,10 @@ export function VideoWorkCard({
           {video.deadline && (
             <span
               className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap', dlTone.className)}
-              title={`Fecha límite: ${fmtDeadline(video.deadline)}`}
+              title={`Fecha límite: ${formatDateShortES(video.deadline)}`}
             >
               <Flag className="h-3 w-3" aria-hidden />
-              {dlTone.label ? `${dlTone.label} · ` : ''}{fmtDeadline(video.deadline)}
+              {dlTone.label ? `${dlTone.label} · ` : ''}{formatDateShortES(video.deadline)}
             </span>
           )}
         </div>

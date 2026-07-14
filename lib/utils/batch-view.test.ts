@@ -190,14 +190,25 @@ describe('batchHint', () => {
 })
 
 describe('videoNextStep — the single "what to do next" per video', () => {
-  it('walks the happy path in order: caption → edited → review → approve → publish', () => {
-    expect(videoNextStep(mk())).toEqual({ label: 'Siguiente: genera el caption', tone: 'action' })
-    expect(videoNextStep(mk({ generated_caption: 'c' }))).toEqual({
+  // An unshot planned slot must be told to SHOOT, not to write a caption — most
+  // of the real board is exactly this, and asking for a caption on a video that
+  // doesn't exist yet is how the board became noise.
+  it('asks for the camera first when nothing has been recorded', () => {
+    expect(videoNextStep(mk())).toEqual({ label: 'Siguiente: graba el video', tone: 'action' })
+  })
+
+  it('walks the happy path in order: grabar → caption → edited → review → approve → publish', () => {
+    expect(videoNextStep(mk())).toEqual({ label: 'Siguiente: graba el video', tone: 'action' })
+    expect(videoNextStep(mk({ status: 'grabada' }))).toEqual({
+      label: 'Siguiente: genera el caption',
+      tone: 'action',
+    })
+    expect(videoNextStep(mk({ status: 'grabada', generated_caption: 'c' }))).toEqual({
       label: 'Siguiente: sube el video editado',
       tone: 'action',
     })
     expect(
-      videoNextStep(mk({ generated_caption: 'c', videos: { raw: [], broll: [], edited: [rawFile()] } })),
+      videoNextStep(mk({ status: 'grabada', generated_caption: 'c', videos: { raw: [], broll: [], edited: [rawFile()] } })),
     ).toEqual({ label: 'Siguiente: envía a revisión', tone: 'action' })
     expect(videoNextStep(mk({ approval_status: 'submitted' }))).toEqual({
       label: 'En revisión — aprueba o pide cambios',

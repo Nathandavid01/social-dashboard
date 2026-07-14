@@ -25,6 +25,9 @@ export interface Profile {
   /** Admin-granted areas the user may reach (list of area hrefs). null = no
    * per-user restriction → role defaults apply. See lib/auth/areas.ts. */
   area_access?: string[] | null
+  /** Videos per day this person can take (migration 0045). null = no ceiling
+   * configured; 0 = none today. Optional so the app works before it's applied. */
+  daily_video_capacity?: number | null
   nav_preferences?: NavPreferences
   created_at: string
   updated_at: string
