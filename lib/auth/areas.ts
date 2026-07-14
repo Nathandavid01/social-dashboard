@@ -22,32 +22,68 @@ export interface Area {
   /** Show in the sidebar nav. Defaults to true; false = gated/manageable but
    * reached only via deep links (e.g. /inbox, /alerts), not the sidebar. */
   nav?: boolean
+  /** Sidebar section. A flat list of 20+ destinations is a wall, not a menu —
+   * grouping is what makes it scannable. See NAV_GROUPS for the order. */
+  group?: NavGroup
 }
+
+/**
+ * The six sections of the sidebar, in order. Named for what the person is trying
+ * to DO, not for how the app is built — "Publicación" is a job; "Metricool" is an
+ * integration.
+ */
+export const NAV_GROUPS = [
+  'Trabajo',
+  'Ideas',
+  'Publicación',
+  'Clientes',
+  'Métricas',
+  'Equipo',
+] as const
+
+export type NavGroup = (typeof NAV_GROUPS)[number]
 
 /** Restricted areas. `/mi-dia` and `/home` are intentionally excluded — everyone
  * lands there and `/mi-dia` only ever shows a person their OWN work. */
 export const AREAS: Area[] = [
-  { href: '/runway',             label: 'Runway',          permission: 'runway.read' },
-  { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit' },
-  { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read' },
-  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read' },
-  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read' },
-  { href: '/posting',            label: 'Posting',         permission: 'posting.read' },
-  { href: '/team',               label: 'Equipo',          permission: 'team.read' },
-  { href: '/produccion',         label: 'Producción',      permission: 'production.read' },
-  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read' },
-  { href: '/clients',            label: 'Clientes',        permission: 'clients.read' },
-  { href: '/clients/cadence',    label: 'Cadencia',        permission: 'clients.read' },
-  { href: '/calendar',           label: 'Calendario' },
-  { href: '/performance',        label: 'Rendimiento',     permission: 'performance.read' },
-  { href: '/reportes',           label: 'Reportes',        permission: 'metricool.read' },
-  { href: '/efficiency',         label: 'Eficiencia',      permission: 'efficiency.read' },
-  { href: '/published',          label: 'Publicados',      permission: 'metricool.read' },
-  { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all' },
-  { href: '/automation',         label: 'Automatización',  permission: 'automation.read' },
-  { href: '/actividad',          label: 'Actividad',       permission: 'activity.read' },
-  { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles' },
-  { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit' },
+  // ── Trabajo: el flujo de un video, de la cámara a la aprobación ──
+  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Trabajo' },
+  { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Trabajo' },
+  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Trabajo' },
+  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Trabajo' },
+
+  // ── Ideas: qué vamos a grabar ──
+  { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Ideas' },
+  { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Ideas' },
+  { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Ideas' },
+
+  // ── Publicación: sacarlo a la calle y comprobar que salió ──
+  { href: '/posting',            label: 'Posting',         permission: 'posting.read',       group: 'Publicación' },
+  { href: '/published',          label: 'Publicados',      permission: 'metricool.read',     group: 'Publicación' },
+  { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all',     group: 'Publicación' },
+  { href: '/automation',         label: 'Automatización',  permission: 'automation.read',    group: 'Publicación' },
+
+  // ── Clientes ──
+  { href: '/clients',            label: 'Clientes',        permission: 'clients.read',       group: 'Clientes' },
+  { href: '/clients/cadence',    label: 'Cadencia',        permission: 'clients.read',       group: 'Clientes' },
+  // Was ungated: any role could reach it. It shows every client's schedule, so it
+  // belongs behind the same gate as the clients list.
+  { href: '/calendar',           label: 'Calendario',      permission: 'clients.read',       group: 'Clientes' },
+
+  // ── Métricas ──
+  { href: '/reportes',           label: 'Reportes',        permission: 'metricool.read',     group: 'Métricas' },
+  { href: '/performance',        label: 'Rendimiento',     permission: 'performance.read',   group: 'Métricas' },
+  { href: '/efficiency',         label: 'Eficiencia',      permission: 'efficiency.read',    group: 'Métricas' },
+
+  // ── Equipo y ajustes ──
+  { href: '/team',               label: 'Equipo',          permission: 'team.read',          group: 'Equipo' },
+  { href: '/actividad',          label: 'Actividad',       permission: 'activity.read',      group: 'Equipo' },
+  { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles',  group: 'Equipo' },
+  { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit',      group: 'Equipo' },
+  // Was reachable by ANY authenticated user: it wasn't in AREAS at all, so
+  // `areaForPath` returned null and `canAccessPath` waved it through. It exposes
+  // the agency's Metricool connection — owner-level settings.
+  { href: '/settings/metricool', label: 'Metricool',       permission: 'settings.edit',      group: 'Equipo' },
   // Reached via deep links (notifications, home cards, command palette), not the
   // sidebar — gated and manageable all the same. No permission = open by role
   // default (preserves their current ungated behavior); restrictable per-user.

@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.98 — 2026-07-14
+
+**El menú, por fin ordenado.** Eran 22 destinos en una lista plana; ahora están en **6 secciones** — Trabajo, Ideas, Publicación, Clientes, Métricas y Equipo — con "Mi día" e "Inicio" arriba, fijos.
+
+- Cada quien ve solo lo suyo: un editor pasa de 22 items a 16, un videógrafo a 11.
+- Si habías reordenado tu menú a mano, se respeta tu orden (las secciones solo aparecen en el orden por defecto).
+
+**Dos agujeros de permisos cerrados:**
+- **Calendario** era visible para cualquier rol, y muestra el calendario de TODOS los clientes. Ahora pide el mismo permiso que la lista de clientes.
+- **Ajustes de Metricool** no estaba protegido: cualquier usuario con cuenta podía entrar y ver la conexión de la agencia. Ahora es solo para quien administra la configuración.
+
+También quité tres contadores del menú que apuntaban a páginas que ya no están en el menú: hacían consultas en cada carga y no se pintaban nunca.
+
 ## v2.97 — 2026-07-14
 
 **"Mi día": la pantalla que te dice qué tienes que hacer hoy.** Es lo primero que ves al entrar. Antes el dashboard no sabía cuántos videos tenía cada quien — esa era la razón por la que el equipo seguía en ClickUp.

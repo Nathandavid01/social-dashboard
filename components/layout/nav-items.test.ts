@@ -35,7 +35,17 @@ describe('visibleNavItems', () => {
     expect(visible.every((n) => !n.permission)).toBe(true)
     const hrefs = visible.map((n) => n.href)
     expect(hrefs).toContain('/home') // Inicio has no permission gate
-    expect(hrefs).toContain('/calendar') // Calendario has no permission gate
+    expect(hrefs).toContain('/mi-dia') // your own work — nothing to authorize
+    // /calendar USED to be ungated (any role could see every client's schedule).
+    // It's now behind clients.read, like the client list it draws from.
+    expect(hrefs).not.toContain('/calendar')
+  })
+
+  it('every nav area lives in a section — a flat 20-item wall is not a menu', () => {
+    const ungrouped = navItems
+      .filter((n) => n.href !== '/home' && n.href !== '/mi-dia')
+      .filter((n) => !n.group)
+    expect(ungrouped).toEqual([])
   })
 
   it('hides a permission-gated item when the role lacks the permission', () => {

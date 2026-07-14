@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, useTransition } from 'react'
+import { Fragment, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -139,6 +139,21 @@ export function Sidebar({
   const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h)))
     .filter((h) => allowedHrefs.has(h))
 
+  // Section headings turn a 20-item wall into a menu you can scan. They only make
+  // sense while the list is in its default order — once someone has dragged items
+  // around (or is dragging right now), their order is the truth and a heading
+  // would be a lie about what follows it.
+  const customOrder = orderedHrefs.some((h, i) => h !== DEFAULT_HREFS[i])
+  const showGroups = !editing && !collapsed && !customOrder
+
+  const headingBefore = (href: string, i: number): string | null => {
+    if (!showGroups) return null
+    const group = itemsByHref.get(href)?.group
+    if (!group) return null
+    const prev = i > 0 ? itemsByHref.get(visibleHrefs[i - 1])?.group : undefined
+    return group === prev ? null : group
+  }
+
   return (
     <aside className={cn(
       'fixed left-0 top-0 z-30 hidden h-screen flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex',
@@ -170,23 +185,17 @@ export function Sidebar({
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {visibleHrefs.map((href) => {
+        {visibleHrefs.map((href, i) => {
           const item = itemsByHref.get(href)
           if (!item) return null
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
           const isHidden = hidden.has(item.href)
+          const heading = headingBefore(href, i)
 
-          const badge =
-            item.href === '/planning' && planningPendingCount > 0 ? planningPendingCount
-            : item.href === '/operations' && overdueCount > 0 ? overdueCount
-            : item.href === '/inbox' && requestsCount > 0 ? requestsCount
-            : item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
-            : 0
-          const badgeColor =
-            item.href === '/planning' ? 'bg-red-500 animate-pulse'
-            : item.href === '/operations' ? 'bg-red-500'
-            : item.href === '/video-reviews' ? 'bg-orange-500'
-            : 'bg-blue-500'
+          // Only /video-reviews is actually in the sidebar; the other three badges
+          // pointed at nav:false routes and could never render.
+          const badge = item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount : 0
+          const badgeColor = 'bg-orange-500'
 
           const itemEl = (
             <span
@@ -265,22 +274,28 @@ export function Sidebar({
           }
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onPointerDown={startLongPress}
-              onPointerMove={onPressMove}
-              onPointerUp={clearLongPress}
-              onPointerLeave={clearLongPress}
-              onClick={(e) => {
-                if (suppressClick.current) {
-                  e.preventDefault()
-                  suppressClick.current = false
-                }
-              }}
-            >
-              {itemEl}
-            </Link>
+            <Fragment key={item.href}>
+              {heading && (
+                <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground first:pt-0">
+                  {heading}
+                </p>
+              )}
+              <Link
+                href={item.href}
+                onPointerDown={startLongPress}
+                onPointerMove={onPressMove}
+                onPointerUp={clearLongPress}
+                onPointerLeave={clearLongPress}
+                onClick={(e) => {
+                  if (suppressClick.current) {
+                    e.preventDefault()
+                    suppressClick.current = false
+                  }
+                }}
+              >
+                {itemEl}
+              </Link>
+            </Fragment>
           )
         })}
 
