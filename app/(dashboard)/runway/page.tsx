@@ -3,6 +3,8 @@ import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { computeRunway } from '@/lib/utils/content-runway'
 import { PageHeader } from '@/components/shared/page-header'
 import { RunwayBoard } from '@/components/runway/runway-board'
+import { WeeklyPlanView } from '@/components/runway/weekly-plan-view'
+import { getWeeklyPlan } from '@/lib/actions/weekly-plan'
 import type { RunwayRowData } from '@/components/runway/runway-row'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export default async function RunwayPage() {
   await requirePermission('runway.read')
 
-  const { perClient } = await getPipelineTotals()
+  const [{ perClient }, plan] = await Promise.all([getPipelineTotals(), getWeeklyPlan()])
 
   const rows: RunwayRowData[] = perClient.map((c) => ({
     clientId: c.clientId,
@@ -35,28 +37,23 @@ export default async function RunwayPage() {
     return am - bm
   })
 
-  const cadenced = rows.filter((r) => r.runway.status !== 'no_cadence')
-  const behind = cadenced.filter((r) => r.runway.status !== 'ok').length
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title="Runway"
-        description="Semanas de contenido adelantadas por cliente. La meta: siempre 1 mes (4 semanas) en Ideas, Grabado y Editado."
+        description="A quién le toca esta semana, y cuánto contenido tiene cada cliente en banco."
       />
-      <p className="text-sm text-muted-foreground">
-        {cadenced.length === 0 ? (
-          'Configura la cadencia de tus clientes para ver su runway.'
-        ) : behind === 0 ? (
-          <span className="text-emerald-600">✓ Todas tus empresas están a 1 mes o más.</span>
-        ) : (
-          <>
-            <span className="font-semibold text-foreground">{behind}</span> de {cadenced.length}{' '}
-            clientes tienen <span className="font-medium">menos de 1 mes</span> en alguna etapa.
-          </>
-        )}
-      </p>
-      <RunwayBoard rows={rows} />
+
+      {/* The short list first: with ~50 clients, "who do I touch NOW" is the
+          question. The full board below is the detail behind it. */}
+      {plan && <WeeklyPlanView plan={plan} />}
+
+      {/* The detail behind the short list: weeks buffered at each stage. The old
+          summary line lived here and now says the same thing as the header above. */}
+      <div className="space-y-3 border-t pt-6">
+        <h2 className="text-sm font-semibold">Semanas en banco por cliente</h2>
+        <RunwayBoard rows={rows} />
+      </div>
     </div>
   )
 }
