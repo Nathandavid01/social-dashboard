@@ -27,7 +27,6 @@ const NON_AREA_ROUTES = new Set<string>([
   '/home',       // mandatory landing
   '/changelog',  // release notes, everyone
   '/account',    // personal account (e.g. /account/security)
-  '/settings/metricool', // personal Metricool connection
 ])
 
 /** Top-level route hrefs that have their own page.tsx. */

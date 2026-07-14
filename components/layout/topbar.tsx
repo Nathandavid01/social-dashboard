@@ -9,8 +9,6 @@ import { Search } from 'lucide-react'
 import type { Notification } from '@/lib/supabase/types'
 
 interface TopbarProps {
-  overdueCount?: number
-  requestsCount?: number
   videoReviewCount?: number
   notifications?: Notification[]
   unreadCount?: number
@@ -18,8 +16,6 @@ interface TopbarProps {
 }
 
 export function Topbar({
-  overdueCount = 0,
-  requestsCount = 0,
   videoReviewCount = 0,
   notifications = [],
   unreadCount = 0,
@@ -27,7 +23,7 @@ export function Topbar({
 }: TopbarProps) {
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur px-4 lg:px-6">
-      <MobileNav overdueCount={overdueCount} requestsCount={requestsCount} videoReviewCount={videoReviewCount} />
+      <MobileNav videoReviewCount={videoReviewCount} />
       {currentUser && <PresenceBar currentUser={currentUser} />}
       <div className="flex-1" />
       <div className="flex items-center gap-2">

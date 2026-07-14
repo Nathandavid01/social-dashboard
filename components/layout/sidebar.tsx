@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, useTransition } from 'react'
+import { Fragment, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -15,10 +15,7 @@ import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {
-  overdueCount?: number
-  requestsCount?: number
   videoReviewCount?: number
-  planningPendingCount?: number
   navPreferences?: NavPreferences
   /** Admin-granted areas (null = no restriction → role defaults). */
   areaAccess?: string[] | null
@@ -26,8 +23,23 @@ interface SidebarProps {
 
 const DEFAULT_HREFS = navItems.map((n) => n.href)
 
+/**
+ * Bump this whenever the DEFAULT sidebar layout changes.
+ *
+ * v2 = the six-section menu. A saved `order` from v1 was a full snapshot of the
+ * OLD flat list — and `toggleHidden` used to save that snapshot even for people
+ * who never reordered anything, just hid one item. Honoring it would pin those
+ * users to the old flat menu forever and they'd never see the sections. So an
+ * order from an older version is dropped; `hidden` (still meaningful) is kept.
+ */
+const NAV_PREFS_VERSION = 2
+
 function applyPreferences(prefs: NavPreferences | undefined) {
-  const order = Array.isArray(prefs?.order) ? prefs!.order!.filter((h) => DEFAULT_HREFS.includes(h)) : []
+  const fromThisLayout = prefs?.v === NAV_PREFS_VERSION
+  const order =
+    fromThisLayout && Array.isArray(prefs?.order)
+      ? prefs!.order!.filter((h) => DEFAULT_HREFS.includes(h))
+      : []
   const hidden = new Set(prefs?.hidden ?? [])
 
   // Ordered list: prefs.order first (filtered to known items), then any new items not in prefs.order, in their default order
@@ -37,10 +49,7 @@ function applyPreferences(prefs: NavPreferences | undefined) {
 }
 
 export function Sidebar({
-  overdueCount = 0,
-  requestsCount = 0,
   videoReviewCount = 0,
-  planningPendingCount = 0,
   navPreferences,
   areaAccess = null,
 }: SidebarProps) {
@@ -103,7 +112,9 @@ export function Sidebar({
 
   function persist(next: { order: string[]; hidden: string[] }) {
     startTransition(async () => {
-      const res = await saveNavPreferences(next)
+      // Stamp the layout version, or the order we just saved would be discarded
+      // as stale on the next load.
+      const res = await saveNavPreferences({ ...next, v: NAV_PREFS_VERSION })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
     })
   }
@@ -113,7 +124,10 @@ export function Sidebar({
     if (nextHidden.has(href)) nextHidden.delete(href)
     else nextHidden.add(href)
     setHidden(nextHidden)
-    persist({ order: orderedHrefs, hidden: Array.from(nextHidden) })
+    // Don't save an order the user never chose: hiding an item used to snapshot
+    // the whole default list, which then read as "custom" forever after.
+    const isDefaultOrder = orderedHrefs.every((h, i) => h === DEFAULT_HREFS[i])
+    persist({ order: isDefaultOrder ? [] : orderedHrefs, hidden: Array.from(nextHidden) })
   }
 
   function reorder(srcHref: string, destHref: string) {
@@ -138,6 +152,21 @@ export function Sidebar({
   // Filter to allowed first, then apply user prefs
   const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h)))
     .filter((h) => allowedHrefs.has(h))
+
+  // Section headings turn a 20-item wall into a menu you can scan. They only make
+  // sense while the list is in its default order — once someone has dragged items
+  // around (or is dragging right now), their order is the truth and a heading
+  // would be a lie about what follows it.
+  const customOrder = orderedHrefs.some((h, i) => h !== DEFAULT_HREFS[i])
+  const showGroups = !editing && !collapsed && !customOrder
+
+  const headingBefore = (href: string, i: number): string | null => {
+    if (!showGroups) return null
+    const group = itemsByHref.get(href)?.group
+    if (!group) return null
+    const prev = i > 0 ? itemsByHref.get(visibleHrefs[i - 1])?.group : undefined
+    return group === prev ? null : group
+  }
 
   return (
     <aside className={cn(
@@ -170,23 +199,17 @@ export function Sidebar({
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {visibleHrefs.map((href) => {
+        {visibleHrefs.map((href, i) => {
           const item = itemsByHref.get(href)
           if (!item) return null
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
           const isHidden = hidden.has(item.href)
+          const heading = headingBefore(href, i)
 
-          const badge =
-            item.href === '/planning' && planningPendingCount > 0 ? planningPendingCount
-            : item.href === '/operations' && overdueCount > 0 ? overdueCount
-            : item.href === '/inbox' && requestsCount > 0 ? requestsCount
-            : item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount
-            : 0
-          const badgeColor =
-            item.href === '/planning' ? 'bg-red-500 animate-pulse'
-            : item.href === '/operations' ? 'bg-red-500'
-            : item.href === '/video-reviews' ? 'bg-orange-500'
-            : 'bg-blue-500'
+          // Only /video-reviews is actually in the sidebar; the other three badges
+          // pointed at nav:false routes and could never render.
+          const badge = item.href === '/video-reviews' && videoReviewCount > 0 ? videoReviewCount : 0
+          const badgeColor = 'bg-orange-500'
 
           const itemEl = (
             <span
@@ -265,22 +288,28 @@ export function Sidebar({
           }
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onPointerDown={startLongPress}
-              onPointerMove={onPressMove}
-              onPointerUp={clearLongPress}
-              onPointerLeave={clearLongPress}
-              onClick={(e) => {
-                if (suppressClick.current) {
-                  e.preventDefault()
-                  suppressClick.current = false
-                }
-              }}
-            >
-              {itemEl}
-            </Link>
+            <Fragment key={item.href}>
+              {heading && (
+                <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground first:pt-0">
+                  {heading}
+                </p>
+              )}
+              <Link
+                href={item.href}
+                onPointerDown={startLongPress}
+                onPointerMove={onPressMove}
+                onPointerUp={clearLongPress}
+                onPointerLeave={clearLongPress}
+                onClick={(e) => {
+                  if (suppressClick.current) {
+                    e.preventDefault()
+                    suppressClick.current = false
+                  }
+                }}
+              >
+                {itemEl}
+              </Link>
+            </Fragment>
           )
         })}
 

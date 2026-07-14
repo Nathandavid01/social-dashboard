@@ -25,7 +25,13 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
-import { AREAS, ALWAYS_ALLOWED_PREFIXES, effectiveAreaHrefs } from '@/lib/auth/areas'
+import {
+  AREAS,
+  ALWAYS_ALLOWED_PREFIXES,
+  effectiveAreaHrefs,
+  NAV_GROUPS,
+  type NavGroup,
+} from '@/lib/auth/areas'
 import type { UserRole } from '@/lib/supabase/types'
 
 export interface NavItem {
@@ -34,7 +40,11 @@ export interface NavItem {
   icon: LucideIcon
   /** Hide this item from the sidebar when the current user lacks this permission. */
   permission?: Permission
+  /** Sidebar section. Absent for the pinned top items (Mi día, Inicio). */
+  group?: NavGroup
 }
+
+export { NAV_GROUPS, type NavGroup }
 
 /** Icon per area href. AREAS (lib/auth/areas.ts) is the single source of truth for
  * the destinations themselves; the sidebar just attaches an icon to each. */
@@ -62,6 +72,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/actividad': Activity,
   '/settings/users': UserCog,
   '/settings/workflow': Settings,
+  '/settings/metricool': Globe,
 }
 
 export const navItems: NavItem[] = [
@@ -71,6 +82,7 @@ export const navItems: NavItem[] = [
   ...AREAS.filter((a) => a.nav !== false).map((a) => ({
     href: a.href,
     label: a.label,
+    group: a.group,
     icon: ICON_BY_HREF[a.href] ?? Home,
     permission: a.permission,
   })),
