@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.99 — 2026-07-14
+
+**"Esta semana toca": con ~50 clientes, cuáles necesitas tocar HOY.** Antes cada cliente se evaluaba por separado — nada en la app miraba los 50 a la vez para decirte cuáles se están quedando sin contenido. Ahora Runway abre con la lista corta.
+
+- **Urgente** — se quedan sin contenido, ordenados por quién publica primero. Cada uno dice por qué ("Sin contenido listo. Publica el 16 jul").
+- **Esta semana** — les queda poco banco, toca reponer.
+- **Pueden esperar** — colapsados. Los que puedes ignorar hoy.
+- **Sin cadencia configurada** — apartados, no escondidos: sin cadencia no podemos saber cuánto contenido necesitan, y darlos por buenos taparía a un cliente que nadie está atendiendo.
+
+Lo que la lista revela hoy en tu cuenta: **39 clientes con compromiso de publicación vencido y nada grabado**, y **23 sin cadencia configurada**.
+
 ## v2.98 — 2026-07-14
 
 **El menú, por fin ordenado.** Eran 22 destinos en una lista plana; ahora están en **6 secciones** — Trabajo, Ideas, Publicación, Clientes, Métricas y Equipo — con "Mi día" e "Inicio" arriba, fijos.
