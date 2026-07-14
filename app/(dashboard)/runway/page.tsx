@@ -45,8 +45,18 @@ export default async function RunwayPage() {
       />
 
       {/* The short list first: with ~50 clients, "who do I touch NOW" is the
-          question. The full board below is the detail behind it. */}
-      {plan && <WeeklyPlanView plan={plan} />}
+          question. The full board below is the detail behind it.
+
+          On failure say so LOUDLY — silently dropping the section would read as
+          "nothing is urgent", the most dangerous lie this page can tell. */}
+      {plan ? (
+        <WeeklyPlanView plan={plan} />
+      ) : (
+        <p className="rounded-lg border border-amber-500/50 bg-amber-50 px-3 py-2.5 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          No se pudo calcular a quién le toca esta semana. Recarga la página — no
+          asumas que no hay nada urgente.
+        </p>
+      )}
 
       {/* The detail behind the short list: weeks buffered at each stage. The old
           summary line lived here and now says the same thing as the header above. */}
