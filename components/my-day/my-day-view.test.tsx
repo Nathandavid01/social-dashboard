@@ -112,8 +112,22 @@ describe('MyDayView', () => {
     expect(screen.getByText(/trabajo libre del equipo/i)).toBeInTheDocument()
   })
 
-  it('congratulates instead of showing an empty list when there is nothing', () => {
-    render(<MyDayView day={day([])} firstName="Eric" />)
+  it('congratulates instead of showing an empty list when my own work is done', () => {
+    // Videos that are MINE but finished → scope stays 'mio', nothing to do.
+    const d = day([mine({ id: 'done', published_at: '2026-07-01T00:00:00Z' })])
+    render(<MyDayView day={d} firstName="Eric" />)
+    expect(d.scope).toBe('mio')
     expect(screen.getByText(/nada pendiente para hoy/i)).toBeInTheDocument()
+  })
+
+  // A supervisor's review queue is THEIR work, not "esperando a otros".
+  it('counts the review queue as my work when I can approve', () => {
+    const d = buildMyDay(
+      [mine({ id: 'r', approval_status: 'submitted', publish_date: TODAY })],
+      { today: TODAY, userId: ME, canApprove: true },
+    )
+    render(<MyDayView day={d} />)
+    expect(screen.getByText('Tienes 1 video hoy')).toBeInTheDocument()
+    expect(screen.getByText('Aprobar')).toBeInTheDocument()
   })
 })

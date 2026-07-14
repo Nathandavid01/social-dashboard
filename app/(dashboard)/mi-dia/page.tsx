@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { getMyDay } from '@/lib/actions/my-day'
 import { MyDayView } from '@/components/my-day/my-day-view'
 
@@ -7,26 +6,15 @@ import { MyDayView } from '@/components/my-day/my-day-view'
  * "Mi día" — the landing page. Every role has one: what do I have to do today?
  *
  * No permission gate on purpose: this is each person's own work, so there is
- * nothing to authorize. The rows only ever contain videos they own (or, when
- * they own none, the team's unclaimed work).
+ * nothing to authorize. `getMyDay` does the real gating (active + approved
+ * account) and refuses to show the unowned team pool to anyone who isn't allowed
+ * to see the pipeline.
  */
 export const dynamic = 'force-dynamic'
 
 export default async function MiDiaPage() {
-  const day = await getMyDay()
-  if (!day) redirect('/login')
+  const result = await getMyDay()
+  if (!result) redirect('/login')
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user!.id)
-    .maybeSingle()
-
-  const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? null
-
-  return <MyDayView day={day} firstName={firstName} />
+  return <MyDayView day={result.day} firstName={result.firstName} />
 }

@@ -110,24 +110,52 @@ describe('planned slots that were never shot', () => {
   const slot = (id: string, due: string) =>
     video({ id, status: 'idea', publish_date: due, production_task: { id: 't', status: 'pendiente', publish_date: due, assigned_to_id: ME } })
 
-  it('goes to por_grabar, never to atrasado — no matter how old', () => {
-    expect(bucketFor(slot('a', '2026-01-01'), TODAY)).toBe('por_grabar')
-  })
-
-  it('never counts against the daily load', () => {
-    const day = buildMyDay(
-      [slot('s1', '2026-07-01'), slot('s2', '2026-07-01'), mine({ id: 'real', publish_date: TODAY })],
-      { today: TODAY, userId: ME, capacity: 1 },
-    )
-    expect(day.porGrabar).toHaveLength(2)
-    expect(day.atrasados).toHaveLength(0)
-    expect(day.load.count).toBe(1)
-    expect(day.load.over).toBe(false)
+  // An unshot video whose date has passed IS late — hiding that would lie in the
+  // other direction. It's bucketed by date like everything else; what tells it
+  // apart is its `kind`.
+  it('is late when its date has passed, and marked as camera work', () => {
+    const day = buildMyDay([slot('s1', '2026-07-01')], { today: TODAY, userId: ME })
+    expect(day.atrasados).toHaveLength(1)
+    expect(day.atrasados[0].kind).toBe('grabar')
   })
 
   it('says the next step is to SHOOT it, not to write a caption', () => {
     const day = buildMyDay([slot('s1', TODAY)], { today: TODAY, userId: ME })
-    expect(day.porGrabar[0].nextStep.label).toMatch(/graba el video/i)
+    expect(day.hoy[0].nextStep.label).toMatch(/graba el video/i)
+  })
+
+  // The videographer's whole job is the camera — their load has to count it, or
+  // their ceiling can never fire.
+  it('counts toward the daily load, so a videographer can be over their ceiling', () => {
+    const day = buildMyDay([slot('s1', TODAY), slot('s2', TODAY)], {
+      today: TODAY,
+      userId: ME,
+      capacity: 1,
+    })
+    expect(day.load.count).toBe(2)
+    expect(day.load.over).toBe(true)
+  })
+})
+
+// The row for a video in review literally reads "aprueba o pide cambios". If I'm
+// the one holding that button, it is MY work — filing it under "esperando" hid a
+// supervisor's entire review queue and left it out of their count.
+describe('a video waiting for review', () => {
+  const inReview = (id: string) => mine({ id, approval_status: 'submitted', publish_date: TODAY })
+
+  it('is MY work when I can approve', () => {
+    const day = buildMyDay([inReview('a')], { today: TODAY, userId: ME, canApprove: true })
+    expect(day.hoy).toHaveLength(1)
+    expect(day.hoy[0].kind).toBe('aprobar')
+    expect(day.load.count).toBe(1)
+    expect(day.esperando).toHaveLength(0)
+  })
+
+  it("is someone else's when I cannot", () => {
+    const day = buildMyDay([inReview('a')], { today: TODAY, userId: ME, canApprove: false })
+    expect(day.esperando).toHaveLength(1)
+    expect(day.esperando[0].kind).toBe('esperar')
+    expect(day.load.count).toBe(0)
   })
 })
 
@@ -255,11 +283,14 @@ describe('buildMyDay', () => {
 })
 
 describe('copy', () => {
-  it('names the camera work when there is nothing to edit', () => {
-    expect(myDayHeadline({ count: 0, capacity: null, over: false }, 150)).toBe(
-      'Nada que editar hoy · 150 videos por grabar',
+  // Never claim the team pool is "yours".
+  it('never says "tienes" about the team pool', () => {
+    expect(myDayHeadline({ count: 3, capacity: null, over: false }, 'equipo')).toBe(
+      'Hay 3 videos libres para hoy',
     )
-    expect(myDayHeadline({ count: 0, capacity: null, over: false }, 1)).toMatch(/1 video por grabar/)
+    expect(myDayHeadline({ count: 0, capacity: null, over: false }, 'equipo')).toMatch(
+      /no hay trabajo libre/i,
+    )
   })
 
   it('headlines the count in Spanish, singular and plural', () => {

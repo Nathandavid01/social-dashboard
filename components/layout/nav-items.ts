@@ -25,7 +25,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
-import { AREAS, effectiveAreaHrefs } from '@/lib/auth/areas'
+import { AREAS, ALWAYS_ALLOWED_PREFIXES, effectiveAreaHrefs } from '@/lib/auth/areas'
 import type { UserRole } from '@/lib/supabase/types'
 
 export interface NavItem {
@@ -90,5 +90,11 @@ export function visibleNavItems(
     return navItems.filter((n) => !n.permission || hasPermission(role, n.permission))
   }
   const reachable = effectiveAreaHrefs(role, areaAccess)
-  return navItems.filter((n) => n.href === '/home' || reachable.has(n.href))
+  // Always-allowed destinations aren't in AREAS (there's nothing to authorize),
+  // so they'd never be "reachable" and would vanish from the sidebar. This used
+  // to hardcode '/home'; the moment '/mi-dia' was added it disappeared for
+  // everyone — owner included. Read the list instead of naming routes here.
+  return navItems.filter(
+    (n) => ALWAYS_ALLOWED_PREFIXES.includes(n.href) || reachable.has(n.href),
+  )
 }

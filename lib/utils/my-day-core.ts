@@ -22,7 +22,21 @@ import type { BatchVideo, NextStep } from '@/lib/utils/batch-view'
 import { videoNextStep, isRecorded } from '@/lib/utils/batch-view'
 import type { Client, ProductionTask } from '@/lib/supabase/types'
 
-export type MyDayBucket = 'por_grabar' | 'atrasado' | 'hoy' | 'proximo' | 'esperando'
+export type MyDayBucket = 'atrasado' | 'hoy' | 'proximo' | 'esperando'
+
+/**
+ * What KIND of work this video needs from me. The load is one number, but the
+ * work isn't one thing — a videographer shoots, an editor edits, a supervisor
+ * approves. The row shows the kind; the count treats them all as "my hands".
+ */
+export type MyDayKind = 'grabar' | 'editar' | 'aprobar' | 'esperar'
+
+export const KIND_LABEL_ES: Record<MyDayKind, string> = {
+  grabar: 'Grabar',
+  editar: 'Editar',
+  aprobar: 'Aprobar',
+  esperar: 'Esperando',
+}
 
 /**
  * A video whose owner we can resolve. `production_task.assigned_to_id` is the
@@ -65,6 +79,7 @@ export function videoOwnerId(v: OwnedVideo): string | null {
 export interface MyDayItem {
   video: OwnedVideo
   bucket: MyDayBucket
+  kind: MyDayKind
   /** The date this is due: `deadline` if set, else `publish_date`. */
   dueDate: string | null
   nextStep: NextStep
@@ -89,9 +104,6 @@ export type MyDayScope = 'mio' | 'equipo'
 
 export interface MyDay {
   scope: MyDayScope
-  /** Planned slots nobody has shot yet. Real work — but camera work, and never
-   * part of the editing load. */
-  porGrabar: MyDayItem[]
   atrasados: MyDayItem[]
   hoy: MyDayItem[]
   proximos: MyDayItem[]
@@ -116,27 +128,34 @@ export function videoDueDate(v: BatchVideo): string | null {
 }
 
 /**
+ * What this video needs from ME.
+ *
+ * `canApprove` is the pivot, and getting it wrong is what made the first version
+ * lie: a video sitting at `submitted` reads "aprueba o pide cambios" — that is an
+ * action, and if I'm the one holding the approve button it is MY action, not
+ * someone else's. Filing it under "esperando" hid a supervisor's entire review
+ * queue and left it out of their count. For everyone else, the same video really
+ * is out of their hands.
+ */
+export function kindFor(v: BatchVideo, canApprove: boolean): MyDayKind {
+  if (v.approval_status === 'submitted') return canApprove ? 'aprobar' : 'esperar'
+  if (!isRecorded(v)) return 'grabar'
+  return 'editar'
+}
+
+/**
  * Where a video lands on my day.
  *
- * `por_grabar` comes FIRST, and it is the rule that keeps this screen usable.
- * Most of the board is planned slots that were never shot — a date and a client,
- * nothing else. They are real work, but they are CAMERA work, and they are not
- * what a daily editing ceiling is about. Bucketing them by their (long past)
- * planned date would bury the real work under a wall of red: on the live board
- * that's 150 "atrasados" and 0 actual videos. So they get their own section and
- * they never touch the load count.
- *
- * `waiting` work (with the client, or in someone else's review) is `esperando`
- * no matter how overdue it looks — nagging me about a date I can't move is noise,
- * and counting it would inflate the very number this screen exists to make
- * trustworthy.
+ * Anything I can't act on is `esperando` — nagging me about a date I can't move
+ * is noise, and counting it would inflate the very number this screen exists to
+ * make trustworthy. Everything else is bucketed by its due date, INCLUDING work
+ * that still needs the camera: an unshot video whose date has passed is late,
+ * and hiding that would be lying in the other direction.
  *
  * A video with no due date is `proximo`: real, mine, but not claiming a day.
  */
-export function bucketFor(v: BatchVideo, today: string): MyDayBucket {
-  const step = videoNextStep(v)
-  if (step.tone === 'waiting') return 'esperando'
-  if (!isRecorded(v)) return 'por_grabar'
+export function bucketFor(v: BatchVideo, today: string, canApprove = false): MyDayBucket {
+  if (kindFor(v, canApprove) === 'esperar') return 'esperando'
   const due = videoDueDate(v)
   if (!due) return 'proximo'
   if (due < today) return 'atrasado'
@@ -153,7 +172,7 @@ function byDueDate(a: MyDayItem, b: MyDayItem): number {
 }
 
 /** Turn raw videos into day items, dropping what's finished or discarded. */
-function toItems(videos: OwnedVideo[], today: string): MyDayItem[] {
+function toItems(videos: OwnedVideo[], today: string, canApprove: boolean): MyDayItem[] {
   const items: MyDayItem[] = []
   for (const v of videos) {
     if (v.status === 'descartada') continue
@@ -162,7 +181,8 @@ function toItems(videos: OwnedVideo[], today: string): MyDayItem[] {
     if (isDone(nextStep)) continue
     items.push({
       video: v,
-      bucket: bucketFor(v, today),
+      bucket: bucketFor(v, today, canApprove),
+      kind: kindFor(v, canApprove),
       dueDate: videoDueDate(v),
       nextStep,
     })
@@ -181,9 +201,16 @@ function toItems(videos: OwnedVideo[], today: string): MyDayItem[] {
  */
 export function buildMyDay(
   videos: OwnedVideo[],
-  opts: { today: string; userId?: string | null; capacity?: number | null },
+  opts: {
+    today: string
+    userId?: string | null
+    capacity?: number | null
+    /** Does this person hold the approve button (`video.approve`)? Decides whether
+     * a video in review is their work or someone else's. */
+    canApprove?: boolean
+  },
 ): MyDay {
-  const { today, userId = null } = opts
+  const { today, userId = null, canApprove = false } = opts
 
   const mine = userId ? videos.filter((v) => videoOwnerId(v) === userId) : []
   const scope: MyDayScope = mine.length > 0 ? 'mio' : 'equipo'
@@ -191,7 +218,7 @@ export function buildMyDay(
   // up, and listing it would just recreate the noisy all-videos board.
   const pool = scope === 'mio' ? mine : videos.filter((v) => videoOwnerId(v) === null)
 
-  const items = toItems(pool, today)
+  const items = toItems(pool, today, canApprove)
   const pick = (b: MyDayBucket) => items.filter((i) => i.bucket === b).sort(byDueDate)
   const atrasados = pick('atrasado')
   const hoy = pick('hoy')
@@ -201,7 +228,6 @@ export function buildMyDay(
 
   return {
     scope,
-    porGrabar: pick('por_grabar'),
     atrasados,
     hoy,
     proximos: pick('proximo'),
@@ -218,18 +244,18 @@ export function buildMyDay(
 }
 
 /**
- * The headline: "Tienes 6 videos hoy".
+ * The headline.
  *
- * With nothing to edit, don't just say "nada pendiente" while a pile of unshot
- * slots sits below — that reads as a bug. Name the camera work instead, since
- * that IS what's pending.
+ * Never say "Tienes" about the team pool — that work isn't theirs, and claiming
+ * it is exactly the confusion the `scope` flag exists to prevent.
  */
-export function myDayHeadline(load: MyDayLoad, porGrabar = 0): string {
-  if (load.count === 0) {
-    if (porGrabar === 1) return 'Nada que editar hoy · 1 video por grabar'
-    if (porGrabar > 1) return `Nada que editar hoy · ${porGrabar} videos por grabar`
-    return 'Nada pendiente para hoy'
+export function myDayHeadline(load: MyDayLoad, scope: MyDayScope = 'mio'): string {
+  if (scope === 'equipo') {
+    if (load.count === 0) return 'No hay trabajo libre para hoy'
+    if (load.count === 1) return 'Hay 1 video libre para hoy'
+    return `Hay ${load.count} videos libres para hoy`
   }
+  if (load.count === 0) return 'Nada pendiente para hoy'
   if (load.count === 1) return 'Tienes 1 video hoy'
   return `Tienes ${load.count} videos hoy`
 }

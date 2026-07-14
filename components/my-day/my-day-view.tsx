@@ -1,13 +1,15 @@
 import Link from 'next/link'
-import { AlertTriangle, CalendarClock, CheckCircle2, Clock, Hourglass, Users, Video } from 'lucide-react'
+import { AlertTriangle, CalendarClock, CheckCircle2, Clock, Hourglass, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/empty-state'
 import { formatDateShortES } from '@/lib/utils/deadlines'
 import {
   myDayHeadline,
   myDayCapacityNote,
+  KIND_LABEL_ES,
   type MyDay,
   type MyDayItem,
+  type MyDayKind,
 } from '@/lib/utils/my-day-core'
 import type { NextStepTone } from '@/lib/utils/batch-view'
 
@@ -16,6 +18,14 @@ const TONE: Record<NextStepTone, string> = {
   action: 'text-primary',
   waiting: 'text-muted-foreground',
   warn: 'text-amber-600 dark:text-amber-400',
+}
+
+/** The kind of work, so a shoot never reads like an edit. */
+const KIND_STYLE: Record<MyDayKind, string> = {
+  grabar: 'border-cyan-500/50 text-cyan-700 dark:text-cyan-400',
+  editar: 'border-violet-500/50 text-violet-700 dark:text-violet-400',
+  aprobar: 'border-amber-500/50 text-amber-700 dark:text-amber-400',
+  esperar: 'border-muted text-muted-foreground',
 }
 
 /** One video, one line: what it is, for whom, when it's due, and what to do. */
@@ -33,9 +43,10 @@ function VideoRow({ item, showDate = true }: { item: MyDayItem; showDate?: boole
           <p className={`truncate text-xs ${TONE[item.nextStep.tone]}`}>{item.nextStep.label}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
-          {client && (
-            <span className="text-xs text-muted-foreground">{client}</span>
-          )}
+          {client && <span className="text-xs text-muted-foreground">{client}</span>}
+          <Badge variant="outline" className={`text-xs font-normal ${KIND_STYLE[item.kind]}`}>
+            {KIND_LABEL_ES[item.kind]}
+          </Badge>
           {showDate && item.dueDate && (
             <Badge variant="outline" className="text-xs font-normal">
               {formatDateShortES(item.dueDate)}
@@ -91,10 +102,7 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
   const isTeam = scope === 'equipo'
 
   const nothingAtAll =
-    load.count === 0 &&
-    day.porGrabar.length === 0 &&
-    day.proximos.length === 0 &&
-    day.esperando.length === 0
+    load.count === 0 && day.proximos.length === 0 && day.esperando.length === 0
 
   return (
     <div className="space-y-6">
@@ -104,7 +112,7 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <h1 className="text-2xl font-bold tracking-tight text-balance">
-            {myDayHeadline(load, day.porGrabar.length)}
+            {myDayHeadline(load, scope)}
           </h1>
           {load.over && (
             <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400">
@@ -157,15 +165,6 @@ export function MyDayView({ day, firstName }: { day: MyDay; firstName?: string |
             tone="text-red-600 dark:text-red-400"
           />
           <Section icon={Clock} title="Para hoy" items={day.hoy} tone="text-primary" />
-          {/* Camera work, not editing work. Kept out of the load on purpose — most
-              of the board is planned slots, and burying the real work under them
-              is exactly what makes a dashboard useless. */}
-          <Section
-            icon={Video}
-            title="Por grabar"
-            items={day.porGrabar}
-            tone="text-cyan-600 dark:text-cyan-400"
-          />
           <Section
             icon={CalendarClock}
             title="Próximos"
