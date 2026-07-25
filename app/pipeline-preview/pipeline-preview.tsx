@@ -149,6 +149,8 @@ export function PipelinePreview() {
               <SubmitVideoCard
                 clients={submitterClients}
                 onSubmit={(p: SubmitVideoPayload) =>
+                  // Real page: presign → PUT to R2 → registerR2Video, then create
+                  // the idea. Here we only drop a card on the board.
                   setSubmitted((prev) => [
                     ...prev,
                     ...p.videos.map((v) => ({ clientId: p.clientId, title: v.title })),
