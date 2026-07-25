@@ -37,7 +37,7 @@ export interface PlannedClient {
 }
 
 const STAGE_DOT: Record<BatchStageKey, string> = {
-  video: '#06b6d4', edited: '#8b5cf6', approval: '#f59e0b', copy: '#ec4899', publication: '#10b981',
+  edited: '#8b5cf6', approval: '#f59e0b', copy: '#ec4899', publication: '#10b981',
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
@@ -47,7 +47,7 @@ export function ContentPipelineBoard({
   allClients = [],
   clientCadence = {},
   teamMembers = [],
-  videoColumnSlot,
+  editedColumnSlot,
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -56,8 +56,8 @@ export function ContentPipelineBoard({
   clientCadence?: Record<string, ClientCadence>
   /** All active team members — powers the "Asignado a" filter (not just people on batches). */
   teamMembers?: { id: string; name: string }[]
-  /** Pinned at the top of the Video column — the editor's submit form. */
-  videoColumnSlot?: React.ReactNode
+  /** Pinned at the top of the Editado column — the editor's submit form. */
+  editedColumnSlot?: React.ReactNode
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -262,7 +262,7 @@ export function ContentPipelineBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} topSlot={stage.key === 'video' ? videoColumnSlot : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>

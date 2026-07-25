@@ -136,7 +136,7 @@ export function PipelinePreview() {
           <ContentPipelineBoard
             ideas={ideas}
             allClients={ALL_CLIENTS}
-            videoColumnSlot={
+            editedColumnSlot={
               <SubmitVideoCard
                 clients={ALL_CLIENTS}
                 onSubmit={(p) => setSubmitted((prev) => [...prev, p])}

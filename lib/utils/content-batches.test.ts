@@ -20,12 +20,12 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 }
 
 describe('ideaStage', () => {
-  it('collapses everything pre-edit into the first Video column', () => {
-    expect(ideaStage(idea())).toBe('video')
-    expect(ideaStage(idea({ hook: 'h' }))).toBe('video')
-    expect(ideaStage(idea({ hook: 'h', visual_brief: 'v' }))).toBe('video')
-    expect(ideaStage(idea({ generated_caption: 'c' }))).toBe('video')
-    expect(ideaStage(idea({ status: 'grabada' }))).toBe('video')
+  it('collapses everything before review into the first Editado column', () => {
+    expect(ideaStage(idea())).toBe('edited')
+    expect(ideaStage(idea({ hook: 'h' }))).toBe('edited')
+    expect(ideaStage(idea({ hook: 'h', visual_brief: 'v' }))).toBe('edited')
+    expect(ideaStage(idea({ generated_caption: 'c' }))).toBe('edited')
+    expect(ideaStage(idea({ status: 'grabada' }))).toBe('edited')
     expect(ideaStage(idea({ status: 'producida' }))).toBe('edited')
     expect(ideaStage(idea({ status: 'publicada' }))).toBe('publication')
   })
@@ -43,11 +43,11 @@ describe('ideaStage', () => {
 
 describe('batchStage — moves together (least advanced active video)', () => {
   it('sits at the least-advanced video', () => {
-    expect(batchStage([idea({ status: 'producida' }), idea({ hook: 'h' }), idea({ status: 'grabada' })])).toBe('video')
+    expect(batchStage([idea({ status: 'producida', approval_status: 'approved' }), idea({ hook: 'h' })])).toBe('edited')
   })
   it('is publication only when every active video is published', () => {
     expect(batchStage([idea({ status: 'publicada' }), idea({ status: 'publicada' })])).toBe('publication')
-    expect(batchStage([idea({ status: 'publicada' }), idea({ status: 'grabada' })])).toBe('video')
+    expect(batchStage([idea({ status: 'publicada' }), idea({ status: 'grabada' })])).toBe('edited')
   })
 })
 
@@ -63,7 +63,7 @@ describe('groupIntoBatches', () => {
     const nora = batches.find((b) => b.clientId === 'c1')!
     expect(nora.total).toBe(2)
     expect(nora.assignee).toEqual({ id: 'a', name: 'Ana' })
-    expect(nora.stage).toBe('video') // both pre-edit videos collapse to Video
+    expect(nora.stage).toBe('edited') // nothing sent to review yet
     expect(batches.find((b) => b.clientId === 'c2')!.stage).toBe('publication')
   })
   it('excludes clients whose videos are all discarded', () => {
@@ -83,10 +83,10 @@ describe('buildClientPipelineIndex', () => {
       idea({ id: '2', client_id: 'c1', title: 'Reel B', status: 'grabada' }),
     ] as IdeaWithPipeline[])
     expect(index.c1.total).toBe(2)
-    expect(index.c1.batchStageLabel).toBe('Video')
+    expect(index.c1.batchStageLabel).toBe('Editado')
     expect(index.c1.videos.map((v) => v.title)).toEqual(['Reel A', 'Reel B'])
-    expect(index.c1.videos[0].stageLabel).toBe('Video')
-    expect(index.c1.videos[1].stageLabel).toBe('Video')
+    expect(index.c1.videos[0].stageLabel).toBe('Editado')
+    expect(index.c1.videos[1].stageLabel).toBe('Editado')
     expect(index.c1.metricoolScheduled).toBe(0)
     expect(index.c1.nextNewVideo).toBeNull()
   })
@@ -98,19 +98,27 @@ describe('buildClientPipelineIndex', () => {
 })
 
 describe('bucketBatches / adjacentBatchStage / batchProgress', () => {
-  it('buckets batches into the 4 columns', () => {
+  it('buckets batches into the 4 columns, Editado first', () => {
     const b = bucketBatches(groupIntoBatches([idea({ status: 'grabada' })] as IdeaWithPipeline[]))
-    expect(b.video).toHaveLength(1)
+    expect(b.edited).toHaveLength(1)
     expect(Object.keys(b)).toEqual(BATCH_STAGES.map((s) => s.key))
+    expect(Object.keys(b)).not.toContain('video')
   })
-  it('moves a batch forward and back, video first', () => {
-    expect(adjacentBatchStage('video', 1)).toBe('edited')
-    expect(adjacentBatchStage('edited', -1)).toBe('video')
-    expect(adjacentBatchStage('video', -1)).toBeNull()
+  it('moves a batch forward and back, Editado first', () => {
+    expect(adjacentBatchStage('edited', 1)).toBe('approval')
+    expect(adjacentBatchStage('approval', -1)).toBe('edited')
+    expect(adjacentBatchStage('edited', -1)).toBeNull()
     expect(adjacentBatchStage('publication', 1)).toBeNull()
   })
   it('progress grows along the pipeline', () => {
-    expect(batchProgress('video')).toBe(0)
+    expect(batchProgress('edited')).toBe(0)
     expect(batchProgress('publication')).toBe(1)
+  })
+  it('counts every stage, including copy (a missing key would count NaN)', () => {
+    const batches = groupIntoBatches([
+      idea({ status: 'producida', approval_status: 'approved' }),
+    ] as IdeaWithPipeline[])
+    expect(batches[0].stageCounts.copy).toBe(1)
+    expect(Object.keys(batches[0].stageCounts)).toEqual(BATCH_STAGES.map((s) => s.key))
   })
 })

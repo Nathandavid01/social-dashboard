@@ -1,13 +1,13 @@
 import type { ContentIdea } from '@/lib/supabase/types'
 
 /**
- * The 4 columns of the short Content Pipeline board (per product decision).
- * The process starts at the video: idea / title / caption all live inside the
- * first "Video" column. A card's column is derived from the furthest milestone
- * it has reached, so the board works without a status-enum migration.
+ * The 4 columns of the Content Pipeline board (per product decision).
+ * The pipeline starts when the EDITOR delivers: they pick the client, paste the
+ * Drive link, and the card enters at "Editado". Recording/idea work happens
+ * before the board and has no column. A card's column is derived from the
+ * furthest milestone it has reached, so this needs no status-enum migration.
  */
 export const PIPELINE_STAGES = [
-  { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited Video' },
   { key: 'approval', label: 'Approval' },
   { key: 'copy', label: 'Copy' },
@@ -39,8 +39,8 @@ export function computeStage(idea: StageInput): PipelineStageKey {
   if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
     return 'approval'
   }
-  if (idea.status === 'producida') return 'edited'
-  return 'video'
+  // Nothing sent to review yet: the card sits in Editado, the board's entry point.
+  return 'edited'
 }
 
 const filled = (s?: string | null) => !!s && s.trim().length > 0
@@ -58,9 +58,8 @@ export function adjacentStage(stage: PipelineStageKey, dir: 1 | -1): PipelineSta
  * The content_ideas.status that best persists a board stage. The board stages
  * are derived, not stored; this maps each of the 4 columns to the base status.
  */
-export function stageToStatus(stage: PipelineStageKey): 'grabada' | 'producida' | 'publicada' {
+export function stageToStatus(stage: PipelineStageKey): 'producida' | 'publicada' {
   switch (stage) {
-    case 'video': return 'grabada'
     case 'edited':
     case 'approval':
     case 'copy': return 'producida'
@@ -70,9 +69,9 @@ export function stageToStatus(stage: PipelineStageKey): 'grabada' | 'producida' 
 
 /** Bucket a list of cards into the 4 columns, preserving input order. */
 export function bucketByStage<T extends StageInput>(ideas: T[]): Record<PipelineStageKey, T[]> {
-  const out = {
-    video: [], edited: [], approval: [], copy: [], publication: [],
-  } as Record<PipelineStageKey, T[]>
+  const out = Object.fromEntries(
+    PIPELINE_STAGES.map((s) => [s.key, [] as T[]]),
+  ) as Record<PipelineStageKey, T[]>
   for (const idea of ideas) out[computeStage(idea)].push(idea)
   return out
 }

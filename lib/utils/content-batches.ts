@@ -13,12 +13,11 @@ import {
  * you work their whole period (month / week / recording session), so all of a
  * client's videos travel the pipeline together as one card.
  *
- * Short 4-column pipeline (per product decision): the process starts at the
- * video. Everything before the edit — idea, title, caption — lives inside the
- * first "Video" column, so the board reads shorter and more practical.
+ * 4-column pipeline (per product decision): the process starts when the EDITOR
+ * delivers. They pick the client and paste the Drive link, and the card enters
+ * at "Editado". Idea/recording work happens before the board and has no column.
  */
 export const BATCH_STAGES = [
-  { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited' },
   { key: 'approval', label: 'Approval' },
   { key: 'copy', label: 'Copy' },
@@ -30,8 +29,7 @@ const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) a
 
 /** Spanish labels for pipeline stages (shared with batch view + Nuevo video dialog). */
 export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
-  video: 'Video',
-  edited: 'Edición',
+  edited: 'Editado',
   approval: 'Revisión',
   copy: 'Copy',
   publication: 'Publicación',
@@ -126,8 +124,8 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
   return {
     total: 0,
     published: 0,
-    batchStage: 'video',
-    batchStageLabel: STAGE_LABEL_ES.video,
+    batchStage: 'edited',
+    batchStageLabel: STAGE_LABEL_ES.edited,
     metricoolScheduled: 0,
     hasMetricool: !!(cadence.metricoolBlogId && cadence.metricoolBlogId.trim()),
     nextPublish: null,
@@ -137,9 +135,8 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
 }
 
 /**
- * The pipeline stage a single idea has reached. In the short 4-column board,
- * everything before the edit (idea / title / caption / recording) collapses
- * into the first "Video" column.
+ * The pipeline stage a single idea has reached. Anything not yet sent to review
+ * sits in the first "Editado" column — the board's entry point.
  */
 export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
@@ -151,8 +148,7 @@ export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
     return 'approval'
   }
-  if (idea.status === 'producida') return 'edited'
-  return 'video'
+  return 'edited'
 }
 
 export interface ClientBatch {
@@ -184,7 +180,7 @@ export function batchProgress(stage: BatchStageKey): number {
 /** Stage of a whole batch: the least-advanced active video, or publication when all are out. */
 export function batchStage(ideas: IdeaWithPipeline[]): BatchStageKey {
   const active = ideas.filter((i) => i.status !== 'descartada')
-  if (active.length === 0) return 'video'
+  if (active.length === 0) return 'edited'
   const allPublished = active.every((i) => i.published_at || i.status === 'publicada')
   if (allPublished) return 'publication'
   let min: BatchStageKey = 'publication'
@@ -230,7 +226,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
     const platforms = active[0]?.client?.platforms ?? []
 
     // Per-stage video count (the "status of the videos within" the batch).
-    const stageCounts = { video: 0, edited: 0, approval: 0, publication: 0 } as Record<BatchStageKey, number>
+    const stageCounts = emptyStageCounts()
     const assigneeSet = new Set<string>()
     for (const i of active) {
       stageCounts[ideaStage(i)]++
@@ -276,6 +272,12 @@ export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStage
  */
 export function emptyStageBuckets<T>(): Record<BatchStageKey, T[]> {
   return Object.fromEntries(BATCH_STAGES.map((s) => [s.key, [] as T[]])) as Record<BatchStageKey, T[]>
+}
+
+/** Zeroed counter per stage. Same reasoning as emptyStageBuckets — a hand-written
+ *  literal that misses a stage yields `undefined++` → NaN, silently. */
+export function emptyStageCounts(): Record<BatchStageKey, number> {
+  return Object.fromEntries(BATCH_STAGES.map((s) => [s.key, 0])) as Record<BatchStageKey, number>
 }
 
 /** Batches bucketed by their column. */

@@ -85,25 +85,13 @@ describe('contentTypeLabel', () => {
 })
 
 describe('videoStageKey', () => {
-  it('is "video" with no content (pre-edit collapses to Video)', () => {
-    expect(videoStageKey(mk())).toBe('video')
-  })
-  it('stays "video" through idea/caption prep (collapsed into Video)', () => {
-    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('video')
-    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('video')
-    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('video')
-  })
-  it('stays "video" once a caption is generated (still pre-edit)', () => {
-    expect(videoStageKey(mk({ hook: 'g', visual_brief: 'b', generated_caption: 'texto' }))).toBe('video')
-  })
-  it('is "video" when a raw file is uploaded (even if status not advanced)', () => {
-    expect(videoStageKey(mk({ generated_caption: 'c', videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('video')
-  })
-  it('is "video" when status is grabada or a recording_date exists', () => {
-    expect(videoStageKey(mk({ status: 'grabada' }))).toBe('video')
-    expect(videoStageKey(mk({ recording_date: '2026-06-11' }))).toBe('video')
-  })
-  it('is "edited" when an edited file exists or status producida', () => {
+  it('anything not yet sent to review sits in "edited", the board entry point', () => {
+    expect(videoStageKey(mk())).toBe('edited')
+    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('edited')
+    expect(videoStageKey(mk({ hook: 'g', generated_caption: 'texto' }))).toBe('edited')
+    expect(videoStageKey(mk({ status: 'grabada' }))).toBe('edited')
+    expect(videoStageKey(mk({ recording_date: '2026-06-11' }))).toBe('edited')
+    expect(videoStageKey(mk({ videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('edited')
     expect(videoStageKey(mk({ videos: { raw: [], broll: [], edited: [rawFile()] } }))).toBe('edited')
     expect(videoStageKey(mk({ status: 'producida' }))).toBe('edited')
   })
@@ -122,22 +110,22 @@ describe('videoStageKey', () => {
 })
 
 describe('batchStageKey', () => {
-  it('returns "video" for an empty batch', () => {
-    expect(batchStageKey([])).toBe('video')
+  it('returns "edited" for an empty batch', () => {
+    expect(batchStageKey([])).toBe('edited')
   })
   it('returns the LEAST-advanced active video stage (videos move together)', () => {
     const videos = [
-      mk({ id: 'a', status: 'producida' }), // edited
-      mk({ id: 'b', status: 'grabada' }), // video
+      mk({ id: 'a', approval_status: 'approved' }), // copy
+      mk({ id: 'b', status: 'grabada' }), // edited
     ]
-    expect(batchStageKey(videos)).toBe('video')
+    expect(batchStageKey(videos)).toBe('edited')
   })
   it('ignores discarded videos', () => {
     const videos = [
       mk({ id: 'a', status: 'descartada' }),
       mk({ id: 'b', status: 'grabada' }),
     ]
-    expect(batchStageKey(videos)).toBe('video')
+    expect(batchStageKey(videos)).toBe('edited')
   })
   it('returns "publication" only when all active videos are published', () => {
     const videos = [
@@ -152,7 +140,6 @@ describe('buildStepper', () => {
   it('marks earlier stages done, the current stage current, later ones neither', () => {
     const stepper = buildStepper([mk({ status: 'producida', approval_status: 'submitted' })]) // batch at "approval"
     const byKey = Object.fromEntries(stepper.map((s) => [s.key, s]))
-    expect(byKey.video.done).toBe(true)
     expect(byKey.edited.done).toBe(true)
     expect(byKey.approval.current).toBe(true)
     expect(byKey.approval.done).toBe(false)
@@ -161,7 +148,7 @@ describe('buildStepper', () => {
   })
   it('uses Spanish labels', () => {
     const labels = buildStepper([]).map((s) => s.label)
-    expect(labels).toEqual(['Video', 'Edición', 'Revisión', 'Copy', 'Publicación'])
+    expect(labels).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 })
 
@@ -190,8 +177,8 @@ describe('slotStatus', () => {
 describe('batchHint', () => {
   it('returns the current stage label and an actionable tip', () => {
     const hint = batchHint([mk({ status: 'grabada' })])
-    expect(hint.stageLabel).toBe('Video')
-    expect(hint.tip).toMatch(/raw/i)
+    expect(hint.stageLabel).toBe('Editado')
+    expect(hint.tip).toMatch(/drive/i)
   })
 })
 
