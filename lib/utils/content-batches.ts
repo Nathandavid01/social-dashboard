@@ -21,6 +21,7 @@ export const BATCH_STAGES = [
   { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -31,7 +32,8 @@ const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) a
 export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
   video: 'Video',
   edited: 'Edición',
-  approval: 'Aprobación',
+  approval: 'Revisión',
+  copy: 'Copy',
   publication: 'Publicación',
 }
 
@@ -141,7 +143,14 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
  */
 export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
-  if (idea.approval_status === 'approved' || idea.approval_status === 'submitted') return 'approval'
+  // Approved internally → Copy, until the caption exists. See computeStage in
+  // pipeline-stages.ts — the two derivations must stay in step.
+  if (idea.approval_status === 'approved') {
+    return idea.generated_caption && idea.generated_caption.trim() ? 'publication' : 'copy'
+  }
+  if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
+    return 'approval'
+  }
   if (idea.status === 'producida') return 'edited'
   return 'video'
 }
@@ -250,7 +259,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
  * (one card per video, not per client). Discarded videos are excluded.
  */
 export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStageKey, IdeaWithPipeline[]> {
-  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, IdeaWithPipeline[]>
+  const out = emptyStageBuckets<IdeaWithPipeline>()
   for (const i of ideas) {
     if (i.status === 'descartada') continue
     out[ideaStage(i)].push(i)
@@ -258,9 +267,20 @@ export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStage
   return out
 }
 
+/**
+ * One empty array per stage, derived from BATCH_STAGES. Do NOT hand-write this
+ * object literal — a `as Record<BatchStageKey, T[]>` cast on a literal that is
+ * missing a stage type-checks fine and then blows up at render with
+ * "Cannot read properties of undefined". Adding a column must be a one-line
+ * change to BATCH_STAGES.
+ */
+export function emptyStageBuckets<T>(): Record<BatchStageKey, T[]> {
+  return Object.fromEntries(BATCH_STAGES.map((s) => [s.key, [] as T[]])) as Record<BatchStageKey, T[]>
+}
+
 /** Batches bucketed by their column. */
 export function bucketBatches(batches: ClientBatch[]): Record<BatchStageKey, ClientBatch[]> {
-  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
+  const out = emptyStageBuckets<ClientBatch>()
   for (const b of batches) out[b.stage].push(b)
   return out
 }

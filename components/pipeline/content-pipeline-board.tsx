@@ -5,7 +5,7 @@ import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRigh
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
@@ -37,7 +37,7 @@ export interface PlannedClient {
 }
 
 const STAGE_DOT: Record<BatchStageKey, string> = {
-  video: '#06b6d4', edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
+  video: '#06b6d4', edited: '#8b5cf6', approval: '#f59e0b', copy: '#ec4899', publication: '#10b981',
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
@@ -141,7 +141,7 @@ export function ContentPipelineBoard({
   const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
 
   const byStage = useMemo(() => {
-    const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
+    const out = emptyStageBuckets<ClientBatch>()
     for (const b of visible) out[stageOf(b)].push(b)
     return out
   }, [visible, stageOf])

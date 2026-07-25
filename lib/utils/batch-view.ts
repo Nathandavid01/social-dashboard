@@ -21,6 +21,7 @@ export const BATCH_STAGES = [
   { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -41,7 +42,8 @@ export function contentTypeLabel(type: string | null | undefined): string {
 export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
   video: 'Video',
   edited: 'Edición',
-  approval: 'Aprobación',
+  approval: 'Revisión',
+  copy: 'Copy',
   publication: 'Publicación',
 }
 
@@ -74,7 +76,8 @@ const hasEdited = (v: BatchVideo) => v.videos.edited.length > 0
  */
 export function videoStageKey(v: BatchVideo): BatchStageKey {
   if (v.published_at || v.status === 'publicada') return 'publication'
-  if (v.approval_status === 'approved' || v.approval_status === 'submitted') return 'approval'
+  if (v.approval_status === 'approved') return filled(v.generated_caption) ? 'publication' : 'copy'
+  if (v.approval_status === 'submitted' || v.approval_status === 'revision_needed') return 'approval'
   if (v.status === 'producida' || hasEdited(v)) return 'edited'
   return 'video'
 }
@@ -187,8 +190,10 @@ export function batchHint(videos: BatchVideo[]): { stageLabel: string; tip: stri
   const tips: Record<BatchStageKey, string> = {
     video:
       'Sube el archivo grabado (raw), di de qué es el video y genera el caption con AI. Cuando todos tengan su grabación, el lote avanza a Edición.',
-    edited: 'Sube la versión editada de cada video para enviarla a Aprobación.',
-    approval: 'Envía los videos al cliente y espera su aprobación para publicar.',
+    edited: 'Sube la versión editada de cada video y envíala a revisión del equipo.',
+    approval:
+      'Un compañero con permiso de aprobación revisa cada video: lo aprueba o lo devuelve al editor con los cambios.',
+    copy: 'Videos aprobados. Escribe el copy de cada uno para dejarlos listos para Metricool.',
     publication: 'Programa o publica los videos aprobados. ¡Este lote está casi listo!',
   }
   return { stageLabel: STAGE_LABEL_ES[stage], tip: tips[stage] }

@@ -30,9 +30,24 @@ describe('computeStage — furthest milestone reached', () => {
   it('producida → edited', () => {
     expect(computeStage(idea({ status: 'producida' }))).toBe('edited')
   })
-  it('approval submitted or approved → approval', () => {
+  it('submitted for internal review → approval', () => {
     expect(computeStage(idea({ status: 'producida', approval_status: 'submitted' }))).toBe('approval')
-    expect(computeStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('approval')
+  })
+  it('reviewer sent it back for changes → stays in approval (visible to the editor)', () => {
+    expect(computeStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('approval')
+  })
+  it('approved but no copy written yet → copy', () => {
+    expect(computeStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('copy')
+  })
+  it('approved with the copy written → publication (ready for Metricool)', () => {
+    expect(
+      computeStage(idea({ status: 'producida', approval_status: 'approved', generated_caption: 'Copy listo' })),
+    ).toBe('publication')
+  })
+  it('blank copy does not count as written', () => {
+    expect(
+      computeStage(idea({ status: 'producida', approval_status: 'approved', generated_caption: '   ' })),
+    ).toBe('copy')
   })
   it('published wins over everything', () => {
     expect(computeStage(idea({ status: 'publicada' }))).toBe('publication')
@@ -45,6 +60,12 @@ describe('adjacentStage', () => {
     expect(adjacentStage('video', 1)).toBe('edited')
     expect(adjacentStage('edited', -1)).toBe('video')
   })
+  it('walks through copy between approval and publication', () => {
+    expect(adjacentStage('approval', 1)).toBe('copy')
+    expect(adjacentStage('copy', 1)).toBe('publication')
+    expect(adjacentStage('publication', -1)).toBe('copy')
+    expect(adjacentStage('copy', -1)).toBe('approval')
+  })
   it('returns null at the ends', () => {
     expect(adjacentStage('video', -1)).toBeNull()
     expect(adjacentStage('publication', 1)).toBeNull()
@@ -52,16 +73,17 @@ describe('adjacentStage', () => {
 })
 
 describe('stageToStatus', () => {
-  it('maps the 4 board stages to the persisting base status', () => {
+  it('maps the 5 board stages to the persisting base status', () => {
     expect(stageToStatus('video')).toBe('grabada')
     expect(stageToStatus('edited')).toBe('producida')
     expect(stageToStatus('approval')).toBe('producida')
+    expect(stageToStatus('copy')).toBe('producida')
     expect(stageToStatus('publication')).toBe('publicada')
   })
 })
 
 describe('bucketByStage', () => {
-  it('groups cards into the 4 columns and preserves order', () => {
+  it('groups cards into the 5 columns and preserves order', () => {
     const cards = [
       idea({ status: 'publicada' }),
       idea({ hook: 'h' }),
@@ -70,6 +92,7 @@ describe('bucketByStage', () => {
     const b = bucketByStage(cards)
     expect(b.publication).toHaveLength(1)
     expect(b.video).toHaveLength(2)
+    expect(b.copy).toEqual([])
     expect(Object.keys(b)).toEqual(PIPELINE_STAGES.map((s) => s.key))
   })
 })

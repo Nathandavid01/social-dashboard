@@ -27,8 +27,17 @@ describe('ideaStage', () => {
     expect(ideaStage(idea({ generated_caption: 'c' }))).toBe('video')
     expect(ideaStage(idea({ status: 'grabada' }))).toBe('video')
     expect(ideaStage(idea({ status: 'producida' }))).toBe('edited')
-    expect(ideaStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('approval')
     expect(ideaStage(idea({ status: 'publicada' }))).toBe('publication')
+  })
+
+  it('routes the internal-review states through Revisión → Copy → Publicación', () => {
+    expect(ideaStage(idea({ status: 'producida', approval_status: 'submitted' }))).toBe('approval')
+    expect(ideaStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('approval')
+    // Approved with no copy yet parks the video in the Copy column.
+    expect(ideaStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('copy')
+    expect(
+      ideaStage(idea({ status: 'producida', approval_status: 'approved', generated_caption: 'c' })),
+    ).toBe('publication')
   })
 })
 

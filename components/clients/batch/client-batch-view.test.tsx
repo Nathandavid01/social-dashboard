@@ -89,8 +89,8 @@ describe('ClientBatchView', () => {
     expect(screen.getByText('Activo')).toBeInTheDocument()
   })
 
-  it('renders the 4-stage stepper in Spanish and marks the current stage with AQUÍ', () => {
-    for (const label of ['Video', 'Edición', 'Aprobación', 'Publicación']) {
+  it('renders the 5-stage stepper in Spanish and marks the current stage with AQUÍ', () => {
+    for (const label of ['Video', 'Edición', 'Revisión', 'Copy', 'Publicación']) {
       expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
     // Batch sits at "video": pre-edit work collapses into the first Video column.

@@ -10,6 +10,7 @@ export const PIPELINE_STAGES = [
   { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited Video' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -28,10 +29,21 @@ export type StageInput = Pick<
  */
 export function computeStage(idea: StageInput): PipelineStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
-  if (idea.approval_status === 'approved' || idea.approval_status === 'submitted') return 'approval'
+  // Approved by the internal reviewer: the video now waits in Copy until the
+  // caption is written, and only then is it ready to go out to Metricool.
+  if (idea.approval_status === 'approved') {
+    return filled(idea.generated_caption) ? 'publication' : 'copy'
+  }
+  // Both `submitted` and `revision_needed` live in Approval — a video sent back
+  // for changes must stay visible to the reviewer, not silently fall backwards.
+  if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
+    return 'approval'
+  }
   if (idea.status === 'producida') return 'edited'
   return 'video'
 }
+
+const filled = (s?: string | null) => !!s && s.trim().length > 0
 
 const STAGE_ORDER = PIPELINE_STAGES.map((s) => s.key)
 
@@ -50,7 +62,8 @@ export function stageToStatus(stage: PipelineStageKey): 'grabada' | 'producida' 
   switch (stage) {
     case 'video': return 'grabada'
     case 'edited':
-    case 'approval': return 'producida'
+    case 'approval':
+    case 'copy': return 'producida'
     case 'publication': return 'publicada'
   }
 }
@@ -58,7 +71,7 @@ export function stageToStatus(stage: PipelineStageKey): 'grabada' | 'producida' 
 /** Bucket a list of cards into the 4 columns, preserving input order. */
 export function bucketByStage<T extends StageInput>(ideas: T[]): Record<PipelineStageKey, T[]> {
   const out = {
-    video: [], edited: [], approval: [], publication: [],
+    video: [], edited: [], approval: [], copy: [], publication: [],
   } as Record<PipelineStageKey, T[]>
   for (const idea of ideas) out[computeStage(idea)].push(idea)
   return out

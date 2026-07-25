@@ -107,9 +107,15 @@ describe('videoStageKey', () => {
     expect(videoStageKey(mk({ videos: { raw: [], broll: [], edited: [rawFile()] } }))).toBe('edited')
     expect(videoStageKey(mk({ status: 'producida' }))).toBe('edited')
   })
-  it('is "approval" when submitted/approved, and "publication" when published', () => {
+  it('is "approval" while in internal review, including sent-back-for-changes', () => {
     expect(videoStageKey(mk({ approval_status: 'submitted' }))).toBe('approval')
-    expect(videoStageKey(mk({ approval_status: 'approved' }))).toBe('approval')
+    expect(videoStageKey(mk({ approval_status: 'revision_needed' }))).toBe('approval')
+  })
+  it('is "copy" once approved but with no copy written yet', () => {
+    expect(videoStageKey(mk({ approval_status: 'approved' }))).toBe('copy')
+  })
+  it('is "publication" once the copy is written, or once published', () => {
+    expect(videoStageKey(mk({ approval_status: 'approved', generated_caption: 'Copy listo' }))).toBe('publication')
     expect(videoStageKey(mk({ published_at: '2026-06-20' }))).toBe('publication')
     expect(videoStageKey(mk({ status: 'publicada' }))).toBe('publication')
   })
@@ -155,7 +161,7 @@ describe('buildStepper', () => {
   })
   it('uses Spanish labels', () => {
     const labels = buildStepper([]).map((s) => s.label)
-    expect(labels).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
+    expect(labels).toEqual(['Video', 'Edición', 'Revisión', 'Copy', 'Publicación'])
   })
 })
 
