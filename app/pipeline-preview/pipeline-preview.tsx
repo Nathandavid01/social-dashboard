@@ -71,7 +71,7 @@ const SAMPLE_VIDEO: ReviewVideo = {
 export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
   const [video, setVideo] = useState<ReviewVideo>(SAMPLE_VIDEO)
-  const [submitted, setSubmitted] = useState<SubmitVideoPayload[]>([])
+  const [submitted, setSubmitted] = useState<{ clientId: string; title: string }[]>([])
 
   function decide(decision: 'approve' | 'request_changes', note: string) {
     const next = applyReviewDecision(video.approval_status, decision)
@@ -139,7 +139,12 @@ export function PipelinePreview() {
             editedColumnSlot={
               <SubmitVideoCard
                 clients={ALL_CLIENTS}
-                onSubmit={(p) => setSubmitted((prev) => [...prev, p])}
+                onSubmit={(p: SubmitVideoPayload) =>
+                  setSubmitted((prev) => [
+                    ...prev,
+                    ...p.videos.map((v) => ({ clientId: p.clientId, title: v.title })),
+                  ])
+                }
               />
             }
           />
