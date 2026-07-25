@@ -47,6 +47,7 @@ export function ContentPipelineBoard({
   allClients = [],
   clientCadence = {},
   teamMembers = [],
+  videoColumnSlot,
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -55,6 +56,8 @@ export function ContentPipelineBoard({
   clientCadence?: Record<string, ClientCadence>
   /** All active team members — powers the "Asignado a" filter (not just people on batches). */
   teamMembers?: { id: string; name: string }[]
+  /** Pinned at the top of the Video column — the editor's submit form. */
+  videoColumnSlot?: React.ReactNode
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -259,7 +262,7 @@ export function ContentPipelineBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} topSlot={stage.key === 'video' ? videoColumnSlot : undefined} onMove={moveCard} onOpen={openClientBatch} />
           ))}
         </div>
       </div>
@@ -296,7 +299,7 @@ export function ContentPipelineBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -309,8 +312,11 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
         </div>
       </div>
       <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-muted/30 p-2">
+        {/* The column lives inside the drag-to-pan surface — swallow mousedown so
+            typing/selecting in the submit form doesn't start a horizontal pan. */}
+        {topSlot && <div onMouseDown={(e) => e.stopPropagation()}>{topSlot}</div>}
         {count === 0 ? (
-          <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
+          !topSlot && <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
           <>
             {plannedCards.map(({ client, session }) => (

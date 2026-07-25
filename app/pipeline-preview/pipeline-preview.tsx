@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-board'
 import { InternalReviewPanel, type ReviewVideo } from '@/components/review/internal-review-panel'
+import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
 import { applyReviewDecision } from '@/lib/utils/internal-review'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
 import { Button } from '@/components/ui/button'
@@ -70,12 +71,29 @@ const SAMPLE_VIDEO: ReviewVideo = {
 export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
   const [video, setVideo] = useState<ReviewVideo>(SAMPLE_VIDEO)
+  const [submitted, setSubmitted] = useState<SubmitVideoPayload[]>([])
 
   function decide(decision: 'approve' | 'request_changes', note: string) {
     const next = applyReviewDecision(video.approval_status, decision)
     if (!next) return
     setVideo((v) => ({ ...v, approval_status: next, reviewNote: note || null }))
   }
+
+  // Preview only: a real submit calls a server action and the card appears from
+  // the refetched board data.
+  const ideas = [
+    ...SAMPLE,
+    ...submitted.map((s, i) =>
+      idea({
+        id: `new-${i}`,
+        client_id: s.clientId,
+        title: s.title,
+        status: 'producida',
+        approval_status: 'submitted',
+        client: client(s.clientId, ALL_CLIENTS.find((c) => c.id === s.clientId)?.name ?? 'Cliente'),
+      }),
+    ),
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,7 +133,16 @@ export function PipelinePreview() {
 
       <section className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 overflow-hidden rounded-xl border">
-          <ContentPipelineBoard ideas={SAMPLE} allClients={ALL_CLIENTS} />
+          <ContentPipelineBoard
+            ideas={ideas}
+            allClients={ALL_CLIENTS}
+            videoColumnSlot={
+              <SubmitVideoCard
+                clients={ALL_CLIENTS}
+                onSubmit={(p) => setSubmitted((prev) => [...prev, p])}
+              />
+            }
+          />
         </div>
         <aside className="min-w-0 space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

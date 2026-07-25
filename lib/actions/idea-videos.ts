@@ -6,6 +6,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { isDriveConfigured } from '@/lib/integrations/google-drive'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { parseDriveFileId, driveViewLink, driveThumbUrl } from '@/lib/utils/drive-link'
 
 export async function getIdeaVideos(ideaId: string): Promise<ContentIdeaVideo[]> {
   const supabase = await createClient()
@@ -142,8 +143,8 @@ export async function registerIdeaVideoFromLink(input: {
     return { error: 'No se pudo extraer el file ID del link. Pega el link de Drive completo o el ID directamente.' }
   }
 
-  const viewLink = `https://drive.google.com/file/d/${fileId}/view`
-  const thumbUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`
+  const viewLink = driveViewLink(fileId)
+  const thumbUrl = driveThumbUrl(fileId)
   const name = input.name?.trim() || `Video ${input.kind === 'raw' ? 'crudo' : 'editado'} ${new Date().toLocaleDateString('es-PR')}`
 
   return registerIdeaVideo({
@@ -155,27 +156,6 @@ export async function registerIdeaVideoFromLink(input: {
     driveThumbUrl: thumbUrl,
     notes: input.notes ?? null,
   })
-}
-
-/**
- * Accepts:
- *   - https://drive.google.com/file/d/<ID>/view?usp=sharing
- *   - https://drive.google.com/open?id=<ID>
- *   - https://drive.google.com/uc?id=<ID>&export=download
- *   - the bare 25–60 char file ID
- */
-function parseDriveFileId(raw: string): string | null {
-  const trimmed = raw.trim()
-  if (!trimmed) return null
-  // file/d/<id>/
-  const m1 = trimmed.match(/\/file\/d\/([A-Za-z0-9_-]{15,})/)
-  if (m1) return m1[1]
-  // ?id=<id>
-  const m2 = trimmed.match(/[?&]id=([A-Za-z0-9_-]{15,})/)
-  if (m2) return m2[1]
-  // Bare ID (no slashes, plausible length)
-  if (/^[A-Za-z0-9_-]{15,}$/.test(trimmed) && !trimmed.includes('/')) return trimmed
-  return null
 }
 
 export async function startDriveUpload(input: {
