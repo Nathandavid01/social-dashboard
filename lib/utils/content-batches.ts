@@ -145,9 +145,9 @@ export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.approval_status === 'approved') {
     return idea.generated_caption && idea.generated_caption.trim() ? 'publication' : 'copy'
   }
-  if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
-    return 'approval'
-  }
+  // Only `submitted` sits with the reviewer; `revision_needed` goes back to the
+  // editor's column. See computeStage in pipeline-stages.ts.
+  if (idea.approval_status === 'submitted') return 'approval'
   return 'edited'
 }
 
@@ -169,6 +169,9 @@ export interface ClientBatch {
   total: number
   /** Videos already pulled ahead of the batch's column (informational). */
   ahead: number
+  /** Videos the reviewer sent back for changes — they sit in Editado, and the
+   *  card flags them so the editor sees work returned without opening it. */
+  revisionNeeded: number
   platforms: string[]
 }
 
@@ -223,6 +226,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
     if (active.length === 0) continue
     const stage = batchStage(active)
     const ahead = active.filter((i) => STAGE_INDEX[ideaStage(i)] > STAGE_INDEX[stage]).length
+    const revisionNeeded = active.filter((i) => i.approval_status === 'revision_needed').length
     const platforms = active[0]?.client?.platforms ?? []
 
     // Per-stage video count (the "status of the videos within" the batch).
@@ -244,6 +248,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
       stageCounts,
       total: active.length,
       ahead,
+      revisionNeeded,
       platforms,
     })
   }

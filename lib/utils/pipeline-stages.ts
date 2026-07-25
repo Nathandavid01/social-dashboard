@@ -34,12 +34,10 @@ export function computeStage(idea: StageInput): PipelineStageKey {
   if (idea.approval_status === 'approved') {
     return filled(idea.generated_caption) ? 'publication' : 'copy'
   }
-  // Both `submitted` and `revision_needed` live in Approval — a video sent back
-  // for changes must stay visible to the reviewer, not silently fall backwards.
-  if (idea.approval_status === 'submitted' || idea.approval_status === 'revision_needed') {
-    return 'approval'
-  }
-  // Nothing sent to review yet: the card sits in Editado, the board's entry point.
+  // Approval holds ONLY what the reviewer can act on. A column answers "whose
+  // turn is it": once changes are asked for, the ball is back with the editor,
+  // so `revision_needed` falls through to Editado (flagged, not silent).
+  if (idea.approval_status === 'submitted') return 'approval'
   return 'edited'
 }
 

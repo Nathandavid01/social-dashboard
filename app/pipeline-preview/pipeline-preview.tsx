@@ -6,6 +6,7 @@ import { InternalReviewPanel, type ReviewVideo } from '@/components/review/inter
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
 import { applyReviewDecision } from '@/lib/utils/internal-review'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
+import { clientsForUser, type AssignableClient } from '@/lib/utils/client-visibility'
 import { Button } from '@/components/ui/button'
 import type { IdeaWithPipeline, SocialPlatform, UserRole } from '@/lib/supabase/types'
 
@@ -51,10 +52,14 @@ const SAMPLE: IdeaWithPipeline[] = [
   }),
 ]
 
-const ALL_CLIENTS = [
-  { id: 'c1', name: 'Nora Fitness' }, { id: 'c2', name: 'Clínica Sonrisa' },
-  { id: 'c3', name: 'AA Real Estate' }, { id: 'c4', name: 'Café del Valle' },
-  { id: 'c5', name: 'Gym Titan' }, { id: 'c6', name: 'Surf School PR' },
+/** `assigned_to` is the real clients column — one editor per client. */
+const ALL_CLIENTS: AssignableClient[] = [
+  { id: 'c1', name: 'Nora Fitness', assigned_to: 'editor-1' },
+  { id: 'c2', name: 'Clínica Sonrisa', assigned_to: 'editor-1' },
+  { id: 'c3', name: 'AA Real Estate', assigned_to: 'otro' },
+  { id: 'c4', name: 'Café del Valle', assigned_to: 'otro' },
+  { id: 'c5', name: 'Gym Titan', assigned_to: null },
+  { id: 'c6', name: 'Surf School PR', assigned_to: 'otro' },
 ]
 
 const SAMPLE_VIDEO: ReviewVideo = {
@@ -72,6 +77,10 @@ export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
   const [video, setVideo] = useState<ReviewVideo>(SAMPLE_VIDEO)
   const [submitted, setSubmitted] = useState<{ clientId: string; title: string }[]>([])
+
+  // Editors only get their own accounts; supervisors work the whole roster.
+  // Convenience filter — see the note in client-visibility.ts.
+  const submitterClients = clientsForUser(role, role === 'editor' ? 'editor-1' : 'sup-1', ALL_CLIENTS)
 
   function decide(decision: 'approve' | 'request_changes', note: string) {
     const next = applyReviewDecision(video.approval_status, decision)
@@ -135,10 +144,10 @@ export function PipelinePreview() {
         <div className="min-w-0 overflow-hidden rounded-xl border">
           <ContentPipelineBoard
             ideas={ideas}
-            allClients={ALL_CLIENTS}
+            allClients={ALL_CLIENTS.map((c) => ({ id: c.id, name: c.name }))}
             editedColumnSlot={
               <SubmitVideoCard
-                clients={ALL_CLIENTS}
+                clients={submitterClients}
                 onSubmit={(p: SubmitVideoPayload) =>
                   setSubmitted((prev) => [
                     ...prev,

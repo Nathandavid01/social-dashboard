@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -501,6 +501,14 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
                 <span className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold leading-none whitespace-nowrap', dlt.className)}>
                   <Flag className="h-2.5 w-2.5" aria-hidden />
                   {dlt.label}
+                </span>
+              )}
+              {/* Work the reviewer handed back. Without this the editor has no
+                  signal that anything returned to their column. */}
+              {batch.revisionNeeded > 0 && (
+                <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-rose-600 dark:text-rose-400">
+                  <RotateCcw className="h-2.5 w-2.5" aria-hidden />
+                  {batch.revisionNeeded === 1 ? 'Cambios pedidos' : `${batch.revisionNeeded} con cambios`}
                 </span>
               )}
             </div>

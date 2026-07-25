@@ -75,7 +75,7 @@ const hasEdited = (v: BatchVideo) => v.videos.edited.length > 0
 export function videoStageKey(v: BatchVideo): BatchStageKey {
   if (v.published_at || v.status === 'publicada') return 'publication'
   if (v.approval_status === 'approved') return filled(v.generated_caption) ? 'publication' : 'copy'
-  if (v.approval_status === 'submitted' || v.approval_status === 'revision_needed') return 'approval'
+  if (v.approval_status === 'submitted') return 'approval'
   return 'edited'
 }
 

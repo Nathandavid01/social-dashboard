@@ -95,9 +95,11 @@ describe('videoStageKey', () => {
     expect(videoStageKey(mk({ videos: { raw: [], broll: [], edited: [rawFile()] } }))).toBe('edited')
     expect(videoStageKey(mk({ status: 'producida' }))).toBe('edited')
   })
-  it('is "approval" while in internal review, including sent-back-for-changes', () => {
+  it('is "approval" only while the reviewer actually holds it', () => {
     expect(videoStageKey(mk({ approval_status: 'submitted' }))).toBe('approval')
-    expect(videoStageKey(mk({ approval_status: 'revision_needed' }))).toBe('approval')
+  })
+  it('goes back to "edited" when the reviewer asks for changes', () => {
+    expect(videoStageKey(mk({ approval_status: 'revision_needed' }))).toBe('edited')
   })
   it('is "copy" once approved but with no copy written yet', () => {
     expect(videoStageKey(mk({ approval_status: 'approved' }))).toBe('copy')

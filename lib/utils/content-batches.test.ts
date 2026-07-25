@@ -32,7 +32,8 @@ describe('ideaStage', () => {
 
   it('routes the internal-review states through Revisión → Copy → Publicación', () => {
     expect(ideaStage(idea({ status: 'producida', approval_status: 'submitted' }))).toBe('approval')
-    expect(ideaStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('approval')
+    // Sent back for changes → the editor's column, not the reviewer's.
+    expect(ideaStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('edited')
     // Approved with no copy yet parks the video in the Copy column.
     expect(ideaStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('copy')
     expect(
@@ -69,6 +70,18 @@ describe('groupIntoBatches', () => {
   it('excludes clients whose videos are all discarded', () => {
     const batches = groupIntoBatches([idea({ status: 'descartada' })] as IdeaWithPipeline[])
     expect(batches).toHaveLength(0)
+  })
+  it('counts videos the reviewer sent back, so the card can flag them', () => {
+    const batches = groupIntoBatches([
+      idea({ id: '1', approval_status: 'revision_needed' }),
+      idea({ id: '2', approval_status: 'revision_needed' }),
+      idea({ id: '3', approval_status: 'submitted' }),
+    ] as IdeaWithPipeline[])
+    expect(batches[0].revisionNeeded).toBe(2)
+  })
+  it('is zero when nothing came back', () => {
+    const batches = groupIntoBatches([idea({ approval_status: 'submitted' })] as IdeaWithPipeline[])
+    expect(batches[0].revisionNeeded).toBe(0)
   })
   it('unassigned batch has a null assignee', () => {
     const batches = groupIntoBatches([idea()] as IdeaWithPipeline[])

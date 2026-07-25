@@ -25,8 +25,8 @@ describe('computeStage — furthest milestone reached', () => {
   it('submitted for internal review → approval', () => {
     expect(computeStage(idea({ status: 'producida', approval_status: 'submitted' }))).toBe('approval')
   })
-  it('reviewer sent it back for changes → stays in approval (visible to the editor)', () => {
-    expect(computeStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('approval')
+  it('reviewer sent it back → returns to Editado, the editor owns it again', () => {
+    expect(computeStage(idea({ status: 'producida', approval_status: 'revision_needed' }))).toBe('edited')
   })
   it('approved but no copy written yet → copy', () => {
     expect(computeStage(idea({ status: 'producida', approval_status: 'approved' }))).toBe('copy')
