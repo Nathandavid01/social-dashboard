@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, batchBreakdown, BATCH_STAGES,
 } from './content-batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -107,6 +107,32 @@ describe('buildClientPipelineIndex', () => {
   it('omits clients with only discarded videos', () => {
     const index = buildClientPipelineIndex([idea({ status: 'descartada' })] as IdeaWithPipeline[])
     expect(index).toEqual({})
+  })
+})
+
+describe('batchBreakdown — what the card says when a batch is split', () => {
+  const build = (...ideas: Partial<IdeaWithPipeline>[]) =>
+    groupIntoBatches(ideas.map((o) => idea(o)) as IdeaWithPipeline[])[0]
+
+  it('says nothing when every video sits in the same stage', () => {
+    expect(batchBreakdown(build({ id: '1' }, { id: '2' }))).toEqual([])
+  })
+  it('calls out videos the reviewer sent back', () => {
+    const b = build({ id: '1', approval_status: 'revision_needed' }, { id: '2', approval_status: 'revision_needed' })
+    expect(batchBreakdown(b)).toEqual(['2 con cambios'])
+  })
+  it('lists the stages the rest of the batch has moved on to', () => {
+    const b = build(
+      { id: '1', approval_status: 'revision_needed' },
+      { id: '2', approval_status: 'approved' },
+      { id: '3', approval_status: 'approved' },
+    )
+    // batch sits at edited (least advanced) → that column is implied, not listed
+    expect(batchBreakdown(b)).toEqual(['1 con cambios', '2 en Copy'])
+  })
+  it('uses the singular for one video', () => {
+    const b = build({ id: '1' }, { id: '2', approval_status: 'approved' })
+    expect(batchBreakdown(b)).toEqual(['1 en Copy'])
   })
 })
 

@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-board'
-import { InternalReviewPanel, type ReviewVideo } from '@/components/review/internal-review-panel'
+import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
-import { applyReviewDecision } from '@/lib/utils/internal-review'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
 import { clientsForUser, type AssignableClient } from '@/lib/utils/client-visibility'
 import { Button } from '@/components/ui/button'
@@ -62,31 +61,29 @@ const ALL_CLIENTS: AssignableClient[] = [
   { id: 'c6', name: 'Surf School PR', assigned_to: 'otro' },
 ]
 
-const SAMPLE_VIDEO: ReviewVideo = {
-  id: '3',
-  title: 'Tour del apartamento',
-  clientName: 'AA Real Estate',
-  // Public sample clip — no external asset is bundled with the app.
-  editedUrl: null,
-  approval_status: 'submitted',
-  submitted_by: 'editor-1',
-  submittedByName: 'Ana (editora)',
-}
+/**
+ * Drop any .mp4 at public/sample-review.mp4 to see real playback here. In the
+ * real app this URL comes from getR2PreviewUrl() — a 1-hour signed R2 link.
+ */
+const SAMPLE_CLIP = '/sample-review.mp4'
+
+const QUEUE: QueueVideo[] = [
+  { id: 'q1', videoFileId: 'f1', title: 'Tour del apartamento', clientName: 'AA Real Estate',
+    approval_status: 'submitted', submitted_by: 'editor-1', submittedByName: 'Ana (editora)' },
+  { id: 'q2', videoFileId: 'f2', title: 'Terraza al atardecer', clientName: 'AA Real Estate',
+    approval_status: 'submitted', submitted_by: 'editor-1', submittedByName: 'Ana (editora)' },
+  { id: 'q3', videoFileId: 'f3', title: 'Amenidades del edificio', clientName: 'AA Real Estate',
+    approval_status: 'submitted', submitted_by: 'editor-1', submittedByName: 'Ana (editora)' },
+]
 
 export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
-  const [video, setVideo] = useState<ReviewVideo>(SAMPLE_VIDEO)
   const [submitted, setSubmitted] = useState<{ clientId: string; title: string }[]>([])
 
   // Editors only get their own accounts; supervisors work the whole roster.
   // Convenience filter — see the note in client-visibility.ts.
   const submitterClients = clientsForUser(role, role === 'editor' ? 'editor-1' : 'sup-1', ALL_CLIENTS)
 
-  function decide(decision: 'approve' | 'request_changes', note: string) {
-    const next = applyReviewDecision(video.approval_status, decision)
-    if (!next) return
-    setVideo((v) => ({ ...v, approval_status: next, reviewNote: note || null }))
-  }
 
   // Preview only: a real submit calls a server action and the card appears from
   // the refetched board data.
@@ -164,10 +161,17 @@ export function PipelinePreview() {
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Revisión interna
           </h2>
-          <InternalReviewPanel video={video} role={role} userId="sup-1" onDecision={decide} />
+          <ReviewQueue
+            videos={QUEUE}
+            role={role}
+            userId="sup-1"
+            getPreviewUrl={async () => ({ url: SAMPLE_CLIP })}
+            onDecide={async () => {}}
+          />
           <p className="text-xs text-muted-foreground">
             Cambia de rol arriba: el <strong>Supervisor</strong> aprueba o pide cambios; el{' '}
-            <strong>Editor</strong> solo ve el estado.
+            <strong>Editor</strong> solo ve el estado. Pon un .mp4 en{' '}
+            <code>public/sample-review.mp4</code> para ver el reproductor con video real.
           </p>
         </aside>
       </section>

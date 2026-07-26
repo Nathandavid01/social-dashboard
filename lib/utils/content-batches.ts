@@ -175,6 +175,25 @@ export interface ClientBatch {
   platforms: string[]
 }
 
+/**
+ * Short breakdown for a split batch, e.g. ["1 con cambios", "2 en Copy"].
+ *
+ * The card sits in the column of its LEAST-advanced video, so without this a
+ * client whose videos are half-approved reads as if nothing moved. The batch's
+ * own column is left out — it's the one you're already looking at. Returns []
+ * when the whole batch is in one place and there is nothing to explain.
+ */
+export function batchBreakdown(batch: ClientBatch): string[] {
+  const out: string[] = []
+  if (batch.revisionNeeded > 0) out.push(`${batch.revisionNeeded} con cambios`)
+  for (const s of BATCH_STAGES) {
+    if (s.key === batch.stage) continue
+    const n = batch.stageCounts[s.key]
+    if (n > 0) out.push(`${n} en ${STAGE_LABEL_ES[s.key]}`)
+  }
+  return out
+}
+
 /** 0..1 progress of a batch along the whole pipeline (column position). */
 export function batchProgress(stage: BatchStageKey): number {
   return STAGE_INDEX[stage] / (BATCH_STAGES.length - 1)

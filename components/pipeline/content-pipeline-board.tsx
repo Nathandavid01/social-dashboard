@@ -5,7 +5,7 @@ import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRigh
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
@@ -482,6 +482,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
+  const breakdown = batchBreakdown(batch)
 
   return (
     <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
@@ -512,7 +513,12 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
                 </span>
               )}
             </div>
-            <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
+            <p className="truncate text-[10px] text-muted-foreground">
+              {batch.total} video{batch.total === 1 ? '' : 's'} en el batch
+              {/* A batch sits in its least-advanced column, so a half-approved
+                  client would otherwise read as if nothing had moved. */}
+              {breakdown.length > 0 && <span className="text-muted-foreground/70"> · {breakdown.join(' · ')}</span>}
+            </p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
