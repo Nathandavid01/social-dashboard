@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-board'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
 import { CopyQueue, type CopyVideo } from '@/components/captions/copy-queue'
+import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
+import { AuthProvider } from '@/lib/context/auth-context'
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
 import { clientsForUser, type AssignableClient } from '@/lib/utils/client-visibility'
@@ -83,8 +85,19 @@ const QUEUE: QueueVideo[] = [
 ]
 
 const COPY_QUEUE: CopyVideo[] = [
-  { id: 'k1', title: 'Testimonio de cliente', clientName: 'Gym Titan', generated_caption: null, platforms: ['instagram'] },
-  { id: 'k2', title: 'Rutina exprés', clientName: 'Gym Titan', generated_caption: null, platforms: ['instagram'] },
+  {
+    id: 'k1', title: 'Testimonio de cliente', clientName: 'Gym Titan',
+    generated_caption: null, platforms: ['instagram'],
+    hook: 'Un socio cuenta cómo bajó 15 lb en 3 meses',
+    visualBrief: 'Habla a cámara en el gym, corte a fotos del antes/después',
+    captionAngle: 'Cercano y motivador, sin sonar a venta',
+  },
+  {
+    id: 'k2', title: 'Rutina exprés', clientName: 'Gym Titan',
+    generated_caption: null, platforms: ['instagram'],
+    // Sin hook a propósito: así se ve el gate del botón de IA.
+    hook: null,
+  },
 ]
 
 export function PipelinePreview() {
@@ -169,6 +182,7 @@ export function PipelinePreview() {
             }
           />
         </div>
+        <AuthProvider value={{ user: { id: 'sup-1', email: 'sup@nate.pr' }, profile: null, role }}>
         <aside className="min-w-0 space-y-3">
           <div className="flex flex-wrap gap-1.5">
             {(['revision', 'copy'] as const).map((t) => (
@@ -189,7 +203,17 @@ export function PipelinePreview() {
             <CopyQueue
               videos={COPY_QUEUE}
               renderEditor={(v, onSaved) => (
-                <CopyEditorStub key={v.id} platforms={v.platforms ?? []} onSaved={onSaved} />
+                <IdeaCaptionEditor
+                  key={v.id}
+                  ideaId={v.id}
+                  initialCaption={v.generated_caption}
+                  platforms={v.platforms ?? []}
+                  hook={v.hook}
+                  visualBrief={v.visualBrief}
+                  captionAngle={v.captionAngle}
+                  hashtags={v.hashtags}
+                  onSaved={onSaved}
+                />
               )}
             />
           )}
@@ -199,33 +223,10 @@ export function PipelinePreview() {
             <code>public/sample-review.mp4</code> para ver el reproductor con video real.
           </p>
         </aside>
+        </AuthProvider>
       </section>
     </div>
   )
 }
 
 
-/**
- * Stand-in for <IdeaCaptionEditor>. The real one calls generateIdeaCaption /
- * saveIdeaCaption, which need Supabase; the preview has none.
- */
-function CopyEditorStub({ platforms, onSaved }: { platforms: SocialPlatform[]; onSaved: (c: string) => void }) {
-  const [text, setText] = useState('')
-  return (
-    <div className="space-y-2">
-      <p className="text-[11px] text-muted-foreground">
-        Un solo copy para {platforms.length > 0 ? platforms.join(', ') : 'todas las redes'}.
-      </p>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={5}
-        placeholder="Escribe el copy… (en la app real: generar con IA, editar y guardar)"
-        className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      />
-      <Button size="sm" disabled={!text.trim()} onClick={() => onSaved(text.trim())}>
-        Guardar copy
-      </Button>
-    </div>
-  )
-}
