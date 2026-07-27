@@ -5,6 +5,7 @@ import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-boa
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
 import { CopyQueue, type CopyVideo } from '@/components/captions/copy-queue'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
+import { MetricoolPublishCard, type PublishVideo } from '@/components/pipeline/metricool-publish-card'
 import { AuthProvider } from '@/lib/context/auth-context'
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
@@ -100,10 +101,19 @@ const COPY_QUEUE: CopyVideo[] = [
   },
 ]
 
+const PUBLISH_QUEUE: PublishVideo[] = [
+  { id: 'p1', title: 'Promo de verano', clientName: 'Surf School PR',
+    publishDate: '2026-07-30', postingTime: '14:30', metricoolPostId: null },
+  { id: 'p2', title: 'Clase de principiantes', clientName: 'Surf School PR',
+    publishDate: null, postingTime: '10:00', metricoolPostId: null },
+  { id: 'p3', title: 'Atardecer en la playa', clientName: 'Surf School PR',
+    publishDate: '2026-08-02', postingTime: '18:00', metricoolPostId: 8842 },
+]
+
 export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
   const [submitted, setSubmitted] = useState<{ clientId: string; title: string }[]>([])
-  const [tab, setTab] = useState<'revision' | 'copy'>('revision')
+  const [tab, setTab] = useState<'revision' | 'copy' | 'publicacion'>('revision')
 
   // Editors only get their own accounts; supervisors work the whole roster.
   // Convenience filter — see the note in client-visibility.ts.
@@ -185,13 +195,24 @@ export function PipelinePreview() {
         <AuthProvider value={{ user: { id: 'sup-1', email: 'sup@nate.pr' }, profile: null, role }}>
         <aside className="min-w-0 space-y-3">
           <div className="flex flex-wrap gap-1.5">
-            {(['revision', 'copy'] as const).map((t) => (
+            {(['revision', 'copy', 'publicacion'] as const).map((t) => (
               <Button key={t} size="sm" variant={tab === t ? 'default' : 'outline'} onClick={() => setTab(t)}>
-                {t === 'revision' ? 'Revisión' : 'Copy'}
+                {t === 'revision' ? 'Revisión' : t === 'copy' ? 'Copy' : 'Publicación'}
               </Button>
             ))}
           </div>
-          {tab === 'revision' ? (
+          {tab === 'publicacion' ? (
+            <div className="space-y-2.5">
+              {PUBLISH_QUEUE.map((v) => (
+                <MetricoolPublishCard
+                  key={v.id}
+                  video={v}
+                  canPublish={role === 'supervisor' || role === 'owner'}
+                  onPublish={async () => {}}
+                />
+              ))}
+            </div>
+          ) : tab === 'revision' ? (
             <ReviewQueue
               videos={QUEUE}
               role={role}
