@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-board'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
+import { CopyQueue, type CopyVideo } from '@/components/captions/copy-queue'
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
 import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
 import { clientsForUser, type AssignableClient } from '@/lib/utils/client-visibility'
@@ -76,9 +77,15 @@ const QUEUE: QueueVideo[] = [
     approval_status: 'submitted', submitted_by: 'editor-1', submittedByName: 'Ana (editora)' },
 ]
 
+const COPY_QUEUE: CopyVideo[] = [
+  { id: 'k1', title: 'Testimonio de cliente', clientName: 'Gym Titan', generated_caption: null, platforms: ['instagram'] },
+  { id: 'k2', title: 'Rutina exprés', clientName: 'Gym Titan', generated_caption: null, platforms: ['instagram'] },
+]
+
 export function PipelinePreview() {
   const [role, setRole] = useState<UserRole>('supervisor')
   const [submitted, setSubmitted] = useState<{ clientId: string; title: string }[]>([])
+  const [tab, setTab] = useState<'revision' | 'copy'>('revision')
 
   // Editors only get their own accounts; supervisors work the whole roster.
   // Convenience filter — see the note in client-visibility.ts.
@@ -158,16 +165,29 @@ export function PipelinePreview() {
           />
         </div>
         <aside className="min-w-0 space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Revisión interna
-          </h2>
-          <ReviewQueue
-            videos={QUEUE}
-            role={role}
-            userId="sup-1"
-            getPreviewUrl={async () => ({ url: SAMPLE_CLIP })}
-            onDecide={async () => {}}
-          />
+          <div className="flex flex-wrap gap-1.5">
+            {(['revision', 'copy'] as const).map((t) => (
+              <Button key={t} size="sm" variant={tab === t ? 'default' : 'outline'} onClick={() => setTab(t)}>
+                {t === 'revision' ? 'Revisión' : 'Copy'}
+              </Button>
+            ))}
+          </div>
+          {tab === 'revision' ? (
+            <ReviewQueue
+              videos={QUEUE}
+              role={role}
+              userId="sup-1"
+              getPreviewUrl={async () => ({ url: SAMPLE_CLIP })}
+              onDecide={async () => {}}
+            />
+          ) : (
+            <CopyQueue
+              videos={COPY_QUEUE}
+              renderEditor={(v, onSaved) => (
+                <CopyEditorStub key={v.id} platforms={v.platforms ?? []} onSaved={onSaved} />
+              )}
+            />
+          )}
           <p className="text-xs text-muted-foreground">
             Cambia de rol arriba: el <strong>Supervisor</strong> aprueba o pide cambios; el{' '}
             <strong>Editor</strong> solo ve el estado. Pon un .mp4 en{' '}
@@ -175,6 +195,32 @@ export function PipelinePreview() {
           </p>
         </aside>
       </section>
+    </div>
+  )
+}
+
+
+/**
+ * Stand-in for <IdeaCaptionEditor>. The real one calls generateIdeaCaption /
+ * saveIdeaCaption, which need Supabase; the preview has none.
+ */
+function CopyEditorStub({ platforms, onSaved }: { platforms: SocialPlatform[]; onSaved: (c: string) => void }) {
+  const [text, setText] = useState('')
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] text-muted-foreground">
+        Un solo copy para {platforms.length > 0 ? platforms.join(', ') : 'todas las redes'}.
+      </p>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={5}
+        placeholder="Escribe el copy… (en la app real: generar con IA, editar y guardar)"
+        className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      <Button size="sm" disabled={!text.trim()} onClick={() => onSaved(text.trim())}>
+        Guardar copy
+      </Button>
     </div>
   )
 }
