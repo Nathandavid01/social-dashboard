@@ -43,6 +43,36 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 
+  it('la tarjeta lista los títulos de sus videos, no barras vacías', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: 'Rutina de piernas' }),
+      idea({ id: '2', title: 'Antes y después' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Rutina de piernas')
+    expect(card.textContent).toContain('Antes y después')
+  })
+
+  it('con más de 3 videos muestra los primeros y cuántos faltan', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: 'Uno' }), idea({ id: '2', title: 'Dos' }),
+      idea({ id: '3', title: 'Tres' }), idea({ id: '4', title: 'Cuatro' }),
+      idea({ id: '5', title: 'Cinco' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Uno')
+    expect(card.textContent).toContain('Tres')
+    expect(card.textContent).not.toContain('Cuatro')
+    expect(card.textContent).toMatch(/\+2 más/)
+  })
+
+  it('un video sin título no deja la fila en blanco', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: undefined, hook: null }),
+    ]} />)
+    expect(container.querySelector('article')!.textContent).toContain('Sin título')
+  })
+
   it('un cliente con videos en dos columnas sale en LAS DOS', () => {
     const { container } = render(<ContentPipelineBoard ideas={[
       idea({ id: '1' }),                                              // edited

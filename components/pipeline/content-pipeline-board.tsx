@@ -528,13 +528,20 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
 
-        {/* thumbnail strip (assignee-tinted) */}
-        <div className="flex gap-1">
-          {Array.from({ length: thumbs }).map((_, i) => (
-            <div key={i} className="h-[42px] flex-1 rounded-md" style={{ background: `linear-gradient(135deg, ${a.dot}, ${a.dot}22 70%, transparent)` }} />
+        {/* What the batch actually contains. This was a strip of empty gradient
+            blocks — it filled the card without telling you anything, and in Copy
+            you need to know WHAT you're writing about. */}
+        <ul className="space-y-0.5">
+          {batch.ideas.slice(0, 3).map((i) => (
+            <li key={i.id} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: a.dot }} />
+              <span className="truncate">{i.title?.trim() || i.hook?.trim() || 'Sin título'}</span>
+            </li>
           ))}
-          {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">+{more}</div>}
-        </div>
+          {more > 0 && (
+            <li className="pl-2.5 text-[11px] font-medium text-muted-foreground/70">+{more} más</li>
+          )}
+        </ul>
 
         {/* progress */}
         <div className="space-y-1.5">
