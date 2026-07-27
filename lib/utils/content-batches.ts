@@ -176,6 +176,47 @@ export interface ClientBatch {
 }
 
 /**
+ * One card per (client, stage) instead of one card per client.
+ *
+ * A batch normally sits in the column of its LEAST-advanced video, which means
+ * sending one video of three to review leaves the card parked in Editado and
+ * the submission looks like it did nothing. Splitting puts the client in every
+ * column where they actually have videos, each card counting only its own.
+ *
+ * Cards keep the same clientId, so callers must key by clientId + stage.
+ */
+export function splitBatchesByStage(batches: ClientBatch[]): ClientBatch[] {
+  const out: ClientBatch[] = []
+  for (const b of batches) {
+    const byStage = new Map<BatchStageKey, IdeaWithPipeline[]>()
+    for (const i of b.ideas) {
+      if (i.status === 'descartada') continue
+      const s = ideaStage(i)
+      const arr = byStage.get(s) ?? []
+      arr.push(i)
+      byStage.set(s, arr)
+    }
+    for (const s of BATCH_STAGES) {
+      const ideas = byStage.get(s.key)
+      if (!ideas || ideas.length === 0) continue
+      const counts = emptyStageCounts()
+      counts[s.key] = ideas.length
+      out.push({
+        ...b,
+        ideas,
+        stage: s.key,
+        stageCounts: counts,
+        total: ideas.length,
+        ahead: 0,
+        revisionNeeded: ideas.filter((i) => i.approval_status === 'revision_needed').length,
+        assigneeIds: Array.from(new Set(ideas.map((i) => i.assignee?.id).filter(Boolean) as string[])),
+      })
+    }
+  }
+  return out
+}
+
+/**
  * Short breakdown for a split batch, e.g. ["1 con cambios", "2 en Copy"].
  *
  * The card sits in the column of its LEAST-advanced video, so without this a

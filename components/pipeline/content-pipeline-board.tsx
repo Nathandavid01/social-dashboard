@@ -5,7 +5,7 @@ import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRigh
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, splitBatchesByStage, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
@@ -92,7 +92,12 @@ export function ContentPipelineBoard({
     setBatchData(data)
   }, [openClientId, openOptions])
 
-  const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
+  // One card per (client, stage): a client with videos in two columns shows in
+  // both, instead of parking in the least-advanced one.
+  const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideas)), [ideas])
+
+  /** Cards share a clientId now, so anything per-card must key on stage too. */
+  const cardKey = useCallback((b: ClientBatch) => `${b.clientId}:${b.stage}`, [])
 
   const pipelineByClient = useMemo(
     () => buildClientPipelineIndex(ideas, clientCadence),
@@ -105,7 +110,7 @@ export function ContentPipelineBoard({
   )
   const clientCounts = useMemo(() => {
     const m: Record<string, number> = {}
-    for (const b of batches) m[b.clientId] = (m[b.clientId] ?? 0) + 1
+    for (const b of batches) m[b.clientId] = (m[b.clientId] ?? 0) + b.total
     return m
   }, [batches])
   const team = useMemo(() => {
@@ -141,7 +146,7 @@ export function ContentPipelineBoard({
     return plannedClients.filter((p) => p.stepAssignee?.id === assigneeFilter)
   }, [plannedClients, assigneeFilter])
 
-  const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
+  const stageOf = useCallback((b: ClientBatch) => overrides[cardKey(b)] ?? b.stage, [overrides, cardKey])
 
   const byStage = useMemo(() => {
     const out = emptyStageBuckets<ClientBatch>()
@@ -154,16 +159,16 @@ export function ContentPipelineBoard({
       const cur = stageOf(batch)
       const target = adjacentBatchStage(cur, dir)
       if (!target) return
-      setOverrides((o) => ({ ...o, [batch.clientId]: target }))
+      setOverrides((o) => ({ ...o, [cardKey(batch)]: target }))
       startMove(async () => {
         const res = await moveBatch(batch.ideas.map((i) => i.id), target)
         if (res?.error) {
-          setOverrides((o) => ({ ...o, [batch.clientId]: cur }))
+          setOverrides((o) => ({ ...o, [cardKey(batch)]: cur }))
           toast({ title: 'No se pudo mover el batch', description: res.error, variant: 'destructive' })
         }
       })
     },
-    [stageOf, toast],
+    [stageOf, cardKey, toast],
   )
 
   const published = visible.filter((b) => stageOf(b) === 'publication').length
@@ -322,7 +327,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpe
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={b.clientId} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
           </>
         )}
       </div>

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, batchBreakdown, BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, batchBreakdown, splitBatchesByStage, BATCH_STAGES,
 } from './content-batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -107,6 +107,75 @@ describe('buildClientPipelineIndex', () => {
   it('omits clients with only discarded videos', () => {
     const index = buildClientPipelineIndex([idea({ status: 'descartada' })] as IdeaWithPipeline[])
     expect(index).toEqual({})
+  })
+})
+
+describe('splitBatchesByStage — un cliente puede estar en varias columnas', () => {
+  const build = (...ideas: Partial<IdeaWithPipeline>[]) =>
+    splitBatchesByStage(groupIntoBatches(ideas.map((o) => idea(o)) as IdeaWithPipeline[]))
+
+  it('deja una sola tarjeta cuando todo está en la misma columna', () => {
+    const cards = build({ id: '1' }, { id: '2' })
+    expect(cards).toHaveLength(1)
+    expect(cards[0].stage).toBe('edited')
+    expect(cards[0].total).toBe(2)
+  })
+
+  it('parte el cliente en una tarjeta por columna con videos', () => {
+    const cards = build(
+      { id: '1' },                                   // edited
+      { id: '2', approval_status: 'submitted' },     // approval
+      { id: '3', approval_status: 'approved' },      // copy
+    )
+    expect(cards.map((c) => c.stage)).toEqual(['edited', 'approval', 'copy'])
+    expect(cards.map((c) => c.total)).toEqual([1, 1, 1])
+  })
+
+  it('cada tarjeta cuenta SOLO sus videos', () => {
+    const cards = build(
+      { id: '1' }, { id: '2' },                      // 2 en edited
+      { id: '3', approval_status: 'submitted' },     // 1 en approval
+    )
+    const edited = cards.find((c) => c.stage === 'edited')!
+    const approval = cards.find((c) => c.stage === 'approval')!
+    expect(edited.total).toBe(2)
+    expect(approval.total).toBe(1)
+    expect(edited.ideas.map((i) => i.id)).toEqual(['1', '2'])
+    expect(approval.ideas.map((i) => i.id)).toEqual(['3'])
+  })
+
+  it('no deja columnas vacías', () => {
+    const cards = build({ id: '1', approval_status: 'submitted' })
+    expect(cards).toHaveLength(1)
+    expect(cards[0].stage).toBe('approval')
+  })
+
+  it('los cambios pedidos se cuentan en la tarjeta de Editado', () => {
+    const cards = build(
+      { id: '1', approval_status: 'revision_needed' },
+      { id: '2', approval_status: 'submitted' },
+    )
+    const edited = cards.find((c) => c.stage === 'edited')!
+    const approval = cards.find((c) => c.stage === 'approval')!
+    expect(edited.revisionNeeded).toBe(1)
+    expect(approval.revisionNeeded).toBe(0)
+  })
+
+  it('ya no hay desglose que mostrar: cada tarjeta es de una sola columna', () => {
+    const cards = build({ id: '1' }, { id: '2', approval_status: 'approved' })
+    for (const c of cards) expect(batchBreakdown(c)).toEqual([])
+  })
+
+  it('mantiene cliente y asignado en cada tarjeta', () => {
+    const ana = { id: 'a', full_name: 'Ana' }
+    const cards = build(
+      { id: '1', assignee: ana },
+      { id: '2', assignee: ana, approval_status: 'submitted' },
+    )
+    for (const c of cards) {
+      expect(c.clientName).toBe('Nora')
+      expect(c.assignee).toEqual({ id: 'a', name: 'Ana' })
+    }
   })
 })
 

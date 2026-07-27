@@ -43,6 +43,21 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 
+  it('un cliente con videos en dos columnas sale en LAS DOS', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1' }),                                              // edited
+      idea({ id: '2', status: 'producida', approval_status: 'submitted' }), // approval
+    ]} />)
+    const cols = container.querySelectorAll('section')
+    const editado = cols[0].textContent ?? ''
+    const revision = cols[1].textContent ?? ''
+    expect(editado).toContain('Nora Fitness')
+    expect(revision).toContain('Nora Fitness')
+    // y cada tarjeta cuenta SOLO sus videos
+    expect(editado).toMatch(/1 video en el batch/)
+    expect(revision).toMatch(/1 video en el batch/)
+  })
+
   it('shows one batch card per client (not per video)', () => {
     const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
     const cards = container.querySelectorAll('article')

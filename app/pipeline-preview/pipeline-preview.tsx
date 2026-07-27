@@ -38,6 +38,11 @@ const SAMPLE: IdeaWithPipeline[] = [
     id: '3', client_id: 'c3', title: 'Tour del apartamento', client: client('c3', 'AA Real Estate'),
     status: 'producida', approval_status: 'submitted',
   }),
+  // Mismo cliente, sin enviar: AA Real Estate sale en Editado Y en Revisión.
+  idea({
+    id: '3b', client_id: 'c3', title: 'Vista desde el balcón', client: client('c3', 'AA Real Estate'),
+    status: 'producida',
+  }),
   idea({
     id: '4', client_id: 'c4', title: 'Receta en 30s', client: client('c4', 'Café del Valle'),
     status: 'producida', approval_status: 'revision_needed',
