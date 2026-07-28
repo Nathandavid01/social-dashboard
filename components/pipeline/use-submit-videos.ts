@@ -33,7 +33,10 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
       xhr.status >= 200 && xhr.status < 300
         ? resolve()
         : reject(new Error(`La subida falló (${xhr.status})`))
-    xhr.onerror = () => reject(new Error('Se cortó la conexión durante la subida'))
+    // Un bloqueo de CORS llega aquí, no a onload: el navegador no deja ver el
+    // status real, así que el mensaje tiene que apuntar a la causa probable.
+    xhr.onerror = () =>
+      reject(new Error('No se pudo subir — revisa la política CORS del bucket'))
     xhr.send(file)
   })
 }
