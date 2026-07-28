@@ -15,6 +15,8 @@ import { requirePermission } from '@/lib/auth/server'
 
 export interface CopyVideoRow {
   id: string
+  /** content_idea_videos.id of the edited file — signed for playback. */
+  videoFileId: string | null
   title: string
   clientName: string
   hook: string | null
@@ -50,7 +52,7 @@ export async function getEntregaCopyVideos(
       .single(),
     supabase
       .from('content_ideas')
-      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption')
+      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
       .eq('client_id', clientId)
       .eq('approval_status', 'approved')
       .order('approved_at', { ascending: true }),
@@ -63,8 +65,15 @@ export async function getEntregaCopyVideos(
   return {
     data: {
       captionNotes: client?.caption_notes ?? null,
-      videos: (ideas ?? []).map((i) => ({
+      videos: (ideas ?? []).map((i) => {
+        const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string }[]
+        // Newest edited file in R2 — a re-upload leaves the older row behind.
+        const edited = files
+          .filter((f) => f.kind === 'edited' && f.storage_provider === 'r2')
+          .sort((a, b) => (a.uploaded_at < b.uploaded_at ? 1 : -1))[0]
+        return {
         id: i.id,
+        videoFileId: edited?.id ?? null,
         title: i.title ?? 'Sin título',
         clientName: client?.name ?? 'Cliente',
         hook: i.hook,
@@ -73,7 +82,8 @@ export async function getEntregaCopyVideos(
         hashtags: i.hashtags_suggestion,
         generated_caption: i.generated_caption,
         platforms: platforms as string[],
-      })),
+        }
+      }),
     },
   }
 }

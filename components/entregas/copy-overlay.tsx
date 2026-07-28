@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-captions'
+import { getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
@@ -41,6 +42,8 @@ export function CopyOverlay({
   const [hook, setHook] = useState('')
   const [caption, setCaption] = useState('')
   const [busy, setBusy] = useState<'generando' | 'guardando' | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [videoError, setVideoError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     const res = await getEntregaCopyVideos(clientId)
@@ -60,6 +63,25 @@ export function CopyOverlay({
     setHook(current?.hook ?? '')
     setCaption(current?.generated_caption ?? '')
   }, [current?.id, current?.hook, current?.generated_caption])
+
+  // Sign only the video on screen: getR2PreviewUrl firma por 1 hora, así que
+  // firmar el lote entero de golpe daría enlaces muertos al llegar al final.
+  useEffect(() => {
+    if (!current?.videoFileId) {
+      setVideoUrl(null)
+      setVideoError(current ? 'Este video no tiene archivo subido' : null)
+      return
+    }
+    let alive = true
+    setVideoUrl(null)
+    setVideoError(null)
+    getR2PreviewUrl(current.videoFileId).then((res) => {
+      if (!alive) return
+      if (res.url) setVideoUrl(res.url)
+      else setVideoError(res.error ?? 'No se pudo cargar el video')
+    })
+    return () => { alive = false }
+  }, [current?.videoFileId, current])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -157,7 +179,18 @@ export function CopyOverlay({
               </div>
             </div>
 
-            <section className="space-y-3 rounded-xl border bg-card p-4">
+            <section className="space-y-3 overflow-hidden rounded-xl border bg-card">
+              <div className="bg-black/90">
+                {videoUrl ? (
+                  <video src={videoUrl} controls playsInline className="max-h-[340px] w-full object-contain" />
+                ) : (
+                  <div className="grid h-32 place-items-center text-xs text-muted-foreground">
+                    {videoError ?? 'Cargando video…'}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 px-4 pb-4">
               <h3 className="truncate text-sm font-semibold">{current.title}</h3>
 
               <div className="space-y-1.5">
@@ -197,6 +230,7 @@ export function CopyOverlay({
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
                 {caption.trim() ? 'Regenerar con IA' : 'Generar copy con IA'}
               </Button>
+              </div>
             </section>
 
             <section className="space-y-2 rounded-xl border bg-card p-4">
