@@ -44,6 +44,12 @@ export interface IdeaGenInput {
   approvedExamples?: string[]
   /** Idea titles/hooks the team has REJECTED — the model steers away from these. */
   rejectedExamples?: string[]
+  /**
+   * Ideas Nathan pasted into the Idea Lab for THIS run. Distinct from
+   * approvedExamples (which come from app history) — these are hand-written
+   * reference material for the model to learn the target style from.
+   */
+  referenceIdeas?: string[]
 }
 
 /** Senior-strategist playbook baked into every generation. */
@@ -128,6 +134,33 @@ export function formatFeedbackForPrompt(approved: string[], rejected: string[]):
   return parts.join('\n\n')
 }
 
+/**
+ * Turn a pasted blob into a clean list. People paste out of Docs and Notion, so
+ * strip the bullet/number prefix that comes along for the ride — otherwise the
+ * model sees "2." as part of the idea.
+ */
+export function parseReferenceIdeas(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  return raw
+    .split('\n')
+    .map((line) => line.replace(/^\s*(?:[-*•·]|\d+[.)])\s*/, '').trim())
+    .filter((line) => line.length > 0)
+    .slice(0, 40)
+}
+
+/**
+ * Reference ideas the team pasted in. The whole risk here is plagiarism: given
+ * examples, a model will happily hand them back reworded. The block below is
+ * explicit that these are a STYLE target, not source material to remix.
+ */
+export function formatReferenceIdeasForPrompt(ideas: string[]): string {
+  if (!ideas || ideas.length === 0) return ''
+  return `REFERENCE IDEAS FROM THE TEAM (this is the bar and the taste to hit):
+${ideas.map((t) => `- ${t}`).join('\n')}
+
+Study what makes these work — the angle, the specificity, the level of ambition, the kind of hook they open with, how concrete they are. Then hit that same standard with DIFFERENT ideas. Do not repeat, reword, or lightly remix any idea on this list; if one of your ideas is recognisably one of these, replace it. They are the target quality, not the raw material.`
+}
+
 const JSON_SCHEMA = `Output STRICT JSON — an array, no markdown, no commentary, no code fence:
 [
   {
@@ -152,6 +185,7 @@ export function buildGenerationPrompt(input: IdeaGenInput): string {
     : ''
   const winnersBlock = formatWinnersForPrompt(winners)
   const feedbackBlock = formatFeedbackForPrompt(input.approvedExamples ?? [], input.rejectedExamples ?? [])
+  const referenceBlock = formatReferenceIdeasForPrompt(input.referenceIdeas ?? [])
   const recentBlock = recentTexts.length > 0
     ? `RECENT POSTS (avoid repeating these themes — bring fresh angles):\n${recentTexts.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
     : 'No recent post history available.'
@@ -161,7 +195,7 @@ export function buildGenerationPrompt(input: IdeaGenInput): string {
 ${general
     ? 'MODE: General marketing brainstorming (not tied to a specific client).'
     : `CLIENT: ${clientName}\nINDUSTRY: ${industry || 'Business'}`}
-${clientProfile ? `\nCLIENT PROFILE:\n${clientProfile}\n` : ''}${theme ? `\nBRIEF / THEME: ${theme}\n` : ''}${trendsBlock ? `\n${trendsBlock}\n` : ''}${winnersBlock ? `\n${winnersBlock}\n` : ''}${feedbackBlock ? `\n${feedbackBlock}\n` : ''}
+${clientProfile ? `\nCLIENT PROFILE:\n${clientProfile}\n` : ''}${theme ? `\nBRIEF / THEME: ${theme}\n` : ''}${trendsBlock ? `\n${trendsBlock}\n` : ''}${winnersBlock ? `\n${winnersBlock}\n` : ''}${feedbackBlock ? `\n${feedbackBlock}\n` : ''}${referenceBlock ? `\n${referenceBlock}\n` : ''}
 ALLOWED CONTENT TYPES: ${typeLabels.join(', ')}
 
 ${recentBlock}
@@ -187,7 +221,10 @@ Rules:
  * separates "AI slop" from genuinely sharp work.
  */
 export function buildCritiquePrompt(ideasJson: string, input: IdeaGenInput): string {
+  const referenceBlock = formatReferenceIdeasForPrompt(input.referenceIdeas ?? [])
+
   return `You are a SKEPTICAL, world-class creative director reviewing a first draft of ${input.count} content ideas for ${input.general ? 'a brainstorming session' : input.clientName}. Be demanding.
+${referenceBlock ? `\n${referenceBlock}\n` : ''}
 
 FIRST DRAFT:
 ${ideasJson}
@@ -197,7 +234,7 @@ For EACH idea, silently judge:
 - Objective fit: is the objective + funnel_stage right and is the CTA aligned to it?
 - Distinctiveness: would a competitor post the same thing? Make it sharper and more specific.
 - Local resonance: does it feel authentically Puerto Rican where relevant (without forcing it)?
-- Executability: is the visual_brief concrete enough to shoot/design today?
+- Executability: is the visual_brief concrete enough to shoot/design today?${input.referenceIdeas?.length ? '\n- Originality vs the reference ideas: is this just one of them reworded? If so, REPLACE it with something new that clears the same bar.' : ''}
 
 Then RETURN the improved set — same JSON schema, same number of ideas — rewriting hooks, briefs, and CTAs wherever they fall short. Keep the strong ones, sharpen the rest.
 

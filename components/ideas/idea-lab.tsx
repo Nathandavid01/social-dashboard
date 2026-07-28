@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { Client, ContentIdeaType } from '@/lib/supabase/types'
 import type { TrendItem } from '@/lib/utils/trends'
+import { parseReferenceIdeas } from '@/lib/utils/idea-prompt'
 import { rateIdea } from '@/lib/actions/idea-feedback'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -65,6 +66,9 @@ export function IdeaLab({ clients }: Props) {
     new Set(['R', 'P', 'C'] as ContentIdeaType[])
   )
   const [theme, setTheme] = useState('')
+  const [referenceIdeas, setReferenceIdeas] = useState('')
+  // Live count so it's obvious the textarea is read line-by-line.
+  const referenceCount = parseReferenceIdeas(referenceIdeas).length
   const [count, setCount] = useState(5)
   const [generating, setGenerating] = useState(false)
 
@@ -157,6 +161,7 @@ export function IdeaLab({ clients }: Props) {
           contentTypes: Array.from(selectedTypes),
           theme: theme.trim() || undefined,
           trends,
+          referenceIdeas: referenceIdeas.trim() || undefined,
           count,
         }),
       })
@@ -345,6 +350,32 @@ export function IdeaLab({ clients }: Props) {
             disabled={generating}
             className="text-sm resize-none"
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <Label htmlFor="reference_ideas" className="min-w-0 truncate text-xs">
+              Ideas de referencia (opcional)
+            </Label>
+            {referenceCount > 0 ? (
+              <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">
+                {referenceCount} {referenceCount === 1 ? 'idea' : 'ideas'}
+              </span>
+            ) : null}
+          </div>
+          <Textarea
+            id="reference_ideas"
+            value={referenceIdeas}
+            onChange={(e) => setReferenceIdeas(e.target.value)}
+            placeholder={'Una idea por línea. Ej:\nTour de la casa modelo al atardecer\nTestimonio de familia que ya se mudó'}
+            rows={5}
+            disabled={generating}
+            className="resize-none text-sm"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            El modelo aprende el estilo y el nivel de estas ideas, y genera otras nuevas a esa
+            altura — no las copia.
+          </p>
         </div>
 
         <div className="space-y-1.5">
