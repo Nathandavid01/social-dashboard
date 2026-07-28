@@ -158,3 +158,32 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
 export async function reportUploadFailure(detail: string): Promise<void> {
   console.error('[subida fallida]', detail)
 }
+
+/**
+ * Take a batch off the board.
+ *
+ * Marks the rows `descartada` instead of deleting them: the board already
+ * excludes that status everywhere, so the card disappears exactly as a delete
+ * would — but the video, its copy and its history survive. An X on a card is
+ * one misclick away, and a misclick shouldn't destroy an editor's work.
+ */
+export async function discardEntregaVideos(
+  ideaIds: string[],
+): Promise<{ ok?: true; count?: number; error?: string }> {
+  try {
+    await requirePermission('video.upload')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (ideaIds.length === 0) return { error: 'Nada que descartar' }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('content_ideas')
+    .update({ status: 'descartada' })
+    .in('id', ideaIds)
+  if (error) return { error: error.message }
+
+  revalidatePath('/entregas')
+  return { ok: true, count: ideaIds.length }
+}

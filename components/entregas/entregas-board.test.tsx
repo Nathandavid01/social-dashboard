@@ -4,7 +4,12 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const push = vi.fn()
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
+const refresh = vi.fn()
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push, refresh }) }))
+const discardEntregaVideos = vi.fn(async () => ({ ok: true as const, count: 1 }))
+vi.mock('@/lib/actions/pipeline-submit', () => ({
+  discardEntregaVideos: (...a: unknown[]) => discardEntregaVideos(...(a as [])),
+}))
 vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
@@ -30,6 +35,25 @@ beforeEach(() => {
 })
 
 describe('EntregasBoard — batch model', () => {
+  it('cada tarjeta trae una X para quitarla del tablero', () => {
+    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    expect(screen.getByRole('button', { name: /quitar Nora Fitness del tablero/i })).toBeInTheDocument()
+  })
+
+  it('la X pide confirmación antes de quitar nada', () => {
+    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    fireEvent.click(screen.getByRole('button', { name: /^quitar Nora Fitness/i }))
+    expect(screen.getByRole('button', { name: /confirmar quitar/i })).toBeInTheDocument()
+    expect(discardEntregaVideos).not.toHaveBeenCalled()
+  })
+
+  it('el segundo click sí la quita', async () => {
+    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    fireEvent.click(screen.getByRole('button', { name: /^quitar Nora Fitness/i }))
+    fireEvent.click(screen.getByRole('button', { name: /confirmar quitar/i }))
+    await waitFor(() => expect(discardEntregaVideos).toHaveBeenCalledWith(['1']))
+  })
+
   it('la tarjeta de Publicación dice cuándo cae el borrador en Metricool', () => {
     render(<EntregasBoard
       ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: '2099-07-30' })]}

@@ -13,6 +13,7 @@ import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishCardButton } from './publish-card-button'
+import { DiscardCardButton } from './discard-card-button'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
@@ -444,6 +445,9 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
 
   return (
     <article onClick={() => onOpen(batch.clientId, stage)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+      <div className="absolute right-1.5 top-1.5 z-10 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+        <DiscardCardButton ideaIds={batch.ideas.map((i) => i.id)} clientName={batch.clientName} />
+      </div>
 
       <div className="space-y-2.5 p-3 pl-3.5">
         {/* client + period */}
