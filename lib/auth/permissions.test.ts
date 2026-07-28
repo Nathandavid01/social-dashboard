@@ -19,9 +19,14 @@ describe('planning.assign permission (assigning videos to others)', () => {
 })
 
 describe('captions.use / captions.edit (AI captions on the video card)', () => {
-  it('the video role can generate AND edit captions (works from the recorded video)', () => {
-    expect(hasPermission('video', 'captions.use')).toBe(true)
-    expect(hasPermission('video', 'captions.edit')).toBe(true)
+  it('el videógrafo YA NO escribe captions: su trabajo es grabar', () => {
+    expect(hasPermission('video', 'captions.use')).toBe(false)
+    expect(hasPermission('video', 'captions.edit')).toBe(false)
+  })
+
+  it('el diseñador entrega piezas pero no escribe el copy', () => {
+    expect(hasPermission('disenador', 'video.upload')).toBe(true)
+    expect(hasPermission('disenador', 'captions.edit')).toBe(false)
   })
 
   it('owner, supervisor and editor keep caption access', () => {

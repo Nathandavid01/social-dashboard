@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Check, Loader2, UserCheck, UserX, Crown, UserCog, Pencil, Video, Shield, Clock } from 'lucide-react'
+import { Check, Loader2, UserCheck, UserX, Crown, UserCog, Pencil, Video, Shield, Clock , Palette , PenLine } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,6 +23,8 @@ const ROLE_ICON: Record<UserRole, typeof Crown> = {
   supervisor: UserCog,
   editor: Pencil,
   video: Video,
+  disenador: Palette,
+  copy: PenLine,
   team_member: Shield,
 }
 
@@ -30,6 +32,8 @@ const ROLE_TONE: Record<UserRole, string> = {
   owner: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/30',
   supervisor: 'text-purple-500 bg-purple-500/10 border-purple-500/30',
   editor: 'text-blue-500 bg-blue-500/10 border-blue-500/30',
+  disenador: 'text-pink-500 bg-pink-500/10 border-pink-500/30',
+  copy: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
   video: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30',
   team_member: 'text-muted-foreground bg-muted border-border',
 }

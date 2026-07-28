@@ -39,7 +39,7 @@ export async function getEntregaCopyVideos(
   clientId: string,
 ): Promise<{ data?: CopyStageData; error?: string }> {
   try {
-    await requirePermission('planning.read')
+    await requirePermission('entregas.read')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }

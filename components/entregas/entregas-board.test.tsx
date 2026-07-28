@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
-import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import type { IdeaWithPipeline, UserRole } from '@/lib/supabase/types'
 
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const push = vi.fn()
@@ -11,6 +11,10 @@ vi.mock('@/lib/actions/pipeline-submit', () => ({
   discardEntregaVideos: (...a: unknown[]) => discardEntregaVideos(...(a as [])),
 }))
 vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
+let mockRole: UserRole | null = 'supervisor'
+vi.mock('@/lib/context/auth-context', () => ({
+  useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: mockRole }),
+}))
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
 
@@ -32,6 +36,33 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 beforeEach(() => {
   cleanup()
   push.mockClear()
+})
+
+describe('EntregasBoard — columnas por rol', () => {
+  it('supervisor ve las cuatro', () => {
+    mockRole = 'supervisor'
+    render(<EntregasBoard ideas={[idea()]} />)
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
+      .toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
+  })
+
+  it('editor y diseñador solo ven Editado y Revisión', () => {
+    for (const r of ['editor', 'disenador'] as const) {
+      cleanup()
+      mockRole = r
+      render(<EntregasBoard ideas={[idea()]} />)
+      expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
+        .toEqual(['Editado', 'Revisión'])
+    }
+    mockRole = 'supervisor'
+  })
+
+  it('el rol copy ve las cuatro', () => {
+    mockRole = 'copy'
+    render(<EntregasBoard ideas={[idea()]} />)
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(4)
+    mockRole = 'supervisor'
+  })
 })
 
 describe('EntregasBoard — batch model', () => {

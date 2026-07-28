@@ -10,10 +10,15 @@ import { hasPermission } from './permissions'
  * in-flight uncommitted edits to that file on eric/dev.
  */
 describe('planning.move permission (moving cards on the Flujo board)', () => {
-  it('owner, supervisor and editor may move cards', () => {
+  it('owner y supervisor mueven tarjetas', () => {
     expect(hasPermission('owner', 'planning.move')).toBe(true)
     expect(hasPermission('supervisor', 'planning.move')).toBe(true)
-    expect(hasPermission('editor', 'planning.move')).toBe(true)
+  })
+
+  // El editor solo trabaja en Entregas, donde la tarjeta avanza por una
+  // decisión (enviar, aprobar, escribir copy), no arrastrándola.
+  it('el editor ya no mueve tarjetas a mano', () => {
+    expect(hasPermission('editor', 'planning.move')).toBe(false)
   })
 
   it('the video role and legacy team_member may NOT move cards', () => {

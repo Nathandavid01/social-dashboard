@@ -131,8 +131,10 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.getByText('6')).toBeInTheDocument() // approved 4 + loved 2
   })
 
+  // Editar las reglas del cliente exige clients.brand.edit, que el editor ya no
+  // tiene: su alcance es Entregas, no la configuración del cliente.
   it('offers to make a recurring 👎 reason a client rule and calls the action', async () => {
-    mockRole = 'editor'
+    mockRole = 'supervisor'
     getCaptionLearningStats.mockResolvedValueOnce({ approved: 0, loved: 0, rejected: 3, suggestions: [{ phrase: 'menos emojis', count: 3 }] })
     appendClientCaptionRule.mockClear()
     render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)

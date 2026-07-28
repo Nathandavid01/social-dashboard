@@ -6,6 +6,7 @@ import { Send, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/lib/hooks/use-toast'
 import { publishIdeaToMetricool } from '@/lib/actions/idea-posting'
+import { useHasPermission } from '@/components/auth/role-gate'
 
 /**
  * "Enviar a Metricool" on a Publicación card.
@@ -28,6 +29,8 @@ export function PublishCardButton({
   const { toast } = useToast()
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(0)
+  // La server action también lo exige; sin esto el botón se ofrece para fallar.
+  const canPublish = useHasPermission('posting.publish')
 
   async function send(e: React.MouseEvent) {
     // The whole card is a click target that opens the overlay — publishing
@@ -62,6 +65,8 @@ export function PublishCardButton({
     }
     router.refresh()
   }
+
+  if (!canPublish) return null
 
   return (
     <Button

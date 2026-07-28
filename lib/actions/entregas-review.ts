@@ -16,7 +16,7 @@ export async function getEntregaReviewVideos(
   clientId: string,
 ): Promise<{ videos?: QueueVideo[]; error?: string }> {
   try {
-    await requirePermission('planning.read')
+    await requirePermission('entregas.read')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }

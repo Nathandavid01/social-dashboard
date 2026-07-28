@@ -15,6 +15,8 @@ import { CopyOverlay } from './copy-overlay'
 import { PublishCardButton } from './publish-card-button'
 import { DiscardCardButton } from './discard-card-button'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
+import { visibleEntregaStages } from '@/lib/entregas/visible-stages'
+import { useAuth } from '@/lib/context/auth-context'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -63,6 +65,12 @@ export function EntregasBoard({
   /** clients.posting_time — the hour Metricool will schedule at, per client. */
   postingTimes?: Record<string, string | null>
 }) {
+  // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
+  // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
+  // mandando en el servidor; esto es la vista.
+  const { role } = useAuth()
+  const visibleStages = useMemo(() => visibleEntregaStages(role), [role])
+
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -239,7 +247,7 @@ export function EntregasBoard({
         className={cn('flex-1 overflow-x-auto overflow-y-hidden', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
       >
         <div className="flex h-full min-w-max gap-3 p-4">
-          {ENTREGA_BATCH_STAGES.map((stage) => (
+          {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
             <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
           ))}
         </div>

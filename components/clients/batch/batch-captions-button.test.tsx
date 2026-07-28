@@ -73,17 +73,13 @@ describe('BatchCaptionsButton', () => {
   })
 
   it('renders nothing without captions.use permission', () => {
-    mockRole = 'video'
-    try {
+    // El videógrafo ya no escribe captions: su trabajo termina al grabar.
+    for (const role of ['video', 'disenador', null] as const) {
+      mockRole = role
       const { container } = render(<BatchCaptionsButton videos={[vid('a', null)]} onDone={vi.fn()} />)
-      // video role DOES have captions.use since v2.83 — use a role that doesn't.
-      expect(container.firstChild).not.toBeNull()
+      expect(container.firstChild).toBeNull()
       cleanup()
-      mockRole = null
-      const { container: c2 } = render(<BatchCaptionsButton videos={[vid('a', null)]} onDone={vi.fn()} />)
-      expect(c2.firstChild).toBeNull()
-    } finally {
-      mockRole = 'supervisor'
     }
+    mockRole = 'supervisor'
   })
 })

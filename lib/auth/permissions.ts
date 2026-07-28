@@ -51,6 +51,7 @@ export type Permission =
   | 'runway.read'
   | 'activity.read'
   | 'planning.read'
+  | 'entregas.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -91,40 +92,56 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
-    'planning.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'planning.act', 'planning.assign', 'planning.move',
     'cadence.read',
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
   ],
 
-  // Editor — content + captions, no billing, no team management.
+  // Editor — SOLO Entregas: sube el video editado y escribe su copy.
+  // Mantiene captions.* porque la etapa Copy vive dentro de Entregas; lo que
+  // pierde es el acceso a las otras pantallas (pipeline, producción, QC).
+  // No aprueba ni publica: revisar el propio trabajo vaciaría esa etapa.
   editor: [
-    'clients.read', 'clients.brand.edit', 'clients.assets.upload',
-    'tasks.read.all', 'tasks.create', 'tasks.edit',
-    'ideas.read', 'ideas.edit',
-    'video_reviews.read', 'video.upload',
-    'production.read', 'production.edit',
-    'recording.read',
-    'posting.read', 'captions.use', 'captions.edit',
-    'metricool.read',
-    'weekly_compliance.read', 'cadence.read', 'activity.read',
-    'planning.read', 'planning.act', 'planning.move',
+    'ideas.read',
+    'video.upload',
+    'captions.use', 'captions.edit',
+    'entregas.read', 'planning.act',
     'alerts.read',
   ],
 
-  // Video / videógrafo — recording-focused, video upload + QC. Works from the
-  // already-recorded video, so it can also generate + edit AI captions on the card.
+  // Videógrafo — grabación e ideas. No entra a Entregas: su trabajo termina
+  // cuando el material está grabado; entregarlo editado es del editor.
   video: [
     'clients.read', 'clients.assets.upload',
     'tasks.read.own', 'tasks.edit',
-    'ideas.read',
-    'video_reviews.read', 'video_reviews.write', 'video.upload',
-    'production.read', 'production.edit',
+    'ideas.read', 'ideas.edit',
+    'runway.read',
     'recording.read', 'recording.create', 'recording.complete',
-    'captions.use', 'captions.edit',
     'weekly_compliance.read', 'cadence.read', 'activity.read',
-    'planning.read',
+    'alerts.read',
+  ],
+
+  // Diseñador — Ideas y Entregas. Sube piezas pero NO escribe el copy (sin
+  // captions.*), ni aprueba, ni publica.
+  disenador: [
+    'ideas.read', 'ideas.edit',
+    'runway.read',
+    'video.upload',
+    'entregas.read',
+    'alerts.read',
+  ],
+
+  // Copy — escribe el copy de lo aprobado. Ve el tablero entero para saber
+  // qué viene y qué ya salió, pero no aprueba ni publica.
+  copy: [
+    'clients.read',
+    'ideas.read',
+    'entregas.read',
+    'captions.use', 'captions.edit',
+    'metricool.read', 'posting.read',
+    'cadence.read',
     'alerts.read',
   ],
 
@@ -159,14 +176,18 @@ export const ROLE_LABEL: Record<UserRole, string> = {
   supervisor:  'Supervisor',
   editor:      'Editor',
   video:       'Videógrafo',
+  disenador:   'Diseñador',
+  copy:        'Copy',
   team_member: 'Team (legacy)',
 }
 
 export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   owner:       'Acceso completo, incluyendo facturación, contratos y asignación de roles.',
   supervisor:  'Gestión de equipo y contenido. Ve facturación/contratos pero no los edita.',
-  editor:      'Edición de contenido, captions y marca. Sin acceso a facturación.',
-  video:       'Calendario de grabación, QC de video y subida de material. Sin edición de marca.',
+  editor:      'Entregas: sube el video editado y escribe su copy. No aprueba ni publica.',
+  video:       'Grabación e ideas. No entra a Entregas.',
+  disenador:   'Ideas y Entregas: sube piezas, sin escribir el copy.',
+  copy:        'Escribe el copy de los videos aprobados. No aprueba ni publica.',
   team_member: 'Rol heredado — se trata como Editor.',
 }
 

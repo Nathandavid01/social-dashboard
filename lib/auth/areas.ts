@@ -49,7 +49,7 @@ export const AREAS: Area[] = [
   // ── Trabajo: el flujo de un video, de la cámara a la aprobación ──
   // Flujo del editor: Editado → Revisión → Copy → Publicación. Separado de
   // /pipeline a propósito; mismos datos, otra forma de agruparlos.
-  { href: '/entregas',           label: 'Entregas',        permission: 'planning.read',      group: 'Trabajo' },
+  { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
   { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Trabajo' },
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Trabajo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Trabajo' },

@@ -95,7 +95,7 @@ export async function getEntregasPreviewUrl(
   videoId: string,
 ): Promise<{ url?: string; error?: string }> {
   try {
-    await requirePermission('planning.read')
+    await requirePermission('entregas.read')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }

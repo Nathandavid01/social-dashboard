@@ -45,6 +45,8 @@ const ROLE_AVATAR: Record<UserRole, string> = {
   supervisor: 'text-purple-500 border-purple-500/40 bg-purple-500/10',
   editor: 'text-blue-500 border-blue-500/40 bg-blue-500/10',
   video: 'text-cyan-500 border-cyan-500/40 bg-cyan-500/10',
+  disenador: 'text-pink-500 border-pink-500/40 bg-pink-500/10',
+  copy: 'text-emerald-500 border-emerald-500/40 bg-emerald-500/10',
   team_member: 'text-muted-foreground border-border bg-muted',
 }
 

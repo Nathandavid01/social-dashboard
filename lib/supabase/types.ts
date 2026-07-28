@@ -1,4 +1,4 @@
-export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'team_member'
+export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'disenador' | 'copy' | 'team_member'
 export type UserStatus = 'active' | 'inactive'
 export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type ClientStatus = 'active' | 'paused' | 'onboarding'

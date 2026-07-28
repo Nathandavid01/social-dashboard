@@ -17,7 +17,7 @@ export const revalidate = 0
  * other — it's the same row seen through two lenses.
  */
 export default async function EntregasPage() {
-  await requirePermission('planning.read')
+  await requirePermission('entregas.read')
   const supabase = await createClient()
 
   const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
