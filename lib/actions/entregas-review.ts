@@ -44,7 +44,15 @@ export async function getEntregaReviewVideos(
     for (const p of profiles ?? []) names.set(p.id, p.full_name ?? 'Alguien del equipo')
   }
 
-  const videos: QueueVideo[] = (data ?? []).map((i) => {
+  const rows = (data ?? []).filter((i) => {
+    // Mismo criterio que el tablero: sin archivo editado en R2 no hay nada que
+    // revisar. Antes entraban las filas de subidas fallidas y, como se ordena
+    // por antigüedad, la cola abría justo en una de ellas — tarjeta sin video.
+    const files = (i.videos ?? []) as { kind: string; storage_provider: string }[]
+    return files.some((f) => f.kind === 'edited' && f.storage_provider === 'r2')
+  })
+
+  const videos: QueueVideo[] = rows.map((i) => {
     const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string }[]
     // Newest edited file in R2 — re-uploads leave the older rows behind.
     const edited = files
