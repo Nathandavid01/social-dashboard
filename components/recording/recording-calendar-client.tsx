@@ -698,6 +698,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           open={!!ideasSession}
           onClose={() => setIdeasSession(undefined)}
           session={ideasSession}
+          onDelete={() => { const id = ideasSession.id; setIdeasSession(undefined); handleDelete(id) }}
           clientIdeas={ideasSession.client_id ? (ideasMap[ideasSession.client_id] ?? []) : []}
           onIdeasChange={(updated) => {
             if (!ideasSession.client_id) return

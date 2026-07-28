@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/auth/server'
 import type { RecordingSession } from '@/lib/supabase/types'
 
 const SELECT = `
@@ -81,6 +82,13 @@ export async function updateRecordingSession(id: string, values: Partial<{
 }
 
 export async function deleteRecordingSession(id: string) {
+  // No pedía nada: cualquiera con sesión que llegara a la pantalla podía
+  // borrar agenda, y borra de verdad — no marca como cancelada.
+  try {
+    await requirePermission('recording.create')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
   const supabase = await createClient()
   const { error } = await supabase.from('recording_sessions').delete().eq('id', id)
   if (error) return { error: error.message }

@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IdeaVideoLoader } from './idea-video-loader'
 import {
   Camera, CheckCircle2, Circle, Plus, Video, BookOpen,
-  Building2, Clock, MapPin, Link2, Unlink, Loader2,
+  Building2, Clock, MapPin, Link2, Unlink, Loader2, Trash2,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -27,6 +27,8 @@ interface ExtendedSession extends RecordingSession {
 }
 
 interface SessionIdeasPanelProps {
+  /** Quita la sesión de la agenda. Ausente = no se ofrece. */
+  onDelete?: () => void
   open: boolean
   onClose: () => void
   session: ExtendedSession
@@ -244,7 +246,7 @@ function IdeaRow({
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
-export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeasChange }: SessionIdeasPanelProps) {
+export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeasChange, onDelete }: SessionIdeasPanelProps) {
   const [ideas, setIdeas] = useState<ContentIdea[]>(clientIdeas)
   const [showAddForm, setShowAddForm] = useState(false)
 
@@ -362,6 +364,22 @@ export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeas
                   <IdeaRow key={idea.id} idea={idea} sessionId={session.id} onUpdate={updateIdea} />
                 ))}
             </div>
+          </div>
+        )}
+        {/* Eliminar vivía solo en el menú ⋯ de la tarjeta, donde no se
+            encontraba. Aquí abajo, separado y en rojo: visible sin invitar al
+            clic accidental. */}
+        {onDelete && (
+          <div className="border-t border-border pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onDelete}
+              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="mr-1.5 h-4 w-4" />
+              Eliminar de agenda
+            </Button>
           </div>
         )}
       </DialogContent>
