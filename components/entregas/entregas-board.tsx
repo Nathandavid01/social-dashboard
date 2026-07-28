@@ -7,11 +7,11 @@ import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
-import { type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
+import { CopyOverlay } from './copy-overlay'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -65,12 +65,16 @@ export function EntregasBoard({
   const { toast } = useToast()
 
   // Overlay a pantalla completa, sin navegar fuera del tablero.
-  const [openClientId, setOpenClientId] = useState<string | null>(null)
+  // Qué se abre depende de la COLUMNA: una tarjeta en Revisión pide decidir,
+  // una en Copy pide escribir. Abrir siempre lo mismo mandaba a Revisión desde
+  // Copy, con un "no queda nada por revisar" que no explicaba nada.
+  const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey } | null>(null)
+  const openClientId = open?.clientId ?? null
 
-  const openEntregaBatch = useCallback((clientId: string) => {
-    setOpenClientId(clientId)
+  const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey) => {
+    setOpen({ clientId, stage })
   }, [])
-  const closeBatch = useCallback(() => setOpenClientId(null), [])
+  const closeBatch = useCallback(() => setOpen(null), [])
 
   // One card per (client, stage): a client with videos in two columns shows in
   // both, instead of parking in the least-advanced one.
@@ -238,10 +242,17 @@ export function EntregasBoard({
       {/* Abrir una tarjeta de Revisión abre la COLA de revisión — reproductor y
           decisión — no la vista de lote del otro tablero, que contesta otra
           pregunta (el periodo del cliente, no "¿este video está bien?"). */}
-      {openClientId && (
+      {open && open.stage === 'approval' && (
         <ReviewOverlay
-          clientId={openClientId}
-          clientName={batches.find((b) => b.clientId === openClientId)?.clientName ?? 'Cliente'}
+          clientId={open.clientId}
+          clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
+          onClose={closeBatch}
+        />
+      )}
+      {open && open.stage === 'copy' && (
+        <CopyOverlay
+          clientId={open.clientId}
+          clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
           onClose={closeBatch}
         />
       )}
@@ -249,7 +260,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -288,7 +299,7 @@ function PlannedSessionCard({
 }: {
   client: PlannedClient
   session: PlannedSession
-  onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void
+  onOpen: (clientId: string, stage: EntregaStageKey) => void
 }) {
   const isSingle = session.total <= 1
   const daysSinceStart = client.createdAt ? calendarDaysSince(client.createdAt) : null
@@ -301,13 +312,7 @@ function PlannedSessionCard({
         : 'Lleno'
   return (
     <article
-      onClick={() =>
-        onOpen(client.clientId, {
-          fromPlanned: true,
-          publishDate: session.publishDate ?? null,
-          publishLabel: session.publishDate ? session.label : null,
-        })
-      }
+      onClick={() => onOpen(client.clientId, 'edited')}
       className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
     >
       <div className="space-y-2.5 p-3">
@@ -421,7 +426,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -433,7 +438,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const breakdown = batchBreakdown(batch)
 
   return (
-    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article onClick={() => onOpen(batch.clientId, stage)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
 
       <div className="space-y-2.5 p-3 pl-3.5">
         {/* client + period */}

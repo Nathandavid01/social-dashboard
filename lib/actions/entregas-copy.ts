@@ -1,0 +1,131 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/auth/server'
+
+/**
+ * Data for the Copy stage: approved videos still missing their caption, plus
+ * the client-level text that must appear in every caption.
+ *
+ * That "always include" text is `clients.caption_notes` — the same field the
+ * caption prompt already reads as the client's rules (see idea-captions.ts), so
+ * editing it here changes what the AI is told, not just what a human copies.
+ */
+
+export interface CopyVideoRow {
+  id: string
+  title: string
+  clientName: string
+  hook: string | null
+  visualBrief: string | null
+  captionAngle: string | null
+  hashtags: string | null
+  generated_caption: string | null
+  platforms: string[]
+}
+
+export interface CopyStageData {
+  videos: CopyVideoRow[]
+  /** Text the client wants in every caption (schedule, address, disclaimers…). */
+  captionNotes: string | null
+}
+
+export async function getEntregaCopyVideos(
+  clientId: string,
+): Promise<{ data?: CopyStageData; error?: string }> {
+  try {
+    await requirePermission('planning.read')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const supabase = await createClient()
+
+  const [{ data: client }, { data: ideas, error }] = await Promise.all([
+    supabase
+      .from('clients')
+      .select('name, caption_notes, platforms, default_platforms')
+      .eq('id', clientId)
+      .single(),
+    supabase
+      .from('content_ideas')
+      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption')
+      .eq('client_id', clientId)
+      .eq('approval_status', 'approved')
+      .order('approved_at', { ascending: true }),
+  ])
+
+  if (error) return { error: error.message }
+
+  const platforms = (client?.platforms?.length ? client.platforms : client?.default_platforms) ?? []
+
+  return {
+    data: {
+      captionNotes: client?.caption_notes ?? null,
+      videos: (ideas ?? []).map((i) => ({
+        id: i.id,
+        title: i.title ?? 'Sin título',
+        clientName: client?.name ?? 'Cliente',
+        hook: i.hook,
+        visualBrief: i.visual_brief,
+        captionAngle: i.caption_angle,
+        hashtags: i.hashtags_suggestion,
+        generated_caption: i.generated_caption,
+        platforms: platforms as string[],
+      })),
+    },
+  }
+}
+
+/**
+ * "De qué es el video" — the ONE field the caption AI requires
+ * (isIdeaReadyForCaption). Editable here because the editor may have left it
+ * blank at submit, and without it the generate button just refuses.
+ */
+export async function updateIdeaHook(
+  ideaId: string,
+  hook: string,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('captions.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('content_ideas')
+    .update({ hook: hook.trim() || null })
+    .eq('id', ideaId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/entregas')
+  return { ok: true }
+}
+
+/**
+ * Client-level text for every caption. Lives on the CLIENT, not the video: a
+ * schedule or address doesn't change per post, and re-typing it each time is
+ * how it ends up inconsistent.
+ */
+export async function saveClientCaptionNotes(
+  clientId: string,
+  notes: string,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('captions.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('clients')
+    .update({ caption_notes: notes.trim() || null })
+    .eq('id', clientId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/entregas')
+  return { ok: true }
+}
