@@ -24,6 +24,8 @@ export interface CopyVideoRow {
   captionAngle: string | null
   hashtags: string | null
   generated_caption: string | null
+  /** YYYY-MM-DD — the date the copywriter picked, if any. */
+  publishDate: string | null
   platforms: string[]
 }
 
@@ -52,7 +54,7 @@ export async function getEntregaCopyVideos(
       .single(),
     supabase
       .from('content_ideas')
-      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
+      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, publish_date, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
       .eq('client_id', clientId)
       .eq('approval_status', 'approved')
       .order('approved_at', { ascending: true }),
@@ -81,6 +83,7 @@ export async function getEntregaCopyVideos(
         captionAngle: i.caption_angle,
         hashtags: i.hashtags_suggestion,
         generated_caption: i.generated_caption,
+        publishDate: (i.publish_date as string | null) ?? null,
         platforms: platforms as string[],
         }
       }),
@@ -134,6 +137,44 @@ export async function saveClientCaptionNotes(
     .from('clients')
     .update({ caption_notes: notes.trim() || null })
     .eq('id', clientId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/entregas')
+  return { ok: true }
+}
+
+/**
+ * Save the copy and the publish date in one write.
+ *
+ * They travel together on purpose: saving the caption is what moves the video
+ * to Publicación, and a video that lands there without a date gets clamped to
+ * +24h. Two separate calls would leave a window where the board shows a date
+ * that isn't the one the copywriter just chose.
+ */
+export async function saveCopyAndSchedule(input: {
+  ideaId: string
+  caption: string
+  /** YYYY-MM-DD, or null to let Metricool take +24h. */
+  publishDate: string | null
+}): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('captions.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const caption = input.caption.trim()
+  if (!caption) return { error: 'El copy no puede ir vacío' }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('content_ideas')
+    .update({
+      generated_caption: caption,
+      caption_generated_at: new Date().toISOString(),
+      publish_date: input.publishDate || null,
+    })
+    .eq('id', input.ideaId)
   if (error) return { error: error.message }
 
   revalidatePath('/entregas')

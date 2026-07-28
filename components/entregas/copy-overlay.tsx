@@ -7,14 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/lib/hooks/use-toast'
-import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-captions'
+import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
   saveClientCaptionNotes,
+  saveCopyAndSchedule,
   type CopyVideoRow,
 } from '@/lib/actions/entregas-copy'
+import { publishSchedule } from '@/lib/utils/publish-schedule'
 
 /**
  * The Copy stage, one video at a time.
@@ -44,6 +46,7 @@ export function CopyOverlay({
   const [busy, setBusy] = useState<'generando' | 'guardando' | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [videoError, setVideoError] = useState<string | null>(null)
+  const [publishDate, setPublishDate] = useState('')
 
   const load = useCallback(async () => {
     const res = await getEntregaCopyVideos(clientId)
@@ -62,7 +65,8 @@ export function CopyOverlay({
   useEffect(() => {
     setHook(current?.hook ?? '')
     setCaption(current?.generated_caption ?? '')
-  }, [current?.id, current?.hook, current?.generated_caption])
+    setPublishDate(current?.publishDate ?? '')
+  }, [current?.id, current?.hook, current?.generated_caption, current?.publishDate])
 
   // Sign only the video on screen: getR2PreviewUrl firma por 1 hora, así que
   // firmar el lote entero de golpe daría enlaces muertos al llegar al final.
@@ -113,7 +117,11 @@ export function CopyOverlay({
     if (!current || !caption.trim()) return
     setBusy('guardando')
     try {
-      const res = await saveIdeaCaption(current.id, caption.trim())
+      const res = await saveCopyAndSchedule({
+        ideaId: current.id,
+        caption: caption.trim(),
+        publishDate: publishDate || null,
+      })
       if (res.error) {
         toast({ title: 'Error', description: res.error, variant: 'destructive' })
         return
@@ -243,6 +251,22 @@ export function CopyOverlay({
                 placeholder="Genera con IA o escríbelo a mano. Puedes editar lo que genere."
                 className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
               />
+              <div className="space-y-1.5 rounded-lg border bg-muted/30 p-2.5">
+                <Label htmlFor="co-date" className="text-[11px]">Fecha de publicación</Label>
+                <Input
+                  id="co-date"
+                  type="date"
+                  value={publishDate}
+                  onChange={(e) => setPublishDate(e.target.value)}
+                  className="h-9 w-full"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  {publishDate
+                    ? `Borrador en Metricool: ${publishSchedule(publishDate, null).label}`
+                    : 'Sin fecha, Metricool lo programa a +24h.'}
+                </p>
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] tabular-nums text-muted-foreground">
                   {caption.trim().length} caracteres
