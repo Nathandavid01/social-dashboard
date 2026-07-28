@@ -35,12 +35,6 @@ export interface SubmitVideoItem {
   /** Optional reference for the reviewer. Never the published media. */
   driveLink: string | null
   title: string
-  /**
-   * "De qué es el video" → content_ideas.hook. The ONLY thing the caption AI
-   * requires (see isIdeaReadyForCaption); without it the Copy stage can't
-   * generate and someone has to backfill it later.
-   */
-  hook: string | null
 }
 
 export interface SubmitVideoPayload {
@@ -52,10 +46,9 @@ interface Row {
   file: File | null
   link: string
   title: string
-  hook: string
 }
 
-const emptyRow = (): Row => ({ file: null, link: '', title: '', hook: '' })
+const emptyRow = (): Row => ({ file: null, link: '', title: '' })
 
 function formatBytes(n: number): string {
   if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(1)} GB`
@@ -130,7 +123,6 @@ export function SubmitVideoCard({
         file: r.file!,
         driveLink: r.link.trim() || null,
         title: r.title.trim() || `${clientName} — video ${i + 1}`,
-        hook: r.hook.trim() || null,
       })),
     })
     setClientId('')
@@ -231,20 +223,6 @@ export function SubmitVideoCard({
                 onChange={(e) => setRow(i, { title: e.target.value })}
               />
 
-              <div className="space-y-1">
-                <Input
-                  aria-label={`De qué es el video ${i + 1}`}
-                  className="h-9"
-                  placeholder="¿De qué es el video?"
-                  value={row.hook}
-                  onChange={(e) => setRow(i, { hook: e.target.value })}
-                />
-                {!row.hook.trim() && (
-                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                    Sin esto la IA no podrá escribir el copy después.
-                  </p>
-                )}
-              </div>
             </li>
           )
         })}

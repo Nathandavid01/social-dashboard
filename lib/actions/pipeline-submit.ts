@@ -149,3 +149,12 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
   return { ok: true }
 }
 
+
+/**
+ * The browser reports why an upload died. A CORS block or a network drop never
+ * reaches the server on its own — the PUT goes straight to R2 — so without this
+ * the failure is invisible in the logs and only the user sees it.
+ */
+export async function reportUploadFailure(detail: string): Promise<void> {
+  console.error('[subida fallida]', detail)
+}

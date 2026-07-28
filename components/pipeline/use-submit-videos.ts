@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { createSubmittedIdea } from '@/lib/actions/pipeline-submit'
+import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
 import type { SubmitVideoPayload } from './submit-video-card'
@@ -29,14 +29,23 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
     }
-    xhr.onload = () =>
-      xhr.status >= 200 && xhr.status < 300
-        ? resolve()
-        : reject(new Error(`La subida falló (${xhr.status})`))
-    // Un bloqueo de CORS llega aquí, no a onload: el navegador no deja ver el
-    // status real, así que el mensaje tiene que apuntar a la causa probable.
-    xhr.onerror = () =>
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve()
+      void reportUploadFailure(
+        `${file.name} (${file.size}b) → HTTP ${xhr.status} :: ${(xhr.responseText || '').slice(0, 300)}`,
+      )
+      reject(new Error(`La subida falló (${xhr.status})`))
+    }
+    // Un bloqueo de CORS llega aquí, no a onload, y el navegador oculta el
+    // status real — por eso hay que reportarlo explícitamente.
+    xhr.onerror = () => {
+      void reportUploadFailure(`${file.name} (${file.size}b) → onerror, sin status (CORS o red)`)
       reject(new Error('No se pudo subir — revisa la política CORS del bucket'))
+    }
+    xhr.ontimeout = () => {
+      void reportUploadFailure(`${file.name} (${file.size}b) → timeout`)
+      reject(new Error('La subida tardó demasiado'))
+    }
     xhr.send(file)
   })
 }
@@ -64,7 +73,9 @@ export function useSubmitVideos(onDone?: () => void) {
           {
             clientId: payload.clientId,
             title: v.title,
-            hook: v.hook,
+            // "De qué es el video" se escribe en Copy, donde hace falta para la
+            // IA. Pedírselo al editor era pedirle un dato que no usa.
+            hook: null,
             driveLink: v.driveLink,
             file: v.file,
           },

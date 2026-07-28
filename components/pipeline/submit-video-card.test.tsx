@@ -40,6 +40,11 @@ function setup() {
 }
 
 describe('SubmitVideoCard — the editor uploads the real file', () => {
+  it('no pide "de qué es el video" — eso se escribe en Copy', () => {
+    setup()
+    expect(screen.queryByLabelText(/de qué es el video/i)).toBeNull()
+  })
+
   it('asks for a video file, not a link', () => {
     const { files } = setup()
     expect(files()[0]).toHaveAttribute('type', 'file')
@@ -105,38 +110,6 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     expect(submit()).toBeEnabled()                       // junk link → still fine
   })
 
-  it('pide "de qué es el video" — sin eso la IA no puede escribir el copy', () => {
-    const { client, pick, submit } = setup()
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile())
-    const hook = screen.getByLabelText(/de qué es el video/i)
-    fireEvent.change(hook, { target: { value: 'Un socio cuenta cómo bajó 15 lb' } })
-    fireEvent.click(submit())
-    expect(onSubmit).toHaveBeenCalledWith({
-      clientId: 'c1',
-      videos: [expect.objectContaining({ hook: 'Un socio cuenta cómo bajó 15 lb' })],
-    })
-  })
-
-  it('el hook es opcional: sin él se envía igual, con null', () => {
-    const { client, pick, submit } = setup()
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile())
-    expect(submit()).toBeEnabled()
-    fireEvent.click(submit())
-    expect(onSubmit).toHaveBeenCalledWith({
-      clientId: 'c1',
-      videos: [expect.objectContaining({ hook: null })],
-    })
-  })
-
-  it('avisa que sin eso la IA no podrá generar el copy', () => {
-    const { client, pick } = setup()
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile())
-    expect(screen.getByText(/sin esto la ia no podrá/i)).toBeInTheDocument()
-  })
-
   it('hands the parent the actual File objects to upload', () => {
     const { client, pick, submit } = setup()
     fireEvent.change(client, { target: { value: 'c2' } })
@@ -147,7 +120,7 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     fireEvent.click(submit())
     expect(onSubmit).toHaveBeenCalledWith({
       clientId: 'c2',
-      videos: [{ file: f, driveLink: DRIVE, title: 'Reel de abril', hook: null }],
+      videos: [{ file: f, driveLink: DRIVE, title: 'Reel de abril' }],
     })
   })
 
