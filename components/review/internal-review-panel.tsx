@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, RotateCcw, Send, Lock, Clock } from 'lucide-react'
+import { Check, RotateCcw, Lock, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { canReviewVideo, reviewState, type ReviewTone } from '@/lib/utils/internal-review'
@@ -46,7 +46,6 @@ export function InternalReviewPanel({
   onDecision: (decision: 'approve' | 'request_changes', note: string) => void
   pending?: boolean
 }) {
-  const [asking, setAsking] = useState(false)
   const [note, setNote] = useState('')
 
   const state = reviewState(video.approval_status)
@@ -98,23 +97,12 @@ export function InternalReviewPanel({
           </div>
         )}
 
-        {canReview && !asking && (
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={pending} onClick={() => onDecision('approve', '')}>
-              <Check className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Aprobar
-            </Button>
-            <Button size="sm" variant="outline" disabled={pending} onClick={() => setAsking(true)}>
-              <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Pedir cambios
-            </Button>
-          </div>
-        )}
-
-        {canReview && asking && (
-          <div className="space-y-2 animate-in fade-in duration-200">
+        {canReview && (
+          <div className="space-y-2">
+            {/* A la vista, no escondido tras un click: el revisor suele saber lo
+                que quiere decir ANTES de decidir, y esconderlo hace que se
+                devuelvan videos con un "arréglalo" sin explicar qué. */}
             <textarea
-              autoFocus
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="¿Qué hay que cambiar? El editor verá esta nota."
@@ -122,19 +110,26 @@ export function InternalReviewPanel({
               className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
             <div className="flex flex-wrap gap-2">
+              <Button size="sm" disabled={pending} onClick={() => onDecision('approve', note.trim())}>
+                <Check className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Aprobar
+              </Button>
               <Button
                 size="sm"
-                variant="destructive"
+                variant="outline"
+                // Devolver sin decir qué cambiar no le sirve de nada al editor.
                 disabled={pending || !note.trim()}
                 onClick={() => onDecision('request_changes', note.trim())}
               >
-                <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Enviar al editor
-              </Button>
-              <Button size="sm" variant="ghost" disabled={pending} onClick={() => { setAsking(false); setNote('') }}>
-                Cancelar
+                <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Pedir cambios
               </Button>
             </div>
+            {!note.trim() && (
+              <p className="text-[11px] text-muted-foreground">
+                Escribe un comentario para poder pedir cambios. Aprobar no lo necesita.
+              </p>
+            )}
           </div>
         )}
 
