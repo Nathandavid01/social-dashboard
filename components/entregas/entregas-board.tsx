@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -13,6 +13,7 @@ import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishCardButton } from './publish-card-button'
+import { publishSchedule } from '@/lib/utils/publish-schedule'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -47,6 +48,7 @@ export function EntregasBoard({
   clientCadence = {},
   teamMembers = [],
   editedColumnSlot,
+  postingTimes = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -57,6 +59,8 @@ export function EntregasBoard({
   teamMembers?: { id: string; name: string }[]
   /** Pinned at the top of the Editado column — the editor's submit form. */
   editedColumnSlot?: React.ReactNode
+  /** clients.posting_time — the hour Metricool will schedule at, per client. */
+  postingTimes?: Record<string, string | null>
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -235,7 +239,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} onMove={moveCard} onOpen={openEntregaBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
           ))}
         </div>
       </div>
@@ -261,7 +265,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -284,7 +288,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, onMove, onOpe
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} />)}
           </>
         )}
       </div>
@@ -427,7 +431,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -514,7 +518,36 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
             video a Metricool. Va en la tarjeta porque no hace falta abrir nada
             para decidirlo — el copy ya está escrito y aprobado. */}
         {stage === 'publication' && (
-          <PublishCardButton ideaIds={batch.ideas.map((i) => i.id)} />
+          <div className="space-y-1.5">
+            {/* La fecha que Metricool va a RECIBIR, no la planificada:
+                buildPublishDateTime corre a +24h una fecha pasada o ausente
+                para que aprobar algo atrasado no publique al instante. Mostrar
+                publish_date aquí sería enseñar una fecha que no va a ocurrir. */}
+            {(() => {
+              const first = batch.ideas[0]
+              const s = publishSchedule(first?.publish_date ?? null, postingTime)
+              return (
+                <div className="rounded-lg border bg-muted/40 px-2 py-1.5">
+                  <p className="flex items-center gap-1 text-[9px] uppercase tracking-wide text-muted-foreground">
+                    <CalendarClock className="h-2.5 w-2.5" aria-hidden />
+                    Borrador en Metricool
+                  </p>
+                  <p className="text-[11px] font-semibold tabular-nums">{s.label}</p>
+                  {s.clamped && (
+                    <p className="text-[9px] text-amber-600 dark:text-amber-400">
+                      {first?.publish_date ? 'Fecha pasada — se corre a +24h' : 'Sin fecha planificada — se corre a +24h'}
+                    </p>
+                  )}
+                  {batch.ideas.length > 1 && (
+                    <p className="text-[9px] text-muted-foreground">
+                      Fecha del primero · {batch.ideas.length} videos en total
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
+            <PublishCardButton ideaIds={batch.ideas.map((i) => i.id)} />
+          </div>
         )}
       </div>
     </article>

@@ -30,6 +30,22 @@ beforeEach(() => {
 })
 
 describe('EntregasBoard — batch model', () => {
+  it('la tarjeta de Publicación dice cuándo cae el borrador en Metricool', () => {
+    render(<EntregasBoard
+      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: '2099-07-30' })]}
+      postingTimes={{ c1: '14:30' }}
+    />)
+    expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/30 jul 2099 · 14:30/)).toBeInTheDocument()
+  })
+
+  it('avisa cuando no hay fecha y Metricool la corre a +24h', () => {
+    render(<EntregasBoard
+      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: null })]}
+    />)
+    expect(screen.getByText(/se corre a \+24h/i)).toBeInTheDocument()
+  })
+
   it('solo las tarjetas de Publicación traen el botón de Metricool', () => {
     render(<EntregasBoard ideas={[
       idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy listo' }),

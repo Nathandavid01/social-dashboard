@@ -24,7 +24,7 @@ export default async function EntregasPage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, assigned_to')
+      .select('id, name, assigned_to, posting_time')
       .eq('status', 'active')
       .order('name'),
     getCurrentRole(),
@@ -59,6 +59,7 @@ export default async function EntregasPage() {
     <EntregasBoard
       ideas={entregas}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
+      postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
       editedColumnSlot={<EditorSubmitSlot clients={submitClients} />}
     />
   )
