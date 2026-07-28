@@ -39,16 +39,23 @@ export async function runIdeaPost(
   // policy for `anon`, so the lookup would come back empty and every real
   // client's approval would fail to publish — while still working for a logged-in
   // staffer testing it. Resolve it with the client we were handed.
-  const { data: edited } = await supabase
+  const { data: edited, error: editedErr } = await supabase
     .from('content_idea_videos')
     .select('id, drive_file_id, storage_provider, kind')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
     .eq('storage_provider', 'r2')
     .neq('status', 'archived')
-    .order('created_at', { ascending: false })
+    // uploaded_at, NO created_at: esa columna no existe en content_idea_videos.
+    // La consulta fallaba y el error se descartaba, así que `edited` venía
+    // vacío y readiness concluía "falta el video editado" con el archivo ahí.
+    .order('uploaded_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  // Un fallo al buscar el video NO puede leerse como "no hay video": eso fue
+  // exactamente lo que ocultó el bug de created_at durante todo este tiempo.
+  if (editedErr) return { error: `No se pudo leer el video editado: ${editedErr.message}` }
 
   const client = (idea.client ?? {}) as {
     metricool_blog_id?: string | null
