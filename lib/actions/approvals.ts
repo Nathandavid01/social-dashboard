@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { assertOwner } from '@/lib/auth/server'
+import { requirePermission, getCurrentRole } from '@/lib/auth/server'
+import { canAssignRole } from '@/lib/auth/role-assignment'
 import { validateApprovalRole } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
@@ -12,7 +13,7 @@ type Result = { ok?: true; error?: string }
 /** Owner-only: list every account waiting for approval (newest signup first). */
 export async function getPendingApprovals(): Promise<Profile[]> {
   try {
-    await assertOwner()
+    await requirePermission('team.assign_roles')
   } catch {
     return []
   }
@@ -25,10 +26,11 @@ export async function getPendingApprovals(): Promise<Profile[]> {
   return (data as Profile[] | null) ?? []
 }
 
-/** Owner-only: how many accounts are awaiting approval (for the nav badge). */
+/** Cuántas cuentas esperan aprobación (insignia del menú). Owner y supervisor:
+ *  si el supervisor puede aprobar, tiene que poder ver que hay algo esperando. */
 export async function getPendingApprovalCount(): Promise<number> {
   try {
-    await assertOwner()
+    await requirePermission('team.assign_roles')
   } catch {
     return 0
   }
@@ -45,14 +47,20 @@ export async function getPendingApprovalCount(): Promise<number> {
  * profile approved + active and notifies the new user so they know they're in.
  */
 export async function approveUser(userId: string, role: UserRole): Promise<Result> {
-  try {
-    await assertOwner()
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'No autorizado' }
-  }
-
   const validRole = validateApprovalRole(role)
   if (!validRole.ok) return { error: validRole.error }
+
+  // Mismo límite que cambiar un rol existente: un supervisor da de alta
+  // editores, copys, diseñadores y videógrafos — no owners ni supervisores.
+  // Aprobar es asignar un rol; separar las reglas dejaría la puerta de atrás
+  // abierta justo en el alta.
+  const verdict = canAssignRole({
+    actor: await getCurrentRole(),
+    targetCurrent: null,
+    next: role,
+    isSelf: false,
+  })
+  if (!verdict.ok) return { error: verdict.reason ?? 'No autorizado' }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -89,7 +97,7 @@ export async function approveUser(userId: string, role: UserRole): Promise<Resul
  */
 export async function rejectUser(userId: string): Promise<Result> {
   try {
-    await assertOwner()
+    await requirePermission('team.assign_roles')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }

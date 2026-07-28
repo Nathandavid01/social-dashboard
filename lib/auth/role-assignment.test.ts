@@ -53,3 +53,25 @@ describe('canAssignRole — el resto', () => {
     expect(check(null, 'editor', 'editor').ok).toBe(false)
   })
 })
+
+describe('altas nuevas — aprobar es asignar un rol', () => {
+  // Un usuario recién registrado no tiene rol todavía: targetCurrent = null.
+  const approve = (actor: 'owner' | 'supervisor', next: Parameters<typeof canAssignRole>[0]['next']) =>
+    canAssignRole({ actor, targetCurrent: null, next, isSelf: false })
+
+  it('el supervisor da de alta editores, copys, diseñadores y videógrafos', () => {
+    for (const r of ['editor', 'copy', 'disenador', 'video'] as const) {
+      expect(approve('supervisor', r).ok).toBe(true)
+    }
+  })
+
+  it('el supervisor NO puede dar de alta un owner o supervisor', () => {
+    expect(approve('supervisor', 'owner').ok).toBe(false)
+    expect(approve('supervisor', 'supervisor').ok).toBe(false)
+  })
+
+  it('el owner da de alta cualquier rol', () => {
+    expect(approve('owner', 'owner').ok).toBe(true)
+    expect(approve('owner', 'supervisor').ok).toBe(true)
+  })
+})
