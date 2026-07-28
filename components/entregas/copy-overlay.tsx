@@ -236,7 +236,7 @@ export function CopyOverlay({
                 {busy === 'generando'
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
-                {caption.trim() ? 'Regenerar con IA' : 'Generar copy con IA'}
+                {caption.trim() ? 'Regenerar con IA' : 'hola soy grok :)'}
               </Button>
               </div>
             </section>
