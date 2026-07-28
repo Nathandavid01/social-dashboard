@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { generateCaptionText } from '@/lib/llm/caption-llm'
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -541,16 +542,12 @@ async function execGenerateCaption(clientName: string, topic: string, platform?:
       client.caption_notes && `Rules: ${client.caption_notes}`,
     ].filter(Boolean).join('\n')
 
-    const captionMsg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1200,
-      messages: [{
-        role: 'user',
-        content: `You are a professional social media copywriter for NMedia PR.\n\nCLIENT: ${client.name}\nINDUSTRY: ${client.industry || 'Business'}\nPLATFORM: ${platform || 'Instagram'}\n\n${profileLines ? `CLIENT PROFILE:\n${profileLines}\n\n` : ''}${examplesBlock}\n\nVIDEO TOPIC: "${topic}"\n\nWrite ONE complete social media caption. Output ONLY the caption text — no labels, no explanation.`,
-      }],
-    })
-
-    const caption = captionMsg.content[0].type === 'text' ? captionMsg.content[0].text.trim() : ''
+    // Same provider switch as the rest of the app (Grok by default) instead of
+    // a second, hardcoded Anthropic path for the same job.
+    const caption = (await generateCaptionText(
+      `You are a professional social media copywriter for NMedia PR.\n\nCLIENT: ${client.name}\nINDUSTRY: ${client.industry || 'Business'}\nPLATFORM: ${platform || 'Instagram'}\n\n${profileLines ? `CLIENT PROFILE:\n${profileLines}\n\n` : ''}${examplesBlock}\n\nVIDEO TOPIC: "${topic}"\n\nWrite ONE complete social media caption. Output ONLY the caption text — no labels, no explanation.`,
+      { maxTokens: 1200 },
+    )).trim()
     return `Here's the caption for **${client.name}**${examples.length > 0 ? ` (based on ${examples.length} real posts)` : ''}:\n\n\`\`\`\n${caption}\n\`\`\``
   } catch (err) {
     return `Error generating caption: ${err instanceof Error ? err.message : 'Unknown error'}`
