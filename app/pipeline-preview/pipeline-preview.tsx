@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { ContentPipelineBoard } from '@/components/pipeline/content-pipeline-board'
+import { EntregasBoard } from '@/components/entregas/entregas-board'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
 import { CopyQueue, type CopyVideo } from '@/components/captions/copy-queue'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { MetricoolPublishCard, type PublishVideo } from '@/components/pipeline/metricool-publish-card'
 import { AuthProvider } from '@/lib/context/auth-context'
 import { SubmitVideoCard, type SubmitVideoPayload } from '@/components/pipeline/submit-video-card'
-import { STAGE_LABEL_ES, BATCH_STAGES } from '@/lib/utils/content-batches'
+import { ENTREGA_LABEL_ES, ENTREGA_BATCH_STAGES } from '@/lib/entregas/batches'
 import { clientsForUser, type AssignableClient } from '@/lib/utils/client-visibility'
 import { Button } from '@/components/ui/button'
 import type { IdeaWithPipeline, SocialPlatform, UserRole } from '@/lib/supabase/types'
@@ -163,10 +163,10 @@ export function PipelinePreview() {
           </div>
         </div>
         <ol className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-          {BATCH_STAGES.map((s, i) => (
+          {ENTREGA_BATCH_STAGES.map((s, i) => (
             <li key={s.key} className="flex items-center gap-1.5">
               {i > 0 && <span aria-hidden="true">→</span>}
-              <span className="rounded-full border px-2 py-0.5">{STAGE_LABEL_ES[s.key]}</span>
+              <span className="rounded-full border px-2 py-0.5">{ENTREGA_LABEL_ES[s.key]}</span>
             </li>
           ))}
         </ol>
@@ -174,7 +174,7 @@ export function PipelinePreview() {
 
       <section className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 overflow-hidden rounded-xl border">
-          <ContentPipelineBoard
+          <EntregasBoard
             ideas={ideas}
             allClients={ALL_CLIENTS.map((c) => ({ id: c.id, name: c.name }))}
             editedColumnSlot={

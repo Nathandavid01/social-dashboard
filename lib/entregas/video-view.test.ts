@@ -9,8 +9,8 @@ import {
   slotStatus,
   batchHint,
   videoNextStep,
-  type BatchVideo,
-} from './batch-view'
+  type EntregaVideo,
+} from './video-view'
 import type { ContentIdeaVideo } from '@/lib/supabase/types'
 
 function rawFile(): ContentIdeaVideo {
@@ -35,7 +35,7 @@ function rawFile(): ContentIdeaVideo {
   }
 }
 
-function mk(overrides: Partial<BatchVideo> = {}): BatchVideo {
+function mk(overrides: Partial<EntregaVideo> = {}): EntregaVideo {
   return {
     id: 'idea-1',
     client_id: 'c1',
@@ -67,7 +67,7 @@ function mk(overrides: Partial<BatchVideo> = {}): BatchVideo {
     updated_at: '2026-06-01',
     videos: { raw: [], broll: [], edited: [] },
     ...overrides,
-  } as BatchVideo
+  } as EntregaVideo
 }
 
 describe('contentTypeLabel', () => {
@@ -85,53 +85,49 @@ describe('contentTypeLabel', () => {
 })
 
 describe('videoStageKey', () => {
-  it('is "video" with no content (pre-edit collapses to Video)', () => {
-    expect(videoStageKey(mk())).toBe('video')
-  })
-  it('stays "video" through idea/caption prep (collapsed into Video)', () => {
-    expect(videoStageKey(mk({ hook: 'gancho' }))).toBe('video')
-    expect(videoStageKey(mk({ visual_brief: 'brief' }))).toBe('video')
-    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('video')
-  })
-  it('stays "video" once a caption is generated (still pre-edit)', () => {
-    expect(videoStageKey(mk({ hook: 'g', visual_brief: 'b', generated_caption: 'texto' }))).toBe('video')
-  })
-  it('is "video" when a raw file is uploaded (even if status not advanced)', () => {
-    expect(videoStageKey(mk({ generated_caption: 'c', videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('video')
-  })
-  it('is "video" when status is grabada or a recording_date exists', () => {
-    expect(videoStageKey(mk({ status: 'grabada' }))).toBe('video')
-    expect(videoStageKey(mk({ recording_date: '2026-06-11' }))).toBe('video')
-  })
-  it('is "edited" when an edited file exists or status producida', () => {
+  it('anything not yet sent to review sits in "edited", the board entry point', () => {
+    expect(videoStageKey(mk())).toBe('edited')
+    expect(videoStageKey(mk({ hook: 'gancho', visual_brief: 'brief' }))).toBe('edited')
+    expect(videoStageKey(mk({ hook: 'g', generated_caption: 'texto' }))).toBe('edited')
+    expect(videoStageKey(mk({ status: 'grabada' }))).toBe('edited')
+    expect(videoStageKey(mk({ recording_date: '2026-06-11' }))).toBe('edited')
+    expect(videoStageKey(mk({ videos: { raw: [rawFile()], broll: [], edited: [] } }))).toBe('edited')
     expect(videoStageKey(mk({ videos: { raw: [], broll: [], edited: [rawFile()] } }))).toBe('edited')
     expect(videoStageKey(mk({ status: 'producida' }))).toBe('edited')
   })
-  it('is "approval" when submitted/approved, and "publication" when published', () => {
+  it('is "approval" only while the reviewer actually holds it', () => {
     expect(videoStageKey(mk({ approval_status: 'submitted' }))).toBe('approval')
-    expect(videoStageKey(mk({ approval_status: 'approved' }))).toBe('approval')
+  })
+  it('goes back to "edited" when the reviewer asks for changes', () => {
+    expect(videoStageKey(mk({ approval_status: 'revision_needed' }))).toBe('edited')
+  })
+  it('is "copy" once approved but with no copy written yet', () => {
+    expect(videoStageKey(mk({ approval_status: 'approved' }))).toBe('copy')
+  })
+  it('is "publication" once the copy is written, or once published', () => {
+    expect(videoStageKey(mk({ approval_status: 'approved', generated_caption: 'Copy listo' }))).toBe('publication')
     expect(videoStageKey(mk({ published_at: '2026-06-20' }))).toBe('publication')
     expect(videoStageKey(mk({ status: 'publicada' }))).toBe('publication')
   })
 })
 
 describe('batchStageKey', () => {
-  it('returns "video" for an empty batch', () => {
-    expect(batchStageKey([])).toBe('video')
+  it('returns "edited" for an empty batch', () => {
+    expect(batchStageKey([])).toBe('edited')
   })
   it('returns the LEAST-advanced active video stage (videos move together)', () => {
     const videos = [
-      mk({ id: 'a', status: 'producida' }), // edited
-      mk({ id: 'b', status: 'grabada' }), // video
+      mk({ id: 'a', approval_status: 'approved' }), // copy
+      mk({ id: 'b', status: 'grabada' }), // edited
     ]
-    expect(batchStageKey(videos)).toBe('video')
+    expect(batchStageKey(videos)).toBe('edited')
   })
   it('ignores discarded videos', () => {
     const videos = [
       mk({ id: 'a', status: 'descartada' }),
       mk({ id: 'b', status: 'grabada' }),
     ]
-    expect(batchStageKey(videos)).toBe('video')
+    expect(batchStageKey(videos)).toBe('edited')
   })
   it('returns "publication" only when all active videos are published', () => {
     const videos = [
@@ -146,7 +142,6 @@ describe('buildStepper', () => {
   it('marks earlier stages done, the current stage current, later ones neither', () => {
     const stepper = buildStepper([mk({ status: 'producida', approval_status: 'submitted' })]) // batch at "approval"
     const byKey = Object.fromEntries(stepper.map((s) => [s.key, s]))
-    expect(byKey.video.done).toBe(true)
     expect(byKey.edited.done).toBe(true)
     expect(byKey.approval.current).toBe(true)
     expect(byKey.approval.done).toBe(false)
@@ -155,7 +150,7 @@ describe('buildStepper', () => {
   })
   it('uses Spanish labels', () => {
     const labels = buildStepper([]).map((s) => s.label)
-    expect(labels).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
+    expect(labels).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 })
 
@@ -184,8 +179,8 @@ describe('slotStatus', () => {
 describe('batchHint', () => {
   it('returns the current stage label and an actionable tip', () => {
     const hint = batchHint([mk({ status: 'grabada' })])
-    expect(hint.stageLabel).toBe('Video')
-    expect(hint.tip).toMatch(/raw/i)
+    expect(hint.stageLabel).toBe('Editado')
+    expect(hint.tip).toMatch(/drive/i)
   })
 })
 
@@ -223,12 +218,12 @@ describe('videoNextStep — the single "what to do next" per video', () => {
 
   it('surfaces a publish failure so the team can retry (posting_error)', () => {
     expect(
-      videoNextStep(mk({ approval_status: 'approved', posting_error: 'La URL del video no responde' } as Partial<BatchVideo>)),
+      videoNextStep(mk({ approval_status: 'approved', posting_error: 'La URL del video no responde' } as Partial<EntregaVideo>)),
     ).toEqual({ label: 'Error al publicar — revisa y reintenta', tone: 'warn' })
     // A recorded post wins over a stale error (success clears it, but belt-and-suspenders).
     expect(
       videoNextStep(
-        mk({ approval_status: 'approved', posting_error: 'viejo', metricool_post_id: 9 } as Partial<BatchVideo>),
+        mk({ approval_status: 'approved', posting_error: 'viejo', metricool_post_id: 9 } as Partial<EntregaVideo>),
       ),
     ).toEqual({ label: 'Programado en Metricool', tone: 'done' })
   })
@@ -252,7 +247,7 @@ describe('videoNextStep — the single "what to do next" per video', () => {
   })
 
   it('shows scheduled and published end states', () => {
-    expect(videoNextStep(mk({ metricool_post_id: 123 } as Partial<BatchVideo>))).toEqual({
+    expect(videoNextStep(mk({ metricool_post_id: 123 } as Partial<EntregaVideo>))).toEqual({
       label: 'Programado en Metricool',
       tone: 'done',
     })

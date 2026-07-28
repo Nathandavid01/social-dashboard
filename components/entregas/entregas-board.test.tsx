@@ -2,17 +2,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
-const moveBatch = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
-vi.mock('@/lib/actions/content-ideas', () => ({ moveBatch: (...a: unknown[]) => moveBatch(...a) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const push = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
-vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
 vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
 
-import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
+import { EntregasBoard, type PlannedClient } from './entregas-board'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -31,20 +28,63 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 
 beforeEach(() => {
   cleanup()
-  moveBatch.mockClear()
-  moveBatch.mockResolvedValue({ success: true })
   push.mockClear()
 })
 
-describe('ContentPipelineBoard — batch model', () => {
-  it('renders the 4 columns in Spanish with Video first', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+describe('EntregasBoard — batch model', () => {
+  it('renders the 4 columns in Spanish with Editado first and Copy after Revisión', () => {
+    render(<EntregasBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
+    expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
+  })
+
+  it('la tarjeta lista los títulos de sus videos, no barras vacías', () => {
+    const { container } = render(<EntregasBoard ideas={[
+      idea({ id: '1', title: 'Rutina de piernas' }),
+      idea({ id: '2', title: 'Antes y después' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Rutina de piernas')
+    expect(card.textContent).toContain('Antes y después')
+  })
+
+  it('con más de 3 videos muestra los primeros y cuántos faltan', () => {
+    const { container } = render(<EntregasBoard ideas={[
+      idea({ id: '1', title: 'Uno' }), idea({ id: '2', title: 'Dos' }),
+      idea({ id: '3', title: 'Tres' }), idea({ id: '4', title: 'Cuatro' }),
+      idea({ id: '5', title: 'Cinco' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Uno')
+    expect(card.textContent).toContain('Tres')
+    expect(card.textContent).not.toContain('Cuatro')
+    expect(card.textContent).toMatch(/\+2 más/)
+  })
+
+  it('un video sin título no deja la fila en blanco', () => {
+    const { container } = render(<EntregasBoard ideas={[
+      idea({ id: '1', title: undefined, hook: null }),
+    ]} />)
+    expect(container.querySelector('article')!.textContent).toContain('Sin título')
+  })
+
+  it('un cliente con videos en dos columnas sale en LAS DOS', () => {
+    const { container } = render(<EntregasBoard ideas={[
+      idea({ id: '1' }),                                              // edited
+      idea({ id: '2', status: 'producida', approval_status: 'submitted' }), // approval
+    ]} />)
+    const cols = container.querySelectorAll('section')
+    const editado = cols[0].textContent ?? ''
+    const revision = cols[1].textContent ?? ''
+    expect(editado).toContain('Nora Fitness')
+    expect(revision).toContain('Nora Fitness')
+    // y cada tarjeta cuenta SOLO sus videos
+    expect(editado).toMatch(/1 video en el batch/)
+    expect(revision).toMatch(/1 video en el batch/)
   })
 
   it('shows one batch card per client (not per video)', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
+    const { container } = render(<EntregasBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
     const cards = container.querySelectorAll('article')
     expect(cards).toHaveLength(1)
     expect(cards[0].textContent).toContain('Nora Fitness')
@@ -52,14 +92,14 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('places the batch in the column of its least-advanced video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
-    // least advanced is grabada → Video column (1st section)
-    const videoCol = container.querySelectorAll('section')[0]
-    expect(videoCol.textContent).toContain('Nora Fitness')
+    const { container } = render(<EntregasBoard ideas={[idea({ id: '1', approval_status: 'approved' }), idea({ id: '2', status: 'grabada' })]} />)
+    // least advanced is unsent → Editado column (1st section)
+    const editedCol = container.querySelectorAll('section')[0]
+    expect(editedCol.textContent).toContain('Nora Fitness')
   })
 
   it('shows the assignee filter and filters by person', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[
+    const { container } = render(<EntregasBoard ideas={[
       idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} teamMembers={[
@@ -76,19 +116,18 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(cardsText).not.toContain('Lumen')
   })
 
-  it('moves the whole batch forward, persisting all its videos', async () => {
-    render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
-    fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
-    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
+  it('no se mueve arrastrando: en Entregas la tarjeta avanza por una decisión', () => {
+    render(<EntregasBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
+    expect(screen.queryByRole('button', { name: /mover batch adelante/i })).toBeNull()
   })
 
   it('shows "Sin asignar" for an unassigned batch', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    render(<EntregasBoard ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
   it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[
+    const { container } = render(<EntregasBoard ideas={[
       idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
     ] as IdeaWithPipeline[]} />)
     expect(container.querySelector('article')!.textContent).toContain('Atrasado')
@@ -96,7 +135,7 @@ describe('ContentPipelineBoard — batch model', () => {
 
   it('opens the client batch overlay in place on card click (no navigation)', async () => {
     getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    const { container } = render(<EntregasBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
     expect(push).not.toHaveBeenCalled()
@@ -104,7 +143,7 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 })
 
-describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
+describe('EntregasBoard — planned sessions (empty slots)', () => {
   const planned: PlannedClient[] = [
     {
       clientId: 'nd',
@@ -116,13 +155,13 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
       sessions: [
         { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
       ],
-      nextStage: 'video',
+      nextStage: 'edited',
       stepAssignee: { id: 'u1', name: 'Ana Torres' },
     },
   ]
 
   it('renders one planned card per client for the next single video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    const { container } = render(<EntregasBoard ideas={[]} plannedClients={planned} />)
     expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
     expect(screen.getByText('Lun 8 jun')).toBeInTheDocument()
     expect(screen.getByText('Próxima publicación')).toBeInTheDocument()
@@ -135,7 +174,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
 
   it('opens the client batch overlay when a planned card is clicked', () => {
     getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    const { container } = render(<EntregasBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('nd', {
       fromPlanned: true,
@@ -145,20 +184,20 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
   })
 })
 
-describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', () => {
+describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
   const twoClients = [
     idea({ id: '1', client_id: 'c1' }),
     idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null } }),
   ] as IdeaWithPipeline[]
 
   it('renders a compact "Todos los clientes" dropdown trigger, closed by default', () => {
-    render(<ContentPipelineBoard ideas={twoClients} />)
+    render(<EntregasBoard ideas={twoClients} />)
     expect(screen.getByRole('button', { name: /todos los clientes/i })).toBeInTheDocument()
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
   it('opens the list with every client + count and filters the board on select', () => {
-    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    const { container } = render(<EntregasBoard ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     expect(screen.getByRole('listbox')).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /lumen/i })).toBeInTheDocument()
@@ -173,7 +212,7 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
   })
 
   it('clears the filter back to all clients via the clear button', () => {
-    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    const { container } = render(<EntregasBoard ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     fireEvent.click(screen.getByRole('option', { name: /lumen/i }))
     fireEvent.click(screen.getByRole('button', { name: /quitar filtro de cliente/i }))
@@ -183,18 +222,18 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
   })
 
   it('still shows the batches/publicados stats line', () => {
-    render(<ContentPipelineBoard ideas={twoClients} />)
+    render(<EntregasBoard ideas={twoClients} />)
     expect(screen.getByText(/publicados/i)).toBeInTheDocument()
   })
 })
 
-describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => {
+describe('EntregasBoard — drag-to-scroll columns (grab cursor)', () => {
   function scrollEl() {
     return document.querySelector('[data-testid="pipeline-scroll"]') as HTMLElement
   }
 
   it('shows a grab cursor at rest and grabbing while dragging horizontally', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    render(<EntregasBoard ideas={[idea()]} />)
     const el = scrollEl()
     expect(el.className).toContain('cursor-grab')
     expect(el.className).not.toContain('cursor-grabbing')
@@ -208,7 +247,7 @@ describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => 
   })
 
   it('does not enter grabbing state for a click without movement (cards stay clickable)', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    render(<EntregasBoard ideas={[idea()]} />)
     const el = scrollEl()
     fireEvent.mouseDown(el, { button: 0, clientX: 300 })
     fireEvent.mouseUp(el, { clientX: 300 })

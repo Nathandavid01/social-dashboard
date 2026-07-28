@@ -87,8 +87,8 @@ describe('NewVideoDialog', () => {
       c1: {
         total: 2,
         published: 0,
-        batchStage: 'edited',
-        batchStageLabel: 'Editado',
+        batchStage: 'video',
+        batchStageLabel: 'Video',
         metricoolScheduled: 1,
         hasMetricool: true,
         nextPublish: {
@@ -103,8 +103,8 @@ describe('NewVideoDialog', () => {
           isCadenceSlot: true,
         },
         videos: [
-          { id: 'v1', title: 'Reel verano', stage: 'edited', stageLabel: 'Editado', inMetricool: true, publishLabel: '20 jun 2026 · 10:00' },
-          { id: 'v2', title: 'Tips gym', stage: 'edited', stageLabel: 'Editado', inMetricool: false, publishLabel: null },
+          { id: 'v1', title: 'Reel verano', stage: 'video', stageLabel: 'Video', inMetricool: true, publishLabel: '20 jun 2026 · 10:00' },
+          { id: 'v2', title: 'Tips gym', stage: 'video', stageLabel: 'Video', inMetricool: false, publishLabel: null },
         ],
       },
     }

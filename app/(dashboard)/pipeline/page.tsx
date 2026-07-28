@@ -7,9 +7,6 @@ import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
 import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
-import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
-import { clientsForUser } from '@/lib/utils/client-visibility'
-import { getCurrentRole } from '@/lib/auth/server'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
@@ -28,7 +25,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id, assigned_to')
+      .select('id, name, logo_url, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
@@ -59,16 +56,6 @@ export default async function PipelinePage() {
     profilesById,
   )
 
-  // The submit dropdown only offers what this person may work on. Convenience
-  // filter — see the note in client-visibility.ts; it is not access control.
-  const role = await getCurrentRole()
-  const { data: { user } } = await supabase.auth.getUser()
-  const submitClients = clientsForUser(
-    role,
-    user?.id ?? null,
-    activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null })),
-  ).map((c) => ({ id: c.id, name: c.name }))
-
   const teamMembers = (teamProfiles ?? []).map((p) => ({
     id: p.id,
     name: p.full_name ?? 'Sin nombre',
@@ -81,7 +68,6 @@ export default async function PipelinePage() {
       allClients={allClients}
       clientCadence={clientCadence}
       teamMembers={teamMembers}
-      editedColumnSlot={<EditorSubmitSlot clients={submitClients} />}
     />
   )
 }
@@ -115,7 +101,7 @@ function buildPlannedClients(
     const nextVideo = planNextVideoSlot(postingDays, new Date())
     if (!nextVideo) continue
     const metricoolPic = c.metricool_blog_id ? metricoolPics[String(c.metricool_blog_id)] : undefined
-    const nextStage: BatchStageKey = 'edited'
+    const nextStage: BatchStageKey = 'video'
     planned.push({
       clientId: c.id,
       clientName: c.name,
