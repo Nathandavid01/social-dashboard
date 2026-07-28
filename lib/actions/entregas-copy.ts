@@ -71,7 +71,7 @@ export async function getEntregaCopyVideos(
         const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string }[]
         // Newest edited file in R2 — a re-upload leaves the older row behind.
         const edited = files
-          .filter((f) => f.kind === 'edited' && f.storage_provider === 'r2')
+          .filter((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2')
           .sort((a, b) => (a.uploaded_at < b.uploaded_at ? 1 : -1))[0]
         return {
         id: i.id,

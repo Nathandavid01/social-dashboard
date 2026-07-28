@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
-import { getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
+import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
@@ -79,7 +79,7 @@ export function CopyOverlay({
     let alive = true
     setVideoUrl(null)
     setVideoError(null)
-    getR2PreviewUrl(current.videoFileId).then((res) => {
+    getEntregasPreviewUrl(current.videoFileId).then((res) => {
       if (!alive) return
       if (res.url) setVideoUrl(res.url)
       else setVideoError(res.error ?? 'No se pudo cargar el video')

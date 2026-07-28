@@ -44,7 +44,7 @@ export default async function EntregasPage() {
    * delivered. Nothing is deleted; /pipeline still shows everything.
    */
   const entregas = ideas.filter((i) =>
-    (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'r2'),
+    (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
   )
 
   // The submit dropdown only offers what this person may work on. Convenience

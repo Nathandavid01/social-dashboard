@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
-import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
 import type { SubmitVideoPayload } from './submit-video-card'
 
@@ -52,9 +52,10 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
 
 const deps: SubmitDeps = {
   createIdea: (i) => createSubmittedIdea(i),
-  getUploadUrl: (i) => getR2UploadUrl(i),
+  getUploadUrl: (i) => getEntregasUploadUrl({ ideaId: i.ideaId, fileName: i.fileName, contentType: i.contentType }),
   putFile: putWithProgress,
-  registerVideo: (i) => registerR2Video(i),
+  registerVideo: (i) =>
+    registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType }),
 }
 
 export function useSubmitVideos(onDone?: () => void) {

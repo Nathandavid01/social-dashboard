@@ -49,14 +49,14 @@ export async function getEntregaReviewVideos(
     // revisar. Antes entraban las filas de subidas fallidas y, como se ordena
     // por antigüedad, la cola abría justo en una de ellas — tarjeta sin video.
     const files = (i.videos ?? []) as { kind: string; storage_provider: string }[]
-    return files.some((f) => f.kind === 'edited' && f.storage_provider === 'r2')
+    return files.some((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2')
   })
 
   const videos: QueueVideo[] = rows.map((i) => {
     const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string }[]
     // Newest edited file in R2 — re-uploads leave the older rows behind.
     const edited = files
-      .filter((f) => f.kind === 'edited' && f.storage_provider === 'r2')
+      .filter((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2')
       .sort((a, b) => (a.uploaded_at < b.uploaded_at ? 1 : -1))[0]
 
     const client = i.client as { name?: string } | null

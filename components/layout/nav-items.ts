@@ -1,4 +1,5 @@
 import {
+  PackageCheck,
   Sun,
   Home,
   Users,
@@ -54,6 +55,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/runway': Rocket,
   '/idea-lab': Lightbulb,
   '/ideas-aprobadas': CheckCircle2,
+  '/entregas': PackageCheck,
   '/pipeline': KanbanSquare,
   '/video-reviews': Film,
   '/posting': Send,

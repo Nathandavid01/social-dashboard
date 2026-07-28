@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
 import { getEntregaReviewVideos } from '@/lib/actions/entregas-review'
-import { getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
+import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { decideReview } from '@/lib/actions/pipeline-submit'
 import { useAuth } from '@/lib/context/auth-context'
 
@@ -47,7 +47,7 @@ export function ReviewOverlay({
   }, [onClose])
 
   const getPreviewUrl = useCallback(
-    async (videoFileId: string) => getR2PreviewUrl(videoFileId),
+    async (videoFileId: string) => getEntregasPreviewUrl(videoFileId),
     [],
   )
 
