@@ -3,9 +3,10 @@ import { parsePipelineStepAssignees, resolveStepAssignee } from './pipeline-step
 
 describe('parsePipelineStepAssignees', () => {
   it('keeps valid stage keys only', () => {
-    expect(parsePipelineStepAssignees({ video: 'u1', bogus: 'x', edited: 'u2' })).toEqual({
-      video: 'u1',
+    // 'video' is no longer a stage — it must be dropped like any bogus key.
+    expect(parsePipelineStepAssignees({ video: 'u1', bogus: 'x', edited: 'u2', copy: 'u3' })).toEqual({
       edited: 'u2',
+      copy: 'u3',
     })
   })
 
@@ -18,12 +19,12 @@ describe('parsePipelineStepAssignees', () => {
 describe('resolveStepAssignee', () => {
   it('resolves a configured owner', () => {
     expect(
-      resolveStepAssignee('video', { video: 'u1' }, { u1: 'Ana Torres' }),
+      resolveStepAssignee('edited', { edited: 'u1' }, { u1: 'Ana Torres' }),
     ).toEqual({ id: 'u1', name: 'Ana Torres' })
   })
 
   it('returns null when unassigned or profile missing', () => {
-    expect(resolveStepAssignee('video', {}, { u1: 'Ana' })).toBeNull()
-    expect(resolveStepAssignee('video', { video: 'u9' }, { u1: 'Ana' })).toBeNull()
+    expect(resolveStepAssignee('edited', {}, { u1: 'Ana' })).toBeNull()
+    expect(resolveStepAssignee('edited', { edited: 'u9' }, { u1: 'Ana' })).toBeNull()
   })
 })

@@ -37,10 +37,55 @@ beforeEach(() => {
 })
 
 describe('ContentPipelineBoard — batch model', () => {
-  it('renders the 4 columns in Spanish with Video first', () => {
+  it('renders the 4 columns in Spanish with Editado first and Copy after Revisión', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
-    expect(headings).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
+    expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
+  })
+
+  it('la tarjeta lista los títulos de sus videos, no barras vacías', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: 'Rutina de piernas' }),
+      idea({ id: '2', title: 'Antes y después' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Rutina de piernas')
+    expect(card.textContent).toContain('Antes y después')
+  })
+
+  it('con más de 3 videos muestra los primeros y cuántos faltan', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: 'Uno' }), idea({ id: '2', title: 'Dos' }),
+      idea({ id: '3', title: 'Tres' }), idea({ id: '4', title: 'Cuatro' }),
+      idea({ id: '5', title: 'Cinco' }),
+    ]} />)
+    const card = container.querySelector('article')!
+    expect(card.textContent).toContain('Uno')
+    expect(card.textContent).toContain('Tres')
+    expect(card.textContent).not.toContain('Cuatro')
+    expect(card.textContent).toMatch(/\+2 más/)
+  })
+
+  it('un video sin título no deja la fila en blanco', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1', title: undefined, hook: null }),
+    ]} />)
+    expect(container.querySelector('article')!.textContent).toContain('Sin título')
+  })
+
+  it('un cliente con videos en dos columnas sale en LAS DOS', () => {
+    const { container } = render(<ContentPipelineBoard ideas={[
+      idea({ id: '1' }),                                              // edited
+      idea({ id: '2', status: 'producida', approval_status: 'submitted' }), // approval
+    ]} />)
+    const cols = container.querySelectorAll('section')
+    const editado = cols[0].textContent ?? ''
+    const revision = cols[1].textContent ?? ''
+    expect(editado).toContain('Nora Fitness')
+    expect(revision).toContain('Nora Fitness')
+    // y cada tarjeta cuenta SOLO sus videos
+    expect(editado).toMatch(/1 video en el batch/)
+    expect(revision).toMatch(/1 video en el batch/)
   })
 
   it('shows one batch card per client (not per video)', () => {
@@ -52,10 +97,10 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('places the batch in the column of its least-advanced video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
-    // least advanced is grabada → Video column (1st section)
-    const videoCol = container.querySelectorAll('section')[0]
-    expect(videoCol.textContent).toContain('Nora Fitness')
+    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', approval_status: 'approved' }), idea({ id: '2', status: 'grabada' })]} />)
+    // least advanced is unsent → Editado column (1st section)
+    const editedCol = container.querySelectorAll('section')[0]
+    expect(editedCol.textContent).toContain('Nora Fitness')
   })
 
   it('shows the assignee filter and filters by person', () => {
@@ -79,7 +124,7 @@ describe('ContentPipelineBoard — batch model', () => {
   it('moves the whole batch forward, persisting all its videos', async () => {
     render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
-    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
+    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'approval'))
   })
 
   it('shows "Sin asignar" for an unassigned batch', () => {
@@ -116,7 +161,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
       sessions: [
         { index: 0, label: 'Lun 8 jun', total: 1, filled: 0, empty: 1, publishDate: '2026-06-08' },
       ],
-      nextStage: 'video',
+      nextStage: 'edited',
       stepAssignee: { id: 'u1', name: 'Ana Torres' },
     },
   ]

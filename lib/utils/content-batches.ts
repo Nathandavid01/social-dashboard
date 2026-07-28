@@ -13,14 +13,14 @@ import {
  * you work their whole period (month / week / recording session), so all of a
  * client's videos travel the pipeline together as one card.
  *
- * Short 4-column pipeline (per product decision): the process starts at the
- * video. Everything before the edit — idea, title, caption — lives inside the
- * first "Video" column, so the board reads shorter and more practical.
+ * 4-column pipeline (per product decision): the process starts when the EDITOR
+ * delivers. They pick the client and paste the Drive link, and the card enters
+ * at "Editado". Idea/recording work happens before the board and has no column.
  */
 export const BATCH_STAGES = [
-  { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -29,9 +29,9 @@ const STAGE_INDEX = Object.fromEntries(BATCH_STAGES.map((s, i) => [s.key, i])) a
 
 /** Spanish labels for pipeline stages (shared with batch view + Nuevo video dialog). */
 export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
-  video: 'Video',
-  edited: 'Edición',
-  approval: 'Aprobación',
+  edited: 'Editado',
+  approval: 'Revisión',
+  copy: 'Copy',
   publication: 'Publicación',
 }
 
@@ -124,8 +124,8 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
   return {
     total: 0,
     published: 0,
-    batchStage: 'video',
-    batchStageLabel: STAGE_LABEL_ES.video,
+    batchStage: 'edited',
+    batchStageLabel: STAGE_LABEL_ES.edited,
     metricoolScheduled: 0,
     hasMetricool: !!(cadence.metricoolBlogId && cadence.metricoolBlogId.trim()),
     nextPublish: null,
@@ -135,15 +135,20 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
 }
 
 /**
- * The pipeline stage a single idea has reached. In the short 4-column board,
- * everything before the edit (idea / title / caption / recording) collapses
- * into the first "Video" column.
+ * The pipeline stage a single idea has reached. Anything not yet sent to review
+ * sits in the first "Editado" column — the board's entry point.
  */
 export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
-  if (idea.approval_status === 'approved' || idea.approval_status === 'submitted') return 'approval'
-  if (idea.status === 'producida') return 'edited'
-  return 'video'
+  // Approved internally → Copy, until the caption exists. See computeStage in
+  // pipeline-stages.ts — the two derivations must stay in step.
+  if (idea.approval_status === 'approved') {
+    return idea.generated_caption && idea.generated_caption.trim() ? 'publication' : 'copy'
+  }
+  // Only `submitted` sits with the reviewer; `revision_needed` goes back to the
+  // editor's column. See computeStage in pipeline-stages.ts.
+  if (idea.approval_status === 'submitted') return 'approval'
+  return 'edited'
 }
 
 export interface ClientBatch {
@@ -164,7 +169,70 @@ export interface ClientBatch {
   total: number
   /** Videos already pulled ahead of the batch's column (informational). */
   ahead: number
+  /** Videos the reviewer sent back for changes — they sit in Editado, and the
+   *  card flags them so the editor sees work returned without opening it. */
+  revisionNeeded: number
   platforms: string[]
+}
+
+/**
+ * One card per (client, stage) instead of one card per client.
+ *
+ * A batch normally sits in the column of its LEAST-advanced video, which means
+ * sending one video of three to review leaves the card parked in Editado and
+ * the submission looks like it did nothing. Splitting puts the client in every
+ * column where they actually have videos, each card counting only its own.
+ *
+ * Cards keep the same clientId, so callers must key by clientId + stage.
+ */
+export function splitBatchesByStage(batches: ClientBatch[]): ClientBatch[] {
+  const out: ClientBatch[] = []
+  for (const b of batches) {
+    const byStage = new Map<BatchStageKey, IdeaWithPipeline[]>()
+    for (const i of b.ideas) {
+      if (i.status === 'descartada') continue
+      const s = ideaStage(i)
+      const arr = byStage.get(s) ?? []
+      arr.push(i)
+      byStage.set(s, arr)
+    }
+    for (const s of BATCH_STAGES) {
+      const ideas = byStage.get(s.key)
+      if (!ideas || ideas.length === 0) continue
+      const counts = emptyStageCounts()
+      counts[s.key] = ideas.length
+      out.push({
+        ...b,
+        ideas,
+        stage: s.key,
+        stageCounts: counts,
+        total: ideas.length,
+        ahead: 0,
+        revisionNeeded: ideas.filter((i) => i.approval_status === 'revision_needed').length,
+        assigneeIds: Array.from(new Set(ideas.map((i) => i.assignee?.id).filter(Boolean) as string[])),
+      })
+    }
+  }
+  return out
+}
+
+/**
+ * Short breakdown for a split batch, e.g. ["1 con cambios", "2 en Copy"].
+ *
+ * The card sits in the column of its LEAST-advanced video, so without this a
+ * client whose videos are half-approved reads as if nothing moved. The batch's
+ * own column is left out — it's the one you're already looking at. Returns []
+ * when the whole batch is in one place and there is nothing to explain.
+ */
+export function batchBreakdown(batch: ClientBatch): string[] {
+  const out: string[] = []
+  if (batch.revisionNeeded > 0) out.push(`${batch.revisionNeeded} con cambios`)
+  for (const s of BATCH_STAGES) {
+    if (s.key === batch.stage) continue
+    const n = batch.stageCounts[s.key]
+    if (n > 0) out.push(`${n} en ${STAGE_LABEL_ES[s.key]}`)
+  }
+  return out
 }
 
 /** 0..1 progress of a batch along the whole pipeline (column position). */
@@ -175,7 +243,7 @@ export function batchProgress(stage: BatchStageKey): number {
 /** Stage of a whole batch: the least-advanced active video, or publication when all are out. */
 export function batchStage(ideas: IdeaWithPipeline[]): BatchStageKey {
   const active = ideas.filter((i) => i.status !== 'descartada')
-  if (active.length === 0) return 'video'
+  if (active.length === 0) return 'edited'
   const allPublished = active.every((i) => i.published_at || i.status === 'publicada')
   if (allPublished) return 'publication'
   let min: BatchStageKey = 'publication'
@@ -218,10 +286,11 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
     if (active.length === 0) continue
     const stage = batchStage(active)
     const ahead = active.filter((i) => STAGE_INDEX[ideaStage(i)] > STAGE_INDEX[stage]).length
+    const revisionNeeded = active.filter((i) => i.approval_status === 'revision_needed').length
     const platforms = active[0]?.client?.platforms ?? []
 
     // Per-stage video count (the "status of the videos within" the batch).
-    const stageCounts = { video: 0, edited: 0, approval: 0, publication: 0 } as Record<BatchStageKey, number>
+    const stageCounts = emptyStageCounts()
     const assigneeSet = new Set<string>()
     for (const i of active) {
       stageCounts[ideaStage(i)]++
@@ -239,6 +308,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
       stageCounts,
       total: active.length,
       ahead,
+      revisionNeeded,
       platforms,
     })
   }
@@ -250,7 +320,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
  * (one card per video, not per client). Discarded videos are excluded.
  */
 export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStageKey, IdeaWithPipeline[]> {
-  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, IdeaWithPipeline[]>
+  const out = emptyStageBuckets<IdeaWithPipeline>()
   for (const i of ideas) {
     if (i.status === 'descartada') continue
     out[ideaStage(i)].push(i)
@@ -258,9 +328,26 @@ export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStage
   return out
 }
 
+/**
+ * One empty array per stage, derived from BATCH_STAGES. Do NOT hand-write this
+ * object literal — a `as Record<BatchStageKey, T[]>` cast on a literal that is
+ * missing a stage type-checks fine and then blows up at render with
+ * "Cannot read properties of undefined". Adding a column must be a one-line
+ * change to BATCH_STAGES.
+ */
+export function emptyStageBuckets<T>(): Record<BatchStageKey, T[]> {
+  return Object.fromEntries(BATCH_STAGES.map((s) => [s.key, [] as T[]])) as Record<BatchStageKey, T[]>
+}
+
+/** Zeroed counter per stage. Same reasoning as emptyStageBuckets — a hand-written
+ *  literal that misses a stage yields `undefined++` → NaN, silently. */
+export function emptyStageCounts(): Record<BatchStageKey, number> {
+  return Object.fromEntries(BATCH_STAGES.map((s) => [s.key, 0])) as Record<BatchStageKey, number>
+}
+
 /** Batches bucketed by their column. */
 export function bucketBatches(batches: ClientBatch[]): Record<BatchStageKey, ClientBatch[]> {
-  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
+  const out = emptyStageBuckets<ClientBatch>()
   for (const b of batches) out[b.stage].push(b)
   return out
 }

@@ -90,10 +90,10 @@ describe('ClientBatchView', () => {
   })
 
   it('renders the 4-stage stepper in Spanish and marks the current stage with AQUÍ', () => {
-    for (const label of ['Video', 'Edición', 'Aprobación', 'Publicación']) {
+    for (const label of ['Editado', 'Revisión', 'Copy', 'Publicación']) {
       expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
-    // Batch sits at "video": pre-edit work collapses into the first Video column.
+    // Batch sits at "edited": nothing has been sent to review yet.
     expect(screen.getByText('AQUÍ')).toBeInTheDocument()
   })
 

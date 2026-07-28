@@ -18,9 +18,9 @@ import {
 
 /** The 4 pipeline stages, in order — the same short workflow as the Kanban board. */
 export const BATCH_STAGES = [
-  { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -39,9 +39,9 @@ export function contentTypeLabel(type: string | null | undefined): string {
 
 /** Spanish labels for the 4 board stages, matching the approved design. */
 export const STAGE_LABEL_ES: Record<BatchStageKey, string> = {
-  video: 'Video',
-  edited: 'Edición',
-  approval: 'Aprobación',
+  edited: 'Editado',
+  approval: 'Revisión',
+  copy: 'Copy',
   publication: 'Publicación',
 }
 
@@ -74,15 +74,15 @@ const hasEdited = (v: BatchVideo) => v.videos.edited.length > 0
  */
 export function videoStageKey(v: BatchVideo): BatchStageKey {
   if (v.published_at || v.status === 'publicada') return 'publication'
-  if (v.approval_status === 'approved' || v.approval_status === 'submitted') return 'approval'
-  if (v.status === 'producida' || hasEdited(v)) return 'edited'
-  return 'video'
+  if (v.approval_status === 'approved') return filled(v.generated_caption) ? 'publication' : 'copy'
+  if (v.approval_status === 'submitted') return 'approval'
+  return 'edited'
 }
 
 /** Stage of the whole batch: the LEAST-advanced active video (they move together). */
 export function batchStageKey(videos: BatchVideo[]): BatchStageKey {
   const active = videos.filter((v) => v.status !== 'descartada')
-  if (active.length === 0) return 'video'
+  if (active.length === 0) return 'edited'
   if (active.every((v) => v.published_at || v.status === 'publicada')) return 'publication'
   let min: BatchStageKey = 'publication'
   for (const v of active) {
@@ -111,14 +111,24 @@ export function buildStepper(videos: BatchVideo[]): StepperStage[] {
 }
 
 /**
- * A video is "recorded" once there is real evidence of a recording. Since the
- * short board collapses pre-edit work into the Video column, we can't use the
- * column index anymore — a card in "Video" may still be unshot. Anything past
- * Video (edited/approval/publication) is recorded by definition.
+ * A video is "recorded" once there is real evidence of a recording. The board no
+ * longer has a Video column to infer this from — a card in "Editado" may still
+ * be unshot — so this reads the evidence directly. Anything already past review
+ * is recorded by definition; otherwise we need a status, a date, or a file.
+ *
+ * Do NOT reduce this to a column check: every card is now at least 'edited', so
+ * a stage-based test would mark everything recorded and silently drop the
+ * "grabar" task from My Day.
  */
 export function isRecorded(v: BatchVideo): boolean {
-  if (videoStageKey(v) !== 'video') return true
-  return v.status === 'grabada' || v.recording_date != null || hasRaw(v)
+  if (videoStageKey(v) !== 'edited') return true
+  return (
+    v.status === 'grabada' ||
+    v.status === 'producida' ||
+    v.recording_date != null ||
+    hasRaw(v) ||
+    hasEdited(v)
+  )
 }
 
 export interface CardStatus {
@@ -185,10 +195,11 @@ export function slotStatus(count: number, optional = false): SlotStatus {
 export function batchHint(videos: BatchVideo[]): { stageLabel: string; tip: string } {
   const stage = batchStageKey(videos)
   const tips: Record<BatchStageKey, string> = {
-    video:
-      'Sube el archivo grabado (raw), di de qué es el video y genera el caption con AI. Cuando todos tengan su grabación, el lote avanza a Edición.',
-    edited: 'Sube la versión editada de cada video para enviarla a Aprobación.',
-    approval: 'Envía los videos al cliente y espera su aprobación para publicar.',
+    edited:
+      'Elige el cliente y pega el link de Drive del video editado para enviarlo a revisión del equipo.',
+    approval:
+      'Un compañero con permiso de aprobación revisa cada video: lo aprueba o lo devuelve al editor con los cambios.',
+    copy: 'Videos aprobados. Escribe el copy de cada uno para dejarlos listos para Metricool.',
     publication: 'Programa o publica los videos aprobados. ¡Este lote está casi listo!',
   }
   return { stageLabel: STAGE_LABEL_ES[stage], tip: tips[stage] }

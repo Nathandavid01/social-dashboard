@@ -1,15 +1,16 @@
 import type { ContentIdea } from '@/lib/supabase/types'
 
 /**
- * The 4 columns of the short Content Pipeline board (per product decision).
- * The process starts at the video: idea / title / caption all live inside the
- * first "Video" column. A card's column is derived from the furthest milestone
- * it has reached, so the board works without a status-enum migration.
+ * The 4 columns of the Content Pipeline board (per product decision).
+ * The pipeline starts when the EDITOR delivers: they pick the client, paste the
+ * Drive link, and the card enters at "Editado". Recording/idea work happens
+ * before the board and has no column. A card's column is derived from the
+ * furthest milestone it has reached, so this needs no status-enum migration.
  */
 export const PIPELINE_STAGES = [
-  { key: 'video', label: 'Video' },
   { key: 'edited', label: 'Edited Video' },
   { key: 'approval', label: 'Approval' },
+  { key: 'copy', label: 'Copy' },
   { key: 'publication', label: 'Publication' },
 ] as const
 
@@ -28,10 +29,19 @@ export type StageInput = Pick<
  */
 export function computeStage(idea: StageInput): PipelineStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
-  if (idea.approval_status === 'approved' || idea.approval_status === 'submitted') return 'approval'
-  if (idea.status === 'producida') return 'edited'
-  return 'video'
+  // Approved by the internal reviewer: the video now waits in Copy until the
+  // caption is written, and only then is it ready to go out to Metricool.
+  if (idea.approval_status === 'approved') {
+    return filled(idea.generated_caption) ? 'publication' : 'copy'
+  }
+  // Approval holds ONLY what the reviewer can act on. A column answers "whose
+  // turn is it": once changes are asked for, the ball is back with the editor,
+  // so `revision_needed` falls through to Editado (flagged, not silent).
+  if (idea.approval_status === 'submitted') return 'approval'
+  return 'edited'
 }
+
+const filled = (s?: string | null) => !!s && s.trim().length > 0
 
 const STAGE_ORDER = PIPELINE_STAGES.map((s) => s.key)
 
@@ -46,20 +56,20 @@ export function adjacentStage(stage: PipelineStageKey, dir: 1 | -1): PipelineSta
  * The content_ideas.status that best persists a board stage. The board stages
  * are derived, not stored; this maps each of the 4 columns to the base status.
  */
-export function stageToStatus(stage: PipelineStageKey): 'grabada' | 'producida' | 'publicada' {
+export function stageToStatus(stage: PipelineStageKey): 'producida' | 'publicada' {
   switch (stage) {
-    case 'video': return 'grabada'
     case 'edited':
-    case 'approval': return 'producida'
+    case 'approval':
+    case 'copy': return 'producida'
     case 'publication': return 'publicada'
   }
 }
 
 /** Bucket a list of cards into the 4 columns, preserving input order. */
 export function bucketByStage<T extends StageInput>(ideas: T[]): Record<PipelineStageKey, T[]> {
-  const out = {
-    video: [], edited: [], approval: [], publication: [],
-  } as Record<PipelineStageKey, T[]>
+  const out = Object.fromEntries(
+    PIPELINE_STAGES.map((s) => [s.key, [] as T[]]),
+  ) as Record<PipelineStageKey, T[]>
   for (const idea of ideas) out[computeStage(idea)].push(idea)
   return out
 }
