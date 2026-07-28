@@ -93,6 +93,9 @@ const RBAC: Record<UserRole, RolePerms> = {
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
     'planning.read', 'entregas.read', 'planning.act', 'planning.assign', 'planning.move',
+    // Reparte los roles de ejecución; owner y supervisor siguen siendo del
+    // owner (lo impone canAssignRole, no esta lista).
+    'team.assign_roles',
     'cadence.read',
     'team.read',
     'automation.read',
@@ -191,4 +194,4 @@ export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   team_member: 'Rol heredado — se trata como Editor.',
 }
 
-export const ASSIGNABLE_ROLES: UserRole[] = ['owner', 'supervisor', 'editor', 'video']
+export const ASSIGNABLE_ROLES: UserRole[] = ['owner', 'supervisor', 'copy', 'editor', 'disenador', 'video']

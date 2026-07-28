@@ -56,7 +56,8 @@ describe('modelo de roles', () => {
     const h = effectiveAreaHrefs('supervisor', null)
     expect(h.has('/team')).toBe(true)
     expect(h.has('/performance')).toBe(true)
-    // Asignar roles sigue siendo de owner.
-    expect(h.has('/settings/users')).toBe(false)
+    // Ahora también gestiona usuarios, pero SOLO reparte roles de ejecución:
+    // el límite lo pone canAssignRole, no el acceso a la pantalla.
+    expect(h.has('/settings/users')).toBe(true)
   })
 })
