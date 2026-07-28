@@ -7,11 +7,11 @@ import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
-import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
+import { type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
-import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
+import { ReviewOverlay } from './review-overlay'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -64,31 +64,13 @@ export function EntregasBoard({
   const [, startMove] = useTransition()
   const { toast } = useToast()
 
-  // In-place full-screen overlay of a client's batch view (no navigation).
+  // Overlay a pantalla completa, sin navegar fuera del tablero.
   const [openClientId, setOpenClientId] = useState<string | null>(null)
-  const [openOptions, setOpenOptions] = useState<ClientBatchOpenOptions | null>(null)
-  const [batchData, setBatchData] = useState<ClientBatchData | null>(null)
-  const [batchLoading, setBatchLoading] = useState(false)
 
-  const openEntregaBatch = useCallback(async (clientId: string, opts?: ClientBatchOpenOptions) => {
+  const openEntregaBatch = useCallback((clientId: string) => {
     setOpenClientId(clientId)
-    setOpenOptions(opts ?? null)
-    setBatchData(null)
-    setBatchLoading(true)
-    const data = await getClientBatchData(clientId, opts)
-    setBatchData(data)
-    setBatchLoading(false)
   }, [])
-  const closeBatch = useCallback(() => {
-    setOpenClientId(null)
-    setOpenOptions(null)
-    setBatchData(null)
-  }, [])
-  const refetchBatch = useCallback(async () => {
-    if (!openClientId) return
-    const data = await getClientBatchData(openClientId, openOptions ?? undefined)
-    setBatchData(data)
-  }, [openClientId, openOptions])
+  const closeBatch = useCallback(() => setOpenClientId(null), [])
 
   // One card per (client, stage): a client with videos in two columns shows in
   // both, instead of parking in the least-advanced one.
@@ -253,33 +235,15 @@ export function EntregasBoard({
         </div>
       </div>
 
-      {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
+      {/* Abrir una tarjeta de Revisión abre la COLA de revisión — reproductor y
+          decisión — no la vista de lote del otro tablero, que contesta otra
+          pregunta (el periodo del cliente, no "¿este video está bien?"). */}
       {openClientId && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-          {!batchData ? (
-            <div className="flex h-screen flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
-              <button
-                onClick={closeBatch}
-                aria-label="Cerrar"
-                className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              {batchLoading ? 'Cargando…' : 'No se pudo cargar el cliente.'}
-            </div>
-          ) : (
-            <ClientBatchView
-              pipeline={batchData.pipeline}
-              plannedSlots={batchData.plannedSlots}
-              config={batchData.config}
-              members={batchData.members}
-              singleVideoMode={openOptions?.fromPlanned}
-              plannedPublishLabel={openOptions?.publishLabel ?? undefined}
-              onClose={closeBatch}
-              onChanged={refetchBatch}
-            />
-          )}
-        </div>
+        <ReviewOverlay
+          clientId={openClientId}
+          clientName={batches.find((b) => b.clientId === openClientId)?.clientName ?? 'Cliente'}
+          onClose={closeBatch}
+        />
       )}
     </div>
   )

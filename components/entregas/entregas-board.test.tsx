@@ -5,9 +5,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const push = vi.fn()
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
-const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
-vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
-vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
+vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
 
@@ -133,13 +131,13 @@ describe('EntregasBoard — batch model', () => {
     expect(container.querySelector('article')!.textContent).toContain('Atrasado')
   })
 
-  it('opens the client batch overlay in place on card click (no navigation)', async () => {
-    getClientBatchData.mockClear()
-    const { container } = render(<EntregasBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+  it('al abrir una tarjeta sale la COLA de revisión, no la vista de lote', async () => {
+    const { container } = render(<EntregasBoard ideas={[
+      idea({ client_id: 'c9', status: 'producida', approval_status: 'submitted', client: { id: 'c9', name: 'Acme', industry: null } }),
+    ]} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
+    expect(await screen.findByTestId('review-overlay')).toBeInTheDocument()
     expect(push).not.toHaveBeenCalled()
-    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
   })
 })
 
@@ -172,16 +170,6 @@ describe('EntregasBoard — planned sessions (empty slots)', () => {
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
   })
 
-  it('opens the client batch overlay when a planned card is clicked', () => {
-    getClientBatchData.mockClear()
-    const { container } = render(<EntregasBoard ideas={[]} plannedClients={planned} />)
-    fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('nd', {
-      fromPlanned: true,
-      publishDate: '2026-06-08',
-      publishLabel: 'Lun 8 jun',
-    })
-  })
 })
 
 describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
