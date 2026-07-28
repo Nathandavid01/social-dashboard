@@ -33,6 +33,20 @@ export default async function EntregasPage() {
 
   const activeClients = activeClientsRaw ?? []
 
+  /**
+   * Entregas only shows what came through THIS flow: a video with its edited
+   * file already in R2. The board reads the same content_ideas table as
+   * /pipeline, so without this filter it would inherit all 225 historical
+   * ideas — work that never passed through here and that nobody in this flow
+   * is waiting on.
+   *
+   * A row whose upload failed has no file, so it stays out until it's really
+   * delivered. Nothing is deleted; /pipeline still shows everything.
+   */
+  const entregas = ideas.filter((i) =>
+    (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'r2'),
+  )
+
   // The submit dropdown only offers what this person may work on. Convenience
   // filter — see the note in client-visibility.ts; it is not access control.
   const submitClients = clientsForUser(
@@ -43,7 +57,7 @@ export default async function EntregasPage() {
 
   return (
     <EntregasBoard
-      ideas={ideas}
+      ideas={entregas}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       editedColumnSlot={<EditorSubmitSlot clients={submitClients} />}
     />
