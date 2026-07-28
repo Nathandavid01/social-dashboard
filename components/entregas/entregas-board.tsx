@@ -12,6 +12,7 @@ import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
+import { PublishCardButton } from './publish-card-button'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -508,6 +509,13 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
             <span className="grid h-[18px] w-[18px] place-items-center rounded-full text-[9px] font-bold text-black" style={{ backgroundColor: a.dot }}>{(batch.assignee?.name ?? '?').slice(0, 1).toUpperCase()}</span>
           </div>
         </div>
+
+        {/* Publicación es la única columna con una acción externa: mandar el
+            video a Metricool. Va en la tarjeta porque no hace falta abrir nada
+            para decidirlo — el copy ya está escrito y aprobado. */}
+        {stage === 'publication' && (
+          <PublishCardButton ideaIds={batch.ideas.map((i) => i.id)} />
+        )}
       </div>
     </article>
   )

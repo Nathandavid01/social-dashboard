@@ -30,6 +30,16 @@ beforeEach(() => {
 })
 
 describe('EntregasBoard — batch model', () => {
+  it('solo las tarjetas de Publicación traen el botón de Metricool', () => {
+    render(<EntregasBoard ideas={[
+      idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy listo' }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null },
+             status: 'producida', approval_status: 'submitted' }),
+    ]} />)
+    // Un video aprobado CON copy está en Publicación; el enviado, en Revisión.
+    expect(screen.getAllByRole('button', { name: /enviar a metricool/i })).toHaveLength(1)
+  })
+
   it('renders the 4 columns in Spanish with Editado first and Copy after Revisión', () => {
     render(<EntregasBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
