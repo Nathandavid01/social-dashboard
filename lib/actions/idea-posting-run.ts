@@ -7,6 +7,7 @@ import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms } from '@/lib/utils/idea-posting-core'
+import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
 export type PostResult = { ok?: true; error?: string; skipped?: string; metricoolPostId?: number | null }
 
@@ -39,16 +40,24 @@ export async function runIdeaPost(
   // policy for `anon`, so the lookup would come back empty and every real
   // client's approval would fail to publish — while still working for a logged-in
   // staffer testing it. Resolve it with the client we were handed.
-  const { data: edited } = await supabase
+  const { data: edited, error: editedErr } = await supabase
     .from('content_idea_videos')
     .select('id, drive_file_id, storage_provider, kind')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
-    .eq('storage_provider', 'r2')
+    // Los dos tableros publican por aquí, cada uno desde SU bucket.
+    .in('storage_provider', ['r2', 'entregas-r2'])
     .neq('status', 'archived')
-    .order('created_at', { ascending: false })
+    // uploaded_at, NO created_at: esa columna no existe en content_idea_videos.
+    // La consulta fallaba y el error se descartaba, así que `edited` venía
+    // vacío y readiness concluía "falta el video editado" con el archivo ahí.
+    .order('uploaded_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  // Un fallo al buscar el video NO puede leerse como "no hay video": eso fue
+  // exactamente lo que ocultó el bug de created_at durante todo este tiempo.
+  if (editedErr) return { error: `No se pudo leer el video editado: ${editedErr.message}` }
 
   const client = (idea.client ?? {}) as {
     metricool_blog_id?: string | null
@@ -99,8 +108,14 @@ export async function runIdeaPost(
   // Public, permanent URL for the edited video. Only `edited` videos are ever
   // exposed publicly — the query above already constrains kind + provider, and
   // the Cloudflare Worker enforces the same `/edited/` restriction at the edge.
-  const editedVideo = edited as { id: string; drive_file_id: string | null }
-  const publicUrl = editedVideo.drive_file_id ? r2PublicUrl(editedVideo.drive_file_id) : null
+  const editedVideo = edited as { id: string; drive_file_id: string | null; storage_provider?: string }
+  // El dominio público depende del bucket donde vive el archivo: usar el del
+  // otro tablero devolvería un 404 que Metricool reporta como "media inválida".
+  const publicUrl = !editedVideo.drive_file_id
+    ? null
+    : editedVideo.storage_provider === 'entregas-r2'
+      ? entregasR2PublicUrl(editedVideo.drive_file_id)
+      : r2PublicUrl(editedVideo.drive_file_id)
   if (!publicUrl) {
     const msg = 'No se pudo obtener la URL pública del video editado (¿falta R2_PUBLIC_BASE_URL?)'
     await releaseClaim(msg)

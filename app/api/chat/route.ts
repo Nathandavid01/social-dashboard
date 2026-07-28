@@ -1,12 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { generateCaptionText, captionModelId } from '@/lib/llm/caption-llm'
+import { toGrokTools, toGrokMessages, parseGrokToolCalls, type GrokMessage, type AnthropicToolDef } from '@/lib/llm/tool-adapter'
+import { parseSseTextDeltas } from '@/lib/llm/grok-stream'
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
 // ── Tool definitions ─────────────────────────────────────────────────────────
+// Kept in Anthropic's shape (flat name/description/input_schema) and translated
+// to Grok's nested `function` form at call time — see lib/llm/tool-adapter.ts.
 
-const tools: Anthropic.Tool[] = [
+const tools: AnthropicToolDef[] = [
   {
     name: 'search_client',
     description: 'Search for a client by name and return their full profile including brand voice, hashtags, CTA, caption rules, and language. Use this whenever the user mentions a specific client.',
@@ -541,16 +543,12 @@ async function execGenerateCaption(clientName: string, topic: string, platform?:
       client.caption_notes && `Rules: ${client.caption_notes}`,
     ].filter(Boolean).join('\n')
 
-    const captionMsg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1200,
-      messages: [{
-        role: 'user',
-        content: `You are a professional social media copywriter for NMedia PR.\n\nCLIENT: ${client.name}\nINDUSTRY: ${client.industry || 'Business'}\nPLATFORM: ${platform || 'Instagram'}\n\n${profileLines ? `CLIENT PROFILE:\n${profileLines}\n\n` : ''}${examplesBlock}\n\nVIDEO TOPIC: "${topic}"\n\nWrite ONE complete social media caption. Output ONLY the caption text — no labels, no explanation.`,
-      }],
-    })
-
-    const caption = captionMsg.content[0].type === 'text' ? captionMsg.content[0].text.trim() : ''
+    // Same provider switch as the rest of the app (Grok by default) instead of
+    // a second, hardcoded Anthropic path for the same job.
+    const caption = (await generateCaptionText(
+      `You are a professional social media copywriter for NMedia PR.\n\nCLIENT: ${client.name}\nINDUSTRY: ${client.industry || 'Business'}\nPLATFORM: ${platform || 'Instagram'}\n\n${profileLines ? `CLIENT PROFILE:\n${profileLines}\n\n` : ''}${examplesBlock}\n\nVIDEO TOPIC: "${topic}"\n\nWrite ONE complete social media caption. Output ONLY the caption text — no labels, no explanation.`,
+      { maxTokens: 1200 },
+    )).trim()
     return `Here's the caption for **${client.name}**${examples.length > 0 ? ` (based on ${examples.length} real posts)` : ''}:\n\n\`\`\`\n${caption}\n\`\`\``
   } catch (err) {
     return `Error generating caption: ${err instanceof Error ? err.message : 'Unknown error'}`
@@ -2416,37 +2414,53 @@ export async function POST(req: NextRequest) {
     }
 
     // Tool use loop — gather tool calls first, then stream the final text response
-    const turnMessages: Anthropic.MessageParam[] = messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
-
     const system = buildSystem()
 
-    // Run tool calls (non-streaming) until we're ready to produce the final answer
-    for (let i = 0; i < 5; i++) {
-      const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        system,
-        tools,
-        messages: turnMessages,
+    // Grok speaks OpenAI's tool-calling dialect; the translation lives in
+    // lib/llm/tool-adapter.ts so it can be tested without an API key.
+    const grokMessages: GrokMessage[] = toGrokMessages(
+      messages.map((m) => ({ role: m.role, content: m.content })),
+      system,
+    )
+    const grokTools = toGrokTools(tools)
+    const model = captionModelId(process.env)
+    const apiKey = process.env.XAI_API_KEY
+    if (!apiKey) return new Response('XAI_API_KEY no está configurado', { status: 500 })
+
+    const callGrok = (stream: boolean) =>
+      fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model, max_tokens: 2000, messages: grokMessages, tools: grokTools, stream }),
       })
 
-      if (response.stop_reason !== 'tool_use') break
+    // Run tool calls until the model is ready to answer.
+    for (let i = 0; i < 5; i++) {
+      const res = await callGrok(false)
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '')
+        return new Response(`Grok API ${res.status}: ${detail.slice(0, 200)}`, { status: 502 })
+      }
+      const json = await res.json().catch(() => null)
+      const calls = parseGrokToolCalls(json)
+      if (calls.length === 0) break
 
-      const toolUseBlocks = response.content.filter((b) => b.type === 'tool_use') as Anthropic.ToolUseBlock[]
-      turnMessages.push({ role: 'assistant', content: response.content })
+      const assistantText =
+        (json as { choices?: { message?: { content?: string } }[] })?.choices?.[0]?.message?.content ?? ''
+      grokMessages.push({
+        role: 'assistant',
+        content: assistantText,
+        tool_calls: calls.map((c) => ({
+          id: c.id,
+          type: 'function' as const,
+          function: { name: c.name, arguments: JSON.stringify(c.input) },
+        })),
+      })
 
-      const toolResults: Anthropic.ToolResultBlockParam[] = await Promise.all(
-        toolUseBlocks.map(async (tu) => ({
-          type: 'tool_result' as const,
-          tool_use_id: tu.id,
-          content: await runTool(tu.name, tu.input as Record<string, unknown>),
-        }))
-      )
-
-      turnMessages.push({ role: 'user', content: toolResults })
+      const results = await Promise.all(calls.map((c) => runTool(c.name, c.input)))
+      calls.forEach((c, idx) => {
+        grokMessages.push({ role: 'tool', tool_call_id: c.id, content: results[idx] })
+      })
     }
 
     // Stream the final response token-by-token
@@ -2454,20 +2468,23 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          const stream = anthropic.messages.stream({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 2000,
-            system,
-            tools,
-            messages: turnMessages,
-          })
+          const res = await callGrok(true)
+          if (!res.ok || !res.body) throw new Error(`Grok stream ${res.status}`)
 
-          for await (const event of stream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(encoder.encode(event.delta.text))
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+
+          for (;;) {
+            const { done, value } = await reader.read()
+            if (done) break
+            // Carry the partial event forward — otherwise words get cut at the
+            // chunk boundary. See parseSseTextDeltas.
+            buffer += decoder.decode(value, { stream: true })
+            const parsed = parseSseTextDeltas(buffer)
+            buffer = parsed.rest
+            if (parsed.text) {
+              controller.enqueue(encoder.encode(parsed.text))
             }
           }
         } catch (err) {

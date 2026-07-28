@@ -40,6 +40,11 @@ function setup() {
 }
 
 describe('SubmitVideoCard — the editor uploads the real file', () => {
+  it('no pide "de qué es el video" — eso se escribe en Copy', () => {
+    setup()
+    expect(screen.queryByLabelText(/de qué es el video/i)).toBeNull()
+  })
+
   it('asks for a video file, not a link', () => {
     const { files } = setup()
     expect(files()[0]).toHaveAttribute('type', 'file')

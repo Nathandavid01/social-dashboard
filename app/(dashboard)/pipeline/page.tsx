@@ -101,7 +101,7 @@ function buildPlannedClients(
     const nextVideo = planNextVideoSlot(postingDays, new Date())
     if (!nextVideo) continue
     const metricoolPic = c.metricool_blog_id ? metricoolPics[String(c.metricool_blog_id)] : undefined
-    const nextStage: BatchStageKey = 'edited'
+    const nextStage: BatchStageKey = 'video'
     planned.push({
       clientId: c.id,
       clientName: c.name,

@@ -222,6 +222,7 @@ export function SubmitVideoCard({
                 value={row.title}
                 onChange={(e) => setRow(i, { title: e.target.value })}
               />
+
             </li>
           )
         })}

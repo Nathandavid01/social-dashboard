@@ -1,19 +1,20 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
-import { moveBatch } from '@/lib/actions/content-ideas'
-import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
-import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
-import { NewVideoDialog } from './new-video-dialog'
+import { ReviewOverlay } from './review-overlay'
+import { CopyOverlay } from './copy-overlay'
+import { PublishCardButton } from './publish-card-button'
+import { DiscardCardButton } from './discard-card-button'
+import { publishSchedule } from '@/lib/utils/publish-schedule'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -30,23 +31,25 @@ export interface PlannedClient {
   inColumnSince?: string | null
   platforms?: SocialPlatform[]
   /** Pipeline column this planned slot is waiting in (always video for now). */
-  nextStage?: BatchStageKey
+  nextStage?: EntregaStageKey
   /** Team member configured in settings for `nextStage`. */
   stepAssignee?: { id: string; name: string } | null
   sessions: PlannedSession[]
 }
 
-const STAGE_DOT: Record<BatchStageKey, string> = {
-  video: '#06b6d4', edited: '#8b5cf6', approval: '#f59e0b', publication: '#10b981',
+const STAGE_DOT: Record<EntregaStageKey, string> = {
+  edited: '#8b5cf6', approval: '#f59e0b', copy: '#ec4899', publication: '#10b981',
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({
+export function EntregasBoard({
   ideas,
   plannedClients = [],
   allClients = [],
   clientCadence = {},
   teamMembers = [],
+  editedColumnSlot,
+  postingTimes = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -55,41 +58,36 @@ export function ContentPipelineBoard({
   clientCadence?: Record<string, ClientCadence>
   /** All active team members — powers the "Asignado a" filter (not just people on batches). */
   teamMembers?: { id: string; name: string }[]
+  /** Pinned at the top of the Editado column — the editor's submit form. */
+  editedColumnSlot?: React.ReactNode
+  /** clients.posting_time — the hour Metricool will schedule at, per client. */
+  postingTimes?: Record<string, string | null>
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
+  const [overrides, setOverrides] = useState<Record<string, EntregaStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
 
-  // In-place full-screen overlay of a client's batch view (no navigation).
-  const [openClientId, setOpenClientId] = useState<string | null>(null)
-  const [openOptions, setOpenOptions] = useState<ClientBatchOpenOptions | null>(null)
-  const [batchData, setBatchData] = useState<ClientBatchData | null>(null)
-  const [batchLoading, setBatchLoading] = useState(false)
+  // Overlay a pantalla completa, sin navegar fuera del tablero.
+  // Qué se abre depende de la COLUMNA: una tarjeta en Revisión pide decidir,
+  // una en Copy pide escribir. Abrir siempre lo mismo mandaba a Revisión desde
+  // Copy, con un "no queda nada por revisar" que no explicaba nada.
+  const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey } | null>(null)
+  const openClientId = open?.clientId ?? null
 
-  const openClientBatch = useCallback(async (clientId: string, opts?: ClientBatchOpenOptions) => {
-    setOpenClientId(clientId)
-    setOpenOptions(opts ?? null)
-    setBatchData(null)
-    setBatchLoading(true)
-    const data = await getClientBatchData(clientId, opts)
-    setBatchData(data)
-    setBatchLoading(false)
+  const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey) => {
+    setOpen({ clientId, stage })
   }, [])
-  const closeBatch = useCallback(() => {
-    setOpenClientId(null)
-    setOpenOptions(null)
-    setBatchData(null)
-  }, [])
-  const refetchBatch = useCallback(async () => {
-    if (!openClientId) return
-    const data = await getClientBatchData(openClientId, openOptions ?? undefined)
-    setBatchData(data)
-  }, [openClientId, openOptions])
+  const closeBatch = useCallback(() => setOpen(null), [])
 
-  const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
+  // One card per (client, stage): a client with videos in two columns shows in
+  // both, instead of parking in the least-advanced one.
+  const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideas)), [ideas])
+
+  /** Cards share a clientId now, so anything per-card must key on stage too. */
+  const cardKey = useCallback((b: EntregaBatch) => `${b.clientId}:${b.stage}`, [])
 
   const pipelineByClient = useMemo(
     () => buildClientPipelineIndex(ideas, clientCadence),
@@ -102,7 +100,7 @@ export function ContentPipelineBoard({
   )
   const clientCounts = useMemo(() => {
     const m: Record<string, number> = {}
-    for (const b of batches) m[b.clientId] = (m[b.clientId] ?? 0) + 1
+    for (const b of batches) m[b.clientId] = (m[b.clientId] ?? 0) + b.total
     return m
   }, [batches])
   const team = useMemo(() => {
@@ -138,30 +136,18 @@ export function ContentPipelineBoard({
     return plannedClients.filter((p) => p.stepAssignee?.id === assigneeFilter)
   }, [plannedClients, assigneeFilter])
 
-  const stageOf = useCallback((b: ClientBatch) => overrides[b.clientId] ?? b.stage, [overrides])
+  const stageOf = useCallback((b: EntregaBatch) => overrides[cardKey(b)] ?? b.stage, [overrides, cardKey])
 
   const byStage = useMemo(() => {
-    const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, ClientBatch[]>
+    const out = emptyStageBuckets<EntregaBatch>()
     for (const b of visible) out[stageOf(b)].push(b)
     return out
   }, [visible, stageOf])
 
-  const moveCard = useCallback(
-    (batch: ClientBatch, dir: 1 | -1) => {
-      const cur = stageOf(batch)
-      const target = adjacentBatchStage(cur, dir)
-      if (!target) return
-      setOverrides((o) => ({ ...o, [batch.clientId]: target }))
-      startMove(async () => {
-        const res = await moveBatch(batch.ideas.map((i) => i.id), target)
-        if (res?.error) {
-          setOverrides((o) => ({ ...o, [batch.clientId]: cur }))
-          toast({ title: 'No se pudo mover el batch', description: res.error, variant: 'destructive' })
-        }
-      })
-    },
-    [stageOf, toast],
-  )
+  // En Entregas una tarjeta avanza por una DECISIÓN (enviar a revisión,
+  // aprobar, escribir el copy), no arrastrándola. Sin mover manual, la columna
+  // siempre refleja el estado real del video.
+  const moveCard = useCallback((_b: EntregaBatch, _d: 1 | -1) => {}, [])
 
   const published = visible.filter((b) => stageOf(b) === 'publication').length
 
@@ -223,11 +209,6 @@ export function ContentPipelineBoard({
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <NewVideoDialog
-            clients={allClients.length > 0 ? allClients : clients}
-            pipelineByClient={pipelineByClient}
-            clientCadence={clientCadence}
-          />
         </div>
       </header>
 
@@ -258,45 +239,34 @@ export function ContentPipelineBoard({
         className={cn('flex-1 overflow-x-auto overflow-y-hidden', grabbing ? 'cursor-grabbing select-none' : 'cursor-grab')}
       >
         <div className="flex h-full min-w-max gap-3 p-4">
-          {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+          {ENTREGA_BATCH_STAGES.map((stage) => (
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
           ))}
         </div>
       </div>
 
-      {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
-      {openClientId && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-          {!batchData ? (
-            <div className="flex h-screen flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
-              <button
-                onClick={closeBatch}
-                aria-label="Cerrar"
-                className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              {batchLoading ? 'Cargando…' : 'No se pudo cargar el cliente.'}
-            </div>
-          ) : (
-            <ClientBatchView
-              pipeline={batchData.pipeline}
-              plannedSlots={batchData.plannedSlots}
-              config={batchData.config}
-              members={batchData.members}
-              singleVideoMode={openOptions?.fromPlanned}
-              plannedPublishLabel={openOptions?.publishLabel ?? undefined}
-              onClose={closeBatch}
-              onChanged={refetchBatch}
-            />
-          )}
-        </div>
+      {/* Abrir una tarjeta de Revisión abre la COLA de revisión — reproductor y
+          decisión — no la vista de lote del otro tablero, que contesta otra
+          pregunta (el periodo del cliente, no "¿este video está bien?"). */}
+      {open && open.stage === 'approval' && (
+        <ReviewOverlay
+          clientId={open.clientId}
+          clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
+          onClose={closeBatch}
+        />
+      )}
+      {open && open.stage === 'copy' && (
+        <CopyOverlay
+          clientId={open.clientId}
+          clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
+          onClose={closeBatch}
+        />
       )}
     </div>
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -309,14 +279,17 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
         </div>
       </div>
       <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-muted/30 p-2">
+        {/* The column lives inside the drag-to-pan surface — swallow mousedown so
+            typing/selecting in the submit form doesn't start a horizontal pan. */}
+        {topSlot && <div onMouseDown={(e) => e.stopPropagation()}>{topSlot}</div>}
         {count === 0 ? (
-          <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
+          !topSlot && <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
         ) : (
           <>
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={b.clientId} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} />)}
           </>
         )}
       </div>
@@ -332,7 +305,7 @@ function PlannedSessionCard({
 }: {
   client: PlannedClient
   session: PlannedSession
-  onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void
+  onOpen: (clientId: string, stage: EntregaStageKey) => void
 }) {
   const isSingle = session.total <= 1
   const daysSinceStart = client.createdAt ? calendarDaysSince(client.createdAt) : null
@@ -345,13 +318,7 @@ function PlannedSessionCard({
         : 'Lleno'
   return (
     <article
-      onClick={() =>
-        onOpen(client.clientId, {
-          fromPlanned: true,
-          publishDate: session.publishDate ?? null,
-          publishLabel: session.publishDate ? session.label : null,
-        })
-      }
+      onClick={() => onOpen(client.clientId, 'edited')}
       className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
     >
       <div className="space-y-2.5 p-3">
@@ -406,13 +373,13 @@ function PlannedSessionCard({
                 </span>
                 <p className="min-w-0 truncate text-[10px] text-muted-foreground">
                   Le toca a <span className="font-semibold text-foreground">{client.stepAssignee.name}</span>
-                  {client.nextStage ? ` · ${STAGE_LABEL_ES[client.nextStage]}` : ''}
+                  {client.nextStage ? ` · ${ENTREGA_LABEL_ES[client.nextStage]}` : ''}
                 </p>
               </>
             ) : (
               <p className="text-[10px] text-muted-foreground">
                 Sin responsable
-                {client.nextStage ? ` · ${STAGE_LABEL_ES[client.nextStage]}` : ''}
+                {client.nextStage ? ` · ${ENTREGA_LABEL_ES[client.nextStage]}` : ''}
                 <span className="text-muted-foreground/70"> — asígnalo en Configuración</span>
               </p>
             )}
@@ -465,10 +432,8 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { batch: ClientBatch; stage: BatchStageKey; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
   const a = userAccent(batch.assignee?.id)
-  const canBack = adjacentBatchStage(stage, -1) !== null
-  const canFwd = adjacentBatchStage(stage, 1) !== null
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
   const more = batch.total - thumbs
@@ -476,12 +441,12 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
+  const breakdown = batchBreakdown(batch)
 
   return (
-    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
-      <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
-        <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(batch, -1) }} />
-        <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(batch, 1) }} />
+    <article onClick={() => onOpen(batch.clientId, stage)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+      <div className="absolute right-1.5 top-1.5 z-10 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+        <DiscardCardButton ideaIds={batch.ideas.map((i) => i.id)} clientName={batch.clientName} />
       </div>
 
       <div className="space-y-2.5 p-3 pl-3.5">
@@ -497,19 +462,39 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
                   {dlt.label}
                 </span>
               )}
+              {/* Work the reviewer handed back. Without this the editor has no
+                  signal that anything returned to their column. */}
+              {batch.revisionNeeded > 0 && (
+                <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-rose-600 dark:text-rose-400">
+                  <RotateCcw className="h-2.5 w-2.5" aria-hidden />
+                  {batch.revisionNeeded === 1 ? 'Cambios pedidos' : `${batch.revisionNeeded} con cambios`}
+                </span>
+              )}
             </div>
-            <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
+            <p className="truncate text-[10px] text-muted-foreground">
+              {batch.total} video{batch.total === 1 ? '' : 's'} en el batch
+              {/* A batch sits in its least-advanced column, so a half-approved
+                  client would otherwise read as if nothing had moved. */}
+              {breakdown.length > 0 && <span className="text-muted-foreground/70"> · {breakdown.join(' · ')}</span>}
+            </p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
 
-        {/* thumbnail strip (assignee-tinted) */}
-        <div className="flex gap-1">
-          {Array.from({ length: thumbs }).map((_, i) => (
-            <div key={i} className="h-[42px] flex-1 rounded-md" style={{ background: `linear-gradient(135deg, ${a.dot}, ${a.dot}22 70%, transparent)` }} />
+        {/* What the batch actually contains. This was a strip of empty gradient
+            blocks — it filled the card without telling you anything, and in Copy
+            you need to know WHAT you're writing about. */}
+        <ul className="space-y-0.5">
+          {batch.ideas.slice(0, 3).map((i) => (
+            <li key={i.id} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: a.dot }} />
+              <span className="truncate">{i.title?.trim() || i.hook?.trim() || 'Sin título'}</span>
+            </li>
           ))}
-          {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">+{more}</div>}
-        </div>
+          {more > 0 && (
+            <li className="pl-2.5 text-[11px] font-medium text-muted-foreground/70">+{more} más</li>
+          )}
+        </ul>
 
         {/* progress */}
         <div className="space-y-1.5">
@@ -532,6 +517,42 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
             <span className="grid h-[18px] w-[18px] place-items-center rounded-full text-[9px] font-bold text-black" style={{ backgroundColor: a.dot }}>{(batch.assignee?.name ?? '?').slice(0, 1).toUpperCase()}</span>
           </div>
         </div>
+
+        {/* Publicación es la única columna con una acción externa: mandar el
+            video a Metricool. Va en la tarjeta porque no hace falta abrir nada
+            para decidirlo — el copy ya está escrito y aprobado. */}
+        {stage === 'publication' && (
+          <div className="space-y-1.5">
+            {/* La fecha que Metricool va a RECIBIR, no la planificada:
+                buildPublishDateTime corre a +24h una fecha pasada o ausente
+                para que aprobar algo atrasado no publique al instante. Mostrar
+                publish_date aquí sería enseñar una fecha que no va a ocurrir. */}
+            {(() => {
+              const first = batch.ideas[0]
+              const s = publishSchedule(first?.publish_date ?? null, postingTime)
+              return (
+                <div className="rounded-lg border bg-muted/40 px-2 py-1.5">
+                  <p className="flex items-center gap-1 text-[9px] uppercase tracking-wide text-muted-foreground">
+                    <CalendarClock className="h-2.5 w-2.5" aria-hidden />
+                    Borrador en Metricool
+                  </p>
+                  <p className="text-[11px] font-semibold tabular-nums">{s.label}</p>
+                  {s.clamped && (
+                    <p className="text-[9px] text-amber-600 dark:text-amber-400">
+                      {first?.publish_date ? 'Fecha pasada — se corre a +24h' : 'Sin fecha planificada — se corre a +24h'}
+                    </p>
+                  )}
+                  {batch.ideas.length > 1 && (
+                    <p className="text-[9px] text-muted-foreground">
+                      Fecha del primero · {batch.ideas.length} videos en total
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
+            <PublishCardButton ideaIds={batch.ideas.map((i) => i.id)} />
+          </div>
+        )}
       </div>
     </article>
   )

@@ -79,11 +79,10 @@ describe('ReviewQueue — one video at a time', () => {
   it('sending back records the note and also moves on', async () => {
     renderQueue(three)
     await screen.findByText('Uno')
-    fireEvent.click(screen.getByRole('button', { name: /pedir cambios/i }))
     fireEvent.change(screen.getByPlaceholderText(/qué hay que cambiar/i), {
       target: { value: 'Corta los primeros 2s' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /enviar al editor/i }))
+    fireEvent.click(screen.getByRole('button', { name: /pedir cambios/i }))
     await waitFor(() =>
       expect(onDecide).toHaveBeenCalledWith('v1', 'request_changes', 'Corta los primeros 2s'),
     )

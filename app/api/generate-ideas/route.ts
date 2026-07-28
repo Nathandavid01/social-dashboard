@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import type { ContentIdeaType } from '@/lib/supabase/types'
 import { getPosts, formatDateParam } from '@/lib/metricool/client'
@@ -6,17 +5,16 @@ import {
   buildGenerationPrompt,
   buildCritiquePrompt,
   selectTopPosts,
+  parseReferenceIdeas,
   type PerfPost,
   type IdeaGenInput,
 } from '@/lib/utils/idea-prompt'
 import { getIdeaFeedbackForPrompt } from '@/lib/actions/idea-feedback'
+import { runIdeaModel, ideaModelId } from '@/lib/llm/idea-llm'
 
-// Upgraded to Opus with adaptive thinking: the Idea Lab strategizes before it
-// writes, then critiques its own draft (two-pass) — the difference between
-// generic output and expert-level ideas.
-const MODEL = 'claude-opus-4-8'
-const EFFORT = 'medium' as const
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// The Idea Lab strategizes before it writes, then critiques its own draft
+// (two-pass). The provider is resolved per request — Grok by default, same
+// switch the captions use. See lib/llm/idea-llm-core.ts.
 
 interface GeneratedIdea {
   content_type: ContentIdeaType
@@ -79,17 +77,9 @@ async function fetchTopPosts(blogId: string | null | undefined): Promise<PerfPos
   }
 }
 
-/** Call the model and return the first text block (skips thinking blocks). */
+/** Call the configured model (Grok by default) and return its text. */
 async function runModel(prompt: string, maxTokens: number): Promise<string> {
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: maxTokens,
-    thinking: { type: 'adaptive' },
-    output_config: { effort: EFFORT },
-    messages: [{ role: 'user', content: prompt }],
-  })
-  const textBlock = message.content.find((b) => b.type === 'text')
-  return textBlock && textBlock.type === 'text' ? textBlock.text.trim() : ''
+  return runIdeaModel(prompt, maxTokens)
 }
 
 /** Parse a strict-JSON idea array, tolerating an accidental code fence. */
@@ -122,6 +112,7 @@ export async function POST(req: NextRequest) {
       contentTypes,        // e.g. ['R', 'P', 'C']
       theme,               // optional brief/topic
       trends,              // optional string[] of trending topics/audio to riff on
+      referenceIdeas,      // optional raw textarea blob of ideas to learn from
       count = 5,           // how many ideas
     } = await req.json()
 
@@ -132,7 +123,12 @@ export async function POST(req: NextRequest) {
       ? trends.map((t) => String(t).trim()).filter(Boolean).slice(0, 20)
       : []
 
-    const typesLabel: Record<string, string> = { R: 'Reel', P: 'Static Post', C: 'Carousel', S: 'Story' }
+    // #5 Reference ideas: hand-written examples for this run only.
+    const referenceList = parseReferenceIdeas(
+      typeof referenceIdeas === 'string' ? referenceIdeas : null
+    )
+
+    const typesLabel: Record<string, string> ={ R: 'Reel', P: 'Static Post', C: 'Carousel', S: 'Story' }
     const allowedTypes: ContentIdeaType[] = (Array.isArray(contentTypes) && contentTypes.length > 0)
       ? contentTypes
       : ['R', 'P', 'C']
@@ -167,6 +163,7 @@ export async function POST(req: NextRequest) {
       recentTexts,
       approvedExamples: feedback.approved,
       rejectedExamples: feedback.rejected,
+      referenceIdeas: referenceList,
     }
 
     // Pass 1 — strategize + generate.
@@ -193,10 +190,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ideas,
-      model: MODEL,
+      model: ideaModelId(process.env),
       refined,
       examplesUsed: recentTexts.length,
       winnersUsed: winners.length,
+      referenceIdeasUsed: referenceList.length,
     })
   } catch (error) {
     console.error('Idea generation error:', error)

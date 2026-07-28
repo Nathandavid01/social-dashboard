@@ -32,10 +32,10 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
     expect(container.querySelector('video')).toHaveAttribute('src', 'https://cdn.example.com/v1.mp4')
   })
 
-  it('a reviewer gets both decisions', () => {
+  it('el revisor ve las dos decisiones; devolver espera al comentario', () => {
     renderPanel()
     expect(screen.getByRole('button', { name: /aprobar/i })).toBeEnabled()
-    expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeDisabled()
   })
 
   it('approving reports the decision', () => {
@@ -44,15 +44,39 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
     expect(onDecision).toHaveBeenCalledWith('approve', '')
   })
 
-  it('sending it back requires a note saying what to change', () => {
+  it('la caja de comentarios está a la vista, sin tener que abrirla', () => {
     renderPanel()
+    expect(screen.getByPlaceholderText(/qué hay que cambiar/i)).toBeInTheDocument()
+  })
+
+  it('no se puede devolver sin decir qué cambiar', () => {
+    renderPanel()
+    expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeDisabled()
+    fireEvent.change(screen.getByPlaceholderText(/qué hay que cambiar/i), {
+      target: { value: 'Corta los primeros 2s' },
+    })
+    expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeEnabled()
+  })
+
+  it('devolver manda la nota escrita', () => {
+    renderPanel()
+    fireEvent.change(screen.getByPlaceholderText(/qué hay que cambiar/i), {
+      target: { value: 'Corta los primeros 2s' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /pedir cambios/i }))
-    // The note box opens; nothing is reported until there is a reason.
-    expect(onDecision).not.toHaveBeenCalled()
-    const box = screen.getByPlaceholderText(/qué hay que cambiar/i)
-    fireEvent.change(box, { target: { value: 'Corta los primeros 2s' } })
-    fireEvent.click(screen.getByRole('button', { name: /enviar al editor/i }))
     expect(onDecision).toHaveBeenCalledWith('request_changes', 'Corta los primeros 2s')
+  })
+
+  it('solo espacios no cuenta como comentario', () => {
+    renderPanel()
+    fireEvent.change(screen.getByPlaceholderText(/qué hay que cambiar/i), { target: { value: '   ' } })
+    expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeDisabled()
+  })
+
+  it('aprobar no exige comentario', () => {
+    renderPanel()
+    fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
+    expect(onDecision).toHaveBeenCalledWith('approve', '')
   })
 
   it('an editor sees the state but cannot decide', () => {
