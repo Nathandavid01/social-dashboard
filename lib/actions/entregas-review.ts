@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import type { QueueVideo } from '@/components/review/review-queue'
 
 /**
@@ -15,10 +15,10 @@ import type { QueueVideo } from '@/components/review/review-queue'
 export async function getEntregaReviewVideos(
   clientId: string,
 ): Promise<{ videos?: QueueVideo[]; error?: string }> {
-  try {
-    await requirePermission('entregas.read')
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  // Cualquiera de las dos pantallas del flujo: el editor vive en /revision y
+  // el copy en /entregas, pero ambos necesitan mirar el mismo video.
+  if (!(await currentUserHas('revision.read')) && !(await currentUserHas('entregas.read'))) {
+    return { error: 'No autorizado' }
   }
 
   const supabase = await createClient()

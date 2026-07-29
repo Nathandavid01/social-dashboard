@@ -3,7 +3,7 @@
 import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import {
   entregasR2Client,
   entregasR2Bucket,
@@ -94,10 +94,10 @@ export async function registerEntregasVideo(input: {
 export async function getEntregasPreviewUrl(
   videoId: string,
 ): Promise<{ url?: string; error?: string }> {
-  try {
-    await requirePermission('entregas.read')
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  // Cualquiera de las dos pantallas del flujo: el editor vive en /revision y
+  // el copy en /entregas, pero ambos necesitan mirar el mismo video.
+  if (!(await currentUserHas('revision.read')) && !(await currentUserHas('entregas.read'))) {
+    return { error: 'No autorizado' }
   }
 
   const supabase = await createClient()

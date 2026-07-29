@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 
 /**
  * Data for the Copy stage: approved videos still missing their caption, plus
@@ -38,10 +38,10 @@ export interface CopyStageData {
 export async function getEntregaCopyVideos(
   clientId: string,
 ): Promise<{ data?: CopyStageData; error?: string }> {
-  try {
-    await requirePermission('entregas.read')
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  // Cualquiera de las dos pantallas del flujo: el editor vive en /revision y
+  // el copy en /entregas, pero ambos necesitan mirar el mismo video.
+  if (!(await currentUserHas('revision.read')) && !(await currentUserHas('entregas.read'))) {
+    return { error: 'No autorizado' }
   }
 
   const supabase = await createClient()
