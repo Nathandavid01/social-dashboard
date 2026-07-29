@@ -40,7 +40,7 @@ const PLATFORMS: { value: SocialPlatform; label: string }[] = [
 
 interface ClientFormProps {
   client?: Client
-  teamMembers: Pick<Profile, 'id' | 'full_name' | 'email'>[]
+  teamMembers: Pick<Profile, 'id' | 'full_name' | 'email' | 'role'>[]
 }
 
 export function ClientForm({ client, teamMembers }: ClientFormProps) {
@@ -58,6 +58,7 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
       // away (antes nacían en "onboarding" y había que activarlos a mano).
       status: client?.status ?? 'active',
       assigned_to: client?.assigned_to ?? null,
+      assigned_designer: client?.assigned_designer ?? null,
       notes: client?.notes ?? '',
       brand_voice: client?.brand_voice ?? '',
       caption_language: (client?.caption_language as 'spanish' | 'english' | 'spanglish') ?? 'spanish',
@@ -182,26 +183,59 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
 
         <FormField
           control={form.control}
-          name="assigned_to"
+          name="assigned_designer"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Miembro del Equipo Asignado</FormLabel>
+              <FormLabel>Diseñador asignado</FormLabel>
               <Select
                 onValueChange={(val) => field.onChange(val === 'unassigned' ? null : val)}
                 defaultValue={field.value ?? 'unassigned'}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona miembro del equipo" />
+                    <SelectValue placeholder="Selecciona un diseñador" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="unassigned">Sin asignar</SelectItem>
-                  {teamMembers.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.full_name || member.email}
-                    </SelectItem>
-                  ))}
+                  {teamMembers
+                    .filter((m) => m.role === 'disenador' || m.role === 'supervisor' || m.role === 'owner')
+                    .map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.full_name || member.email}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="assigned_to"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Editor asignado</FormLabel>
+              <Select
+                onValueChange={(val) => field.onChange(val === 'unassigned' ? null : val)}
+                defaultValue={field.value ?? 'unassigned'}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un editor" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="unassigned">Sin asignar</SelectItem>
+                  {teamMembers
+                    .filter((m) => m.role === 'editor' || m.role === 'supervisor' || m.role === 'owner')
+                    .map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.full_name || member.email}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               <FormMessage />

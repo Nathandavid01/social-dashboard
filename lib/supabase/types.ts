@@ -123,7 +123,10 @@ export interface Client {
   industry: string | null
   platforms: SocialPlatform[]
   status: ClientStatus
+  /** Editor asignado. */
   assigned_to: string | null
+  /** Diseñador asignado — columna aparte: no es la misma persona. */
+  assigned_designer?: string | null
   notes: string | null
   brand_voice: string | null
   caption_language: string | null

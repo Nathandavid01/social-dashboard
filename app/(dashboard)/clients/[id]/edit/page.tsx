@@ -16,7 +16,7 @@ export default async function EditClientPage({
 
   const { data: teamMembers } = await supabase
     .from('profiles')
-    .select('id, full_name, email')
+    .select('id, full_name, email, role')
     .order('full_name')
 
   return (

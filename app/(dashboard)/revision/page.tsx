@@ -20,7 +20,7 @@ export default async function RevisionPage() {
 
   const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
-    supabase.from('clients').select('id, name, assigned_to, posting_time').eq('status', 'active').order('name'),
+    supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time').eq('status', 'active').order('name'),
     getCurrentRole(),
     supabase.auth.getUser(),
   ])
@@ -36,7 +36,7 @@ export default async function RevisionPage() {
   // El tablero también se acota: filtrar solo el desplegable dejaba al editor
   // viendo el trabajo de los demás, que no puede tocar y le estorba para ver
   // el suyo.
-  const asignables = activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null }))
+  const asignables = activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null, assigned_designer: c.assigned_designer ?? null }))
   const permitidos = visibleClientIds(role, user?.id ?? null, asignables)
   const mios = permitidos === null
     ? entregados

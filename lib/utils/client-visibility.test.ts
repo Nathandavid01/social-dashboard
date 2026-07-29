@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { clientsForUser, visibleClientIds, type AssignableClient } from './client-visibility'
 
 const CLIENTS: AssignableClient[] = [
-  { id: 'c1', name: 'Nora Fitness', assigned_to: 'ana' },
-  { id: 'c2', name: 'Gym Titan', assigned_to: 'beto' },
-  { id: 'c3', name: 'Surf School', assigned_to: null },
+  { id: 'c1', name: 'Nora Fitness', assigned_to: 'ana', assigned_designer: null },
+  { id: 'c2', name: 'Gym Titan', assigned_to: 'beto', assigned_designer: null },
+  { id: 'c3', name: 'Surf School', assigned_to: null, assigned_designer: null },
 ]
 
 const names = (cs: { name: string }[]) => cs.map((c) => c.name)
@@ -64,5 +64,25 @@ describe('visibleClientIds — qué trabajo ve cada quien', () => {
 
   it('un cliente sin asignar no es de nadie', () => {
     expect(visibleClientIds('editor', 'ana', [CLIENTS[2]])).toEqual(new Set())
+  })
+})
+
+describe('editor y diseñador no se pisan', () => {
+  const MIXTO: AssignableClient[] = [
+    { id: 'c1', name: 'Solo editor',    assigned_to: 'ana',  assigned_designer: null },
+    { id: 'c2', name: 'Solo diseñador', assigned_to: null,   assigned_designer: 'dani' },
+    { id: 'c3', name: 'Los dos',        assigned_to: 'ana',  assigned_designer: 'dani' },
+  ]
+
+  it('el editor ve donde es EDITOR, no donde hay diseñador', () => {
+    expect(visibleClientIds('editor', 'ana', MIXTO)).toEqual(new Set(['c1', 'c3']))
+  })
+
+  it('el diseñador ve donde es DISEÑADOR', () => {
+    expect(visibleClientIds('disenador', 'dani', MIXTO)).toEqual(new Set(['c2', 'c3']))
+  })
+
+  it('ser diseñador de un cliente no te da lo que edita otro', () => {
+    expect(visibleClientIds('disenador', 'ana', MIXTO)).toEqual(new Set())
   })
 })

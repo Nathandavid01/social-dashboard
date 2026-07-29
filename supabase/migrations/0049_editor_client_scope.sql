@@ -20,7 +20,10 @@ create policy "clients: read scoped by assignment"
   on public.clients for select to authenticated
   using (
     coalesce(public.get_my_role()::text, '') not in ('editor', 'disenador')
-    or assigned_to = auth.uid()
+    -- Cada rol mira SU columna: cruzarlas haría que el editor viera lo del
+    -- diseñador y al revés.
+    or (public.get_my_role()::text = 'editor'    and assigned_to = auth.uid())
+    or (public.get_my_role()::text = 'disenador' and assigned_designer = auth.uid())
     or created_by = auth.uid()
   );
 
@@ -32,7 +35,9 @@ create policy "content_ideas: read scoped by client assignment"
   using (
     coalesce(public.get_my_role()::text, '') not in ('editor', 'disenador')
     or client_id in (
-      select id from public.clients where assigned_to = auth.uid()
+      select id from public.clients
+      where (public.get_my_role()::text = 'editor'    and assigned_to = auth.uid())
+         or (public.get_my_role()::text = 'disenador' and assigned_designer = auth.uid())
     )
     -- Lo que el propio editor creó sigue siendo suyo aunque el cliente cambie
     -- de manos: si no, entregar un video y perder el cliente al día siguiente
@@ -56,6 +61,10 @@ create policy "content_idea_videos: read follows the idea"
     or idea_id in (
       select i.id from public.content_ideas i
       where i.created_by = auth.uid()
-         or i.client_id in (select id from public.clients where assigned_to = auth.uid())
+         or i.client_id in (
+              select id from public.clients
+              where (public.get_my_role()::text = 'editor'    and assigned_to = auth.uid())
+                 or (public.get_my_role()::text = 'disenador' and assigned_designer = auth.uid())
+            )
     )
   );

@@ -6,6 +6,7 @@ export const clientSchema = z.object({
   platforms: z.array(z.enum(['instagram', 'facebook', 'tiktok', 'linkedin'])).min(1, 'Select at least one platform'),
   status: z.enum(['active', 'paused', 'onboarding']),
   assigned_to: z.string().uuid().optional().nullable(),
+  assigned_designer: z.string().uuid().optional().nullable(),
   notes: z.string().max(2000).optional(),
   brand_voice: z.string().max(500).optional(),
   caption_language: z.enum(['spanish', 'english', 'spanglish']),

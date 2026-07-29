@@ -16,7 +16,17 @@ import type { UserRole } from '@/lib/supabase/types'
 export interface AssignableClient {
   id: string
   name: string
+  /** Editor asignado. */
   assigned_to: string | null
+  /** Diseñador asignado — columna distinta: no es la misma persona. */
+  assigned_designer?: string | null
+}
+
+/** El cliente es de esta persona según SU rol: el editor mira assigned_to, el
+ *  diseñador assigned_designer. Cruzarlos haría que cada uno viera el trabajo
+ *  del otro. */
+function esSuyo(c: AssignableClient, role: UserRole, userId: string): boolean {
+  return role === 'disenador' ? c.assigned_designer === userId : c.assigned_to === userId
 }
 
 /** Roles that work the whole roster rather than their own assignments. */
@@ -37,7 +47,7 @@ export function visibleClientIds(
   if (!role) return new Set()
   if (SEES_ALL.includes(role) || role === 'copy') return null
   if (!userId) return new Set()
-  return new Set(clients.filter((c) => c.assigned_to === userId).map((c) => c.id))
+  return new Set(clients.filter((c) => esSuyo(c, role, userId)).map((c) => c.id))
 }
 
 export function clientsForUser<T extends AssignableClient>(
@@ -49,5 +59,5 @@ export function clientsForUser<T extends AssignableClient>(
   if (!role) return []
   if (SEES_ALL.includes(role)) return clients
   if (!userId) return []
-  return clients.filter((c) => c.assigned_to === userId)
+  return clients.filter((c) => esSuyo(c, role, userId))
 }
