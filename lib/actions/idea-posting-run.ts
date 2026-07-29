@@ -7,6 +7,7 @@ import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms } from '@/lib/utils/idea-posting-core'
+import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
 export type PostResult = { ok?: true; error?: string; skipped?: string; metricoolPostId?: number | null }
@@ -21,7 +22,20 @@ export async function runIdeaPost(
   supabase: SupabaseClient,
   ideaId: string,
   userId: string | null,
+  /**
+   * Naive "YYYY-MM-DDTHH:MM" chosen by hand on the Publicación card. Re-validated
+   * here — the browser's copy of the rule is a convenience, not the authority.
+   */
+  scheduleOverride?: string | null,
 ): Promise<PostResult> {
+  // Before any DB work: a bad override must not burn the posting claim.
+  let overrideIso: string | null = null
+  if (scheduleOverride) {
+    const checked = validateScheduleOverride(scheduleOverride)
+    if (!checked.ok) return { error: checked.error }
+    overrideIso = checked.iso
+  }
+
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
@@ -133,7 +147,8 @@ export async function runIdeaPost(
     return { error: msg }
   }
 
-  const scheduledFor = buildPublishDateTime(idea.publish_date as string | null, client.posting_time)
+  // A hand-picked time wins over the planned date + the client's posting_time.
+  const scheduledFor = overrideIso ?? buildPublishDateTime(idea.publish_date as string | null, client.posting_time)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   try {
@@ -171,7 +186,7 @@ export async function runIdeaPost(
       ideaId,
       userId,
       action: 'posted_to_metricool',
-      metadata: { platforms, scheduledFor, autoPublish: true, metricoolPostId: postId },
+      metadata: { platforms, scheduledFor, scheduleOverridden: overrideIso != null, autoPublish: true, metricoolPostId: postId },
     })
 
     revalidatePath('/pipeline')

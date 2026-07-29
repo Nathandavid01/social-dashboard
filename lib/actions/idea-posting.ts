@@ -11,9 +11,11 @@ const AUTOPOST_ON_APPROVAL_DISABLED = process.env.METRICOOL_AUTOPOST_ON_APPROVAL
 
 /**
  * Manual "Publicar a Metricool" — gated by `posting.publish`. Publishes a
- * fully-ready idea (caption + edited video + approved) on its planned date.
+ * fully-ready idea (caption + edited video + approved) on its planned date, or
+ * at `scheduleOverride` ("YYYY-MM-DDTHH:MM", Puerto Rico wall-clock) when the
+ * Publicación card picked a time by hand.
  */
-export async function publishIdeaToMetricool(ideaId: string): Promise<Result> {
+export async function publishIdeaToMetricool(ideaId: string, scheduleOverride?: string | null): Promise<Result> {
   try {
     await requirePermission('posting.publish')
   } catch (err) {
@@ -21,7 +23,7 @@ export async function publishIdeaToMetricool(ideaId: string): Promise<Result> {
   }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  return runIdeaPost(supabase, ideaId, user?.id ?? null)
+  return runIdeaPost(supabase, ideaId, user?.id ?? null, scheduleOverride)
 }
 
 /** Outcome of the best-effort auto-post, so the approval UI can tell the user. */

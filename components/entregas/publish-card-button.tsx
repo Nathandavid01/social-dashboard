@@ -21,9 +21,12 @@ import { useHasPermission } from '@/components/auth/role-gate'
 export function PublishCardButton({
   ideaIds,
   disabled,
+  scheduleOverride,
 }: {
   ideaIds: string[]
   disabled?: boolean
+  /** Hand-picked "YYYY-MM-DDTHH:MM" (PR wall-clock) — applies to every video in the card. */
+  scheduleOverride?: string
 }) {
   const router = useRouter()
   const { toast } = useToast()
@@ -44,7 +47,7 @@ export function PublishCardButton({
     const errors: string[] = []
 
     for (const id of ideaIds) {
-      const res = await publishIdeaToMetricool(id)
+      const res = await publishIdeaToMetricool(id, scheduleOverride)
       if (res.error) errors.push(res.error)
       else if (res.skipped) errors.push(res.skipped)
       else ok++
