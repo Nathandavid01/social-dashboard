@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Link2, AlertCircle, Send, Film, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DIAS, type DiaKey } from '@/lib/entregas/dias'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,6 +40,8 @@ export interface SubmitVideoItem {
 
 export interface SubmitVideoPayload {
   clientId: string
+  /** Día de la semana para el que se entrega el lote. */
+  dia: DiaKey
   videos: SubmitVideoItem[]
 }
 
@@ -78,6 +81,7 @@ export function SubmitVideoCard({
   pending?: boolean
 }) {
   const [clientId, setClientId] = useState('')
+  const [dia, setDia] = useState<DiaKey | null>(null)
   const [rows, setRows] = useState<Row[]>([emptyRow()])
 
   const clientName = clients.find((c) => c.id === clientId)?.name ?? 'Cliente'
@@ -98,7 +102,7 @@ export function SubmitVideoCard({
   }, [rows])
 
   const readyCount = checks.filter((c) => c.ok).length
-  const canSubmit = !!clientId && readyCount === rows.length && !pending
+  const canSubmit = !!clientId && dia !== null && readyCount === rows.length && !pending
 
   function setCount(raw: string) {
     const n = Number.parseInt(raw, 10)
@@ -116,9 +120,10 @@ export function SubmitVideoCard({
   }
 
   function submit() {
-    if (!canSubmit) return
+    if (!canSubmit || dia === null) return
     onSubmit({
       clientId,
+      dia,
       videos: rows.map((r, i) => ({
         file: r.file!,
         driveLink: r.link.trim() || null,
@@ -126,6 +131,7 @@ export function SubmitVideoCard({
       })),
     })
     setClientId('')
+    setDia(null)
     setRows([emptyRow()])
   }
 
@@ -150,6 +156,29 @@ export function SubmitVideoCard({
             )}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-[11px]">¿Para qué día? *</Label>
+        <div className="flex flex-wrap gap-1">
+          {DIAS.map((d) => (
+            <button
+              key={d.key}
+              type="button"
+              aria-label={d.label}
+              aria-pressed={dia === d.key}
+              onClick={() => setDia(d.key)}
+              className={cn(
+                'rounded-md border px-2 py-1 text-[11px] font-medium transition',
+                dia === d.key
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-muted-foreground hover:bg-muted',
+              )}
+            >
+              {d.short}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-1.5">

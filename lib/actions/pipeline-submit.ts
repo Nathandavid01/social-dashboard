@@ -20,6 +20,8 @@ export async function createSubmittedIdea(input: {
   title: string
   /** "De qué es el video" — the only field the caption AI requires. */
   hook?: string | null
+  /** YYYY-MM-DD del día para el que se entrega. */
+  publishDate?: string | null
   /**
    * Optional Drive reference for the reviewer. content_ideas has no free-text
    * column for it (verified against the live schema), so it rides in
@@ -53,6 +55,7 @@ export async function createSubmittedIdea(input: {
       status: 'producida',
       approval_status: 'submitted' satisfies IdeaApprovalStatus,
       submitted_at: new Date().toISOString(),
+      publish_date: input.publishDate || null,
       created_by: user?.id ?? null,
       visual_brief: input.driveLink?.trim()
         ? `Referencia en Drive: ${input.driveLink.trim()}`

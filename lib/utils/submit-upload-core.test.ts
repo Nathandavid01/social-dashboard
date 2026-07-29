@@ -12,6 +12,7 @@ const input: SubmitInput = {
   title: 'Reel de abril',
   hook: 'Un socio cuenta su progreso',
   driveLink: null,
+  publishDate: '2026-08-03',
   file: file(),
 }
 

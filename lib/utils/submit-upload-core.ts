@@ -13,6 +13,7 @@ export interface SubmitDeps {
     title: string
     hook: string | null
     driveLink: string | null
+    publishDate: string | null
   }) => Promise<{ idea?: { id: string }; error?: string }>
   getUploadUrl: (input: {
     ideaId: string
@@ -36,6 +37,8 @@ export interface SubmitInput {
   title: string
   hook: string | null
   driveLink: string | null
+  /** YYYY-MM-DD del día de entrega. */
+  publishDate: string | null
   file: File
 }
 
@@ -66,6 +69,7 @@ export async function submitOneVideo(
       title: input.title,
       hook: input.hook,
       driveLink: input.driveLink,
+      publishDate: input.publishDate,
     })
     if (created.error || !created.idea?.id) {
       return { ok: false, stage: 'creando', error: created.error ?? 'No se pudo crear el video' }

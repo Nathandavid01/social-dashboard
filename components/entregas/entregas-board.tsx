@@ -16,6 +16,7 @@ import { PublishCardButton } from './publish-card-button'
 import { DiscardCardButton } from './discard-card-button'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
 import { visibleEntregaStages } from '@/lib/entregas/visible-stages'
+import { DIAS, diaDeFecha, type DiaKey } from '@/lib/entregas/dias'
 import { useAuth } from '@/lib/context/auth-context'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
@@ -71,6 +72,11 @@ export function EntregasBoard({
   const { role } = useAuth()
   const visibleStages = useMemo(() => visibleEntregaStages(role), [role])
 
+  // La operación es POR DÍA: cada día tiene su tablero completo. Sin esto,
+  // el lunes y el jueves se mezclan en las mismas columnas y nadie sabe qué
+  // toca hoy.
+  const [dia, setDia] = useState<DiaKey | 'sin'>(DIAS[0].key)
+
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -92,7 +98,26 @@ export function EntregasBoard({
 
   // One card per (client, stage): a client with videos in two columns shows in
   // both, instead of parking in the least-advanced one.
-  const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideas)), [ideas])
+  const ideasDelDia = useMemo(
+    () => ideas.filter((i) => {
+      const d = diaDeFecha(i.publish_date as string | null)
+      return dia === 'sin' ? d === null : d === dia
+    }),
+    [ideas, dia],
+  )
+
+  /** Cuántos videos hay en cada día, para que la pestaña lo diga sin entrar. */
+  const conteoPorDia = useMemo(() => {
+    const m: Record<string, number> = { sin: 0 }
+    for (const i of ideas) {
+      const d = diaDeFecha(i.publish_date as string | null)
+      const k = d === null ? 'sin' : String(d)
+      m[k] = (m[k] ?? 0) + 1
+    }
+    return m
+  }, [ideas])
+
+  const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideasDelDia)), [ideasDelDia])
 
   /** Cards share a clientId now, so anything per-card must key on stage too. */
   const cardKey = useCallback((b: EntregaBatch) => `${b.clientId}:${b.stage}`, [])
@@ -236,6 +261,54 @@ export function EntregasBoard({
       </div>
 
       {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}
+      {/* La operación es por día: cada pestaña es su propio tablero. */}
+      <div className="flex flex-wrap items-center gap-1 border-b border-border px-4 pb-2">
+        {DIAS.map((d) => (
+          <button
+            key={d.key}
+            onClick={() => setDia(d.key)}
+            aria-pressed={dia === d.key}
+            aria-label={d.label}
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition',
+              dia === d.key
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            {d.label}
+            {(conteoPorDia[String(d.key)] ?? 0) > 0 && (
+              <span className={cn(
+                'rounded-full px-1.5 text-[10px] font-semibold tabular-nums',
+                dia === d.key ? 'bg-black/20' : 'bg-muted',
+              )}>
+                {conteoPorDia[String(d.key)]}
+              </span>
+            )}
+          </button>
+        ))}
+        {/* Un video sin fecha no desaparece del tablero: se ve aquí y se puede
+            arreglar, en vez de existir en la base y en ninguna pestaña. */}
+        {(conteoPorDia.sin ?? 0) > 0 && (
+          <button
+            onClick={() => setDia('sin')}
+            aria-pressed={dia === 'sin'}
+            aria-label="Sin día"
+            className={cn(
+              'ml-auto flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition',
+              dia === 'sin'
+                ? 'bg-amber-500 text-black'
+                : 'text-amber-600 hover:bg-amber-500/10 dark:text-amber-400',
+            )}
+          >
+            Sin día
+            <span className="rounded-full bg-black/20 px-1.5 text-[10px] font-semibold tabular-nums">
+              {conteoPorDia.sin}
+            </span>
+          </button>
+        )}
+      </div>
+
       <div
         ref={scrollRef}
         data-testid="pipeline-scroll"
