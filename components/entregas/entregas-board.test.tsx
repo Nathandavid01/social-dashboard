@@ -38,9 +38,23 @@ beforeEach(() => {
   push.mockClear()
 })
 
+describe('EntregasBoard — las columnas las define la ruta', () => {
+  it('Revisión monta entrega y revisión', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[idea()]} />)
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
+      .toEqual(['Editado', 'Revisión'])
+  })
+
+  it('Entregas monta copy y publicación', () => {
+    render(<EntregasBoard stages={['copy','publication']} ideas={[idea()]} />)
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
+      .toEqual(['Copy', 'Publicación'])
+  })
+})
+
 describe('EntregasBoard — la operación es por día', () => {
   it('cada día es su propio tablero: el lunes no enseña lo del martes', () => {
-    render(<EntregasBoard ideas={[
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', publish_date: '2026-08-03' }),                                    // lunes
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: '2026-08-04' }), // martes
     ]} />)
@@ -53,7 +67,7 @@ describe('EntregasBoard — la operación es por día', () => {
   })
 
   it('la pestaña dice cuántos videos hay sin tener que entrar', () => {
-    render(<EntregasBoard ideas={[
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', publish_date: '2026-08-04' }),
       idea({ id: '2', publish_date: '2026-08-04' }),
     ]} />)
@@ -62,7 +76,7 @@ describe('EntregasBoard — la operación es por día', () => {
   })
 
   it('un video sin fecha no desaparece: cae en "Sin día"', () => {
-    render(<EntregasBoard ideas={[idea({ id: '1', publish_date: null })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: null })]} />)
     const sinDia = screen.getByRole('button', { name: /sin día/i })
     expect(sinDia).toBeInTheDocument()
     fireEvent.click(sinDia)
@@ -70,53 +84,26 @@ describe('EntregasBoard — la operación es por día', () => {
   })
 
   it('sin videos sueltos no hay pestaña "Sin día"', () => {
-    render(<EntregasBoard ideas={[idea({ id: '1', publish_date: '2026-08-03' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: '2026-08-03' })]} />)
     expect(screen.queryByRole('button', { name: /sin día/i })).toBeNull()
-  })
-})
-
-describe('EntregasBoard — columnas por rol', () => {
-  it('supervisor ve las cuatro', () => {
-    mockRole = 'supervisor'
-    render(<EntregasBoard ideas={[idea()]} />)
-    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
-      .toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
-  })
-
-  it('editor y diseñador solo ven Editado y Revisión', () => {
-    for (const r of ['editor', 'disenador'] as const) {
-      cleanup()
-      mockRole = r
-      render(<EntregasBoard ideas={[idea()]} />)
-      expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent))
-        .toEqual(['Editado', 'Revisión'])
-    }
-    mockRole = 'supervisor'
-  })
-
-  it('el rol copy ve las cuatro', () => {
-    mockRole = 'copy'
-    render(<EntregasBoard ideas={[idea()]} />)
-    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(4)
-    mockRole = 'supervisor'
   })
 })
 
 describe('EntregasBoard — batch model', () => {
   it('cada tarjeta trae una X para quitarla del tablero', () => {
-    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' })]} />)
     expect(screen.getByRole('button', { name: /quitar Nora Fitness del tablero/i })).toBeInTheDocument()
   })
 
   it('la X pide confirmación antes de quitar nada', () => {
-    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /^quitar Nora Fitness/i }))
     expect(screen.getByRole('button', { name: /confirmar quitar/i })).toBeInTheDocument()
     expect(discardEntregaVideos).not.toHaveBeenCalled()
   })
 
   it('el segundo click sí la quita', async () => {
-    render(<EntregasBoard ideas={[idea({ id: '1' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /^quitar Nora Fitness/i }))
     fireEvent.click(screen.getByRole('button', { name: /confirmar quitar/i }))
     await waitFor(() => expect(discardEntregaVideos).toHaveBeenCalledWith(['1']))
@@ -124,6 +111,7 @@ describe('EntregasBoard — batch model', () => {
 
   it('la tarjeta de Publicación dice cuándo cae el borrador en Metricool', () => {
     render(<EntregasBoard
+      stages={['edited','approval','copy','publication']}
       ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: '2099-08-03' })]}
       postingTimes={{ c1: '14:30' }}
     />)
@@ -133,6 +121,7 @@ describe('EntregasBoard — batch model', () => {
 
   it('avisa cuando no hay fecha y Metricool la corre a +24h', () => {
     render(<EntregasBoard
+      stages={['edited','approval','copy','publication']}
       ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: null })]}
     />)
     // Sin fecha el video vive en la pestaña "Sin día", no en un día concreto.
@@ -141,7 +130,7 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('solo las tarjetas de Publicación traen el botón de Metricool', () => {
-    render(<EntregasBoard ideas={[
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy listo' }),
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null },
              status: 'producida', approval_status: 'submitted' }),
@@ -151,13 +140,13 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('renders the 4 columns in Spanish with Editado first and Copy after Revisión', () => {
-    render(<EntregasBoard ideas={[idea()]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
     expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 
   it('la tarjeta lista los títulos de sus videos, no barras vacías', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', title: 'Rutina de piernas' }),
       idea({ id: '2', title: 'Antes y después' }),
     ]} />)
@@ -167,7 +156,7 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('con más de 3 videos muestra los primeros y cuántos faltan', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', title: 'Uno' }), idea({ id: '2', title: 'Dos' }),
       idea({ id: '3', title: 'Tres' }), idea({ id: '4', title: 'Cuatro' }),
       idea({ id: '5', title: 'Cinco' }),
@@ -180,14 +169,14 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('un video sin título no deja la fila en blanco', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', title: undefined, hook: null }),
     ]} />)
     expect(container.querySelector('article')!.textContent).toContain('Sin título')
   })
 
   it('un cliente con videos en dos columnas sale en LAS DOS', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1' }),                                              // edited
       idea({ id: '2', status: 'producida', approval_status: 'submitted' }), // approval
     ]} />)
@@ -202,7 +191,7 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('shows one batch card per client (not per video)', () => {
-    const { container } = render(<EntregasBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
     const cards = container.querySelectorAll('article')
     expect(cards).toHaveLength(1)
     expect(cards[0].textContent).toContain('Nora Fitness')
@@ -210,14 +199,14 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('places the batch in the column of its least-advanced video', () => {
-    const { container } = render(<EntregasBoard ideas={[idea({ id: '1', approval_status: 'approved' }), idea({ id: '2', status: 'grabada' })]} />)
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', approval_status: 'approved' }), idea({ id: '2', status: 'grabada' })]} />)
     // least advanced is unsent → Editado column (1st section)
     const editedCol = container.querySelectorAll('section')[0]
     expect(editedCol.textContent).toContain('Nora Fitness')
   })
 
   it('shows the assignee filter and filters by person', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} teamMembers={[
@@ -235,24 +224,24 @@ describe('EntregasBoard — batch model', () => {
   })
 
   it('no se mueve arrastrando: en Entregas la tarjeta avanza por una decisión', () => {
-    render(<EntregasBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     expect(screen.queryByRole('button', { name: /mover batch adelante/i })).toBeNull()
   })
 
   it('shows "Sin asignar" for an unassigned batch', () => {
-    render(<EntregasBoard ideas={[idea()]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
   it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
     ] as IdeaWithPipeline[]} />)
     expect(container.querySelector('article')!.textContent).toContain('Atrasado')
   })
 
   it('al abrir una tarjeta sale la COLA de revisión, no la vista de lote', async () => {
-    const { container } = render(<EntregasBoard ideas={[
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
       idea({ client_id: 'c9', status: 'producida', approval_status: 'submitted', client: { id: 'c9', name: 'Acme', industry: null } }),
     ]} />)
     fireEvent.click(container.querySelector('article')!)
@@ -279,7 +268,7 @@ describe('EntregasBoard — planned sessions (empty slots)', () => {
   ]
 
   it('renders one planned card per client for the next single video', () => {
-    const { container } = render(<EntregasBoard ideas={[]} plannedClients={planned} />)
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[]} plannedClients={planned} />)
     expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
     expect(screen.getByText('Lun 8 jun')).toBeInTheDocument()
     expect(screen.getByText('Próxima publicación')).toBeInTheDocument()
@@ -299,13 +288,13 @@ describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
   ] as IdeaWithPipeline[]
 
   it('renders a compact "Todos los clientes" dropdown trigger, closed by default', () => {
-    render(<EntregasBoard ideas={twoClients} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
     expect(screen.getByRole('button', { name: /todos los clientes/i })).toBeInTheDocument()
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
   it('opens the list with every client + count and filters the board on select', () => {
-    const { container } = render(<EntregasBoard ideas={twoClients} />)
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     expect(screen.getByRole('listbox')).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /lumen/i })).toBeInTheDocument()
@@ -320,7 +309,7 @@ describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
   })
 
   it('clears the filter back to all clients via the clear button', () => {
-    const { container } = render(<EntregasBoard ideas={twoClients} />)
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     fireEvent.click(screen.getByRole('option', { name: /lumen/i }))
     fireEvent.click(screen.getByRole('button', { name: /quitar filtro de cliente/i }))
@@ -330,7 +319,7 @@ describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
   })
 
   it('still shows the batches/publicados stats line', () => {
-    render(<EntregasBoard ideas={twoClients} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
     expect(screen.getByText(/publicados/i)).toBeInTheDocument()
   })
 })
@@ -341,7 +330,7 @@ describe('EntregasBoard — drag-to-scroll columns (grab cursor)', () => {
   }
 
   it('shows a grab cursor at rest and grabbing while dragging horizontally', () => {
-    render(<EntregasBoard ideas={[idea()]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea()]} />)
     const el = scrollEl()
     expect(el.className).toContain('cursor-grab')
     expect(el.className).not.toContain('cursor-grabbing')
@@ -355,7 +344,7 @@ describe('EntregasBoard — drag-to-scroll columns (grab cursor)', () => {
   })
 
   it('does not enter grabbing state for a click without movement (cards stay clickable)', () => {
-    render(<EntregasBoard ideas={[idea()]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea()]} />)
     const el = scrollEl()
     fireEvent.mouseDown(el, { button: 0, clientX: 300 })
     fireEvent.mouseUp(el, { clientX: 300 })

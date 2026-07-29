@@ -15,10 +15,8 @@ import { CopyOverlay } from './copy-overlay'
 import { PublishCardButton } from './publish-card-button'
 import { DiscardCardButton } from './discard-card-button'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
-import { visibleEntregaStages } from '@/lib/entregas/visible-stages'
 import { DIAS, diaDeFecha, type DiaKey } from '@/lib/entregas/dias'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
-import { useAuth } from '@/lib/context/auth-context'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -53,6 +51,7 @@ export function EntregasBoard({
   clientCadence = {},
   teamMembers = [],
   submitClients,
+  stages,
   postingTimes = {},
 }: {
   ideas: Idea[]
@@ -66,14 +65,18 @@ export function EntregasBoard({
    *  él mismo porque necesita el día de la pestaña activa, y una función no
    *  puede cruzar de un Server Component a uno de cliente. */
   submitClients?: { id: string; name: string }[]
+  /** Columnas de esta pantalla. El flujo vive en dos rutas: /revision lleva
+   *  entrega y revisión, /entregas copy y publicación. La ruta manda; el rol
+   *  decide a cuál puede entrar. */
+  stages: EntregaStageKey[]
   /** clients.posting_time — the hour Metricool will schedule at, per client. */
   postingTimes?: Record<string, string | null>
 }) {
   // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
   // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
   // mandando en el servidor; esto es la vista.
-  const { role } = useAuth()
-  const visibleStages = useMemo(() => visibleEntregaStages(role), [role])
+  // La ruta define las columnas; el rol solo decide si puede abrirla.
+  const visibleStages = stages
 
   // La operación es POR DÍA: cada día tiene su tablero completo. Sin esto,
   // el lunes y el jueves se mezclan en las mismas columnas y nadie sabe qué

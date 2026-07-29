@@ -52,6 +52,7 @@ export type Permission =
   | 'activity.read'
   | 'planning.read'
   | 'entregas.read'
+  | 'revision.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -92,7 +93,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
-    'planning.read', 'entregas.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -110,7 +111,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read',
     'video.upload',
     'captions.use', 'captions.edit',
-    'entregas.read', 'planning.act',
+    'revision.read', 'planning.act',
     'alerts.read',
   ],
 
@@ -132,7 +133,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read', 'ideas.edit',
     'runway.read',
     'video.upload',
-    'entregas.read',
+    'revision.read',
     'alerts.read',
   ],
 
@@ -141,7 +142,7 @@ const RBAC: Record<UserRole, RolePerms> = {
   copy: [
     'clients.read',
     'ideas.read',
-    'entregas.read',
+    'entregas.read', 'revision.read',
     'captions.use', 'captions.edit',
     'metricool.read', 'posting.read',
     'cadence.read',

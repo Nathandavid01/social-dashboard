@@ -1,7 +1,6 @@
-import { requirePermission, getCurrentRole } from '@/lib/auth/server'
+import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
-import { clientsForUser } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
 
 export const dynamic = 'force-dynamic'
@@ -19,15 +18,13 @@ export default async function EntregasPage() {
   await requirePermission('entregas.read')
   const supabase = await createClient()
 
-  const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
+  const [ideas, { data: activeClientsRaw }] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
       .select('id, name, assigned_to, posting_time')
       .eq('status', 'active')
       .order('name'),
-    getCurrentRole(),
-    supabase.auth.getUser(),
   ])
 
   const activeClients = activeClientsRaw ?? []
@@ -46,20 +43,12 @@ export default async function EntregasPage() {
     (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
   )
 
-  // The submit dropdown only offers what this person may work on. Convenience
-  // filter — see the note in client-visibility.ts; it is not access control.
-  const submitClients = clientsForUser(
-    role,
-    user?.id ?? null,
-    activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null })),
-  ).map((c) => ({ id: c.id, name: c.name }))
-
   return (
     <EntregasBoard
       ideas={entregas}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
-      submitClients={submitClients}
+      stages={['copy', 'publication']}
     />
   )
 }

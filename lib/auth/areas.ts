@@ -47,8 +47,9 @@ export type NavGroup = (typeof NAV_GROUPS)[number]
  * lands there and `/mi-dia` only ever shows a person their OWN work. */
 export const AREAS: Area[] = [
   // ── Trabajo: el flujo de un video, de la cámara a la aprobación ──
-  // Flujo del editor: Editado → Revisión → Copy → Publicación. Separado de
-  // /pipeline a propósito; mismos datos, otra forma de agruparlos.
+  // El flujo del editor va en dos pantallas: entrega y revisión en /revision,
+  // copy y publicación en /entregas. Cruzan al aprobar el video.
+  { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
   { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Trabajo' },
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Trabajo' },

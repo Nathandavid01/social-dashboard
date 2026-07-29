@@ -55,6 +55,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/runway': Rocket,
   '/idea-lab': Lightbulb,
   '/ideas-aprobadas': CheckCircle2,
+  '/revision': ClipboardCheck,
   '/entregas': PackageCheck,
   '/pipeline': KanbanSquare,
   '/video-reviews': Film,
