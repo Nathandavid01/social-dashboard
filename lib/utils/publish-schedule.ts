@@ -21,6 +21,20 @@ export interface PublishSchedule {
   clamped: boolean
 }
 
+/**
+ * Label for a naive "YYYY-MM-DDTHH:MM[:SS]", e.g. "Jue 30 jul 2026 · 14:30".
+ * Shared so a hand-picked time on the Publicación card reads identically to the
+ * planned one.
+ */
+export function formatScheduleLabel(iso: string): string {
+  const [datePart, timePart] = iso.split('T')
+  const [y, m, d] = datePart.split('-').map(Number)
+  const time = timePart?.slice(0, 5) ?? '10:00'
+  // Local midnight of that calendar day — only the weekday is read off it.
+  const weekday = DAY_ES[new Date(y, m - 1, d).getDay()]
+  return `${weekday} ${d} ${MONTH_ES[m - 1]} ${y} · ${time}`
+}
+
 export function publishSchedule(
   publishDate: string | null | undefined,
   postingTime: string | null | undefined,
@@ -30,11 +44,5 @@ export function publishSchedule(
   const todayUtc = new Date(nowMs).toISOString().slice(0, 10)
   const clamped = !publishDate || publishDate < todayUtc
 
-  const [datePart, timePart] = iso.split('T')
-  const [y, m, d] = datePart.split('-').map(Number)
-  const time = timePart?.slice(0, 5) ?? '10:00'
-  // Local midnight of that calendar day — only the weekday is read off it.
-  const weekday = DAY_ES[new Date(y, m - 1, d).getDay()]
-
-  return { iso, clamped, label: `${weekday} ${d} ${MONTH_ES[m - 1]} ${y} · ${time}` }
+  return { iso, clamped, label: formatScheduleLabel(iso) }
 }

@@ -12,9 +12,8 @@ import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
-import { PublishCardButton } from './publish-card-button'
+import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { publishSchedule } from '@/lib/utils/publish-schedule'
 import { DIAS, diaDeFecha, type DiaKey } from '@/lib/entregas/dias'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
@@ -608,37 +607,16 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
         {/* Publicación es la única columna con una acción externa: mandar el
             video a Metricool. Va en la tarjeta porque no hace falta abrir nada
             para decidirlo — el copy ya está escrito y aprobado. */}
+        {/* La fecha que Metricool va a RECIBIR, no la planificada:
+            buildPublishDateTime corre a +24h una fecha pasada o ausente para que
+            aprobar algo atrasado no publique al instante. La tarjeta además deja
+            elegir la hora a mano — un turno de hoy que ya pasó es un 400 seguro. */}
         {stage === 'publication' && (
-          <div className="space-y-1.5">
-            {/* La fecha que Metricool va a RECIBIR, no la planificada:
-                buildPublishDateTime corre a +24h una fecha pasada o ausente
-                para que aprobar algo atrasado no publique al instante. Mostrar
-                publish_date aquí sería enseñar una fecha que no va a ocurrir. */}
-            {(() => {
-              const first = batch.ideas[0]
-              const s = publishSchedule(first?.publish_date ?? null, postingTime)
-              return (
-                <div className="rounded-lg border bg-muted/40 px-2 py-1.5">
-                  <p className="flex items-center gap-1 text-[9px] uppercase tracking-wide text-muted-foreground">
-                    <CalendarClock className="h-2.5 w-2.5" aria-hidden />
-                    Borrador en Metricool
-                  </p>
-                  <p className="text-[11px] font-semibold tabular-nums">{s.label}</p>
-                  {s.clamped && (
-                    <p className="text-[9px] text-amber-600 dark:text-amber-400">
-                      {first?.publish_date ? 'Fecha pasada — se corre a +24h' : 'Sin fecha planificada — se corre a +24h'}
-                    </p>
-                  )}
-                  {batch.ideas.length > 1 && (
-                    <p className="text-[9px] text-muted-foreground">
-                      Fecha del primero · {batch.ideas.length} videos en total
-                    </p>
-                  )}
-                </div>
-              )
-            })()}
-            <PublishCardButton ideaIds={batch.ideas.map((i) => i.id)} />
-          </div>
+          <PublishScheduleCard
+            ideaIds={batch.ideas.map((i) => i.id)}
+            publishDate={batch.ideas[0]?.publish_date ?? null}
+            postingTime={postingTime}
+          />
         )}
       </div>
     </article>
