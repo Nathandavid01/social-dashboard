@@ -60,7 +60,7 @@ export default async function EntregasPage() {
       ideas={entregas}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
-      editedColumnSlot={<EditorSubmitSlot clients={submitClients} />}
+      editedColumnSlot={(dia) => <EditorSubmitSlot clients={submitClients} dia={dia} />}
     />
   )
 }

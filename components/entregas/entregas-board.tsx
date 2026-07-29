@@ -61,8 +61,9 @@ export function EntregasBoard({
   clientCadence?: Record<string, ClientCadence>
   /** All active team members — powers the "Asignado a" filter (not just people on batches). */
   teamMembers?: { id: string; name: string }[]
-  /** Pinned at the top of the Editado column — the editor's submit form. */
-  editedColumnSlot?: React.ReactNode
+  /** Formulario del editor, arriba de Editado. Recibe el día de la pestaña
+   *  activa: entregar estando en Lunes es entregar para el lunes. */
+  editedColumnSlot?: (dia: DiaKey) => React.ReactNode
   /** clients.posting_time — the hour Metricool will schedule at, per client. */
   postingTimes?: Record<string, string | null>
 }) {
@@ -321,7 +322,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' ? editedColumnSlot : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' ? editedColumnSlot?.(dia) : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
           ))}
         </div>
       </div>

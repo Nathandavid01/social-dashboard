@@ -36,18 +36,13 @@ function setup() {
     files,
     pick: (i: number, f: File) => fireEvent.change(files()[i], { target: { files: [f] } }),
     submit: () => screen.getByRole('button', { name: /enviar a revisión/i }),
-    dia: (label: string) => fireEvent.click(screen.getByRole('button', { name: label })),
   }
 }
 
 describe('SubmitVideoCard — the editor uploads the real file', () => {
-  it('no se puede enviar sin decir para qué día', () => {
-    const { client, pick, submit, dia } = setup()
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile())
-    expect(submit()).toBeDisabled()   // falta el día
-    dia('Jueves')
-    expect(submit()).toBeEnabled()
+  it('no pregunta el día: lo da la pestaña activa del tablero', () => {
+    setup()
+    expect(screen.queryByText(/para qué día/i)).toBeNull()
   })
 
   it('no pide "de qué es el video" — eso se escribe en Copy', () => {
@@ -74,10 +69,9 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
   })
 
   it('needs a client and a file in every row', () => {
-    const { client, count, pick, submit, dia } = setup()
+    const { client, count, pick, submit } = setup()
     fireEvent.change(count, { target: { value: '2' } })
     fireEvent.change(client, { target: { value: 'c1' } })
-    dia('Lunes')
     expect(submit()).toBeDisabled()
     pick(0, videoFile('a.mp4'))
     expect(submit()).toBeDisabled()
@@ -112,10 +106,9 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
   })
 
   it('the Drive link is optional and never blocks the submission', () => {
-    const { client, pick, submit, dia } = setup()
+    const { client, pick, submit } = setup()
     fireEvent.change(client, { target: { value: 'c1' } })
     pick(0, videoFile())
-    dia('Lunes')
     expect(submit()).toBeEnabled()                       // no link at all → fine
     const link = screen.getByLabelText(/enlace de drive .*opcional/i)
     fireEvent.change(link, { target: { value: 'no-es-un-link' } })
@@ -123,9 +116,8 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
   })
 
   it('hands the parent the actual File objects to upload', () => {
-    const { client, pick, submit, dia } = setup()
+    const { client, pick, submit } = setup()
     fireEvent.change(client, { target: { value: 'c2' } })
-    dia('Miércoles')
     const f = videoFile('reel-abril.mp4', 42)
     pick(0, f)
     fireEvent.change(screen.getByLabelText(/enlace de drive .*opcional/i), { target: { value: DRIVE } })
@@ -133,20 +125,17 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     fireEvent.click(submit())
     expect(onSubmit).toHaveBeenCalledWith({
       clientId: 'c2',
-      dia: 3,
       videos: [{ file: f, driveLink: DRIVE, title: 'Reel de abril' }],
     })
   })
 
   it('falls back to a client-based title and a null link', () => {
-    const { client, pick, submit, dia } = setup()
+    const { client, pick, submit } = setup()
     fireEvent.change(client, { target: { value: 'c1' } })
-    dia('Lunes')
     pick(0, videoFile())
     fireEvent.click(submit())
     expect(onSubmit).toHaveBeenCalledWith({
       clientId: 'c1',
-      dia: 1,
       videos: [expect.objectContaining({ title: 'Nora Fitness — video 1', driveLink: null })],
     })
   })
@@ -160,10 +149,9 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
   })
 
   it('clears back to one empty row after submitting', () => {
-    const { client, count, pick, files, submit, dia } = setup()
+    const { client, count, pick, files, submit } = setup()
     fireEvent.change(count, { target: { value: '2' } })
     fireEvent.change(client, { target: { value: 'c1' } })
-    dia('Lunes')
     pick(0, videoFile('a.mp4'))
     pick(1, videoFile('b.mp4'))
     fireEvent.click(submit())

@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
-import { proximaFechaDelDia } from '@/lib/entregas/dias'
+import { proximaFechaDelDia, type DiaKey } from '@/lib/entregas/dias'
 import type { SubmitVideoPayload } from './submit-video-card'
 
 /**
@@ -59,7 +59,9 @@ const deps: SubmitDeps = {
     registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType }),
 }
 
-export function useSubmitVideos(onDone?: () => void) {
+/** `dia` viene de la pestaña activa del tablero: entregar estando en Lunes
+ *  significa entregar para el lunes. Por eso el formulario ya no lo pregunta. */
+export function useSubmitVideos(dia: DiaKey, onDone?: () => void) {
   const [rows, setRows] = useState<RowProgress[]>([])
   const [running, setRunning] = useState(false)
 
@@ -68,7 +70,7 @@ export function useSubmitVideos(onDone?: () => void) {
       setRunning(true)
       // "Lunes" es el próximo lunes: se guarda como fecha real porque es lo que
       // acaba recibiendo Metricool. Guardar solo el día dejaría dos verdades.
-      const publishDate = proximaFechaDelDia(payload.dia)
+      const publishDate = proximaFechaDelDia(dia)
       setRows(payload.videos.map((v) => ({ title: v.title, stage: 'creando' as SubmitStage, pct: 0 })))
 
       for (let i = 0; i < payload.videos.length; i++) {
@@ -98,7 +100,7 @@ export function useSubmitVideos(onDone?: () => void) {
       setRunning(false)
       onDone?.()
     },
-    [onDone],
+    [dia, onDone],
   )
 
   const clear = useCallback(() => setRows([]), [])

@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SubmitVideoCard } from './submit-video-card'
 import { useSubmitVideos } from './use-submit-videos'
+import { etiquetaDia, type DiaKey } from '@/lib/entregas/dias'
 
 /**
  * The real Editado column slot: the submit form plus per-video progress while
@@ -21,15 +22,21 @@ const STAGE_LABEL: Record<string, string> = {
 
 export function EditorSubmitSlot({
   clients,
+  dia,
 }: {
   clients: { id: string; name: string }[]
+  /** Día de la pestaña activa — para el que se entrega. */
+  dia: DiaKey
 }) {
   const router = useRouter()
   // Refresh so the new cards appear in Revisión from real data, not local state.
-  const { submit, rows, running, clear } = useSubmitVideos(() => router.refresh())
+  const { submit, rows, running, clear } = useSubmitVideos(dia, () => router.refresh())
 
   return (
     <div className="space-y-2">
+      <p className="px-0.5 text-[11px] text-muted-foreground">
+        Entregando para <strong className="text-foreground">{etiquetaDia(dia)}</strong>
+      </p>
       <SubmitVideoCard clients={clients} onSubmit={submit} pending={running} />
 
       {rows.length > 0 && (
