@@ -1,7 +1,7 @@
 import { requirePermission, getCurrentRole } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
-import { clientsForUser } from '@/lib/utils/client-visibility'
+import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
 
 export const dynamic = 'force-dynamic'
@@ -33,17 +33,26 @@ export default async function RevisionPage() {
     (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
   )
 
+  // El tablero también se acota: filtrar solo el desplegable dejaba al editor
+  // viendo el trabajo de los demás, que no puede tocar y le estorba para ver
+  // el suyo.
+  const asignables = activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null }))
+  const permitidos = visibleClientIds(role, user?.id ?? null, asignables)
+  const mios = permitidos === null
+    ? entregados
+    : entregados.filter((i) => permitidos.has(i.client_id ?? ''))
+
   // El desplegable solo ofrece lo que esta persona trabaja. Filtro de
   // conveniencia — ver la nota en client-visibility.ts; no es control de acceso.
   const submitClients = clientsForUser(
     role,
     user?.id ?? null,
-    activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null })),
+    asignables,
   ).map((c) => ({ id: c.id, name: c.name }))
 
   return (
     <EntregasBoard
-      ideas={entregados}
+      ideas={mios}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       submitClients={submitClients}
       stages={['edited', 'approval']}

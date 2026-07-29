@@ -22,6 +22,24 @@ export interface AssignableClient {
 /** Roles that work the whole roster rather than their own assignments. */
 const SEES_ALL: UserRole[] = ['owner', 'supervisor']
 
+/**
+ * Los clientes cuyo trabajo puede VER esta persona. Owner, supervisor y copy
+ * trabajan la cartera entera; el resto, solo lo asignado.
+ *
+ * Devuelve null cuando no hay que filtrar nada — distinto de un Set vacío, que
+ * significa "no ve ningún cliente".
+ */
+export function visibleClientIds(
+  role: UserRole | null | undefined,
+  userId: string | null | undefined,
+  clients: AssignableClient[],
+): Set<string> | null {
+  if (!role) return new Set()
+  if (SEES_ALL.includes(role) || role === 'copy') return null
+  if (!userId) return new Set()
+  return new Set(clients.filter((c) => c.assigned_to === userId).map((c) => c.id))
+}
+
 export function clientsForUser<T extends AssignableClient>(
   role: UserRole | null | undefined,
   userId: string | null | undefined,

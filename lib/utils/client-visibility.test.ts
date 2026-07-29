@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { clientsForUser, type AssignableClient } from './client-visibility'
+import { clientsForUser, visibleClientIds, type AssignableClient } from './client-visibility'
 
 const CLIENTS: AssignableClient[] = [
   { id: 'c1', name: 'Nora Fitness', assigned_to: 'ana' },
@@ -36,5 +36,33 @@ describe('clientsForUser — which clients an editor may submit for', () => {
   it('a missing role or user id is treated as no access, never as full access', () => {
     expect(clientsForUser(null, 'ana', CLIENTS)).toEqual([])
     expect(clientsForUser('editor', null, CLIENTS)).toEqual([])
+  })
+})
+
+describe('visibleClientIds — qué trabajo ve cada quien', () => {
+  it('owner, supervisor y copy ven todo: no hay filtro', () => {
+    for (const r of ['owner', 'supervisor', 'copy'] as const) {
+      expect(visibleClientIds(r, 'ana', CLIENTS)).toBeNull()
+    }
+  })
+
+  it('un editor solo ve sus clientes asignados', () => {
+    const ids = visibleClientIds('editor', 'ana', CLIENTS)
+    expect(ids).toEqual(new Set(['c1']))
+  })
+
+  it('un editor sin asignaciones no ve nada — Set vacío, no null', () => {
+    const ids = visibleClientIds('editor', 'nadie', CLIENTS)
+    expect(ids).toEqual(new Set())
+    expect(ids).not.toBeNull()
+  })
+
+  it('sin rol o sin sesión no ve nada', () => {
+    expect(visibleClientIds(null, 'ana', CLIENTS)).toEqual(new Set())
+    expect(visibleClientIds('editor', null, CLIENTS)).toEqual(new Set())
+  })
+
+  it('un cliente sin asignar no es de nadie', () => {
+    expect(visibleClientIds('editor', 'ana', [CLIENTS[2]])).toEqual(new Set())
   })
 })
