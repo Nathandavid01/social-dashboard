@@ -65,6 +65,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/recording-calendar': Camera,
   '/clients': Users,
   '/clients/cadence': CalendarClock,
+  '/clients/asignaciones': UserSquare2,
   '/calendar': Calendar,
   '/performance': BarChart3,
   '/reportes': FileBarChart,
