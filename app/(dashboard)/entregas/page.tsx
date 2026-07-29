@@ -3,7 +3,6 @@ import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { clientsForUser } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
-import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -60,7 +59,7 @@ export default async function EntregasPage() {
       ideas={entregas}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
-      editedColumnSlot={(dia) => <EditorSubmitSlot clients={submitClients} dia={dia} />}
+      submitClients={submitClients}
     />
   )
 }
