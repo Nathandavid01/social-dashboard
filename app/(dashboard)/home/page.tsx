@@ -7,9 +7,7 @@ import { TeamWorkload } from '@/components/home/team-workload'
 import { RecentCompletions } from '@/components/home/recent-completions'
 import { GlobalPipelineSection } from '@/components/home/global-pipeline-section'
 import { RunwayHealthCard } from '@/components/runway/runway-health-card'
-import { PlanningBanner } from '@/components/home/planning-banner'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
-import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
 import { getWeeklyProductionStatus } from '@/lib/utils/weekly-production'
 import { WeeklyProductionCard } from '@/components/home/weekly-production-card'
 import { WeeklyComplianceCard } from '@/components/home/weekly-compliance-card'
@@ -157,13 +155,6 @@ export default async function HomePage() {
   const canSeeWeeklyCompliance = await currentUserHas('weekly_compliance.read')
   const weeklyCompliance = canSeeWeeklyCompliance ? await getWeeklyComplianceByClient() : null
   const canSeeCadencia = await currentUserHas('cadence.read')
-  const planning = await getWorkflowProgress().catch(() => ({ rows: [], pendingCount: 0 }))
-  const planningBuckets = {
-    reagendar: planning.rows.filter((r) => r.status === 'reagendar').length,
-    agendar: planning.rows.filter((r) => r.status === 'agendar').length,
-    ideas: planning.rows.filter((r) => r.status === 'ideas').length,
-    listo: planning.rows.filter((r) => r.status === 'listo').length,
-  }
 
   return (
     <div className="space-y-6">
@@ -175,13 +166,6 @@ export default async function HomePage() {
         </div>
         <QuickBriefingButton />
       </div>
-
-      {/* Planning banner — always visible, non-dismissible until everyone is ready */}
-      <PlanningBanner
-        pendingCount={planning.pendingCount}
-        buckets={planningBuckets}
-        total={planning.rows.length}
-      />
 
       {/* Cadencia — posting cadence from Metricool (today / week / per client).
           Streamed in Suspense so the Metricool sweep never blocks page paint. */}
