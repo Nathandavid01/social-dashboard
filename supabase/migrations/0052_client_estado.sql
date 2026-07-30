@@ -1,14 +1,20 @@
--- Dos estados nuevos de cliente: "próximo a grabar" y "sin contenido".
+-- Dos valores nuevos en el enum client_status: 'proximo_a_grabar' y
+-- 'sin_contenido'.
 --
--- Describen en qué punto está el trabajo, no si el cliente sigue con nosotros:
--- los tres (activo incluido) cuentan como cliente en producción. Las consultas
--- que antes hacían .eq('status','active') ahora leen ESTADOS_VIVOS
--- (lib/clients/estado.ts), para que marcar un cliente "próximo a grabar" no lo
--- saque de cadencia, Metricool, captions ni el plan semanal.
+-- YA APLICADO EN PRODUCCIÓN, y de momento SIN USAR a propósito.
 --
--- Sin begin/commit a propósito: ALTER TYPE ... ADD VALUE no puede usarse en la
--- misma transacción en la que se añade el valor, y estos dos ALTER son
--- idempotentes por separado gracias a IF NOT EXISTS.
+-- La función que los aprovechaba se revirtió: el código de main filtra "cliente
+-- vivo" con .eq('status','active') en 46 sitios, así que un cliente marcado
+-- 'proximo_a_grabar' desaparecería de cadencia, del sync de Metricool, de los
+-- captions y del plan semanal. Hasta que ese refactor llegue a main, nada debe
+-- escribir estos dos valores.
+--
+-- El fichero se queda porque Postgres no sabe quitar valores de un enum
+-- (no hay ALTER TYPE ... DROP VALUE) y porque las migraciones son el registro
+-- de lo aplicado. Un valor de enum que nadie usa no hace nada.
+--
+-- Sin begin/commit: ALTER TYPE ... ADD VALUE no puede usarse en la misma
+-- transacción en la que se añade, y cada ALTER es idempotente por su cuenta.
 
 alter type public.client_status add value if not exists 'proximo_a_grabar';
 alter type public.client_status add value if not exists 'sin_contenido';

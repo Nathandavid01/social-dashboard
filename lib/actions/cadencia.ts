@@ -13,7 +13,6 @@ import {
   type CadenciaClientInput,
 } from '@/lib/utils/cadencia'
 import type { SocialPlatform } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 // Clients to keep out of the cadence overview (Nathan's call). Matched on the
 // trimmed, lowercased client name.
@@ -72,7 +71,7 @@ async function sweepWeekUncached(weekStart: string, weekEnd: string): Promise<Ca
   const { data } = await supabase
     .from('clients')
     .select('id, name, posting_time, posting_days, platforms, metricool_blog_id')
-    .in('status', ESTADOS_VIVOS)
+    .eq('status', 'active')
     .not('metricool_blog_id', 'is', null)
     .order('name', { ascending: true })
 

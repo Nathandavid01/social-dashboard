@@ -9,7 +9,6 @@ import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pip
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
 import type { SocialPlatform } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -27,7 +26,7 @@ export default async function PipelinePage() {
     supabase
       .from('clients')
       .select('id, name, logo_url, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
     getWorkflowSettings(),

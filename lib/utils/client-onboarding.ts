@@ -6,8 +6,6 @@
  * Required items (active + metricool + cadence) are what the core automations
  * need: auto-provision del lote, captions con estilo, y auto-publicación.
  */
-
-import { esVivo } from '@/lib/clients/estado'
 export type OnboardingKey = 'active' | 'metricool' | 'cadence' | 'voice' | 'firstVideo'
 
 export interface OnboardingItem {
@@ -42,7 +40,7 @@ export function clientOnboardingStatus(c: {
       key: 'active',
       label: 'Cliente activo',
       required: true,
-      done: esVivo(c.status),
+      done: c.status === 'active',
       hint: 'Actívalo para que el contenido se planifique y publique solo.',
     },
     {

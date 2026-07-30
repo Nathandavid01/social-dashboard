@@ -9,7 +9,6 @@ import { getVideoUploadMetricsByUser } from '@/lib/actions/video-uploads'
 import { Film, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { Task, Profile, Client } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +35,7 @@ export default async function MemberPage({ params }: Props) {
       .eq('assignee_id', memberId)
       .order('priority', { ascending: true })
       .order('due_at', { ascending: true, nullsFirst: false }),
-    supabase.from('clients').select('id, name').in('status', ESTADOS_VIVOS).order('name'),
+    supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name').order('full_name'),
     getAssignedVideosForMember(memberId),
     getVideoUploadMetricsByUser({ userId: memberId }),

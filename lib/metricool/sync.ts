@@ -7,7 +7,6 @@ import {
   ideasToMarkPublished,
   type SyncIdeaRef,
 } from '@/lib/utils/metricool-sync-core'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export interface MetricoolSyncResult {
   updated: number
@@ -47,7 +46,7 @@ export async function runMetricoolPublishedSync(): Promise<MetricoolSyncResult> 
     .from('clients')
     .select('metricool_blog_id')
     .not('metricool_blog_id', 'is', null)
-    .in('status', ESTADOS_VIVOS)
+    .eq('status', 'active')
   const blogIds = new Set<string>([base.blogId])
   for (const c of clients ?? []) {
     const b = (c.metricool_blog_id as string | null)?.trim()

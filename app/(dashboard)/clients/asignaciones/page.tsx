@@ -1,7 +1,6 @@
 import { requirePermission } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
 import { AssignmentsTable } from '@/components/clients/assignments-table'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -21,7 +20,7 @@ export default async function AsignacionesPage() {
     supabase
       .from('clients')
       .select('id, name, assigned_to, assigned_designer')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name'),
     supabase
       .from('profiles')

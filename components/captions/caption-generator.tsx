@@ -21,7 +21,6 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { sendCaptionToDraft } from '@/lib/actions/metricool'
 import type { Client } from '@/lib/supabase/types'
 import { friendlyError } from '@/lib/utils/error-message'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 const platforms = ['Instagram', 'TikTok', 'Facebook', 'Twitter/X', 'LinkedIn', 'YouTube'] as const
 
@@ -161,7 +160,7 @@ function CaptionGeneratorInner() {
     supabase
       .from('clients')
       .select('*')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name')
       .then(({ data }) => {
         if (data) setClients(data as Client[])

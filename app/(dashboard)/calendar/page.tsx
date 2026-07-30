@@ -4,7 +4,6 @@ import { WeeklyCalendar } from '@/components/calendar/weekly-calendar'
 import { PageHeader } from '@/components/shared/page-header'
 import { startOfWeek, addDays, subDays } from 'date-fns'
 import type { Profile } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +17,7 @@ export default async function CalendarPage() {
 
   const [items, { data: clients }, { data: profiles }] = await Promise.all([
     getCalendarItems(rangeStart.toISOString(), rangeEnd.toISOString()),
-    supabase.from('clients').select('id, name').in('status', ESTADOS_VIVOS).order('name'),
+    supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name').order('full_name'),
   ])
 

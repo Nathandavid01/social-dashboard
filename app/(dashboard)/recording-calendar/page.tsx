@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { RecordingCalendarClient } from '@/components/recording/recording-calendar-client'
 import type { Client, Profile, ContentIdea } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +25,7 @@ export default async function RecordingCalendarPage() {
       .lt('session_date', monthEnd)
       .order('session_date')
       .order('start_time', { nullsFirst: true }),
-    supabase.from('clients').select('id, name').in('status', ESTADOS_VIVOS).order('name'),
+    supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name').order('full_name'),
     // Fetch all non-discarded/non-published ideas for active clients
     supabase

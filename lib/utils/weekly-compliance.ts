@@ -5,7 +5,6 @@ import {
   type ClientWeeklyCompliance,
   type WeeklyComplianceSummary,
 } from './weekly-compliance-types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export type { WeeklyComplianceSummary, ClientWeeklyCompliance } from './weekly-compliance-types'
 
@@ -38,7 +37,7 @@ export async function getWeeklyComplianceByClient(): Promise<WeeklyComplianceSum
     supabase
       .from('clients')
       .select('id, name, weekly_post_quota')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name', { ascending: true }),
     // Published-this-week counts come from Metricool (real social posts),
     // not internal idea status. Keyed by client id, cached ~5 min upstream.

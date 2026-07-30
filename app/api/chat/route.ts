@@ -3,7 +3,6 @@ import { toGrokTools, toGrokMessages, parseGrokToolCalls, type GrokMessage, type
 import { parseSseTextDeltas } from '@/lib/llm/grok-stream'
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 // ── Tool definitions ─────────────────────────────────────────────────────────
 // Kept in Anthropic's shape (flat name/description/input_schema) and translated
@@ -593,7 +592,7 @@ async function execGetRecentPosts(clientName?: string, range?: string, platform?
     const endStr = end.toISOString().slice(0, 19)
 
     // Get clients to fetch from
-    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) query = query.ilike('name', `%${clientName}%`)
 
     const { data: clients } = await query.limit(clientName ? 3 : 50)
@@ -647,7 +646,7 @@ async function execGetUpcomingSchedule(clientName?: string, platform?: string): 
     const startStr = now.toISOString().slice(0, 19)
     const endStr = nextWeek.toISOString().slice(0, 19)
 
-    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) query = query.ilike('name', `%${clientName}%`)
 
     const { data: clients } = await query.limit(clientName ? 3 : 50)
@@ -785,7 +784,7 @@ async function execGetDashboardSummary(): Promise<string> {
     ] = await Promise.all([
       supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
       supabase.from('alerts').select('title, severity, message').order('created_at', { ascending: false }).limit(5),
-      supabase.from('clients').select('*', { count: 'exact', head: true }).in('status', ESTADOS_VIVOS),
+      supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('client_requests').select('*', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
       supabase.from('video_reviews').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'head_editor_review', 'pending_final_check', 'final_check_review', 'revision_needed']),
       supabase.from('profiles').select('id, full_name').order('full_name'),
@@ -946,7 +945,7 @@ async function execGetClientEfficiency(showIssuesOnly?: boolean): Promise<string
     const { data: clients } = await supabase
       .from('clients')
       .select('id, name, status, metricool_blog_id')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name')
       .limit(60)
 
@@ -1011,7 +1010,7 @@ async function execGetStaleClients(days: number = 7): Promise<string> {
       .from('clients')
       .select('id, name, metricool_blog_id')
       .not('metricool_blog_id', 'is', null)
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name')
 
     if (!clients?.length) return 'No Metricool clients configured.'
@@ -1203,7 +1202,7 @@ async function execSearchPosts(query: string, clientName?: string): Promise<stri
     const startStr = start.toISOString().slice(0, 19)
     const endStr = end.toISOString().slice(0, 19)
 
-    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) dbQuery = dbQuery.ilike('name', `%${clientName}%`)
     const { data: clients } = await dbQuery.limit(clientName ? 3 : 50)
     if (!clients?.length) return clientName ? `No client found matching "${clientName}".` : 'No Metricool clients configured.'
@@ -1254,7 +1253,7 @@ async function execGetTodaysPosts(clientName?: string): Promise<string> {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().slice(0, 19)
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString().slice(0, 19)
 
-    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) dbQuery = dbQuery.ilike('name', `%${clientName}%`)
     const { data: clients } = await dbQuery.limit(clientName ? 3 : 50)
     if (!clients?.length) return 'No Metricool clients configured.'
@@ -1590,7 +1589,7 @@ async function execGetWeeklyReport(weeksBack: number = 1): Promise<string> {
       .from('clients')
       .select('id, name, metricool_blog_id')
       .not('metricool_blog_id', 'is', null)
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
 
     if (!clients?.length) return 'No Metricool clients configured.'
 
@@ -1669,7 +1668,7 @@ async function execGetPostsByDate(date: string, endDate?: string, clientName?: s
     const startStr = `${date}T00:00:00`
     const endStr = endDate ? `${endDate}T23:59:59` : `${date}T23:59:59`
 
-    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) dbQuery = dbQuery.ilike('name', `%${clientName}%`)
     const { data: clients } = await dbQuery.limit(clientName ? 3 : 50)
     if (!clients?.length) return clientName ? `No client found matching "${clientName}".` : 'No Metricool clients configured.'
@@ -1881,7 +1880,7 @@ async function execGetMonthlyReport(monthsBack: number = 0): Promise<string> {
       .from('clients')
       .select('id, name, metricool_blog_id')
       .not('metricool_blog_id', 'is', null)
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
 
     if (!clients?.length) return 'No Metricool clients configured.'
 
@@ -2148,7 +2147,7 @@ async function execGetContentAnalytics(range?: string, clientName?: string): Pro
     const endStr = end.toISOString().slice(0, 19)
     const prevStartStr = prevStart.toISOString().slice(0, 19)
 
-    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).in('status', ESTADOS_VIVOS)
+    let query = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
     if (clientName) query = query.ilike('name', `%${clientName}%`)
     const { data: clients } = await query.limit(clientName ? 3 : 50)
     if (!clients?.length) return clientName ? `No se encontró "${clientName}".` : 'Sin clientes Metricool configurados.'

@@ -6,7 +6,6 @@ import { computeRunway } from '@/lib/utils/content-runway'
 import { computePostingTargets } from '@/lib/utils/posting-cadence'
 import { planWeek, type WeeklyPlan, type WeeklyPlanClient } from '@/lib/utils/weekly-plan-core'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 const POST_TZ = 'America/Puerto_Rico'
 
@@ -35,7 +34,7 @@ export async function getWeeklyPlan(): Promise<WeeklyPlan | null> {
   const { data: clients, error: cErr } = await supabase
     .from('clients')
     .select('id, name, posting_days')
-    .in('status', ESTADOS_VIVOS)
+    .eq('status', 'active')
   if (cErr || !clients) {
     console.warn('[weekly-plan] clients fetch failed:', cErr?.message)
     return null

@@ -11,14 +11,13 @@ import { format } from 'date-fns'
 import { Video, Clock, CheckCircle2, AlertTriangle, PlayCircle } from 'lucide-react'
 import Link from 'next/link'
 import type { ClientRequest } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export default async function OperationsPage() {
   const supabase = await createClient()
 
   const [tasks, { data: clients }, { data: teamMembers }, { data: approvedVideos }, clientRequestsResult] = await Promise.all([
     getTasks(),
-    supabase.from('clients').select('id, name').in('status', ESTADOS_VIVOS).order('name'),
+    supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name, email').order('full_name'),
     supabase
       .from('video_reviews')

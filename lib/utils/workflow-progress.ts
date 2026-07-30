@@ -5,7 +5,6 @@ import type {
   WorkflowSettings,
   WorkflowStepStatus,
 } from './workflow-types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export type { ClientWorkflowProgress, WorkflowSettings, WorkflowStepStatus }
 export { STATUS_META } from './workflow-types'
@@ -77,7 +76,7 @@ export async function getWorkflowProgress(): Promise<{
     supabase
       .from('clients')
       .select('id, name, posting_days')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name'),
     supabase
       .from('recording_sessions')

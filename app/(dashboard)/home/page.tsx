@@ -35,7 +35,6 @@ import {
   Video,
 } from 'lucide-react'
 import type { Task } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -61,7 +60,7 @@ export default async function HomePage() {
     { count: productionInReview },
     { count: productionPublishingToday },
   ] = await Promise.all([
-    supabase.from('clients').select('id', { count: 'exact', head: true }).in('status', ESTADOS_VIVOS),
+    supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase
       .from('tasks')
       .select('id, title, status, priority, due_at, client:clients(id, name)')
@@ -119,7 +118,7 @@ export default async function HomePage() {
     bufferMap.set(row.client_id, (bufferMap.get(row.client_id) ?? 0) + 1)
   }
   // Clients with 0 buffer also count — get active clients
-  const { data: activeClientsList } = await supabase.from('clients').select('id').in('status', ESTADOS_VIVOS)
+  const { data: activeClientsList } = await supabase.from('clients').select('id').eq('status', 'active')
   let lowBufferCount = 0
   let criticalBufferCount = 0
   for (const c of activeClientsList ?? []) {

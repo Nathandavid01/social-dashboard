@@ -12,7 +12,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { VideoReview, Client } from '@/lib/supabase/types'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { EditQueueItem } from '@/components/video-pipeline/editor-video-card'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +20,7 @@ export default async function VideoReviewsPage() {
 
   const [reviews, { data: clients }, { data: sentDrafts }, pipeline, metricoolPics] = await Promise.all([
     getVideoReviews().catch(() => [] as VideoReview[]),
-    supabase.from('clients').select('id, name').in('status', ESTADOS_VIVOS).order('name'),
+    supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
     supabase.from('posting_drafts').select('video_review_id').eq('status', 'sent'),
     getClientVideoPipeline().catch(() => [] as ClientVideoPipeline[]),
     getMetricoolPicturesByBlogId().catch(() => ({} as Record<string, string>)),

@@ -5,7 +5,6 @@ import { EngagementChart } from '@/components/performance/engagement-chart'
 import { PlatformBreakdown } from '@/components/performance/platform-breakdown'
 import { Users, CheckCircle2, AlertCircle, ShieldAlert, Clock } from 'lucide-react'
 import { startOfWeek, endOfWeek } from 'date-fns'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export default async function PerformancePage() {
   const supabase = await createClient()
@@ -25,7 +24,7 @@ export default async function PerformancePage() {
     supabase
       .from('clients')
       .select('id', { count: 'exact', head: true })
-      .in('status', ESTADOS_VIVOS),
+      .eq('status', 'active'),
     supabase
       .from('tasks')
       .select('id', { count: 'exact', head: true })

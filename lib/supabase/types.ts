@@ -1,12 +1,7 @@
 export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'disenador' | 'copy' | 'team_member'
 export type UserStatus = 'active' | 'inactive'
 export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
-export type ClientStatus =
-  | 'active'
-  | 'proximo_a_grabar'
-  | 'sin_contenido'
-  | 'onboarding'
-  | 'paused'
+export type ClientStatus = 'active' | 'paused' | 'onboarding'
 export type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
 export type TaskType = 'content_creation' | 'scheduling' | 'reporting' | 'client_call' | 'review' | 'other'

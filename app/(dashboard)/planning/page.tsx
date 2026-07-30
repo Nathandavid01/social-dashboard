@@ -9,7 +9,6 @@ import { resolveInterval } from '@/lib/utils/recording-window'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { createClient } from '@/lib/supabase/server'
 import type { Client, Profile } from '@/lib/supabase/types'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,12 +22,12 @@ async function WorkflowData() {
     supabase
       .from('clients')
       .select('id, name, industry, logo_url, metricool_blog_id, brand_voice, caption_language, default_cta, default_hashtags, caption_notes')
-      .in('status', ESTADOS_VIVOS)
+      .eq('status', 'active')
       .order('name'),
     supabase.from('profiles').select('id, full_name').order('full_name'),
     // Resilient: this column may not exist yet (migration 0029). On error the
     // query returns { data: null } and every client falls back to the default.
-    supabase.from('clients').select('id, recording_interval_weeks').in('status', ESTADOS_VIVOS),
+    supabase.from('clients').select('id, recording_interval_weeks').eq('status', 'active'),
     // Brand pictures from Metricool ({} when not configured → falls back to initials).
     getMetricoolPicturesByBlogId(),
   ])

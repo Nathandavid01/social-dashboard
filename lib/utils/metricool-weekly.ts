@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 /** Current week, Monday→Sunday, as ISO datetimes. */
 function weekRangeMon(ref: Date = new Date()) {
@@ -45,7 +44,7 @@ export async function getMetricoolWeeklyPostsByClient(): Promise<Record<string, 
   const { data: clients } = await supabase
     .from('clients')
     .select('id, metricool_blog_id')
-    .in('status', ESTADOS_VIVOS)
+    .eq('status', 'active')
     .not('metricool_blog_id', 'is', null)
 
   if (!clients?.length) return {}
