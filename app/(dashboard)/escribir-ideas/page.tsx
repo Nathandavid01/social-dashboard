@@ -25,11 +25,26 @@ export default async function EscribirIdeasPage({
 
   const { c: clientId } = await searchParams
   const supabase = await createClient()
-  const { data: clients } = await supabase
-    .from('clients')
-    .select('id, name')
-    .eq('status', 'active')
-    .order('name')
+
+  // Solo los clientes agendados en el calendario de grabación. Escribir ideas
+  // para un cliente que nadie va a grabar es trabajo que se queda ahí; y con
+  // los 66 activos, encontrar el de hoy era el problema.
+  const { data: sesiones } = await supabase
+    .from('recording_sessions')
+    .select('client_id')
+    .neq('status', 'cancelled')
+    .not('client_id', 'is', null)
+
+  const agendados = new Set((sesiones ?? []).map((s) => s.client_id as string))
+
+  const { data: clients } = agendados.size === 0
+    ? { data: [] }
+    : await supabase
+        .from('clients')
+        .select('id, name')
+        .eq('status', 'active')
+        .in('id', Array.from(agendados))
+        .order('name')
 
   const lista = clients ?? []
   const activo = lista.find((x) => x.id === clientId) ?? lista[0]
@@ -45,7 +60,7 @@ export default async function EscribirIdeasPage({
           <div className="min-w-0">
             <h1 className="truncate text-[15px] font-semibold tracking-tight">Escribir ideas</h1>
             <p className="truncate text-xs text-muted-foreground">
-              Una fila por idea. Van directas al flujo — sin documento aparte.
+              Solo los clientes agendados para grabar. Una fila por idea.
             </p>
           </div>
         </div>
@@ -60,7 +75,14 @@ export default async function EscribirIdeasPage({
       {lista.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border bg-card px-4 py-12 text-center">
           <Users className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-          <p className="text-sm font-medium">No hay clientes activos</p>
+          <p className="text-sm font-medium">Ningún cliente agendado para grabar</p>
+          <p className="max-w-md text-xs text-muted-foreground">
+            Aquí solo salen los clientes con una sesión en el calendario de grabación.
+            Agenda una sesión —y asígnale cliente— y aparecerá para escribirle ideas.
+          </p>
+          <Link href="/recording-calendar" className="mt-1 rounded-lg border px-3 py-1.5 text-[12px] transition hover:bg-muted">
+            Abrir calendario de grabación
+          </Link>
         </div>
       ) : (
         <>
