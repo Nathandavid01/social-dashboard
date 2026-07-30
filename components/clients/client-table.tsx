@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { deleteClient } from '@/lib/actions/clients'
+import { deleteClient, pauseClient, activateClient } from '@/lib/actions/clients'
 import type { Client } from '@/lib/supabase/types'
 import { useToast } from '@/lib/hooks/use-toast'
 import { StatusBadge } from './status-badge'
@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard, UserPlus, Users } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Globe, Clapperboard, UserPlus, Users, PauseCircle, PlayCircle } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { friendlyError } from '@/lib/utils/error-message'
@@ -52,6 +52,25 @@ export function ClientTable({ clients }: ClientTableProps) {
     const matchStatus = statusFilter === 'all' || c.status === statusFilter
     return matchSearch && matchStatus
   })
+
+  // Pausar es reversible y no destruye nada, así que va directo, sin diálogo.
+  // Borrar sí lo lleva: arrastra las ideas en cascada.
+  function togglePausa(client: Client) {
+    const pausar = client.status !== 'paused'
+    startTransition(async () => {
+      const result = pausar ? await pauseClient(client.id) : await activateClient(client.id)
+      if (result.error) {
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+        return
+      }
+      toast({
+        title: pausar ? 'Cliente pausado' : 'Cliente reactivado',
+        description: pausar
+          ? `${client.name} sale del flujo. Su historial y sus videos se conservan.`
+          : `${client.name} vuelve al flujo.`,
+      })
+    })
+  }
 
   function confirmDelete() {
     if (!deleteTarget) return
@@ -180,6 +199,7 @@ export function ClientTable({ clients }: ClientTableProps) {
                       client={client}
                       isPending={isPending}
                       onDelete={() => setDeleteTarget({ id: client.id, name: client.name })}
+                      onTogglePausa={() => togglePausa(client)}
                     />
                   </TableCell>
                 </TableRow>
@@ -220,6 +240,7 @@ export function ClientTable({ clients }: ClientTableProps) {
                 client={client}
                 isPending={isPending}
                 onDelete={() => setDeleteTarget({ id: client.id, name: client.name })}
+                onTogglePausa={() => togglePausa(client)}
               />
             </div>
           ))}
@@ -230,7 +251,10 @@ export function ClientTable({ clients }: ClientTableProps) {
         open={deleteTarget !== null}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
         title={`¿Eliminar a ${deleteTarget?.name ?? ''}?`}
-        description="Esto borra el cliente y su información asociada. No se puede deshacer."
+        // Antes decía solo "y su información asociada". Lo que de verdad pasa es
+        // que las ideas caen en cascada —y con ellas los videos—, así que vale la
+        // pena decirlo y ofrecer Pausar, que hace lo que casi siempre se busca.
+        description="Borra para siempre sus ideas, videos, métricas y pagos, y sus sesiones de grabación se quedan sin cliente. No se puede deshacer. Si solo quieres sacarlo del flujo, usa Pausar."
         confirmLabel="Eliminar"
         destructive
         loading={isPending}
@@ -245,16 +269,18 @@ function ClientActions({
   client,
   isPending,
   onDelete,
+  onTogglePausa,
 }: {
   client: Client
   isPending: boolean
   onDelete: () => void
+  onTogglePausa: () => void
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending} className="shrink-0">
-          <MoreHorizontal className="h-4 w-4" />
+        <Button variant="ghost" size="icon" disabled={isPending} className="shrink-0" aria-label={`Acciones de ${client.name}`}>
+          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -291,11 +317,18 @@ function ClientActions({
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer" onClick={onTogglePausa}>
+          {client.status === 'paused' ? (
+            <><PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" />Reactivar</>
+          ) : (
+            <><PauseCircle className="mr-2 h-4 w-4" aria-hidden="true" />Pausar</>
+          )}
+        </DropdownMenuItem>
         <DropdownMenuItem
           className="text-destructive focus:text-destructive cursor-pointer"
           onClick={onDelete}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
           Eliminar
         </DropdownMenuItem>
       </DropdownMenuContent>

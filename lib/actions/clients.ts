@@ -102,6 +102,34 @@ export async function updateClient(id: string, values: ClientFormValues) {
   return { success: true }
 }
 
+/**
+ * Pausar un cliente — la alternativa a borrarlo.
+ *
+ * Sale del flujo (cadencia, sync de Metricool, captions, plan semanal) pero
+ * conserva su historial, sus ideas y sus videos. Borrar es definitivo: arrastra
+ * en cascada las ideas —y con ellas los videos— y deja huérfanas las sesiones de
+ * grabación, además de dejar los archivos en R2 sin nada que apunte a ellos.
+ *
+ * Reversible, así que basta con clients.edit; borrar sigue siendo de owner.
+ */
+export async function pauseClient(id: string) {
+  try {
+    await requirePermission('clients.edit')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const supabase = await createSupabaseClient()
+  const { error } = await supabase
+    .from('clients')
+    .update({ status: 'paused', updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/clients')
+  revalidatePath(`/clients/${id}`)
+  revalidatePath('/pipeline')
+  return { success: true }
+}
+
 /** One-click "Activar cliente" from the onboarding checklist — flips status to
  *  active so the pipeline auto-provisions and auto-publish can fire. */
 export async function activateClient(id: string) {
