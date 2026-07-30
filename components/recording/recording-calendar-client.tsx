@@ -183,8 +183,8 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Fecha *</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 text-sm" />
+              <Label htmlFor="rc-fecha" className="text-xs flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Fecha *</Label>
+              <Input id="rc-fecha" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 text-sm" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1"><MapPin className="h-3 w-3" /> Tipo de ubicación</Label>
@@ -683,7 +683,12 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
         </div>
       )}
 
+      {/* key fuerza un montaje nuevo al cambiar de objetivo. Todos los campos
+          del diálogo se inicializan con useState, que solo lee el valor la
+          primera vez: sin esto, pulsar otro día del calendario no cambiaba la
+          fecha, y abrir una segunda sesión mostraba los datos de la anterior. */}
       <SessionDialog
+        key={editing?.id ?? addDate ?? 'nueva'}
         open={showAdd}
         onClose={() => { setShowAdd(false); setEditing(undefined); setAddDate(undefined) }}
         onSaved={handleSaved}

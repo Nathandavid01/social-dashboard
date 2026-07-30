@@ -31,6 +31,29 @@ const clients = [{ id: 'c1', name: 'Nora Fitness' }]
 
 beforeEach(() => cleanup())
 
+describe('el día que pulsas es la fecha de la sesión', () => {
+  /** Los campos del diálogo se inicializan con useState, que solo lee el valor
+   *  una vez. Sin remontarlo, pulsar otro día no cambiaba la fecha. */
+  const fecha = (n: number) =>
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(n).padStart(2, '0')}`
+
+  it('al pulsar un día, el diálogo abre con ESA fecha', () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByText('7'))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(7))
+  })
+
+  it('pulsar otro día actualiza la fecha, no se queda con la primera', () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByText('7'))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(7))
+    // Cerrar y elegir otro día: aquí es donde fallaba.
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }))
+    fireEvent.click(screen.getByText('12'))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(12))
+  })
+})
+
 describe('RecordingCalendarClient — premium redesign', () => {
   it('renders the calendar header and a session in the grid', () => {
     render(<RecordingCalendarClient initialSessions={[session()]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
