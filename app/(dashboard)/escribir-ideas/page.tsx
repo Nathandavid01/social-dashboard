@@ -5,7 +5,8 @@ import { getWrittenIdeas } from '@/lib/actions/ideas-batch'
 import { IdeaBatchTable } from '@/components/ideas/idea-batch-table'
 import { PenLine, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ESTADOS_VIVOS } from '@/lib/clients/estado'
+import { ESTADOS_VIVOS, estadoLabel, estadoTone } from '@/lib/clients/estado'
+import { paraEscribirIdeas } from '@/lib/clients/para-escribir'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -27,27 +28,22 @@ export default async function EscribirIdeasPage({
   const { c: clientId } = await searchParams
   const supabase = await createClient()
 
-  // Solo los clientes agendados en el calendario de grabación. Escribir ideas
-  // para un cliente que nadie va a grabar es trabajo que se queda ahí; y con
-  // los 66 activos, encontrar el de hoy era el problema.
-  const { data: sesiones } = await supabase
-    .from('recording_sessions')
-    .select('client_id')
-    .neq('status', 'cancelled')
-    .not('client_id', 'is', null)
+  // No los 66 activos: con esa lista el problema era encontrar el de hoy. Salen
+  // los agendados en el calendario y los marcados "próximo a grabar" o "sin
+  // contenido" — esas son las dos razones por las que se escriben ideas, y no
+  // siempre hay ya una sesión puesta cuando toca escribirlas. El criterio y el
+  // orden viven en paraEscribirIdeas.
+  const [{ data: sesiones }, { data: clients }] = await Promise.all([
+    supabase
+      .from('recording_sessions')
+      .select('client_id')
+      .neq('status', 'cancelled')
+      .not('client_id', 'is', null),
+    supabase.from('clients').select('id, name, status').in('status', ESTADOS_VIVOS),
+  ])
 
   const agendados = new Set((sesiones ?? []).map((s) => s.client_id as string))
-
-  const { data: clients } = agendados.size === 0
-    ? { data: [] }
-    : await supabase
-        .from('clients')
-        .select('id, name')
-        .in('status', ESTADOS_VIVOS)
-        .in('id', Array.from(agendados))
-        .order('name')
-
-  const lista = clients ?? []
+  const lista = paraEscribirIdeas(clients ?? [], agendados)
   const activo = lista.find((x) => x.id === clientId) ?? lista[0]
   const { ideas } = activo ? await getWrittenIdeas(activo.id) : { ideas: [] }
 
@@ -76,14 +72,20 @@ export default async function EscribirIdeasPage({
       {lista.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border bg-card px-4 py-12 text-center">
           <Users className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-          <p className="text-sm font-medium">Ningún cliente agendado para grabar</p>
+          <p className="text-sm font-medium">Ningún cliente pide ideas ahora mismo</p>
           <p className="max-w-md text-xs text-muted-foreground">
-            Aquí solo salen los clientes con una sesión en el calendario de grabación.
-            Agenda una sesión —y asígnale cliente— y aparecerá para escribirle ideas.
+            Aquí salen los clientes con sesión en el calendario de grabación y los
+            marcados «próximo a grabar» o «sin contenido». Cambia el estado de un
+            cliente en su ficha, o agenda una sesión, y aparecerá aquí.
           </p>
-          <Link href="/recording-calendar" className="mt-1 rounded-lg border px-3 py-1.5 text-[12px] transition hover:bg-muted">
-            Abrir calendario de grabación
-          </Link>
+          <div className="mt-1 flex flex-wrap justify-center gap-2">
+            <Link href="/clients" className="rounded-lg border px-3 py-1.5 text-[12px] transition hover:bg-muted">
+              Ver clientes
+            </Link>
+            <Link href="/recording-calendar" className="rounded-lg border px-3 py-1.5 text-[12px] transition hover:bg-muted">
+              Abrir calendario de grabación
+            </Link>
+          </div>
         </div>
       ) : (
         <>
@@ -97,7 +99,14 @@ export default async function EscribirIdeasPage({
                   c.id === activo?.id ? 'border-primary bg-primary/10' : 'hover:bg-muted',
                 )}
               >
-                {c.name}
+                <span className="flex items-center gap-1.5">
+                  {c.name}
+                  {c.status !== 'active' && (
+                    <span className={cn('rounded-full border px-1.5 text-[9px]', estadoTone(c.status))}>
+                      {estadoLabel(c.status)}
+                    </span>
+                  )}
+                </span>
               </Link>
             ))}
           </nav>
