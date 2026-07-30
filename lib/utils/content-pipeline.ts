@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { computePostingTargets } from './posting-cadence'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 /**
  * Pipeline buckets — derived from content_ideas.status semantics:
@@ -139,7 +140,7 @@ export async function getPipelineTotals(): Promise<{
   const supabase = await createClient()
 
   const [{ data: clients }, { data: ideas }] = await Promise.all([
-    supabase.from('clients').select('id, name, posting_days').eq('status', 'active'),
+    supabase.from('clients').select('id, name, posting_days').in('status', ESTADOS_VIVOS),
     supabase
       .from('content_ideas')
       .select('client_id, status, published_at, updated_at, created_at')

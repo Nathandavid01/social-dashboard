@@ -5,6 +5,7 @@ import { getWrittenIdeas } from '@/lib/actions/ideas-batch'
 import { IdeaBatchTable } from '@/components/ideas/idea-batch-table'
 import { PenLine, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,7 +43,7 @@ export default async function EscribirIdeasPage({
     : await supabase
         .from('clients')
         .select('id, name')
-        .eq('status', 'active')
+        .in('status', ESTADOS_VIVOS)
         .in('id', Array.from(agendados))
         .order('name')
 

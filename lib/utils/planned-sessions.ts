@@ -10,6 +10,8 @@
  * created; this only computes how many cards/slots to draw.
  */
 
+import { esVivo } from '@/lib/clients/estado'
+
 export interface PlannedSession {
   index: number
   label: string
@@ -93,7 +95,7 @@ export function shouldPlanForClient(opts: {
   postingDaysLength: number
   activeIdeasCount: number
 }): boolean {
-  return opts.status === 'active' && opts.postingDaysLength > 0 && opts.activeIdeasCount === 0
+  return esVivo(opts.status) && opts.postingDaysLength > 0 && opts.activeIdeasCount === 0
 }
 
 export interface PlanSessionsInput {

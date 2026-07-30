@@ -3,6 +3,7 @@ import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -20,7 +21,7 @@ export default async function RevisionPage() {
 
   const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
-    supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time').eq('status', 'active').order('name'),
+    supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time').in('status', ESTADOS_VIVOS).order('name'),
     getCurrentRole(),
     supabase.auth.getUser(),
   ])

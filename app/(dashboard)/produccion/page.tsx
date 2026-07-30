@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getProductionSchedules, getProductionTasks, getMyProductionTasks, getReviewQueueTasks } from '@/lib/actions/production'
 import { ProduccionClient } from '@/components/produccion/produccion-client'
 import type { Profile, Client } from '@/lib/supabase/types'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export default async function ProduccionPage() {
     supabase
       .from('clients')
       .select('id, name')
-      .eq('status', 'active')
+      .in('status', ESTADOS_VIVOS)
       .order('name'),
   ])
 

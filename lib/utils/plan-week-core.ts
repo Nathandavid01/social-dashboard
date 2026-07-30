@@ -1,5 +1,6 @@
 import { nextPostingDates, formatPlannedPublishLabel } from '@/lib/utils/planned-sessions'
 import { addDaysISO } from '@/lib/utils/deadlines'
+import { esVivo } from '@/lib/clients/estado'
 
 /**
  * Pure planner for the weekly auto-created cards: for every active client with
@@ -62,7 +63,7 @@ export function planWeekInserts(
 
   const out: PlanWeekInsert[] = []
   for (const c of clients) {
-    if (c.status !== 'active') continue
+    if (!esVivo(c.status)) continue
     const days = c.posting_days ?? []
     if (days.length === 0) continue
     // At most one slot per day → daysAhead+1 dates cover the whole window.

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import type { SocialPlatform } from '@/lib/supabase/types'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export interface CachedMetricoolProfile {
   id: string
@@ -20,7 +21,7 @@ export async function getCachedMetricoolProfiles(): Promise<CachedMetricoolProfi
     .from('clients')
     .select('name, metricool_blog_id, platforms, logo_url')
     .not('metricool_blog_id', 'is', null)
-    .eq('status', 'active')
+    .in('status', ESTADOS_VIVOS)
     .order('name', { ascending: true })
 
   return (data ?? []).map((c) => ({

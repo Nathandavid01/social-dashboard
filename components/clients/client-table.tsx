@@ -35,6 +35,7 @@ import { MoreHorizontal, Pencil, Trash2, Eye, Search, Brain, Zap, Sparkles, Glob
 import { EmptyState } from '@/components/shared/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { friendlyError } from '@/lib/utils/error-message'
+import { CLIENT_ESTADOS } from '@/lib/clients/estado'
 
 interface ClientTableProps {
   clients: Client[]
@@ -86,9 +87,9 @@ export function ClientTable({ clients }: ClientTableProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="active">Activo</SelectItem>
-            <SelectItem value="paused">Pausado</SelectItem>
-            <SelectItem value="onboarding">Onboarding</SelectItem>
+            {CLIENT_ESTADOS.map((e) => (
+              <SelectItem key={e.key} value={e.key}>{e.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

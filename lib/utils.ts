@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format, formatDistanceToNow } from 'date-fns'
-import type { SocialPlatform, ClientStatus, TaskStatus, AlertSeverity } from './supabase/types'
+import type { SocialPlatform, TaskStatus, AlertSeverity } from './supabase/types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -77,12 +77,6 @@ export const platformLabels: Record<SocialPlatform, string> = {
   facebook: 'Facebook',
   tiktok: 'TikTok',
   linkedin: 'LinkedIn',
-}
-
-export const statusColors: Record<ClientStatus, string> = {
-  active: 'bg-green-500/10 text-green-500 border-green-500/20',
-  paused: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-  onboarding: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
 }
 
 export const taskStatusColors: Record<TaskStatus, string> = {

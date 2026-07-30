@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export interface PublishedPost {
   id: number
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
         .from('clients')
         .select('id, name, metricool_blog_id')
         .not('metricool_blog_id', 'is', null)
-        .eq('status', 'active')
+        .in('status', ESTADOS_VIVOS)
         .limit(50)
 
       if (!clients?.length) return NextResponse.json({ posts: [] })

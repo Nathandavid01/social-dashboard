@@ -5,6 +5,7 @@ import { computePostingTargets } from '@/lib/utils/posting-cadence'
 import { planSessions, planSlots, type PlannedSlot } from '@/lib/utils/planned-sessions'
 import { resolveInterval } from '@/lib/utils/recording-window'
 import { getClientVideoBatch, type ClientVideoPipeline } from './video-pipeline'
+import { esVivo } from '@/lib/clients/estado'
 
 export interface BatchConfig {
   /** Optional name/period for the current batch (LOTE). */
@@ -135,7 +136,7 @@ export async function ensureBatchVideos(
     .select('posting_days, status')
     .eq('id', clientId)
     .maybeSingle()
-  if (!client || client.status !== 'active') return { created: 0 }
+  if (!client || !esVivo(client.status)) return { created: 0 }
 
   const postingDays = (client.posting_days ?? []) as number[]
   if (postingDays.length === 0) return { created: 0 }

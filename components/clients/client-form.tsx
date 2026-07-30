@@ -30,6 +30,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { RefreshCw } from 'lucide-react'
 import { friendlyError } from '@/lib/utils/error-message'
+import { CLIENT_ESTADOS } from '@/lib/clients/estado'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
   { value: 'instagram', label: 'Instagram' },
@@ -170,10 +171,17 @@ export function ClientForm({ client, teamMembers }: ClientFormProps) {
                     <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>
                 </FormControl>
+                {/* De CLIENT_ESTADOS, no a mano: este desplegable y las ~42
+                    consultas que filtran por estado tienen que ir a la par. */}
                 <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="paused">Pausado</SelectItem>
-                  <SelectItem value="onboarding">Onboarding</SelectItem>
+                  {CLIENT_ESTADOS.map((e) => (
+                    <SelectItem key={e.key} value={e.key}>
+                      <span className="flex flex-col gap-0.5 text-left">
+                        <span>{e.label}</span>
+                        <span className="text-[11px] text-muted-foreground">{e.hint}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

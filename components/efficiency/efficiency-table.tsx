@@ -26,6 +26,7 @@ import { StatusBadge } from '@/components/clients/status-badge'
 import { ScoreBadge } from './score-badge'
 import { cn } from '@/lib/utils'
 import type { ClientEfficiencyRow } from '@/lib/actions/efficiency'
+import { CLIENT_ESTADOS, esVivo } from '@/lib/clients/estado'
 
 type SortKey =
   | 'score'
@@ -43,14 +44,17 @@ interface Props {
 
 export function EfficiencyTable({ rows }: Props) {
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('active')
+  const [statusFilter, setStatusFilter] = useState('vivos')
   const [sortKey, setSortKey] = useState<SortKey>('score')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
   const filtered = useMemo(() => {
     const list = rows.filter((r) => {
       const matchSearch = r.name.toLowerCase().includes(search.toLowerCase())
-      const matchStatus = statusFilter === 'all' || r.status === statusFilter
+      const matchStatus =
+        statusFilter === 'all' ? true
+        : statusFilter === 'vivos' ? esVivo(r.status)
+        : r.status === statusFilter
       return matchSearch && matchStatus
     })
     list.sort((a, b) => {
@@ -94,10 +98,11 @@ export function EfficiencyTable({ rows }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="vivos">En producción</SelectItem>
             <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="active">Activo</SelectItem>
-            <SelectItem value="paused">Pausado</SelectItem>
-            <SelectItem value="onboarding">Onboarding</SelectItem>
+            {CLIENT_ESTADOS.map((e) => (
+              <SelectItem key={e.key} value={e.key}>{e.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

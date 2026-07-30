@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { addDaysISO, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { planWeekInserts, type PlanWeekClient, type PlanWeekExistingIdea } from '@/lib/utils/plan-week-core'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
 
   const [{ data: clients, error: clientsErr }, { data: existing, error: ideasErr }, { data: inFlight, error: flightErr }] =
     await Promise.all([
-      sb.from('clients').select('id, name, status, posting_days').eq('status', 'active'),
+      sb.from('clients').select('id, name, status, posting_days').in('status', ESTADOS_VIVOS),
       // Every idea dated inside the window blocks its (client, date) slot —
       // including 'descartada' (the team explicitly killed that slot; don't
       // resurrect it). Bounded to the window so the result set stays small.

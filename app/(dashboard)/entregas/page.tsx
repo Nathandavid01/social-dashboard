@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,7 +24,7 @@ export default async function EntregasPage() {
     supabase
       .from('clients')
       .select('id, name, assigned_to, posting_time')
-      .eq('status', 'active')
+      .in('status', ESTADOS_VIVOS)
       .order('name'),
   ])
 

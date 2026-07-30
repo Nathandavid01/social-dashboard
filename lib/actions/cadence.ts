@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { inferCadenceFromMetricoolPosts, type InferredCadence, type MetricoolPostMinimal } from '@/lib/utils/metricool-cadence'
+import { ESTADOS_VIVOS } from '@/lib/clients/estado'
 
 interface ClientWithBlog {
   id: string
@@ -54,7 +55,7 @@ export async function inferAllActiveCadences(): Promise<CadenceRow[]> {
   const { data: clients } = await supabase
     .from('clients')
     .select('id, name, posting_days, metricool_blog_id')
-    .eq('status', 'active')
+    .in('status', ESTADOS_VIVOS)
     .order('name', { ascending: true })
 
   const rows: ClientWithBlog[] = (clients ?? []) as ClientWithBlog[]
@@ -199,7 +200,7 @@ export async function applyInferredProfileToAll(): Promise<AutoApplyResult[]> {
   const { data: clients } = await supabase
     .from('clients')
     .select('id, name, posting_days, posting_time, default_platforms, metricool_blog_id')
-    .eq('status', 'active')
+    .in('status', ESTADOS_VIVOS)
     .order('name', { ascending: true })
 
   const rows = (clients ?? []) as Array<{
