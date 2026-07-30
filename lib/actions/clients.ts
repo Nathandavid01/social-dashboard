@@ -1,6 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { CADENCIA_TAG } from './cadencia-tag'
 import { createClient as createSupabaseClient } from '@/lib/supabase/server'
 import { assertOwner, requirePermission } from '@/lib/auth/server'
 import { clientSchema } from '@/lib/validations/client.schema'
@@ -74,6 +75,7 @@ export async function createClient(values: ClientFormValues) {
 
   if (error) return { error: error.message }
 
+  revalidateTag(CADENCIA_TAG)
   revalidatePath('/clients')
   // Return the id so the onboarding wizard can keep configuring this client.
   return { success: true, id: created?.id as string | undefined }
@@ -97,6 +99,7 @@ export async function updateClient(id: string, values: ClientFormValues) {
 
   if (error) return { error: error.message }
 
+  revalidateTag(CADENCIA_TAG)
   revalidatePath('/clients')
   revalidatePath(`/clients/${id}`)
   return { success: true }
@@ -124,6 +127,7 @@ export async function pauseClient(id: string) {
     .update({ status: 'paused', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
+  revalidateTag(CADENCIA_TAG)
   revalidatePath('/clients')
   revalidatePath(`/clients/${id}`)
   revalidatePath('/pipeline')
@@ -144,6 +148,7 @@ export async function activateClient(id: string) {
     .update({ status: 'active', updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
+  revalidateTag(CADENCIA_TAG)
   revalidatePath('/clients')
   revalidatePath(`/clients/${id}`)
   revalidatePath('/pipeline')
@@ -165,6 +170,7 @@ export async function deleteClient(id: string) {
 
   if (error) return { error: error.message }
 
+  revalidateTag(CADENCIA_TAG)
   revalidatePath('/clients')
   return { success: true }
 }

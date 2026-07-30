@@ -1,6 +1,7 @@
 'use server'
 
 import { unstable_cache } from 'next/cache'
+import { CADENCIA_TAG } from './cadencia-tag'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePermission } from '@/lib/auth/server'
 import { getServerConfig } from '@/lib/metricool/post'
@@ -58,8 +59,11 @@ export async function getCadenciaData(): Promise<CadenciaData> {
  */
 function sweepWeek(weekStart: string, weekEnd: string): Promise<CadenciaClientInput[]> {
   // Bump the version segment whenever the cached shape changes, to evict stale entries.
+  // tags: revalidatePath no limpia un unstable_cache. Sin la etiqueta, pausar un
+  // cliente lo dejaba en la cadencia del dia hasta 10 minutos mas.
   return unstable_cache(() => sweepWeekUncached(weekStart, weekEnd), ['cadencia-sweep', 'v2', weekStart], {
     revalidate: 600,
+    tags: [CADENCIA_TAG],
   })()
 }
 
