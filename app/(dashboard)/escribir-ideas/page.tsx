@@ -1,0 +1,93 @@
+import Link from 'next/link'
+import { requirePermission } from '@/lib/auth/server'
+import { createClient } from '@/lib/supabase/server'
+import { getWrittenIdeas } from '@/lib/actions/ideas-batch'
+import { IdeaBatchTable } from '@/components/ideas/idea-batch-table'
+import { PenLine, Users } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+/**
+ * Escribir ideas — reemplaza el documento PDF donde se listaban a mano.
+ *
+ * Cada fila es una content_ideas normal, así que lo escrito aquí aparece solo
+ * en On Site para grabarlo y sigue el resto del flujo. Nada que importar
+ * después.
+ */
+export default async function EscribirIdeasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ c?: string }>
+}) {
+  await requirePermission('ideas.edit')
+
+  const { c: clientId } = await searchParams
+  const supabase = await createClient()
+  const { data: clients } = await supabase
+    .from('clients')
+    .select('id, name')
+    .eq('status', 'active')
+    .order('name')
+
+  const lista = clients ?? []
+  const activo = lista.find((x) => x.id === clientId) ?? lista[0]
+  const { ideas } = activo ? await getWrittenIdeas(activo.id) : { ideas: [] }
+
+  return (
+    <div className="space-y-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-black">
+            <PenLine className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="truncate text-[15px] font-semibold tracking-tight">Escribir ideas</h1>
+            <p className="truncate text-xs text-muted-foreground">
+              Una fila por idea. Van directas al flujo — sin documento aparte.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/onsite"
+          className="shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-[12px] transition hover:bg-muted"
+        >
+          Ir a On Site
+        </Link>
+      </header>
+
+      {lista.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-xl border bg-card px-4 py-12 text-center">
+          <Users className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+          <p className="text-sm font-medium">No hay clientes activos</p>
+        </div>
+      ) : (
+        <>
+          <nav className="flex gap-1.5 overflow-x-auto pb-1">
+            {lista.map((c) => (
+              <Link
+                key={c.id}
+                href={`/escribir-ideas?c=${c.id}`}
+                className={cn(
+                  'shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-[12px] transition',
+                  c.id === activo?.id ? 'border-primary bg-primary/10' : 'hover:bg-muted',
+                )}
+              >
+                {c.name}
+              </Link>
+            ))}
+          </nav>
+
+          {activo && (
+            <IdeaBatchTable
+              clientId={activo.id}
+              clientName={activo.name}
+              existing={ideas ?? []}
+            />
+          )}
+        </>
+      )}
+    </div>
+  )
+}

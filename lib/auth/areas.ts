@@ -55,8 +55,13 @@ export const AREAS: Area[] = [
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Trabajo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Trabajo' },
   { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Trabajo' },
+  // Lista de grabación para marcar en el sitio. Va junto a Grabación porque
+  // trabaja sobre las sesiones de ese calendario.
+  { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Trabajo' },
 
   // ── Ideas: qué vamos a grabar ──
+  // Escribir el lote a mano — reemplaza el documento PDF.
+  { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Ideas' },
   { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Ideas' },
   { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Ideas' },
   { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Ideas' },

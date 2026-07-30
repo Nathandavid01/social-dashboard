@@ -23,6 +23,8 @@ import {
   UserCog,
   FileBarChart,
   Activity,
+  ClipboardList,
+  PenLine,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -53,6 +55,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/mi-dia': Sun,
   '/home': Home,
   '/runway': Rocket,
+  '/escribir-ideas': PenLine,
   '/idea-lab': Lightbulb,
   '/ideas-aprobadas': CheckCircle2,
   '/revision': ClipboardCheck,
@@ -63,6 +66,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/team': UserSquare2,
   '/produccion': Clapperboard,
   '/recording-calendar': Camera,
+  '/onsite': ClipboardList,
   '/clients': Users,
   '/clients/cadence': CalendarClock,
   '/clients/asignaciones': UserSquare2,
