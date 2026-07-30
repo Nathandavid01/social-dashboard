@@ -28,16 +28,23 @@ export interface Area {
 }
 
 /**
- * The six sections of the sidebar, in order. Named for what the person is trying
- * to DO, not for how the app is built — "Publicación" is a job; "Metricool" is an
- * integration.
+ * Las secciones del menú, en orden. Nombradas por lo que la persona intenta
+ * HACER, no por cómo está construida la app.
+ *
+ * Trabajo    — el flujo del editor: entregar y revisar, luego copy y publicar.
+ * Marketing  — de dónde salen las ideas.
+ * Recordings — el día de rodaje.
+ * Desarrollo — lo anterior a este flujo (Pipeline, Producción, Video QC) más
+ *              Runway. Sigue vivo, pero no es por donde entra el trabajo nuevo.
  */
 export const NAV_GROUPS = [
   'Trabajo',
-  'Ideas',
-  'Publicación',
+  'Marketing',
+  'Recordings',
   'Clientes',
+  'Publicación',
   'Métricas',
+  'Desarrollo',
   'Equipo',
 ] as const
 
@@ -51,20 +58,20 @@ export const AREAS: Area[] = [
   // copy y publicación en /entregas. Cruzan al aprobar el video.
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
-  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Trabajo' },
-  { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Trabajo' },
-  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Trabajo' },
-  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Trabajo' },
+  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
+  { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
+  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
+  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Recordings' },
   // Lista de grabación para marcar en el sitio. Va junto a Grabación porque
   // trabaja sobre las sesiones de ese calendario.
-  { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Trabajo' },
+  { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Recordings' },
 
   // ── Ideas: qué vamos a grabar ──
   // Escribir el lote a mano — reemplaza el documento PDF.
-  { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Ideas' },
-  { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Ideas' },
-  { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Ideas' },
-  { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Ideas' },
+  { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Marketing' },
+  { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Marketing' },
+  { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Marketing' },
+  { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Desarrollo' },
 
   // ── Publicación: sacarlo a la calle y comprobar que salió ──
   { href: '/posting',            label: 'Posting',         permission: 'posting.read',       group: 'Publicación' },
@@ -79,7 +86,7 @@ export const AREAS: Area[] = [
   { href: '/clients/asignaciones', label: 'Asignaciones',  permission: 'clients.edit',       group: 'Clientes' },
   // Was ungated: any role could reach it. It shows every client's schedule, so it
   // belongs behind the same gate as the clients list.
-  { href: '/calendar',           label: 'Calendario',      permission: 'clients.read',       group: 'Clientes' },
+  { href: '/calendar',           label: 'Calendario de Contenido', permission: 'clients.read',   group: 'Clientes' },
 
   // ── Métricas ──
   { href: '/reportes',           label: 'Reportes',        permission: 'metricool.read',     group: 'Métricas' },
