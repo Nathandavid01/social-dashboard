@@ -37,11 +37,21 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
       )
       reject(new Error(`La subida falló (${xhr.status})`))
     }
-    // Un bloqueo de CORS llega aquí, no a onload, y el navegador oculta el
-    // status real — por eso hay que reportarlo explícitamente.
+    // Aquí caen tanto un bloqueo de CORS como una caída de red, y el navegador
+    // oculta el status real en los dos casos. El mensaje anterior culpaba a CORS
+    // sin más, y eso mandó una investigación entera por el camino equivocado
+    // teniendo la política del bucket bien: no nombres una causa que no puedes
+    // distinguir desde aquí.
     xhr.onerror = () => {
-      void reportUploadFailure(`${file.name} (${file.size}b) → onerror, sin status (CORS o red)`)
-      reject(new Error('No se pudo subir — revisa la política CORS del bucket'))
+      void reportUploadFailure(
+        `${file.name} (${file.size}b) → onerror, sin status (CORS, red o subida interrumpida)`,
+      )
+      reject(
+        new Error(
+          'Se cortó la subida. Revisa tu conexión e inténtalo otra vez; ' +
+            'si se repite, abre la consola del navegador (pestaña Red) para ver el error real.',
+        ),
+      )
     }
     xhr.ontimeout = () => {
       void reportUploadFailure(`${file.name} (${file.size}b) → timeout`)
