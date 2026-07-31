@@ -206,12 +206,12 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><Clock className="h-3 w-3" /> Hora de Inicio</Label>
-              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-9 text-sm" />
+              <Label htmlFor="recording-start-time" className="text-xs flex items-center gap-1"><Clock className="h-3 w-3" /> Hora de Inicio</Label>
+              <Input id="recording-start-time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-9 text-sm" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Hora de Fin</Label>
-              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-9 text-sm" />
+              <Label htmlFor="recording-end-time" className="text-xs">Hora de Fin</Label>
+              <Input id="recording-end-time" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-9 text-sm" />
             </div>
           </div>
 
@@ -438,6 +438,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
       }
       return [...prev, session].sort((a, b) => a.session_date.localeCompare(b.session_date))
     })
+    setIdeasSession((current) => current?.id === session.id ? session : current)
   }
 
   function handleDelete(id: string) {
@@ -705,6 +706,11 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           session={ideasSession}
           onDelete={() => { const id = ideasSession.id; setIdeasSession(undefined); handleDelete(id) }}
           clientIdeas={ideasSession.client_id ? (ideasMap[ideasSession.client_id] ?? []) : []}
+          onEdit={() => {
+            setIdeasSession(undefined)
+            setEditing(ideasSession)
+            setShowAdd(true)
+          }}
           onIdeasChange={(updated) => {
             if (!ideasSession.client_id) return
             setIdeasMap((prev) => ({ ...prev, [ideasSession.client_id!]: updated }))
