@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 
+const { updateRecordingSession } = vi.hoisted(() => ({ updateRecordingSession: vi.fn() }))
 vi.mock('@/lib/actions/recording-sessions', () => ({
   createRecordingSession: vi.fn(),
-  updateRecordingSession: vi.fn(),
+  updateRecordingSession,
   deleteRecordingSession: vi.fn(),
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
-vi.mock('./session-ideas-panel', () => ({ SessionIdeasPanel: () => null }))
 vi.mock('./gps-picker', () => ({ GpsPicker: () => null }))
 
 import { RecordingCalendarClient } from './recording-calendar-client'
@@ -29,7 +29,11 @@ function session(over: Record<string, any> = {}): any {
 const team = [{ id: 'v1', full_name: 'María R.' }, { id: 'v2', full_name: 'Diego V.' }]
 const clients = [{ id: 'c1', name: 'Nora Fitness' }]
 
-beforeEach(() => cleanup())
+beforeEach(() => {
+  cleanup()
+  vi.clearAllMocks()
+  updateRecordingSession.mockResolvedValue({ success: true })
+})
 
 describe('el día que pulsas es la fecha de la sesión', () => {
   /** Los campos del diálogo se inicializan con useState, que solo lee el valor
@@ -73,5 +77,23 @@ describe('RecordingCalendarClient — premium redesign', () => {
     render(<RecordingCalendarClient initialSessions={[session()]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
     fireEvent.click(screen.getByRole('button', { name: /lista/i }))
     expect(screen.getByText('Grabación Nora')).toBeInTheDocument()
+  })
+
+  it('opens the existing edit form from a calendar event detail and saves a time change', async () => {
+    render(<RecordingCalendarClient initialSessions={[session({ start_time: '09:30:00' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+
+    fireEvent.click(screen.getByText('Grabación Nora'))
+    fireEvent.click(screen.getByRole('button', { name: /editar sesión/i }))
+
+    expect(screen.getByText('Editar Sesión de Grabación')).toBeInTheDocument()
+    const startTime = screen.getByLabelText(/hora de inicio/i)
+    expect(startTime).toHaveValue('09:30:00')
+    fireEvent.change(startTime, { target: { value: '10:15' } })
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }))
+
+    await waitFor(() => expect(updateRecordingSession).toHaveBeenCalledWith(
+      's1',
+      expect.objectContaining({ start_time: '10:15' }),
+    ))
   })
 })
