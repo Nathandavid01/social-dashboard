@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
-import { proximaFechaDelDia, type DiaKey } from '@/lib/entregas/dias'
+import { fechaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
 import type { SubmitVideoPayload } from './submit-video-card'
 
 /**
@@ -78,9 +78,10 @@ export function useSubmitVideos(dia: DiaKey, onDone?: () => void) {
   const submit = useCallback(
     async (payload: SubmitVideoPayload) => {
       setRunning(true)
-      // "Lunes" es el próximo lunes: se guarda como fecha real porque es lo que
-      // acaba recibiendo Metricool. Guardar solo el día dejaría dos verdades.
-      const publishDate = proximaFechaDelDia(dia)
+      // La pestaña es el día en que se ENTREGA; se publica al día siguiente.
+      // Se guarda la fecha real de publicación porque es lo que acaba
+      // recibiendo Metricool: guardar el día suelto dejaría dos verdades.
+      const publishDate = fechaDeEntrega(dia)
       setRows(payload.videos.map((v) => ({ title: v.title, stage: 'creando' as SubmitStage, pct: 0 })))
 
       for (let i = 0; i < payload.videos.length; i++) {

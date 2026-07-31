@@ -5,7 +5,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SubmitVideoCard } from './submit-video-card'
 import { useSubmitVideos } from './use-submit-videos'
-import { etiquetaDia, type DiaKey } from '@/lib/entregas/dias'
+import { etiquetaDia, diaDePublicacion, type DiaKey } from '@/lib/entregas/dias'
 
 /**
  * The real Editado column slot: the submit form plus per-video progress while
@@ -35,7 +35,7 @@ export function EditorSubmitSlot({
   return (
     <div className="space-y-2">
       <p className="px-0.5 text-[11px] text-muted-foreground">
-        Entregando para <strong className="text-foreground">{etiquetaDia(dia)}</strong>
+        Entregando para <strong className="text-foreground">{etiquetaDia(diaDePublicacion(dia))}</strong>
       </p>
       <SubmitVideoCard clients={clients} onSubmit={submit} pending={running} />
 

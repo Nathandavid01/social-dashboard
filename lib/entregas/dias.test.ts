@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { diaDeFecha, proximaFechaDelDia, etiquetaDia, DIAS } from './dias'
+import { diaDeFecha, proximaFechaDelDia, etiquetaDia, DIAS, diaDePublicacion, diaDeEntrega, fechaDeEntrega } from './dias'
 
 describe('DIAS', () => {
   it('va de lunes a sábado, sin domingo', () => {
@@ -65,5 +65,71 @@ describe('etiquetaDia', () => {
   it('nombra el día, y lo vacío es "Sin día"', () => {
     expect(etiquetaDia(1)).toBe('Lunes')
     expect(etiquetaDia(null)).toBe('Sin día')
+  })
+})
+
+/**
+ * La pestaña es el día en que el editor ENTREGA; se publica al día siguiente.
+ * Antes la pestaña era el día de publicación, y "Entregando para Lunes" en la
+ * pestaña Lunes no decía cuándo se publicaba, sino cuándo se trabajaba.
+ */
+describe('diaDePublicacion', () => {
+  it('entregar el lunes publica el martes', () => {
+    expect(diaDePublicacion(1)).toBe(2)
+  })
+
+  it('cada día apunta al siguiente', () => {
+    expect(diaDePublicacion(2)).toBe(3)
+    expect(diaDePublicacion(3)).toBe(4)
+    expect(diaDePublicacion(4)).toBe(5)
+    expect(diaDePublicacion(5)).toBe(6)
+  })
+
+  // El domingo no existe en el tablero: entregar el sábado es para el lunes.
+  it('el sábado salta el domingo y publica el lunes', () => {
+    expect(diaDePublicacion(6)).toBe(1)
+  })
+})
+
+describe('diaDeEntrega — la pestaña donde vive una tarjeta', () => {
+  it('un video que publica el martes se entrega el lunes', () => {
+    expect(diaDeEntrega('2026-08-04')).toBe(1) // martes -> lunes
+  })
+
+  it('un video que publica el lunes se entregó el sábado', () => {
+    expect(diaDeEntrega('2026-08-03')).toBe(6) // lunes -> sábado
+  })
+
+  it('es exactamente la inversa de diaDePublicacion', () => {
+    for (const d of DIAS) {
+      const publica = diaDePublicacion(d.key)
+      expect(diaDeEntrega(proximaFechaDelDia(publica))).toBe(d.key)
+    }
+  })
+
+  it('un domingo no cae en ninguna pestaña', () => {
+    expect(diaDeEntrega('2026-08-02')).toBeNull() // domingo
+  })
+
+  it('sin fecha no cae en ninguna pestaña', () => {
+    expect(diaDeEntrega(null)).toBeNull()
+    expect(diaDeEntrega('')).toBeNull()
+  })
+})
+
+describe('fechaDeEntrega — qué fecha se guarda al entregar', () => {
+  it('entregar en la pestaña Lunes guarda el próximo martes', () => {
+    // jueves 2026-07-30 -> el próximo martes es el 2026-08-04
+    expect(fechaDeEntrega(1, new Date(2026, 6, 30))).toBe('2026-08-04')
+  })
+
+  it('entregar en Sábado guarda el próximo lunes, no el domingo', () => {
+    expect(fechaDeEntrega(6, new Date(2026, 6, 30))).toBe('2026-08-03')
+  })
+
+  it('la fecha que guarda cae siempre en la pestaña desde la que se entregó', () => {
+    for (const d of DIAS) {
+      expect(diaDeEntrega(fechaDeEntrega(d.key, new Date(2026, 6, 30)))).toBe(d.key)
+    }
   })
 })

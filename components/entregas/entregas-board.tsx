@@ -14,7 +14,7 @@ import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { DIAS, diaDeFecha, type DiaKey } from '@/lib/entregas/dias'
+import { DIAS, diaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
@@ -110,7 +110,7 @@ export function EntregasBoard({
   // both, instead of parking in the least-advanced one.
   const ideasDelDia = useMemo(
     () => ideas.filter((i) => {
-      const d = diaDeFecha(i.publish_date as string | null)
+      const d = diaDeEntrega(i.publish_date as string | null)
       return dia === 'sin' ? d === null : d === dia
     }),
     [ideas, dia],
@@ -120,7 +120,7 @@ export function EntregasBoard({
   const conteoPorDia = useMemo(() => {
     const m: Record<string, number> = { sin: 0 }
     for (const i of ideas) {
-      const d = diaDeFecha(i.publish_date as string | null)
+      const d = diaDeEntrega(i.publish_date as string | null)
       const k = d === null ? 'sin' : String(d)
       m[k] = (m[k] ?? 0) + 1
     }

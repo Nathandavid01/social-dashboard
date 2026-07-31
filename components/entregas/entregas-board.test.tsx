@@ -25,7 +25,7 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
     status: 'idea', production_task_id: null, recording_session_id: null, theme: null,
     generation_prompt: null, model: null, generated_caption: null, caption_platform: null, caption_generated_at: null,
     published_at: null, approval_status: 'pending', approved_by: null, approved_at: null, submitted_at: null,
-    recording_date: null, publish_date: '2026-08-03', created_by: null,
+    recording_date: null, publish_date: '2026-08-04', created_by: null,
     created_at: '2026-06-01', updated_at: '2026-06-01',
     recordingScheduled: false, videos: [], assignee: null,
     client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'] },
@@ -55,8 +55,8 @@ describe('EntregasBoard — las columnas las define la ruta', () => {
 describe('EntregasBoard — la operación es por día', () => {
   it('cada día es su propio tablero: el lunes no enseña lo del martes', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: '2026-08-03' }),                                    // lunes
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: '2026-08-04' }), // martes
+      idea({ id: '1', publish_date: '2026-08-04' }),                                    // publica martes -> pestaña Lunes
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: '2026-08-05' }), // publica miércoles -> pestaña Martes
     ]} />)
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
     expect(screen.queryByText('Lumen')).toBeNull()
@@ -68,11 +68,28 @@ describe('EntregasBoard — la operación es por día', () => {
 
   it('la pestaña dice cuántos videos hay sin tener que entrar', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: '2026-08-04' }),
-      idea({ id: '2', publish_date: '2026-08-04' }),
+      idea({ id: '1', publish_date: '2026-08-05' }),
+      idea({ id: '2', publish_date: '2026-08-05' }),
     ]} />)
     const martes = screen.getByRole('button', { name: 'Martes' })
     expect(martes.textContent).toMatch(/2/)
+  })
+
+  // La pestaña es el día en que se ENTREGA; se publica al día siguiente.
+  it('la pestaña Lunes lleva lo que se publica el martes', () => {
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
+      idea({ id: '1', publish_date: '2026-08-04' }),   // martes
+    ]} />)
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+  })
+
+  it('lo que se publica el lunes se entregó el sábado', () => {
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
+      idea({ id: '1', publish_date: '2026-08-03' }),   // lunes
+    ]} />)
+    expect(screen.queryByText('Nora Fitness')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Sábado' }))
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 
   it('un video sin fecha no desaparece: cae en "Sin día"', () => {
@@ -84,7 +101,7 @@ describe('EntregasBoard — la operación es por día', () => {
   })
 
   it('sin videos sueltos no hay pestaña "Sin día"', () => {
-    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: '2026-08-03' })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: '2026-08-04' })]} />)
     expect(screen.queryByRole('button', { name: /sin día/i })).toBeNull()
   })
 })
@@ -112,11 +129,11 @@ describe('EntregasBoard — batch model', () => {
   it('la tarjeta de Publicación dice cuándo cae el borrador en Metricool', () => {
     render(<EntregasBoard
       stages={['edited','approval','copy','publication']}
-      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: '2099-08-03' })]}
+      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: '2099-08-04' })]}
       postingTimes={{ c1: '14:30' }}
     />)
     expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
-    expect(screen.getByText(/3 ago 2099 · 14:30/)).toBeInTheDocument()
+    expect(screen.getByText(/4 ago 2099 · 14:30/)).toBeInTheDocument()
   })
 
   it('avisa cuando no hay fecha y Metricool la corre a +24h', () => {

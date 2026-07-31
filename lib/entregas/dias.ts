@@ -45,3 +45,35 @@ export function proximaFechaDelDia(dia: DiaKey, hoy: Date = new Date()): string 
 export function etiquetaDia(dia: DiaKey | null): string {
   return DIAS.find((d) => d.key === dia)?.label ?? 'Sin día'
 }
+
+/**
+ * El día en que se publica lo que se entrega un día dado: el siguiente.
+ *
+ * La pestaña del tablero es el día en que el editor ENTREGA, no el de
+ * publicación — se edita con un día de antelación. El sábado salta el domingo,
+ * que no existe en el tablero ni en la cadencia.
+ */
+export function diaDePublicacion(dia: DiaKey): DiaKey {
+  return dia === 6 ? 1 : ((dia + 1) as DiaKey)
+}
+
+/**
+ * La pestaña donde vive una tarjeta, a partir de su fecha de publicación: el
+ * día anterior. Es la inversa exacta de diaDePublicacion.
+ *
+ * Un domingo no cae en ninguna pestaña — nadie entrega para el domingo.
+ */
+export function diaDeEntrega(publishDate: string | null | undefined): DiaKey | null {
+  const publica = diaDeFecha(publishDate)
+  if (publica === null) return null
+  return publica === 1 ? 6 : ((publica - 1) as DiaKey)
+}
+
+/**
+ * La fecha que se guarda al entregar desde una pestaña: la próxima del día en
+ * que eso se publica. Se guarda la fecha real de publicación porque es lo que
+ * acaba recibiendo Metricool; la pestaña se deriva de ella con diaDeEntrega.
+ */
+export function fechaDeEntrega(dia: DiaKey, hoy: Date = new Date()): string {
+  return proximaFechaDelDia(diaDePublicacion(dia), hoy)
+}
