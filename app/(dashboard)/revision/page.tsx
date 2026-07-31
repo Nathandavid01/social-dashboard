@@ -3,6 +3,7 @@ import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -50,9 +51,23 @@ export default async function RevisionPage() {
     asignables,
   ).map((c) => ({ id: c.id, name: c.name }))
 
+  // Las correcciones de la última ronda, para enseñarlas en la tarjeta que
+  // volvió al editor. Solo de lo visible: no hace falta traerlas todas.
+  const devueltos = mios.filter((i) => i.approval_status === 'revision_needed').map((i) => i.id)
+  const { data: notasRaw } = devueltos.length
+    ? await supabase
+        .from('content_idea_activity')
+        .select('content_idea_id, metadata, created_at, user:profiles(full_name)')
+        .eq('action', 'changes_requested')
+        .in('content_idea_id', devueltos)
+        .order('created_at', { ascending: false })
+    : { data: [] }
+  const reviewNotes = latestNoteByIdea((notasRaw ?? []) as unknown as ReviewNoteRow[])
+
   return (
     <EntregasBoard
       ideas={mios}
+      reviewNotes={reviewNotes}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       submitClients={submitClients}
       stages={['edited', 'approval']}

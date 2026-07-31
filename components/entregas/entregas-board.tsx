@@ -18,6 +18,7 @@ import { DIAS, diaDeFecha, type DiaKey } from '@/lib/entregas/dias'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
+import type { ReviewNote } from '@/lib/actions/review-notes-core'
 
 type Idea = IdeaWithPipeline
 
@@ -52,6 +53,7 @@ export function EntregasBoard({
   submitClients,
   stages,
   postingTimes = {},
+  reviewNotes = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -70,6 +72,9 @@ export function EntregasBoard({
   stages: EntregaStageKey[]
   /** clients.posting_time — the hour Metricool will schedule at, per client. */
   postingTimes?: Record<string, string | null>
+  /** Lo que el revisor pidió cambiar, por id de video. La etiqueta "Cambios
+   *  pedidos" ya existía, pero sin el texto el editor no sabía qué corregir. */
+  reviewNotes?: Record<string, ReviewNote>
 }) {
   // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
   // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
@@ -326,7 +331,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} />
           ))}
         </div>
       </div>
@@ -352,7 +357,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote> }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -375,7 +380,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes 
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} />)}
           </>
         )}
       </div>
@@ -518,7 +523,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -528,6 +533,13 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
   // can triage urgency from the board without opening each client.
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
   const breakdown = batchBreakdown(batch)
+
+  // La corrección más reciente del batch. Un batch puede traer varios videos
+  // devueltos; se enseña la última, y el detalle por video vive en el overlay.
+  const devuelto = batch.ideas
+    .map((i) => reviewNotes[i.id])
+    .filter(Boolean)
+    .sort((a, b) => (a.at < b.at ? 1 : -1))[0]
 
   return (
     <article onClick={() => onOpen(batch.clientId, stage)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
@@ -581,6 +593,21 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             <li className="pl-2.5 text-[11px] font-medium text-muted-foreground/70">+{more} más</li>
           )}
         </ul>
+
+        {/* Lo que hay que corregir. La etiqueta "Cambios pedidos" ya estaba,
+            pero sin el texto el editor reenviaba el mismo video sin saber qué
+            cambiar. Solo la última ronda: es la que manda. */}
+        {devuelto && (
+          <div className="rounded-lg border border-rose-500/25 bg-rose-500/5 p-2">
+            <p className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">
+              <RotateCcw className="h-2.5 w-2.5" aria-hidden="true" />
+              Cambios pedidos{devuelto.author ? ` · ${devuelto.author}` : ''}
+            </p>
+            <p className="mt-0.5 whitespace-pre-wrap break-words text-[11px] leading-snug text-foreground/90">
+              {devuelto.note}
+            </p>
+          </div>
+        )}
 
         {/* progress */}
         <div className="space-y-1.5">

@@ -119,7 +119,24 @@ export async function decideReview(input: {
     .eq('id', input.ideaId)
   if (error) return { error: error.message }
 
+  // El texto es lo unico que le dice al editor que corregir. Antes se exigia y
+  // se tiraba: la tarjeta volvia con la etiqueta "Cambios pedidos" y nada mas.
+  // Va a content_idea_activity y no a una columna para conservar cada ronda.
+  if (next === 'revision_needed') {
+    const { error: notaErr } = await supabase.from('content_idea_activity').insert({
+      content_idea_id: input.ideaId,
+      user_id: user?.id ?? null,
+      action: 'changes_requested',
+      metadata: { note: input.note?.trim() ?? '' },
+    })
+    // Que no se pierda en silencio: si esto falla, el editor se queda sin saber
+    // que cambiar, que es justo el fallo que veniamos a arreglar.
+    if (notaErr) console.error('[revision] no se pudo guardar la nota', notaErr.message)
+  }
+
   revalidatePath('/pipeline')
+  revalidatePath('/revision')
+  revalidatePath('/entregas')
   return { ok: true, status: next }
 }
 

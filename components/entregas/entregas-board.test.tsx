@@ -351,3 +351,50 @@ describe('EntregasBoard — drag-to-scroll columns (grab cursor)', () => {
     expect(el.className).not.toContain('cursor-grabbing')
   })
 })
+
+describe('EntregasBoard — lo que el revisor pidió cambiar', () => {
+  const devuelto = () => idea({ id: 'v1', client_id: 'c1', approval_status: 'revision_needed' })
+
+  it('enseña el texto de la corrección en la tarjeta del editor', () => {
+    render(
+      <EntregasBoard
+        stages={['edited', 'approval']}
+        ideas={[devuelto()]}
+        reviewNotes={{ v1: { note: 'Corta los primeros 3 segundos', author: 'Tuti', at: '2026-07-30T10:00:00Z' } }}
+      />,
+    )
+    expect(screen.getByText('Corta los primeros 3 segundos')).toBeInTheDocument()
+  })
+
+  it('dice quién los pidió, para saber a quién preguntar', () => {
+    render(
+      <EntregasBoard
+        stages={['edited', 'approval']}
+        ideas={[devuelto()]}
+        reviewNotes={{ v1: { note: 'Cambia la música', author: 'Tuti', at: '2026-07-30T10:00:00Z' } }}
+      />,
+    )
+    expect(screen.getByText(/Tuti/)).toBeInTheDocument()
+  })
+
+  it('sin correcciones no dibuja la caja', () => {
+    render(<EntregasBoard stages={['edited', 'approval']} ideas={[idea({ id: 'v1' })]} reviewNotes={{}} />)
+    expect(screen.queryByText(/Cambios pedidos/)).not.toBeInTheDocument()
+  })
+
+  // Un video puede volver varias veces: lo que hay que leer es lo último.
+  it('con varias rondas en el batch enseña la más reciente', () => {
+    render(
+      <EntregasBoard
+        stages={['edited', 'approval']}
+        ideas={[devuelto(), idea({ id: 'v2', client_id: 'c1', approval_status: 'revision_needed' })]}
+        reviewNotes={{
+          v1: { note: 'ronda vieja', author: null, at: '2026-07-01T10:00:00Z' },
+          v2: { note: 'ronda nueva', author: null, at: '2026-07-30T10:00:00Z' },
+        }}
+      />,
+    )
+    expect(screen.getByText('ronda nueva')).toBeInTheDocument()
+    expect(screen.queryByText('ronda vieja')).not.toBeInTheDocument()
+  })
+})

@@ -454,6 +454,9 @@ export type ContentIdeaActivityAction =
   | 'posted_to_metricool'
   | 'assigned'
   | 'status_changed'
+  // Correcciones que pide el revisor interno. El texto va en metadata.note: es
+  // lo unico que le dice al editor que corregir.
+  | 'changes_requested'
   // Decisions taken by the CLIENT on the public review link (user_id is null —
   // the actor is the client, not a profile).
   | 'sent_to_client'

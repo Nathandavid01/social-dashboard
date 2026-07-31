@@ -69,6 +69,15 @@ export const ACTION_META: Record<
     tone: 'text-amber-600',
     verb: () => 'el cliente pidió cambios',
   },
+  // Revisión interna, no del cliente: por eso no entra en CLIENT_ACTIONS.
+  changes_requested: {
+    icon: RotateCcw,
+    tone: 'text-rose-600',
+    verb: (m) => {
+      const note = typeof m.note === 'string' ? m.note.trim() : ''
+      return note ? `pidió cambios: "${note}"` : 'pidió cambios'
+    },
+  },
 }
 
 /** Fallback icon for unknown/legacy actions. */
