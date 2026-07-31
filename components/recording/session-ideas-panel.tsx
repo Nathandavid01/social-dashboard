@@ -15,6 +15,7 @@ import { IdeaVideoLoader } from './idea-video-loader'
 import {
   Camera, CheckCircle2, Circle, Plus, Video, BookOpen,
   Building2, Clock, MapPin, Link2, Unlink, Loader2,
+  Pencil,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -32,6 +33,7 @@ interface SessionIdeasPanelProps {
   session: ExtendedSession
   clientIdeas: ContentIdea[]          // All ideas for this client
   onIdeasChange: (ideas: ContentIdea[]) => void
+  onEdit: () => void
 }
 
 // ── Content type label helpers ────────────────────────────────────────────────
@@ -244,7 +246,7 @@ function IdeaRow({
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
-export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeasChange }: SessionIdeasPanelProps) {
+export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeasChange, onEdit }: SessionIdeasPanelProps) {
   const [ideas, setIdeas] = useState<ContentIdea[]>(clientIdeas)
   const [showAddForm, setShowAddForm] = useState(false)
 
@@ -273,10 +275,15 @@ export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeas
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Camera className="h-4 w-4 text-primary" />
-            {session.title}
-          </DialogTitle>
+          <div className="flex items-start justify-between gap-3 pr-6">
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Camera className="h-4 w-4 text-primary" />
+              {session.title}
+            </DialogTitle>
+            <Button type="button" size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={onEdit}>
+              <Pencil className="h-3.5 w-3.5" /> Editar sesión
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Session meta */}
