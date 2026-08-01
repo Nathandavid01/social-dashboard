@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -33,6 +33,7 @@ import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 import type { ReviewNote } from '@/lib/actions/review-notes-core'
 import { EnlaceClienteBoton } from './enlace-cliente-boton'
+import { marcaAprobacionCliente, type EstadoCliente } from '@/lib/entregas/marca-cliente'
 
 type Idea = IdeaWithPipeline
 
@@ -68,6 +69,7 @@ export function EntregasBoard({
   stages,
   postingTimes = {},
   reviewNotes = {},
+  clientApprovals = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -89,6 +91,8 @@ export function EntregasBoard({
   /** Lo que el revisor pidió cambiar, por id de video. La etiqueta "Cambios
    *  pedidos" ya existía, pero sin el texto el editor no sabía qué corregir. */
   reviewNotes?: Record<string, ReviewNote>
+  /** Lo que el cliente respondió por video, para marcarlo en la tarjeta. */
+  clientApprovals?: Record<string, EstadoCliente>
 }) {
   // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
   // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
@@ -425,7 +429,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />
           ))}
         </div>
       </div>
@@ -451,7 +455,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote> }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -474,7 +478,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes 
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />)}
           </>
         )}
       </div>
@@ -617,7 +621,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote> }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -630,6 +634,12 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
 
   // La corrección más reciente del batch. Un batch puede traer varios videos
   // devueltos; se enseña la última, y el detalle por video vive en el overlay.
+  // Solo los videos de ESTA tarjeta que tienen respuesta del cliente.
+  const marca = marcaAprobacionCliente(
+    batch.ideas.map((i) => clientApprovals[i.id]).filter(Boolean) as EstadoCliente[],
+    stage,
+  )
+
   const devuelto = batch.ideas
     .map((i) => reviewNotes[i.id])
     .filter(Boolean)
@@ -701,6 +711,25 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
               {devuelto.note}
             </p>
           </div>
+        )}
+
+        {/* El cliente puede aprobar antes de que exista el copy. La tarjeta se
+            queda en Copy —ideaStage exige el caption para pasar— pero sin esto
+            no lo decía en ninguna parte. */}
+        {marca && (
+          <p
+            className={cn(
+              'flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold',
+              marca.tone === 'ok' && 'border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400',
+              marca.tone === 'parcial' && 'border-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400',
+              marca.tone === 'cambios' && 'border-rose-500/30 bg-rose-500/5 text-rose-600 dark:text-rose-400',
+            )}
+          >
+            {marca.tone === 'cambios'
+              ? <RotateCcw className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+              : <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />}
+            <span className="truncate">{marca.label}</span>
+          </p>
         )}
 
         {/* progress */}

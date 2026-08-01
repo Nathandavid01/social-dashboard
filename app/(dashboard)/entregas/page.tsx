@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import type { EstadoCliente } from '@/lib/entregas/marca-cliente'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -43,9 +44,22 @@ export default async function EntregasPage() {
     (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
   )
 
+  // Lo que el cliente respondió, por video. Solo de lo visible: la tarjeta lo
+  // usa para decir "aprobado por el cliente" aunque el copy aún no exista.
+  const { data: votos } = entregas.length
+    ? await supabase
+        .from('entregas_client_review_items')
+        .select('idea_id, status')
+        .in('idea_id', entregas.map((i) => i.id))
+    : { data: [] }
+  const clientApprovals = Object.fromEntries(
+    (votos ?? []).map((v) => [v.idea_id as string, v.status as EstadoCliente]),
+  )
+
   return (
     <EntregasBoard
       ideas={entregas}
+      clientApprovals={clientApprovals}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
       stages={['copy', 'publication']}

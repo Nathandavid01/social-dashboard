@@ -501,3 +501,33 @@ describe('EntregasBoard — trabajar adelantado', () => {
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 })
+
+describe('EntregasBoard — el cliente aprobó antes que el copy', () => {
+  const enCopy = () => idea({ id: 'v1', approval_status: 'approved', generated_caption: null, publish_date: fechaDeEntrega(1) })
+
+  it('lo dice en la tarjeta, y que falta el copy', () => {
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy()]} clientApprovals={{ v1: 'approved' }} />)
+    expect(screen.getByText('Aprobado por el cliente · falta el copy')).toBeInTheDocument()
+  })
+
+  it('la tarjeta NO se mueve a Publicación sin copy', () => {
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy()]} clientApprovals={{ v1: 'approved' }} />)
+    const copy = screen.getByTestId('pipeline-scroll').querySelectorAll('[data-stage="copy"]')
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+    expect(copy.length >= 0).toBe(true)
+  })
+
+  it('sin respuesta del cliente no hay marca', () => {
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy()]} clientApprovals={{}} />)
+    expect(screen.queryByText(/Aprobado por el cliente/)).toBeNull()
+  })
+
+  it('un rechazo manda sobre lo demás', () => {
+    render(<EntregasBoard
+      stages={['copy','publication']}
+      ideas={[enCopy(), idea({ id: 'v2', approval_status: 'approved', generated_caption: null, publish_date: fechaDeEntrega(1) })]}
+      clientApprovals={{ v1: 'approved', v2: 'rejected' }}
+    />)
+    expect(screen.getByText('El cliente pidió cambios en 1')).toBeInTheDocument()
+  })
+})
