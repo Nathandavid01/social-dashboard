@@ -14,7 +14,20 @@ import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { DIAS, diaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
+import { DIAS, diaDeEntrega, offsetSemana, rangoSemana, type DiaKey } from '@/lib/entregas/dias'
+
+/** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
+function etiquetaRango(semana: number): string {
+  const { desde, hasta } = rangoSemana(undefined, semana)
+  const f = (iso: string, conMes: boolean) => {
+    const [y, m, d] = iso.split('-').map(Number)
+    return new Date(y, m - 1, d, 12).toLocaleDateString('es', conMes ? { day: 'numeric', month: 'short' } : { day: 'numeric' })
+  }
+  const mismoMes = desde.slice(0, 7) === hasta.slice(0, 7)
+  return `${f(desde, !mismoMes)} – ${f(hasta, true)}`
+}
+import { semanaDeEntregas } from '@/lib/entregas/semana'
+import { WeekView } from './week-view'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
@@ -86,6 +99,19 @@ export function EntregasBoard({
   // el lunes y el jueves se mezclan en las mismas columnas y nadie sabe qué
   // toca hoy.
   const [dia, setDia] = useState<DiaKey | 'sin'>(DIAS[0].key)
+  // Las pestañas contestan "qué hago hoy"; la semana, "cómo viene". Empieza en
+  // día: es lo que se abre para trabajar.
+  const [vista, setVista] = useState<'dia' | 'semana'>('dia')
+  // Cuánto adelantado se trabaja: 0 lo próximo, 1 la semana siguiente. Manda a
+  // la vez sobre lo que se ve y sobre para cuándo se entrega, para que no
+  // puedan contradecirse.
+  const [semanaOffset, setSemanaOffset] = useState(0)
+  // Sin useMemo con new Date(): se calcula una vez al montar. El domingo no
+  // resalta ninguna columna, que es correcto — nadie entrega en domingo.
+  const [hoyDia] = useState<DiaKey | null>(() => {
+    const d = new Date().getDay()
+    return d >= 1 && d <= 6 ? (d as DiaKey) : null
+  })
 
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -111,9 +137,14 @@ export function EntregasBoard({
   const ideasDelDia = useMemo(
     () => ideas.filter((i) => {
       const d = diaDeEntrega(i.publish_date as string | null)
-      return dia === 'sin' ? d === null : d === dia
+      if (dia === 'sin') return d === null
+      if (d !== dia) return false
+      // Lo atrasado se queda en la semana 0: es trabajo que sigue pendiente y
+      // esconderlo por estar vencido es justo lo contrario de lo que hace falta.
+      const w = offsetSemana(i.publish_date as string | null)
+      return semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
     }),
-    [ideas, dia],
+    [ideas, dia, semanaOffset],
   )
 
   /** Cuántos videos hay en cada día, para que la pestaña lo diga sin entrar. */
@@ -121,11 +152,18 @@ export function EntregasBoard({
     const m: Record<string, number> = { sin: 0 }
     for (const i of ideas) {
       const d = diaDeEntrega(i.publish_date as string | null)
+      if (d !== null) {
+        const w = offsetSemana(i.publish_date as string | null)
+        const enEstaSemana = semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
+        if (!enEstaSemana) continue
+      }
       const k = d === null ? 'sin' : String(d)
       m[k] = (m[k] ?? 0) + 1
     }
     return m
-  }, [ideas])
+  }, [ideas, semanaOffset])
+
+  const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset), [ideas, semanaOffset])
 
   const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideasDelDia)), [ideasDelDia])
 
@@ -317,7 +355,62 @@ export function EntregasBoard({
             </span>
           </button>
         )}
+
+        {/* Para el editor que va adelantado. Las pestañas solo distinguen el
+            día, así que sin esto dos martes distintos caían en la misma,
+            mezclados y sin forma de saber cuál era de cuándo. */}
+        <div className="flex shrink-0 items-center gap-0.5 rounded-lg border p-0.5">
+          <button
+            onClick={() => setSemanaOffset((w) => Math.max(0, w - 1))}
+            disabled={semanaOffset === 0}
+            aria-label="Semana anterior"
+            className="rounded-md px-1.5 py-1 text-muted-foreground transition hover:bg-muted disabled:opacity-30"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          <span className="flex flex-col items-center whitespace-nowrap px-1.5 leading-tight">
+            <span className="text-[11px] font-medium">
+              {semanaOffset === 0 ? 'Esta semana' : semanaOffset === 1 ? 'Próxima semana' : `En ${semanaOffset} semanas`}
+            </span>
+            <span className="text-[9.5px] tabular-nums text-muted-foreground">{etiquetaRango(semanaOffset)}</span>
+          </span>
+          <button
+            onClick={() => setSemanaOffset((w) => w + 1)}
+            aria-label="Semana siguiente"
+            className="rounded-md px-1.5 py-1 text-muted-foreground transition hover:bg-muted"
+          >
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Día para trabajar, semana para planificar. El conmutador va aquí y
+            no en otra ruta: es la misma información mirada de otra manera. */}
+        <div className={cn('flex shrink-0 gap-0.5 rounded-lg border p-0.5', (conteoPorDia.sin ?? 0) > 0 ? '' : 'ml-auto')}>
+          {(['dia', 'semana'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setVista(v)}
+              aria-pressed={vista === v}
+              className={cn(
+                'rounded-md px-2.5 py-1 text-[11px] font-medium transition',
+                vista === v ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-muted',
+              )}
+            >
+              {v === 'dia' ? 'Día' : 'Semana'}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {vista === 'semana' && (
+        <div className="border-b px-4 pb-3">
+          <WeekView
+            semana={semana}
+            hoy={hoyDia}
+            onAbrirDia={(d) => { setDia(d); setVista('dia') }}
+          />
+        </div>
+      )}
 
       <div
         ref={scrollRef}
@@ -331,7 +424,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} />
           ))}
         </div>
       </div>

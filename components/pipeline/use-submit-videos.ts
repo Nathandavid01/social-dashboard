@@ -71,7 +71,7 @@ const deps: SubmitDeps = {
 
 /** `dia` viene de la pestaña activa del tablero: entregar estando en Lunes
  *  significa entregar para el lunes. Por eso el formulario ya no lo pregunta. */
-export function useSubmitVideos(dia: DiaKey, onDone?: () => void) {
+export function useSubmitVideos(dia: DiaKey, onDone?: () => void, semanaOffset = 0) {
   const [rows, setRows] = useState<RowProgress[]>([])
   const [running, setRunning] = useState(false)
 
@@ -81,7 +81,7 @@ export function useSubmitVideos(dia: DiaKey, onDone?: () => void) {
       // La pestaña es el día en que se ENTREGA; se publica al día siguiente.
       // Se guarda la fecha real de publicación porque es lo que acaba
       // recibiendo Metricool: guardar el día suelto dejaría dos verdades.
-      const publishDate = fechaDeEntrega(dia)
+      const publishDate = fechaDeEntrega(dia, undefined, semanaOffset)
       setRows(payload.videos.map((v) => ({ title: v.title, stage: 'creando' as SubmitStage, pct: 0 })))
 
       for (let i = 0; i < payload.videos.length; i++) {
@@ -111,7 +111,7 @@ export function useSubmitVideos(dia: DiaKey, onDone?: () => void) {
       setRunning(false)
       onDone?.()
     },
-    [dia, onDone],
+    [dia, onDone, semanaOffset],
   )
 
   const clear = useCallback(() => setRows([]), [])

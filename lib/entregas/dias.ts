@@ -74,6 +74,99 @@ export function diaDeEntrega(publishDate: string | null | undefined): DiaKey | n
  * que eso se publica. Se guarda la fecha real de publicación porque es lo que
  * acaba recibiendo Metricool; la pestaña se deriva de ella con diaDeEntrega.
  */
-export function fechaDeEntrega(dia: DiaKey, hoy: Date = new Date()): string {
-  return proximaFechaDelDia(diaDePublicacion(dia), hoy)
+function sumarDias(iso: string, dias: number): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const f = new Date(y, m - 1, d, 12)
+  f.setDate(f.getDate() + dias)
+  const mm = String(f.getMonth() + 1).padStart(2, '0')
+  const dd = String(f.getDate()).padStart(2, '0')
+  return `${f.getFullYear()}-${mm}-${dd}`
+}
+
+/**
+ * La fecha en que se ENTREGA, para un día y un adelanto en semanas.
+ *
+ * `semana` es cuánto va adelantado el editor: 0 esta semana, 1 la que viene.
+ * Sin esto no había forma de entregar para más adelante — proximaFechaDelDia
+ * siempre da la más cercana.
+ */
+export function fechaEntregaDelDia(dia: DiaKey, hoy: Date = new Date(), semana = 0): string {
+  return sumarDias(lunesDeLaSemana(hoy), (dia - 1) + semana * 7)
+}
+
+/**
+ * El lunes de la semana de trabajo de una fecha.
+ *
+ * El domingo salta a la semana que empieza al día siguiente: no se entrega en
+ * domingo, así que la semana que acaba de terminar ya no sirve de nada. Sin
+ * esto, el domingo el tablero abría en una semana entera vencida y había que
+ * pulsar la flecha a mano.
+ */
+function lunesDeLaSemana(hoy: Date): string {
+  const f = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 12)
+  const dow = f.getDay()
+  f.setDate(f.getDate() + (dow === 0 ? 1 : -(dow - 1)))
+  const mm = String(f.getMonth() + 1).padStart(2, '0')
+  const dd = String(f.getDate()).padStart(2, '0')
+  return `${f.getFullYear()}-${mm}-${dd}`
+}
+
+/**
+ * El rango de una semana de entrega, de lunes a sábado. Con solo "Esta semana"
+ * no se sabe de qué fechas se está hablando, que es justo lo que hace falta
+ * cuando se trabaja adelantado.
+ */
+export function rangoSemana(hoy: Date = new Date(), semana = 0): { desde: string; hasta: string } {
+  return {
+    desde: fechaEntregaDelDia(1, hoy, semana),
+    hasta: fechaEntregaDelDia(6, hoy, semana),
+  }
+}
+
+/**
+ * La fecha de publicación que se guarda al entregar: el día siguiente al de
+ * entrega.
+ *
+ * Se cuenta DESDE el día de entrega y no buscando por separado la próxima fecha
+ * del día de publicación: calculadas aparte, cada una redondea a su "próxima" y
+ * pueden invertirse. Un jueves, entregar en la pestaña Miércoles daba como
+ * publicación el jueves de HOY, antes de la propia entrega.
+ */
+export function fechaDeEntrega(dia: DiaKey, hoy: Date = new Date(), semana = 0): string {
+  // El sábado salta el domingo: publica el lunes.
+  return sumarDias(fechaEntregaDelDia(dia, hoy, semana), dia === 6 ? 2 : 1)
+}
+
+function lunesDeLaSemanaDeIso(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return lunesDeLaSemana(new Date(y, m - 1, d, 12))
+}
+
+function diffEnSemanas(a: string, b: string): number {
+  const [ay, am, ad] = a.split('-').map(Number)
+  const [by, bm, bd] = b.split('-').map(Number)
+  const ms = new Date(ay, am - 1, ad, 12).getTime() - new Date(by, bm - 1, bd, 12).getTime()
+  return Math.round(ms / (7 * 24 * 60 * 60 * 1000))
+}
+
+/**
+ * Cuánto adelantado va un video: 0 la próxima vez que toca ese día, 1 la
+ * siguiente, negativo si ya pasó.
+ *
+ * Se compara contra la próxima fecha DE SU MISMO DÍA, no contra el lunes de la
+ * semana natural. "Esta semana" no es una semana del calendario: un jueves, el
+ * próximo jueves es hoy y el próximo lunes ya es de la semana que viene, así
+ * que medir por semanas naturales daba desfases de uno según el día.
+ *
+ * Es la inversa exacta de fechaDeEntrega, para que lo guardado vuelva a leerse
+ * donde se entregó.
+ */
+export function offsetSemana(publishDate: string | null | undefined, hoy: Date = new Date()): number | null {
+  const dia = diaDeEntrega(publishDate)
+  if (dia === null || !publishDate) return null
+  // De la fecha de publicación a la de entrega: el sábado publica el lunes.
+  const entrega = sumarDias(publishDate, dia === 6 ? -2 : -1)
+  // Por el lunes de cada semana natural: así los seis días de una misma semana
+  // dan siempre el mismo número, que es lo que la etiqueta promete.
+  return diffEnSemanas(lunesDeLaSemanaDeIso(entrega), lunesDeLaSemana(hoy))
 }
