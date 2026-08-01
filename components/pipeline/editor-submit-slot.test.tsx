@@ -15,7 +15,7 @@ import { fechaDeEntrega } from '@/lib/entregas/dias'
 
 const clientes = [{ id: 'c1', name: 'Kavanna' }]
 
-function fechaEsperada(dia: 1 | 2 | 6, semana: number): string {
+function fechaEsperada(dia: 0 | 1 | 2 | 6, semana: number): string {
   const iso = fechaDeEntrega(dia, undefined, semana)
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' })
@@ -47,10 +47,17 @@ describe('EditorSubmitSlot — el rótulo de entrega', () => {
     expect(proxima).toContain(fechaEsperada(1, 1))
   })
 
-  it('el sábado publica el lunes, y lo dice con su fecha', () => {
+  it('el sábado publica el domingo, y lo dice con su fecha', () => {
     render(<EditorSubmitSlot clients={clientes} dia={6} semanaOffset={0} />)
     const t = screen.getByText(/Entregando para/)
-    expect(t).toHaveTextContent('Lunes')
+    expect(t).toHaveTextContent('Domingo')
     expect(t).toHaveTextContent(fechaEsperada(6, 0))
+  })
+
+  it('el domingo cierra la semana y publica el lunes', () => {
+    render(<EditorSubmitSlot clients={clientes} dia={0} semanaOffset={0} />)
+    const t = screen.getByText(/Entregando para/)
+    expect(t).toHaveTextContent('Lunes')
+    expect(t).toHaveTextContent(fechaEsperada(0, 0))
   })
 })

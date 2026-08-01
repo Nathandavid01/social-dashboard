@@ -437,9 +437,10 @@ describe('EntregasBoard — vista semana', () => {
   it('cada día dice cuándo se publica lo que entregas ahí', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1' })]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }))
-    // lunes -> martes, y el sábado salta el domingo
+    // la semana cierra en domingo: sábado -> domingo, domingo -> lunes
     expect(screen.getByRole('button', { name: /Abrir Lunes/ })).toHaveTextContent('Martes')
-    expect(screen.getByRole('button', { name: /Abrir Sábado/ })).toHaveTextContent('Lunes')
+    expect(screen.getByRole('button', { name: /Abrir Sábado/ })).toHaveTextContent('Domingo')
+    expect(screen.getByRole('button', { name: /Abrir Domingo/ })).toHaveTextContent('Lunes')
   })
 
   it('cuenta los videos de cada día de entrega', () => {

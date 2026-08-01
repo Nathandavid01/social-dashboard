@@ -12,16 +12,17 @@ const idea = (over: Partial<IdeaParaSemana> = {}): IdeaParaSemana => ({
 })
 
 describe('semanaDeEntregas', () => {
-  it('trae los seis días de entrega, de lunes a sábado', () => {
+  it('trae los siete días de entrega, de lunes a domingo', () => {
     const s = semanaDeEntregas([], HOY)
-    expect(s).toHaveLength(6)
-    expect(s.map((d) => d.label)).toEqual(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'])
+    expect(s).toHaveLength(7)
+    expect(s.map((d) => d.label)).toEqual(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'])
   })
 
   it('cada día dice cuándo se publica lo que entregas ese día', () => {
     const s = semanaDeEntregas([], HOY)
     expect(s[0].diaPublicacion).toBe('Martes')
-    expect(s[5].diaPublicacion).toBe('Lunes') // sábado salta el domingo
+    expect(s[5].diaPublicacion).toBe('Domingo') // sábado -> domingo
+    expect(s[6].diaPublicacion).toBe('Lunes')   // domingo cierra la semana
   })
 
   it('coloca el video en el día en que hay que entregarlo, no en el que se publica', () => {

@@ -2,10 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { diaDeFecha, proximaFechaDelDia, etiquetaDia, DIAS, diaDePublicacion, diaDeEntrega, fechaDeEntrega, fechaEntregaDelDia, offsetSemana, rangoSemana } from './dias'
 
 describe('DIAS', () => {
-  it('va de lunes a sábado, sin domingo', () => {
-    expect(DIAS.map((d) => d.label)).toEqual([
-      'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado',
-    ])
+  it('va de lunes a domingo', () => {
+    expect(DIAS.map((d) => d.label)).toEqual(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'])
   })
 })
 
@@ -17,8 +15,10 @@ describe('diaDeFecha', () => {
     expect(diaDeFecha('2026-08-01')).toBe(6) // sábado
   })
 
-  it('el domingo queda fuera de la operación', () => {
-    expect(diaDeFecha('2026-08-02')).toBeNull()
+  it('el domingo también es un día de la operación', () => {
+    // Había 3 videos con fecha en domingo y 3 clientes con el domingo en su
+    // cadencia: dejarlo fuera los mandaba a "Sin día" como si no tuvieran fecha.
+    expect(diaDeFecha('2026-08-02')).toBe(0)
   })
 
   it('sin fecha no hay día', () => {
@@ -86,8 +86,9 @@ describe('diaDePublicacion', () => {
   })
 
   // El domingo no existe en el tablero: entregar el sábado es para el lunes.
-  it('el sábado salta el domingo y publica el lunes', () => {
-    expect(diaDePublicacion(6)).toBe(1)
+  it('el sábado publica el domingo, y el domingo el lunes', () => {
+    expect(diaDePublicacion(6)).toBe(0)
+    expect(diaDePublicacion(0)).toBe(1)
   })
 })
 
@@ -96,8 +97,8 @@ describe('diaDeEntrega — la pestaña donde vive una tarjeta', () => {
     expect(diaDeEntrega('2026-08-04')).toBe(1) // martes -> lunes
   })
 
-  it('un video que publica el lunes se entregó el sábado', () => {
-    expect(diaDeEntrega('2026-08-03')).toBe(6) // lunes -> sábado
+  it('un video que publica el lunes se entregó el domingo', () => {
+    expect(diaDeEntrega('2026-08-03')).toBe(0) // lunes -> domingo
   })
 
   it('es exactamente la inversa de diaDePublicacion', () => {
@@ -107,8 +108,8 @@ describe('diaDeEntrega — la pestaña donde vive una tarjeta', () => {
     }
   })
 
-  it('un domingo no cae en ninguna pestaña', () => {
-    expect(diaDeEntrega('2026-08-02')).toBeNull() // domingo
+  it('un video que publica el domingo se entregó el sábado', () => {
+    expect(diaDeEntrega('2026-08-02')).toBe(6) // domingo -> sábado
   })
 
   it('sin fecha no cae en ninguna pestaña', () => {
@@ -125,9 +126,14 @@ describe('fechaDeEntrega — qué fecha se guarda al entregar', () => {
     expect(fechaDeEntrega(1, new Date(2026, 6, 30))).toBe('2026-07-28')
   })
 
-  it('entregar en Sábado guarda el lunes siguiente, no el domingo', () => {
-    // sábado 1 ago + 2 = lunes 3 ago
-    expect(fechaDeEntrega(6, new Date(2026, 6, 30))).toBe('2026-08-03')
+  it('entregar en Sábado guarda el domingo', () => {
+    // sábado 1 ago + 1 = domingo 2 ago
+    expect(fechaDeEntrega(6, new Date(2026, 6, 30))).toBe('2026-08-02')
+  })
+
+  it('entregar en Domingo guarda el lunes siguiente', () => {
+    // domingo 2 ago + 1 = lunes 3 ago
+    expect(fechaDeEntrega(0, new Date(2026, 6, 30))).toBe('2026-08-03')
   })
 
   it('la fecha que guarda cae siempre en la pestaña desde la que se entregó', () => {
@@ -181,10 +187,10 @@ describe('semanas adelantadas', () => {
     }
   })
 
-  it('los seis días de una semana caen dentro de su rango', () => {
+  it('los siete días de una semana caen dentro de su rango', () => {
     const { desde, hasta } = rangoSemana(JUEVES, 1)
     expect(desde).toBe('2026-08-03')   // lunes
-    expect(hasta).toBe('2026-08-08')   // sábado
+    expect(hasta).toBe('2026-08-09')   // domingo
     for (const d of DIAS) {
       const f = fechaEntregaDelDia(d.key, JUEVES, 1)
       expect(f >= desde && f <= hasta, d.label).toBe(true)
@@ -211,7 +217,7 @@ describe('offsetSemana — de qué semana es un video', () => {
     expect(offsetSemana('2026-07-21', JUEVES)).toBeLessThan(0)
   })
 
-  it('los seis días de una misma semana dan el mismo número', () => {
+  it('los siete días de una misma semana dan el mismo número', () => {
     const nums = DIAS.map((d) => offsetSemana(fechaDeEntrega(d.key, JUEVES, 1), JUEVES))
     expect(new Set(nums)).toEqual(new Set([1]))
   })
@@ -231,34 +237,28 @@ describe('offsetSemana — de qué semana es un video', () => {
 })
 
 /**
- * El domingo no se entrega, así que la semana "en curso" ya no sirve de nada:
- * lo útil es la que empieza mañana. Sin esto, el domingo el tablero enseñaba
- * una semana entera vencida y había que pulsar la flecha a mano.
+ * El domingo pasó a ser día de entrega, así que la semana ya no salta ese día:
+ * saltar escondería el trabajo del propio domingo, que es justo lo que la
+ * pestaña nueva viene a enseñar.
  */
-describe('el domingo ya cuenta como la semana siguiente', () => {
+describe('el domingo cierra su semana, no abre la siguiente', () => {
   const DOMINGO = new Date(2026, 7, 2)  // domingo 2026-08-02
   const SABADO = new Date(2026, 7, 1)   // sábado  2026-08-01
 
-  it('el sábado sigue en su semana', () => {
-    expect(rangoSemana(SABADO, 0)).toEqual({ desde: '2026-07-27', hasta: '2026-08-01' })
+  it('sábado y domingo están en la misma semana', () => {
+    expect(rangoSemana(SABADO, 0)).toEqual(rangoSemana(DOMINGO, 0))
   })
 
-  it('el domingo salta ya a la semana que empieza mañana', () => {
-    expect(rangoSemana(DOMINGO, 0)).toEqual({ desde: '2026-08-03', hasta: '2026-08-08' })
+  it('esa semana va del lunes 27 al domingo 2', () => {
+    expect(rangoSemana(DOMINGO, 0)).toEqual({ desde: '2026-07-27', hasta: '2026-08-02' })
   })
 
-  it('el lunes se queda en la suya, no salta otra vez', () => {
-    const LUNES = new Date(2026, 7, 3)
-    expect(rangoSemana(LUNES, 0)).toEqual({ desde: '2026-08-03', hasta: '2026-08-08' })
+  it('el lunes ya abre la suya', () => {
+    expect(rangoSemana(new Date(2026, 7, 3), 0)).toEqual({ desde: '2026-08-03', hasta: '2026-08-09' })
   })
 
-  it('entregar el domingo guarda fechas de la semana que entra', () => {
-    expect(fechaEntregaDelDia(1, DOMINGO, 0)).toBe('2026-08-03')
-    expect(fechaDeEntrega(1, DOMINGO, 0)).toBe('2026-08-04')
-  })
-
-  it('el domingo, lo de la semana que acaba de terminar cuenta como atrasado', () => {
-    // se publicaba el martes 28 jul, de la semana anterior
-    expect(offsetSemana('2026-07-28', DOMINGO)).toBeLessThan(0)
+  it('entregar el domingo publica el lunes siguiente', () => {
+    expect(fechaEntregaDelDia(0, DOMINGO, 0)).toBe('2026-08-02')
+    expect(fechaDeEntrega(0, DOMINGO, 0)).toBe('2026-08-03')
   })
 })
