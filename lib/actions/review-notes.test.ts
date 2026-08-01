@@ -53,3 +53,26 @@ describe('latestNoteByIdea', () => {
     expect(latestNoteByIdea([])).toEqual({})
   })
 })
+
+describe('correcciones que vienen del cliente', () => {
+  it('el nombre del cliente sale de metadata, no de profiles', () => {
+    const m = latestNoteByIdea([{
+      content_idea_id: 'a',
+      metadata: { note: 'Cortar el logo', cliente: 'La Guarapera' },
+      created_at: '2026-08-01T10:00:00Z',
+      user: null,
+    }])
+    expect(m.a.author).toBe('La Guarapera')
+    expect(m.a.note).toBe('Cortar el logo')
+  })
+
+  it('si la pidió el equipo, sigue saliendo el nombre del perfil', () => {
+    const m = latestNoteByIdea([{
+      content_idea_id: 'a',
+      metadata: { note: 'Subir la música' },
+      created_at: '2026-08-01T10:00:00Z',
+      user: { full_name: 'Tuti' },
+    }])
+    expect(m.a.author).toBe('Tuti')
+  })
+})

@@ -11,7 +11,8 @@
 
 export interface ReviewNoteRow {
   content_idea_id: string
-  metadata: { note?: string } | null
+  /** `cliente` solo viene cuando la pidió el cliente desde su enlace. */
+  metadata: { note?: string; cliente?: string } | null
   created_at: string
   user: { full_name: string | null } | null
 }
@@ -35,7 +36,10 @@ export function latestNoteByIdea(rows: ReviewNoteRow[]): Record<string, ReviewNo
     if (!note) continue
     const prev = out[r.content_idea_id]
     if (prev && prev.at >= r.created_at) continue
-    out[r.content_idea_id] = { note, author: r.user?.full_name ?? null, at: r.created_at }
+    // El cliente no es un profile: su nombre viaja en metadata. Sin esto la
+    // caja saldría sin autor justo cuando más importa saber quién lo pidió.
+    const author = r.metadata?.cliente ?? r.user?.full_name ?? null
+    out[r.content_idea_id] = { note, author, at: r.created_at }
   }
   return out
 }

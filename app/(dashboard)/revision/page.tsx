@@ -58,7 +58,9 @@ export default async function RevisionPage() {
     ? await supabase
         .from('content_idea_activity')
         .select('content_idea_id, metadata, created_at, user:profiles(full_name)')
-        .eq('action', 'changes_requested')
+        // Las dos: el revisor del equipo y el cliente por su enlace. El editor
+        // corrige lo mismo venga de quien venga; distinguirlo es cosa del autor.
+        .in('action', ['changes_requested', 'client_requested_changes'])
         .in('content_idea_id', devueltos)
         .order('created_at', { ascending: false })
     : { data: [] }
