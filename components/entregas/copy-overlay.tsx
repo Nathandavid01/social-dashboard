@@ -17,7 +17,6 @@ import {
   type CopyVideoRow,
 } from '@/lib/actions/entregas-copy'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
-import { EnlaceClientePanel } from './enlace-cliente-panel'
 
 /**
  * The Copy stage, one video at a time.
@@ -267,10 +266,6 @@ export function CopyOverlay({
                     : 'Sin fecha, Metricool lo programa a +24h.'}
                 </p>
               </div>
-
-              {/* El enlace va aquí: es el momento en que la pieza está lista y
-                  alguien la manda por WhatsApp. */}
-              {current && <EnlaceClientePanel key={current.id} ideaId={current.id} />}
 
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] tabular-nums text-muted-foreground">

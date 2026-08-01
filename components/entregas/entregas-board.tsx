@@ -32,6 +32,7 @@ import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 import type { ReviewNote } from '@/lib/actions/review-notes-core'
+import { EnlaceClienteBoton } from './enlace-cliente-boton'
 
 type Idea = IdeaWithPipeline
 
@@ -712,6 +713,17 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: a.dot }} />
           </div>
         </div>
+
+        {/* El enlace de aprobación, en la tarjeta y no dentro de Copy: es un
+            clic desde el tablero, que es cuando de verdad se manda al cliente.
+            Solo donde la pieza ya está lista para enseñarla. */}
+        {(stage === 'copy' || stage === 'publication') && (
+          <EnlaceClienteBoton
+            clientId={batch.clientId}
+            clientName={batch.clientName}
+            ideaIds={batch.ideas.map((i) => i.id)}
+          />
+        )}
 
         {/* footer: platforms + assignee (colored) */}
         <div className="flex items-center justify-between gap-2 pt-0.5">
