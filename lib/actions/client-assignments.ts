@@ -27,11 +27,19 @@ export async function setClientAssignment(input: {
   const columna = input.campo === 'editor' ? 'assigned_to' : 'assigned_designer'
 
   const supabase = await createClient()
-  const { error } = await supabase
+  // .select() para saber CUÁNTAS filas cambiaron: un UPDATE bloqueado por RLS
+  // no da error en Postgres, actualiza 0 filas. Sin esto la acción devolvía
+  // "ok" y la pantalla confirmaba un guardado que nunca ocurrió — que es como
+  // los supervisores creyeron estar asignando editores durante semanas.
+  const { data, error } = await supabase
     .from('clients')
     .update({ [columna]: input.userId })
     .eq('id', input.clientId)
+    .select('id')
   if (error) return { error: error.message }
+  if (!data || data.length === 0) {
+    return { error: 'No se guardó: no tienes permiso para editar este cliente.' }
+  }
 
   // Las dos pantallas del flujo filtran por asignación: sin esto seguirían
   // enseñando el reparto viejo hasta la próxima recarga completa.
