@@ -44,7 +44,12 @@ export function EditorSubmitSlot({
   return (
     <div className="space-y-2">
       <p className="px-0.5 text-[11px] text-muted-foreground">
-        Entregando para <strong className="text-foreground">{etiquetaDia(diaDePublicacion(dia))}</strong>
+        {/* Con el nombre del día solo no se distingue una semana de la
+            siguiente: "Martes" es igual de cierto para el 4 y para el 11. */}
+        Entregando para{' '}
+        <strong className="text-foreground">
+          {etiquetaDia(diaDePublicacion(dia))} {fechaCorta(fechaDeEntrega(dia, undefined, semanaOffset))}
+        </strong>
       </p>
       <SubmitVideoCard clients={clients} onSubmit={submit} pending={running} />
 
