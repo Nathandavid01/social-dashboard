@@ -739,7 +739,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
           <EnlaceClienteBoton
             clientId={batch.clientId}
             clientName={batch.clientName}
-            ideaIds={batch.ideas.map((i) => i.id)}
+            ideaId={batch.ideas[0].id}
           />
         )}
 

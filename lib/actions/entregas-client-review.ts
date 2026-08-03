@@ -35,8 +35,11 @@ export interface EnlaceGuardado {
 }
 
 /**
- * Genera un enlace para toda la tarjeta. El anterior de ese cliente deja de
- * valer: uno viejo circulando por WhatsApp seguiría aceptando votos.
+ * Genera el enlace de UN video. El anterior de ese mismo video deja de valer:
+ * uno viejo circulando por WhatsApp seguiría aceptando votos.
+ *
+ * Un enlace por video y no por cliente: la tarjeta es un video, así que el
+ * enlace que sale de ella tiene que serlo también.
  */
 export async function crearEnlaceCliente(input: {
   clientId: string
@@ -63,7 +66,12 @@ export async function crearEnlaceCliente(input: {
   const listos = Array.from(new Set((conVideo ?? []).map((v) => v.idea_id as string)))
   if (listos.length === 0) return { error: 'Ningún video de esta tarjeta está subido todavía.' }
 
-  await supabase.from('entregas_client_reviews').delete().eq('client_id', input.clientId)
+  // Solo los enlaces de ESTE video, no los del cliente entero: cada video
+  // tiene el suyo y regenerar uno no debe tumbar los demás.
+  const { data: previos } = await supabase
+    .from('entregas_client_review_items').select('review_id').in('idea_id', listos)
+  const aBorrar = Array.from(new Set((previos ?? []).map((r) => r.review_id as string)))
+  if (aBorrar.length) await supabase.from('entregas_client_reviews').delete().in('id', aBorrar)
 
   const expira = new Date()
   expira.setDate(expira.getDate() + DIAS_DE_VIGENCIA)
@@ -84,9 +92,9 @@ export async function crearEnlaceCliente(input: {
   return { token: review.token as string }
 }
 
-/** El enlace vivo de un cliente, para pintarlo en la tarjeta del tablero. */
+/** El enlace vivo de un video, para pintarlo en su tarjeta. */
 export async function getEnlaceCliente(
-  clientId: string,
+  ideaId: string,
 ): Promise<{ enlace?: EnlaceGuardado | null; error?: string }> {
   try {
     await requirePermission('captions.edit')
@@ -94,12 +102,19 @@ export async function getEnlaceCliente(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
   const supabase = await createClient()
+  const { data: item } = await supabase
+    .from('entregas_client_review_items')
+    .select('review_id')
+    .eq('idea_id', ideaId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!item) return { enlace: null }
+
   const { data, error } = await supabase
     .from('entregas_client_reviews')
     .select('token, expires_at, created_at, items:entregas_client_review_items(idea_id, status, comment, reviewer_name)')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false })
-    .limit(1)
+    .eq('id', item.review_id as string)
     .maybeSingle()
   if (error) return { error: error.message }
   if (!data) return { enlace: null }

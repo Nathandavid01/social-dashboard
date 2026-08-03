@@ -10,20 +10,19 @@ import { crearEnlaceCliente, getEnlaceCliente, type EnlaceGuardado } from '@/lib
 /**
  * El enlace de aprobación, en la propia tarjeta del tablero.
  *
- * Estaba dentro de la tarjeta de Copy y había que abrirla para llegar. Aquí es
- * un clic desde el tablero, que es cuando de verdad se manda por WhatsApp.
- *
- * Un enlace por tarjeta con todos sus videos dentro: mandarle cinco enlaces al
- * cliente y explicarle cuál es cuál es peor para todos.
+ * Un enlace por VIDEO: la tarjeta es un video, así que lo que sale de ella
+ * también. Un clic desde el tablero, que es cuando de verdad se manda por
+ * WhatsApp, sin tener que abrir nada.
  */
 export function EnlaceClienteBoton({
   clientId,
   clientName,
-  ideaIds,
+  ideaId,
 }: {
   clientId: string
   clientName: string
-  ideaIds: string[]
+  /** El video de ESTA tarjeta: un enlace por video. */
+  ideaId: string
 }) {
   const { toast } = useToast()
   const [enlace, setEnlace] = useState<EnlaceGuardado | null>(null)
@@ -32,10 +31,10 @@ export function EnlaceClienteBoton({
   const [copiado, setCopiado] = useState(false)
 
   const cargar = useCallback(async () => {
-    const res = await getEnlaceCliente(clientId)
+    const res = await getEnlaceCliente(ideaId)
     setEnlace(res.enlace ?? null)
     setCargando(false)
-  }, [clientId])
+  }, [ideaId])
 
   useEffect(() => { void cargar() }, [cargar])
 
@@ -56,7 +55,7 @@ export function EnlaceClienteBoton({
   async function generar(e: React.MouseEvent) {
     parar(e)
     setGenerando(true)
-    const res = await crearEnlaceCliente({ clientId, ideaIds })
+    const res = await crearEnlaceCliente({ clientId, ideaIds: [ideaId] })
     setGenerando(false)
     if (res.error) {
       toast({ title: 'No se pudo generar', description: res.error, variant: 'destructive' })
