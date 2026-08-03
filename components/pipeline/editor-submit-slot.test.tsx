@@ -11,53 +11,28 @@ vi.mock('./use-submit-videos', () => ({
 }))
 
 import { EditorSubmitSlot } from './editor-submit-slot'
-import { fechaDeEntrega } from '@/lib/entregas/dias'
 
 const clientes = [{ id: 'c1', name: 'Kavanna' }]
 
-function fechaEsperada(dia: 0 | 1 | 2 | 6, semana: number): string {
-  const iso = fechaDeEntrega(dia, undefined, semana)
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' })
-}
-
-describe('EditorSubmitSlot — el rótulo de entrega', () => {
-  it('dice el día en que se publica, no el de la pestaña', () => {
+/**
+ * La fecha la elige el editor por video, asi que el formulario ya no depende de
+ * la pestaña abierta. El rotulo "Entregando para X" desaparecio con ella:
+ * anunciaba un dia que ya no decide nada.
+ */
+describe('EditorSubmitSlot', () => {
+  it('monta el formulario', () => {
     render(<EditorSubmitSlot clients={clientes} dia={1} />)
-    expect(screen.getByText(/Entregando para/)).toHaveTextContent('Martes')
+    expect(screen.getByTestId('form')).toBeInTheDocument()
   })
 
-  /**
-   * Trabajando adelantado, el nombre del día no distingue una semana de la
-   * siguiente: "Martes" es igual de cierto para el 4 y para el 11 de agosto.
-   */
-  it('lleva la fecha, no solo el nombre del día', () => {
-    render(<EditorSubmitSlot clients={clientes} dia={1} semanaOffset={0} />)
-    expect(screen.getByText(/Entregando para/)).toHaveTextContent(fechaEsperada(1, 0))
+  it('ya no anuncia un dia: lo dice cada video', () => {
+    render(<EditorSubmitSlot clients={clientes} dia={1} />)
+    expect(screen.queryByText(/Entregando para/i)).toBeNull()
   })
 
-  it('la fecha cambia al adelantar de semana', () => {
-    const { unmount } = render(<EditorSubmitSlot clients={clientes} dia={1} semanaOffset={0} />)
-    const estaSemana = screen.getByText(/Entregando para/).textContent
-    unmount()
-
-    render(<EditorSubmitSlot clients={clientes} dia={1} semanaOffset={1} />)
-    const proxima = screen.getByText(/Entregando para/).textContent
-    expect(proxima).not.toBe(estaSemana)
-    expect(proxima).toContain(fechaEsperada(1, 1))
-  })
-
-  it('el sábado publica el domingo, y lo dice con su fecha', () => {
-    render(<EditorSubmitSlot clients={clientes} dia={6} semanaOffset={0} />)
-    const t = screen.getByText(/Entregando para/)
-    expect(t).toHaveTextContent('Domingo')
-    expect(t).toHaveTextContent(fechaEsperada(6, 0))
-  })
-
-  it('el domingo cierra la semana y publica el lunes', () => {
-    render(<EditorSubmitSlot clients={clientes} dia={0} semanaOffset={0} />)
-    const t = screen.getByText(/Entregando para/)
-    expect(t).toHaveTextContent('Lunes')
-    expect(t).toHaveTextContent(fechaEsperada(0, 0))
+  it('la pestaña abierta no cambia lo que se ve', () => {
+    const { container: lunes } = render(<EditorSubmitSlot clients={clientes} dia={1} />)
+    const { container: viernes } = render(<EditorSubmitSlot clients={clientes} dia={5} />)
+    expect(lunes.textContent).toBe(viernes.textContent)
   })
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { checkFechaVideo, etiquetaFechaVideo } from '@/lib/entregas/fecha-video'
 import { Link2, AlertCircle, Send, Film, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,8 @@ export interface SubmitVideoItem {
   /** Optional reference for the reviewer. Never the published media. */
   driveLink: string | null
   title: string
+  /** Día en que se publica. Lo dice el editor, video a video. */
+  publishDate: string
 }
 
 export interface SubmitVideoPayload {
@@ -46,9 +49,10 @@ interface Row {
   file: File | null
   link: string
   title: string
+  fecha: string
 }
 
-const emptyRow = (): Row => ({ file: null, link: '', title: '' })
+const emptyRow = (): Row => ({ file: null, link: '', title: '', fecha: '' })
 
 function formatBytes(n: number): string {
   if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(1)} GB`
@@ -93,7 +97,13 @@ export function SubmitVideoCard({
         if (first !== undefined && first < i) duplicate = true
         else seen.set(key, i)
       }
-      return checkFile(r.file, duplicate)
+      const archivo = checkFile(r.file, duplicate)
+      if (!archivo.ok) return archivo
+      // Sin fecha no se puede entregar: es el dato que decide en qué día cae
+      // la tarjeta y qué recibe Metricool.
+      const fecha = checkFechaVideo(r.fecha)
+      if (!fecha.ok) return { ok: false, message: r.fecha ? 'Fecha no válida' : null }
+      return { ok: true, message: fecha.aviso }
     })
   }, [rows])
 
@@ -123,6 +133,7 @@ export function SubmitVideoCard({
         file: r.file!,
         driveLink: r.link.trim() || null,
         title: r.title.trim() || `${clientName} — video ${i + 1}`,
+        publishDate: r.fecha,
       })),
     })
     setClientId('')
@@ -176,6 +187,30 @@ export function SubmitVideoCard({
           return (
             <li key={i} className="space-y-1.5 rounded-lg border bg-muted/30 p-2">
               <p className="text-[11px] font-medium text-muted-foreground">Video {i + 1}</p>
+
+              {/* La fecha la dice el editor, video a video. Antes salía de la
+                  pestaña abierta, lo que obligaba a entrar en el día correcto
+                  antes de entregar y hacía imposible subir en una sola tanda
+                  videos de días distintos. */}
+              <div className="space-y-1">
+                <Label htmlFor={`sv-date-${i}`} className="text-[11px]">
+                  ¿Para cuándo es este video? *
+                </Label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input
+                    id={`sv-date-${i}`}
+                    type="date"
+                    value={row.fecha}
+                    onChange={(e) => setRow(i, { fecha: e.target.value })}
+                    className="h-9 w-auto min-w-[9.5rem] text-[11px]"
+                  />
+                  {row.fecha && (
+                    <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">
+                      {etiquetaFechaVideo(row.fecha)}
+                    </span>
+                  )}
+                </div>
+              </div>
 
               <div className="space-y-1">
                 <Label htmlFor={`sv-file-${i}`} className="sr-only">Archivo del video {i + 1}</Label>

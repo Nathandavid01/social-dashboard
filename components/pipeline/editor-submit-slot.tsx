@@ -39,18 +39,10 @@ export function EditorSubmitSlot({
 }) {
   const router = useRouter()
   // Refresh so the new cards appear in Revisión from real data, not local state.
-  const { submit, rows, running, clear } = useSubmitVideos(dia, () => router.refresh(), semanaOffset)
+  const { submit, rows, running, clear } = useSubmitVideos(() => router.refresh())
 
   return (
     <div className="space-y-2">
-      <p className="px-0.5 text-[11px] text-muted-foreground">
-        {/* Con el nombre del día solo no se distingue una semana de la
-            siguiente: "Martes" es igual de cierto para el 4 y para el 11. */}
-        Entregando para{' '}
-        <strong className="text-foreground">
-          {etiquetaDia(diaDePublicacion(dia))} {fechaCorta(fechaDeEntrega(dia, undefined, semanaOffset))}
-        </strong>
-      </p>
       <SubmitVideoCard clients={clients} onSubmit={submit} pending={running} />
 
       {rows.length > 0 && (

@@ -34,15 +34,20 @@ function setup() {
     client: screen.getByLabelText('Cliente') as HTMLSelectElement,
     count: screen.getByLabelText(/cuántos videos/i) as HTMLInputElement,
     files,
-    pick: (i: number, f: File) => fireEvent.change(files()[i], { target: { files: [f] } }),
+    fechas: () => screen.getAllByLabelText(/para cuándo es este video/i) as HTMLInputElement[],
+    // Elegir un video es archivo + fecha: sin fecha la fila no está lista.
+    pick: (i: number, f: File, fecha = '2026-08-05') => {
+      fireEvent.change(files()[i], { target: { files: [f] } })
+      fireEvent.change(screen.getAllByLabelText(/para cuándo es este video/i)[i], { target: { value: fecha } })
+    },
     submit: () => screen.getByRole('button', { name: /enviar a revisión/i }),
   }
 }
 
 describe('SubmitVideoCard — the editor uploads the real file', () => {
-  it('no pregunta el día: lo da la pestaña activa del tablero', () => {
+  it('pregunta la fecha de cada video: ya no la da la pestaña', () => {
     setup()
-    expect(screen.queryByText(/para qué día/i)).toBeNull()
+    expect(screen.getByLabelText(/para cuándo es este video/i)).toBeInTheDocument()
   })
 
   it('no pide "de qué es el video" — eso se escribe en Copy', () => {
@@ -125,7 +130,7 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     fireEvent.click(submit())
     expect(onSubmit).toHaveBeenCalledWith({
       clientId: 'c2',
-      videos: [{ file: f, driveLink: DRIVE, title: 'Reel de abril' }],
+      videos: [{ file: f, driveLink: DRIVE, title: 'Reel de abril', publishDate: '2026-08-05' }],
     })
   })
 
@@ -157,5 +162,53 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     fireEvent.click(submit())
     expect(files()).toHaveLength(1)
     expect(submit()).toBeDisabled()
+  })
+})
+
+/**
+ * La fecha la dice el editor, video a video. Antes salía de la pestaña abierta,
+ * lo que obligaba a entrar en el día correcto antes de entregar y hacía
+ * imposible subir en una sola tanda videos de días distintos.
+ */
+describe('SubmitVideoCard — la fecha de cada video', () => {
+  it('sin fecha no deja enviar, aunque el archivo esté puesto', () => {
+    const { client, files, submit } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    fireEvent.change(files()[0], { target: { files: [videoFile('a.mp4', 5)] } })
+    expect(submit()).toBeDisabled()
+  })
+
+  it('con archivo y fecha sí', () => {
+    const { client, pick, submit } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    pick(0, videoFile('a.mp4', 5))
+    expect(submit()).toBeEnabled()
+  })
+
+  it('enseña el día de la semana, que es lo que se piensa al planificar', () => {
+    const { client, pick } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    pick(0, videoFile('a.mp4', 5), '2026-08-05')
+    expect(screen.getByText(/miércoles 5 ago/i)).toBeInTheDocument()
+  })
+
+  // Lo que la pestaña impedía: entregar de una vez videos de días distintos.
+  it('cada video puede ir a un día distinto en la misma entrega', () => {
+    const { client, count, pick, submit } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    fireEvent.change(count, { target: { value: '2' } })
+    pick(0, videoFile('a.mp4', 5), '2026-08-05')
+    pick(1, videoFile('b.mp4', 5), '2026-08-07')
+    fireEvent.click(submit())
+    const { videos } = onSubmit.mock.calls[0][0]
+    expect(videos.map((v: { publishDate: string }) => v.publishDate)).toEqual(['2026-08-05', '2026-08-07'])
+  })
+
+  it('una fecha pasada avisa pero no bloquea: puede ser trabajo atrasado', () => {
+    const { client, pick, submit } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    pick(0, videoFile('a.mp4', 5), '2020-01-01')
+    expect(screen.getByText(/fecha pasada/i)).toBeInTheDocument()
+    expect(submit()).toBeEnabled()
   })
 })

@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
-import { fechaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
 import type { SubmitVideoPayload } from './submit-video-card'
 
 /**
@@ -71,17 +70,13 @@ const deps: SubmitDeps = {
 
 /** `dia` viene de la pestaña activa del tablero: entregar estando en Lunes
  *  significa entregar para el lunes. Por eso el formulario ya no lo pregunta. */
-export function useSubmitVideos(dia: DiaKey, onDone?: () => void, semanaOffset = 0) {
+export function useSubmitVideos(onDone?: () => void) {
   const [rows, setRows] = useState<RowProgress[]>([])
   const [running, setRunning] = useState(false)
 
   const submit = useCallback(
     async (payload: SubmitVideoPayload) => {
       setRunning(true)
-      // La pestaña es el día en que se ENTREGA; se publica al día siguiente.
-      // Se guarda la fecha real de publicación porque es lo que acaba
-      // recibiendo Metricool: guardar el día suelto dejaría dos verdades.
-      const publishDate = fechaDeEntrega(dia, undefined, semanaOffset)
       setRows(payload.videos.map((v) => ({ title: v.title, stage: 'creando' as SubmitStage, pct: 0 })))
 
       for (let i = 0; i < payload.videos.length; i++) {
@@ -95,7 +90,8 @@ export function useSubmitVideos(dia: DiaKey, onDone?: () => void, semanaOffset =
             // IA. Pedírselo al editor era pedirle un dato que no usa.
             hook: null,
             driveLink: v.driveLink,
-            publishDate,
+            // La que eligió el editor para ESTE video, no la de la pestaña.
+            publishDate: v.publishDate,
             file: v.file,
           },
           (stage, pct) =>
@@ -111,7 +107,7 @@ export function useSubmitVideos(dia: DiaKey, onDone?: () => void, semanaOffset =
       setRunning(false)
       onDone?.()
     },
-    [dia, onDone, semanaOffset],
+    [onDone],
   )
 
   const clear = useCallback(() => setRows([]), [])
