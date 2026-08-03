@@ -68,7 +68,7 @@ export function PublishScheduleCard({
               onClick={(e) => { e.stopPropagation(); setEditing(true) }}
               className="shrink-0 whitespace-nowrap rounded px-1 text-[9px] font-medium text-muted-foreground underline-offset-2 transition hover:text-foreground hover:underline"
             >
-              Cambiar hora
+              Cambiar fecha y hora
             </button>
           )}
         </div>
@@ -87,7 +87,7 @@ export function PublishScheduleCard({
           </p>
         )}
         {override && check.ok && (
-          <p className="text-[9px] text-muted-foreground">Hora elegida a mano</p>
+          <p className="text-[9px] text-muted-foreground">Fecha y hora elegidas a mano</p>
         )}
 
         {editing && (

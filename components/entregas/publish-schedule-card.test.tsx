@@ -52,22 +52,22 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
     expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
   })
 
-  it('abre un selector de fecha y hora con "Cambiar hora"', () => {
+  it('abre un selector de fecha y hora', () => {
     setup()
     expect(screen.queryByLabelText(/fecha y hora/i)).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     expect(screen.getByLabelText(/fecha y hora/i)).toBeInTheDocument()
   })
 
   it('propone el día siguiente cuando el turno de hoy ya pasó', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     expect(screen.getByLabelText(/fecha y hora/i)).toHaveValue('2026-07-30T10:00')
   })
 
   it('envía a Metricool la hora elegida, no la planificada', async () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-07-29T14:30' } })
     fireEvent.click(screen.getByRole('button', { name: /enviar a metricool/i }))
 
@@ -76,7 +76,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
 
   it('refleja la hora elegida en la etiqueta del borrador', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-07-29T14:30' } })
     expect(screen.getByText(/29 jul 2026 · 14:30/i)).toBeInTheDocument()
     expect(screen.queryByText(/ya pasó/i)).not.toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
 
   it('rechaza una hora pasada y no deja enviar', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-07-29T09:00' } })
 
     expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
@@ -94,7 +94,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
 
   it('exige margen para que el video suba', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-07-29T11:07' } })
     expect(screen.getByText(/5 minutos/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /enviar a metricool/i })).toBeDisabled()
@@ -102,7 +102,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
 
   it('"Restaurar" vuelve a la hora planificada', async () => {
     setup({ publishDate: '2026-08-03' })
-    fireEvent.click(screen.getByRole('button', { name: /cambiar hora/i }))
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-08-04T18:00' } })
     expect(screen.getByText(/4 ago 2026 · 18:00/i)).toBeInTheDocument()
 
@@ -116,7 +116,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
   it('sin permiso de publicar no se ofrece cambiar la hora ni enviar', () => {
     mockRole = 'video'
     setup()
-    expect(screen.queryByRole('button', { name: /cambiar hora/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /cambiar fecha y hora/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /enviar a metricool/i })).not.toBeInTheDocument()
     // La fecha sigue siendo informativa para todos.
     expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
@@ -125,5 +125,23 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
   it('avisa que la hora elegida aplica a todo el batch', () => {
     setup({ ideaIds: ['i1', 'i2', 'i3'] })
     expect(screen.getByText(/3 videos/i)).toBeInTheDocument()
+  })
+})
+
+/**
+ * El campo siempre fue un datetime-local, asi que la fecha se podia cambiar
+ * desde el principio. Los textos decian solo "hora" y lo escondian: quien
+ * queria mover un video a otro dia no sabia que podia hacerlo desde aqui.
+ */
+describe('PublishScheduleCard — se cambian fecha y hora, no solo la hora', () => {
+  it('el boton lo dice', () => {
+    setup()
+    expect(screen.getByRole('button', { name: /cambiar fecha y hora/i })).toBeInTheDocument()
+  })
+
+  it('el campo acepta fecha y hora juntas', () => {
+    setup()
+    fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
+    expect(screen.getByLabelText(/fecha y hora/i)).toHaveAttribute('type', 'datetime-local')
   })
 })
