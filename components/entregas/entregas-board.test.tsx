@@ -168,28 +168,7 @@ describe('EntregasBoard — batch model', () => {
     expect(headings).toEqual(['Editado', 'Revisión', 'Copy', 'Publicación'])
   })
 
-  it('la tarjeta lista los títulos de sus videos, no barras vacías', () => {
-    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', title: 'Rutina de piernas' }),
-      idea({ id: '2', title: 'Antes y después' }),
-    ]} />)
-    const card = container.querySelector('article')!
-    expect(card.textContent).toContain('Rutina de piernas')
-    expect(card.textContent).toContain('Antes y después')
-  })
 
-  it('con más de 3 videos muestra los primeros y cuántos faltan', () => {
-    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', title: 'Uno' }), idea({ id: '2', title: 'Dos' }),
-      idea({ id: '3', title: 'Tres' }), idea({ id: '4', title: 'Cuatro' }),
-      idea({ id: '5', title: 'Cinco' }),
-    ]} />)
-    const card = container.querySelector('article')!
-    expect(card.textContent).toContain('Uno')
-    expect(card.textContent).toContain('Tres')
-    expect(card.textContent).not.toContain('Cuatro')
-    expect(card.textContent).toMatch(/\+2 más/)
-  })
 
   it('un video sin título no deja la fila en blanco', () => {
     const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
@@ -198,30 +177,15 @@ describe('EntregasBoard — batch model', () => {
     expect(container.querySelector('article')!.textContent).toContain('Sin título')
   })
 
-  it('un cliente con videos en dos columnas sale en LAS DOS', () => {
-    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1' }),                                              // edited
-      idea({ id: '2', status: 'producida', approval_status: 'submitted' }), // approval
-    ]} />)
-    const cols = container.querySelectorAll('section')
-    const editado = cols[0].textContent ?? ''
-    const revision = cols[1].textContent ?? ''
-    expect(editado).toContain('Nora Fitness')
-    expect(revision).toContain('Nora Fitness')
-    // y cada tarjeta cuenta SOLO sus videos
-    expect(editado).toMatch(/1 video en el batch/)
-    expect(revision).toMatch(/1 video en el batch/)
-  })
 
-  it('shows one batch card per client (not per video)', () => {
+  it('una tarjeta por VIDEO, no por cliente', () => {
     const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
     const cards = container.querySelectorAll('article')
-    expect(cards).toHaveLength(1)
-    expect(cards[0].textContent).toContain('Nora Fitness')
-    expect(cards[0].textContent).toMatch(/3 videos en el batch/i)
+    expect(cards).toHaveLength(3)
+    Array.from(cards).forEach((c) => expect(c.textContent).toContain('Nora Fitness'))
   })
 
-  it('places the batch in the column of its least-advanced video', () => {
+  it('cada video va a la columna que le toca, no a la del menos avanzado', () => {
     const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', approval_status: 'approved' }), idea({ id: '2', status: 'grabada' })]} />)
     // least advanced is unsent → Editado column (1st section)
     const editedCol = container.querySelectorAll('section')[0]
@@ -405,20 +369,21 @@ describe('EntregasBoard — lo que el revisor pidió cambiar', () => {
     expect(screen.queryByText(/Cambios pedidos/)).not.toBeInTheDocument()
   })
 
-  // Un video puede volver varias veces: lo que hay que leer es lo último.
-  it('con varias rondas en el batch enseña la más reciente', () => {
+  // Con una tarjeta por video, cada una enseña LA SUYA: ya no hay que elegir
+  // entre varias rondas dentro de la misma tarjeta.
+  it('cada tarjeta enseña la corrección de su propio video', () => {
     render(
       <EntregasBoard
         stages={['edited', 'approval']}
         ideas={[devuelto(), idea({ id: 'v2', client_id: 'c1', approval_status: 'revision_needed' })]}
         reviewNotes={{
-          v1: { note: 'ronda vieja', author: null, at: '2026-07-01T10:00:00Z' },
-          v2: { note: 'ronda nueva', author: null, at: '2026-07-30T10:00:00Z' },
+          v1: { note: 'corrige el inicio', author: null, at: '2026-07-01T10:00:00Z' },
+          v2: { note: 'corrige el final', author: null, at: '2026-07-30T10:00:00Z' },
         }}
       />,
     )
-    expect(screen.getByText('ronda nueva')).toBeInTheDocument()
-    expect(screen.queryByText('ronda vieja')).not.toBeInTheDocument()
+    expect(screen.getByText('corrige el inicio')).toBeInTheDocument()
+    expect(screen.getByText('corrige el final')).toBeInTheDocument()
   })
 })
 

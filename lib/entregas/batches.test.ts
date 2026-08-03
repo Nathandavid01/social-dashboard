@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, batchBreakdown, splitBatchesByStage, ENTREGA_BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, splitBatchesByStage, ENTREGA_BATCH_STAGES,
 } from './batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -52,32 +52,58 @@ describe('batchStage — moves together (least advanced active video)', () => {
   })
 })
 
+/**
+ * Una tarjeta por VIDEO, no por cliente. Agrupar por cliente juntaba en una
+ * misma tarjeta videos de dias distintos, y con la fecha elegida video a video
+ * eso ya no tiene sentido: cada uno tiene que caer en su dia.
+ */
 describe('groupIntoBatches', () => {
-  it('produces one batch per client with totals and dominant assignee', () => {
+  it('produce una tarjeta por video, no una por cliente', () => {
     const ann = { id: 'a', full_name: 'Ana' }
     const batches = groupIntoBatches([
       idea({ id: '1', client_id: 'c1', assignee: ann, hook: 'h' }),
       idea({ id: '2', client_id: 'c1', assignee: ann, status: 'grabada' }),
       idea({ id: '3', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, status: 'publicada' }),
     ] as IdeaWithPipeline[])
-    expect(batches).toHaveLength(2)
-    const nora = batches.find((b) => b.clientId === 'c1')!
-    expect(nora.total).toBe(2)
-    expect(nora.assignee).toEqual({ id: 'a', name: 'Ana' })
-    expect(nora.stage).toBe('edited') // nothing sent to review yet
-    expect(batches.find((b) => b.clientId === 'c2')!.stage).toBe('publication')
+    expect(batches).toHaveLength(3)
+    for (const b of batches) expect(b.total).toBe(1)
   })
-  it('excludes clients whose videos are all discarded', () => {
+
+  it('cada tarjeta conserva su cliente y su responsable', () => {
+    const ann = { id: 'a', full_name: 'Ana' }
+    const [b] = groupIntoBatches([idea({ id: '1', client_id: 'c1', assignee: ann })] as IdeaWithPipeline[])
+    expect(b.clientId).toBe('c1')
+    expect(b.assignee).toEqual({ id: 'a', name: 'Ana' })
+  })
+
+  // Lo que motivo el cambio: dos videos del mismo cliente en dias distintos.
+  it('dos videos del mismo cliente son dos tarjetas independientes', () => {
+    const batches = groupIntoBatches([
+      idea({ id: '1', client_id: 'c1', publish_date: '2026-08-05' }),
+      idea({ id: '2', client_id: 'c1', publish_date: '2026-08-07' }),
+    ] as IdeaWithPipeline[])
+    expect(batches).toHaveLength(2)
+    expect(new Set(batches.map((b) => b.ideas[0].publish_date))).toEqual(new Set(['2026-08-05', '2026-08-07']))
+  })
+
+  it('cada tarjeta esta en la etapa de SU video', () => {
+    const batches = groupIntoBatches([
+      idea({ id: '1', client_id: 'c1' }),
+      idea({ id: '2', client_id: 'c1', status: 'publicada' }),
+    ] as IdeaWithPipeline[])
+    expect(new Set(batches.map((b) => b.stage))).toEqual(new Set(['edited', 'publication']))
+  })
+  it('un video descartado no genera tarjeta', () => {
     const batches = groupIntoBatches([idea({ status: 'descartada' })] as IdeaWithPipeline[])
     expect(batches).toHaveLength(0)
   })
-  it('counts videos the reviewer sent back, so the card can flag them', () => {
+  it('la tarjeta marca si SU video volvio con cambios', () => {
     const batches = groupIntoBatches([
       idea({ id: '1', approval_status: 'revision_needed' }),
-      idea({ id: '2', approval_status: 'revision_needed' }),
-      idea({ id: '3', approval_status: 'submitted' }),
+      idea({ id: '2', approval_status: 'submitted' }),
     ] as IdeaWithPipeline[])
-    expect(batches[0].revisionNeeded).toBe(2)
+    expect(batches.filter((b) => b.revisionNeeded === 1)).toHaveLength(1)
+    expect(batches.filter((b) => b.revisionNeeded === 0)).toHaveLength(1)
   })
   it('is zero when nothing came back', () => {
     const batches = groupIntoBatches([idea({ approval_status: 'submitted' })] as IdeaWithPipeline[])
@@ -114,14 +140,13 @@ describe('splitBatchesByStage — un cliente puede estar en varias columnas', ()
   const build = (...ideas: Partial<IdeaWithPipeline>[]) =>
     splitBatchesByStage(groupIntoBatches(ideas.map((o) => idea(o)) as IdeaWithPipeline[]))
 
-  it('deja una sola tarjeta cuando todo está en la misma columna', () => {
+  it('dos videos en la misma columna son dos tarjetas', () => {
     const cards = build({ id: '1' }, { id: '2' })
-    expect(cards).toHaveLength(1)
-    expect(cards[0].stage).toBe('edited')
-    expect(cards[0].total).toBe(2)
+    expect(cards).toHaveLength(2)
+    expect(cards.every((c) => c.stage === 'edited' && c.total === 1)).toBe(true)
   })
 
-  it('parte el cliente en una tarjeta por columna con videos', () => {
+  it('cada video va a la columna que le toca', () => {
     const cards = build(
       { id: '1' },                                   // edited
       { id: '2', approval_status: 'submitted' },     // approval
@@ -131,17 +156,15 @@ describe('splitBatchesByStage — un cliente puede estar en varias columnas', ()
     expect(cards.map((c) => c.total)).toEqual([1, 1, 1])
   })
 
-  it('cada tarjeta cuenta SOLO sus videos', () => {
+  it('cada tarjeta lleva un solo video', () => {
     const cards = build(
       { id: '1' }, { id: '2' },                      // 2 en edited
       { id: '3', approval_status: 'submitted' },     // 1 en approval
     )
-    const edited = cards.find((c) => c.stage === 'edited')!
-    const approval = cards.find((c) => c.stage === 'approval')!
-    expect(edited.total).toBe(2)
-    expect(approval.total).toBe(1)
-    expect(edited.ideas.map((i) => i.id)).toEqual(['1', '2'])
-    expect(approval.ideas.map((i) => i.id)).toEqual(['3'])
+    expect(cards.filter((c) => c.stage === 'edited')).toHaveLength(2)
+    expect(cards.filter((c) => c.stage === 'approval')).toHaveLength(1)
+    expect(cards.every((c) => c.total === 1)).toBe(true)
+    expect(new Set(cards.flatMap((c) => c.ideas.map((i) => i.id)))).toEqual(new Set(['1', '2', '3']))
   })
 
   it('no deja columnas vacías', () => {
@@ -157,13 +180,8 @@ describe('splitBatchesByStage — un cliente puede estar en varias columnas', ()
     )
     const edited = cards.find((c) => c.stage === 'edited')!
     const approval = cards.find((c) => c.stage === 'approval')!
-    expect(edited.revisionNeeded).toBe(1)
-    expect(approval.revisionNeeded).toBe(0)
-  })
-
-  it('ya no hay desglose que mostrar: cada tarjeta es de una sola columna', () => {
-    const cards = build({ id: '1' }, { id: '2', approval_status: 'approved' })
-    for (const c of cards) expect(batchBreakdown(c)).toEqual([])
+    expect(edited.total).toBe(1)
+    expect(approval.total).toBe(1)
   })
 
   it('mantiene cliente y asignado en cada tarjeta', () => {
@@ -179,31 +197,6 @@ describe('splitBatchesByStage — un cliente puede estar en varias columnas', ()
   })
 })
 
-describe('batchBreakdown — what the card says when a batch is split', () => {
-  const build = (...ideas: Partial<IdeaWithPipeline>[]) =>
-    groupIntoBatches(ideas.map((o) => idea(o)) as IdeaWithPipeline[])[0]
-
-  it('says nothing when every video sits in the same stage', () => {
-    expect(batchBreakdown(build({ id: '1' }, { id: '2' }))).toEqual([])
-  })
-  it('calls out videos the reviewer sent back', () => {
-    const b = build({ id: '1', approval_status: 'revision_needed' }, { id: '2', approval_status: 'revision_needed' })
-    expect(batchBreakdown(b)).toEqual(['2 con cambios'])
-  })
-  it('lists the stages the rest of the batch has moved on to', () => {
-    const b = build(
-      { id: '1', approval_status: 'revision_needed' },
-      { id: '2', approval_status: 'approved' },
-      { id: '3', approval_status: 'approved' },
-    )
-    // batch sits at edited (least advanced) → that column is implied, not listed
-    expect(batchBreakdown(b)).toEqual(['1 con cambios', '2 en Copy'])
-  })
-  it('uses the singular for one video', () => {
-    const b = build({ id: '1' }, { id: '2', approval_status: 'approved' })
-    expect(batchBreakdown(b)).toEqual(['1 en Copy'])
-  })
-})
 
 describe('bucketBatches / adjacentBatchStage / batchProgress', () => {
   it('buckets batches into the 4 columns, Editado first', () => {

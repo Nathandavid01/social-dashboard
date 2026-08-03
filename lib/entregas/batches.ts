@@ -216,25 +216,6 @@ export function splitBatchesByStage(batches: EntregaBatch[]): EntregaBatch[] {
   return out
 }
 
-/**
- * Short breakdown for a split batch, e.g. ["1 con cambios", "2 en Copy"].
- *
- * The card sits in the column of its LEAST-advanced video, so without this a
- * client whose videos are half-approved reads as if nothing moved. The batch's
- * own column is left out — it's the one you're already looking at. Returns []
- * when the whole batch is in one place and there is nothing to explain.
- */
-export function batchBreakdown(batch: EntregaBatch): string[] {
-  const out: string[] = []
-  if (batch.revisionNeeded > 0) out.push(`${batch.revisionNeeded} con cambios`)
-  for (const s of ENTREGA_BATCH_STAGES) {
-    if (s.key === batch.stage) continue
-    const n = batch.stageCounts[s.key]
-    if (n > 0) out.push(`${n} en ${ENTREGA_LABEL_ES[s.key]}`)
-  }
-  return out
-}
-
 /** 0..1 progress of a batch along the whole pipeline (column position). */
 export function batchProgress(stage: EntregaStageKey): number {
   return STAGE_INDEX[stage] / (ENTREGA_BATCH_STAGES.length - 1)
@@ -270,18 +251,29 @@ function dominantAssignee(ideas: IdeaWithPipeline[]): { id: string; name: string
 }
 
 /** Group ideas into one batch per client (excludes fully-discarded clients). */
+/**
+ * Una tarjeta por VIDEO.
+ *
+ * Agrupaba por cliente, y eso juntaba en una misma tarjeta videos de días
+ * distintos. Con la fecha elegida video a video ya no tiene sentido: cada uno
+ * tiene que caer en el día de SU fecha, aunque el editor suba cinco de golpe.
+ *
+ * Se conserva la estructura de "batch" —de un solo video— para no reescribir el
+ * tablero entero: lo que cambia es por qué se agrupa.
+ */
 export function groupIntoBatches(ideas: IdeaWithPipeline[]): EntregaBatch[] {
   const byClient = new Map<string, IdeaWithPipeline[]>()
   for (const i of ideas) {
     const cid = i.client?.id ?? i.client_id
     if (!cid) continue
-    const arr = byClient.get(cid) ?? []
-    arr.push(i)
-    byClient.set(cid, arr)
+    // Por id del video, no del cliente. El cliente va delante en la clave para
+    // que el orden siga juntando visualmente lo del mismo.
+    byClient.set(`${cid}:${i.id}`, [i])
   }
 
   const batches: EntregaBatch[] = []
-  for (const [clientId, list] of Array.from(byClient.entries())) {
+  for (const [clave, list] of Array.from(byClient.entries())) {
+    const clientId = clave.split(':')[0]
     const active = list.filter((i) => i.status !== 'descartada')
     if (active.length === 0) continue
     const stage = batchStage(active)

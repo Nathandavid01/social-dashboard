@@ -5,7 +5,7 @@ import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRigh
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, batchBreakdown, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
+import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
@@ -635,7 +635,6 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
-  const breakdown = batchBreakdown(batch)
 
   // La corrección más reciente del batch. Un batch puede traer varios videos
   // devueltos; se enseña la última, y el detalle por video vive en el overlay.
@@ -678,30 +677,15 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
                 </span>
               )}
             </div>
+            {/* Una tarjeta es UN video: lo que identifica la tarjeta es su
+                título, no cuántos hay. */}
             <p className="truncate text-[10px] text-muted-foreground">
-              {batch.total} video{batch.total === 1 ? '' : 's'} en el batch
-              {/* A batch sits in its least-advanced column, so a half-approved
-                  client would otherwise read as if nothing had moved. */}
-              {breakdown.length > 0 && <span className="text-muted-foreground/70"> · {breakdown.join(' · ')}</span>}
+              {batch.ideas[0]?.title?.trim() || batch.ideas[0]?.hook?.trim() || 'Sin título'}
             </p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
 
-        {/* What the batch actually contains. This was a strip of empty gradient
-            blocks — it filled the card without telling you anything, and in Copy
-            you need to know WHAT you're writing about. */}
-        <ul className="space-y-0.5">
-          {batch.ideas.slice(0, 3).map((i) => (
-            <li key={i.id} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: a.dot }} />
-              <span className="truncate">{i.title?.trim() || i.hook?.trim() || 'Sin título'}</span>
-            </li>
-          ))}
-          {more > 0 && (
-            <li className="pl-2.5 text-[11px] font-medium text-muted-foreground/70">+{more} más</li>
-          )}
-        </ul>
 
         {/* Lo que hay que corregir. La etiqueta "Cambios pedidos" ya estaba,
             pero sin el texto el editor reenviaba el mismo video sin saber qué
