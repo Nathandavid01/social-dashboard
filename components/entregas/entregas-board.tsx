@@ -163,6 +163,10 @@ export function EntregasBoard({
   const conteoPorDia = useMemo(() => {
     const m: Record<string, number> = { sin: 0 }
     for (const i of ideas) {
+      // Los descartados no cuentan: groupIntoBatches ya los excluye de las
+      // tarjetas, asi que sin esto la pestaña anunciaba un numero de videos que
+      // no estaban en ninguna parte al entrar.
+      if (i.status === 'descartada') continue
       const d = diaDeTablero(i.publish_date as string | null, modoDia)
       if (d !== null) {
         const w = offsetSemanaTablero(i.publish_date as string | null, modoDia)

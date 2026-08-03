@@ -537,3 +537,20 @@ describe('EntregasBoard — modo publicación', () => {
     expect(screen.getByRole('button', { name: 'Martes' }).textContent).not.toMatch(/[1-9]/)
   })
 })
+
+describe('EntregasBoard — el contador de la pestaña', () => {
+  it('no cuenta los descartados: la tarjeta ya no esta ahi', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: fechaDeEntrega(1) }),
+      idea({ id: '2', publish_date: fechaDeEntrega(1), status: 'descartada' }),
+    ]} />)
+    expect(screen.getByRole('button', { name: 'Lunes' }).textContent).toMatch(/1/)
+  })
+
+  it('con todo descartado la pestaña queda sin numero', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: fechaDeEntrega(1), status: 'descartada' }),
+    ]} />)
+    expect(screen.getByRole('button', { name: 'Lunes' }).textContent).not.toMatch(/[0-9]/)
+  })
+})
