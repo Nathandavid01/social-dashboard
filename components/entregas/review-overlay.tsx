@@ -17,10 +17,14 @@ import { useAuth } from '@/lib/context/auth-context'
  */
 export function ReviewOverlay({
   clientId,
+  ideaId,
   clientName,
   onClose,
 }: {
   clientId: string
+  /** El video de la tarjeta que se abrio. La tarjeta es UN video, asi que el
+   *  overlay tiene que enseñar ese y no todos los del cliente. */
+  ideaId: string
   clientName: string
   onClose: () => void
 }) {
@@ -34,10 +38,12 @@ export function ReviewOverlay({
     getEntregaReviewVideos(clientId).then((res) => {
       if (!alive) return
       if (res.error) setError(res.error)
-      else setVideos(res.videos ?? [])
+      // Solo el video de la tarjeta. Se filtra aqui y no en el servidor para no
+      // tocar una accion que tambien usa el otro tablero.
+      else setVideos((res.videos ?? []).filter((v) => v.id === ideaId))
     })
     return () => { alive = false }
-  }, [clientId])
+  }, [clientId, ideaId])
 
   // Esc closes — a full-screen overlay with no keyboard exit is a trap.
   useEffect(() => {

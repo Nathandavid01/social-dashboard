@@ -28,10 +28,14 @@ import { publishSchedule } from '@/lib/utils/publish-schedule'
  */
 export function CopyOverlay({
   clientId,
+  ideaId,
   clientName,
   onClose,
 }: {
   clientId: string
+  /** El video de la tarjeta que se abrio. La tarjeta es UN video, asi que el
+   *  overlay tiene que enseñar ese y no todos los del cliente. */
+  ideaId: string
   clientName: string
   onClose: () => void
 }) {
@@ -51,11 +55,13 @@ export function CopyOverlay({
   const load = useCallback(async () => {
     const res = await getEntregaCopyVideos(clientId)
     if (res.error) return setError(res.error)
-    const pending = (res.data?.videos ?? []).filter((v) => !v.generated_caption?.trim())
+    // Solo el video de la tarjeta. Se filtra aqui y no en el servidor para no
+    // tocar una accion que tambien usa el otro tablero.
+    const pending = (res.data?.videos ?? []).filter((v) => v.id === ideaId)
     setVideos(pending)
     setNotes(res.data?.captionNotes ?? '')
     setIndex(0)
-  }, [clientId])
+  }, [clientId, ideaId])
 
   useEffect(() => { void load() }, [load])
 

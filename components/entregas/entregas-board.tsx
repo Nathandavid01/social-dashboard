@@ -133,11 +133,14 @@ export function EntregasBoard({
   // Qué se abre depende de la COLUMNA: una tarjeta en Revisión pide decidir,
   // una en Copy pide escribir. Abrir siempre lo mismo mandaba a Revisión desde
   // Copy, con un "no queda nada por revisar" que no explicaba nada.
-  const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey } | null>(null)
+  // Con ideaId: la tarjeta es UN video, así que abrirla tiene que enseñar ese
+  // y no todos los del cliente. Ver los cinco de un cliente al abrir uno
+  // obligaba a buscar cuál era, que es justo lo que la tarjeta ya resolvía.
+  const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey; ideaId: string } | null>(null)
   const openClientId = open?.clientId ?? null
 
-  const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey) => {
-    setOpen({ clientId, stage })
+  const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey, ideaId: string) => {
+    setOpen({ clientId, stage, ideaId })
   }, [])
   const closeBatch = useCallback(() => setOpen(null), [])
 
@@ -445,6 +448,7 @@ export function EntregasBoard({
       {open && open.stage === 'approval' && (
         <ReviewOverlay
           clientId={open.clientId}
+          ideaId={open.ideaId}
           clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
           onClose={closeBatch}
         />
@@ -452,6 +456,7 @@ export function EntregasBoard({
       {open && open.stage === 'copy' && (
         <CopyOverlay
           clientId={open.clientId}
+          ideaId={open.ideaId}
           clientName={batches.find((b) => b.clientId === open.clientId)?.clientName ?? 'Cliente'}
           onClose={closeBatch}
         />
@@ -460,7 +465,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -499,7 +504,7 @@ function PlannedSessionCard({
 }: {
   client: PlannedClient
   session: PlannedSession
-  onOpen: (clientId: string, stage: EntregaStageKey) => void
+  onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void
 }) {
   const isSingle = session.total <= 1
   const daysSinceStart = client.createdAt ? calendarDaysSince(client.createdAt) : null
@@ -512,7 +517,9 @@ function PlannedSessionCard({
         : 'Lleno'
   return (
     <article
-      onClick={() => onOpen(client.clientId, 'edited')}
+      // Sin video todavia: es un hueco planificado. Abre la columna Editado,
+      // que no tiene overlay, asi que el id vacio no llega a usarse.
+      onClick={() => onOpen(client.clientId, 'edited', '')}
       className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
     >
       <div className="space-y-2.5 p-3">
@@ -626,7 +633,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -650,7 +657,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
     .sort((a, b) => (a.at < b.at ? 1 : -1))[0]
 
   return (
-    <article onClick={() => onOpen(batch.clientId, stage)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article onClick={() => onOpen(batch.clientId, stage, batch.ideas[0].id)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
         <DiscardCardButton ideaIds={batch.ideas.map((i) => i.id)} clientName={batch.clientName} />
       </div>

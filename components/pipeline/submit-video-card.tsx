@@ -27,8 +27,12 @@ import {
 /** Matches the ceiling used by the existing R2 uploader (idea-video-panel). */
 export const MAX_VIDEO_BYTES = 5 * 1024 * 1024 * 1024
 
-/** Sanity cap: a batch bigger than this is a sign something went wrong. */
-export const MAX_VIDEOS_PER_SUBMIT = 10
+/**
+ * Un video por envio. El editor elegia cuantos subir de golpe, pero cada video
+ * lleva su fecha y termina en su propia tarjeta: subirlos de uno en uno es lo
+ * mismo, y quita un campo que solo servia para multiplicar formularios.
+ */
+export const MAX_VIDEOS_PER_SUBMIT = 1
 
 export interface SubmitVideoItem {
   /** The real file — the caller presigns, PUTs to R2 and registers it. */
@@ -110,17 +114,6 @@ export function SubmitVideoCard({
   const readyCount = checks.filter((c) => c.ok).length
   const canSubmit = !!clientId && readyCount === rows.length && !pending
 
-  function setCount(raw: string) {
-    const n = Number.parseInt(raw, 10)
-    if (Number.isNaN(n)) return
-    const next = Math.min(Math.max(n, 1), MAX_VIDEOS_PER_SUBMIT)
-    setRows((prev) =>
-      next <= prev.length
-        ? prev.slice(0, next)
-        : [...prev, ...Array.from({ length: next - prev.length }, emptyRow)],
-    )
-  }
-
   function setRow(i: number, patch: Partial<Row>) {
     setRows((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)))
   }
@@ -163,31 +156,11 @@ export function SubmitVideoCard({
         </Select>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="sv-count" className="text-[11px]">¿Cuántos videos? *</Label>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <Input
-            id="sv-count"
-            type="number"
-            min={1}
-            max={MAX_VIDEOS_PER_SUBMIT}
-            value={rows.length}
-            onChange={(e) => setCount(e.target.value)}
-            className="h-9 w-20 shrink-0"
-          />
-          <span className="whitespace-nowrap text-[11px] tabular-nums text-muted-foreground">
-            {readyCount} de {rows.length} listos
-          </span>
-        </div>
-      </div>
-
       <ol className="space-y-2.5">
         {rows.map((row, i) => {
           const c = checks[i]
           return (
             <li key={i} className="space-y-1.5 rounded-lg border bg-muted/30 p-2">
-              <p className="text-[11px] font-medium text-muted-foreground">Video {i + 1}</p>
-
               {/* La fecha la dice el editor, video a video. Antes salía de la
                   pestaña abierta, lo que obligaba a entrar en el día correcto
                   antes de entregar y hacía imposible subir en una sola tanda
@@ -266,7 +239,6 @@ export function SubmitVideoCard({
       <Button size="sm" className="w-full" disabled={!canSubmit} onClick={submit}>
         <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />
         Enviar a revisión
-        {rows.length > 1 && ` (${rows.length})`}
       </Button>
     </section>
   )

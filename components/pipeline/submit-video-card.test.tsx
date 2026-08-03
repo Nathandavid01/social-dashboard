@@ -32,7 +32,6 @@ function setup() {
   const files = () => screen.getAllByLabelText(/archivo del video/i) as HTMLInputElement[]
   return {
     client: screen.getByLabelText('Cliente') as HTMLSelectElement,
-    count: screen.getByLabelText(/cuántos videos/i) as HTMLInputElement,
     files,
     fechas: () => screen.getAllByLabelText(/para cuándo es este video/i) as HTMLInputElement[],
     // Elegir un video es archivo + fecha: sin fecha la fila no está lista.
@@ -61,11 +60,6 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     expect(files()[0]).toHaveAttribute('accept', 'video/*')
   })
 
-  it('still gives one row per video asked for', () => {
-    const { count, files } = setup()
-    fireEvent.change(count, { target: { value: '3' } })
-    expect(files()).toHaveLength(3)
-  })
 
   it('shows the chosen file name so the editor can check it', () => {
     const { pick } = setup()
@@ -73,16 +67,6 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     expect(screen.getByText(/rutina-piernas\.mp4/)).toBeInTheDocument()
   })
 
-  it('needs a client and a file in every row', () => {
-    const { client, count, pick, submit } = setup()
-    fireEvent.change(count, { target: { value: '2' } })
-    fireEvent.change(client, { target: { value: 'c1' } })
-    expect(submit()).toBeDisabled()
-    pick(0, videoFile('a.mp4'))
-    expect(submit()).toBeDisabled()
-    pick(1, videoFile('b.mp4'))
-    expect(submit()).toBeEnabled()
-  })
 
   it('rejects a file that is not a video', () => {
     const { client, pick, submit } = setup()
@@ -100,15 +84,6 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     expect(submit()).toBeDisabled()
   })
 
-  it('catches the same file picked twice', () => {
-    const { client, count, pick, submit } = setup()
-    fireEvent.change(count, { target: { value: '2' } })
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile('reel.mp4', 123))
-    pick(1, videoFile('reel.mp4', 123))
-    expect(screen.getByText(/ya está en otro campo/i)).toBeInTheDocument()
-    expect(submit()).toBeDisabled()
-  })
 
   it('the Drive link is optional and never blocks the submission', () => {
     const { client, pick, submit } = setup()
@@ -145,24 +120,7 @@ describe('SubmitVideoCard — the editor uploads the real file', () => {
     })
   })
 
-  it('reports progress as "N de M listos"', () => {
-    const { client, count, pick } = setup()
-    fireEvent.change(count, { target: { value: '3' } })
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile('a.mp4'))
-    expect(screen.getByText(/1 de 3 listos/i)).toBeInTheDocument()
-  })
 
-  it('clears back to one empty row after submitting', () => {
-    const { client, count, pick, files, submit } = setup()
-    fireEvent.change(count, { target: { value: '2' } })
-    fireEvent.change(client, { target: { value: 'c1' } })
-    pick(0, videoFile('a.mp4'))
-    pick(1, videoFile('b.mp4'))
-    fireEvent.click(submit())
-    expect(files()).toHaveLength(1)
-    expect(submit()).toBeDisabled()
-  })
 })
 
 /**
@@ -193,16 +151,6 @@ describe('SubmitVideoCard — la fecha de cada video', () => {
   })
 
   // Lo que la pestaña impedía: entregar de una vez videos de días distintos.
-  it('cada video puede ir a un día distinto en la misma entrega', () => {
-    const { client, count, pick, submit } = setup()
-    fireEvent.change(client, { target: { value: 'c1' } })
-    fireEvent.change(count, { target: { value: '2' } })
-    pick(0, videoFile('a.mp4', 5), '2026-08-05')
-    pick(1, videoFile('b.mp4', 5), '2026-08-07')
-    fireEvent.click(submit())
-    const { videos } = onSubmit.mock.calls[0][0]
-    expect(videos.map((v: { publishDate: string }) => v.publishDate)).toEqual(['2026-08-05', '2026-08-07'])
-  })
 
   it('una fecha pasada avisa pero no bloquea: puede ser trabajo atrasado', () => {
     const { client, pick, submit } = setup()
@@ -210,5 +158,38 @@ describe('SubmitVideoCard — la fecha de cada video', () => {
     pick(0, videoFile('a.mp4', 5), '2020-01-01')
     expect(screen.getByText(/fecha pasada/i)).toBeInTheDocument()
     expect(submit()).toBeEnabled()
+  })
+})
+
+/**
+ * Un video por envio. El editor elegia cuantos subir de golpe, pero cada video
+ * lleva su fecha y termina en su propia tarjeta: subirlos de uno en uno es lo
+ * mismo, y quita un campo que solo servia para multiplicar formularios.
+ */
+describe('SubmitVideoCard — un video por envio', () => {
+  it('ya no pregunta cuantos', () => {
+    setup()
+    expect(screen.queryByLabelText(/cuántos videos/i)).toBeNull()
+  })
+
+  it('siempre hay un solo formulario de video', () => {
+    const { files } = setup()
+    expect(files()).toHaveLength(1)
+  })
+
+  it('sin cliente no deja enviar aunque el video este listo', () => {
+    const { pick, submit } = setup()
+    pick(0, videoFile('a.mp4', 5))
+    expect(submit()).toBeDisabled()
+  })
+
+  it('con cliente, archivo y fecha, envia uno solo', () => {
+    const { client, pick, submit } = setup()
+    fireEvent.change(client, { target: { value: 'c1' } })
+    pick(0, videoFile('a.mp4', 5), '2026-08-05')
+    fireEvent.click(submit())
+    const { videos } = onSubmit.mock.calls[0][0]
+    expect(videos).toHaveLength(1)
+    expect(videos[0].publishDate).toBe('2026-08-05')
   })
 })
