@@ -164,3 +164,39 @@ export function offsetSemana(publishDate: string | null | undefined, hoy: Date =
   const entrega = sumarDias(publishDate, -1)
   return diffEnSemanas(lunesDeLaSemanaDeIso(entrega), lunesDeLaSemana(hoy))
 }
+
+/**
+ * Desde qué lado se mira la fecha en cada tablero.
+ *
+ * `entrega` — Revisión: el editor piensa "cuándo entrego", y publica al día
+ *   siguiente.
+ * `publicacion` — Copy y Publicación: ahí se piensa en la cadencia del cliente
+ *   y en lo que recibe Metricool, que es cuándo se publica. La Guira publica
+ *   lunes, miércoles y viernes; verla en domingo, martes y jueves no se
+ *   entendía.
+ */
+export type ModoDia = 'entrega' | 'publicacion'
+
+/** La pestaña donde vive una tarjeta, según desde dónde se mire. */
+export function diaDeTablero(
+  publishDate: string | null | undefined,
+  modo: ModoDia,
+): DiaKey | null {
+  return modo === 'publicacion' ? diaDeFecha(publishDate) : diaDeEntrega(publishDate)
+}
+
+/**
+ * La semana de una tarjeta, según el modo. En modo publicación se cuenta por la
+ * fecha real; en modo entrega, por el día anterior. En el borde del domingo los
+ * dos difieren —publicar el lunes es entregar el domingo, que ya es otra
+ * semana— y eso es correcto: cada pantalla cuenta lo suyo.
+ */
+export function offsetSemanaTablero(
+  publishDate: string | null | undefined,
+  modo: ModoDia,
+  hoy: Date = new Date(),
+): number | null {
+  if (modo === 'entrega') return offsetSemana(publishDate, hoy)
+  if (!publishDate || diaDeFecha(publishDate) === null) return null
+  return diffEnSemanas(lunesDeLaSemanaDeIso(publishDate), lunesDeLaSemana(hoy))
+}

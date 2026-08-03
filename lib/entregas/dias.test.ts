@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { diaDeFecha, proximaFechaDelDia, etiquetaDia, DIAS, diaDePublicacion, diaDeEntrega, fechaDeEntrega, fechaEntregaDelDia, offsetSemana, rangoSemana } from './dias'
+import { diaDeFecha, proximaFechaDelDia, etiquetaDia, DIAS, diaDePublicacion, diaDeEntrega, fechaDeEntrega, fechaEntregaDelDia, offsetSemana, rangoSemana, diaDeTablero, offsetSemanaTablero } from './dias'
 
 describe('DIAS', () => {
   it('va de lunes a domingo', () => {
@@ -260,5 +260,46 @@ describe('el domingo cierra su semana, no abre la siguiente', () => {
   it('entregar el domingo publica el lunes siguiente', () => {
     expect(fechaEntregaDelDia(0, DOMINGO, 0)).toBe('2026-08-02')
     expect(fechaDeEntrega(0, DOMINGO, 0)).toBe('2026-08-03')
+  })
+})
+
+/**
+ * Las dos pantallas miran la misma fecha desde sitios distintos: en Revisión el
+ * editor piensa "cuándo entrego", y en Copy y Publicación se piensa en la
+ * cadencia del cliente y en lo que recibe Metricool, que es cuándo se publica.
+ */
+describe('modo de día del tablero', () => {
+  const HOY = new Date(2026, 7, 3) // lunes 3 ago
+
+  it('en modo entrega, un video que publica el miércoles va al martes', () => {
+    expect(diaDeTablero('2026-08-05', 'entrega')).toBe(2)
+  })
+
+  it('en modo publicación, ese mismo video va al miércoles', () => {
+    expect(diaDeTablero('2026-08-05', 'publicacion')).toBe(3)
+  })
+
+  // La cadencia de La Guira es publicar lunes, miércoles y viernes; en Copy
+  // tiene que verse en esos días y no un día antes.
+  it('una cadencia lunes-miércoles-viernes se ve tal cual en modo publicación', () => {
+    expect(['2026-08-03', '2026-08-05', '2026-08-07'].map((f) => diaDeTablero(f, 'publicacion')))
+      .toEqual([1, 3, 5])
+  })
+
+  it('sin fecha no cae en ningún día, en los dos modos', () => {
+    expect(diaDeTablero(null, 'entrega')).toBeNull()
+    expect(diaDeTablero(null, 'publicacion')).toBeNull()
+  })
+
+  it('la semana en modo publicación se cuenta por la fecha de publicación', () => {
+    expect(offsetSemanaTablero('2026-08-05', 'publicacion', HOY)).toBe(0)
+    expect(offsetSemanaTablero('2026-08-12', 'publicacion', HOY)).toBe(1)
+  })
+
+  // Publicar el lunes 3 significa entregar el domingo 2, que es de la semana
+  // pasada: los dos modos no tienen por qué coincidir en el borde.
+  it('en el borde del domingo los dos modos difieren, y es correcto', () => {
+    expect(offsetSemanaTablero('2026-08-03', 'publicacion', HOY)).toBe(0)
+    expect(offsetSemanaTablero('2026-08-03', 'entrega', HOY)).toBe(-1)
   })
 })
