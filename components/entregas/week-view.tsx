@@ -3,7 +3,7 @@
 import { CalendarDays, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DiaDeSemana } from '@/lib/entregas/semana'
-import type { DiaKey } from '@/lib/entregas/dias'
+import type { DiaKey, ModoDia } from '@/lib/entregas/dias'
 
 /**
  * Cómo viene la semana, para poder planificar sin ir pestaña por pestaña.
@@ -16,11 +16,13 @@ export function WeekView({
   semana,
   hoy,
   onAbrirDia,
+  modoDia = 'entrega',
 }: {
   semana: DiaDeSemana[]
   /** Día de hoy, para resaltar la columna. null si hoy es domingo. */
   hoy?: DiaKey | null
   onAbrirDia: (dia: DiaKey) => void
+  modoDia?: ModoDia
 }) {
   const totalSemana = semana.reduce((n, d) => n + d.total, 0)
 
@@ -66,7 +68,7 @@ export function WeekView({
 
                 {/* Lo que más se olvida: que lo del lunes sale el martes. */}
                 <p className="flex items-center gap-0.5 whitespace-nowrap text-[9.5px] text-muted-foreground">
-                  publica <ArrowRight className="h-2.5 w-2.5" aria-hidden="true" /> {d.diaPublicacion}
+                  {modoDia === 'publicacion' ? 'listo' : 'publica'} <ArrowRight className="h-2.5 w-2.5" aria-hidden="true" /> {d.diaPublicacion}
                 </p>
 
                 {d.clientes.length === 0 ? (

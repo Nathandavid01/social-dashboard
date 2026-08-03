@@ -14,7 +14,7 @@ import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { DIAS, diaDeEntrega, offsetSemana, rangoSemana, type DiaKey } from '@/lib/entregas/dias'
+import { DIAS, diaDeTablero, offsetSemanaTablero, rangoSemana, type DiaKey, type ModoDia } from '@/lib/entregas/dias'
 
 /** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
 function etiquetaRango(semana: number): string {
@@ -70,6 +70,7 @@ export function EntregasBoard({
   postingTimes = {},
   reviewNotes = {},
   clientApprovals = {},
+  modoDia = 'entrega',
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -93,6 +94,9 @@ export function EntregasBoard({
   reviewNotes?: Record<string, ReviewNote>
   /** Lo que el cliente respondió por video, para marcarlo en la tarjeta. */
   clientApprovals?: Record<string, EstadoCliente>
+  /** Desde qué lado se mira la fecha. Revisión razona en día de entrega; Copy y
+   *  Publicación en día de publicación, que es la cadencia del cliente. */
+  modoDia?: ModoDia
 }) {
   // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
   // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
@@ -141,24 +145,24 @@ export function EntregasBoard({
   // both, instead of parking in the least-advanced one.
   const ideasDelDia = useMemo(
     () => ideas.filter((i) => {
-      const d = diaDeEntrega(i.publish_date as string | null)
+      const d = diaDeTablero(i.publish_date as string | null, modoDia)
       if (dia === 'sin') return d === null
       if (d !== dia) return false
       // Lo atrasado se queda en la semana 0: es trabajo que sigue pendiente y
       // esconderlo por estar vencido es justo lo contrario de lo que hace falta.
-      const w = offsetSemana(i.publish_date as string | null)
+      const w = offsetSemanaTablero(i.publish_date as string | null, modoDia)
       return semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
     }),
-    [ideas, dia, semanaOffset],
+    [ideas, dia, semanaOffset, modoDia],
   )
 
   /** Cuántos videos hay en cada día, para que la pestaña lo diga sin entrar. */
   const conteoPorDia = useMemo(() => {
     const m: Record<string, number> = { sin: 0 }
     for (const i of ideas) {
-      const d = diaDeEntrega(i.publish_date as string | null)
+      const d = diaDeTablero(i.publish_date as string | null, modoDia)
       if (d !== null) {
-        const w = offsetSemana(i.publish_date as string | null)
+        const w = offsetSemanaTablero(i.publish_date as string | null, modoDia)
         const enEstaSemana = semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
         if (!enEstaSemana) continue
       }
@@ -166,9 +170,9 @@ export function EntregasBoard({
       m[k] = (m[k] ?? 0) + 1
     }
     return m
-  }, [ideas, semanaOffset])
+  }, [ideas, semanaOffset, modoDia])
 
-  const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset), [ideas, semanaOffset])
+  const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset, modoDia), [ideas, semanaOffset, modoDia])
 
   const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideasDelDia)), [ideasDelDia])
 
@@ -413,6 +417,7 @@ export function EntregasBoard({
             semana={semana}
             hoy={hoyDia}
             onAbrirDia={(d) => { setDia(d); setVista('dia') }}
+            modoDia={modoDia}
           />
         </div>
       )}

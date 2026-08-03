@@ -17,7 +17,7 @@ vi.mock('@/lib/context/auth-context', () => ({
 }))
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
-import { fechaDeEntrega } from '@/lib/entregas/dias'
+import { fechaDeEntrega, fechaEntregaDelDia } from '@/lib/entregas/dias'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -529,5 +529,46 @@ describe('EntregasBoard — el cliente aprobó antes que el copy', () => {
       clientApprovals={{ v1: 'approved', v2: 'rejected' }}
     />)
     expect(screen.getByText('El cliente pidió cambios en 1')).toBeInTheDocument()
+  })
+})
+
+/**
+ * En Copy y Publicación la pestaña es el día en que se PUBLICA: es la cadencia
+ * del cliente y lo que recibe Metricool. La Guira publica lunes, miércoles y
+ * viernes, y verla en domingo, martes y jueves no se entendía.
+ */
+describe('EntregasBoard — modo publicación', () => {
+  const enCopy = (fecha: string, id: string) =>
+    idea({ id, approval_status: 'approved', generated_caption: null, publish_date: fecha })
+
+  it('un video que publica el miércoles sale en Miércoles, no en Martes', () => {
+    // miércoles de la semana en curso
+    const mie = fechaEntregaDelDia(3)
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} modoDia="publicacion" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Miércoles' }))
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+  })
+
+  it('en modo entrega ese mismo video sale un día antes', () => {
+    const mie = fechaEntregaDelDia(3)
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} modoDia="entrega" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Martes' }))
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+  })
+
+  it('una cadencia lunes-miércoles-viernes se ve en esos tres días', () => {
+    render(<EntregasBoard
+      stages={['copy','publication']}
+      modoDia="publicacion"
+      ideas={[
+        enCopy(fechaEntregaDelDia(1), 'v1'),
+        enCopy(fechaEntregaDelDia(3), 'v2'),
+        enCopy(fechaEntregaDelDia(5), 'v3'),
+      ]}
+    />)
+    for (const d of ['Lunes', 'Miércoles', 'Viernes']) {
+      expect(screen.getByRole('button', { name: d }).textContent).toMatch(/1/)
+    }
+    expect(screen.getByRole('button', { name: 'Martes' }).textContent).not.toMatch(/[1-9]/)
   })
 })

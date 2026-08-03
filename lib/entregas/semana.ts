@@ -1,4 +1,4 @@
-import { DIAS, diaDeEntrega, diaDePublicacion, etiquetaDia, offsetSemana, fechaEntregaDelDia, fechaDeEntrega, type DiaKey } from './dias'
+import { DIAS, diaDeTablero, diaDePublicacion, etiquetaDia, offsetSemanaTablero, fechaEntregaDelDia, fechaDeEntrega, type DiaKey, type ModoDia } from './dias'
 
 /**
  * La semana de un editor: qué le toca entregar cada día y cuándo se publica.
@@ -37,6 +37,7 @@ export function semanaDeEntregas(
   ideas: IdeaParaSemana[],
   hoy: Date = new Date(),
   semana = 0,
+  modo: ModoDia = 'entrega',
 ): DiaDeSemana[] {
   // Un mapa por día ANTES de recorrer las ideas: así un día sin trabajo sale
   // igualmente como columna vacía, en vez de desaparecer de la semana.
@@ -44,13 +45,13 @@ export function semanaDeEntregas(
   for (const d of DIAS) porDia.set(d.key, new Map())
 
   for (const i of ideas) {
-    const dia = diaDeEntrega(i.publish_date)
+    const dia = diaDeTablero(i.publish_date, modo)
     // Sin fecha no cae en ningún día: eso vive en la pestaña "Sin día".
     if (dia === null) continue
     // Solo la semana que se está mirando. Lo atrasado se acumula en la actual:
     // sigue pendiente, y esconderlo por vencido es lo contrario de lo que hace
     // falta.
-    const w = offsetSemana(i.publish_date, hoy)
+    const w = offsetSemanaTablero(i.publish_date, modo, hoy)
     if (semana === 0 ? (w ?? 0) > 0 : w !== semana) continue
     const clientes = porDia.get(dia)
     if (!clientes) continue
@@ -68,7 +69,9 @@ export function semanaDeEntregas(
     return {
       dia: d.key,
       label: d.label,
-      diaPublicacion: etiquetaDia(diaPublicacionDe(d.key)),
+      // En modo publicación la columna ya ES el día en que sale; lo útil
+      // entonces es el día anterior, que es cuando hay que tenerlo listo.
+      diaPublicacion: etiquetaDia(modo === 'publicacion' ? ((d.key + 6) % 7) as DiaKey : diaPublicacionDe(d.key)),
       fechaEntrega: fechaEntregaDelDia(d.key, hoy, semana),
       fechaPublicacion: fechaDeEntrega(d.key, hoy, semana),
       clientes,
