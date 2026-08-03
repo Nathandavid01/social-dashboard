@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
 import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
+import { VistaEditor } from '@/components/entregas/vista-editor'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -65,6 +66,25 @@ export default async function RevisionPage() {
         .order('created_at', { ascending: false })
     : { data: [] }
   const reviewNotes = latestNoteByIdea((notasRaw ?? []) as unknown as ReviewNoteRow[])
+
+  // El editor y el diseñador solo entregan: no reparten trabajo del equipo, así
+  // que las pestañas de día y el selector de semana les sobran. Y la fecha ya
+  // la dice cada video, con lo que la pestaña tampoco decidía nada.
+  if (role === 'editor' || role === 'disenador') {
+    return (
+      <VistaEditor
+        submitClients={submitClients}
+        devueltos={mios
+          .filter((i) => i.approval_status === 'revision_needed')
+          .map((i) => ({
+            id: i.id,
+            titulo: i.title?.trim() || i.hook?.trim() || 'Sin título',
+            clientName: i.client?.name ?? 'Sin cliente',
+            nota: reviewNotes[i.id] ?? null,
+          }))}
+      />
+    )
+  }
 
   return (
     <EntregasBoard
