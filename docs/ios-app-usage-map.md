@@ -1,4 +1,4 @@
-# Nate Media Social Dashboard — App usage map (iOS core scope)
+# Social Dashboard — App usage map (iOS core scope)
 
 Grounded in the live Next.js app under this repo. Primary sources:
 
@@ -14,7 +14,7 @@ This document freezes **core** vs **secondary** for the native iOS staff app.
 
 ## Who uses the app
 
-Staff at Nate Media (agency) — **not** end clients. Clients use the separate public portal / review links (`app/(portal)`, `app/(review)`), which are **out of scope** for the iOS staff app.
+Staff at the agency — **not** end clients. Clients use the separate public portal / review links (`app/(portal)`, `app/(review)`), which are **out of scope** for the iOS staff app.
 
 ### Roles (`UserRole`)
 
