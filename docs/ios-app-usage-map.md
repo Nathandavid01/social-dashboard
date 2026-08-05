@@ -1,4 +1,4 @@
-# Social Dashboard — App usage map (iOS core scope)
+# Agency Social Dashboard — App usage map (iOS core scope)
 
 Grounded in the live Next.js app under this repo. Primary sources:
 
