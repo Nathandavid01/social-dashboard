@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Loader2, AlertCircle, PlayCircle } from 'lucide-react'
+import { Loader2, AlertCircle, PlayCircle, VolumeX } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getFiltroIPreviewUrl } from '@/lib/actions/filtro-i'
-import { vistaEditor } from '@/lib/filtro-i/estado-ui'
+import { vistaEditor, sinAudio } from '@/lib/filtro-i/estado-ui'
 import type { EstadoFiltroI } from '@/lib/filtro-i/pasos'
 import type { ErrorDetectado } from '@/lib/llm/grok-vision-core'
 import { TablaErrores } from './tabla-errores'
@@ -24,6 +24,8 @@ export interface AnalisisResumen {
   clientName: string
   status: EstadoFiltroI
   errores: ErrorDetectado[]
+  /** Dónde se paró. Con status distinto de 'error' es un aviso, no un fallo. */
+  errorPaso: string | null
   errorMensaje: string | null
 }
 
@@ -33,6 +35,7 @@ const POLL_MS = 5000
 export function AnalisisCard({ analisis }: { analisis: AnalisisResumen }) {
   const [status, setStatus] = useState<EstadoFiltroI>(analisis.status)
   const [errores, setErrores] = useState<ErrorDetectado[]>(analisis.errores)
+  const [errorPaso, setErrorPaso] = useState<string | null>(analisis.errorPaso)
   const [errorMensaje, setErrorMensaje] = useState<string | null>(analisis.errorMensaje)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [cargandoVideo, setCargandoVideo] = useState(false)
@@ -51,6 +54,7 @@ export function AnalisisCard({ analisis }: { analisis: AnalisisResumen }) {
         if (!vivo) return
         setStatus(data.status as EstadoFiltroI)
         setErrores((data.errores ?? []) as ErrorDetectado[])
+        setErrorPaso(data.error_paso ?? null)
         setErrorMensaje(data.error_mensaje ?? null)
       } catch {
         // Un fallo de red puntual no cambia nada: el siguiente tick reintenta.
@@ -118,7 +122,21 @@ export function AnalisisCard({ analisis }: { analisis: AnalisisResumen }) {
           {errorMensaje ?? 'El análisis falló.'}
         </p>
       ) : vista.terminado ? (
-        <TablaErrores errores={errores} />
+        <>
+          {/* Una tabla hecha sin oír el audio parece completa y no lo es: le
+              faltan justo los subtítulos bien escritos que dicen otra cosa. */}
+          {sinAudio(status, errorPaso) && (
+            <p className="flex items-start gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-[12px] leading-snug">
+              <VolumeX className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+              <span>
+                <strong className="font-semibold">Revisado sin audio.</strong> Se comprobó
+                la ortografía de lo que se ve en pantalla, pero no se pudo comparar contra
+                lo que se escucha.
+              </span>
+            </p>
+          )}
+          <TablaErrores errores={errores} />
+        </>
       ) : (
         <p className="text-[12px] text-muted-foreground">
           Revisando el video. Puedes cerrar esto: cuando vuelvas estará aquí.

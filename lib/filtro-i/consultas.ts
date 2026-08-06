@@ -21,6 +21,7 @@ interface FilaCruda {
   video_id: string
   status: EstadoFiltroI
   errores: ErrorDetectado[] | null
+  error_paso: string | null
   error_mensaje: string | null
   caption_base?: string | null
   caption_final?: string | null
@@ -35,6 +36,8 @@ export interface AnalisisFiltroI {
   clientId: string | null
   status: EstadoFiltroI
   errores: ErrorDetectado[]
+  /** Dónde se paró. Con status distinto de 'error' es un aviso, no un fallo. */
+  errorPaso: string | null
   errorMensaje: string | null
 }
 
@@ -54,6 +57,7 @@ function mapear(f: FilaCruda): AnalisisFiltroI {
     clientId: f.idea?.client_id ?? null,
     status: f.status,
     errores: f.errores ?? [],
+    errorPaso: f.error_paso,
     errorMensaje: f.error_mensaje,
   }
 }
@@ -65,7 +69,7 @@ export async function cargarAnalisisFiltroI(
 ): Promise<AnalisisFiltroI[]> {
   const { data, error } = await supabase
     .from('filtro_i_analisis')
-    .select(`id, video_id, status, errores, error_mensaje, ${IDEA}`)
+    .select(`id, video_id, status, errores, error_paso, error_mensaje, ${IDEA}`)
     .order('created_at', { ascending: false })
     .limit(opts.limit ?? 50)
 
@@ -80,7 +84,7 @@ export async function cargarAnalisisGrokIng(
 ): Promise<AnalisisGrokIng[]> {
   const { data, error } = await supabase
     .from('filtro_i_analisis')
-    .select(`id, video_id, status, errores, error_mensaje, caption_base, caption_final, ${IDEA}`)
+    .select(`id, video_id, status, errores, error_paso, error_mensaje, caption_base, caption_final, ${IDEA}`)
     .order('created_at', { ascending: false })
     .limit(opts.limit ?? 50)
 

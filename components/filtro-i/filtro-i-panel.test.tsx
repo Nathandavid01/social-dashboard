@@ -18,6 +18,7 @@ const analisis = (over: Partial<AnalisisResumen> = {}): AnalisisResumen => ({
   errores: [
     { texto_incorrecto: 'vamos playa', correccion: "vamos pa'llá", tipo: 'Transcripción', momento: '4.8s' },
   ],
+  errorPaso: null,
   errorMensaje: null,
   ...over,
 })
@@ -75,6 +76,28 @@ describe('FiltroIPanel', () => {
     render(<FiltroIPanel clients={[]} analisis={[]} />)
     expect(screen.queryByTestId('entregar')).toBeNull()
     expect(screen.getByText(/no tienes clientes asignados/i)).toBeInTheDocument()
+  })
+
+  /**
+   * Un fallo de transcripción no mata el análisis — Grok revisa igual lo que
+   * ve —, pero la tabla resultante NO cachea los subtítulos que dicen otra
+   * cosa de la que se dijo. Si eso no se avisa, parece completa y no lo es.
+   */
+  it('avisa cuando la tabla se hizo sin oír el audio', () => {
+    render(
+      <FiltroIPanel
+        clients={clientes}
+        analisis={[analisis({ status: 'listo', errorPaso: 'transcribir' })]}
+      />,
+    )
+    expect(screen.getByText(/revisado sin audio/i)).toBeInTheDocument()
+    // La tabla sigue estando: lo que se pudo revisar, se revisó.
+    expect(screen.getByText('vamos playa')).toBeInTheDocument()
+  })
+
+  it('con audio no mete un aviso que no toca', () => {
+    render(<FiltroIPanel clients={clientes} analisis={[analisis()]} />)
+    expect(screen.queryByText(/revisado sin audio/i)).toBeNull()
   })
 
   it('sin nada entregado no dibuja la sección', () => {

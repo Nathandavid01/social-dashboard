@@ -33,6 +33,20 @@ const ETIQUETAS: Record<EstadoFiltroI, string> = {
   error: 'Falló',
 }
 
+/**
+ * El análisis terminó, pero sin haber podido oír el audio.
+ *
+ * Un fallo de transcripción no mata el análisis: Grok revisa igual la
+ * ortografía de lo que ve en pantalla. Lo que se pierde es la comparación
+ * audio↔subtítulo, y eso hay que decirlo — una tabla hecha sin oír el video
+ * parece completa y no lo es.
+ *
+ * `status === 'error'` gana: si el análisis murió, lo que manda es el error.
+ */
+export function sinAudio(status: EstadoFiltroI, errorPaso: string | null): boolean {
+  return errorPaso === 'transcribir' && status !== 'error'
+}
+
 export function vistaEditor(status: EstadoFiltroI): VistaEstado {
   return {
     etiqueta: ETIQUETAS[status] ?? 'En cola',

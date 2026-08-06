@@ -11,6 +11,7 @@ const item = (over: Partial<AnalisisGrokIng> = {}): AnalisisGrokIng => ({
   clientId: 'c1',
   status: 'listo',
   errores: [],
+  errorPaso: null,
   errorMensaje: null,
   captionBase: 'El equipo recorre la sucursal nueva.',
   captionFinal: '¡Llegamos a la nueva sucursal! 🔥 #LaGuira',

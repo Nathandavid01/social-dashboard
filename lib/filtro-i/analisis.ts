@@ -60,19 +60,41 @@ async function urlFirmadaObligatoria(key: string, queEs: string): Promise<string
   return url
 }
 
+/** Lo que un paso deja guardado, más un aviso no fatal si lo hubo. */
+interface ResultadoPaso {
+  cambios: Record<string, unknown>
+  /** Salió adelante, pero degradado. No corta el análisis. */
+  aviso?: string
+}
+
 /** Un paso. Devuelve lo que hay que guardar en la fila. */
 async function ejecutarPaso(
   paso: PasoFiltroI,
   fila: FilaAnalisis,
   supabase: SupabaseClient,
-): Promise<Record<string, unknown>> {
+): Promise<ResultadoPaso> {
   if (paso === 'transcribir') {
     const key = await claveDelVideo(supabase, fila.video_id)
     const url = await urlFirmadaObligatoria(key, 'del video')
-    const { segmentos } = await transcribirDesdeUrl(url)
-    // Un video mudo da []. Es un resultado, no un hueco: guardarlo es lo que
-    // evita que el reintento vuelva a transcribir para siempre.
-    return { transcripcion: segmentos }
+    try {
+      const { segmentos } = await transcribirDesdeUrl(url)
+      // Un video mudo da []. Es un resultado, no un hueco: guardarlo es lo que
+      // evita que el reintento vuelva a transcribir para siempre.
+      return { cambios: { transcripcion: segmentos } }
+    } catch (err) {
+      // NO se propaga. Sin audio se pierde la comparación audio↔subtítulo,
+      // pero Grok sigue pudiendo revisar ortografía, tildes y puntuación de lo
+      // que ve en pantalla. Tirar el análisis entero dejaría al editor sin la
+      // revisión que sí se podía hacer — y un video mudo caería igual aquí.
+      //
+      // El aviso viaja en error_paso/error_mensaje y la pantalla lo enseña
+      // (ver `sinAudio`): una tabla hecha sin oír el video parece completa y no
+      // lo es, así que callarlo sería peor que no analizarlo.
+      return {
+        cambios: { transcripcion: [] },
+        aviso: err instanceof Error ? err.message : 'No se pudo transcribir el audio',
+      }
+    }
   }
 
   if (paso === 'analizar') {
@@ -90,7 +112,7 @@ async function ejecutarPaso(
       prompt: buildFiltroIPrompt({ segmentos: fila.transcripcion ?? [], momentos }),
       imagenes: urls,
     })
-    return { errores, caption_base: captionBase, modelo_vision: modelo }
+    return { cambios: { errores, caption_base: captionBase, modelo_vision: modelo } }
   }
 
   // redactar
@@ -99,7 +121,7 @@ async function ejecutarPaso(
     ideaId: fila.idea_id,
     captionBase: fila.caption_base ?? '',
   })
-  return { caption_final: caption }
+  return { cambios: { caption_final: caption } }
 }
 
 /**
@@ -125,15 +147,25 @@ export async function procesarAnalisis(
 
     const paso = siguientePaso(fila)
     if (!paso) {
-      await supabase.from(TABLA).update({ status: 'listo', error_paso: null, error_mensaje: null }).eq('id', analisisId)
+      // Sin limpiar error_paso/error_mensaje: un fallo FATAL ya habría salido
+      // por el `return` de abajo, así que lo que quede aquí es un aviso no
+      // fatal (hoy solo el de "sin audio") y la pantalla lo necesita.
+      await supabase.from(TABLA).update({ status: 'listo' }).eq('id', analisisId)
       return { status: 'listo' }
     }
 
     await supabase.from(TABLA).update({ status: ESTADO_POR_PASO[paso] }).eq('id', analisisId)
 
     try {
-      const cambios = await ejecutarPaso(paso, fila, supabase)
-      await supabase.from(TABLA).update(cambios).eq('id', analisisId)
+      const { cambios, aviso } = await ejecutarPaso(paso, fila, supabase)
+      // El aviso se escribe solo en el primer paso, que es el único que hoy
+      // puede degradar. Así un reintento parte de limpio y los pasos de después
+      // no pisan lo que dejó este.
+      const marca =
+        paso === 'transcribir'
+          ? { error_paso: aviso ? 'transcribir' : null, error_mensaje: aviso ?? null }
+          : {}
+      await supabase.from(TABLA).update({ ...cambios, ...marca }).eq('id', analisisId)
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : 'Error desconocido'
       await supabase
