@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.95 — 2026-08-06
+
+- **La AI revisa los subtítulos del video y escribe el caption sola al subirlo.** Al subir el video editado, Grok mira varias escenas y avisa en la tarjeta si hay errores de ortografía en los textos en pantalla ("⚠ 2 posibles errores en subtítulos", con el detalle y el minuto). Es solo un aviso — nunca bloquea la subida ni el flujo. Y si la tarjeta no tenía caption, se genera automáticamente: con el tema que escribió el equipo, o, si no hay, con lo que la AI vio en el video.
+
 ## v2.94 — 2026-07-04
 
 - **La página de revisión ahora confirma la decisión del cliente con claridad.** En vez de solo un aviso que desaparece, arriba de los botones sale un banner con el estado: mientras está pendiente dice "Tu opinión sobre este video"; al **aprobar** cambia a **"✓ Aprobaste este video · ¡Gracias!"** (verde), y al **pedir cambios** a **"Pediste cambios · el equipo subirá una nueva versión"** (ámbar) — con el nombre del cliente si lo puso. Una vez que vota, los botones se recogen detrás de un **"¿Cambiar tu decisión?"** (puede cambiarla hasta que venza el link). Se siente como una herramienta de agencia de verdad.
