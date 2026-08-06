@@ -1,25 +1,25 @@
 'use client'
 
 import { Filter } from 'lucide-react'
-import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
+import { EntregarVideo } from './entregar-video'
+import { AnalisisCard, type AnalisisResumen } from './analisis-card'
 
 /**
- * Filtro I — enviar el video, y nada más.
+ * Filtro I — entregar el video y ver qué encontró la revisión automática.
  *
- * Área aparte de Revisión y Entregas por decisión de producto: no comparte
- * ruta, ni permiso, ni componentes con ellas. Reutiliza `EditorSubmitSlot`
- * (que vive en components/pipeline y es el mecanismo de subida, no una
- * pantalla), pero no importa nada de components/entregas — así tocar Filtro I
- * no puede romper el flujo del editor, ni al revés.
+ * Área aparte de Revisión y Entregas: no comparte ruta, ni permiso, ni
+ * componentes con ellas. Lo que reutiliza (`SubmitVideoCard`, la cadena de
+ * subida) vive en components/pipeline y lib/, no en components/entregas.
  *
- * Deliberadamente NO trae el tablero por etapas ni la lista de devueltos: eso
- * es el trabajo de Revisión, y duplicarlo aquí crearía dos sitios donde mirar
- * lo mismo.
+ * Deliberadamente NO enseña el caption. El editor entrega y recibe su tabla de
+ * errores; el caption vive en Grok-ing, que es otra área y otro permiso.
  */
 export function FiltroIPanel({
   clients,
+  analisis,
 }: {
   clients: { id: string; name: string }[]
+  analisis: AnalisisResumen[]
 }) {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-5 p-4">
@@ -31,7 +31,7 @@ export function FiltroIPanel({
           <div className="min-w-0">
             <h1 className="truncate text-[15px] font-semibold tracking-tight">Filtro I</h1>
             <p className="truncate text-xs text-muted-foreground">
-              Sube el video y dinos para cuándo es.
+              Sube el video y te decimos qué corregir.
             </p>
           </div>
         </div>
@@ -45,9 +45,18 @@ export function FiltroIPanel({
           Pídele a tu supervisor que te asigne uno.
         </p>
       ) : (
-        // `dia` ya no decide nada — cada video lleva su propia fecha —, pero el
-        // slot sigue pidiéndolo por firma.
-        <EditorSubmitSlot clients={clients} dia={1} />
+        <EntregarVideo clients={clients} />
+      )}
+
+      {analisis.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-[13px] font-semibold">Lo que has entregado</h2>
+          <ul className="space-y-2">
+            {analisis.map((a) => (
+              <AnalisisCard key={a.id} analisis={a} />
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   )

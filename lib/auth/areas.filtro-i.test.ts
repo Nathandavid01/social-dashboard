@@ -68,3 +68,53 @@ describe('Filtro I como área propia', () => {
     expect(alcanzables.has('/filtro-i')).toBe(false)
   })
 })
+
+/**
+ * Grok-ing — donde vive el caption que sale del análisis de Filtro I.
+ *
+ * La regla de producto es que EL EDITOR NO VE EL CAPTION. Eso no se sostiene
+ * escondiendo un componente: se sostiene aquí, en que son dos permisos y el
+ * editor solo tiene uno. Si alguien fusionara los permisos "para simplificar",
+ * estos tests lo paran.
+ */
+describe('Grok-ing como área separada de Filtro I', () => {
+  const area = AREAS.find((a) => a.href === '/grok-ing')
+
+  it('está registrada con su etiqueta y su permiso propio', () => {
+    expect(area?.label).toBe('Grok-ing')
+    expect(area?.permission).toBe('grok_ing.read')
+    expect(area?.permission).not.toBe('filtro_i.read')
+  })
+
+  it('sale en el sidebar', () => {
+    expect(navItems.find((n) => n.href === '/grok-ing')?.permission).toBe('grok_ing.read')
+  })
+
+  /** El punto entero de que sean dos áreas. */
+  it('el editor entrega en Filtro I pero NO llega a Grok-ing', () => {
+    expect(hasPermission('editor', 'filtro_i.read')).toBe(true)
+    expect(hasPermission('editor', 'grok_ing.read')).toBe(false)
+    expect(canAccessPath('/grok-ing', 'editor', null)).toBe(false)
+  })
+
+  it('el diseñador tampoco', () => {
+    expect(hasPermission('disenador', 'filtro_i.read')).toBe(true)
+    expect(hasPermission('disenador', 'grok_ing.read')).toBe(false)
+  })
+
+  it('lo alcanzan owner, supervisor y copy — quienes trabajan el caption', () => {
+    for (const role of ['owner', 'supervisor', 'copy'] as const) {
+      expect(hasPermission(role, 'grok_ing.read'), role).toBe(true)
+    }
+  })
+
+  it('copy ve el caption pero no la pantalla de entrega', () => {
+    expect(hasPermission('copy', 'grok_ing.read')).toBe(true)
+    expect(hasPermission('copy', 'filtro_i.read')).toBe(false)
+  })
+
+  it('conceder una no arrastra la otra', () => {
+    expect(effectiveAreaHrefs('editor', ['/filtro-i']).has('/grok-ing')).toBe(false)
+    expect(effectiveAreaHrefs('copy', ['/grok-ing']).has('/filtro-i')).toBe(false)
+  })
+})

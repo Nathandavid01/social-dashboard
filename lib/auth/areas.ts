@@ -62,6 +62,11 @@ export const AREAS: Area[] = [
   // Entregas: tiene su ruta, su permiso y su pantalla, y ninguna de las otras
   // dos sabe que existe. Quitarle Filtro I a alguien no le quita las otras.
   { href: '/filtro-i',           label: 'Filtro I',        permission: 'filtro_i.read',      group: 'Trabajo' },
+  // Grok-ing — el caption que sale del análisis de Filtro I. Área aparte porque
+  // la ve gente distinta: el editor entrega y ve sus errores en Filtro I, el
+  // caption es de quien lo trabaja. Por ahora solo enseña el caption; más
+  // adelante se integrará con Copy.
+  { href: '/grok-ing',           label: 'Grok-ing',        permission: 'grok_ing.read',      group: 'Trabajo' },
   { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },

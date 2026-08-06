@@ -43,6 +43,15 @@ export interface IdeaCaptionPromptInput {
   feedback?: string | null
   /** The previous caption being revised — shown to the model so it improves on it. */
   previousCaption?: string | null
+  /**
+   * Lo que el video YA EDITADO realmente dice y muestra, según Filtro I
+   * (transcripción del audio + lectura de los frames).
+   *
+   * Manda sobre el brief: el brief es lo que se planeó grabar, esto es lo que
+   * se grabó. Opcional — los llamadores que generan el caption ANTES de grabar
+   * no lo tienen y su prompt no cambia.
+   */
+  captionBase?: string | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -77,6 +86,10 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     filled(visualBrief) && `- Brief visual (qué grabar): ${visualBrief}`,
     filled(captionAngle) && `- Ángulo del caption: ${captionAngle}`,
     filled(hashtags) && `- Hashtags sugeridos: ${hashtags}`,
+    // Va el último a propósito: lo que de verdad salió, después de lo que se
+    // pensó grabar. Si difieren, manda esto.
+    filled(input.captionBase) &&
+      `- CONTENIDO REAL DEL VIDEO YA EDITADO (transcrito del audio y leído de la imagen — si contradice al brief, manda lo que dice el video): ${input.captionBase!.trim()}`,
   ]
     .filter(Boolean)
     .join('\n')

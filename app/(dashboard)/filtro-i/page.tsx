@@ -1,18 +1,18 @@
 import { requirePermission, getCurrentRole } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
-import { clientsForUser } from '@/lib/utils/client-visibility'
+import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
+import { cargarAnalisisFiltroI } from '@/lib/filtro-i/consultas'
 import { FiltroIPanel } from '@/components/filtro-i/filtro-i-panel'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * Filtro I — el área de envío de video, independiente de /revision y /entregas.
+ * Filtro I — el editor entrega el video y recibe su tabla de errores.
  *
- * No lee de ninguna de las dos ni escribe en sus tablas de estado: solo trae la
- * cartera de la persona para poblar el desplegable del formulario. El envío en
- * sí lo hace el mismo mecanismo de subida que ya existe (EditorSubmitSlot), sin
- * copiarlo ni modificarlo.
+ * Independiente de /revision y /entregas: no lee ni escribe nada suyo. El
+ * caption que sale del análisis NO se trae aquí (ver `cargarAnalisisFiltroI`);
+ * vive en /grok-ing, con su propio permiso.
  */
 export default async function FiltroIPage() {
   await requirePermission('filtro_i.read')
@@ -28,18 +28,25 @@ export default async function FiltroIPage() {
     supabase.auth.getUser(),
   ])
 
-  // Solo los clientes que esta persona trabaja. Es filtro de conveniencia, no
-  // control de acceso — ver la nota en client-visibility.ts.
-  const misClientes = clientsForUser(
-    role,
-    user?.id ?? null,
-    (activeClientsRaw ?? []).map((c) => ({
-      id: c.id,
-      name: c.name,
-      assigned_to: c.assigned_to ?? null,
-      assigned_designer: c.assigned_designer ?? null,
-    })),
-  ).map((c) => ({ id: c.id, name: c.name }))
+  const asignables = (activeClientsRaw ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    assigned_to: c.assigned_to ?? null,
+    assigned_designer: c.assigned_designer ?? null,
+  }))
 
-  return <FiltroIPanel clients={misClientes} />
+  // Solo los clientes que esta persona trabaja. Filtro de conveniencia, no
+  // control de acceso — ver la nota en client-visibility.ts.
+  const misClientes = clientsForUser(role, user?.id ?? null, asignables).map((c) => ({
+    id: c.id,
+    name: c.name,
+  }))
+
+  // Devuelve [] mientras la migración 0056 no esté aplicada, para que entregar
+  // videos siga funcionando en vez de romper la página.
+  const todos = await cargarAnalisisFiltroI(supabase)
+  const permitidos = visibleClientIds(role, user?.id ?? null, asignables)
+  const mios = permitidos === null ? todos : todos.filter((a) => permitidos.has(a.clientId ?? ''))
+
+  return <FiltroIPanel clients={misClientes} analisis={mios} />
 }

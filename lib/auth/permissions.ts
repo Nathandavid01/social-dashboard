@@ -57,6 +57,10 @@ export type Permission =
   // propio a propósito: reutilizar 'revision.read' volvería a atar las tres
   // pantallas y quitarle una a alguien le quitaría las otras dos.
   | 'filtro_i.read'
+  // Grok-ing — donde vive el caption que sale de Filtro I. Permiso SEPARADO de
+  // filtro_i.read a propósito: el editor entrega el video y ve sus errores,
+  // pero no ve el caption. Esa separación es el permiso, no la pantalla.
+  | 'grok_ing.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -97,7 +101,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
-    'planning.read', 'entregas.read', 'revision.read', 'filtro_i.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'filtro_i.read', 'grok_ing.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -147,6 +151,8 @@ const RBAC: Record<UserRole, RolePerms> = {
     'clients.read',
     'ideas.read',
     'entregas.read', 'revision.read',
+    // Es quien va a trabajar el caption cuando Grok-ing se integre con Copy.
+    'grok_ing.read',
     'captions.use', 'captions.edit',
     'metricool.read', 'posting.read',
     'cadence.read',
