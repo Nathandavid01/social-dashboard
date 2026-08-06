@@ -13,6 +13,9 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { getR2DownloadUrl, getR2PreviewUrl, getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { captureVideoFrames } from '@/lib/utils/video-frames'
+import { analyzeUploadedVideo } from '@/lib/actions/scene-check'
+import { SceneCheckBadge } from '@/components/video-pipeline/scene-check-badge'
 import type { Client, ContentIdeaType, ContentIdeaVideo } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
 
@@ -74,7 +77,7 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
       </div>
 
       {/* Upload edited */}
-      <EditedUploader ideaId={video.id} />
+      <EditedUploader ideaId={video.id} edited={video.videos.edited} />
     </div>
   )
 }
@@ -126,13 +129,40 @@ function MaterialRow({ video }: { video: ContentIdeaVideo }) {
   )
 }
 
-function EditedUploader({ ideaId }: { ideaId: string }) {
+function EditedUploader({ ideaId, edited }: { ideaId: string; edited: ContentIdeaVideo[] }) {
   const canUpload = useHasPermission('video.upload')
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { toast } = useToast()
   const [progress, setProgress] = useState<number | null>(null)
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  // Último archivo editado subido en esta sesión — permite "Reintentar" el
+  // análisis AI sin volver a subir el video. Se pierde al recargar la
+  // página (comportamiento definido en el spec).
+  const lastFileRef = useRef<{ file: File; videoId: string } | null>(null)
+
+  // Análisis AI en background — la subida ya quedó confirmada antes de esto.
+  // captureVideoFrames devuelve [] ante cualquier fallo; analyzeUploadedVideo
+  // nunca lanza. Nada de esto puede tumbar el flujo de subida.
+  async function analyzeFile(file: File, videoId: string) {
+    setAnalyzing(true)
+    try {
+      const frames = await captureVideoFrames(file)
+      await analyzeUploadedVideo({ videoId, ideaId, frames })
+    } catch {
+      // best-effort: el reporte queda como esté; la tarjeta muestra "no disponible"
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
+  async function retryAnalysis() {
+    const last = lastFileRef.current
+    if (!last) return
+    await analyzeFile(last.file, last.videoId)
+    router.refresh()
+  }
 
   async function uploadOne(file: File) {
     const slot = await getR2UploadUrl({ ideaId, kind: 'edited', fileName: file.name, contentType: file.type || 'video/mp4' })
@@ -148,6 +178,10 @@ function EditedUploader({ ideaId }: { ideaId: string }) {
     })
     const res = await registerR2Video({ ideaId, kind: 'edited', key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4' })
     if (res.error) throw new Error(res.error)
+    if (res.id) {
+      lastFileRef.current = { file, videoId: res.id }
+      await analyzeFile(file, res.id)
+    }
   }
 
   async function handleFiles(files: FileList | File[] | null) {
@@ -170,39 +204,89 @@ function EditedUploader({ ideaId }: { ideaId: string }) {
     if (done > 0) { toast({ title: done === 1 ? 'Video editado subido' : `${done} videos editados subidos` }); router.refresh() }
   }
 
-  if (!canUpload) return null
+  const editedActive = edited.filter((v) => ACTIVE.has(v.status))
+
+  const editedList = editedActive.length > 0 && (
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Editado</p>
+      <div className="space-y-1.5">
+        {editedActive.map((v) => (
+          <EditedRow
+            key={v.id}
+            video={v}
+            isRetryable={lastFileRef.current?.videoId === v.id}
+            analyzing={analyzing}
+            onRetry={retryAnalysis}
+          />
+        ))}
+      </div>
+    </div>
+  )
+
+  if (!canUpload) return editedList || null
 
   if (progress !== null) {
     return (
-      <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-3">
-        <div className="mb-2 flex items-center justify-between text-xs font-medium">
-          <span>Subiendo editado…{batch && batch.total > 1 ? ` (${batch.done + 1} de ${batch.total})` : ''}</span>
-          <span className="tabular-nums">{progress}%</span>
+      <>
+        {editedList}
+        <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-3">
+          <div className="mb-2 flex items-center justify-between text-xs font-medium">
+            <span>Subiendo editado…{batch && batch.total > 1 ? ` (${batch.done + 1} de ${batch.total})` : ''}</span>
+            <span className="tabular-nums">{progress}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-background/60">
+            <div className="h-full bg-purple-500 transition-all" style={{ width: `${progress}%` }} />
+          </div>
+          {analyzing && <span className="text-xs text-muted-foreground">Analizando subtítulos…</span>}
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-background/60">
-          <div className="h-full bg-purple-500 transition-all" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
+      </>
     )
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => fileRef.current?.click()}
-      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-primary/5') }}
-      onDragLeave={(e) => e.currentTarget.classList.remove('border-primary', 'bg-primary/5')}
-      onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary', 'bg-primary/5'); handleFiles(e.dataTransfer.files) }}
-      className="group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all hover:border-primary hover:bg-primary/5"
-    >
-      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-purple-500/10 text-purple-600">
-        <Upload className="h-4 w-4" />
+    <>
+      {editedList}
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-primary/5') }}
+        onDragLeave={(e) => e.currentTarget.classList.remove('border-primary', 'bg-primary/5')}
+        onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary', 'bg-primary/5'); handleFiles(e.dataTransfer.files) }}
+        className="group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all hover:border-primary hover:bg-primary/5"
+      >
+        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-purple-500/10 text-purple-600">
+          <Upload className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">Subir video editado</p>
+          <p className="text-[10px] text-muted-foreground">Versión final · arrastra uno o varios o haz click</p>
+        </div>
+        <input ref={fileRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      </button>
+    </>
+  )
+}
+
+function EditedRow({
+  video, isRetryable, analyzing, onRetry,
+}: {
+  video: ContentIdeaVideo
+  isRetryable: boolean
+  analyzing: boolean
+  onRetry: () => void
+}) {
+  const showRetry = isRetryable && (video.scene_check?.status === 'error' || video.scene_check?.status === 'skipped')
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border bg-muted/30 px-2 py-1.5">
+      <span className="min-w-0 flex-1 truncate text-xs">{video.name}</span>
+      <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+        <SceneCheckBadge report={video.scene_check} />
+        {showRetry && (
+          <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={onRetry} disabled={analyzing}>
+            Reintentar
+          </Button>
+        )}
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="font-medium">Subir video editado</p>
-        <p className="text-[10px] text-muted-foreground">Versión final · arrastra uno o varios o haz click</p>
-      </div>
-      <input ref={fileRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-    </button>
+    </div>
   )
 }
