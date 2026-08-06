@@ -8,7 +8,7 @@ import type { SceneCheckIssue } from './scene-check-types'
 /** Modelo con visión: el default de captions también acepta imágenes. */
 export const SCENE_CHECK_MODEL = 'grok-4-1-fast-non-reasoning'
 
-export function sceneCheckModelId(env: { GROK_SCENE_CHECK_MODEL?: string }): string {
+export function sceneCheckModelId(env: { GROK_SCENE_CHECK_MODEL?: string; [key: string]: string | undefined }): string {
   return (env.GROK_SCENE_CHECK_MODEL ?? '').trim() || SCENE_CHECK_MODEL
 }
 

@@ -1,4 +1,4 @@
-import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History } from 'lucide-react'
+import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History, SpellCheck2 } from 'lucide-react'
 import type { ContentIdeaActivityAction } from '@/lib/supabase/types'
 
 /**
@@ -34,6 +34,14 @@ export const ACTION_META: Record<
     icon: ArrowRight,
     tone: 'text-zinc-500',
     verb: (m) => `cambió el estado${m.status ? ` a “${m.status}”` : ''}`,
+  },
+  scene_check_completed: {
+    icon: SpellCheck2,
+    tone: 'text-teal-500',
+    verb: (m) =>
+      m.status === 'issues'
+        ? `revisó el video con IA (${m.issueCount ?? '?'} error${m.issueCount === 1 ? '' : 'es'})`
+        : 'revisó el video con IA',
   },
 }
 

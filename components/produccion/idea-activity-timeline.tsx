@@ -1,4 +1,4 @@
-import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History } from 'lucide-react'
+import { Video, Sparkles, Pencil, Upload, Send, Rocket, ClipboardList, ArrowRight, History, SpellCheck2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { ContentIdeaActivity, ContentIdeaActivityAction } from '@/lib/supabase/types'
@@ -15,6 +15,7 @@ const ACTION_META: Record<
   posted_to_metricool: { icon: Rocket,      tone: 'text-sky-500',    verb: (m) => `publicó en Metricool${Array.isArray(m.platforms) ? ` (${(m.platforms as string[]).join(', ')})` : ''}` },
   assigned:          { icon: ClipboardList, tone: 'text-blue-500',   verb: () => 'asignó a producción' },
   status_changed:    { icon: ArrowRight,    tone: 'text-zinc-500',   verb: (m) => `cambió el estado${m.status ? ` a “${m.status}”` : ''}` },
+  scene_check_completed: { icon: SpellCheck2, tone: 'text-teal-500', verb: (m) => m.status === 'issues' ? `revisó el video con IA (${m.issueCount ?? '?'} error${m.issueCount === 1 ? '' : 'es'})` : 'revisó el video con IA' },
 }
 
 export function IdeaActivityTimeline({ activities }: { activities: ContentIdeaActivity[] }) {

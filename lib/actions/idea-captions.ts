@@ -20,8 +20,10 @@ import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 export async function generateIdeaCaption(
   ideaId: string,
   /** Optional feedback to revise a prior attempt — the user's instructions
-   *  ("más corto", "menos emojis") + the caption being revised. */
-  opts?: { feedback?: string | null; previousCaption?: string | null },
+   *  ("más corto", "menos emojis") + the caption being revised. Also accepts
+   *  `topicOverride`: used as the effective hook when the idea has none yet
+   *  (e.g. the topic Grok's scene-check inferred from the uploaded video). */
+  opts?: { feedback?: string | null; previousCaption?: string | null; topicOverride?: string | null },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -41,7 +43,8 @@ export async function generateIdeaCaption(
 
   if (!idea) return { error: 'Idea no encontrada' }
 
-  if (!isIdeaReadyForCaption(idea)) {
+  const effectiveHook = isIdeaReadyForCaption(idea) ? idea.hook : (opts?.topicOverride ?? null)
+  if (!effectiveHook || !effectiveHook.trim()) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
 
@@ -74,7 +77,7 @@ export async function generateIdeaCaption(
 
   const prompt = buildIdeaCaptionPrompt({
     title: idea.title,
-    hook: idea.hook,
+    hook: effectiveHook,
     visualBrief: idea.visual_brief,
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,

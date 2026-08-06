@@ -443,6 +443,7 @@ export type ContentIdeaActivityAction =
   | 'caption_generated'
   | 'caption_saved'
   | 'video_uploaded'
+  | 'scene_check_completed'
   | 'published'
   | 'posted_to_metricool'
   | 'assigned'
