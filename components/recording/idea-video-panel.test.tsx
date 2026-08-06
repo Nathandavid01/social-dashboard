@@ -50,6 +50,7 @@ function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
     uploaded_by: 'user-1',
     status: 'uploaded',
     error_message: null,
+    scene_check: null,
     uploaded_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }

@@ -29,7 +29,7 @@ function rawFile(): ContentIdeaVideo {
     id: 'f1', idea_id: 'i', kind: 'raw', name: 'clip.mp4', drive_file_id: null,
     drive_view_link: null, drive_thumb_url: null, storage_provider: 'r2', mime_type: 'video/mp4',
     size_bytes: 1000, duration_sec: 42, notes: null, uploaded_by: null, status: 'uploaded',
-    error_message: null, uploaded_at: '2026-06-01', updated_at: '2026-06-01',
+    error_message: null, scene_check: null, uploaded_at: '2026-06-01', updated_at: '2026-06-01',
   }
 }
 

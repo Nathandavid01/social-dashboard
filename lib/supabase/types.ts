@@ -1,3 +1,5 @@
+import type { SceneCheckReport } from '@/lib/llm/scene-check-types'
+
 export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'team_member'
 export type UserStatus = 'active' | 'inactive'
 export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
@@ -85,6 +87,7 @@ export interface ContentIdeaVideo {
   uploaded_by: string | null
   status: ContentIdeaVideoStatus
   error_message: string | null
+  scene_check: SceneCheckReport | null
   uploaded_at: string
   updated_at: string
 }

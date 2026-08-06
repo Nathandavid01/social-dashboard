@@ -30,6 +30,7 @@ function rawFile(): ContentIdeaVideo {
     uploaded_by: null,
     status: 'uploaded',
     error_message: null,
+    scene_check: null,
     uploaded_at: '2026-06-01',
     updated_at: '2026-06-01',
   }
