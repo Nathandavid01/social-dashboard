@@ -21,7 +21,7 @@ export function IdeaStudio({
   ideaId: string
   idea: Pick<
     ContentIdea,
-    'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'title'
+    'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'
   >
   videos: ContentIdeaVideo[]
   publicEnabled?: boolean
@@ -67,6 +67,7 @@ export function IdeaStudio({
           <IdeaCaptionEditor
             ideaId={ideaId}
             initialCaption={savedCaption}
+            initialDraft={idea.caption_draft}
             hook={hook}
             visualBrief={visualBrief}
             captionAngle={captionAngle}

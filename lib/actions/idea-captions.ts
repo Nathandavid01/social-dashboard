@@ -15,7 +15,12 @@ import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 /**
  * Generate a caption for a specific idea, grounded in the idea's hook +
  * caption_angle + suggested hashtags AND the client's brand voice.
- * Saves the result to content_ideas.generated_caption.
+ *
+ * Saves the result to `content_ideas.caption_draft` — a DRAFT, deliberately not
+ * `generated_caption`. `ideaStage()` sends any approved video with a non-empty
+ * `generated_caption` to Publicación, so writing that field here meant pressing
+ * "Generar con IA" shipped the video out of Copy with nobody having read,
+ * edited or approved the text. Only `saveIdeaCaption` promotes the draft.
  */
 export async function generateIdeaCaption(
   ideaId: string,
@@ -98,13 +103,10 @@ export async function generateIdeaCaption(
 
     if (!caption) return { error: 'La IA no devolvió caption' }
 
+    // Draft only. The stage-driving field stays untouched until a human saves.
     const { error: updErr } = await supabase
       .from('content_ideas')
-      .update({
-        generated_caption: caption,
-        caption_platform: null,
-        caption_generated_at: new Date().toISOString(),
-      })
+      .update({ caption_draft: caption })
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
@@ -121,6 +123,13 @@ export async function generateIdeaCaption(
   }
 }
 
+/**
+ * Promote the caption a human settled on: it becomes `generated_caption` (the
+ * field the pipeline reads) and the draft is cleared so no stale AI text is
+ * left behind to reappear later.
+ *
+ * This — not generation — is what moves an approved video to Publicación.
+ */
 export async function saveIdeaCaption(
   ideaId: string,
   caption: string,
@@ -131,11 +140,17 @@ export async function saveIdeaCaption(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
+  // An empty save would clear `generated_caption` and silently drag the video
+  // back from Publicación to Copy — refuse instead.
+  const clean = caption.trim()
+  if (!clean) return { error: 'El caption no puede ir vacío' }
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('content_ideas')
     .update({
-      generated_caption: caption,
+      generated_caption: clean,
+      caption_draft: null,
       caption_platform: null,
       caption_generated_at: new Date().toISOString(),
     })

@@ -1,0 +1,82 @@
+/**
+ * La etapa Copy de /entregas: el overlay carga el borrador, y "Enviar a
+ * Publicación" es lo ÚNICO que promueve ese borrador a `generated_caption`
+ * (que es lo que `ideaStage()` mira para mover el video de columna).
+ */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const h = vi.hoisted(() => ({
+  updates: [] as Record<string, unknown>[],
+  client: { name: 'Gym X', caption_notes: 'Lun-Vie 6am', platforms: ['instagram'], default_platforms: [] },
+  ideas: [
+    {
+      id: 'i1',
+      title: 'Testimonio',
+      hook: 'Bajó 15 lb',
+      visual_brief: null,
+      caption_angle: null,
+      hashtags_suggestion: null,
+      generated_caption: null,
+      caption_draft: 'Borrador que escribió la IA',
+      publish_date: null,
+      videos: [],
+    },
+  ] as Record<string, unknown>[],
+}))
+
+vi.mock('@/lib/auth/server', () => ({
+  requirePermission: vi.fn(async () => {}),
+  currentUserHas: vi.fn(async () => true),
+}))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({
+    from: (table: string) => ({
+      // `.eq()` encadena consigo mismo: clients hace .eq().single() y
+      // content_ideas hace .eq().eq().order().
+      select: () => {
+        const chain: Record<string, unknown> = {
+          single: async () => ({ data: h.client, error: null }),
+          order: async () => ({ data: h.ideas, error: null }),
+        }
+        chain.eq = () => chain
+        return chain
+      },
+      update: (payload: Record<string, unknown>) => {
+        h.updates.push({ __table: table, ...payload })
+        return { eq: async () => ({ error: null }) }
+      },
+    }),
+  }),
+}))
+
+import { getEntregaCopyVideos, saveCopyAndSchedule } from './entregas-copy'
+
+beforeEach(() => {
+  h.updates.length = 0
+})
+
+describe('getEntregaCopyVideos — el overlay recupera el borrador', () => {
+  it('devuelve caption_draft para que el copy generado no se pierda al recargar', async () => {
+    const res = await getEntregaCopyVideos('c1')
+    expect(res.data?.videos[0].caption_draft).toBe('Borrador que escribió la IA')
+    expect(res.data?.videos[0].generated_caption).toBeNull()
+  })
+})
+
+describe('saveCopyAndSchedule — promueve el borrador', () => {
+  it('escribe generated_caption con el texto final y limpia el borrador', async () => {
+    const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: 'Copy final del equipo', publishDate: '2026-09-01' })
+    expect(res.ok).toBe(true)
+    expect(h.updates).toHaveLength(1)
+    expect(h.updates[0].generated_caption).toBe('Copy final del equipo')
+    expect(h.updates[0].caption_draft).toBeNull()
+    expect(h.updates[0].publish_date).toBe('2026-09-01')
+  })
+
+  it('sigue rechazando el copy vacío', async () => {
+    const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: '  ', publishDate: null })
+    expect(res.error).toBeTruthy()
+    expect(h.updates).toHaveLength(0)
+  })
+})

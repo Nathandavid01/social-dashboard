@@ -70,9 +70,11 @@ export function CopyOverlay({
   // Reset the per-video fields whenever a different video comes on screen.
   useEffect(() => {
     setHook(current?.hook ?? '')
-    setCaption(current?.generated_caption ?? '')
+    // El caption guardado manda; si no hay, se recupera el borrador de la IA
+    // para que una recarga no lo tire.
+    setCaption(current?.generated_caption || current?.caption_draft || '')
     setPublishDate(current?.publishDate ?? '')
-  }, [current?.id, current?.hook, current?.generated_caption, current?.publishDate])
+  }, [current?.id, current?.hook, current?.generated_caption, current?.caption_draft, current?.publishDate])
 
   // Sign only the video on screen: getR2PreviewUrl firma por 1 hora, así que
   // firmar el lote entero de golpe daría enlaces muertos al llegar al final.
@@ -113,7 +115,12 @@ export function CopyOverlay({
       await saveClientCaptionNotes(clientId, notes)
       const res = await generateIdeaCaption(current.id)
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else if (res.caption) setCaption(res.caption)
+      else if (res.caption) {
+        // Borrador: queda en pantalla y en `caption_draft`. El video sigue en
+        // Copy hasta que alguien apriete "Enviar a Publicación".
+        setCaption(res.caption)
+        toast({ title: 'Borrador listo', description: 'Léelo y ajústalo — el video no se mueve hasta que lo envíes.' })
+      }
     } finally {
       setBusy(null)
     }
@@ -141,6 +148,9 @@ export function CopyOverlay({
   }
 
   const done = videos !== null && videos.length === 0
+  // Hay copy en pantalla que aún no es el del video: mientras se vea, el video
+  // sigue en Copy. Es la señal de que generar no envió nada.
+  const sinEnviar = !!caption.trim() && caption.trim() !== (current?.generated_caption ?? '').trim()
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
@@ -242,13 +252,20 @@ export function CopyOverlay({
                 {busy === 'generando'
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
-                {caption.trim() ? 'Regenerar con IA' : 'hola soy grok :)'}
+                {caption.trim() ? 'Regenerar con IA' : 'Escribir copy con IA'}
               </Button>
               </div>
             </section>
 
             <section className="space-y-2 rounded-xl border bg-card p-4">
-              <Label htmlFor="co-caption" className="text-[11px]">Copy final</Label>
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                <Label htmlFor="co-caption" className="min-w-0 text-[11px]">Copy final</Label>
+                {sinEnviar && (
+                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" /> Borrador — sin enviar
+                  </span>
+                )}
+              </div>
               <textarea
                 id="co-caption"
                 value={caption}

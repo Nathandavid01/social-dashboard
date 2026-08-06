@@ -40,6 +40,20 @@ describe('ideaStage', () => {
       ideaStage(idea({ status: 'producida', approval_status: 'approved', generated_caption: 'c' })),
     ).toBe('publication')
   })
+
+  /**
+   * La garantía del arreglo: generar con IA deja el texto en `caption_draft`, y
+   * un borrador NO mueve el video. Antes la generación escribía directo en
+   * `generated_caption` y el video salía de Copy solo, sin revisión humana.
+   */
+  it('un borrador de la IA deja el video en Copy — sólo el caption guardado lo mueve', () => {
+    const conBorrador = idea({
+      status: 'producida',
+      approval_status: 'approved',
+      caption_draft: 'lo que acaba de escribir la IA',
+    } as Partial<IdeaWithPipeline>)
+    expect(ideaStage(conBorrador)).toBe('copy')
+  })
 })
 
 describe('batchStage — moves together (least advanced active video)', () => {

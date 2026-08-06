@@ -143,3 +143,69 @@ describe('IdeaCaptionEditor — caption único', () => {
     await waitFor(() => expect(appendClientCaptionRule).toHaveBeenCalledWith({ ideaId: 'i1' }, 'menos emojis'))
   })
 })
+
+/**
+ * Generar es un BORRADOR. `onSaved` es la señal de "este caption ya es
+ * definitivo" — las pantallas que la escuchan sacan el video de la cola de Copy.
+ * Dispararla al generar es lo que mandaba videos a Publicación sin revisión.
+ */
+describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
+  it('generar NO avisa onSaved', async () => {
+    mockRole = 'editor'
+    const onSaved = vi.fn()
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /generar desde la idea/i }))
+    await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
+    expect(onSaved).not.toHaveBeenCalled()
+  })
+
+  it('regenerar con feedback tampoco avisa onSaved', async () => {
+    mockRole = 'editor'
+    const onSaved = vi.fn()
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption="Caption viejo" hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+    )
+    fireEvent.change(screen.getByPlaceholderText(/qué cambiar/i), { target: { value: 'más corto' } })
+    fireEvent.click(screen.getByRole('button', { name: /regenerar con feedback/i }))
+    await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
+    expect(onSaved).not.toHaveBeenCalled()
+  })
+
+  it('guardar SÍ avisa onSaved con el texto guardado', async () => {
+    mockRole = 'editor'
+    const onSaved = vi.fn()
+    saveIdeaCaption.mockClear()
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+    )
+    fireEvent.change(screen.getByPlaceholderText(/genera el caption/i), { target: { value: 'lo edité a mano' } })
+    fireEvent.click(screen.getByRole('button', { name: /guardar caption/i }))
+    await waitFor(() => expect(saveIdeaCaption).toHaveBeenCalledWith('i1', 'lo edité a mano'))
+    expect(onSaved).toHaveBeenCalledWith('lo edité a mano')
+  })
+
+  it('recupera el borrador guardado en la base y lo marca como sin guardar', () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor
+        ideaId="i1"
+        initialCaption={null}
+        initialDraft="borrador de ayer"
+        hook="Gancho"
+        visualBrief="Brief"
+      />,
+    )
+    expect(screen.getByDisplayValue('borrador de ayer')).toBeInTheDocument()
+    expect(screen.getByText(/sin guardar/i)).toBeInTheDocument()
+  })
+
+  it('un caption ya guardado no se anuncia como borrador', () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption="caption definitivo" hook="Gancho" visualBrief="Brief" />,
+    )
+    expect(screen.queryByText(/sin guardar/i)).not.toBeInTheDocument()
+  })
+})

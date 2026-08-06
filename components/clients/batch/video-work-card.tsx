@@ -149,6 +149,7 @@ export function VideoWorkCard({
       <IdeaCaptionEditor
         ideaId={video.id}
         initialCaption={savedCaption}
+        initialDraft={video.caption_draft}
         platforms={platforms}
         hook={hook}
         visualBrief={visualBrief}

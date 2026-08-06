@@ -23,7 +23,10 @@ export interface CopyVideoRow {
   visualBrief: string | null
   captionAngle: string | null
   hashtags: string | null
+  /** The caption a human saved. Non-empty = the video already left Copy. */
   generated_caption: string | null
+  /** Unreviewed AI text. Loaded back into the box so a reload doesn't lose it. */
+  caption_draft: string | null
   /** YYYY-MM-DD — the date the copywriter picked, if any. */
   publishDate: string | null
   platforms: string[]
@@ -54,7 +57,7 @@ export async function getEntregaCopyVideos(
       .single(),
     supabase
       .from('content_ideas')
-      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, publish_date, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
+      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, caption_draft, publish_date, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
       .eq('client_id', clientId)
       .eq('approval_status', 'approved')
       .order('approved_at', { ascending: true }),
@@ -83,6 +86,7 @@ export async function getEntregaCopyVideos(
         captionAngle: i.caption_angle,
         hashtags: i.hashtags_suggestion,
         generated_caption: i.generated_caption,
+        caption_draft: (i as { caption_draft?: string | null }).caption_draft ?? null,
         publishDate: (i.publish_date as string | null) ?? null,
         platforms: platforms as string[],
         }
@@ -150,6 +154,10 @@ export async function saveClientCaptionNotes(
  * to Publicación, and a video that lands there without a date gets clamped to
  * +24h. Two separate calls would leave a window where the board shows a date
  * that isn't the one the copywriter just chose.
+ *
+ * This is the ONLY path out of Copy. Generating with the AI leaves its text in
+ * `caption_draft`, which the board ignores — the copywriter has to look at it
+ * and press the button before the video moves.
  */
 export async function saveCopyAndSchedule(input: {
   ideaId: string
@@ -171,6 +179,9 @@ export async function saveCopyAndSchedule(input: {
     .from('content_ideas')
     .update({
       generated_caption: caption,
+      // El borrador ya cumplió: promovido, se limpia. Dejarlo haría que una
+      // recarga reviviera el texto de la IA encima del copy aprobado.
+      caption_draft: null,
       caption_generated_at: new Date().toISOString(),
       publish_date: input.publishDate || null,
     })

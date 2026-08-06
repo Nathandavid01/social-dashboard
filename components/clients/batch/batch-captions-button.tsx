@@ -11,11 +11,15 @@ import type { BatchVideo } from '@/lib/utils/batch-view'
 const filled = (s?: string | null) => !!s && s.trim().length > 0
 
 /**
- * One click → AI captions for every video in the batch that's missing one.
- * Uses the exact same engine + learning loop as the per-video editor
- * (generateIdeaCaption resolves client voice, approved examples and 👍/👎
- * server-side from the idea id). Runs SEQUENTIALLY to be gentle on the LLM
- * API and shows N/M progress on the button itself.
+ * One click → AI caption DRAFTS for every video in the batch that has neither a
+ * saved caption nor a pending draft. Uses the exact same engine + learning loop
+ * as the per-video editor (generateIdeaCaption resolves client voice, approved
+ * examples and 👍/👎 server-side from the idea id). Runs SEQUENTIALLY to be
+ * gentle on the LLM API and shows N/M progress on the button itself.
+ *
+ * Nothing here moves a video: the drafts land in `caption_draft`, and each card
+ * still needs a human to read it and press Guardar. Before that split, this one
+ * button shipped the whole batch to Publicación unreviewed.
  */
 export function BatchCaptionsButton({
   videos,
@@ -28,8 +32,10 @@ export function BatchCaptionsButton({
   const { toast } = useToast()
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
 
+  // Un borrador pendiente ya ocupa el hueco: regenerarlo encima pisaría el
+  // texto que alguien está por revisar.
   const missing = useMemo(
-    () => videos.filter((v) => v.status !== 'descartada' && !filled(v.generated_caption)),
+    () => videos.filter((v) => v.status !== 'descartada' && !filled(v.generated_caption) && !filled(v.caption_draft)),
     [videos],
   )
 
@@ -54,10 +60,10 @@ export function BatchCaptionsButton({
     }
     setProgress(null)
     if (ok > 0 && failed === 0) {
-      toast({ title: `${ok} captions generados`, description: 'Revísalos y ajústalos en cada tarjeta.' })
+      toast({ title: `${ok} borradores listos`, description: 'Ninguno se envió: revísalos y guárdalos tarjeta por tarjeta.' })
     } else if (ok > 0) {
       toast({
-        title: `${ok} captions generados`,
+        title: `${ok} borradores listos`,
         description: `${failed} ${failed === 1 ? 'falló' : 'fallaron'} — suele faltar la idea (hook + brief). Revisa esas tarjetas.`,
       })
     } else {
@@ -78,7 +84,7 @@ export function BatchCaptionsButton({
         </>
       ) : (
         <>
-          <Sparkles className="h-4 w-4" /> Generar {missing.length} {missing.length === 1 ? 'caption' : 'captions'}
+          <Sparkles className="h-4 w-4" /> Generar {missing.length} {missing.length === 1 ? 'borrador' : 'borradores'}
         </>
       )}
     </Button>

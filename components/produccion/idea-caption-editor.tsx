@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb } from 'lucide-react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -14,7 +14,10 @@ import type { SocialPlatform } from '@/lib/supabase/types'
 
 interface Props {
   ideaId: string
+  /** The caption a human already saved. Non-empty = the video moved on. */
   initialCaption: string | null
+  /** Unsaved AI text from a previous visit, so a reload doesn't lose it. */
+  initialDraft?: string | null
   /** The client's networks — shown as badges. ONE caption is written for all of them. */
   platforms?: SocialPlatform[]
   hook?: string | null
@@ -28,10 +31,15 @@ interface Props {
  * Caption único: a single caption per video that goes to ALL the client's
  * networks. Generated from the idea brief (hook + visual brief + angle) so
  * recording follows a clear script.
+ *
+ * Generar ≠ guardar. What the AI writes is a draft nobody has read yet; only
+ * "Guardar caption" persists it as the real caption and fires `onSaved`, which
+ * is the signal the surrounding screens use to move the video along.
  */
 export function IdeaCaptionEditor({
   ideaId,
   initialCaption,
+  initialDraft,
   platforms = [],
   hook,
   visualBrief,
@@ -40,7 +48,9 @@ export function IdeaCaptionEditor({
   onSaved,
 }: Props) {
   const canUse = useHasPermission('captions.use')
-  const [caption, setCaption] = useState(initialCaption ?? '')
+  // A saved caption wins over a leftover draft — the draft is only what's
+  // pending when nothing has been settled yet.
+  const [caption, setCaption] = useState(initialCaption || initialDraft || '')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
@@ -49,6 +59,9 @@ export function IdeaCaptionEditor({
   const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief })
   const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle })
   const dirty = caption !== (initialCaption ?? '')
+  // Hay texto en pantalla que todavía no es el caption del video. Se avisa
+  // fuerte: mientras esto se vea, el video NO se ha movido de Copy.
+  const unsaved = dirty && !!caption.trim()
 
   function generate() {
     if (!ideaReady) {
@@ -63,9 +76,10 @@ export function IdeaCaptionEditor({
       const res = await generateIdeaCaption(ideaId)
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
+        // Sin onSaved: es un borrador. Avisar aquí sacaba el video de la cola
+        // de Copy antes de que nadie lo leyera.
         setCaption(res.caption)
-        onSaved?.(res.caption)
-        toast({ title: 'Caption generado desde la idea' })
+        toast({ title: 'Borrador listo', description: 'Revísalo y guárdalo — el video no se mueve hasta entonces.' })
       }
     })
   }
@@ -77,8 +91,7 @@ export function IdeaCaptionEditor({
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         setCaption(res.caption)
-        onSaved?.(res.caption)
-        toast({ title: 'Caption regenerado con tu feedback' })
+        toast({ title: 'Borrador regenerado', description: 'Sigue sin guardar — revísalo.' })
       }
     })
   }
@@ -102,9 +115,14 @@ export function IdeaCaptionEditor({
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-3">
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</span>
-        <span className="text-[10px] text-muted-foreground">— basado en la idea de arriba</span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</span>
+        <span className="min-w-0 text-[10px] text-muted-foreground">— basado en la idea de arriba</span>
+        {unsaved && (
+          <span className="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+            <AlertCircle className="h-3 w-3" aria-hidden /> Borrador sin guardar
+          </span>
+        )}
       </div>
 
       {ideaReady ? (
@@ -171,10 +189,15 @@ export function IdeaCaptionEditor({
       <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
 
       {dirty && (
-        <Button size="sm" onClick={save} disabled={isSaving || !ideaReady}>
-          {isSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
-          Guardar caption
-        </Button>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-border/60 pt-3">
+          <Button size="sm" onClick={save} disabled={isSaving || !ideaReady || !caption.trim()}>
+            {isSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
+            Guardar caption
+          </Button>
+          <span className="min-w-0 text-[11px] text-muted-foreground">
+            Guardar es lo que mueve el video a Publicación.
+          </span>
+        </div>
       )}
     </div>
   )

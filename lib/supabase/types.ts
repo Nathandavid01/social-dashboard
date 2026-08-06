@@ -407,7 +407,11 @@ export interface ContentIdea {
   theme: string | null
   generation_prompt: string | null
   model: string | null
+  /** Caption que un humano guardó. Escribirlo mueve la etapa a Publicación. */
   generated_caption: string | null
+  /** Lo que acaba de escribir la IA, todavía sin revisar. NO mueve la etapa —
+   *  guardar es lo que lo promueve a `generated_caption` y deja esto en null. */
+  caption_draft: string | null
   caption_platform: string | null
   /** Per-network post format, e.g. { instagram: 'reel', tiktok: 'video' }. */
   platform_formats: Record<string, string> | null
