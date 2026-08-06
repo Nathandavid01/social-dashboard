@@ -53,6 +53,10 @@ export type Permission =
   | 'planning.read'
   | 'entregas.read'
   | 'revision.read'
+  // Filtro I — área de envío de video, aparte de Revisión y Entregas. Permiso
+  // propio a propósito: reutilizar 'revision.read' volvería a atar las tres
+  // pantallas y quitarle una a alguien le quitaría las otras dos.
+  | 'filtro_i.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -93,7 +97,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read',
-    'planning.read', 'entregas.read', 'revision.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'filtro_i.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -111,7 +115,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read',
     'video.upload',
     'captions.use', 'captions.edit',
-    'revision.read', 'planning.act',
+    'revision.read', 'filtro_i.read', 'planning.act',
     'alerts.read',
   ],
 
@@ -133,7 +137,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read', 'ideas.edit',
     'runway.read',
     'video.upload',
-    'revision.read',
+    'revision.read', 'filtro_i.read',
     'alerts.read',
   ],
 

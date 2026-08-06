@@ -58,6 +58,10 @@ export const AREAS: Area[] = [
   // copy y publicación en /entregas. Cruzan al aprobar el video.
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
+  // Filtro I — envío de video, por su cuenta. No es una etapa de Revisión ni de
+  // Entregas: tiene su ruta, su permiso y su pantalla, y ninguna de las otras
+  // dos sabe que existe. Quitarle Filtro I a alguien no le quita las otras.
+  { href: '/filtro-i',           label: 'Filtro I',        permission: 'filtro_i.read',      group: 'Trabajo' },
   { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
