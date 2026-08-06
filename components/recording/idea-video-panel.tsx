@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, getR2PreviewUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { SceneCheckBadge } from '@/components/video-pipeline/scene-check-badge'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -278,6 +279,11 @@ function Slot({
             {video.uploaded_at ? ` · subido ${formatUploadedAt(video.uploaded_at)}` : ''}
           </p>
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
+          {kind === 'edited' && (
+            <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <SceneCheckBadge report={video.scene_check} />
+            </span>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {isR2 && (

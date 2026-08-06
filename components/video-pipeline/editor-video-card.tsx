@@ -144,7 +144,11 @@ function EditedUploader({ ideaId, edited }: { ideaId: string; edited: ContentIde
 
   // Análisis AI en background — la subida ya quedó confirmada antes de esto.
   // captureVideoFrames devuelve [] ante cualquier fallo; analyzeUploadedVideo
-  // nunca lanza. Nada de esto puede tumbar el flujo de subida.
+  // nunca lanza. Nada de esto puede tumbar el flujo de subida. Se llama SIN
+  // await desde uploadOne (fire-and-forget): captureVideoFrames + la llamada
+  // AI pueden tardar ~30s+, y esperarlas bloquearía el loop de subida y el
+  // toast de éxito de todo el lote. El propio refresh() al completar es lo
+  // que trae el reporte nuevo a la tarjeta.
   async function analyzeFile(file: File, videoId: string) {
     setAnalyzing(true)
     try {
@@ -154,14 +158,14 @@ function EditedUploader({ ideaId, edited }: { ideaId: string; edited: ContentIde
       // best-effort: el reporte queda como esté; la tarjeta muestra "no disponible"
     } finally {
       setAnalyzing(false)
+      router.refresh()
     }
   }
 
-  async function retryAnalysis() {
+  function retryAnalysis() {
     const last = lastFileRef.current
     if (!last) return
-    await analyzeFile(last.file, last.videoId)
-    router.refresh()
+    void analyzeFile(last.file, last.videoId)
   }
 
   async function uploadOne(file: File) {
@@ -180,7 +184,8 @@ function EditedUploader({ ideaId, edited }: { ideaId: string; edited: ContentIde
     if (res.error) throw new Error(res.error)
     if (res.id) {
       lastFileRef.current = { file, videoId: res.id }
-      await analyzeFile(file, res.id)
+      // Fire-and-forget: no bloquea el resto del lote ni el toast de éxito.
+      void analyzeFile(file, res.id)
     }
   }
 

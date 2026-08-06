@@ -210,3 +210,57 @@ describe('IdeaVideoPanel — multi-file upload', () => {
     inputs.forEach((input) => expect(input).toHaveAttribute('multiple'))
   })
 })
+
+describe('IdeaVideoPanel — scene check badge (persistent surface)', () => {
+  it('shows the amber issues badge for an edited video with a scene_check report', () => {
+    const edited = {
+      ...makeVideo('edited', 0),
+      scene_check: {
+        status: 'issues' as const,
+        checkedAt: '2026-08-06T12:00:00Z',
+        framesAnalyzed: 10,
+        videoTopic: null,
+        issues: [{ text: 'exelente', problem: '«exelente» → «excelente»', approxSecond: 12 }],
+      },
+    }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), edited]} />)
+    expect(screen.getByText(/1 posible error/i)).toBeInTheDocument()
+  })
+
+  it('shows the green "revisados" badge for an edited video with an ok scene_check report', () => {
+    const edited = {
+      ...makeVideo('edited', 0),
+      scene_check: {
+        status: 'ok' as const,
+        checkedAt: '2026-08-06T12:00:00Z',
+        framesAnalyzed: 10,
+        videoTopic: null,
+        issues: [],
+      },
+    }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), edited]} />)
+    expect(screen.getByText(/subtítulos revisados/i)).toBeInTheDocument()
+  })
+
+  it('does NOT show a scene check badge for a raw video (scene_check is edited-only)', () => {
+    const raw = {
+      ...makeVideo('raw', 0),
+      scene_check: {
+        status: 'ok' as const,
+        checkedAt: '2026-08-06T12:00:00Z',
+        framesAnalyzed: 10,
+        videoTopic: null,
+        issues: [],
+      },
+    }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[raw]} />)
+    expect(screen.queryByText(/subtítulos revisados/i)).not.toBeInTheDocument()
+  })
+
+  it('renders nothing extra for an edited video with no scene_check report yet', () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), makeVideo('edited', 0)]} />)
+    expect(screen.queryByText(/subtítulos revisados/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/posible error/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/revisión ai no disponible/i)).not.toBeInTheDocument()
+  })
+})
