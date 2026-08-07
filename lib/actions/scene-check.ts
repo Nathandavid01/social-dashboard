@@ -12,6 +12,11 @@ import {
 } from '@/lib/llm/scene-check-core'
 import type { SceneCheckReport } from '@/lib/llm/scene-check-types'
 
+/** Tope de frames enviados a Grok por request, y tamaño máximo aceptado por frame. */
+const MAX_FRAMES = 12
+const MAX_B64_CHARS = 400_000
+const BASE64_RE = /^[A-Za-z0-9+/=]+$/
+
 /**
  * Revisión AI de subtítulos del video recién subido (Grok visión) + caption
  * automático si falta. Espíritu del spec: esto NUNCA rompe la subida — todo
@@ -31,18 +36,35 @@ export async function analyzeUploadedVideo(input: {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const base = { checkedAt: new Date().toISOString(), framesAnalyzed: input.frames.length }
+  // ── I2: el video debe existir, ser 'edited' y pertenecer a la idea. ──
+  const { data: video } = await supabase
+    .from('content_idea_videos')
+    .select('id, kind, idea_id')
+    .eq('id', input.videoId)
+    .single()
+  if (!video || video.kind !== 'edited' || video.idea_id !== input.ideaId) {
+    return { error: 'Video no encontrado o no corresponde a la idea.' }
+  }
+
+  // ── I1: límites server-side de payload — nunca confiar en lo que manda el cliente. ──
+  const validFrames = input.frames
+    .slice(0, MAX_FRAMES)
+    .filter((f) => f.b64.length > 0 && f.b64.length <= MAX_B64_CHARS && BASE64_RE.test(f.b64))
+
+  const base = { checkedAt: new Date().toISOString(), framesAnalyzed: validFrames.length }
   let report: SceneCheckReport
 
   const apiKey = (process.env.XAI_API_KEY ?? '').trim()
   if (!input.frames.length) {
     report = { ...base, status: 'skipped', issues: [], videoTopic: null, error: 'No se pudieron capturar frames del video.' }
+  } else if (!validFrames.length) {
+    report = { ...base, status: 'skipped', issues: [], videoTopic: null, error: 'Frames inválidos o demasiado grandes.' }
   } else if (!apiKey) {
     report = { ...base, status: 'skipped', issues: [], videoTopic: null, error: 'XAI_API_KEY no está configurado en el servidor.' }
   } else {
     try {
       const req = buildSceneCheckRequest({
-        frames: input.frames,
+        frames: validFrames,
         apiKey,
         model: sceneCheckModelId(process.env),
       })
@@ -51,7 +73,7 @@ export async function analyzeUploadedVideo(input: {
         const detail = await res.text().catch(() => '')
         report = { ...base, status: 'error', issues: [], videoTopic: null, error: `Grok API ${res.status}: ${detail.slice(0, 300)}` }
       } else {
-        const parsed = parseSceneCheckResponse(await res.json(), input.frames)
+        const parsed = parseSceneCheckResponse(await res.json(), validFrames)
         report = parsed
           ? { ...base, status: parsed.issues.length ? 'issues' : 'ok', issues: parsed.issues, videoTopic: parsed.videoTopic }
           : { ...base, status: 'error', issues: [], videoTopic: null, error: 'La AI no devolvió un reporte legible.' }
@@ -61,7 +83,14 @@ export async function analyzeUploadedVideo(input: {
     }
   }
 
-  await supabase.from('content_idea_videos').update({ scene_check: report }).eq('id', input.videoId)
+  const { error: updateErr } = await supabase
+    .from('content_idea_videos')
+    .update({ scene_check: report })
+    .eq('id', input.videoId)
+  if (updateErr) {
+    console.error('[scene-check] no se pudo guardar el reporte', updateErr)
+    return { error: 'No se pudo guardar el reporte.' }
+  }
 
   await logIdeaActivity(supabase, {
     ideaId: input.ideaId,

@@ -9,6 +9,27 @@ export const DEFAULT_FRAME_COUNT = 10
 const MAX_DIM = 720
 const JPEG_QUALITY = 0.8
 const CAPTURE_TIMEOUT_MS = 30_000
+/** Presupuesto de payload del cliente (suma de b64.length) antes de enviar al server action. */
+export const MAX_TOTAL_B64_CHARS = 2_500_000
+
+/**
+ * Recorta `frames` para que la suma de `b64.length` quepa en `maxTotalChars`,
+ * descartando frames alternos (manteniendo el orden cronológico) hasta caber.
+ * Si un solo frame ya excede el presupuesto, devuelve [].
+ */
+export function fitFramesToBudget<T extends { b64: string }>(
+  frames: T[],
+  maxTotalChars: number,
+): T[] {
+  let current = frames
+  while (current.length > 0) {
+    const total = current.reduce((sum, f) => sum + f.b64.length, 0)
+    if (total <= maxTotalChars) return current
+    if (current.length === 1) return []
+    current = current.filter((_, i) => i % 2 === 0)
+  }
+  return current
+}
 
 /** Distributes n frame timestamps equidistantly across duration.
  * Places frames at the inner points of n+1 equal segments: positions 1*step through n*step,
@@ -73,7 +94,7 @@ export async function captureVideoFrames(
           const b64 = dataUrl.split(',')[1]
           if (b64) frames.push({ b64, second: Math.round(second) })
         }
-        return frames
+        return fitFramesToBudget(frames, MAX_TOTAL_B64_CHARS)
       })()])
     } finally {
       cleanup()

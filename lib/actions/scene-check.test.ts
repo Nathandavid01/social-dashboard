@@ -18,6 +18,8 @@ vi.mock('@/lib/utils/idea-activity', () => ({
 // Supabase chainable mínimo: from().update().eq() y from().select().eq().single()
 type Row = Record<string, unknown>
 let ideaRow: Row | null
+let videoRow: Row | null
+let updateError: { message: string } | null
 let updateCalls: Array<{ table: string; values: Row }>
 function makeSupabase() {
   return {
@@ -26,10 +28,17 @@ function makeSupabase() {
       return {
         update(values: Row) {
           updateCalls.push({ table, values })
-          return { eq: async () => ({ error: null }) }
+          return { eq: async () => ({ error: updateError }) }
         },
         select() {
-          return { eq: () => ({ single: async () => ({ data: ideaRow, error: null }) }) }
+          return {
+            eq: () => ({
+              single: async () => ({
+                data: table === 'content_idea_videos' ? videoRow : ideaRow,
+                error: null,
+              }),
+            }),
+          }
         },
       }
     },
@@ -49,7 +58,9 @@ const grokJson = (payload: unknown) => ({
 beforeEach(() => {
   vi.clearAllMocks()
   updateCalls = []
+  updateError = null
   ideaRow = { id: 'idea-1', hook: 'promo pizzas', generated_caption: null }
+  videoRow = { id: 'v1', kind: 'edited', idea_id: 'idea-1' }
   process.env.XAI_API_KEY = 'test-key'
   // clearAllMocks() resets call history but NOT queued implementations
   // (mockRejectedValue/mockResolvedValue survive it) — re-arm the happy path
@@ -157,5 +168,95 @@ describe('analyzeUploadedVideo', () => {
     expect(mockLogIdeaActivity).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       action: 'scene_check_completed',
     }))
+  })
+
+  // ── I2: el video debe existir, ser 'edited' y pertenecer a la idea ──
+  describe('validación del video (I2)', () => {
+    it('video inexistente → error, sin tocar la DB', async () => {
+      videoRow = null
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      const res = await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames })
+      expect(res.error).toBe('Video no encontrado o no corresponde a la idea.')
+      expect(updateCalls).toHaveLength(0)
+      expect(mockLogIdeaActivity).not.toHaveBeenCalled()
+      expect(mockGenerateIdeaCaption).not.toHaveBeenCalled()
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it('video de otra idea → error, sin tocar la DB', async () => {
+      videoRow = { id: 'v1', kind: 'edited', idea_id: 'idea-OTRA' }
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      const res = await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames })
+      expect(res.error).toBe('Video no encontrado o no corresponde a la idea.')
+      expect(updateCalls).toHaveLength(0)
+      expect(mockLogIdeaActivity).not.toHaveBeenCalled()
+    })
+
+    it('video kind raw (no edited) → error, sin tocar la DB', async () => {
+      videoRow = { id: 'v1', kind: 'raw', idea_id: 'idea-1' }
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      const res = await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames })
+      expect(res.error).toBe('Video no encontrado o no corresponde a la idea.')
+      expect(updateCalls).toHaveLength(0)
+    })
+  })
+
+  // ── I1: límites de frames server-side ──
+  describe('límites de frames server-side (I1)', () => {
+    it('frame con b64 no-base64 se filtra antes de llamar a Grok', async () => {
+      fetchMock.mockResolvedValue(grokJson({ issues: [], videoTopic: null }))
+      const bad = [{ b64: 'no-es-base64!!', second: 1 }, { b64: 'AAAA', second: 2 }]
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames: bad })
+      const [, init] = fetchMock.mock.calls[0]
+      const body = JSON.parse(init.body as string)
+      const imageCount = body.messages[0].content.filter((c: { type: string }) => c.type === 'image_url').length
+      expect(imageCount).toBe(1)
+    })
+
+    it('más de 12 frames se recortan a 12 en el request a Grok', async () => {
+      fetchMock.mockResolvedValue(grokJson({ issues: [], videoTopic: null }))
+      const many = Array.from({ length: 20 }, (_, i) => ({ b64: 'AAAA', second: i }))
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames: many })
+      const [, init] = fetchMock.mock.calls[0]
+      const body = JSON.parse(init.body as string)
+      const imageCount = body.messages[0].content.filter((c: { type: string }) => c.type === 'image_url').length
+      expect(imageCount).toBe(12)
+    })
+
+    it('frame gigante (b64 > MAX_B64_CHARS) se filtra', async () => {
+      fetchMock.mockResolvedValue(grokJson({ issues: [], videoTopic: null }))
+      const giant = [{ b64: 'A'.repeat(400_001), second: 1 }, { b64: 'AAAA', second: 2 }]
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames: giant })
+      const [, init] = fetchMock.mock.calls[0]
+      const body = JSON.parse(init.body as string)
+      const imageCount = body.messages[0].content.filter((c: { type: string }) => c.type === 'image_url').length
+      expect(imageCount).toBe(1)
+    })
+
+    it('todos los frames inválidos → reporte skipped con mensaje específico, sin llamar a Grok', async () => {
+      const allBad = [{ b64: 'no-es-base64!!', second: 1 }]
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      const res = await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames: allBad })
+      expect(res.report!.status).toBe('skipped')
+      expect(res.report!.error).toBe('Frames inválidos o demasiado grandes.')
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── M1: si el update falla, el action debe reportarlo ──
+  describe('fallo al guardar el reporte (M1)', () => {
+    it('update falla → devuelve error, no registra actividad ni caption', async () => {
+      updateError = { message: 'db down' }
+      fetchMock.mockResolvedValue(grokJson({ issues: [], videoTopic: 'pizzas' }))
+      const { analyzeUploadedVideo } = await import('./scene-check')
+      const res = await analyzeUploadedVideo({ videoId: 'v1', ideaId: 'idea-1', frames })
+      expect(res.error).toBe('No se pudo guardar el reporte.')
+      expect(res.ok).toBeUndefined()
+      expect(mockLogIdeaActivity).not.toHaveBeenCalled()
+      expect(mockGenerateIdeaCaption).not.toHaveBeenCalled()
+    })
   })
 })
