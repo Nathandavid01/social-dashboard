@@ -43,8 +43,19 @@ function putConProgreso(url: string, file: File, onProgress: (pct: number) => vo
       xhr.status >= 200 && xhr.status < 300
         ? resolve()
         : reject(new Error(`La subida falló (${xhr.status})`))
+    // Aquí caen tanto un bloqueo de CORS como una caída de red, y el navegador
+    // oculta el status real en los dos casos. Culpar a la conexión mandó una
+    // sesión entera a mirar el wifi cuando lo que pasaba era que el dev server
+    // estaba en un puerto que el bucket no permite: no nombres una causa que no
+    // puedes distinguir desde aquí.
     xhr.onerror = () =>
-      reject(new Error('Se cortó la subida. Revisa tu conexión e inténtalo otra vez.'))
+      reject(
+        new Error(
+          'Se cortó la subida a R2. Puede ser la red o que este origen no esté ' +
+            'permitido en el CORS del bucket. Abre la consola del navegador ' +
+            '(pestaña Red) para ver el error real.',
+        ),
+      )
     xhr.ontimeout = () => reject(new Error('La subida tardó demasiado'))
     xhr.send(file)
   })
