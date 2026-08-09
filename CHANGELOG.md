@@ -4,6 +4,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v2.96 — 2026-08-08
+
+- **Grok ahora confirma si el video corresponde al cliente antes de preparar el caption.** La revisión compara los frames contra el nombre, industria, voz de marca y contexto creativo del cliente, y muestra uno de tres resultados auditables: corresponde, no parece corresponder o no hay evidencia suficiente. La tarjeta también permite reproducir el video editado ahí mismo. Luego del análisis, el caption se genera automáticamente si estaba vacío. El modelo de xAI se actualizó al reemplazo vigente `grok-4.3` y la visión usa Responses API con salida JSON estricta.
+
 ## v2.95 — 2026-08-06
 
 - **La AI revisa los subtítulos del video y escribe el caption sola al subirlo.** Al subir el video editado, Grok mira varias escenas y avisa en la tarjeta si hay errores de ortografía en los textos en pantalla ("⚠ 2 posibles errores en subtítulos", con el detalle y el minuto). Es solo un aviso — nunca bloquea la subida ni el flujo. Y si la tarjeta no tenía caption, se genera automáticamente: con el tema que escribió el equipo, o, si no hay, con lo que la AI vio en el video.

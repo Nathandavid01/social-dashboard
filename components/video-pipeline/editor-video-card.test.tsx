@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { EditorVideoCard, type EditQueueItem } from './editor-video-card'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
 import type { ContentIdeaVideo } from '@/lib/supabase/types'
@@ -132,5 +132,18 @@ describe('EditorVideoCard', () => {
     render(<EditorVideoCard item={withEdited} />)
     expect(screen.getByText(/revisión ai no disponible/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Reintentar/i })).not.toBeInTheDocument()
+  })
+
+  it('permite ver el video editado dentro de la tarjeta', async () => {
+    const edited = mat('edited', 0)
+    const withEdited: EditQueueItem = {
+      video: { ...video(), videos: { raw: [], broll: [], edited: [edited] } } as unknown as PipelineVideo,
+      client: { id: 'c1', name: 'Acme', logo_url: null },
+    }
+    const { container } = render(<EditorVideoCard item={withEdited} />)
+    fireEvent.click(screen.getByRole('button', { name: /^Ver$/i }))
+    await waitFor(() => {
+      expect(container.querySelector('video')).toHaveAttribute('src', 'https://r2/preview')
+    })
   })
 })

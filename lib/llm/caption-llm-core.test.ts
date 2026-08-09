@@ -33,6 +33,7 @@ describe('resolveCaptionProvider', () => {
 describe('captionModelId', () => {
   it('returns the grok model by default', () => {
     expect(captionModelId({})).toBe(GROK_CAPTION_MODEL)
+    expect(GROK_CAPTION_MODEL).toBe('grok-4.3')
   })
   it('returns the claude model when provider is claude', () => {
     expect(captionModelId({ CAPTION_PROVIDER: 'claude' })).toBe(CLAUDE_CAPTION_MODEL)
@@ -79,7 +80,7 @@ describe('buildGrokRequest', () => {
     const req = buildGrokRequest({
       prompt: 'write a caption',
       apiKey: 'xai-secret',
-      model: 'grok-4-1-fast-non-reasoning',
+      model: 'grok-4.3',
       maxTokens: 1024,
     })
     expect(req.url).toBe(GROK_CHAT_COMPLETIONS_URL)
@@ -87,7 +88,8 @@ describe('buildGrokRequest', () => {
     expect(req.headers['Content-Type']).toBe('application/json')
     const body = JSON.parse(req.body)
     expect(body).toEqual({
-      model: 'grok-4-1-fast-non-reasoning',
+      model: 'grok-4.3',
+      reasoning_effort: 'none',
       max_tokens: 1024,
       messages: [{ role: 'user', content: 'write a caption' }],
     })

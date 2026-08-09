@@ -8,16 +8,20 @@ Dos automatizaciones que corren al subir el video editado a una tarjeta del pipe
 
 1. **Caption automático** — si la tarjeta no tiene caption, se genera solo con Grok
    (el proveedor ya integrado en `lib/llm/caption-llm.ts`), sin que nadie toque el botón.
-2. **Verificación de subtítulos ("scene check")** — Grok con visión revisa frames del
-   video y reporta **errores de ortografía y gramática** en los textos en pantalla.
+2. **Verificación de subtítulos + cliente ("scene check")** — Grok con visión revisa frames del
+   video, reporta **errores de ortografía y gramática** en los textos en pantalla y clasifica
+   si el contenido corresponde al cliente (`match` / `mismatch` / `uncertain`).
    El resultado es un **aviso en la tarjeta** — nunca bloquea el flujo.
 
 ## Decisiones cerradas (con Eric)
 
 - Proveedor de visión: **Grok (xAI)** — misma API key `XAI_API_KEY` ya configurada.
 - Trigger: **al subir el video editado** (flujo R2 del dashboard web).
-- Criterio del check: **solo ortografía/gramática** del texto en pantalla (español).
-  No valida tema ni legibilidad (fase futura si hace falta).
+- Criterio de texto: **solo ortografía/gramática** del texto en pantalla (español).
+  No valida legibilidad (fase futura si hace falta).
+- Ampliación 2026-08-08: también compara el video con el nombre, industria, voz de marca
+  y contexto creativo del cliente. Si no hay evidencia visual suficiente, devuelve
+  `uncertain`; nunca fuerza un sí/no.
 - Resultado: **solo avisar en la tarjeta**. No bloquea envío a revisión ni notifica.
 - Caption automático **solo si `generated_caption` está vacío** — nunca sobrescribe.
 - Si la tarjeta no tiene "¿de qué es este video?" (`isIdeaReadyForCaption` falla),
@@ -54,12 +58,13 @@ subir video a R2 (flujo actual)
   del video NUNCA se cae por esto).
 
 **2. `lib/llm/scene-check-core.ts` (puro, testeable)**
-- `SCENE_CHECK_MODEL` — modelo de visión de Grok (`grok-4-1-fast-non-reasoning`
-  soporta imágenes; se confirma en implementación y queda en un solo lugar).
-- `buildSceneCheckRequest({ frames, apiKey, model })` — request OpenAI-compatible
+- `SCENE_CHECK_MODEL` — modelo de visión de Grok (`grok-4.3`, reemplazo oficial del
+  modelo fast retirado; soporta imágenes y queda en un solo lugar).
+- `buildSceneCheckRequest({ frames, clientContext, apiKey, model })` — request a
+  Responses API
   con las imágenes en base64 y el prompt: "Lee TODO el texto visible en pantalla
   en estos frames de un video en español. Reporta SOLO errores de ortografía o
-  gramática" con salida JSON estricta.
+  gramática", más el contexto del cliente y salida JSON Schema estricta.
 - `parseSceneCheckResponse(json)` → `SceneCheckReport`.
 - `describeFramesPromptFragment()` — segundo uso: pedirle a Grok una descripción
   de 1–2 oraciones del video (tema) cuando la tarjeta no tiene "¿de qué es?".
@@ -76,6 +81,11 @@ type SceneCheckReport = {
     approxSecond: number | null
   }>
   videoTopic: string | null   // descripción del contenido (para caption sin tema)
+  clientMatch?: {
+    status: 'match' | 'mismatch' | 'uncertain'
+    reason: string
+    evidence: string[]
+  }
   error?: string              // cuando status = 'error'
 }
 ```
@@ -92,7 +102,7 @@ type SceneCheckReport = {
      caption automático queda logueado por el flujo existente.
   - Errores de Grok → reporte `status:'error'` guardado; nunca lanza al cliente.
 
-**4. Migración `supabase/migrations/0042_scene_check.sql`** (la 0041 ya existe local)
+**4. Migración `supabase/migrations/0043_scene_check.sql`**
 - `alter table content_idea_videos add column scene_check jsonb;`
 
 **5. UI — tarjeta del video (`editor-video-card.tsx` / panel del pipeline)**
@@ -106,6 +116,9 @@ type SceneCheckReport = {
   simplemente no se muestra).
 - El flujo de subida muestra "Analizando subtítulos…" mientras corre, pero la
   subida se confirma independiente del análisis.
+- El video editado se puede reproducir dentro de la tarjeta con **Ver**.
+- El resultado de cliente aparece como **Corresponde al cliente**, **No parece ser
+  del cliente** o **Cliente no confirmado**, con razón/evidencia expandible.
 
 ### Flujo de datos
 
@@ -142,7 +155,6 @@ type SceneCheckReport = {
 
 ### Fuera de alcance (YAGNI)
 
-- Validar que el video corresponde al tema del cliente (fase 2 si se pide).
 - Legibilidad/posición del texto.
 - Transcripción de audio / sincronización de subtítulos con el habla.
 - Procesamiento server-side con ffmpeg (enfoque B descartado).

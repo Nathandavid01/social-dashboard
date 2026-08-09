@@ -112,7 +112,7 @@ git commit -m "feat(scene-check): columna scene_check + tipos del reporte"
 **Interfaces:**
 - Consumes: `SceneCheckReport`, `SceneCheckIssue` de `lib/llm/scene-check-types.ts`; patrón de `buildGrokRequest`/`parseGrokResponse` de `caption-llm-core.ts` (referencia de estilo, no se importa).
 - Produces:
-  - `SCENE_CHECK_MODEL = 'grok-4-1-fast-non-reasoning'` (mismo endpoint `GROK_CHAT_COMPLETIONS_URL`; override por env `GROK_SCENE_CHECK_MODEL`)
+  - `SCENE_CHECK_MODEL = 'grok-4.3'` (Responses API; override por env `GROK_SCENE_CHECK_MODEL`)
   - `sceneCheckModelId(env: { GROK_SCENE_CHECK_MODEL?: string }): string`
   - `buildSceneCheckRequest(input: { frames: Array<{ b64: string; second: number }>; apiKey: string; model: string }): GrokRequest` (mismo shape `{url, headers, body}`)
   - `parseSceneCheckResponse(json: unknown, frames: Array<{ second: number }>): { issues: SceneCheckIssue[]; videoTopic: string | null } | null` (null = respuesta inservible)
@@ -224,7 +224,7 @@ import { GROK_CHAT_COMPLETIONS_URL, type GrokRequest } from './caption-llm-core'
 import type { SceneCheckIssue } from './scene-check-types'
 
 /** Modelo con visión: el default de captions también acepta imágenes. */
-export const SCENE_CHECK_MODEL = 'grok-4-1-fast-non-reasoning'
+export const SCENE_CHECK_MODEL = 'grok-4.3'
 
 export function sceneCheckModelId(env: { GROK_SCENE_CHECK_MODEL?: string }): string {
   return (env.GROK_SCENE_CHECK_MODEL ?? '').trim() || SCENE_CHECK_MODEL

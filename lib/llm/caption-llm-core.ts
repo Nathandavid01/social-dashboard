@@ -12,8 +12,8 @@
 
 export type CaptionProvider = 'grok' | 'claude'
 
-/** Default Grok model for captions: fast + cheap, plenty for short copy. */
-export const GROK_CAPTION_MODEL = 'grok-4-1-fast-non-reasoning'
+/** Current xAI replacement for the retired fast model; no reasoning for short copy. */
+export const GROK_CAPTION_MODEL = 'grok-4.3'
 /** Claude caption model (fallback provider). */
 export const CLAUDE_CAPTION_MODEL = 'claude-sonnet-4-6'
 /** xAI's OpenAI-compatible chat-completions endpoint. */
@@ -83,6 +83,7 @@ export function buildGrokRequest(input: {
     },
     body: JSON.stringify({
       model: input.model,
+      ...(input.model.startsWith('grok-4.3') ? { reasoning_effort: 'none' } : {}),
       max_tokens: input.maxTokens,
       messages: [{ role: 'user', content: input.prompt }],
     }),

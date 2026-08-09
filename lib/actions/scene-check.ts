@@ -46,6 +46,19 @@ export async function analyzeUploadedVideo(input: {
     return { error: 'Video no encontrado o no corresponde a la idea.' }
   }
 
+  // Se carga una sola vez: alimenta la comparación cliente/video y luego el
+  // caption, garantizando el orden revisión → guardado → caption.
+  const { data: idea } = await supabase
+    .from('content_ideas')
+    .select('id, title, hook, visual_brief, generated_caption, client:clients(name, industry, brand_voice)')
+    .eq('id', input.ideaId)
+    .single()
+  const client = (idea?.client ?? null) as {
+    name?: string | null
+    industry?: string | null
+    brand_voice?: string | null
+  } | null
+
   // ── I1: límites server-side de payload — nunca confiar en lo que manda el cliente. ──
   const validFrames = input.frames
     .slice(0, MAX_FRAMES)
@@ -65,6 +78,14 @@ export async function analyzeUploadedVideo(input: {
     try {
       const req = buildSceneCheckRequest({
         frames: validFrames,
+        clientContext: {
+          name: client?.name?.trim() || 'Cliente no identificado',
+          industry: client?.industry?.trim() || null,
+          brandVoice: client?.brand_voice?.trim() || null,
+          ideaTitle: idea?.title?.trim() || null,
+          ideaTopic: idea?.hook?.trim() || null,
+          visualBrief: idea?.visual_brief?.trim() || null,
+        },
         apiKey,
         model: sceneCheckModelId(process.env),
       })
@@ -75,7 +96,13 @@ export async function analyzeUploadedVideo(input: {
       } else {
         const parsed = parseSceneCheckResponse(await res.json(), validFrames)
         report = parsed
-          ? { ...base, status: parsed.issues.length ? 'issues' : 'ok', issues: parsed.issues, videoTopic: parsed.videoTopic }
+          ? {
+              ...base,
+              status: parsed.issues.length ? 'issues' : 'ok',
+              issues: parsed.issues,
+              videoTopic: parsed.videoTopic,
+              clientMatch: parsed.clientMatch,
+            }
           : { ...base, status: 'error', issues: [], videoTopic: null, error: 'La AI no devolvió un reporte legible.' }
       }
     } catch (err) {
@@ -96,16 +123,16 @@ export async function analyzeUploadedVideo(input: {
     ideaId: input.ideaId,
     userId: user?.id ?? null,
     action: 'scene_check_completed',
-    metadata: { videoId: input.videoId, status: report.status, issueCount: report.issues.length },
+    metadata: {
+      videoId: input.videoId,
+      status: report.status,
+      issueCount: report.issues.length,
+      clientMatchStatus: report.clientMatch?.status ?? null,
+    },
   })
 
   // ── Caption automático: solo si la idea no tiene caption. ──
-  const { data: idea } = await supabase
-    .from('content_ideas')
-    .select('id, hook, generated_caption')
-    .eq('id', input.ideaId)
-    .single()
-  if (idea && !idea.generated_caption) {
+  if (idea && !idea.generated_caption?.trim()) {
     const hasTopic = typeof idea.hook === 'string' && idea.hook.trim().length > 0
     if (hasTopic) {
       await generateIdeaCaption(input.ideaId, {}).catch(() => null)

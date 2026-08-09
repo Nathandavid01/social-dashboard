@@ -12,9 +12,21 @@ describe('SceneCheckBadge', () => {
   })
 
   it('status ok → badge verde de revisado', () => {
-    const report: SceneCheckReport = { ...base, status: 'ok', issues: [] }
+    const report: SceneCheckReport = {
+      ...base,
+      status: 'ok',
+      issues: [],
+      clientMatch: {
+        status: 'match',
+        reason: 'El logo y el producto coinciden.',
+        evidence: ['Logo Acme visible'],
+      },
+    }
     render(<SceneCheckBadge report={report} />)
     expect(screen.getByText(/subtítulos revisados/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /corresponde al cliente/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /corresponde al cliente/i }))
+    expect(screen.getByText(/logo y el producto coinciden/i)).toBeInTheDocument()
   })
 
   it('status issues → badge ámbar con el conteo y detalle expandible', () => {
@@ -48,5 +60,35 @@ describe('SceneCheckBadge', () => {
     const report: SceneCheckReport = { ...base, status: 'error', issues: [], error: 'Grok API 500' }
     render(<SceneCheckBadge report={report} />)
     expect(screen.getByText(/revisión ai no disponible/i)).toBeInTheDocument()
+  })
+
+  it('mismatch → alerta clara de que no parece ser del cliente', () => {
+    const report: SceneCheckReport = {
+      ...base,
+      status: 'ok',
+      issues: [],
+      clientMatch: {
+        status: 'mismatch',
+        reason: 'Aparece el nombre de otra empresa.',
+        evidence: ['Logo Beta visible'],
+      },
+    }
+    render(<SceneCheckBadge report={report} />)
+    expect(screen.getByRole('button', { name: /no parece ser del cliente/i })).toBeInTheDocument()
+  })
+
+  it('uncertain → no inventa una coincidencia', () => {
+    const report: SceneCheckReport = {
+      ...base,
+      status: 'ok',
+      issues: [],
+      clientMatch: {
+        status: 'uncertain',
+        reason: 'El contenido es genérico.',
+        evidence: [],
+      },
+    }
+    render(<SceneCheckBadge report={report} />)
+    expect(screen.getByRole('button', { name: /cliente no confirmado/i })).toBeInTheDocument()
   })
 })

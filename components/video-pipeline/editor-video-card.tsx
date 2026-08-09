@@ -280,18 +280,53 @@ function EditedRow({
   analyzing: boolean
   onRetry: () => void
 }) {
+  const { toast } = useToast()
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
   const showRetry = isRetryable && (video.scene_check?.status === 'error' || video.scene_check?.status === 'skipped')
+
+  async function togglePreview() {
+    if (previewUrl) {
+      setPreviewUrl(null)
+      return
+    }
+    setPreviewLoading(true)
+    const res = await getR2PreviewUrl(video.id)
+    setPreviewLoading(false)
+    if (res.error || !res.url) {
+      toast({ title: 'Error', description: res.error ?? 'No se pudo cargar el preview', variant: 'destructive' })
+      return
+    }
+    setPreviewUrl(res.url)
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border bg-muted/30 px-2 py-1.5">
-      <span className="min-w-0 flex-1 truncate text-xs">{video.name}</span>
-      <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
-        <SceneCheckBadge report={video.scene_check} />
-        {showRetry && (
-          <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={onRetry} disabled={analyzing}>
-            Reintentar
-          </Button>
-        )}
+    <div className="space-y-2 rounded-md border bg-muted/30 px-2 py-1.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="min-w-0 flex-1 truncate text-xs">{video.name}</span>
+        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+          {video.storage_provider === 'r2' && (
+            <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={togglePreview} disabled={previewLoading}>
+              {previewLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : previewUrl ? <X className="mr-1 h-3 w-3" /> : <Play className="mr-1 h-3 w-3" />}
+              {previewUrl ? 'Cerrar' : 'Ver'}
+            </Button>
+          )}
+          {showRetry && (
+            <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={onRetry} disabled={analyzing}>
+              Reintentar
+            </Button>
+          )}
+        </div>
       </div>
+      <SceneCheckBadge report={video.scene_check} />
+      {previewUrl && (
+        <video
+          src={previewUrl}
+          controls
+          playsInline
+          className="aspect-video w-full rounded-md border bg-black"
+        />
+      )}
     </div>
   )
 }
