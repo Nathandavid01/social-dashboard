@@ -94,6 +94,8 @@ export interface ContentIdeaVideo {
   error_message: string | null
   uploaded_at: string
   updated_at: string
+  /** Joined uploader profile when the query requests it. */
+  uploader?: Pick<Profile, 'id' | 'full_name' | 'email'> | null
 }
 
 export type NotificationKind =

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Plus, Play, X } from 'lucide-react'
+import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Play, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -39,7 +39,7 @@ function formatUploadedAt(iso: string | null): string {
   return d.toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-const MIN_SLOTS: Record<ContentIdeaVideoKind, number> = { raw: 4, broll: 4, edited: 2 }
+const REQUIRED_FILES: Partial<Record<ContentIdeaVideoKind, number>> = { raw: 4, edited: 1 }
 
 export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
   const canUpload = useHasPermission('video.upload')
@@ -88,11 +88,18 @@ function VideoStatusBadges({
   const badge = STATUS_BADGE[video.status] ?? STATUS_BADGE.uploaded
   const isR2 = video.storage_provider === 'r2'
   const isPublic = isR2 && kind === 'edited' && publicEnabled && video.status === 'uploaded'
+  const storageLabel = video.storage_provider === 'entregas-r2'
+    ? 'Entregas R2'
+    : video.storage_provider === 'r2'
+      ? 'R2'
+      : video.storage_provider === 'supabase'
+        ? 'Supabase'
+        : 'Drive'
   const pill = 'rounded border px-1.5 py-0.5 text-[10px] font-medium'
   return (
     <span className="mt-1 flex flex-wrap items-center gap-1">
       <span className={cn(pill, badge.cls)}>{badge.label}</span>
-      <span className={cn(pill, 'bg-muted text-muted-foreground border-border')}>{isR2 ? 'R2' : 'Drive'}</span>
+      <span className={cn(pill, 'bg-muted text-muted-foreground border-border')}>{storageLabel}</span>
       {isPublic && (
         <span className={cn(pill, 'bg-purple-500/15 text-purple-600 border-purple-500/30')}>Público</span>
       )}
@@ -112,13 +119,14 @@ function SlotGroup({
 }) {
   const meta = META[kind]
   const Icon = meta.icon
-  const min = MIN_SLOTS[kind]
-  // Extra empty slots the user explicitly added beyond the minimum.
-  const [extra, setExtra] = useState(0)
-
-  // Minimum visible empty slots so the group always shows at least `min` rows.
-  const minEmpties = Math.max(0, min - videos.length)
-  const emptyCount = minEmpties + extra
+  const required = REQUIRED_FILES[kind]
+  const missing = required == null ? 0 : Math.max(0, required - videos.length)
+  const uploadedLabel = `${videos.length} ${videos.length === 1 ? 'subido' : 'subidos'}`
+  const requirementLabel = required == null
+    ? 'Opcional'
+    : missing > 0
+      ? `Faltan ${missing}`
+      : 'Completo'
 
   return (
     <div className="space-y-2">
@@ -126,45 +134,43 @@ function SlotGroup({
         <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           <Icon className="h-3.5 w-3.5" /> {meta.label}
           <span className="tabular-nums font-normal normal-case text-muted-foreground/70">
-            {videos.length}/{min}
+            {uploadedLabel}
           </span>
         </p>
+        <span
+          className={cn(
+            'rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            required == null
+              ? 'border-border bg-muted/50 text-muted-foreground'
+              : missing > 0
+                ? 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+          )}
+        >
+          {requirementLabel}
+        </span>
       </div>
 
       <div className="space-y-2.5">
         {videos.map((v) => (
           <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} publicEnabled={publicEnabled} />
         ))}
-        {Array.from({ length: emptyCount }).map((_, i) => (
-          <Slot
-            key={`empty-${i}`}
-            kind={kind}
-            ideaId={ideaId}
-            video={undefined}
-            canUpload={canUpload}
-            publicEnabled={publicEnabled}
-            disabledReason={disabledReason}
-          />
-        ))}
+        <Slot
+          kind={kind}
+          ideaId={ideaId}
+          video={undefined}
+          canUpload={canUpload}
+          publicEnabled={publicEnabled}
+          disabledReason={disabledReason}
+          additional={videos.length > 0}
+        />
       </div>
-
-      {canUpload && (
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={() => setExtra((n) => n + 1)}
-          className="h-8 text-xs text-muted-foreground hover:text-primary"
-        >
-          <Plus className="mr-1 h-3.5 w-3.5" /> Agregar más {meta.label.toLowerCase()}
-        </Button>
-      )}
     </div>
   )
 }
 
 function Slot({
-  kind, ideaId, video, canUpload, publicEnabled, disabledReason,
+  kind, ideaId, video, canUpload, publicEnabled, disabledReason, additional = false,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
@@ -172,6 +178,7 @@ function Slot({
   canUpload: boolean
   publicEnabled: boolean
   disabledReason?: string
+  additional?: boolean
 }) {
   const meta = META[kind]
   const Icon = meta.icon
@@ -275,7 +282,8 @@ function Slot({
           <p className="truncate text-sm font-medium">{video.name}</p>
           <p className="text-xs text-muted-foreground">
             {formatBytes(video.size_bytes)}
-            {video.uploaded_at ? ` · subido ${formatUploadedAt(video.uploaded_at)}` : ''}
+            {video.uploader?.full_name?.trim() ? ` · subido por ${video.uploader.full_name.trim()}` : ''}
+            {video.uploaded_at ? ` · ${formatUploadedAt(video.uploaded_at)}` : ''}
           </p>
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
@@ -333,11 +341,7 @@ function Slot({
   }
 
   if (!canUpload) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-dashed p-2.5 text-xs text-muted-foreground opacity-70">
-        <Icon className="h-3.5 w-3.5" /> {meta.label} pendiente
-      </div>
-    )
+    return null
   }
 
   if (progress !== null) {
@@ -379,7 +383,7 @@ function Slot({
     >
       <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', meta.tone)}><Icon className="h-4 w-4" /></div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium">Subir {meta.label.toLowerCase()}</p>
+        <p className="font-medium">{additional ? 'Subir más' : 'Subir'} {meta.label.toLowerCase()}</p>
         <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub} · arrastra uno o varios o haz click</p>
       </div>
       <Upload className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:scale-110 group-hover:text-primary" />

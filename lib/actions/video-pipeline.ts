@@ -77,7 +77,10 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
       .select(
         `
         *,
-        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*)
+        videos:content_idea_videos!content_idea_videos_idea_id_fkey(
+          *,
+          uploader:profiles!content_idea_videos_uploaded_by_fkey(id, full_name, email)
+        )
       `,
       )
       .order('created_at', { ascending: false }),
@@ -162,7 +165,10 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
       .select(
         `
         *,
-        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
+        videos:content_idea_videos!content_idea_videos_idea_id_fkey(
+          *,
+          uploader:profiles!content_idea_videos_uploaded_by_fkey(id, full_name, email)
+        ),
         production_task:production_tasks!content_ideas_production_task_id_fkey(
           id,
           assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)

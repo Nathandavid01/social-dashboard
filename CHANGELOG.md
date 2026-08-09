@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.11 — 2026-08-09
+
+**La carga de videos ahora es más compacta y fácil de leer, sin cambiar el flujo existente.**
+
+- Cada sección conserva visibles los archivos subidos y muestra un solo control para añadir más.
+- Los encabezados resumen el estado con **“Faltan”**, **“Completo”** u **“Opcional”**.
+- Los videos procedentes de Entregas muestran **“Entregas R2”** en lugar de “Drive”.
+- Cada archivo muestra el nombre del editor que lo subió, cuando está disponible.
+
 ## v2.99 — 2026-07-14
 
 **"Esta semana toca": con ~50 clientes, cuáles necesitas tocar HOY.** Antes cada cliente se evaluaba por separado — nada en la app miraba los 50 a la vez para decirte cuáles se están quedando sin contenido. Ahora Runway abre con la lista corta.
