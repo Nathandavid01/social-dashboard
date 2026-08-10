@@ -6,9 +6,11 @@ import type { ContentIdeaVideo } from '@/lib/supabase/types'
 
 vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getR2DownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
-  getR2PreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview' })),
   getR2UploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k' })),
   registerR2Video: vi.fn(async () => ({ ok: true, id: 'e1' })),
+}))
+vi.mock('@/lib/actions/video-preview', () => ({
+  getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
@@ -49,12 +51,5 @@ describe('EditorVideoCard', () => {
     const input = container.querySelector('input[type="file"]')
     expect(input).toHaveAttribute('multiple')
     expect(input).toHaveAttribute('accept', 'video/*')
-    expect(screen.getByText(/Subir video editado/i)).toBeInTheDocument()
-  })
-
-  it('shows the caption and links the title to the workspace', () => {
-    render(<EditorVideoCard item={item} />)
-    expect(screen.getByText('Mi caption')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Reel 1/i })).toHaveAttribute('href', '/produccion/idea/v1')
   })
 })

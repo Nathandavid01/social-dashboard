@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
-import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, getR2PreviewUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -197,7 +198,8 @@ function Slot({
       return
     }
     setPreviewLoading(true)
-    const res = await getR2PreviewUrl(video.id)
+    // Routes by storage_provider so pipeline r2 AND entregas-r2 remain viewable.
+    const res = await getVideoPreviewUrl(video.id)
     setPreviewLoading(false)
     if (res.error || !res.url) {
       toast({ title: 'Error', description: res.error ?? 'No se pudo cargar el preview', variant: 'destructive' })
