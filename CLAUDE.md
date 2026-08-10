@@ -2,6 +2,10 @@
 
 Next.js 14 (App Router) · Supabase (auth + Postgres + Storage + Realtime) · Anthropic SDK · Radix/shadcn + Tailwind.
 
+## Mobile companion (iOS)
+
+Native app lives at `../social-dashboard-ios`. **Ship for Nate Media first**; keep the shell multi-agency-ready (workspace + `AppRepository`) so other agencies can adopt the same product later. See that repo’s `CLAUDE.md` and `docs/WHITE_LABEL.md`.
+
 ## Mandatory: TDD for ALL work
 
 Every change — feature, fix, refactor — is done **test-first (TDD)**. No exceptions.

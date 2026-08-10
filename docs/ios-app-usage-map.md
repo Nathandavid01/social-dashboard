@@ -8,7 +8,10 @@ Grounded in the live Next.js app under this repo. Primary sources:
 - `lib/utils/pipeline-stages.ts` — 4-column board placement
 - `app/(dashboard)/*` — authenticated staff routes
 
-This document freezes **core** vs **secondary** for the native iOS staff app.
+This document originally froze **core** vs **secondary** for iOS v1. The native app
+at `social-dashboard-ios` now implements the **full staff shell** (every `AREAS`
+destination + home). Secondary rows below remain useful as product notes; they
+are no longer “non-goals” for the iOS binary.
 
 ---
 

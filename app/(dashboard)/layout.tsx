@@ -9,12 +9,14 @@ import { Toaster } from '@/components/ui/toaster'
 import { CommandPalette } from '@/components/shared/command-palette'
 import { RequestNotifier } from '@/components/shared/request-notifier'
 import { AvatarSetupGate } from '@/components/account/avatar-setup-gate'
+import { RolePreviewBanner } from '@/components/auth/role-preview-banner'
 import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
 import { getWorkflowProgress } from '@/lib/utils/workflow-progress'
-import { getCurrentRole } from '@/lib/auth/server'
+import { getCurrentAccessContext } from '@/lib/auth/server'
 import { resolveApprovalRedirect } from '@/lib/utils/approval-core'
+import { getAgencyBranding } from '@/lib/actions/agency-branding'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 export default async function DashboardLayout({
@@ -27,10 +29,12 @@ export default async function DashboardLayout({
 
   let profile: Profile | null = null
   let role: UserRole | null = null
+  let areaAccess: string[] | null = null
+  let isRolePreview = false
 
   if (user) {
     // Backfills profile if the signup trigger never ran.
-    const ensuredRole = await getCurrentRole()
+    const access = await getCurrentAccessContext()
 
     const { data } = await supabase
       .from('profiles')
@@ -38,7 +42,9 @@ export default async function DashboardLayout({
       .eq('id', user.id)
       .maybeSingle()
     profile = data as Profile | null
-    role = profile?.role ?? ensuredRole
+    role = access.role ?? profile?.role ?? null
+    areaAccess = access.areaAccess
+    isRolePreview = access.isRolePreview
 
     // Deactivated accounts are locked out of the entire dashboard.
     if (profile && profile.status === 'inactive') {
@@ -85,7 +91,10 @@ export default async function DashboardLayout({
     getMyUnreadCount(),
   ])
 
-  const { pendingCount: planningPendingCount } = await getWorkflowProgress().catch(() => ({ pendingCount: 0 }))
+  const [{ pendingCount: planningPendingCount }, branding] = await Promise.all([
+    getWorkflowProgress().catch(() => ({ pendingCount: 0 })),
+    getAgencyBranding(),
+  ])
 
   const currentUserForTopbar = profile
     ? { id: profile.id, full_name: profile.full_name, avatar_url: profile.avatar_url }
@@ -101,9 +110,11 @@ export default async function DashboardLayout({
           videoReviewCount={videoReviewCount ?? 0}
           planningPendingCount={planningPendingCount}
           navPreferences={profile?.nav_preferences}
-          areaAccess={profile?.area_access ?? null}
+          areaAccess={areaAccess}
+          branding={branding}
         />
         <SidebarAwareContent>
+          {isRolePreview && role && <RolePreviewBanner role={role} />}
           <Topbar
             overdueCount={overdueCount ?? 0}
             requestsCount={pendingRequestsCount ?? 0}

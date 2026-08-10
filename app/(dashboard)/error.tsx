@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 import { AlertOctagon, Home, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ interface Props {
 
 export default function DashboardError({ error, reset }: Props) {
   useEffect(() => {
+    Sentry.captureException(error)
     console.error('Dashboard route error:', error)
   }, [error])
 

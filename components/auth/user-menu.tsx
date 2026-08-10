@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
-import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound } from 'lucide-react'
+import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -131,6 +131,14 @@ export function UserMenu() {
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        {process.env.NODE_ENV !== 'production' && profile?.role === 'owner' && (
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/role-preview">
+              <Eye className="mr-2 h-4 w-4" />
+              Ver como otro rol
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/account/security">
             <KeyRound className="mr-2 h-4 w-4" />

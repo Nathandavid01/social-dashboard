@@ -13,6 +13,9 @@ import { useAuth } from '@/lib/context/auth-context'
 import { useSidebar } from '@/lib/context/sidebar-context'
 import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
+import type { AgencyBranding } from '@/lib/utils/agency-branding'
+import { DEFAULT_AGENCY_BRANDING } from '@/lib/utils/agency-branding'
+import { AgencyMark } from '@/components/brand/agency-mark'
 
 interface SidebarProps {
   overdueCount?: number
@@ -22,6 +25,7 @@ interface SidebarProps {
   navPreferences?: NavPreferences
   /** Admin-granted areas (null = no restriction → role defaults). */
   areaAccess?: string[] | null
+  branding?: AgencyBranding
 }
 
 const DEFAULT_HREFS = navItems.map((n) => n.href)
@@ -43,6 +47,7 @@ export function Sidebar({
   planningPendingCount = 0,
   navPreferences,
   areaAccess = null,
+  branding = DEFAULT_AGENCY_BRANDING,
 }: SidebarProps) {
   const pathname = usePathname()
   const { role } = useAuth()
@@ -145,14 +150,14 @@ export function Sidebar({
       collapsed ? 'w-16' : 'w-60',
     )}>
       {/* Logo + collapse toggle */}
-      <div className={cn('flex items-center border-b border-border py-5', collapsed ? 'justify-center px-2' : 'gap-2 px-6')}>
-        {!collapsed && (
+      <div className={cn('flex items-center border-b border-border py-5', collapsed ? 'justify-center px-2' : 'gap-2 px-4')}>
+        {!collapsed ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icons/icon-512.svg" alt="Nate Media" className="h-8 w-8 rounded-lg" />
-            <span className="text-lg font-bold tracking-tight">Nate <span className="text-primary">Media</span></span>
-            {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            <AgencyMark branding={branding} size={32} showWordmark className="min-w-0 flex-1" />
+            {isPending && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />}
           </>
+        ) : (
+          <AgencyMark branding={branding} size={32} />
         )}
         <button
           type="button"
@@ -160,7 +165,7 @@ export function Sidebar({
           aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
           title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
           className={cn(
-            'rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+            'shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
             !collapsed && 'ml-auto',
           )}
         >
@@ -320,7 +325,7 @@ export function Sidebar({
           title="Ver novedades / changelog"
           className="block text-center text-[10px] text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
-          Nate Media · v{APP_VERSION}
+          {branding.brand_name} · v{APP_VERSION}
         </Link>
       </div>
       )}

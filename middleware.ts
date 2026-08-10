@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { areaForPath, canAccessPath } from '@/lib/auth/areas'
+import { ROLE_PREVIEW_COOKIE, resolveRolePreview } from '@/lib/auth/role-preview-core'
 import type { UserRole } from '@/lib/supabase/types'
 
 export async function middleware(request: NextRequest) {
@@ -36,7 +37,16 @@ export async function middleware(request: NextRequest) {
       .select('role, area_access')
       .eq('id', user.id)
       .single()
-    if (profile && !canAccessPath(path, profile.role as UserRole, profile.area_access as string[] | null)) {
+    const actualRole = profile?.role as UserRole | undefined
+    const previewRole = resolveRolePreview(
+      actualRole,
+      request.cookies.get(ROLE_PREVIEW_COOKIE)?.value,
+      process.env.NODE_ENV === 'production',
+    )
+    const effectiveRole = previewRole ?? actualRole
+    const effectiveAreas = previewRole ? null : profile?.area_access as string[] | null
+
+    if (profile && !canAccessPath(path, effectiveRole, effectiveAreas)) {
       const url = request.nextUrl.clone()
       url.pathname = '/home'
       url.search = ''

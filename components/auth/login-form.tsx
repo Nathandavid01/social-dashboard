@@ -70,7 +70,7 @@ export function LoginForm() {
     <div className="w-full">
       <div className="mb-6 space-y-1.5">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Bienvenido de nuevo</h2>
-        <p className="text-sm text-muted-foreground">Entra a tu panel de Nate Media para seguir trabajando.</p>
+        <p className="text-sm text-muted-foreground">Entra a tu panel de operaciones de contenido para seguir trabajando.</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">

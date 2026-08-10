@@ -1,13 +1,17 @@
 import 'server-only'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { hasPermission, type Permission } from './permissions'
 import { areaGrantsPermission } from './areas'
+import { ROLE_PREVIEW_COOKIE, resolveRolePreview } from './role-preview-core'
 import type { UserRole } from '@/lib/supabase/types'
 
-interface RoleAndAreas {
+export interface CurrentAccessContext {
   role: UserRole | null
   areaAccess: string[] | null
+  actualRole: UserRole | null
+  isRolePreview: boolean
 }
 
 /**
@@ -45,7 +49,7 @@ async function ensureProfileRole(user: {
   }
 }
 
-async function getRoleAndAreas(): Promise<RoleAndAreas> {
+async function getActualRoleAndAreas(): Promise<Pick<CurrentAccessContext, 'role' | 'areaAccess'>> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { role: null, areaAccess: null }
@@ -76,6 +80,33 @@ async function getRoleAndAreas(): Promise<RoleAndAreas> {
     role: (refreshed?.role as UserRole | undefined) ?? backfilled,
     areaAccess: (refreshed?.area_access as string[] | null | undefined) ?? null,
   }
+}
+
+export async function getCurrentAccessContext(): Promise<CurrentAccessContext> {
+  const actual = await getActualRoleAndAreas()
+  const cookieStore = await cookies()
+  const previewRole = resolveRolePreview(
+    actual.role,
+    cookieStore.get(ROLE_PREVIEW_COOKIE)?.value,
+    process.env.NODE_ENV === 'production',
+  )
+
+  return {
+    role: previewRole ?? actual.role,
+    areaAccess: previewRole ? null : actual.areaAccess,
+    actualRole: actual.role,
+    isRolePreview: previewRole !== null,
+  }
+}
+
+async function getRoleAndAreas(): Promise<Pick<CurrentAccessContext, 'role' | 'areaAccess'>> {
+  const { role, areaAccess } = await getCurrentAccessContext()
+  return { role, areaAccess }
+}
+
+export async function getActualCurrentRole(): Promise<UserRole | null> {
+  const { role } = await getActualRoleAndAreas()
+  return role
 }
 
 export async function getCurrentRole(): Promise<UserRole | null> {
@@ -109,5 +140,12 @@ export async function assertOwner(): Promise<void> {
   const role = await getCurrentRole()
   if (role !== 'owner') {
     throw new Error('Esta acción requiere rol de Owner.')
+  }
+}
+
+export async function assertActualOwner(): Promise<void> {
+  const role = await getActualCurrentRole()
+  if (role !== 'owner') {
+    throw new Error('Esta acción requiere una cuenta Owner.')
   }
 }

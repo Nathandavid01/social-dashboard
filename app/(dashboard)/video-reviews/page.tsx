@@ -2,9 +2,9 @@ import { getVideoReviews } from '@/lib/actions/video-reviews'
 import { getClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
-import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { currentUserHas } from '@/lib/auth/server'
 import { isReadyToEdit } from '@/lib/utils/edit-queue'
+import { getMyVideoUploadLog } from '@/lib/actions/video-upload-log'
 import { VideoReviewBoard } from '@/components/video-reviews/video-review-board'
 import { ClientVideoSection } from '@/components/video-pipeline/client-video-section'
 import { EditoresTab } from '@/components/video-pipeline/editores-tab'
@@ -58,6 +58,7 @@ export default async function VideoReviewsPage() {
         })),
       )
     : []
+  const uploadLog = canEdit ? await getMyVideoUploadLog() : []
 
   return (
     <Tabs defaultValue="pipeline" className="space-y-4">
@@ -96,7 +97,7 @@ export default async function VideoReviewsPage() {
 
       {canEdit && (
         <TabsContent value="editores" className="space-y-5">
-          <EditoresTab items={editQueue} />
+          <EditoresTab items={editQueue} uploads={uploadLog} />
         </TabsContent>
       )}
     </Tabs>
