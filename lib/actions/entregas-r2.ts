@@ -94,9 +94,13 @@ export async function registerEntregasVideo(input: {
 export async function getEntregasPreviewUrl(
   videoId: string,
 ): Promise<{ url?: string; error?: string }> {
-  // Cualquiera de las dos pantallas del flujo: el editor vive en /revision y
-  // el copy en /entregas, pero ambos necesitan mirar el mismo video.
-  if (!(await currentUserHas('revision.read')) && !(await currentUserHas('entregas.read'))) {
+  // Pipeline, /revision and /entregas all need to preview the same files.
+  // planning.read covers the global pipeline; revision/entregas cover their boards.
+  const canPreview =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canPreview) {
     return { error: 'No autorizado' }
   }
 
