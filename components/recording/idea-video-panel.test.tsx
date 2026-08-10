@@ -183,6 +183,13 @@ describe('IdeaVideoPanel — inline preview', () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
   })
+
+  it('shows a "Ver" button for entregas-r2 videos so dual-R2 files stay viewable', () => {
+    canUpload = true
+    const entregas = { ...makeVideo('edited', 0), storage_provider: 'entregas-r2' as const }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
+    expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+  })
 })
 
 describe('IdeaVideoPanel — multi-file upload', () => {

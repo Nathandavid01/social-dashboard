@@ -270,7 +270,11 @@ function Slot({
   }
 
   if (video) {
-    const isR2 = video.storage_provider === 'r2'
+    // Both pipeline R2 and Entregas R2 support signed preview via getVideoPreviewUrl.
+    // Download still uses pipeline R2 signer (old-bucket rows only); entregas uses preview URL as fallback for now.
+    const isCloudR2 =
+      video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
+    const canDownloadR2 = video.storage_provider === 'r2'
     return (
       <div className="space-y-2">
       <div className={cn('flex items-center gap-3 rounded-lg border p-3', meta.tone)}>
@@ -290,7 +294,7 @@ function Slot({
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {isR2 && (
+          {isCloudR2 && (
             <Button size="sm" variant="outline" onClick={togglePreview} disabled={previewLoading}>
               {previewLoading ? (
                 <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
@@ -302,7 +306,7 @@ function Slot({
               Ver
             </Button>
           )}
-          {isR2 ? (
+          {canDownloadR2 ? (
             <Button size="sm" variant="outline" onClick={download}>
               <Download className="mr-1 h-3.5 w-3.5" /> Bajar
             </Button>
