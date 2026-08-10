@@ -2,6 +2,7 @@ import { requirePermission, getCurrentRole } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
+import { filterEntregasDeliveredIdeas } from '@/lib/utils/entregas-delivery'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
 import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
 import { VistaEditor } from '@/components/entregas/vista-editor'
@@ -29,11 +30,9 @@ export default async function RevisionPage() {
 
   const activeClients = activeClientsRaw ?? []
 
-  // Solo lo entregado por este flujo: un video con su archivo ya en R2. Sin
-  // esto heredaría las ideas históricas, que nunca pasaron por aquí.
-  const entregados = ideas.filter((i) =>
-    (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
-  )
+  // Solo lo entregado por este flujo: edited file on Entregas R2 (not pipeline r2).
+  // Without this filter, historical ideas without Entregas uploads pollute the board.
+  const entregados = filterEntregasDeliveredIdeas(ideas)
 
   // El tablero también se acota: filtrar solo el desplegable dejaba al editor
   // viendo el trabajo de los demás, que no puede tocar y le estorba para ver
