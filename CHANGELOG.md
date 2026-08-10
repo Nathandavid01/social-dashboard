@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.13 — 2026-08-10
+
+**Se elimina el error "Could not embed… content_ideas / content_idea_videos" de raíz.**
+
+- Había dos foreign keys entre `content_ideas` y `content_idea_videos`; PostgREST no sabía cuál usar.
+- Se elimina la FK inversa no usada (`editing_source_video_id`) y queda solo la relación real del video a la idea.
+- Las consultas con hint explícito siguen funcionando igual.
+
 ## v3.12 — 2026-08-10
 
 **El dashboard de Entregas vuelve a cargar los videos y el error no puede reaparecer silenciosamente.**
