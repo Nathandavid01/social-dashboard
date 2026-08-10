@@ -47,10 +47,10 @@ const describeLive = hasEnv || forceLive ? describe : describe.skip
 describeLive('content idea/video relationships (LIVE against Supabase)', () => {
   it('allows only ONE relationship (bare embed must NOT return PGRST201)', async () => {
     const result = await probeIdeaVideoRelationshipSchema()
-    if (result.skipped && forceLive) {
-      throw new Error('RELATIONSHIP_LIVE=1 but Supabase env is missing')
+    if (result.ok && result.skipped) {
+      if (forceLive) throw new Error('RELATIONSHIP_LIVE=1 but Supabase env is missing')
+      return
     }
-    if (result.skipped) return
 
     expect(
       result.ok,
@@ -65,7 +65,7 @@ describeLive('content idea/video relationships (LIVE against Supabase)', () => {
 
   it('runs the /revision pipeline select shape without embed errors', async () => {
     const result = await probeRevisionPipelineSelect()
-    if (result.skipped) return
+    if (result.ok && result.skipped) return
 
     expect(
       result.ok,

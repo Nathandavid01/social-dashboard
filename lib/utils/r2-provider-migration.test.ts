@@ -100,3 +100,26 @@ describe('assertNoLossCopy / summarizeMigrationLoss', () => {
     })
   })
 })
+
+describe('mjs twin stays aligned with TS module', () => {
+  it('buildMigrationPlan from .mjs matches .ts for production sample rows', async () => {
+    const mjs = await import('./r2-provider-migration.mjs')
+    const rows = [
+      {
+        id: '465adcc3-682d-4cc7-8dc7-fbc2ca9b5a1c',
+        idea_id: 'fb12908c-7204-486b-b8ae-1d67c8a0a82e',
+        kind: 'raw',
+        status: 'uploaded',
+        name: 'clip.MP4',
+        drive_file_id:
+          'ideas/fb12908c-7204-486b-b8ae-1d67c8a0a82e/raw/1780046354094-2f5e8d59-fd9a-462b-8934-0fc89f80eb84.mp4',
+        storage_provider: 'r2',
+        size_bytes: 8647881,
+      },
+    ]
+    const a = buildMigrationPlan(rows as never)
+    const b = mjs.buildMigrationPlan(rows)
+    expect(b.plan).toEqual(a.plan)
+    expect(b.skipped).toEqual(a.skipped)
+  })
+})

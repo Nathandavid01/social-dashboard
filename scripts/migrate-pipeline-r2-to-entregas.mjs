@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 /**
- * Copy content_idea_videos objects from pipeline R2 → Entregas R2, then
- * retarget DB rows. Refuses to update DB unless object sizes match (no loss).
+ * Copy content_idea_videos from pipeline R2 → Entregas R2, then retarget DB.
+ * Refuses DB update unless object sizes match.
  *
- * Usage:
  *   node scripts/migrate-pipeline-r2-to-entregas.mjs --dry-run
  *   node scripts/migrate-pipeline-r2-to-entregas.mjs --execute
  *   node scripts/migrate-pipeline-r2-to-entregas.mjs --verify
- *
- * Requires env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
- *   R2_* (source), ENTREGAS_R2_* (dest). Loads .env.local if present.
  */
 
 import { readFileSync, existsSync, writeFileSync } from 'node:fs'
@@ -22,7 +18,7 @@ import {
   summarizeMigrationLoss,
   PIPELINE_PROVIDER,
   ENTREGAS_PROVIDER,
-} from '../lib/utils/r2-provider-migration.ts'
+} from '../lib/utils/r2-provider-migration.mjs'
 
 function loadEnvLocal() {
   const p = resolve(process.cwd(), '.env.local')
@@ -40,15 +36,14 @@ function loadEnvLocal() {
   }
 }
 
-
+/** @param {'pipeline' | 'entregas'} kind */
 function makeClient(kind) {
   const isEntregas = kind === 'entregas'
   const accountId = process.env[isEntregas ? 'ENTREGAS_R2_ACCOUNT_ID' : 'R2_ACCOUNT_ID']
   const accessKeyId = process.env[isEntregas ? 'ENTREGAS_R2_ACCESS_KEY_ID' : 'R2_ACCESS_KEY_ID']
   const secretAccessKey = process.env[isEntregas ? 'ENTREGAS_R2_SECRET_ACCESS_KEY' : 'R2_SECRET_ACCESS_KEY']
   const bucket =
-    process.env[isEntregas ? 'ENTREGAS_R2_BUCKET' : 'R2_BUCKET'] ||
-    (isEntregas ? '' : 'nmedia-videos')
+    process.env[isEntregas ? 'ENTREGAS_R2_BUCKET' : 'R2_BUCKET'] || (isEntregas ? '' : 'nmedia-videos')
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
     return { client: null, bucket: null, missing: true }
   }
@@ -81,17 +76,14 @@ async function fetchPipelineR2Rows(url, key) {
 }
 
 async function countProvider(url, key, provider) {
-  const res = await fetch(
-    `${url}/rest/v1/content_idea_videos?select=id&storage_provider=eq.${provider}`,
-    {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        Prefer: 'count=exact',
-        Range: '0-0',
-      },
+  const res = await fetch(`${url}/rest/v1/content_idea_videos?select=id&storage_provider=eq.${provider}`, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Prefer: 'count=exact',
+      Range: '0-0',
     },
-  )
+  })
   const cr = res.headers.get('content-range') || ''
   const m = /\/(\d+|\*)/.exec(cr)
   if (m && m[1] !== '*') return Number(m[1])
@@ -121,13 +113,25 @@ async function patchRow(url, key, videoId, destKey) {
 async function main() {
   loadEnvLocal()
   const args = new Set(process.argv.slice(2))
-  const dryRun = args.has('--dry-run') || (!args.has('--execute') && !args.has('--verify'))
   const execute = args.has('--execute')
   const verifyOnly = args.has('--verify')
+  const dryRun = !execute && !verifyOnly
 
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '')
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
   if (!url || !serviceKey) {
+    if (dryRun) {
+      console.log(
+        JSON.stringify({
+          mode: 'dry-run',
+          skipped: true,
+          reason: 'no_supabase_env',
+          note: 'CI without secrets is OK for dry-run; set Actions secrets for live inventory.',
+        }),
+      )
+      process.exitCode = 0
+      return
+    }
     console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
     process.exitCode = 2
     return
@@ -135,27 +139,41 @@ async function main() {
 
   const rows = await fetchPipelineR2Rows(url, serviceKey)
   const { plan, skipped } = buildMigrationPlan(rows)
-  console.log(JSON.stringify({ mode: execute ? 'execute' : verifyOnly ? 'verify' : 'dry-run', pipeline_r2_rows: rows.length, plan: plan.length, skipped }, null, 2))
-  console.log('Plan items:')
+  console.log(
+    JSON.stringify(
+      {
+        mode: execute ? 'execute' : verifyOnly ? 'verify' : 'dry-run',
+        pipeline_r2_rows: rows.length,
+        plan: plan.length,
+        skipped,
+      },
+      null,
+      2,
+    ),
+  )
   for (const p of plan) {
     console.log(`- ${p.videoId} ${p.sourceKey} -> ${p.destKey} (size_bytes=${p.expectedSizeBytes})`)
   }
 
   if (verifyOnly) {
     const leftover = await fetchPipelineR2Rows(url, serviceKey)
-    const summary = summarizeMigrationLoss({
-      planIds: plan.map((p) => p.videoId),
-      succeededIds: [], // verify mode: leftover empty means done
-      remainingPipelineR2Ids: leftover.map((r) => r.id),
-    })
-    // Special: if plan empty and leftover empty, migration complete
     const ok = leftover.length === 0
-    console.log(JSON.stringify({ verify: ok ? 'PASS' : 'FAIL', remaining_pipeline_r2: leftover.length, leftover_ids: leftover.map((r) => r.id) }, null, 2))
+    console.log(
+      JSON.stringify(
+        {
+          verify: ok ? 'PASS' : 'FAIL',
+          remaining_pipeline_r2: leftover.length,
+          leftover_ids: leftover.map((r) => r.id),
+        },
+        null,
+        2,
+      ),
+    )
     process.exitCode = ok ? 0 : 1
     return
   }
 
-  if (dryRun && !execute) {
+  if (dryRun) {
     console.log('Dry-run only. Re-run with --execute after R2_* and ENTREGAS_R2_* are set.')
     const src = makeClient('pipeline')
     const dst = makeClient('entregas')
@@ -175,18 +193,8 @@ async function main() {
 
   const src = makeClient('pipeline')
   const dst = makeClient('entregas')
-  if (src.missing || dst.missing) {
+  if (src.missing || dst.missing || !src.client || !dst.client || !src.bucket || !dst.bucket) {
     console.error('Cannot execute: pipeline R2 and/or Entregas R2 credentials missing.')
-    console.error(
-      JSON.stringify(
-        {
-          pipeline_r2_credentials: src.missing ? 'ABSENT' : 'PRESENT',
-          entregas_r2_credentials: dst.missing ? 'ABSENT' : 'PRESENT',
-        },
-        null,
-        2,
-      ),
-    )
     process.exitCode = 2
     return
   }
@@ -250,9 +258,7 @@ async function main() {
     pipeline_count: await countProvider(url, serviceKey, PIPELINE_PROVIDER),
   }
   console.log(JSON.stringify(report, null, 2))
-  const outPath = resolve(process.cwd(), 'migration-r2-report.json')
-  writeFileSync(outPath, JSON.stringify(report, null, 2))
-  console.log('Wrote', outPath)
+  writeFileSync(resolve(process.cwd(), 'migration-r2-report.json'), JSON.stringify(report, null, 2))
   process.exitCode = loss.ok && failed.length === 0 ? 0 : 1
 }
 

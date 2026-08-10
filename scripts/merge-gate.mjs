@@ -55,11 +55,10 @@ const GRAPH = [
     id: 'r2-inventory-dry-run',
     label: 'R2 migration dry-run (inventory; no credentials required)',
     run: () => {
-      const r = spawnSync(
-        'node',
-        ['--experimental-strip-types', 'scripts/migrate-pipeline-r2-to-entregas.ts', '--dry-run'],
-        { cwd: root, encoding: 'utf8' },
-      )
+      const r = spawnSync('node', ['scripts/migrate-pipeline-r2-to-entregas.mjs', '--dry-run'], {
+        cwd: root,
+        encoding: 'utf8',
+      })
       // dry-run exits 0 even when credentials absent, as long as Supabase list works
       return { ok: r.status === 0, detail: (r.stdout || '') + (r.stderr || '') }
     },
