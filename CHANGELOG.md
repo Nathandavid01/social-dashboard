@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.14 — 2026-08-10
+
+**Pruebas más duras para que el error de embed de Revisión no vuelva.**
+
+- Checker estático: prohíbe embeds sin `!content_idea_videos_idea_id_fkey` y también hints de FKs inversas.
+- Tests live: el bare embed no puede devolver PGRST201 (un solo relationship en el schema).
+- CI `relationship-guard` + `pretest` / `npm run test:relationships`.
+
 ## v3.13 — 2026-08-10
 
 **Se elimina el error "Could not embed… content_ideas / content_idea_videos" de raíz.**

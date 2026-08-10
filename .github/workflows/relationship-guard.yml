@@ -1,0 +1,47 @@
+# Blocks PRs that reintroduce the /revision embed crash (PGRST201).
+name: relationship-guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  static-and-unit:
+    name: Static embed guard + unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: Static scan (bare / wrong FK embeds)
+        run: npm run check:db-relationships
+      - name: Relationship unit tests (no network required)
+        run: npx vitest run lib/actions/content-idea-video-relationship.test.ts scripts/check-content-idea-video-schema.test.ts --exclude '**/.claude/**'
+
+  live-schema:
+    name: Live schema (single relationship)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: Live probe — dual FK must not return
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RELATIONSHIP_LIVE: '1'
+        run: |
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "No Supabase secrets on this repo — skipping live schema check."
+            echo "Add NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY as Actions secrets to enforce live."
+            exit 0
+          fi
+          npm run check:db-schema-relationships -- --require
+          npx vitest run lib/actions/content-idea-video-relationship.live.test.ts --exclude '**/.claude/**'

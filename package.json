@@ -13,7 +13,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:db-schema-relationships": "node scripts/check-content-idea-video-schema.mjs",
+    "test:relationships": "vitest run lib/actions/content-idea-video-relationship scripts/check-content-idea-video-schema --exclude \"**/.claude/**\"",
+    "pretest": "npm run check:db-relationships"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
