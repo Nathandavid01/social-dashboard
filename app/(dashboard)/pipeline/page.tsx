@@ -61,6 +61,14 @@ export default async function PipelinePage() {
     name: p.full_name ?? 'Sin nombre',
   }))
 
+  // Same logo resolution as planned cards: uploaded logo_url, else Metricool pic.
+  const clientLogos: Record<string, string | null> = Object.fromEntries(
+    activeClients.map((c) => {
+      const metricoolPic = c.metricool_blog_id ? metricoolPics[String(c.metricool_blog_id)] : undefined
+      return [c.id, resolveClientLogo(c.logo_url, metricoolPic)]
+    }),
+  )
+
   return (
     <ContentPipelineBoard
       ideas={ideas}
@@ -68,6 +76,7 @@ export default async function PipelinePage() {
       allClients={allClients}
       clientCadence={clientCadence}
       teamMembers={teamMembers}
+      clientLogos={clientLogos}
     />
   )
 }

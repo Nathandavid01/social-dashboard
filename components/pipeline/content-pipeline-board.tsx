@@ -9,6 +9,8 @@ import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batc
 import { userAccent } from '@/lib/utils/user-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
+import { getBatchVideoPreviewUrls } from '@/lib/actions/batch-video-previews'
+import { pickBatchEditedVideos } from '@/lib/utils/batch-video-thumbs'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
@@ -47,6 +49,7 @@ export function ContentPipelineBoard({
   allClients = [],
   clientCadence = {},
   teamMembers = [],
+  clientLogos = {},
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -55,6 +58,11 @@ export function ContentPipelineBoard({
   clientCadence?: Record<string, ClientCadence>
   /** All active team members — powers the "Asignado a" filter (not just people on batches). */
   teamMembers?: { id: string; name: string }[]
+  /**
+   * Resolved brand marks by client id (uploaded logo_url, else Metricool picture).
+   * Fills batch cards when ideas.client.logo_url is empty.
+   */
+  clientLogos?: Record<string, string | null>
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -89,7 +97,16 @@ export function ContentPipelineBoard({
     setBatchData(data)
   }, [openClientId, openOptions])
 
-  const batches = useMemo(() => groupIntoBatches(ideas), [ideas])
+  const batches = useMemo(() => {
+    const raw = groupIntoBatches(ideas)
+    // Prefer logo from the idea join; fall back to the page-level resolved map
+    // (Metricool brand picture) so Edición cards never show a bare initial when
+    // the client has a brand mark elsewhere.
+    return raw.map((b) => ({
+      ...b,
+      logoUrl: b.logoUrl ?? clientLogos[b.clientId] ?? null,
+    }))
+  }, [ideas, clientLogos])
 
   const pipelineByClient = useMemo(
     () => buildClientPipelineIndex(ideas, clientCadence),
@@ -444,23 +461,128 @@ function PipelineVideoThumb({
   name,
   logoUrl,
   thumbUrl,
+  className,
 }: {
   name: string
   logoUrl?: string | null
   thumbUrl?: string | null
+  className?: string
 }) {
   const src = thumbUrl ?? logoUrl
   if (src) {
     return (
-      <div className="relative h-[42px] overflow-hidden rounded-lg border border-border/60 bg-muted/30 ring-1 ring-inset ring-white/5">
+      <div
+        className={cn(
+          'relative h-[42px] overflow-hidden rounded-lg border border-border/60 bg-muted/30 ring-1 ring-inset ring-white/5',
+          className,
+        )}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+        <img
+          src={src}
+          alt=""
+          referrerPolicy="no-referrer"
+          className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
+        />
       </div>
     )
   }
   return (
-    <div className="grid h-[42px] place-items-center rounded-lg border border-dashed border-border/70 bg-muted/30 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+    <div
+      className={cn(
+        'grid h-[42px] place-items-center rounded-lg border border-dashed border-border/70 bg-muted/30 text-[11px] font-bold uppercase tracking-wide text-muted-foreground',
+        className,
+      )}
+    >
       {name.slice(0, 2)}
+    </div>
+  )
+}
+
+/** Strip of editor-uploaded videos (up to 3). Loads signed/public preview URLs. */
+function BatchVideoStrip({
+  ideas,
+  clientName,
+  logoUrl,
+  total,
+}: {
+  ideas: IdeaWithPipeline[]
+  clientName: string
+  logoUrl?: string | null
+  total: number
+}) {
+  const edited = useMemo(() => pickBatchEditedVideos(ideas, 3), [ideas])
+  const [urls, setUrls] = useState<Record<string, string>>({})
+  const idsKey = edited.map((v) => v.id).join(',')
+
+  useEffect(() => {
+    if (edited.length === 0) return
+    let cancelled = false
+    getBatchVideoPreviewUrls(edited.map((v) => v.id)).then((res) => {
+      if (cancelled || !res.urls) return
+      setUrls(res.urls)
+    })
+    return () => {
+      cancelled = true
+    }
+    // idsKey captures the set of video ids without depending on array identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsKey])
+
+  const more = Math.max(0, total - Math.max(edited.length, Math.min(3, total)))
+
+  // No editor uploads yet → keep brand mark placeholders (same slots as before).
+  if (edited.length === 0) {
+    const placeholders = Math.min(3, Math.max(1, total))
+    return (
+      <div className="flex gap-1" data-testid="batch-video-strip">
+        {Array.from({ length: placeholders }).map((_, i) => (
+          <PipelineVideoThumb
+            key={i}
+            name={clientName}
+            logoUrl={logoUrl}
+            className="min-w-0 flex-1"
+          />
+        ))}
+        {total > placeholders && (
+          <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">
+            +{total - placeholders}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex gap-1" data-testid="batch-video-strip">
+      {edited.map((v) => {
+        const src = urls[v.id]
+        return (
+          <div
+            key={v.id}
+            className="relative h-[42px] min-w-0 flex-1 overflow-hidden rounded-lg border border-border/60 bg-muted/40 ring-1 ring-inset ring-white/5"
+            title={v.name}
+          >
+            {src ? (
+              <video
+                src={src}
+                muted
+                playsInline
+                preload="metadata"
+                className="h-full w-full object-cover"
+                aria-label={v.name}
+              />
+            ) : (
+              <div className="h-full w-full animate-pulse bg-muted" aria-hidden />
+            )}
+          </div>
+        )
+      })}
+      {more > 0 && (
+        <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">
+          +{more}
+        </div>
+      )}
     </div>
   )
 }
@@ -470,8 +592,6 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const canBack = adjacentBatchStage(stage, -1) !== null
   const canFwd = adjacentBatchStage(stage, 1) !== null
   const pct = Math.round(batchProgress(stage) * 100)
-  const thumbs = Math.min(3, batch.total)
-  const more = batch.total - thumbs
 
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
@@ -485,9 +605,13 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
       </div>
 
       <div className="space-y-2.5 p-3 pl-3.5">
-        {/* client + period */}
+        {/* client + period — brand logo, not assignee-tinted initials */}
         <div className="flex items-center gap-2.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-black" style={{ backgroundColor: a.dot }}>{batch.clientName.slice(0, 1).toUpperCase()}</span>
+          <ClientLogo
+            name={batch.clientName}
+            logoUrl={batch.logoUrl}
+            className="h-7 w-7 shrink-0 text-[10px] ring-1 ring-border/60"
+          />
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-[13px] font-semibold leading-tight text-foreground">{batch.clientName}</p>
@@ -503,13 +627,13 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
 
-        {/* thumbnail strip (assignee-tinted) */}
-        <div className="flex gap-1">
-          {Array.from({ length: thumbs }).map((_, i) => (
-            <div key={i} className="h-[42px] flex-1 rounded-md" style={{ background: `linear-gradient(135deg, ${a.dot}, ${a.dot}22 70%, transparent)` }} />
-          ))}
-          {more > 0 && <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">+{more}</div>}
-        </div>
+        {/* editor-uploaded videos (gray strip → real previews) */}
+        <BatchVideoStrip
+          ideas={batch.ideas}
+          clientName={batch.clientName}
+          logoUrl={batch.logoUrl}
+          total={batch.total}
+        />
 
         {/* progress */}
         <div className="space-y-1.5">

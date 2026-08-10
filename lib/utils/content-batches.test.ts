@@ -65,6 +65,22 @@ describe('groupIntoBatches', () => {
     const batches = groupIntoBatches([idea()] as IdeaWithPipeline[])
     expect(batches[0].assignee).toBeNull()
   })
+
+  it('carries the client logo_url onto the batch for board cards', () => {
+    const batches = groupIntoBatches([
+      idea({
+        client: {
+          id: 'c1',
+          name: 'Speedy Net',
+          industry: null,
+          logo_url: 'https://cdn.example/speedy.png',
+          platforms: ['instagram'],
+        },
+      }),
+    ] as IdeaWithPipeline[])
+    expect(batches[0].logoUrl).toBe('https://cdn.example/speedy.png')
+    expect(batches[0].clientName).toBe('Speedy Net')
+  })
 })
 
 describe('buildClientPipelineIndex', () => {

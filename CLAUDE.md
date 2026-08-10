@@ -14,6 +14,19 @@ Every change — feature, fix, refactor — is done **test-first (TDD)**. No exc
 
 If a requested task **cannot be completed now** (needs a DB migration to be applied, an external integration, a product decision), DO NOT drop it — leave it as a tracked TODO (in the session task list and/or `docs/TODO.md`) and implement it when the blocker clears.
 
+
+## Hard merge rules (mandatory for everyone including Nathan)
+
+See **`docs/MERGE_RULES.md`**. Short version:
+
+1. **Never push to `main` directly** — only via **Pull Request**.
+2. PR must be **verified**: CI jobs `merge-gate`, `test`, and relationship-guard must be green.
+3. **Graph model** must pass: run `npm run merge-gate` (same ordered graph CI runs).
+4. **≥1 approving review** before merge.
+5. Dual-R2: editor media is **`entregas-r2`**; do not reintroduce pipeline-only assumptions.
+
+Admin (once): `bash scripts/apply-branch-protection.sh`
+
 ## Workflow & commits
 
 - Work on a feature branch (e.g. `eric/dev`). Commit in small, green increments — never leave large uncommitted work.
@@ -45,7 +58,14 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 
 - **TypeScript strict**. Run `npx tsc --noEmit` before claiming work is done — never `next build` while `next dev` is running (they share `.next/`).
 - **Local auth**. Keep a `.env.local` with the Supabase URL and anon key in every checkout used for `npm run dev`; `npm run predev` checks this automatically before Next starts.
-- **PostgREST joins between `content_ideas` and `content_idea_videos` must name the intended foreign key** with an explicit `!<foreign_key>` relationship hint. `npm run check:db-relationships` enforces this rule and runs automatically before `npm run build`.
+- **PostgREST joins between `content_ideas` and `content_idea_videos` — hard rules (regression: /revision PGRST201):**
+  1. Always embed with the idea→videos FK: `videos:content_idea_videos!content_idea_videos_idea_id_fkey(...)`. Never a bare `content_idea_videos(...)`.
+  2. **Never re-add a second FK** between those tables (e.g. `content_ideas.editing_source_video_id` → videos). A dual FK makes *every* bare embed fail and takes down `/revision`.
+  3. Guards (must stay green):
+     - `npm run check:db-relationships` — static scan of `app/`, `lib/`, `components/` (prebuild + pretest)
+     - `npm run test:relationships` — unit + live schema probes
+     - `npm run check:db-schema-relationships` — live: bare embed must not return PGRST201 (needs `.env.local`)
+  4. See `supabase/migrations/0058_drop_editing_source_video_fk.sql` and `lib/actions/content-idea-video-relationship*.test.ts`.
 - **Server-only utils** go in files imported only from server components / server actions. Anything imported by `'use client'` files must not transitively import `lib/supabase/server.ts` — split types into a `*-types.ts` companion (see `workflow-progress.ts` + `workflow-types.ts`).
 - **Card headers** that have title + badges/actions must use `flex-wrap items-center justify-between gap-x-3 gap-y-2` on the container, `min-w-0` + `truncate` on the title, `shrink-0` + `whitespace-nowrap` on the right-side children. Narrow grid columns are the rule, not the exception.
 - **Animations** use `tailwindcss-animate` utilities (`animate-in fade-in slide-in-from-bottom-1 duration-300`) with `animationDelay` for stagger. No framer-motion in this project.
