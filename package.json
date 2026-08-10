@@ -16,7 +16,11 @@
     "test:watch": "vitest",
     "check:db-schema-relationships": "node scripts/check-content-idea-video-schema.mjs",
     "test:relationships": "vitest run lib/actions/content-idea-video-relationship scripts/check-content-idea-video-schema --exclude \"**/.claude/**\"",
-    "pretest": "npm run check:db-relationships"
+    "pretest": "npm run check:db-relationships",
+    "merge-gate": "node scripts/merge-gate.mjs",
+    "migrate:r2-to-entregas": "node --experimental-strip-types scripts/migrate-pipeline-r2-to-entregas.ts",
+    "migrate:r2-to-entregas:dry": "node --experimental-strip-types scripts/migrate-pipeline-r2-to-entregas.ts --dry-run",
+    "migrate:r2-to-entregas:verify": "node --experimental-strip-types scripts/migrate-pipeline-r2-to-entregas.ts --verify"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

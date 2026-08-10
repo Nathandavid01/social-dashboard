@@ -1,0 +1,14 @@
+# Default owners — adjust GitHub usernames as needed.
+# With "Require review from Code Owners" enabled, these must approve.
+*       @Nathandavid01 @ericmperez
+
+# Storage / dual-R2 paths need careful review
+/lib/integrations/r2.ts              @Nathandavid01 @ericmperez
+/lib/integrations/entregas-r2.ts     @Nathandavid01 @ericmperez
+/lib/actions/entregas-r2.ts          @Nathandavid01 @ericmperez
+/lib/actions/idea-videos-r2.ts       @Nathandavid01 @ericmperez
+/lib/utils/entregas-delivery.ts      @Nathandavid01 @ericmperez
+/lib/utils/r2-provider-migration.ts  @Nathandavid01 @ericmperez
+/scripts/migrate-pipeline-r2-to-entregas.ts @Nathandavid01 @ericmperez
+/scripts/merge-gate.mjs              @Nathandavid01 @ericmperez
+/supabase/migrations/                @Nathandavid01 @ericmperez

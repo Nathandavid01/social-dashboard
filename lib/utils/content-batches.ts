@@ -149,6 +149,8 @@ export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
 export interface ClientBatch {
   clientId: string
   clientName: string
+  /** Brand mark for the board card (from clients.logo_url). */
+  logoUrl: string | null
   /** Client account status (active / paused / onboarding). null when unknown. */
   clientStatus: string | null
   /** The person the batch is assigned to (drives its color). null = unassigned. */
@@ -231,6 +233,7 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
     batches.push({
       clientId,
       clientName: active[0]?.client?.name ?? 'Sin cliente',
+      logoUrl: active[0]?.client?.logo_url ?? null,
       clientStatus: active[0]?.client?.status ?? null,
       assignee: dominantAssignee(active),
       assigneeIds: Array.from(assigneeSet),

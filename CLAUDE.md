@@ -14,6 +14,19 @@ Every change — feature, fix, refactor — is done **test-first (TDD)**. No exc
 
 If a requested task **cannot be completed now** (needs a DB migration to be applied, an external integration, a product decision), DO NOT drop it — leave it as a tracked TODO (in the session task list and/or `docs/TODO.md`) and implement it when the blocker clears.
 
+
+## Hard merge rules (mandatory for everyone including Nathan)
+
+See **`docs/MERGE_RULES.md`**. Short version:
+
+1. **Never push to `main` directly** — only via **Pull Request**.
+2. PR must be **verified**: CI jobs `merge-gate`, `test`, and relationship-guard must be green.
+3. **Graph model** must pass: run `npm run merge-gate` (same ordered graph CI runs).
+4. **≥1 approving review** before merge.
+5. Dual-R2: editor media is **`entregas-r2`**; do not reintroduce pipeline-only assumptions.
+
+Admin (once): `bash scripts/apply-branch-protection.sh`
+
 ## Workflow & commits
 
 - Work on a feature branch (e.g. `eric/dev`). Commit in small, green increments — never leave large uncommitted work.

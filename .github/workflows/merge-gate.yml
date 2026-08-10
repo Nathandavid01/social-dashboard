@@ -1,0 +1,30 @@
+# Required status check name: "merge-gate"
+# Branch protection must require this check + a PR + 1 approval.
+name: merge-gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: merge-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  merge-gate:
+    name: merge-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: Hard merge graph
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/merge-gate.mjs

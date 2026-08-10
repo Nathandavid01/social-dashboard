@@ -10,6 +10,12 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
+const getBatchVideoPreviewUrls = vi.fn(async (ids: string[]) => ({
+  urls: Object.fromEntries(ids.map((id) => [id, `https://cdn.example/preview/${id}.mp4`])),
+}))
+vi.mock('@/lib/actions/batch-video-previews', () => ({
+  getBatchVideoPreviewUrls: (...a: unknown[]) => getBatchVideoPreviewUrls(...(a as [string[]])),
+}))
 vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
 
 import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
@@ -27,6 +33,28 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
     client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'] },
     ...over,
   } as IdeaWithPipeline
+}
+
+function editedVideo(id: string, uploadedAt = '2026-08-10T12:00:00Z') {
+  return {
+    id,
+    idea_id: 'i',
+    kind: 'edited' as const,
+    name: `${id}.mp4`,
+    drive_file_id: `entregas/x/edited/${id}.mp4`,
+    drive_view_link: null,
+    drive_thumb_url: null,
+    storage_provider: 'entregas-r2' as const,
+    mime_type: 'video/mp4',
+    size_bytes: 1000,
+    duration_sec: null,
+    notes: null,
+    uploaded_by: null,
+    status: 'uploaded' as const,
+    error_message: null,
+    uploaded_at: uploadedAt,
+    updated_at: uploadedAt,
+  }
 }
 
 beforeEach(() => {
@@ -85,6 +113,79 @@ describe('ContentPipelineBoard — batch model', () => {
   it('shows "Sin asignar" for an unassigned batch', () => {
     render(<ContentPipelineBoard ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
+  })
+
+  it('shows the client logo on the batch card (header + strip)', () => {
+    const { container } = render(
+      <ContentPipelineBoard
+        ideas={[
+          idea({
+            id: '1',
+            client: {
+              id: 'c1',
+              name: 'Speedy Net',
+              industry: null,
+              logo_url: 'https://cdn.example/speedy-logo.png',
+              platforms: ['instagram'],
+            },
+          }),
+        ]}
+      />,
+    )
+    const imgs = container.querySelectorAll('article img[src*="speedy-logo"]')
+    // Header ClientLogo + at least one strip thumb using the logo.
+    expect(imgs.length).toBeGreaterThanOrEqual(2)
+    expect(imgs[0]).toHaveAttribute('alt', 'Speedy Net')
+  })
+
+  it('falls back to clientLogos map when idea.client.logo_url is empty (Metricool)', () => {
+    const { container } = render(
+      <ContentPipelineBoard
+        ideas={[
+          idea({
+            id: '1',
+            client_id: 'c1',
+            client: { id: 'c1', name: 'Speedy Net', industry: null, logo_url: null, platforms: [] },
+          }),
+        ]}
+        clientLogos={{ c1: 'https://cdn.example/metricool-speedy.png' }}
+      />,
+    )
+    expect(container.querySelectorAll('article img[src*="metricool-speedy"]').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows editor-uploaded videos in the gray strip (not only logos)', async () => {
+    getBatchVideoPreviewUrls.mockClear()
+    const { container } = render(
+      <ContentPipelineBoard
+        ideas={[
+          idea({
+            id: '1',
+            status: 'grabada',
+            client: {
+              id: 'c1',
+              name: 'Speedy Net',
+              industry: null,
+              logo_url: 'https://cdn.example/speedy.png',
+              platforms: [],
+            },
+            videos: [
+              editedVideo('ev1', '2026-08-10T14:00:00Z'),
+              editedVideo('ev2', '2026-08-10T13:00:00Z'),
+            ],
+          }),
+        ]}
+      />,
+    )
+    expect(container.querySelector('[data-testid="batch-video-strip"]')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(getBatchVideoPreviewUrls).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      const videos = container.querySelectorAll('article video')
+      expect(videos.length).toBe(2)
+      expect(videos[0]).toHaveAttribute('src', 'https://cdn.example/preview/ev1.mp4')
+    })
   })
 
   it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
