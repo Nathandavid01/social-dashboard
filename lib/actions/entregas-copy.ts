@@ -57,7 +57,7 @@ export async function getEntregaCopyVideos(
       .single(),
     supabase
       .from('content_ideas')
-      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, caption_draft, publish_date, videos:content_idea_videos(id, kind, storage_provider, uploaded_at)')
+      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, caption_draft, publish_date, videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at)')
       .eq('client_id', clientId)
       .eq('approval_status', 'approved')
       .order('approved_at', { ascending: true }),
