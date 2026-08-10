@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run check:db-relationships",
     "build": "next build",
+    "check:db-relationships": "node scripts/check-content-idea-video-relationships.mjs",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

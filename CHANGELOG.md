@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.12 — 2026-08-10
+
+**El dashboard de Entregas vuelve a cargar los videos y el error no puede reaparecer silenciosamente.**
+
+- Las consultas de Revisión y Copy ahora indican exactamente cuál relación usar entre ideas y videos.
+- El build de producción se detiene si alguien vuelve a introducir una consulta ambigua entre esas tablas.
+
 ## v3.11 — 2026-08-09
 
 **La carga de videos ahora es más compacta y fácil de leer, sin cambiar el flujo existente.**

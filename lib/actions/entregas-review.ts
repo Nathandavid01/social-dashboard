@@ -26,7 +26,7 @@ export async function getEntregaReviewVideos(
   const { data, error } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, hook, approval_status, created_by, client:clients(name), videos:content_idea_videos(id, kind, storage_provider, uploaded_at)',
+      'id, title, hook, approval_status, created_by, client:clients(name), videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at)',
     )
     .eq('client_id', clientId)
     .eq('approval_status', 'submitted')
