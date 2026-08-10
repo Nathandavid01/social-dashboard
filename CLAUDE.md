@@ -44,6 +44,7 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 ## House style
 
 - **TypeScript strict**. Run `npx tsc --noEmit` before claiming work is done — never `next build` while `next dev` is running (they share `.next/`).
+- **Local auth**. Keep a `.env.local` with the Supabase URL and anon key in every checkout used for `npm run dev`; `npm run predev` checks this automatically before Next starts.
 - **PostgREST joins between `content_ideas` and `content_idea_videos` must name the intended foreign key** with an explicit `!<foreign_key>` relationship hint. `npm run check:db-relationships` enforces this rule and runs automatically before `npm run build`.
 - **Server-only utils** go in files imported only from server components / server actions. Anything imported by `'use client'` files must not transitively import `lib/supabase/server.ts` — split types into a `*-types.ts` companion (see `workflow-progress.ts` + `workflow-types.ts`).
 - **Card headers** that have title + badges/actions must use `flex-wrap items-center justify-between gap-x-3 gap-y-2` on the container, `min-w-0` + `truncate` on the title, `shrink-0` + `whitespace-nowrap` on the right-side children. Narrow grid columns are the rule, not the exception.

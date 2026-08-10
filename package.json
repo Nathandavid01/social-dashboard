@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "npm run check:local-env && next dev --port 3020",
+    "predev": "node scripts/check-local-env.mjs",
     "prebuild": "npm run check:db-relationships",
     "build": "next build",
     "check:db-relationships": "node scripts/check-content-idea-video-relationships.mjs",
+    "check:local-env": "node scripts/check-local-env.mjs",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
