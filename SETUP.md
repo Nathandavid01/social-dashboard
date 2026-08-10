@@ -38,7 +38,23 @@ METRICOOL_TOKEN=...  (ya estaba)
 # Por ahora la app usa modo "pegar link" que no necesita auth.
 ```
 
-## 3. Smoke test
+## 3. Auth recovery redirects (local + production)
+
+In Supabase Studio → Authentication → URL Configuration, keep the Site URL on
+the real production domain and add every redirect URL used by the app:
+
+```text
+https://social-dashboard-zeta-orpin.vercel.app/
+https://social-dashboard-zeta-orpin.vercel.app/update-password
+http://localhost:3020/
+http://localhost:3020/update-password
+```
+
+Do not use `http://localhost:3000`: Nate Media runs locally on port `3020`.
+If production uses a custom domain, replace the two `social-dashboard-zeta-orpin`
+entries with that exact domain.
+
+## 4. Smoke test
 
 Arranca el dev y verifica:
 
@@ -56,7 +72,7 @@ Visita en orden:
 - `/team` — pills clickables de rol por persona (solo Owners pueden editar)
 - `/settings/workflow` — configuración del workflow (Owner-only)
 
-## 4. Roles y permisos
+## 5. Roles y permisos
 
 | Rol | Acceso resumido |
 |---|---|
@@ -67,12 +83,12 @@ Visita en orden:
 
 Cada feature futura DEBE registrar su `Permission` en `lib/auth/permissions.ts`. Ver `CLAUDE.md` del proyecto.
 
-## 5. Lo que sigue (decisiones pendientes)
+## 6. Lo que sigue (decisiones pendientes)
 
 - **Drive nativo (#23)**: hoy el equipo sube manual a Drive y pega link. Si quieres upload directo desde la app: confirma modo **service-account** (folder compartido) vs **OAuth personal** (Drive de cada user). Recomiendo service-account.
 - **Workflow settings**: revisa los defaults en `/settings/workflow` y ajusta `min_ideas_per_session` y `ideas_multiplier` a tu cadencia real.
 
-## 6. Mergear a `eric/dev`
+## 7. Mergear a `eric/dev`
 
 ```bash
 git checkout eric/dev
