@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { assertOwner, requirePermission } from '@/lib/auth/server'
+import { requirePermission } from '@/lib/auth/server'
 import { hasPermission } from '@/lib/auth/permissions'
 import {
   clientProfilePatchSchema,
@@ -74,23 +74,6 @@ export async function updateClientProfile(clientId: string, input: ClientProfile
   revalidatePath(`/clients/${clientId}`)
   revalidatePath('/clients')
   return { ok: true }
-}
-
-async function uploadToBucket(
-  bucket: string,
-  path: string,
-  file: File,
-  cacheControl = '3600',
-  upsert = true,
-) {
-  const supabase = await createClient()
-  const buf = Buffer.from(await file.arrayBuffer())
-  const { error } = await supabase.storage.from(bucket).upload(path, buf, {
-    contentType: file.type || 'application/octet-stream',
-    cacheControl,
-    upsert,
-  })
-  return { supabase, error }
 }
 
 export async function uploadClientLogo(

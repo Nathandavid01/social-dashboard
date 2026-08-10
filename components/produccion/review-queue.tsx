@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { ProductionTask, ProductionTaskStatus, Profile } from '@/lib/supabase/types'
+import type { ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 import { updateTaskStatus, updateTaskNotes } from '@/lib/actions/production'
 import { StatusBadge } from './status-badge'
 import { cn } from '@/lib/utils'
@@ -191,7 +191,7 @@ function ReviewCard({ task: initialTask }: { task: ProductionTask }) {
 }
 
 export function ReviewQueue({ tasks: initialTasks }: Props) {
-  const [tasks, setTasks] = useState(initialTasks)
+  const [tasks] = useState(initialTasks)
 
   const inRevision = tasks.filter(t => t.status === 'en_revision')
   const needsChanges = tasks.filter(t => t.status === 'revisiones')

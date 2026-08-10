@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Loader2, Trash2, ExternalLink, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Save, Loader2, Trash2, ExternalLink } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SHOT_TYPES, shotTypeLabel } from '@/lib/onsite/shot-types'
 import {

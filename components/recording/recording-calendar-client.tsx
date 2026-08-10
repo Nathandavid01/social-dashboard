@@ -376,7 +376,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const [search, setSearch] = useState('')
   const [filterVideographer, setFilterVideographer] = useState('all')
   const [filterClient, setFilterClient] = useState('all')
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [showAdd, setShowAdd] = useState(false)
   const [addDate, setAddDate] = useState<string | undefined>()
   const [editing, setEditing] = useState<ExtendedSession | undefined>()

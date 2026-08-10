@@ -1,13 +1,12 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Search, Filter, LayoutGrid, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CheckCircle2 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
+import { ENTREGA_BATCH_STAGES, groupIntoBatches, batchProgress, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
-import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
@@ -62,8 +61,6 @@ const STAGE_DOT: Record<EntregaStageKey, string> = {
 export function EntregasBoard({
   ideas,
   plannedClients = [],
-  allClients = [],
-  clientCadence = {},
   teamMembers = [],
   submitClients,
   stages,
@@ -125,9 +122,7 @@ export function EntregasBoard({
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [overrides, setOverrides] = useState<Record<string, EntregaStageKey>>({})
-  const [, startMove] = useTransition()
-  const { toast } = useToast()
+  const [overrides] = useState<Record<string, EntregaStageKey>>({})
 
   // Overlay a pantalla completa, sin navegar fuera del tablero.
   // Qué se abre depende de la COLUMNA: una tarjeta en Revisión pide decidir,
@@ -137,7 +132,6 @@ export function EntregasBoard({
   // y no todos los del cliente. Ver los cinco de un cliente al abrir uno
   // obligaba a buscar cuál era, que es justo lo que la tarjeta ya resolvía.
   const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey; ideaId: string } | null>(null)
-  const openClientId = open?.clientId ?? null
 
   const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey, ideaId: string) => {
     setOpen({ clientId, stage, ideaId })
@@ -186,10 +180,6 @@ export function EntregasBoard({
   /** Cards share a clientId now, so anything per-card must key on stage too. */
   const cardKey = useCallback((b: EntregaBatch) => `${b.clientId}:${b.stage}`, [])
 
-  const pipelineByClient = useMemo(
-    () => buildClientPipelineIndex(ideas, clientCadence),
-    [ideas, clientCadence],
-  )
 
   const clients = useMemo(
     () => batches.map((b) => ({ id: b.clientId, name: b.clientName })).sort((a, b) => a.name.localeCompare(b.name)),
@@ -637,11 +627,9 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove: _onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
-  const thumbs = Math.min(3, batch.total)
-  const more = batch.total - thumbs
 
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
@@ -784,14 +772,6 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
   )
 })
 
-function MoveBtn({ dir, disabled, onClick }: { dir: 1 | -1; disabled: boolean; onClick: (e: React.MouseEvent) => void }) {
-  const Icon = dir === 1 ? ChevronRight : ChevronLeft
-  return (
-    <button onClick={onClick} disabled={disabled} aria-label={dir === 1 ? 'Mover batch adelante' : 'Mover batch atrás'} className="grid h-5 w-5 place-items-center rounded border border-border bg-background/80 text-muted-foreground backdrop-blur-sm transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30">
-      <Icon className="h-3.5 w-3.5" />
-    </button>
-  )
-}
 
 /** Searchable assignee picker — lists every active team member, not only batch owners. */
 function AssigneeFilterDropdown({

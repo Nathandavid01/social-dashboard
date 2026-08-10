@@ -4,11 +4,11 @@ import { computeIdeaPipeline } from './idea-pipeline-stages'
 
 function pipe(over: Record<string, unknown> = {}) {
   return computeIdeaPipeline({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     idea: {
       hook: 'h', visual_brief: 'b', generated_caption: null, status: 'idea',
       approval_status: 'pending', published_at: null, recording_session_id: null, recording_date: null,
       ...over,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     videos: [],
     recordingScheduled: false,

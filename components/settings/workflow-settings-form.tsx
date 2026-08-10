@@ -104,7 +104,7 @@ export function WorkflowSettingsForm({ initial }: Props) {
                 className="h-9"
               />
               <p className="text-[10px] text-muted-foreground">
-                Cuántos días hacia adelante consideras "ya agendado".
+                Cuántos días hacia adelante consideras &quot;ya agendado&quot;.
               </p>
             </div>
             <div className="space-y-1.5">
@@ -121,7 +121,7 @@ export function WorkflowSettingsForm({ initial }: Props) {
                 className="h-9"
               />
               <p className="text-[10px] text-muted-foreground">
-                Piso de ideas requeridas para considerar un cliente "listo".
+                Piso de ideas requeridas para considerar un cliente &quot;listo&quot;.
               </p>
             </div>
             <div className="space-y-1.5">

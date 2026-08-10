@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import {
   Play,
-  ExternalLink,
   Sparkles,
   Send,
   CheckCircle2,

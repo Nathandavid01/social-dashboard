@@ -779,7 +779,7 @@ async function execGetDashboardSummary(): Promise<string> {
       { count: clientCount },
       { count: pendingRequests },
       { count: pendingVideos },
-      { data: profiles },
+      { data: _profiles },
       { data: prodTasks },
     ] = await Promise.all([
       supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
@@ -1497,7 +1497,7 @@ async function execGetClientSnapshot(clientName: string): Promise<string> {
 
     const nowIso = new Date().toISOString()
 
-    const [{ data: openTasks }, { data: completedTasks }] = await Promise.all([
+    const [{ data: openTasks }, { data: _completedTasks }] = await Promise.all([
       supabase.from('tasks').select('title, status, priority, due_at, assignee:profiles!tasks_assignee_id_fkey(full_name)').eq('client_id', client.id).neq('status', 'completed').order('priority', { ascending: true }).limit(10),
       supabase.from('tasks').select('title, updated_at').eq('client_id', client.id).eq('status', 'completed').order('updated_at', { ascending: false }).limit(3),
     ])
@@ -2166,7 +2166,7 @@ async function execGetContentAnalytics(range?: string, clientName?: string): Pro
         const res = await fetch(url, { headers: { 'X-Mc-Auth': token } })
         if (!res.ok) return { name: c.name, count: 0 }
         const json = await res.json() as { data?: { draft?: boolean; publicationDate: { dateTime: string } }[] }
-        const prevStart2 = new Date(prevStart)
+        const _prevStart2 = new Date(prevStart)
         const count = (json.data || []).filter((p) => !p.draft && new Date(p.publicationDate?.dateTime || '') <= start).length
         return { name: c.name, count }
       })),

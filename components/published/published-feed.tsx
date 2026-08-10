@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -44,9 +43,6 @@ const networkEmoji: Record<string, string> = {
   youtube: '▶️',
 }
 
-const NetworkIcon = ({ network }: { network: string }) => (
-  <span className="text-[10px]">{networkEmoji[network] ?? network}</span>
-)
 
 function formatDate(dateStr: string) {
   try {

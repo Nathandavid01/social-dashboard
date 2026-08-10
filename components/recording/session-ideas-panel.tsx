@@ -212,7 +212,7 @@ function IdeaRow({
           </p>
         </div>
         {idea.hook && (
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">"{idea.hook}"</p>
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">&quot;{idea.hook}&quot;</p>
         )}
         {isRecorded && (
           <p className="text-xs text-green-600 mt-0.5 font-medium">✓ Grabado — en buffer</p>

@@ -11,6 +11,7 @@ let ownerCount = 2
 
 function makeSupabase() {
   // One builder serves both the .single() read and the awaited count query.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {
     eq: () => builder,
     single: async () => ({ data: targetRow, error: null }),

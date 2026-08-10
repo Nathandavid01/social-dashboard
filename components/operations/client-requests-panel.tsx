@@ -226,7 +226,6 @@ export function ClientRequestsPanel({ initialRequests, showHistory = false }: Pr
               {showClosed && (
                 <div className="space-y-2 mt-2 opacity-60">
                   {closed.map((req) => {
-                    const urgency = urgencyConfig[req.urgency as keyof typeof urgencyConfig] ?? urgencyConfig.normal
                     const status = statusConfig[req.status as keyof typeof statusConfig] ?? statusConfig.new
                     return (
                       <div

@@ -17,18 +17,6 @@ const networkEmoji: Record<string, string> = {
   youtube: '▶️',
 }
 
-function formatDateTime(dateStr: string) {
-  try {
-    const d = new Date(dateStr)
-    const today = new Date()
-    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
-    const isTomorrow = d.toDateString() === tomorrow.toDateString()
-    const dayLabel = isTomorrow ? 'Mañana' : d.toLocaleDateString('es-PR', { weekday: 'short', month: 'short', day: 'numeric' })
-    const time = d.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', hour12: true })
-    return `${dayLabel} · ${time}`
-  } catch { return dateStr }
-}
-
 export function UpcomingSchedule() {
   const [posts, setPosts] = useState<PublishedPost[]>([])
   const [loading, setLoading] = useState(true)

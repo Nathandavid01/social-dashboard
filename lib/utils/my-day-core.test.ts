@@ -8,7 +8,6 @@ import {
   myDayCapacityNote,
   type OwnedVideo,
 } from './my-day-core'
-import type { BatchVideo } from '@/lib/utils/batch-view'
 import type { ContentIdeaVideo } from '@/lib/supabase/types'
 
 const ME = 'user-me'

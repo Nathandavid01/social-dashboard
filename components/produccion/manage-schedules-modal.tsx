@@ -48,9 +48,6 @@ interface Props {
   onClose: () => void
 }
 
-const editors = (profiles: Pick<Profile, 'id' | 'full_name'>[]) =>
-  profiles // show all for flexibility
-
 export function ManageSchedulesModal({ clients, profiles, existingSchedules, onClose }: Props) {
   const router = useRouter()
   const [selectedClientId, setSelectedClientId] = useState('')
@@ -198,7 +195,7 @@ export function ManageSchedulesModal({ clients, profiles, existingSchedules, onC
               {days.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border py-8 text-center text-muted-foreground text-sm">
                   <p>Sin publicaciones programadas.</p>
-                  <p className="text-xs mt-1">Haz clic en "Agregar día" para comenzar.</p>
+                  <p className="text-xs mt-1">Haz clic en &quot;Agregar día&quot; para comenzar.</p>
                 </div>
               ) : (
                 <div className="space-y-2">

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import {
-  Check, ChevronRight, ChevronLeft, Loader2, Search, Sparkles, CalendarDays, Megaphone, MessageSquareText, PartyPopper, Rocket, ArrowRight,
+  Check, ChevronRight, ChevronLeft, Loader2, Search, Sparkles, CalendarDays, Megaphone, PartyPopper, Rocket, ArrowRight,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

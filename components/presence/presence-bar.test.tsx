@@ -5,6 +5,7 @@ import { PresenceBar } from './presence-bar'
 // A channel stub that mimics realtime-js: binding presence callbacks on an
 // already-joined channel throws, exactly like the real RealtimeChannel.on().
 function makeChannel(state: string, topic = 'realtime:nm-presence-global') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const channel: any = {
     topic,
     state,
@@ -22,7 +23,9 @@ function makeChannel(state: string, topic = 'realtime:nm-presence-global') {
   return channel
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const supabase: any = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _channels: [] as any[],
   channel: vi.fn(),
   getChannels: vi.fn(() => supabase._channels),

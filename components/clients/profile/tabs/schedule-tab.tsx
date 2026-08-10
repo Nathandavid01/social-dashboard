@@ -11,7 +11,6 @@ import {
   SLOT_STATUS_META,
   type ScheduleSlot,
 } from '@/lib/utils/posting-schedule'
-import { dayLabelsShort } from '@/lib/utils/posting-cadence'
 import { PostingTimeEditor } from '../posting-time-editor'
 
 function startOfWeekMon(d: Date): Date {

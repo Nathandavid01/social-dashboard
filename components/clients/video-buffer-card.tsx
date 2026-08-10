@@ -92,7 +92,7 @@ function IdeaRow({
           </span>
         </div>
         {idea.hook && (
-          <p className="text-[10px] text-muted-foreground italic mt-0.5 line-clamp-1">"{idea.hook}"</p>
+          <p className="text-[10px] text-muted-foreground italic mt-0.5 line-clamp-1">&quot;{idea.hook}&quot;</p>
         )}
         {isRecorded && <p className="text-[10px] text-green-600 mt-0.5 font-medium">En buffer</p>}
       </div>

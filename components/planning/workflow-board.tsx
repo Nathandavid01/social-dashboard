@@ -128,7 +128,10 @@ export function WorkflowBoard({ clients, initialIdeas, profiles, clientList, int
   function toggleGroup(ids: string[], select: boolean) {
     setSelectedIds((prev) => {
       const next = new Set(prev)
-      for (const id of ids) select ? next.add(id) : next.delete(id)
+      for (const id of ids) {
+        if (select) next.add(id)
+        else next.delete(id)
+      }
       return next
     })
   }

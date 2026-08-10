@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Sparkles, Loader2, Check, Copy } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { useToast } from '@/lib/hooks/use-toast'
 import { IdeaStatusBar } from '@/components/ideas/idea-status-bar'

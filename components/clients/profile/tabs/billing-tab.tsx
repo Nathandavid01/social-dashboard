@@ -18,7 +18,7 @@ import { Plus, Trash2, DollarSign, Loader2, TrendingUp, AlertCircle, CheckCircle
 import { useToast } from '@/lib/hooks/use-toast'
 import { addPayment, deletePayment } from '@/lib/actions/client-profile'
 import { derivePaymentStatus } from '@/lib/utils/payment-status'
-import { RoleGate, useHasPermission } from '@/components/auth/role-gate'
+import { RoleGate } from '@/components/auth/role-gate'
 import { cn, formatDate } from '@/lib/utils'
 import type { Client, ClientPayment } from '@/lib/supabase/types'
 

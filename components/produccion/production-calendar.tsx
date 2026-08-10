@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ProductionSchedule, ProductionTask, Profile } from '@/lib/supabase/types'
-import { generateProductionTasks, updateScheduleAssignment } from '@/lib/actions/production'
+import { generateProductionTasks } from '@/lib/actions/production'
 import { cn } from '@/lib/utils'
 import { todayISO } from '@/lib/utils/deadlines'
 import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from 'lucide-react'
@@ -47,10 +47,10 @@ interface Props {
   currentWeekStart: string
 }
 
-export function ProductionCalendar({ schedules, initialTasks, profiles, currentWeekStart }: Props) {
+export function ProductionCalendar({ schedules, initialTasks, profiles: _profiles, currentWeekStart }: Props) {
   const router = useRouter()
   const [weekStart, setWeekStart] = useState(currentWeekStart)
-  const [tasks, setTasks] = useState(initialTasks)
+  const [tasks] = useState(initialTasks)
   const [generating, startGenerating] = useTransition()
   const [generatedMsg, setGeneratedMsg] = useState<string | null>(null)
   const [expandedClient, setExpandedClient] = useState<string | null>(null)

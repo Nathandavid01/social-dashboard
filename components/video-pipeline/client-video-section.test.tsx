@@ -65,7 +65,7 @@ function makePipeline(overrides: Partial<ClientVideoPipeline['client']> = {}): C
         updated_at: '2026-05-01T00:00:00Z',
         videos: { raw: [], broll: [], edited: [] },
       },
-    ] as any,
+    ] as unknown as ClientVideoPipeline['videos'],
     assets: [],
   }
 }

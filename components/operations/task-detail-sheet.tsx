@@ -47,12 +47,6 @@ const taskTypeLabels: Record<string, string> = {
   other: 'Otro',
 }
 
-const priorityLabels: Record<number, { label: string; color: string }> = {
-  1: { label: 'Alta', color: 'text-red-500' },
-  2: { label: 'Media', color: 'text-yellow-500' },
-  3: { label: 'Baja', color: 'text-muted-foreground' },
-}
-
 interface Comment {
   id: string
   content: string
@@ -100,7 +94,6 @@ export function TaskDetailSheet({ task, open, onClose, onTaskUpdated, teamMember
   if (!task) return null
 
   const dueInfo = task.due_at ? formatDueDate(task.due_at) : null
-  const priority = priorityLabels[task.priority] ?? priorityLabels[2]
 
   function handleStatusChange(status: string) {
     startTransition(async () => {

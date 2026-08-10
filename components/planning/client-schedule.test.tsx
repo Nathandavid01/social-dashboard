@@ -56,7 +56,7 @@ describe('ClientSchedule — per-row status column', () => {
     hasCaption: false,
     pipeline: {
       stages: Array.from({ length: 7 }, (_, i) => ({ key: `s${i}`, label: `Stage ${i}`, done: i < 3 })),
-    } as any,
+    } as unknown as import('@/lib/utils/idea-pipeline-stages').IdeaPipeline,
   }
 
   it('renders a 7-segment status bar for a slot that has an idea', () => {

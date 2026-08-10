@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { ClientBatchView } from './client-batch-view'
 import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { BatchVideo } from '@/lib/utils/batch-view'

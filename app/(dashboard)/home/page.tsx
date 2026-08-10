@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { KpiCard } from '@/components/performance/kpi-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { QuickBriefingButton } from '@/components/home/quick-briefing-button'
 import { UrgentTaskList } from '@/components/home/urgent-task-list'
@@ -18,20 +17,7 @@ import { currentUserHas } from '@/lib/auth/server'
 import { PageSpinner } from '@/components/shared/page-spinner'
 import { Suspense } from 'react'
 import Link from 'next/link'
-import {
-  Users,
-  Clock,
-  AlertTriangle,
-  Bell,
-  ArrowRight,
-  CheckCircle2,
-  ShieldAlert,
-  Inbox,
-  Film,
-  Clapperboard,
-  CalendarCheck,
-  Video,
-} from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import type { Task } from '@/lib/supabase/types'
 
 export default async function HomePage() {
@@ -48,15 +34,15 @@ export default async function HomePage() {
     { data: dueTodayTasks },
     { data: overdueTasks },
     { data: blockedTasks },
-    { count: activeAlerts },
-    { count: pendingRequests },
+    { count: _activeAlerts },
+    { count: _pendingRequests },
     { count: pendingVideoReviews },
     { data: myTasks },
     { data: teamTasksRaw },
     { data: recentCompletions },
     { data: currentProfile },
     { count: productionInReview },
-    { count: productionPublishingToday },
+    { count: _productionPublishingToday },
   ] = await Promise.all([
     supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase

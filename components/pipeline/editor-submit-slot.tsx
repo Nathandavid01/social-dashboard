@@ -5,13 +5,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SubmitVideoCard } from './submit-video-card'
 import { useSubmitVideos } from './use-submit-videos'
-import { etiquetaDia, diaDePublicacion, fechaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
-
-/** '11 ago' — con el día solo no se distingue una semana de la siguiente. */
-function fechaCorta(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' })
-}
+import { type DiaKey } from '@/lib/entregas/dias'
 
 /**
  * The real Editado column slot: the submit form plus per-video progress while
@@ -28,8 +22,8 @@ const STAGE_LABEL: Record<string, string> = {
 
 export function EditorSubmitSlot({
   clients,
-  dia,
-  semanaOffset = 0,
+  dia: _dia,
+  semanaOffset: _semanaOffset = 0,
 }: {
   clients: { id: string; name: string }[]
   /** Día de la pestaña activa — para el que se entrega. */

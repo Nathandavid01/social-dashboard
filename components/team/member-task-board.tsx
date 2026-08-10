@@ -424,7 +424,7 @@ export function MemberTaskBoard({ member, initialTasks, clients, teamMembers, as
   const router = useRouter()
   const [tasks, setTasks] = useState<ExtendedTask[]>(initialTasks)
   const [view, setView] = useState<'list' | 'calendar'>('list')
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [showAddTask, setShowAddTask] = useState(false)
   const [addTaskDate, setAddTaskDate] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string>('open')

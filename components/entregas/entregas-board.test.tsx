@@ -11,7 +11,7 @@ vi.mock('@/lib/actions/pipeline-submit', () => ({
   discardEntregaVideos: (...a: unknown[]) => discardEntregaVideos(...(a as [])),
 }))
 vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
-let mockRole: UserRole | null = 'supervisor'
+const mockRole: UserRole | null = 'supervisor'
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: mockRole }),
 }))

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { ProductionTask, ProductionTaskStatus, Profile } from '@/lib/supabase/types'
+import type { ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 import { updateTaskStatus } from '@/lib/actions/production'
 import { StatusBadge } from './status-badge'
 import { deadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -41,7 +41,7 @@ export function MyListView({ tasks: initialTasks }: Props) {
   const [tasks, setTasks] = useState(initialTasks)
   const [saving, setSaving] = useState<string | null>(null)
 
-  const { monday, sunday, nextMonday, nextSunday } = getWeekBounds()
+  const { sunday, nextSunday } = getWeekBounds()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 

@@ -3,7 +3,6 @@ import {
   zonedNaiveToEpoch,
   validateScheduleOverride,
   toDatetimeLocalValue,
-  MIN_LEAD_MS,
   POSTING_TZ,
 } from './publish-override'
 

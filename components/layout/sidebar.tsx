@@ -11,7 +11,6 @@ import { APP_VERSION } from '@/lib/version'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
 import { useSidebar } from '@/lib/context/sidebar-context'
-import { hasPermission } from '@/lib/auth/permissions'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {

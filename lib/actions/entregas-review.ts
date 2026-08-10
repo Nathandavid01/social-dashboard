@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission, currentUserHas } from '@/lib/auth/server'
+import { currentUserHas } from '@/lib/auth/server'
 import type { QueueVideo } from '@/components/review/review-queue'
 
 /**

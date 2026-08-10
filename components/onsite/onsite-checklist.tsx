@@ -49,7 +49,8 @@ export function OnsiteChecklist({
   function marcarOcupado(id: string, on: boolean) {
     setOcupado((s) => {
       const n = new Set(s)
-      on ? n.add(id) : n.delete(id)
+      if (on) n.add(id)
+      else n.delete(id)
       return n
     })
   }
@@ -178,7 +179,8 @@ export function OnsiteChecklist({
             <button
               onClick={() => setAbiertos((s) => {
                 const n = new Set(s)
-                n.has(g.key) ? n.delete(g.key) : n.add(g.key)
+                if (n.has(g.key)) n.delete(g.key)
+                else n.add(g.key)
                 return n
               })}
               aria-expanded={abierto}

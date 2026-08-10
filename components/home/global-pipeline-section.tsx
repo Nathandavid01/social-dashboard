@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PipelineCard } from '@/components/clients/profile/pipeline-card'
-import { Lightbulb, Video, Scissors, CalendarCheck, Send, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { ClientPipeline, PipelineTotals } from '@/lib/utils/content-pipeline'
