@@ -15,8 +15,10 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
   getR2UploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'k' })),
   registerR2Video: vi.fn(async () => ({ ok: true, id: 'v1' })),
   getR2DownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
-  getR2PreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview' })),
   deleteR2Video: vi.fn(async () => ({ ok: true })),
+}))
+vi.mock('@/lib/actions/video-preview', () => ({
+  getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
 
 vi.mock('@/lib/hooks/use-toast', () => ({

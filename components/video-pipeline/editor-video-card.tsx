@@ -12,7 +12,8 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { ClientLogo } from '@/components/clients/client-logo'
-import { getR2DownloadUrl, getR2PreviewUrl, getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2DownloadUrl, getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import type { Client, ContentIdeaType, ContentIdeaVideo } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
 
@@ -81,7 +82,8 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
 
 function MaterialRow({ video }: { video: ContentIdeaVideo }) {
   const { toast } = useToast()
-  const isR2 = video.storage_provider === 'r2'
+  // Both R2 buckets support signed preview via getVideoPreviewUrl.
+  const isR2 = video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const Icon = video.kind === 'broll' ? Video : Camera
@@ -99,7 +101,7 @@ function MaterialRow({ video }: { video: ContentIdeaVideo }) {
   async function togglePreview() {
     if (previewUrl) { setPreviewUrl(null); return }
     setLoading(true)
-    const res = await getR2PreviewUrl(video.id)
+    const res = await getVideoPreviewUrl(video.id)
     setLoading(false)
     if (res.error || !res.url) toast({ title: 'Error', description: res.error ?? 'No se pudo cargar', variant: 'destructive' })
     else setPreviewUrl(res.url)
