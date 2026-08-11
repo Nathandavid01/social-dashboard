@@ -9,7 +9,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', '.next', 'dist', '.claude'],
+    // `e2e/` es de Playwright: sus specs no arrancan bajo jsdom. Corren con
+    // `npm run test:e2e` contra staging (docs/STAGING.md).
+    exclude: ['node_modules', '.next', '.next-staging', 'dist', '.claude', 'e2e'],
   },
   resolve: {
     alias: {

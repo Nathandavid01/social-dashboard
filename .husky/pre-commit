@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+# Nada llega a un commit sin pasar por: tipos → unit → E2E contra staging.
+# Los E2E corren contra el staging local (.env.staging), nunca contra producción
+# — la guarda de scripts/check-staging-env.mjs lo verifica antes de levantar nada.
+#
+# Saltarlo (solo para un WIP que no se mergea): SKIP_E2E=1 git commit …
+
+set -e
+
+echo "› typecheck"
+npx tsc --noEmit
+
+echo "› unit tests"
+npx vitest run --exclude '**/.claude/**' --exclude '**/*.live.test.ts'
+
+if [ "$SKIP_E2E" = "1" ]; then
+  echo "› E2E saltados (SKIP_E2E=1) — el merge-gate los volverá a exigir"
+  exit 0
+fi
+
+echo "› E2E en staging"
+npm run test:e2e

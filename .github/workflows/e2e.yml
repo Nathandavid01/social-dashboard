@@ -1,0 +1,46 @@
+name: e2e
+
+# Los E2E son parte del merge: un PR no entra a main sin pasarlos.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  e2e:
+    name: e2e (staging)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+
+      # El staging de CI es el mismo proyecto Supabase de staging que en local:
+      # los secretos son de STAGING, nunca los de producción.
+      - name: Escribir .env.staging
+        run: |
+          cat > .env.staging <<EOF
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_USER_EMAIL=${{ secrets.STAGING_E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD=${{ secrets.STAGING_E2E_USER_PASSWORD }}
+          EOF
+
+      - name: Guardas de staging
+        run: npm run check:staging-env
+
+      - name: E2E
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -12,6 +12,19 @@ Every change — feature, fix, refactor — is done **test-first (TDD)**. No exc
 4. **Verify before claiming done:** run `npx vitest run <files> --exclude '**/.claude/**'` (the `.claude/worktrees/*` copies have their own `node_modules` and produce spurious "Cannot read properties of null (reading 'useState')" duplicate-React failures — always exclude them) and `npx tsc --noEmit`. Pure logic → unit test; UI → render/interaction test (React Testing Library + jsdom, already configured in `vitest.config.ts`).
 5. **Commit frequently**, then merge to `main` once green (see "Workflow & commits" below).
 
+### E2E en staging (obligatorio)
+
+Toda funcionalidad de UI lleva además una prueba **end-to-end contra staging**,
+no solo unit tests. Staging = la app buildeada en `localhost:3021` contra un
+Supabase de **staging** (jamás producción) con datos sembrados. Ver
+**`docs/STAGING.md`**.
+
+- Escribir el E2E en `e2e/*.spec.ts`; marcar `@smoke` lo que deba correr en cada commit.
+- Datos nuevos → sembrarlos idempotentes en `scripts/seed-staging.mjs`.
+- `npm run test:e2e` levanta staging solo. Corre en **pre-commit** (`.husky/pre-commit`)
+  y en el **merge** (job `e2e` en cada PR a `main`).
+- `scripts/check-staging-env.mjs` rechaza que los E2E apunten a la Supabase de producción.
+
 If a requested task **cannot be completed now** (needs a DB migration to be applied, an external integration, a product decision), DO NOT drop it — leave it as a tracked TODO (in the session task list and/or `docs/TODO.md`) and implement it when the blocker clears.
 
 

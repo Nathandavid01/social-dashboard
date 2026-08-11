@@ -10,8 +10,9 @@ These rules exist so **Nathan, Eric, or any contributor** cannot land broken sto
 | 2 | **Every change lands via Pull Request** | Same |
 | 3 | **PR must be verified** — required status checks green | GitHub required checks |
 | 4 | **Graph model must pass** — ordered check graph in `scripts/merge-gate.mjs` | CI job **`merge-gate`** |
-| 5 | **≥1 approving review** before merge | Branch protection |
-| 6 | **Conversations resolved** before merge | Branch protection |
+| 5 | **E2E en staging verdes** — la suite de Playwright contra staging | CI job **`e2e`** |
+| 6 | **≥1 approving review** before merge | Branch protection |
+| 7 | **Conversations resolved** before merge | Branch protection |
 
 ### Graph model (what “verified” means)
 
@@ -24,6 +25,10 @@ r2-inventory-dry-run  (lists remaining pipeline-r2 rows; needs Supabase env in C
 ```
 
 All nodes must PASS. If any node fails, **merge is blocked**.
+
+Además, el job **`e2e`** corre la suite end-to-end contra el entorno de
+**staging** (nunca producción) y también bloquea el merge. Los mismos E2E corren
+en `pre-commit`. Setup y secretos: **`docs/STAGING.md`**.
 
 Local:
 
@@ -51,6 +56,7 @@ Or configure in GitHub UI:
 - Require status checks to pass:  
   - `merge-gate`  
   - `test`  
+  - `e2e` (Playwright contra staging — ver `docs/STAGING.md`)  
   - `relationship-guard` (static job)  
 - Require conversation resolution before merging  
 - Do not allow bypassing the above settings  

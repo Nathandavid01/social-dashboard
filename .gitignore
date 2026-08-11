@@ -39,3 +39,14 @@ yarn-error.log*
 next-env.d.ts
 .env.local
 .env*
+
+# staging + e2e
+/.next-staging/
+/e2e/.auth/
+/playwright-report/
+/test-results/
+
+# worktrees y estado local de herramientas (settings.json y cli-latest sí van al repo)
+/.claude/worktrees/
+/supabase/.temp/*
+!/supabase/.temp/cli-latest

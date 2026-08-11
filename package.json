@@ -20,7 +20,14 @@
     "merge-gate": "node scripts/merge-gate.mjs",
     "migrate:r2-to-entregas": "node scripts/migrate-pipeline-r2-to-entregas.mjs --execute",
     "migrate:r2-to-entregas:dry": "node scripts/migrate-pipeline-r2-to-entregas.mjs --dry-run",
-    "migrate:r2-to-entregas:verify": "node scripts/migrate-pipeline-r2-to-entregas.mjs --verify"
+    "migrate:r2-to-entregas:verify": "node scripts/migrate-pipeline-r2-to-entregas.mjs --verify",
+    "check:staging-env": "node scripts/check-staging-env.mjs",
+    "staging:seed": "npm run check:staging-env && node scripts/seed-staging.mjs",
+    "staging:serve": "node scripts/staging-serve.mjs",
+    "test:e2e": "npm run staging:seed && node scripts/run-e2e.mjs",
+    "test:e2e:smoke": "npm run staging:seed && node scripts/run-e2e.mjs --smoke",
+    "test:e2e:ui": "playwright test --ui",
+    "prepare": "husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
@@ -64,6 +71,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
@@ -73,6 +81,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
