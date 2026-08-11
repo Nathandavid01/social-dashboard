@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CalendarDays, CheckCircle2 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -15,6 +15,7 @@ import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
 import { DIAS, diaDeTablero, offsetSemanaTablero, rangoSemana, type DiaKey, type ModoDia } from '@/lib/entregas/dias'
+import { fechaTarjeta } from '@/lib/entregas/fecha-tarjeta'
 
 /** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
 function etiquetaRango(semana: number): string {
@@ -655,6 +656,9 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
     stage,
   )
 
+  // Una tarjeta es UN video, así que su fecha es la de su idea.
+  const fecha = fechaTarjeta(batch.ideas[0]?.publish_date as string | null)
+
   const devuelto = batch.ideas
     .map((i) => reviewNotes[i.id])
     .filter(Boolean)
@@ -695,6 +699,38 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             </p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+        </div>
+
+        {/* De qué fecha es este video.
+            El tablero arrastra lo atrasado a la semana en curso a propósito
+            —sigue pendiente—, así que la pestaña "Lunes" acaba enseñando el
+            video del 3 junto al del 10. Sin la fecha escrita aquí no hay forma
+            de distinguirlos, y así es como el equipo acabó diciendo que los
+            videos se cruzaban. Es publish_date: la que eligió el editor y la
+            que recibe Metricool, sin traducir. */}
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+          <span
+            className={cn(
+              'inline-flex min-w-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold leading-none',
+              fecha.estado === 'atrasada' && 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400',
+              fecha.estado === 'hoy' && 'border-primary/40 bg-primary/10 text-primary',
+              fecha.estado === 'sin-fecha' && 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+              (fecha.estado === 'proxima' || fecha.estado === 'otra-semana') && 'border-border bg-muted/60 text-muted-foreground',
+            )}
+          >
+            <CalendarDays className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+            <span className="truncate whitespace-nowrap">{fecha.etiqueta}</span>
+          </span>
+          {fecha.aviso && (
+            <span
+              className={cn(
+                'shrink-0 whitespace-nowrap text-[9px] font-medium',
+                fecha.estado === 'atrasada' ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground',
+              )}
+            >
+              {fecha.aviso}
+            </span>
+          )}
         </div>
 
 

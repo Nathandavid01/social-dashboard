@@ -554,3 +554,72 @@ describe('EntregasBoard — el contador de la pestaña', () => {
     expect(screen.getByRole('button', { name: 'Lunes' }).textContent).not.toMatch(/[0-9]/)
   })
 })
+
+/**
+ * La tarjeta tiene que decir de qué fecha es.
+ *
+ * El tablero acumula lo atrasado en la semana en curso, así que la pestaña
+ * "Lunes" enseña a la vez el video del 3 y el del 10. Sin la fecha escrita en
+ * la tarjeta no hay forma de distinguirlos — que es exactamente lo que el
+ * equipo reportó como "los videos se están cruzando".
+ */
+describe('EntregasBoard — cada tarjeta dice su fecha', () => {
+  /** La misma fecha una semana antes: sigue cayendo en la misma pestaña. */
+  function semanaAntes(iso: string): string {
+    const [y, m, d] = iso.split('-').map(Number)
+    const f = new Date(y, m - 1, d, 12)
+    f.setDate(f.getDate() - 7)
+    return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`
+  }
+
+  /** Oráculo independiente: '11 ago' calculado sin pasar por fechaTarjeta. */
+  function diaMes(iso: string): string {
+    const [y, m, d] = iso.split('-').map(Number)
+    return new Date(y, m - 1, d, 12)
+      .toLocaleDateString('es', { day: 'numeric', month: 'short' })
+      .replace(/[.,]/g, '')
+      .trim()
+  }
+
+  it('escribe la fecha de publicación del video en la tarjeta', () => {
+    const fecha = fechaDeEntrega(1)
+    render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1', publish_date: fecha })]} />)
+    expect(screen.getByText(new RegExp(diaMes(fecha)))).toBeInTheDocument()
+  })
+
+  /** La tarjeta de un cliente, para mirar solo lo suyo. */
+  function tarjeta(cliente: string): HTMLElement {
+    const art = screen.getAllByRole('article').find((a) => a.textContent?.includes(cliente))
+    if (!art) throw new Error(`No hay tarjeta de ${cliente}`)
+    return art
+  }
+
+  it('un video vencido que se arrastra a esta semana se marca como atrasado', () => {
+    const vieja = semanaAntes(fechaDeEntrega(1))
+    render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1', publish_date: vieja })]} />)
+    const card = tarjeta('Nora Fitness')
+    expect(card.textContent).toMatch(/Atrasado/i)
+    // Y dice CUÁL era su fecha, no solo que está atrasado.
+    expect(card.textContent).toContain(diaMes(vieja))
+  })
+
+  it('dos videos de fechas distintas en la misma pestaña se pueden distinguir', () => {
+    const estaSemana = fechaDeEntrega(1)
+    const laPasada = semanaAntes(estaSemana)
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: estaSemana }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: laPasada }),
+    ]} />)
+    // Cada tarjeta lleva SU fecha, no la de la otra.
+    expect(tarjeta('Nora Fitness').textContent).toContain(diaMes(estaSemana))
+    expect(tarjeta('Nora Fitness').textContent).not.toContain(diaMes(laPasada))
+    expect(tarjeta('Lumen').textContent).toContain(diaMes(laPasada))
+    expect(tarjeta('Lumen').textContent).not.toContain(diaMes(estaSemana))
+  })
+
+  it('un video sin fecha lo dice en la tarjeta', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1', publish_date: null })]} />)
+    fireEvent.click(screen.getByRole('button', { name: /Sin día/ }))
+    expect(screen.getByText(/Sin fecha/)).toBeInTheDocument()
+  })
+})
