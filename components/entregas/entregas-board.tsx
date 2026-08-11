@@ -3,7 +3,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CalendarDays, Copy, CheckCircle2 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
-import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
+import { panScrollLeft, isPanDrag, PAN_EXCLUDED } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
@@ -264,6 +264,11 @@ export function EntregasBoard({
 
   const onPanDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return // left button only
+    // Sobre algo que se pulsa NO se panea. Al hacer clic en una tarjeta el ratón
+    // se corre unos píxeles, se pasaba el umbral de arrastre y el clic se lo
+    // tragaba el paneo: la tarjeta no abría nunca. Se panea desde el fondo del
+    // tablero, no desde lo que hay encima.
+    if ((e.target as HTMLElement | null)?.closest?.(PAN_EXCLUDED)) return
     const el = scrollRef.current
     if (!el) return
     pan.current = { active: true, moved: false, startX: e.clientX, scrollLeft: el.scrollLeft }

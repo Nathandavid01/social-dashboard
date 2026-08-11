@@ -337,6 +337,36 @@ describe('EntregasBoard — drag-to-scroll columns (grab cursor)', () => {
     fireEvent.mouseUp(el, { clientX: 300 })
     expect(el.className).not.toContain('cursor-grabbing')
   })
+
+  // Regresión: al pulsar una tarjeta el dedo/ratón se corre unos píxeles, se
+  // pasaba el umbral de arrastre y el clic se lo tragaba el paneo — la tarjeta
+  // no abría nunca. Sobre una tarjeta NO se empieza a panear: se abre.
+  it('abrir una tarjeta funciona aunque el ratón se corra al hacer clic', async () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
+      idea({ client_id: 'c9', status: 'producida', approval_status: 'submitted', client: { id: 'c9', name: 'Acme', industry: null } }),
+    ]} />)
+    const card = container.querySelector('article')!
+    const el = scrollEl()
+
+    fireEvent.mouseDown(card, { button: 0, clientX: 300 })
+    fireEvent.mouseMove(el, { clientX: 280 }) // 20px de deriva, más que el umbral
+    expect(el.className).not.toContain('cursor-grabbing')
+    fireEvent.mouseUp(el, { clientX: 280 })
+    fireEvent.click(card)
+
+    expect(await screen.findByTestId('review-overlay')).toBeInTheDocument()
+  })
+
+  it('el fondo de la columna sí panea (arrastrar el tablero sigue funcionando)', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea()]} />)
+    const el = scrollEl()
+    const fondo = container.querySelector('section > div.flex-1') as HTMLElement // contenedor de tarjetas
+
+    fireEvent.mouseDown(fondo, { button: 0, clientX: 300 })
+    fireEvent.mouseMove(el, { clientX: 240 })
+    expect(el.className).toContain('cursor-grabbing')
+    fireEvent.mouseUp(el)
+  })
 })
 
 describe('EntregasBoard — lo que el revisor pidió cambiar', () => {
