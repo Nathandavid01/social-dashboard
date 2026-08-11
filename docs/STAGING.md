@@ -86,6 +86,24 @@ el staging revivía un build viejo y la suite pasaba sin haber visto el cambio
   `main`. Es parte de las reglas de `docs/MERGE_RULES.md` — sin él verde, no hay
   merge. El reporte HTML queda como artefacto del run.
 
+## Smoke de todas las pantallas
+
+`e2e/rutas-smoke.spec.ts` abre **cada ruta de `AREAS`** (la misma lista que el
+menú) con el rol del usuario E2E y comprueba: responde <400, no rebota al login,
+no cae en la pantalla de error de Next y no tira excepciones de JavaScript.
+
+Una pantalla nueva en `AREAS` entra sola, sin tocar el test. No prueba flujos —
+prueba que nada quedó roto de raíz, que es la regresión más común.
+
+Montarlo destapó columnas que existían **solo en la base de producción** (creadas
+a mano desde el dashboard) y que ninguna migración creaba: `metricool_blog_id`,
+`brand_voice`, `caption_language`, `default_cta`, `caption_notes`,
+`default_hashtags`, `default_platforms` — migraciones 0061 y 0062. La app se
+callaba el fallo y servía la pantalla sin datos. Si aparece
+`column clients.X does not exist` en el log del servidor durante la suite, es
+otra columna que falta en el repo: añádela con `if not exists`, no a mano en el
+dashboard.
+
 ## Escribir una prueba nueva
 
 Van en `e2e/*.spec.ts`. La sesión ya viene iniciada (`e2e/auth.setup.ts` guarda
