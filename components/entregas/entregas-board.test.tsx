@@ -629,3 +629,51 @@ describe('EntregasBoard — cada tarjeta dice su fecha', () => {
     expect(screen.getByText(/Sin fecha/)).toBeInTheDocument()
   })
 })
+
+/**
+ * El mismo archivo editado, subido como dos videos distintos.
+ *
+ * Cada envío crea una fila nueva: resubir el mismo corte tras un "cambios
+ * pedidos" —o un doble clic— deja el mismo video en el tablero dos veces, cada
+ * copia con su fecha. Por separado las dos tarjetas son coherentes, así que
+ * nada lo delataba.
+ */
+describe('EntregasBoard — archivo repetido en otra fecha', () => {
+  const archivo = (name: string, size: number) => ([{
+    id: `v-${name}`, idea_id: 'x', name, size_bytes: size,
+    kind: 'edited', storage_provider: 'entregas-r2', uploaded_at: '2026-08-01T10:00:00Z',
+  }] as unknown as IdeaWithPipeline['videos'])
+
+  function tarjetaDe(cliente: string): HTMLElement {
+    const art = screen.getAllByRole('article').find((a) => a.textContent?.includes(cliente))
+    if (!art) throw new Error(`No hay tarjeta de ${cliente}`)
+    return art
+  }
+
+  it('avisa en la tarjeta cuando el archivo está también en otro video', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: fechaDelDia(1), videos: archivo('guira.mp4', 100) }),
+      idea({ id: '2', publish_date: fechaDelDia(3), videos: archivo('guira.mp4', 100) }),
+    ]} />)
+    expect(tarjetaDe('Nora Fitness').textContent).toMatch(/mismo archivo/i)
+  })
+
+  it('dice en qué otra fecha sale el mismo archivo', () => {
+    const otra = fechaDelDia(3)
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: fechaDelDia(1), videos: archivo('guira.mp4', 100) }),
+      idea({ id: '2', publish_date: otra, videos: archivo('guira.mp4', 100) }),
+    ]} />)
+    const [, m, d] = otra.split('-').map(Number)
+    const dm = new Date(2026, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' }).replace(/[.,]/g, '').trim()
+    expect(tarjetaDe('Nora Fitness').textContent).toContain(dm)
+  })
+
+  it('un archivo que solo sale una vez no lleva aviso', () => {
+    render(<EntregasBoard stages={['edited','approval']} ideas={[
+      idea({ id: '1', publish_date: fechaDelDia(1), videos: archivo('guira.mp4', 100) }),
+      idea({ id: '2', publish_date: fechaDelDia(1), videos: archivo('otro.mp4', 100) }),
+    ]} />)
+    expect(tarjetaDe('Nora Fitness').textContent).not.toMatch(/mismo archivo/i)
+  })
+})

@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CalendarDays, CheckCircle2 } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CalendarDays, Copy, CheckCircle2 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -16,6 +16,7 @@ import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
 import { DIAS, diaDeFecha, offsetSemanaDeFecha, rangoSemana, type DiaKey } from '@/lib/entregas/dias'
 import { fechaTarjeta } from '@/lib/entregas/fecha-tarjeta'
+import { archivosRepetidos, type Repetido } from '@/lib/entregas/duplicados'
 
 /** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
 function etiquetaRango(semana: number): string {
@@ -175,6 +176,17 @@ export function EntregasBoard({
     }
     return m
   }, [ideas, semanaOffset])
+
+  /**
+   * El mismo archivo editado subido como dos videos.
+   *
+   * Se calcula sobre TODAS las ideas y no sobre las del día: el gemelo casi
+   * siempre está en otra pestaña, que es justo lo que lo hacía invisible.
+   */
+  const repetidos = useMemo(
+    () => archivosRepetidos(ideas as unknown as Parameters<typeof archivosRepetidos>[0]),
+    [ideas],
+  )
 
   const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset), [ideas, semanaOffset])
 
@@ -437,7 +449,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} repetidos={repetidos} />
           ))}
         </div>
       </div>
@@ -465,7 +477,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {}, repetidos = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente>; repetidos?: Record<string, Repetido> }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -488,7 +500,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes 
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />)}
+            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} repetidos={repetidos} />)}
           </>
         )}
       </div>
@@ -633,7 +645,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {}, repetidos = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente>; repetidos?: Record<string, Repetido> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -653,6 +665,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
 
   // Una tarjeta es UN video, así que su fecha es la de su idea.
   const fecha = fechaTarjeta(batch.ideas[0]?.publish_date as string | null)
+  const repetido = batch.ideas[0] ? repetidos[batch.ideas[0].id] : undefined
 
   const devuelto = batch.ideas
     .map((i) => reviewNotes[i.id])
@@ -727,6 +740,23 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             </span>
           )}
         </div>
+
+        {/* El mismo archivo editado subido como dos videos.
+            Cada envío crea una fila nueva —no hay forma de reemplazar el video
+            de una tarjeta—, así que resubir tras un "cambios pedidos" o un
+            doble clic deja el mismo corte en dos fechas. Por separado las dos
+            tarjetas son coherentes; solo se ve poniéndolas una al lado de otra,
+            que es lo que hace este aviso. No se toca nada: cuál de las dos
+            fechas vale lo decide quien lo subió. */}
+        {repetido && (
+          <p className="flex items-start gap-1 rounded-lg border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+            <Copy className="mt-px h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+            <span className="min-w-0">
+              Mismo archivo que {repetido.otros === 1 ? 'otro video' : `otros ${repetido.otros} videos`}
+              {repetido.fechas.length > 0 && ` · también el ${repetido.fechas.map((f) => fechaTarjeta(f).etiqueta).join(', ')}`}
+            </span>
+          </p>
+        )}
 
 
         {/* Lo que hay que corregir. La etiqueta "Cambios pedidos" ya estaba,
