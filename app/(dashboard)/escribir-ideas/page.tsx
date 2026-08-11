@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { requirePermission } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
 import { getWrittenIdeas } from '@/lib/actions/ideas-batch'
+import { getIdeaDraft } from '@/lib/actions/idea-drafts'
 import { IdeaBatchTable } from '@/components/ideas/idea-batch-table'
 import { PenLine, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -49,6 +50,8 @@ export default async function EscribirIdeasPage({
   const lista = clients ?? []
   const activo = lista.find((x) => x.id === clientId) ?? lista[0]
   const { ideas } = activo ? await getWrittenIdeas(activo.id) : { ideas: [] }
+  // Lo que esta persona dejó a medio escribir para este cliente.
+  const { rows: draft } = activo ? await getIdeaDraft(activo.id) : { rows: null }
 
   return (
     <div className="space-y-4">
@@ -103,9 +106,14 @@ export default async function EscribirIdeasPage({
 
           {activo && (
             <IdeaBatchTable
+              // La `key` es el arreglo del bug: cambiar de cliente navega dentro
+              // de la MISMA ruta, así que sin ella React reusaba el componente y
+              // lo tecleado para un cliente se guardaba en el siguiente.
+              key={activo.id}
               clientId={activo.id}
               clientName={activo.name}
               existing={ideas ?? []}
+              draft={draft}
             />
           )}
         </>

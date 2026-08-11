@@ -11,7 +11,10 @@ import { defineConfig, devices } from '@playwright/test'
  * `.next/` de `next dev`, que sigue siendo el de desarrollo.
  */
 
-const PORT = Number(process.env.E2E_PORT ?? 3021)
+// Puerto PROPIO de los E2E: el 3021 es el staging que se levanta a mano para
+// mirarlo en el navegador, y reusarlo hacía que la suite corriera contra un
+// build viejo — pasaba verde sin haber visto el cambio.
+const PORT = Number(process.env.E2E_PORT ?? 3022)
 const BASE_URL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`
 
 /** Smoke = lo mínimo que protege el commit; la suite completa corre en el merge. */
@@ -46,7 +49,10 @@ export default defineConfig({
     : {
         command: 'npm run staging:serve',
         url: BASE_URL,
-        reuseExistingServer: !process.env.CI,
+        env: { E2E_PORT: String(PORT) },
+        // Nunca reusar: un servidor ya levantado sirve el build que tenía, no el
+        // código de ahora. La suite tiene que ver SIEMPRE lo último.
+        reuseExistingServer: false,
         timeout: 240_000,
         stdout: 'pipe',
         stderr: 'pipe',

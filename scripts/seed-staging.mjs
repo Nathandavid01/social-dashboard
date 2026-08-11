@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js'
 import { parseEnvFile, stagingEnvProblems } from './check-staging-env.mjs'
 
 const E2E_CLIENT_NAME = 'Cliente E2E'
+const E2E_CLIENT_B_NAME = 'Cliente E2E Dos'
 const E2E_IDEA_TITLE = 'Video E2E en revisión'
 
 function loadEnv() {
@@ -68,17 +69,45 @@ async function main() {
     })
     .eq('id', userId)
 
-  const { data: existingClient } = await admin.from('clients').select('id').eq('name', E2E_CLIENT_NAME).maybeSingle()
-  let clientId = existingClient?.id
-  if (!clientId) {
+  async function ensureClient(name) {
+    const { data: found } = await admin.from('clients').select('id').eq('name', name).maybeSingle()
+    if (found?.id) return found.id
     const { data, error } = await admin
       .from('clients')
-      .insert({ name: E2E_CLIENT_NAME, status: 'active', platforms: ['instagram'], created_by: userId })
+      .insert({ name, status: 'active', platforms: ['instagram'], created_by: userId })
       .select('id')
       .single()
-    if (error) throw new Error(`clients: ${error.message}`)
-    clientId = data.id
+    if (error) throw new Error(`clients (${name}): ${error.message}`)
+    return data.id
   }
+
+  const clientId = await ensureClient(E2E_CLIENT_NAME)
+  // Dos clientes agendados para grabar: "Escribir ideas" solo lista esos, y sin
+  // dos no se puede probar que cambiar de cliente no arrastra lo tecleado.
+  const clientBId = await ensureClient(E2E_CLIENT_B_NAME)
+
+  for (const [cid, titulo] of [[clientId, 'Sesión E2E'], [clientBId, 'Sesión E2E dos']]) {
+    const { data: sesion } = await admin
+      .from('recording_sessions')
+      .select('id')
+      .eq('client_id', cid)
+      .eq('title', titulo)
+      .maybeSingle()
+    if (!sesion) {
+      const { error } = await admin.from('recording_sessions').insert({
+        client_id: cid,
+        title: titulo,
+        session_date: new Date().toISOString().slice(0, 10),
+        status: 'scheduled',
+        created_by: userId,
+      })
+      if (error) throw new Error(`recording_sessions (${titulo}): ${error.message}`)
+    }
+  }
+
+  // Los borradores son por persona y cliente: si quedan de una corrida anterior,
+  // la prueba empieza con texto que ella no escribió.
+  await admin.from('idea_drafts').delete().eq('user_id', userId)
 
   const { data: existingIdea } = await admin
     .from('content_ideas')
@@ -129,7 +158,9 @@ async function main() {
     if (error) throw new Error(`content_idea_videos: ${error.message}`)
   }
 
-  console.log(`✓ staging sembrado — usuario ${env.E2E_USER_EMAIL}, cliente "${E2E_CLIENT_NAME}", idea ${ideaId}`)
+  console.log(
+    `✓ staging sembrado — usuario ${env.E2E_USER_EMAIL}, clientes "${E2E_CLIENT_NAME}" y "${E2E_CLIENT_B_NAME}" (agendados), idea ${ideaId}`,
+  )
 }
 
 main().catch((e) => {

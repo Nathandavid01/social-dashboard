@@ -121,6 +121,20 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 - Inline Suspense fallbacks use the minimal, logo-less `<PageSpinner />` (`components/shared/page-spinner.tsx`).
 - The `NateLoader` component was removed; do not reintroduce a logo splash for loading states.
 
+## Estado local + entidad elegida por searchParams = `key` obligatoria
+
+Si un componente cliente guarda en estado lo que la persona teclea **y** la
+entidad (cliente, video, lote) se elige por `searchParams` de la MISMA ruta,
+hay que pasarle `key={entidad.id}`. Cambiar de entidad navega dentro de la misma
+ruta: sin `key`, React reusa el componente y el estado sobrevive — lo tecleado
+para uno se guarda contra el siguiente. Pasó en `/escribir-ideas`
+(regresión cubierta en `components/ideas/idea-batch-table.test.tsx` y
+`e2e/escribir-ideas.spec.ts`).
+
+Y si lo tecleado se persiste (borradores), **no confíes en la prop del servidor
+al volver**: la caché del router de Next sirve el render anterior. Pídelo también
+en cliente al montar, aplicándolo solo si la persona aún no ha escrito nada.
+
 ## When the user reports a "looks broken" UI bug
 
 First check: is the offending header using the responsive card-header pattern above? Most overflow/clipping bugs in this app are missing `flex-wrap` + `min-w-0` + `shrink-0`.

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Loader2, Trash2, ExternalLink, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,11 @@ import {
   emptyIdeaRow, withTrailingBlank, countWritten, toPayload, type IdeaRow,
 } from '@/lib/ideas/batch-entry'
 import { createIdeasBatch, discardWrittenIdea, type WrittenIdea } from '@/lib/actions/ideas-batch'
+import { saveIdeaDraft, deleteIdeaDraft, getIdeaDraft } from '@/lib/actions/idea-drafts'
+import { hayTrabajoSinEnviar, rowsDesdeBorrador, rowsParaBorrador } from '@/lib/ideas/draft'
+
+/** Lo que se espera tras dejar de teclear para guardar el borrador. */
+const AUTOGUARDADO_MS = 1500
 
 const CONTENT_TYPES = [
   { key: 'R', label: 'Reel' },
@@ -29,18 +34,62 @@ export function IdeaBatchTable({
   clientId,
   clientName,
   existing,
+  draft,
 }: {
   clientId: string
   clientName: string
   existing: WrittenIdea[]
+  /** Lo que esta persona dejó a medio escribir para ESTE cliente. */
+  draft?: IdeaRow[] | null
 }) {
   const router = useRouter()
   const { toast } = useToast()
-  const [rows, setRows] = useState<IdeaRow[]>([emptyIdeaRow()])
+  const [rows, setRows] = useState<IdeaRow[]>(() => rowsDesdeBorrador(draft))
   const [guardando, setGuardando] = useState(false)
   const [borrando, setBorrando] = useState<string | null>(null)
 
   const escritas = useMemo(() => countWritten(rows), [rows])
+  const sinEnviar = hayTrabajoSinEnviar(rows)
+
+  // Volver a la pestaña de un cliente sirve la página desde la caché del router
+  // de Next, renderizada ANTES de que existiera el borrador: por eso se pide al
+  // montar en vez de fiarse de la prop. Solo se aplica si la persona no ha
+  // escrito nada todavía — su tecleo manda siempre sobre lo que llega tarde.
+  useEffect(() => {
+    let vigente = true
+    void getIdeaDraft(clientId).then((res) => {
+      const guardadas = res?.rows
+      if (!vigente || !guardadas?.length) return
+      setRows((actuales) => (hayTrabajoSinEnviar(actuales) ? actuales : rowsDesdeBorrador(guardadas)))
+    })
+    return () => { vigente = false }
+  }, [clientId])
+
+  // Autoguardado del borrador. El primer render no guarda: reabrir un cliente
+  // no debe reescribir lo que acaba de leer.
+  const primerRender = useRef(true)
+  useEffect(() => {
+    if (primerRender.current) {
+      primerRender.current = false
+      return
+    }
+    const t = setTimeout(() => {
+      void saveIdeaDraft({ clientId, rows: rowsParaBorrador(rows) })
+    }, AUTOGUARDADO_MS)
+    return () => clearTimeout(t)
+  }, [rows, clientId])
+
+  // Cerrar la pestaña con ideas a medio escribir: el navegador pregunta. El
+  // borrador ya está a salvo, pero irse creyendo que se enviaron no.
+  useEffect(() => {
+    if (!sinEnviar) return
+    const aviso = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', aviso)
+    return () => window.removeEventListener('beforeunload', aviso)
+  }, [sinEnviar])
 
   function set(i: number, patch: Partial<IdeaRow>) {
     setRows((rs) => {
@@ -61,6 +110,8 @@ export function IdeaBatchTable({
     }
     toast({ title: `${res.created} idea${res.created === 1 ? '' : 's'} guardada${res.created === 1 ? '' : 's'}` })
     setRows([emptyIdeaRow()])
+    // Lo enviado ya no es borrador; si se quedara, reaparecería al volver.
+    await deleteIdeaDraft(clientId)
     router.refresh()
   }
 
@@ -82,6 +133,11 @@ export function IdeaBatchTable({
           <h2 className="min-w-0 truncate text-[13px] font-semibold">Escribir ideas · {clientName}</h2>
           <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
             {escritas} escrita{escritas === 1 ? '' : 's'}
+            {sinEnviar && (
+              <span className="ml-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-600 dark:text-amber-400">
+                sin enviar · se guarda solo
+              </span>
+            )}
           </span>
         </div>
 
