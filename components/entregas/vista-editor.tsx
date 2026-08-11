@@ -49,7 +49,7 @@ export function VistaEditor({
 
       {/* `dia` ya no decide nada — cada video lleva su fecha —, pero el slot
           sigue pidiéndolo por firma. */}
-      <EditorSubmitSlot clients={submitClients} dia={1} />
+      <EditorSubmitSlot clients={submitClients} />
 
       {devueltos.length > 0 && (
         <section className="space-y-2">

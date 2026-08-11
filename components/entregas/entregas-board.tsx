@@ -14,7 +14,7 @@ import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { DIAS, diaDeTablero, offsetSemanaTablero, rangoSemana, type DiaKey, type ModoDia } from '@/lib/entregas/dias'
+import { DIAS, diaDeFecha, offsetSemanaDeFecha, rangoSemana, type DiaKey } from '@/lib/entregas/dias'
 import { fechaTarjeta } from '@/lib/entregas/fecha-tarjeta'
 
 /** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
@@ -71,7 +71,6 @@ export function EntregasBoard({
   postingTimes = {},
   reviewNotes = {},
   clientApprovals = {},
-  modoDia = 'entrega',
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -95,9 +94,6 @@ export function EntregasBoard({
   reviewNotes?: Record<string, ReviewNote>
   /** Lo que el cliente respondió por video, para marcarlo en la tarjeta. */
   clientApprovals?: Record<string, EstadoCliente>
-  /** Desde qué lado se mira la fecha. Revisión razona en día de entrega; Copy y
-   *  Publicación en día de publicación, que es la cadencia del cliente. */
-  modoDia?: ModoDia
 }) {
   // Las columnas dependen del rol: enseñar una en la que no puedes actuar solo
   // llena el tablero de trabajo ajeno. Los permisos de cada acción siguen
@@ -149,15 +145,15 @@ export function EntregasBoard({
   // both, instead of parking in the least-advanced one.
   const ideasDelDia = useMemo(
     () => ideas.filter((i) => {
-      const d = diaDeTablero(i.publish_date as string | null, modoDia)
+      const d = diaDeFecha(i.publish_date as string | null)
       if (dia === 'sin') return d === null
       if (d !== dia) return false
       // Lo atrasado se queda en la semana 0: es trabajo que sigue pendiente y
       // esconderlo por estar vencido es justo lo contrario de lo que hace falta.
-      const w = offsetSemanaTablero(i.publish_date as string | null, modoDia)
+      const w = offsetSemanaDeFecha(i.publish_date as string | null)
       return semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
     }),
-    [ideas, dia, semanaOffset, modoDia],
+    [ideas, dia, semanaOffset],
   )
 
   /** Cuántos videos hay en cada día, para que la pestaña lo diga sin entrar. */
@@ -168,9 +164,9 @@ export function EntregasBoard({
       // tarjetas, asi que sin esto la pestaña anunciaba un numero de videos que
       // no estaban en ninguna parte al entrar.
       if (i.status === 'descartada') continue
-      const d = diaDeTablero(i.publish_date as string | null, modoDia)
+      const d = diaDeFecha(i.publish_date as string | null)
       if (d !== null) {
-        const w = offsetSemanaTablero(i.publish_date as string | null, modoDia)
+        const w = offsetSemanaDeFecha(i.publish_date as string | null)
         const enEstaSemana = semanaOffset === 0 ? (w ?? 0) <= 0 : w === semanaOffset
         if (!enEstaSemana) continue
       }
@@ -178,9 +174,9 @@ export function EntregasBoard({
       m[k] = (m[k] ?? 0) + 1
     }
     return m
-  }, [ideas, semanaOffset, modoDia])
+  }, [ideas, semanaOffset])
 
-  const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset, modoDia), [ideas, semanaOffset, modoDia])
+  const semana = useMemo(() => semanaDeEntregas(ideas as unknown as Parameters<typeof semanaDeEntregas>[0], undefined, semanaOffset), [ideas, semanaOffset])
 
   const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideasDelDia)), [ideasDelDia])
 
@@ -425,7 +421,6 @@ export function EntregasBoard({
             semana={semana}
             hoy={hoyDia}
             onAbrirDia={(d) => { setDia(d); setVista('dia') }}
-            modoDia={modoDia}
           />
         </div>
       )}
@@ -442,7 +437,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />
           ))}
         </div>
       </div>

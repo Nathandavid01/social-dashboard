@@ -63,10 +63,6 @@ export default async function EntregasPage() {
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
       stages={['copy', 'publication']}
-      // La cadencia del cliente y lo que recibe Metricool es el día de
-      // PUBLICACIÓN. La Guira publica lunes, miércoles y viernes; verla en
-      // domingo, martes y jueves no se entendía.
-      modoDia="publicacion"
     />
   )
 }

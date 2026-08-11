@@ -3,26 +3,24 @@
 import { CalendarDays, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DiaDeSemana } from '@/lib/entregas/semana'
-import type { DiaKey, ModoDia } from '@/lib/entregas/dias'
+import type { DiaKey } from '@/lib/entregas/dias'
 
 /**
  * Cómo viene la semana, para poder planificar sin ir pestaña por pestaña.
  *
- * Cada columna es un día de ENTREGA y dice cuándo se publica lo que entregues
- * ahí — mismo criterio que las pestañas, para que las dos vistas no discrepen.
- * Pulsar una columna abre ese día en la vista de tablero.
+ * Cada columna es un día de PUBLICACIÓN y dice cuándo hay que tener listo lo
+ * que sale ahí — mismo criterio que las pestañas, para que las dos vistas no
+ * discrepen. Pulsar una columna abre ese día en la vista de tablero.
  */
 export function WeekView({
   semana,
   hoy,
   onAbrirDia,
-  modoDia = 'entrega',
 }: {
   semana: DiaDeSemana[]
   /** Día de hoy, para resaltar la columna. null si hoy es domingo. */
   hoy?: DiaKey | null
   onAbrirDia: (dia: DiaKey) => void
-  modoDia?: ModoDia
 }) {
   const totalSemana = semana.reduce((n, d) => n + d.total, 0)
 
@@ -34,7 +32,7 @@ export function WeekView({
           <span className="truncate">Tu semana</span>
         </h2>
         <span className="shrink-0 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground">
-          {totalSemana} video{totalSemana === 1 ? '' : 's'} por entregar
+          {totalSemana} video{totalSemana === 1 ? '' : 's'} esta semana
         </span>
       </div>
 
@@ -47,7 +45,7 @@ export function WeekView({
               <button
                 type="button"
                 onClick={() => onAbrirDia(d.dia)}
-                aria-label={`Abrir ${d.label}: ${d.total} video${d.total === 1 ? '' : 's'} por entregar`}
+                aria-label={`Abrir ${d.label}: ${d.total} video${d.total === 1 ? '' : 's'}`}
                 className={cn(
                   'flex h-full w-full flex-col gap-1.5 rounded-xl border p-2.5 text-left transition',
                   'hover:border-foreground/20 hover:bg-muted',
@@ -66,9 +64,9 @@ export function WeekView({
                   </span>
                 </div>
 
-                {/* Lo que más se olvida: que lo del lunes sale el martes. */}
+                {/* Lo que más se olvida: que lo del martes hay que tenerlo el lunes. */}
                 <p className="flex items-center gap-0.5 whitespace-nowrap text-[9.5px] text-muted-foreground">
-                  {modoDia === 'publicacion' ? 'listo' : 'publica'} <ArrowRight className="h-2.5 w-2.5" aria-hidden="true" /> {d.diaPublicacion}
+                  listo <ArrowRight className="h-2.5 w-2.5" aria-hidden="true" /> {d.diaListo}
                 </p>
 
                 {d.clientes.length === 0 ? (

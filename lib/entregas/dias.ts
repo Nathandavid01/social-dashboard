@@ -1,10 +1,19 @@
 /**
- * La operación de Entregas es POR DÍA: el editor entrega para un día concreto
- * y cada día tiene su propio tablero completo.
+ * La operación de Entregas es POR DÍA: cada día tiene su propio tablero
+ * completo.
  *
  * El día no se guarda aparte — se deriva de `publish_date`, que ya existe y es
  * lo que acaba recibiendo Metricool. Una columna nueva solo abriría la puerta a
  * que el día y la fecha real se contradigan.
+ *
+ * La pestaña de una tarjeta es el día en que el video SE PUBLICA, y punto.
+ * Hubo una época en que /revision la corría un día atrás —la pestaña era el día
+ * de ENTREGA, porque la fecha salía de la pestaña abierta y se editaba con un
+ * día de antelación— mientras /entregas usaba la fecha real. El mismo video
+ * salía en pestañas distintas según la pantalla, y el equipo lo reportó como
+ * que los videos se cruzaban. Desde que el editor elige la fecha video a video
+ * (ver fecha-video.ts) esa traducción no tiene dueño: la fecha que él eligió es
+ * la de publicación, y es la única que se usa en todas partes.
  *
  * La semana va de lunes a DOMINGO. El domingo estuvo fuera al principio, y eso
  * mandaba a "Sin día" cualquier video con fecha en domingo —había 3, y 3
@@ -64,23 +73,14 @@ export function etiquetaDia(dia: DiaKey | null): string {
 }
 
 /**
- * El día en que se publica lo que se entrega un día dado: el siguiente.
+ * El día en que hay que tener LISTO lo que se publica un día dado: el anterior.
  *
- * La pestaña del tablero es el día en que el editor ENTREGA, no el de
- * publicación — se edita con un día de antelación.
+ * Es un dato informativo de la columna —"esto sale el martes, tenlo el lunes"—,
+ * nunca el criterio para colocar la tarjeta. Colocarla por aquí es lo que hacía
+ * que un video de lunes apareciera en la pestaña del domingo.
  */
-export function diaDePublicacion(dia: DiaKey): DiaKey {
-  return ((dia + 1) % 7) as DiaKey
-}
-
-/**
- * La pestaña donde vive una tarjeta, a partir de su fecha de publicación: el
- * día anterior. Es la inversa exacta de diaDePublicacion.
- */
-export function diaDeEntrega(publishDate: string | null | undefined): DiaKey | null {
-  const publica = diaDeFecha(publishDate)
-  if (publica === null) return null
-  return ((publica + 6) % 7) as DiaKey
+export function diaListo(dia: DiaKey): DiaKey {
+  return ((dia + 6) % 7) as DiaKey
 }
 
 function sumarDias(iso: string, dias: number): string {
@@ -108,38 +108,36 @@ function lunesDeLaSemanaDeIso(iso: string): string {
 }
 
 /**
- * La fecha en que se ENTREGA, para un día y un adelanto en semanas.
+ * La fecha de publicación de una columna, para un día y un adelanto en semanas.
  *
  * `semana` es cuánto va adelantado el editor: 0 la semana en curso, 1 la que
- * viene. Sin esto no había forma de entregar para más adelante —
- * proximaFechaDelDia siempre da la más cercana.
+ * viene. Sin esto no había forma de mirar más adelante — proximaFechaDelDia
+ * siempre da la más cercana.
  */
-export function fechaEntregaDelDia(dia: DiaKey, hoy: Date = new Date(), semana = 0): string {
+export function fechaDelDia(dia: DiaKey, hoy: Date = new Date(), semana = 0): string {
   return sumarDias(lunesDeLaSemana(hoy), posicion(dia) + semana * 7)
 }
 
 /**
- * La fecha de publicación que se guarda al entregar: el día siguiente al de
- * entrega.
+ * El día natural anterior a una fecha.
  *
- * Se cuenta DESDE el día de entrega y no buscando por separado la próxima fecha
- * del día de publicación: calculadas aparte, cada una redondea a su "próxima" y
- * pueden invertirse. Un jueves, entregar en la pestaña Miércoles daba como
- * publicación el jueves de HOY, antes de la propia entrega.
+ * Se cuenta sobre la fecha y no buscando el día anterior dentro de la semana:
+ * el "listo" de un lunes es el domingo de la semana PASADA, y buscarlo por día
+ * lo mandaba al domingo del final de la misma semana — seis días tarde.
  */
-export function fechaDeEntrega(dia: DiaKey, hoy: Date = new Date(), semana = 0): string {
-  return sumarDias(fechaEntregaDelDia(dia, hoy, semana), 1)
+export function fechaAnterior(iso: string): string {
+  return sumarDias(iso, -1)
 }
 
 /**
- * El rango de una semana de entrega, de lunes a domingo. Con solo "Esta semana"
- * no se sabe de qué fechas se está hablando, que es justo lo que hace falta
- * cuando se trabaja adelantado.
+ * El rango de una semana, de lunes a domingo. Con solo "Esta semana" no se sabe
+ * de qué fechas se está hablando, que es justo lo que hace falta cuando se
+ * trabaja adelantado.
  */
 export function rangoSemana(hoy: Date = new Date(), semana = 0): { desde: string; hasta: string } {
   return {
-    desde: fechaEntregaDelDia(1, hoy, semana),
-    hasta: fechaEntregaDelDia(0, hoy, semana),
+    desde: fechaDelDia(1, hoy, semana),
+    hasta: fechaDelDia(0, hoy, semana),
   }
 }
 
@@ -152,51 +150,18 @@ function diffEnSemanas(a: string, b: string): number {
 
 /**
  * Cuánto adelantado va un video: 0 la semana en curso, 1 la que viene, negativo
- * si ya pasó. Es la inversa exacta de fechaDeEntrega, para que lo guardado
- * vuelva a leerse donde se entregó.
+ * si ya pasó. Es la inversa exacta de fechaDelDia, para que lo guardado vuelva
+ * a leerse en la semana en que se ve.
  *
- * Se compara por la fecha de ENTREGA y por el lunes de cada semana natural: así
- * los siete días de una misma semana dan siempre el mismo número, que es lo que
- * la etiqueta del selector promete.
+ * Se cuenta por la fecha de PUBLICACIÓN y por el lunes de cada semana natural:
+ * así los siete días de una misma semana dan siempre el mismo número, que es lo
+ * que la etiqueta del selector promete. Contarlo por el día anterior mandaba
+ * todo lo que publica en lunes a la semana pasada.
  */
-export function offsetSemana(publishDate: string | null | undefined, hoy: Date = new Date()): number | null {
-  if (!publishDate || diaDeEntrega(publishDate) === null) return null
-  const entrega = sumarDias(publishDate, -1)
-  return diffEnSemanas(lunesDeLaSemanaDeIso(entrega), lunesDeLaSemana(hoy))
-}
-
-/**
- * Desde qué lado se mira la fecha en cada tablero.
- *
- * `entrega` — Revisión: el editor piensa "cuándo entrego", y publica al día
- *   siguiente.
- * `publicacion` — Copy y Publicación: ahí se piensa en la cadencia del cliente
- *   y en lo que recibe Metricool, que es cuándo se publica. La Guira publica
- *   lunes, miércoles y viernes; verla en domingo, martes y jueves no se
- *   entendía.
- */
-export type ModoDia = 'entrega' | 'publicacion'
-
-/** La pestaña donde vive una tarjeta, según desde dónde se mire. */
-export function diaDeTablero(
+export function offsetSemanaDeFecha(
   publishDate: string | null | undefined,
-  modo: ModoDia,
-): DiaKey | null {
-  return modo === 'publicacion' ? diaDeFecha(publishDate) : diaDeEntrega(publishDate)
-}
-
-/**
- * La semana de una tarjeta, según el modo. En modo publicación se cuenta por la
- * fecha real; en modo entrega, por el día anterior. En el borde del domingo los
- * dos difieren —publicar el lunes es entregar el domingo, que ya es otra
- * semana— y eso es correcto: cada pantalla cuenta lo suyo.
- */
-export function offsetSemanaTablero(
-  publishDate: string | null | undefined,
-  modo: ModoDia,
   hoy: Date = new Date(),
 ): number | null {
-  if (modo === 'entrega') return offsetSemana(publishDate, hoy)
   if (!publishDate || diaDeFecha(publishDate) === null) return null
   return diffEnSemanas(lunesDeLaSemanaDeIso(publishDate), lunesDeLaSemana(hoy))
 }

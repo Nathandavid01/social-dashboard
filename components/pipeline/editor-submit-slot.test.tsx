@@ -21,18 +21,20 @@ const clientes = [{ id: 'c1', name: 'Kavanna' }]
  */
 describe('EditorSubmitSlot', () => {
   it('monta el formulario', () => {
-    render(<EditorSubmitSlot clients={clientes} dia={1} />)
+    render(<EditorSubmitSlot clients={clientes} />)
     expect(screen.getByTestId('form')).toBeInTheDocument()
   })
 
   it('ya no anuncia un dia: lo dice cada video', () => {
-    render(<EditorSubmitSlot clients={clientes} dia={1} />)
+    render(<EditorSubmitSlot clients={clientes} />)
     expect(screen.queryByText(/Entregando para/i)).toBeNull()
   })
 
-  it('la pestaña abierta no cambia lo que se ve', () => {
-    const { container: lunes } = render(<EditorSubmitSlot clients={clientes} dia={1} />)
-    const { container: viernes } = render(<EditorSubmitSlot clients={clientes} dia={5} />)
-    expect(lunes.textContent).toBe(viernes.textContent)
+  // La pestaña ya no llega hasta aquí: el componente no acepta día ni semana,
+  // así que no puede influir en la fecha. La garantía es estructural — la fecha
+  // la escribe el editor en el formulario, video a video.
+  it('no anuncia ningún día: la fecha la dice el formulario', () => {
+    render(<EditorSubmitSlot clients={clientes} />)
+    expect(screen.queryByText(/lunes|martes|miércoles|jueves|viernes|sábado|domingo/i)).toBeNull()
   })
 })

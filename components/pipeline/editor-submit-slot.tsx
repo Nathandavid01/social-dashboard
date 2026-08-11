@@ -5,13 +5,6 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SubmitVideoCard } from './submit-video-card'
 import { useSubmitVideos } from './use-submit-videos'
-import { etiquetaDia, diaDePublicacion, fechaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
-
-/** '11 ago' — con el día solo no se distingue una semana de la siguiente. */
-function fechaCorta(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' })
-}
 
 /**
  * The real Editado column slot: the submit form plus per-video progress while
@@ -26,16 +19,16 @@ const STAGE_LABEL: Record<string, string> = {
   error: 'Error',
 }
 
+/**
+ * Ni el día ni la semana de la pestaña entran aquí: la fecha la dice el editor
+ * video a video en el formulario (ver lib/entregas/fecha-video.ts). Pasarle la
+ * pestaña obligaba a entrar en el día correcto antes de entregar y hacía
+ * imposible subir en una tanda videos de días distintos.
+ */
 export function EditorSubmitSlot({
   clients,
-  dia,
-  semanaOffset = 0,
 }: {
   clients: { id: string; name: string }[]
-  /** Día de la pestaña activa — para el que se entrega. */
-  dia: DiaKey
-  /** Cuánto adelantado va: 0 lo próximo, 1 la semana siguiente. */
-  semanaOffset?: number
 }) {
   const router = useRouter()
   // Refresh so the new cards appear in Revisión from real data, not local state.

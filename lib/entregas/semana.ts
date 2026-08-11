@@ -1,12 +1,12 @@
-import { DIAS, diaDeTablero, diaDePublicacion, etiquetaDia, offsetSemanaTablero, fechaEntregaDelDia, fechaDeEntrega, type DiaKey, type ModoDia } from './dias'
+import { DIAS, diaDeFecha, diaListo, etiquetaDia, offsetSemanaDeFecha, fechaDelDia, fechaAnterior, type DiaKey } from './dias'
 
 /**
- * La semana de un editor: qué le toca entregar cada día y cuándo se publica.
+ * La semana de un editor: qué se publica cada día y cuándo hay que tenerlo.
  *
  * Las pestañas de día contestan "qué hago hoy"; esto contesta "cómo viene la
  * semana", que es lo que hacía falta para planificar sin ir pestaña por
  * pestaña. Mismo criterio que el tablero —la columna es el día en que se
- * ENTREGA— para que las dos vistas no puedan discrepar.
+ * PUBLICA— para que las dos vistas no puedan discrepar.
  */
 
 export interface IdeaParaSemana {
@@ -23,11 +23,13 @@ export interface ClienteDelDia {
 
 export interface DiaDeSemana {
   dia: DiaKey
-  /** 'Lunes' — el día en que hay que entregar. */
+  /** 'Lunes' — el día en que se publica lo de esta columna. */
   label: string
-  /** 'Martes' — el día en que eso se publica. */
-  diaPublicacion: string
-  fechaEntrega: string
+  /** 'Domingo' — el día en que hay que tenerlo listo: el anterior. */
+  diaListo: string
+  /** La fecha en que hay que tenerlo listo: el día antes de publicar. */
+  fechaListo: string
+  /** La fecha en que se publica: la de la propia columna. */
   fechaPublicacion: string
   clientes: ClienteDelDia[]
   total: number
@@ -37,7 +39,6 @@ export function semanaDeEntregas(
   ideas: IdeaParaSemana[],
   hoy: Date = new Date(),
   semana = 0,
-  modo: ModoDia = 'entrega',
 ): DiaDeSemana[] {
   // Un mapa por día ANTES de recorrer las ideas: así un día sin trabajo sale
   // igualmente como columna vacía, en vez de desaparecer de la semana.
@@ -45,13 +46,13 @@ export function semanaDeEntregas(
   for (const d of DIAS) porDia.set(d.key, new Map())
 
   for (const i of ideas) {
-    const dia = diaDeTablero(i.publish_date, modo)
+    const dia = diaDeFecha(i.publish_date)
     // Sin fecha no cae en ningún día: eso vive en la pestaña "Sin día".
     if (dia === null) continue
     // Solo la semana que se está mirando. Lo atrasado se acumula en la actual:
     // sigue pendiente, y esconderlo por vencido es lo contrario de lo que hace
     // falta.
-    const w = offsetSemanaTablero(i.publish_date, modo, hoy)
+    const w = offsetSemanaDeFecha(i.publish_date, hoy)
     if (semana === 0 ? (w ?? 0) > 0 : w !== semana) continue
     const clientes = porDia.get(dia)
     if (!clientes) continue
@@ -69,17 +70,13 @@ export function semanaDeEntregas(
     return {
       dia: d.key,
       label: d.label,
-      // En modo publicación la columna ya ES el día en que sale; lo útil
-      // entonces es el día anterior, que es cuando hay que tenerlo listo.
-      diaPublicacion: etiquetaDia(modo === 'publicacion' ? ((d.key + 6) % 7) as DiaKey : diaPublicacionDe(d.key)),
-      fechaEntrega: fechaEntregaDelDia(d.key, hoy, semana),
-      fechaPublicacion: fechaDeEntrega(d.key, hoy, semana),
+      // La columna ES el día en que sale; lo útil es el día anterior, que es
+      // cuando hay que tenerlo listo.
+      diaListo: etiquetaDia(diaListo(d.key)),
+      fechaListo: fechaAnterior(fechaDelDia(d.key, hoy, semana)),
+      fechaPublicacion: fechaDelDia(d.key, hoy, semana),
       clientes,
       total: clientes.reduce((n, c) => n + c.videos, 0),
     }
   })
-}
-
-function diaPublicacionDe(dia: DiaKey): DiaKey {
-  return diaDePublicacion(dia)
 }

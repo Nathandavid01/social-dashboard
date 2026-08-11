@@ -17,7 +17,7 @@ vi.mock('@/lib/context/auth-context', () => ({
 }))
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
-import { fechaDeEntrega, fechaEntregaDelDia } from '@/lib/entregas/dias'
+import { fechaDelDia } from '@/lib/entregas/dias'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -26,7 +26,7 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
     status: 'idea', production_task_id: null, recording_session_id: null, theme: null,
     generation_prompt: null, model: null, generated_caption: null, caption_platform: null, caption_generated_at: null,
     published_at: null, approval_status: 'pending', approved_by: null, approved_at: null, submitted_at: null,
-    recording_date: null, publish_date: fechaDeEntrega(1), created_by: null,
+    recording_date: null, publish_date: fechaDelDia(1), created_by: null,
     created_at: '2026-06-01', updated_at: '2026-06-01',
     recordingScheduled: false, videos: [], assignee: null,
     client: { id: 'c1', name: 'Nora Fitness', industry: null, platforms: ['instagram'] },
@@ -56,8 +56,8 @@ describe('EntregasBoard — las columnas las define la ruta', () => {
 describe('EntregasBoard — la operación es por día', () => {
   it('cada día es su propio tablero: el lunes no enseña lo del martes', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1) }),   // pestaña Lunes
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: fechaDeEntrega(2) }), // pestaña Martes
+      idea({ id: '1', publish_date: fechaDelDia(1) }),   // pestaña Lunes
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: fechaDelDia(2) }), // pestaña Martes
     ]} />)
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
     expect(screen.queryByText('Lumen')).toBeNull()
@@ -69,24 +69,24 @@ describe('EntregasBoard — la operación es por día', () => {
 
   it('la pestaña dice cuántos videos hay sin tener que entrar', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(2) }),
-      idea({ id: '2', publish_date: fechaDeEntrega(2) }),
+      idea({ id: '1', publish_date: fechaDelDia(2) }),
+      idea({ id: '2', publish_date: fechaDelDia(2) }),
     ]} />)
     const martes = screen.getByRole('button', { name: 'Martes' })
     expect(martes.textContent).toMatch(/2/)
   })
 
-  // La pestaña es el día en que se ENTREGA; se publica al día siguiente.
-  it('la pestaña Lunes lleva lo que se publica el martes', () => {
+  // La pestaña es el día en que se PUBLICA.
+  it('la pestaña Lunes lleva lo que se publica el lunes', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1) }),
+      idea({ id: '1', publish_date: fechaDelDia(1) }),
     ]} />)
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 
-  it('lo que se publica el lunes se entregó el sábado', () => {
+  it('lo que se publica el sábado vive en la pestaña Sábado', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(6) }),   // entrega sábado
+      idea({ id: '1', publish_date: fechaDelDia(6) }),   // publica sábado
     ]} />)
     expect(screen.queryByText('Nora Fitness')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Sábado' }))
@@ -102,7 +102,7 @@ describe('EntregasBoard — la operación es por día', () => {
   })
 
   it('sin videos sueltos no hay pestaña "Sin día"', () => {
-    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: fechaDeEntrega(1) })]} />)
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1', publish_date: fechaDelDia(1) })]} />)
     expect(screen.queryByRole('button', { name: /sin día/i })).toBeNull()
   })
 })
@@ -132,7 +132,7 @@ describe('EntregasBoard — batch model', () => {
       stages={['edited','approval','copy','publication']}
       // Fecha relativa a hoy: el tablero filtra por semana, asi que una fecha
       // fija de 2099 se queda fuera de "esta semana" y la tarjeta no sale.
-      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: fechaDeEntrega(1, undefined, 1) })]}
+      ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: fechaDelDia(1, undefined, 1) })]}
       postingTimes={{ c1: '14:30' }}
     />)
     // La semana que viene siempre es futura; en la actual la fecha puede haber
@@ -399,19 +399,19 @@ describe('EntregasBoard — vista semana', () => {
     expect(screen.getByText('Tu semana')).toBeInTheDocument()
   })
 
-  it('cada día dice cuándo se publica lo que entregas ahí', () => {
+  it('cada día dice cuándo hay que tener listo lo que sale ahí', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1' })]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }))
-    // la semana cierra en domingo: sábado -> domingo, domingo -> lunes
-    expect(screen.getByRole('button', { name: /Abrir Lunes/ })).toHaveTextContent('Martes')
-    expect(screen.getByRole('button', { name: /Abrir Sábado/ })).toHaveTextContent('Domingo')
-    expect(screen.getByRole('button', { name: /Abrir Domingo/ })).toHaveTextContent('Lunes')
+    // La columna es el día en que se PUBLICA; lo útil es el día anterior.
+    expect(screen.getByRole('button', { name: /Abrir Lunes/ })).toHaveTextContent('Domingo')
+    expect(screen.getByRole('button', { name: /Abrir Sábado/ })).toHaveTextContent('Viernes')
+    expect(screen.getByRole('button', { name: /Abrir Domingo/ })).toHaveTextContent('Sábado')
   })
 
   it('cuenta los videos de cada día de entrega', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1) }),
-      idea({ id: '2', publish_date: fechaDeEntrega(1) }),
+      idea({ id: '1', publish_date: fechaDelDia(1) }),
+      idea({ id: '2', publish_date: fechaDelDia(1) }),
     ]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }))
     expect(screen.getByRole('button', { name: /Abrir Lunes: 2 videos/ })).toBeInTheDocument()
@@ -419,7 +419,7 @@ describe('EntregasBoard — vista semana', () => {
 
   it('pulsar un día abre ese día en el tablero', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(2) }),
+      idea({ id: '1', publish_date: fechaDelDia(2) }),
     ]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }))
     fireEvent.click(screen.getByRole('button', { name: /Abrir Martes/ }))
@@ -448,8 +448,8 @@ describe('EntregasBoard — trabajar adelantado', () => {
   // Lo que motivó todo: dos martes distintos caían en la misma pestaña.
   it('cada semana enseña solo lo suyo', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1, undefined, 0) }),
-      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: fechaDeEntrega(1, undefined, 1) }),
+      idea({ id: '1', publish_date: fechaDelDia(1, undefined, 0) }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: fechaDelDia(1, undefined, 1) }),
     ]} />)
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
     expect(screen.queryByText('Lumen')).toBeNull()
@@ -461,14 +461,14 @@ describe('EntregasBoard — trabajar adelantado', () => {
 
   it('lo atrasado no se esconde: sigue en esta semana', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1, undefined, -3) }),
+      idea({ id: '1', publish_date: fechaDelDia(1, undefined, -3) }),
     ]} />)
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 })
 
 describe('EntregasBoard — el cliente aprobó antes que el copy', () => {
-  const enCopy = () => idea({ id: 'v1', approval_status: 'approved', generated_caption: null, publish_date: fechaDeEntrega(1) })
+  const enCopy = () => idea({ id: 'v1', approval_status: 'approved', generated_caption: null, publish_date: fechaDelDia(1) })
 
   it('lo dice en la tarjeta, y que falta el copy', () => {
     render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy()]} clientApprovals={{ v1: 'approved' }} />)
@@ -490,7 +490,7 @@ describe('EntregasBoard — el cliente aprobó antes que el copy', () => {
   it('un rechazo manda sobre lo demás', () => {
     render(<EntregasBoard
       stages={['copy','publication']}
-      ideas={[enCopy(), idea({ id: 'v2', approval_status: 'approved', generated_caption: null, publish_date: fechaDeEntrega(1) })]}
+      ideas={[enCopy(), idea({ id: 'v2', approval_status: 'approved', generated_caption: null, publish_date: fechaDelDia(1) })]}
       clientApprovals={{ v1: 'approved', v2: 'rejected' }}
     />)
     expect(screen.getByText('El cliente pidió cambios en 1')).toBeInTheDocument()
@@ -502,33 +502,39 @@ describe('EntregasBoard — el cliente aprobó antes que el copy', () => {
  * del cliente y lo que recibe Metricool. La Guira publica lunes, miércoles y
  * viernes, y verla en domingo, martes y jueves no se entendía.
  */
-describe('EntregasBoard — modo publicación', () => {
+/**
+ * REGRESIÓN — un solo criterio de día en las dos pantallas.
+ *
+ * /revision colocaba la tarjeta un día antes de su publish_date y /entregas en
+ * su fecha real: el mismo video salía en pestañas distintas según dónde se
+ * mirara, y el equipo lo reportó como que los videos se cruzaban.
+ */
+describe('EntregasBoard — la pestaña es el día de publicación', () => {
   const enCopy = (fecha: string, id: string) =>
     idea({ id, approval_status: 'approved', generated_caption: null, publish_date: fecha })
 
   it('un video que publica el miércoles sale en Miércoles, no en Martes', () => {
     // miércoles de la semana en curso
-    const mie = fechaEntregaDelDia(3)
-    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} modoDia="publicacion" />)
+    const mie = fechaDelDia(3)
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Miércoles' }))
     expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 
-  it('en modo entrega ese mismo video sale un día antes', () => {
-    const mie = fechaEntregaDelDia(3)
-    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} modoDia="entrega" />)
+  it('y no aparece además en el día anterior', () => {
+    const mie = fechaDelDia(3)
+    render(<EntregasBoard stages={['copy','publication']} ideas={[enCopy(mie, 'v1')]} />)
     fireEvent.click(screen.getByRole('button', { name: 'Martes' }))
-    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+    expect(screen.queryByText('Nora Fitness')).toBeNull()
   })
 
   it('una cadencia lunes-miércoles-viernes se ve en esos tres días', () => {
     render(<EntregasBoard
       stages={['copy','publication']}
-      modoDia="publicacion"
       ideas={[
-        enCopy(fechaEntregaDelDia(1), 'v1'),
-        enCopy(fechaEntregaDelDia(3), 'v2'),
-        enCopy(fechaEntregaDelDia(5), 'v3'),
+        enCopy(fechaDelDia(1), 'v1'),
+        enCopy(fechaDelDia(3), 'v2'),
+        enCopy(fechaDelDia(5), 'v3'),
       ]}
     />)
     for (const d of ['Lunes', 'Miércoles', 'Viernes']) {
@@ -541,15 +547,15 @@ describe('EntregasBoard — modo publicación', () => {
 describe('EntregasBoard — el contador de la pestaña', () => {
   it('no cuenta los descartados: la tarjeta ya no esta ahi', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1) }),
-      idea({ id: '2', publish_date: fechaDeEntrega(1), status: 'descartada' }),
+      idea({ id: '1', publish_date: fechaDelDia(1) }),
+      idea({ id: '2', publish_date: fechaDelDia(1), status: 'descartada' }),
     ]} />)
     expect(screen.getByRole('button', { name: 'Lunes' }).textContent).toMatch(/1/)
   })
 
   it('con todo descartado la pestaña queda sin numero', () => {
     render(<EntregasBoard stages={['edited','approval']} ideas={[
-      idea({ id: '1', publish_date: fechaDeEntrega(1), status: 'descartada' }),
+      idea({ id: '1', publish_date: fechaDelDia(1), status: 'descartada' }),
     ]} />)
     expect(screen.getByRole('button', { name: 'Lunes' }).textContent).not.toMatch(/[0-9]/)
   })
@@ -582,9 +588,9 @@ describe('EntregasBoard — cada tarjeta dice su fecha', () => {
   }
 
   it('escribe la fecha de publicación del video en la tarjeta', () => {
-    const fecha = fechaDeEntrega(1)
+    const fecha = fechaDelDia(1)
     render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1', publish_date: fecha })]} />)
-    expect(screen.getByText(new RegExp(diaMes(fecha)))).toBeInTheDocument()
+    expect(tarjeta('Nora Fitness').textContent).toContain(diaMes(fecha))
   })
 
   /** La tarjeta de un cliente, para mirar solo lo suyo. */
@@ -595,7 +601,7 @@ describe('EntregasBoard — cada tarjeta dice su fecha', () => {
   }
 
   it('un video vencido que se arrastra a esta semana se marca como atrasado', () => {
-    const vieja = semanaAntes(fechaDeEntrega(1))
+    const vieja = semanaAntes(fechaDelDia(1))
     render(<EntregasBoard stages={['edited','approval']} ideas={[idea({ id: '1', publish_date: vieja })]} />)
     const card = tarjeta('Nora Fitness')
     expect(card.textContent).toMatch(/Atrasado/i)
@@ -604,7 +610,7 @@ describe('EntregasBoard — cada tarjeta dice su fecha', () => {
   })
 
   it('dos videos de fechas distintas en la misma pestaña se pueden distinguir', () => {
-    const estaSemana = fechaDeEntrega(1)
+    const estaSemana = fechaDelDia(1)
     const laPasada = semanaAntes(estaSemana)
     render(<EntregasBoard stages={['edited','approval']} ideas={[
       idea({ id: '1', publish_date: estaSemana }),
