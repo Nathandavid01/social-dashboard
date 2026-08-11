@@ -8,16 +8,24 @@ import { test, expect, type Page } from '@playwright/test'
  * sintéticos; esto lo cubre con un ratón de verdad, que es donde se notó.
  */
 
-/** La pestaña "Sin día" es la que lleva lo sembrado (idea sin publish_date). */
+/**
+ * La pestaña "Sin día" lleva lo sembrado (idea sin publish_date). Si no está,
+ * el seed no llegó: mejor fallar aquí y decirlo que seguir contra el día
+ * equivocado y morir después en un locator que no explica nada.
+ */
 async function abrirSinDia(page: Page) {
   const tab = page.getByRole('button', { name: /sin día/i })
-  if (await tab.count()) await tab.first().click()
+  await expect(tab, 'falta la pestaña "Sin día" — ¿corriste npm run staging:seed?').toBeVisible()
+  await tab.first().click()
 }
+
+/** El overlay de revisión, por su botón de cierre: único y estable. */
+const colaDeRevision = (page: Page) => page.getByRole('button', { name: 'Cerrar revisión' })
 
 test.describe('/revision — abrir un video', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/revision')
-    await expect(page.getByRole('heading', { name: 'Revisión' })).toBeVisible()
+    await expect(page.getByTestId('pipeline-scroll')).toBeVisible()
     await abrirSinDia(page)
   })
 
@@ -34,7 +42,7 @@ test.describe('/revision — abrir un video', () => {
     await page.mouse.up()
 
     // La cola de revisión: reproductor + decisión.
-    await expect(page.getByText(/mira cada video y decide/i)).toBeVisible({ timeout: 15_000 })
+    await expect(colaDeRevision(page)).toBeVisible({ timeout: 15_000 })
   })
 
   test('arrastrar el fondo del tablero sigue paneando, no abre nada', async ({ page }) => {
@@ -47,6 +55,6 @@ test.describe('/revision — abrir un video', () => {
     await page.mouse.move(box.x + 260, box.y + box.height - 30, { steps: 10 })
     await page.mouse.up()
 
-    await expect(page.getByText(/mira cada video y decide/i)).toHaveCount(0)
+    await expect(colaDeRevision(page)).toHaveCount(0)
   })
 })

@@ -28,7 +28,10 @@ if (problems.length) {
 
 // El env de staging gana sobre cualquier cosa que traiga la shell: si el
 // proceso heredara las claves de producción, el "staging" sería producción.
-const env = { ...process.env, ...staging, NEXT_DIST_DIR: DIST, NODE_ENV: undefined }
+const env = { ...process.env, ...staging, NEXT_DIST_DIR: DIST }
+// `next start` decide el modo él mismo; heredar un NODE_ENV de la shell (o
+// dejar la cadena "undefined") le cambia el comportamiento sin avisar.
+delete env.NODE_ENV
 
 const needsBuild = process.argv.includes('--fresh') || !existsSync(resolve(process.cwd(), DIST, 'BUILD_ID'))
 if (needsBuild) {
