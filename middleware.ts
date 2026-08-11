@@ -52,6 +52,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // `monitoring` es el túnel de Sentry (tunnelRoute en next.config.mjs). Si el
+    // middleware lo tocara, cada evento pasaría por getUser() y, sin sesión,
+    // acabaría redirigido — los errores de la pantalla de login, que son
+    // justo los que hay que ver, no llegarían nunca.
+    '/((?!_next/static|_next/image|favicon.ico|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
