@@ -48,3 +48,47 @@ Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelkn
 - [x] Widget mide cadencia configurada (posting_days = meta) vs realidad de Metricool (publicado/atrasado/pendiente). Calendario de producción ya NO alimenta el widget.
 - [ ] **Optimización:** cron `app/api/cron/metricool-sync` que escriba un snapshot semanal por cliente a una tabla nueva (req. migración nueva que aplica Nathan en Supabase), para que el widget lea de la DB en vez de barrer Metricool en vivo (~60 llamadas/cargas, hoy mitigado con unstable_cache 10 min).
 - [ ] Considerar mostrar "sin meta" (clientes sin posting_days) con un CTA para configurar su cadencia, ya que publican pero no cuentan para el anillo.
+
+## Entregas — fechas cruzadas (auditoría 11 ago 2026)
+
+Contexto: el equipo reportó que "en entregas los videos se cruzan". Se arregló
+lo que era de código (la tarjeta ya muestra su fecha; las dos pantallas usan un
+único criterio de día; se avisa del archivo repetido). Queda lo que exige una
+decisión humana:
+
+- [ ] **Resolver los 9 grupos de archivo duplicado.** El mismo archivo editado
+  está registrado como varios videos, varios de ellos con fechas DISTINTAS —o
+  sea, el mismo corte anunciado para dos días. Nadie más que quien lo subió
+  puede decir cuál de las dos fechas vale, así que el tablero solo lo señala
+  (aviso "Mismo archivo que otro video"). Hay que entrar y descartar el sobrante
+  o corregir la fecha:
+
+  | Archivo | Cliente | Ideas (fecha) |
+  |---|---|---|
+  | `La Güira 42.mp4` | La Guira | `eeb2ddb2` (08-03), `1c3aef01` (08-07), `371ce5b3` (08-07) |
+  | `La Güira 47.mp4` | La Guira | `27dbd057` (08-03), `d41b0e1a` (08-05) |
+  | `Guarapera63.mp4` | La Guarapera | `f6acefef` (08-02), `8524e43f` (08-07) |
+  | `DS6.mov` | Dr. Soler | `c03799da` (08-05), `f8dcba88` (08-10) |
+  | `DS7.mov` | Dr. Soler | `540500c9` (08-07), `d476bd95` (08-12) |
+  | `Restauco132.mp4` | Restauco | `8ce31a63` (08-06), `ff5fe658` (08-07) |
+  | `37 ANOS.mov` | Futones Por Sangit | `0012745e` (08-04), `bc102c14` (08-04) |
+  | `HYPE COCINAS Y MAS.mp4` | Beyond PVC | `c4937507` (08-07), `b4c9bcaa` (08-07) |
+  | `EXTHYPEPVC.mp4` | Beyond PVC | `bfa827b6` (08-11), `8b0dd3ab` (08-11) |
+
+  Los tres últimos son el mismo archivo dos veces en la MISMA fecha: doble clic
+  en Enviar, sobra una tarjeta.
+
+- [ ] **Decisión de producto: qué hacer con lo atrasado.** El tablero acumula
+  todo lo vencido en la semana en curso a propósito (sigue pendiente), pero hoy
+  eso son **89 de 128 videos activos** con fecha pasada mezclados en las
+  pestañas de esta semana — 24 solo en la de Lunes. La fecha en la tarjeta y la
+  etiqueta "Atrasado" ya permiten distinguirlos, pero conviene decidir si lo
+  atrasado merece su propia agrupación en vez de mezclarse. Ver el comentario en
+  `entregas-board.tsx` (`ideasDelDia`), que argumenta deliberadamente a favor de
+  acumular.
+
+- [ ] **Evitar el duplicado de raíz.** Hoy cada envío hace `INSERT` en
+  `content_ideas` (`createSubmittedIdea`): no existe "reemplazar el video de
+  esta tarjeta", así que reenviar tras un "cambios pedidos" crea una tarjeta
+  nueva en vez de actualizar la que volvió. Sería el arreglo de fondo del punto
+  anterior.
