@@ -12,6 +12,22 @@ Every change — feature, fix, refactor — is done **test-first (TDD)**. No exc
 4. **Verify before claiming done:** run `npx vitest run <files> --exclude '**/.claude/**'` (the `.claude/worktrees/*` copies have their own `node_modules` and produce spurious "Cannot read properties of null (reading 'useState')" duplicate-React failures — always exclude them) and `npx tsc --noEmit`. Pure logic → unit test; UI → render/interaction test (React Testing Library + jsdom, already configured in `vitest.config.ts`).
 5. **Commit frequently**, then merge to `main` once green (see "Workflow & commits" below).
 
+### Validar en staging ANTES de dar nada por bueno (obligatorio)
+
+Ninguna prueba cuenta hasta haberla visto correr contra el **staging real**
+(`npm run staging:serve` → http://localhost:3021). Una prueba verde en jsdom, o
+una suite que nunca ha fallado, no es evidencia de nada.
+
+Antes de decir "funciona" o "está probado":
+
+1. Levantar staging y **ver el flujo con ojos** (o con la captura del E2E).
+2. Correr `npm run test:e2e` y que esté verde.
+3. **Comprobar que la prueba puede fallar**: revertir el fix (o romper la
+   condición) y ver la prueba en ROJO; restaurar y verla en VERDE. Sin ese paso
+   no se sabe si la prueba mira lo que dice mirar.
+4. Ojo con builds viejos: `staging:serve` reconstruye por huella del código,
+   pero si algo huele raro, `npm run staging:serve -- --fresh`.
+
 ### E2E en staging (obligatorio)
 
 Toda funcionalidad de UI lleva además una prueba **end-to-end contra staging**,

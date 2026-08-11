@@ -11,6 +11,7 @@ These rules exist so **Nathan, Eric, or any contributor** cannot land broken sto
 | 3 | **PR must be verified** — required status checks green | GitHub required checks |
 | 4 | **Graph model must pass** — ordered check graph in `scripts/merge-gate.mjs` | CI job **`merge-gate`** |
 | 5 | **E2E en staging verdes** — la suite de Playwright contra staging | CI job **`e2e`** |
+| 5b | **Validado en staging antes de declarar nada** — flujo visto corriendo en http://localhost:3021 **y** prueba comprobada en rojo sin el fix | Quien abre el PR (decláralo en la descripción) |
 | 6 | **≥1 approving review** before merge | Branch protection |
 | 7 | **Conversations resolved** before merge | Branch protection |
 
@@ -29,6 +30,11 @@ All nodes must PASS. If any node fails, **merge is blocked**.
 Además, el job **`e2e`** corre la suite end-to-end contra el entorno de
 **staging** (nunca producción) y también bloquea el merge. Los mismos E2E corren
 en `pre-commit`. Setup y secretos: **`docs/STAGING.md`**.
+
+**Regla del repo — validar en staging antes de decir que algo funciona.** Verde
+en CI no basta: hay que haber levantado el staging (`npm run staging:serve`),
+visto el flujo, y **comprobado que la prueba se pone ROJA sin el fix**. Una
+suite que nunca ha fallado no demuestra nada. Detalle en `CLAUDE.md`.
 
 Local:
 
