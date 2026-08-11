@@ -14,6 +14,7 @@ gh api -X PUT "repos/$REPO/branches/$BRANCH/protection" \
     "contexts": [
       "merge-gate",
       "test",
+      "e2e (staging)",
       "Static embed guard + unit tests"
     ]
   },
