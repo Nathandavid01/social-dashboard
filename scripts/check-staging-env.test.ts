@@ -33,8 +33,10 @@ describe('stagingEnvProblems', () => {
     }
   })
 
-  it('RECHAZA apuntar a la Supabase de producción', () => {
-    const prod = { ...OK, NEXT_PUBLIC_SUPABASE_URL: 'https://uvphfpqeevmhqmyorhcm.supabase.co' }
+  // Las dos: la base real de la app y el proyecto viejo que sigue enlazado en
+  // supabase/.temp y que cualquiera confundiría con producción.
+  it.each(['bgqdtfhelknmfudcvrzz', 'uvphfpqeevmhqmyorhcm'])('RECHAZA apuntar a producción (%s)', (ref) => {
+    const prod = { ...OK, NEXT_PUBLIC_SUPABASE_URL: `https://${ref}.supabase.co` }
     expect(stagingEnvProblems(prod).join(' ')).toMatch(/PRODUCCIÓN/)
   })
 })

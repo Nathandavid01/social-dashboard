@@ -115,233 +115,142 @@ CREATE POLICY "production_tasks_delete" ON public.production_tasks
 -- Re-run safe (ON CONFLICT DO NOTHING).
 -- ============================================================
 
--- Helper: insert schedule row by client name
-DO $$
-DECLARE
-  cid uuid;
-
-  PROCEDURE add_schedule(p_name text, p_day int, p_type text) AS $$
-  BEGIN
-    SELECT id INTO cid FROM public.clients WHERE lower(name) = lower(p_name) LIMIT 1;
-    IF cid IS NOT NULL THEN
-      INSERT INTO public.production_schedules (client_id, day_of_week, content_type)
-      VALUES (cid, p_day, p_type)
-      ON CONFLICT (client_id, day_of_week, content_type) DO NOTHING;
-    END IF;
-  END;
-
-BEGIN
-  -- COMIDA
-  -- 612 Cigar Lounge: Martes R, Jueves R, Sábado R
-  CALL add_schedule('612 Cigar Lounge', 2, 'R');
-  CALL add_schedule('612 Cigar Lounge', 4, 'R');
-  CALL add_schedule('612 Cigar Lounge', 6, 'R');
-
-  -- Casita Vieja: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R
-  CALL add_schedule('Casita Vieja', 1, 'R');
-  CALL add_schedule('Casita Vieja', 2, 'P');
-  CALL add_schedule('Casita Vieja', 3, 'R');
-  CALL add_schedule('Casita Vieja', 4, 'P');
-  CALL add_schedule('Casita Vieja', 5, 'R');
-
-  -- Kseros: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R, Sábado P
-  CALL add_schedule('Kseros', 1, 'R');
-  CALL add_schedule('Kseros', 2, 'P');
-  CALL add_schedule('Kseros', 3, 'R');
-  CALL add_schedule('Kseros', 4, 'P');
-  CALL add_schedule('Kseros', 5, 'R');
-  CALL add_schedule('Kseros', 6, 'P');
-
-  -- Mondays: Lunes R, Martes P, Miércoles R, Jueves R, Viernes R, Sábado R
-  CALL add_schedule('Mondays', 1, 'R');
-  CALL add_schedule('Mondays', 2, 'P');
-  CALL add_schedule('Mondays', 3, 'R');
-  CALL add_schedule('Mondays', 4, 'R');
-  CALL add_schedule('Mondays', 5, 'R');
-  CALL add_schedule('Mondays', 6, 'R');
-
-  -- El Cuarto Bate: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R
-  CALL add_schedule('El Cuarto Bate', 1, 'R');
-  CALL add_schedule('El Cuarto Bate', 2, 'P');
-  CALL add_schedule('El Cuarto Bate', 3, 'R');
-  CALL add_schedule('El Cuarto Bate', 4, 'P');
-  CALL add_schedule('El Cuarto Bate', 5, 'R');
-
-  -- La Guarapera: Martes R, Jueves R, Domingo R
-  CALL add_schedule('La Guarapera', 2, 'R');
-  CALL add_schedule('La Guarapera', 4, 'R');
-  CALL add_schedule('La Guarapera', 7, 'R');
-
-  -- Familia Pelaez: Lunes R, Jueves R, Sábado R
-  CALL add_schedule('Familia Pelaez', 1, 'R');
-  CALL add_schedule('Familia Pelaez', 4, 'R');
-  CALL add_schedule('Familia Pelaez', 6, 'R');
-
-  -- La Rotonda: Martes R, Miércoles P, Jueves R, Viernes P, Sábado R
-  CALL add_schedule('La Rotonda', 2, 'R');
-  CALL add_schedule('La Rotonda', 3, 'P');
-  CALL add_schedule('La Rotonda', 4, 'R');
-  CALL add_schedule('La Rotonda', 5, 'P');
-  CALL add_schedule('La Rotonda', 6, 'R');
-
-  -- El Capi: Martes R, Jueves R, Sábado R
-  CALL add_schedule('El Capi', 2, 'R');
-  CALL add_schedule('El Capi', 4, 'R');
-  CALL add_schedule('El Capi', 6, 'R');
-
-  -- Restauco: Lunes R, Martes R, Jueves R, Viernes R
-  CALL add_schedule('Restauco', 1, 'R');
-  CALL add_schedule('Restauco', 2, 'R');
-  CALL add_schedule('Restauco', 4, 'R');
-  CALL add_schedule('Restauco', 5, 'R');
-
-  -- La Güira: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('La Güira', 1, 'R');
-  CALL add_schedule('La Güira', 3, 'R');
-  CALL add_schedule('La Güira', 5, 'R');
-
-  -- Arasibo Steakhouse: Martes R, Jueves R, Sábado R
-  CALL add_schedule('Arasibo Steakhouse', 2, 'R');
-  CALL add_schedule('Arasibo Steakhouse', 4, 'R');
-  CALL add_schedule('Arasibo Steakhouse', 6, 'R');
-
-  -- Dorta's Pizza: Martes R, Viernes R, Sábado P
-  CALL add_schedule('Dorta''s Pizza', 2, 'R');
-  CALL add_schedule('Dorta''s Pizza', 5, 'R');
-  CALL add_schedule('Dorta''s Pizza', 6, 'P');
-
-  -- La Mia Pizzeria: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R
-  CALL add_schedule('La Mia Pizzeria', 1, 'R');
-  CALL add_schedule('La Mia Pizzeria', 2, 'P');
-  CALL add_schedule('La Mia Pizzeria', 3, 'R');
-  CALL add_schedule('La Mia Pizzeria', 4, 'P');
-  CALL add_schedule('La Mia Pizzeria', 5, 'R');
-
-  -- Nana's: Lunes P, Miércoles R, Sábado R
-  CALL add_schedule('Nana''s', 1, 'P');
-  CALL add_schedule('Nana''s', 3, 'R');
-  CALL add_schedule('Nana''s', 6, 'R');
-
-  -- FARMACIA
-  -- Tierra Nueva: Jueves R
-  CALL add_schedule('Tierra Nueva', 4, 'R');
-
-  -- Buena Vida: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('Buena Vida', 1, 'R');
-  CALL add_schedule('Buena Vida', 3, 'R');
-  CALL add_schedule('Buena Vida', 5, 'R');
-
-  -- DEPORTE
-  -- RP Sport: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('RP Sport', 1, 'R');
-  CALL add_schedule('RP Sport', 3, 'R');
-  CALL add_schedule('RP Sport', 5, 'R');
-
-  -- Dabel: Martes R, Jueves P
-  CALL add_schedule('Dabel', 2, 'R');
-  CALL add_schedule('Dabel', 4, 'P');
-
-  -- Shooters: Martes R, Jueves R
-  CALL add_schedule('Shooters', 2, 'R');
-  CALL add_schedule('Shooters', 4, 'R');
-
-  -- AUTO
-  -- Centro Inspección: Miércoles R, Viernes R
-  CALL add_schedule('Centro Inspección', 3, 'R');
-  CALL add_schedule('Centro Inspección', 5, 'R');
-
-  -- PERSONAL
-  -- Truco: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('Truco', 1, 'R');
-  CALL add_schedule('Truco', 3, 'R');
-  CALL add_schedule('Truco', 5, 'R');
-
-  -- Geovanni: Martes R, Miércoles R, Viernes R
-  CALL add_schedule('Geovanni', 2, 'R');
-  CALL add_schedule('Geovanni', 3, 'R');
-  CALL add_schedule('Geovanni', 5, 'R');
-
-  -- SALUD
-  -- Dr. Rodriguez: Lunes R, Miércoles P, Viernes R
-  CALL add_schedule('Dr. Rodriguez', 1, 'R');
-  CALL add_schedule('Dr. Rodriguez', 3, 'P');
-  CALL add_schedule('Dr. Rodriguez', 5, 'R');
-
-  -- Pro Familia: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R
-  CALL add_schedule('Pro Familia', 1, 'R');
-  CALL add_schedule('Pro Familia', 2, 'P');
-  CALL add_schedule('Pro Familia', 3, 'R');
-  CALL add_schedule('Pro Familia', 4, 'P');
-  CALL add_schedule('Pro Familia', 5, 'R');
-
-  -- BIENES RAICES
-  -- VSS Properties: Martes R, Sábado R
-  CALL add_schedule('VSS Properties', 2, 'R');
-  CALL add_schedule('VSS Properties', 6, 'R');
-
-  -- Lumavi: Lunes R, Martes R, Miércoles R, Jueves R, Viernes R
-  CALL add_schedule('Lumavi', 1, 'R');
-  CALL add_schedule('Lumavi', 2, 'R');
-  CALL add_schedule('Lumavi', 3, 'R');
-  CALL add_schedule('Lumavi', 4, 'R');
-  CALL add_schedule('Lumavi', 5, 'R');
-
-  -- SERVICIOS
-  -- Beyond PVC: Martes R, Miércoles P, Viernes R
-  CALL add_schedule('Beyond PVC', 2, 'R');
-  CALL add_schedule('Beyond PVC', 3, 'P');
-  CALL add_schedule('Beyond PVC', 5, 'R');
-
-  -- Cerrajero: Martes R, Jueves R, Sábado R
-  CALL add_schedule('Cerrajero', 2, 'R');
-  CALL add_schedule('Cerrajero', 4, 'R');
-  CALL add_schedule('Cerrajero', 6, 'R');
-
-  -- David Bonilla Seguros: Martes R, Miércoles P, Jueves R
-  CALL add_schedule('David Bonilla Seguros', 2, 'R');
-  CALL add_schedule('David Bonilla Seguros', 3, 'P');
-  CALL add_schedule('David Bonilla Seguros', 4, 'R');
-
-  -- David Bonilla Windmar: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('David Bonilla Windmar', 1, 'R');
-  CALL add_schedule('David Bonilla Windmar', 3, 'R');
-  CALL add_schedule('David Bonilla Windmar', 5, 'R');
-
-  -- Quantika: Martes R, Jueves P, Sábado R
-  CALL add_schedule('Quantika', 2, 'R');
-  CALL add_schedule('Quantika', 4, 'P');
-  CALL add_schedule('Quantika', 6, 'R');
-
-  -- RETAIL/OTROS
-  -- Codepola: Lunes R, Miércoles R, Viernes R
-  CALL add_schedule('Codepola', 1, 'R');
-  CALL add_schedule('Codepola', 3, 'R');
-  CALL add_schedule('Codepola', 5, 'R');
-
-  -- Tito Rios: Lunes R, Miércoles R, Jueves R
-  CALL add_schedule('Tito Rios', 1, 'R');
-  CALL add_schedule('Tito Rios', 3, 'R');
-  CALL add_schedule('Tito Rios', 4, 'R');
-
-  -- Arte Digital: Lunes P, Martes R, Miércoles P, Jueves R, Viernes P, Sábado R
-  CALL add_schedule('Arte Digital', 1, 'P');
-  CALL add_schedule('Arte Digital', 2, 'R');
-  CALL add_schedule('Arte Digital', 3, 'P');
-  CALL add_schedule('Arte Digital', 4, 'R');
-  CALL add_schedule('Arte Digital', 5, 'P');
-  CALL add_schedule('Arte Digital', 6, 'R');
-
-  -- Lucky Pet: Lunes R, Martes P, Miércoles R, Jueves P, Viernes R
-  CALL add_schedule('Lucky Pet', 1, 'R');
-  CALL add_schedule('Lucky Pet', 2, 'P');
-  CALL add_schedule('Lucky Pet', 3, 'R');
-  CALL add_schedule('Lucky Pet', 4, 'P');
-  CALL add_schedule('Lucky Pet', 5, 'R');
-
-  -- Sanguit: Martes R, Jueves R, Sábado P
-  CALL add_schedule('Sanguit', 2, 'R');
-  CALL add_schedule('Sanguit', 4, 'R');
-  CALL add_schedule('Sanguit', 6, 'P');
-
-END;
-$$;
+-- Seed de horarios por nombre de cliente. Una sola sentencia: el bloque
+-- anterior declaraba un PROCEDURE dentro de un DO $$ ... $$ con el MISMO tag de
+-- dollar-quoting, que es SQL invalido — la migracion reventaba y ningun entorno
+-- nuevo podia levantarse desde cero. Mismos datos, sentencia valida.
+insert into public.production_schedules (client_id, day_of_week, content_type)
+select c.id, s.day_of_week, s.content_type
+from (values
+    ('612 Cigar Lounge', 2, 'R'),
+    ('612 Cigar Lounge', 4, 'R'),
+    ('612 Cigar Lounge', 6, 'R'),
+    ('Casita Vieja', 1, 'R'),
+    ('Casita Vieja', 2, 'P'),
+    ('Casita Vieja', 3, 'R'),
+    ('Casita Vieja', 4, 'P'),
+    ('Casita Vieja', 5, 'R'),
+    ('Kseros', 1, 'R'),
+    ('Kseros', 2, 'P'),
+    ('Kseros', 3, 'R'),
+    ('Kseros', 4, 'P'),
+    ('Kseros', 5, 'R'),
+    ('Kseros', 6, 'P'),
+    ('Mondays', 1, 'R'),
+    ('Mondays', 2, 'P'),
+    ('Mondays', 3, 'R'),
+    ('Mondays', 4, 'R'),
+    ('Mondays', 5, 'R'),
+    ('Mondays', 6, 'R'),
+    ('El Cuarto Bate', 1, 'R'),
+    ('El Cuarto Bate', 2, 'P'),
+    ('El Cuarto Bate', 3, 'R'),
+    ('El Cuarto Bate', 4, 'P'),
+    ('El Cuarto Bate', 5, 'R'),
+    ('La Guarapera', 2, 'R'),
+    ('La Guarapera', 4, 'R'),
+    ('La Guarapera', 7, 'R'),
+    ('Familia Pelaez', 1, 'R'),
+    ('Familia Pelaez', 4, 'R'),
+    ('Familia Pelaez', 6, 'R'),
+    ('La Rotonda', 2, 'R'),
+    ('La Rotonda', 3, 'P'),
+    ('La Rotonda', 4, 'R'),
+    ('La Rotonda', 5, 'P'),
+    ('La Rotonda', 6, 'R'),
+    ('El Capi', 2, 'R'),
+    ('El Capi', 4, 'R'),
+    ('El Capi', 6, 'R'),
+    ('Restauco', 1, 'R'),
+    ('Restauco', 2, 'R'),
+    ('Restauco', 4, 'R'),
+    ('Restauco', 5, 'R'),
+    ('La Güira', 1, 'R'),
+    ('La Güira', 3, 'R'),
+    ('La Güira', 5, 'R'),
+    ('Arasibo Steakhouse', 2, 'R'),
+    ('Arasibo Steakhouse', 4, 'R'),
+    ('Arasibo Steakhouse', 6, 'R'),
+    ('Dorta''s Pizza', 2, 'R'),
+    ('Dorta''s Pizza', 5, 'R'),
+    ('Dorta''s Pizza', 6, 'P'),
+    ('La Mia Pizzeria', 1, 'R'),
+    ('La Mia Pizzeria', 2, 'P'),
+    ('La Mia Pizzeria', 3, 'R'),
+    ('La Mia Pizzeria', 4, 'P'),
+    ('La Mia Pizzeria', 5, 'R'),
+    ('Nana''s', 1, 'P'),
+    ('Nana''s', 3, 'R'),
+    ('Nana''s', 6, 'R'),
+    ('Tierra Nueva', 4, 'R'),
+    ('Buena Vida', 1, 'R'),
+    ('Buena Vida', 3, 'R'),
+    ('Buena Vida', 5, 'R'),
+    ('RP Sport', 1, 'R'),
+    ('RP Sport', 3, 'R'),
+    ('RP Sport', 5, 'R'),
+    ('Dabel', 2, 'R'),
+    ('Dabel', 4, 'P'),
+    ('Shooters', 2, 'R'),
+    ('Shooters', 4, 'R'),
+    ('Centro Inspección', 3, 'R'),
+    ('Centro Inspección', 5, 'R'),
+    ('Truco', 1, 'R'),
+    ('Truco', 3, 'R'),
+    ('Truco', 5, 'R'),
+    ('Geovanni', 2, 'R'),
+    ('Geovanni', 3, 'R'),
+    ('Geovanni', 5, 'R'),
+    ('Dr. Rodriguez', 1, 'R'),
+    ('Dr. Rodriguez', 3, 'P'),
+    ('Dr. Rodriguez', 5, 'R'),
+    ('Pro Familia', 1, 'R'),
+    ('Pro Familia', 2, 'P'),
+    ('Pro Familia', 3, 'R'),
+    ('Pro Familia', 4, 'P'),
+    ('Pro Familia', 5, 'R'),
+    ('VSS Properties', 2, 'R'),
+    ('VSS Properties', 6, 'R'),
+    ('Lumavi', 1, 'R'),
+    ('Lumavi', 2, 'R'),
+    ('Lumavi', 3, 'R'),
+    ('Lumavi', 4, 'R'),
+    ('Lumavi', 5, 'R'),
+    ('Beyond PVC', 2, 'R'),
+    ('Beyond PVC', 3, 'P'),
+    ('Beyond PVC', 5, 'R'),
+    ('Cerrajero', 2, 'R'),
+    ('Cerrajero', 4, 'R'),
+    ('Cerrajero', 6, 'R'),
+    ('David Bonilla Seguros', 2, 'R'),
+    ('David Bonilla Seguros', 3, 'P'),
+    ('David Bonilla Seguros', 4, 'R'),
+    ('David Bonilla Windmar', 1, 'R'),
+    ('David Bonilla Windmar', 3, 'R'),
+    ('David Bonilla Windmar', 5, 'R'),
+    ('Quantika', 2, 'R'),
+    ('Quantika', 4, 'P'),
+    ('Quantika', 6, 'R'),
+    ('Codepola', 1, 'R'),
+    ('Codepola', 3, 'R'),
+    ('Codepola', 5, 'R'),
+    ('Tito Rios', 1, 'R'),
+    ('Tito Rios', 3, 'R'),
+    ('Tito Rios', 4, 'R'),
+    ('Arte Digital', 1, 'P'),
+    ('Arte Digital', 2, 'R'),
+    ('Arte Digital', 3, 'P'),
+    ('Arte Digital', 4, 'R'),
+    ('Arte Digital', 5, 'P'),
+    ('Arte Digital', 6, 'R'),
+    ('Lucky Pet', 1, 'R'),
+    ('Lucky Pet', 2, 'P'),
+    ('Lucky Pet', 3, 'R'),
+    ('Lucky Pet', 4, 'P'),
+    ('Lucky Pet', 5, 'R'),
+    ('Sanguit', 2, 'R'),
+    ('Sanguit', 4, 'R'),
+    ('Sanguit', 6, 'P')
+) as s(client_name, day_of_week, content_type)
+join public.clients c on lower(c.name) = lower(s.client_name)
+on conflict (client_id, day_of_week, content_type) do nothing;

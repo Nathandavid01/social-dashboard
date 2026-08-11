@@ -8,15 +8,35 @@ Supabase de staging con datos sembrados.
 .env.staging  →  next build/start (distDir .next-staging, puerto 3021)  →  Playwright
 ```
 
-## Montarlo una vez
+## El staging actual
 
-1. **Proyecto Supabase de staging** (uno aparte del de producción
-   `uvphfpqeevmhqmyorhcm`). Aplicarle las migraciones del repo:
+Ya existe: proyecto Supabase **`natemedia-staging`** (`mnqgesxmtsxtsajxfesy`),
+creado el 2026-08-11 en la organización *Eric's projects*, plan incluido ($0).
+
+> **Ojo con cuál es producción.** La app real usa `bgqdtfhelknmfudcvrzz` (está en
+> `.env.local`). El proyecto `uvphfpqeevmhqmyorhcm` ("NathanDashboard") que sigue
+> enlazado en `supabase/.temp/` **no es producción** — solo tiene 3 tablas
+> sueltas. `check-staging-env` bloquea los dos por si acaso.
+
+## Montarlo otra vez (o crear otro)
+
+1. **Proyecto Supabase de staging** aparte del de producción. Aplicarle el
+   esquema del repo:
 
    ```bash
-   supabase link --project-ref <ref-de-staging>
-   supabase db push
+   npm run staging:migrate -- --db-url "<url del pooler>" --reset
    ```
+
+   Se usa `scripts/apply-migrations.mjs` y **no** `supabase db push`: el repo
+   tiene prefijos de migración repetidos (`0025`, `0034`, `0038` salen dos
+   veces) y la CLI los usa como clave única, así que revienta. Este script
+   aplica por nombre completo de archivo, en orden alfabético, cada una en su
+   transacción, y re-otorga los privilegios de `anon`/`authenticated`/
+   `service_role` que `--reset` se lleva por delante.
+
+   La url es la del **pooler** (`aws-0-<región>.pooler.supabase.com:5432`,
+   usuario `postgres.<ref>`): la conexión directa `db.<ref>.supabase.co` solo
+   responde por IPv6.
 
 2. **`.env.staging`** en la raíz (está en `.gitignore`), copiando
    `env.staging.example`:
@@ -42,6 +62,7 @@ Supabase de staging con datos sembrados.
 
 | Comando | Qué hace |
 |---|---|
+| `npm run staging:migrate -- --db-url <url>` | Aplica las migraciones que falten (idempotente). |
 | `npm run staging:seed` | Siembra usuario supervisor + `Cliente E2E` + un video entregado esperando revisión (idempotente). |
 | `npm run staging:serve` | Buildea y levanta el staging en `http://localhost:3021` (añade `--fresh` para forzar build). |
 | `npm run test:e2e` | Siembra y corre toda la suite (levanta el staging solo). |
@@ -50,6 +71,11 @@ Supabase de staging con datos sembrados.
 
 El staging usa `distDir` propio (`.next-staging`), así que **se puede levantar
 con `next dev` corriendo** — no comparten `.next/`.
+
+`staging:serve` guarda una huella del código (`app/`, `components/`, `lib/`,
+config) y **reconstruye solo si algo cambió**. No es una optimización: sin ella
+el staging revivía un build viejo y la suite pasaba sin haber visto el cambio
+—comprobado revirtiendo un fix y viendo la suite seguir verde—.
 
 ## Dónde se exigen
 

@@ -19,8 +19,13 @@ const REQUIRED = [
   'E2E_USER_PASSWORD',
 ]
 
-/** Ref del proyecto de PRODUCCIÓN — nunca puede ser el destino de un E2E. */
-const PROD_REF = 'uvphfpqeevmhqmyorhcm'
+/**
+ * Refs prohibidos como destino de un E2E. `bgqdtfhelknmfudcvrzz` es la base que
+ * usa la app de verdad (la de .env.local, en la cuenta de Nathan);
+ * `uvphfpqeevmhqmyorhcm` es el proyecto "NathanDashboard" viejo, que sigue
+ * enlazado en supabase/.temp y engaña a cualquiera que lo mire.
+ */
+const PROD_REFS = ['bgqdtfhelknmfudcvrzz', 'uvphfpqeevmhqmyorhcm']
 
 export function parseEnvFile(text) {
   const out = {}
@@ -35,14 +40,16 @@ export function parseEnvFile(text) {
 }
 
 /** Lo que hace fallar la guarda, como lista de problemas legibles. */
-export function stagingEnvProblems(env, { prodRef = PROD_REF } = {}) {
+export function stagingEnvProblems(env, { prodRefs = PROD_REFS } = {}) {
   const problems = []
   for (const key of REQUIRED) {
     if (!env[key]) problems.push(`falta ${key}`)
   }
   const url = env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  if (url.includes(prodRef)) {
-    problems.push(`NEXT_PUBLIC_SUPABASE_URL apunta a PRODUCCIÓN (${prodRef}) — los E2E jamás corren contra prod`)
+  for (const ref of prodRefs) {
+    if (url.includes(ref)) {
+      problems.push(`NEXT_PUBLIC_SUPABASE_URL apunta a PRODUCCIÓN (${ref}) — los E2E jamás corren contra prod`)
+    }
   }
   return problems
 }

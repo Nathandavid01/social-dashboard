@@ -56,7 +56,17 @@ async function main() {
 
   const userId = await ensureUser(admin, env.E2E_USER_EMAIL, env.E2E_USER_PASSWORD)
   // El rol lo pone el trigger en 'team_member'; /revision pide revision.read.
-  await admin.from('profiles').update({ role: 'supervisor', full_name: 'E2E Supervisor' }).eq('id', userId)
+  // El avatar no es cosmético: sin él, AvatarSetupGate abre un diálogo modal
+  // encima de todo al entrar y ningún E2E puede pulsar nada detrás.
+  await admin
+    .from('profiles')
+    .update({
+      role: 'supervisor',
+      full_name: 'E2E Supervisor',
+      avatar_url:
+        'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNGE0YTRhIi8+PC9zdmc+',
+    })
+    .eq('id', userId)
 
   const { data: existingClient } = await admin.from('clients').select('id').eq('name', E2E_CLIENT_NAME).maybeSingle()
   let clientId = existingClient?.id
