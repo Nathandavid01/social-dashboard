@@ -47,8 +47,8 @@ export function VistaEditor({
         </div>
       </header>
 
-      {/* `dia` ya no decide nada — cada video lleva su fecha —, pero el slot
-          sigue pidiéndolo por firma. */}
+      {/* Sin día ni semana: cada video lleva su fecha, que el editor escribe en
+          el propio formulario. */}
       <EditorSubmitSlot clients={submitClients} />
 
       {devueltos.length > 0 && (

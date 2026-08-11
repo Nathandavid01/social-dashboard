@@ -707,3 +707,93 @@ describe('EntregasBoard — archivo repetido en otra fecha', () => {
     expect(tarjetaDe('Nora Fitness').textContent).not.toMatch(/mismo archivo/i)
   })
 })
+
+/**
+ * Controles del tablero que nunca tuvieron prueba.
+ *
+ * No los rompió ningún cambio reciente —el buscador y los filtros no se
+ * tocaron—, pero sin una prueba no se puede AFIRMAR que sigan funcionando, que
+ * es justo lo que hay que poder decir después de tocar el tablero.
+ */
+describe('EntregasBoard — buscador y limpiar filtros', () => {
+  const buscador = () => screen.getByPlaceholderText(/buscar clientes, personas/i)
+  const textoTarjetas = (c: HTMLElement) =>
+    Array.from(c.querySelectorAll('article')).map((a) => a.textContent).join('|')
+
+  const dos = () => [
+    idea({ id: '1', client_id: 'c1', publish_date: fechaDelDia(1), assignee: { id: 'u1', full_name: 'María R.' } }),
+    idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, publish_date: fechaDelDia(1), assignee: { id: 'u2', full_name: 'Diego V.' } }),
+  ] as IdeaWithPipeline[]
+
+  it('filtra por nombre de cliente', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} />)
+    fireEvent.change(buscador(), { target: { value: 'lumen' } })
+    expect(textoTarjetas(container)).toContain('Lumen')
+    expect(textoTarjetas(container)).not.toContain('Nora Fitness')
+  })
+
+  it('filtra también por la persona asignada', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} />)
+    fireEvent.change(buscador(), { target: { value: 'diego' } })
+    expect(textoTarjetas(container)).toContain('Lumen')
+    expect(textoTarjetas(container)).not.toContain('Nora Fitness')
+  })
+
+  it('sin coincidencias no deja ninguna tarjeta', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} />)
+    fireEvent.change(buscador(), { target: { value: 'zzzz' } })
+    expect(container.querySelectorAll('article')).toHaveLength(0)
+  })
+
+  it('vaciar el buscador devuelve todas las tarjetas', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} />)
+    fireEvent.change(buscador(), { target: { value: 'lumen' } })
+    fireEvent.change(buscador(), { target: { value: '' } })
+    expect(textoTarjetas(container)).toContain('Lumen')
+    expect(textoTarjetas(container)).toContain('Nora Fitness')
+  })
+
+  it('el buscador no se confunde con la fecha ni el aviso de la tarjeta', () => {
+    // La tarjeta ahora escribe su fecha y puede avisar de archivo repetido. El
+    // buscador busca clientes y personas: que ese texto nuevo no lo enganche.
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} />)
+    fireEvent.change(buscador(), { target: { value: 'ago' } })
+    expect(container.querySelectorAll('article')).toHaveLength(0)
+  })
+
+  it('quitar el filtro de persona devuelve a todas las tarjetas', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval']} ideas={dos()} teamMembers={[
+      { id: 'u1', name: 'María R.' }, { id: 'u2', name: 'Diego V.' },
+    ]} />)
+    const fila = screen.getByText(/asignado a/i).closest('div')!
+    fireEvent.click(within(fila).getByRole('button', { name: /^Todos$/i }))
+    fireEvent.click(screen.getByRole('option', { name: /María R\./i }))
+    expect(textoTarjetas(container)).not.toContain('Lumen')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Quitar filtro de persona' }))
+    expect(textoTarjetas(container)).toContain('Lumen')
+    expect(textoTarjetas(container)).toContain('Nora Fitness')
+  })
+})
+
+/**
+ * REGRESIÓN — la garantía central: las dos pantallas del flujo colocan el mismo
+ * video en la MISMA pestaña. Es lo que se rompía cuando /revision razonaba en
+ * día de entrega y /entregas en día de publicación.
+ */
+describe('EntregasBoard — /revision y /entregas no pueden discrepar', () => {
+  it('el mismo video cae en el mismo día en las dos pantallas', () => {
+    const fecha = fechaDelDia(3) // miércoles
+    const enRevision = idea({ id: '1', publish_date: fecha })
+    const enEntregas = idea({ id: '1', publish_date: fecha, approval_status: 'approved', generated_caption: 'Copy' })
+
+    const r = render(<EntregasBoard stages={['edited','approval']} ideas={[enRevision]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Miércoles' }))
+    expect(r.container.querySelectorAll('article')).toHaveLength(1)
+    cleanup()
+
+    const e = render(<EntregasBoard stages={['copy','publication']} ideas={[enEntregas]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Miércoles' }))
+    expect(e.container.querySelectorAll('article')).toHaveLength(1)
+  })
+})
