@@ -277,7 +277,7 @@ describe('IdeaCaptionEditor — al abrir se escribe el borrador solo', () => {
     expect(screen.getByDisplayValue('caption definitivo')).toBeInTheDocument()
   })
 
-  it('un draft JSON por red se lee como texto, no como llaves crudas', () => {
+  it('un draft JSON por red se lee como un solo caption, no como bloques por red', () => {
     mockRole = 'editor'
     render(
       <IdeaCaptionEditor
@@ -291,8 +291,9 @@ describe('IdeaCaptionEditor — al abrir se escribe el borrador solo', () => {
         hasVideo
       />,
     )
-    const box = screen.getByDisplayValue(/\[Instagram\]/)
-    expect(box).toHaveDisplayValue(/\[Instagram\][\s\S]*hook IG[\s\S]*\[TikTok\][\s\S]*oral TT/)
+    const box = screen.getByDisplayValue('hook IG')
+    expect(box).toHaveDisplayValue('hook IG')
+    expect((box as HTMLTextAreaElement).value).not.toContain('[TikTok]')
     expect((box as HTMLTextAreaElement).value).not.toContain('"by"')
   })
 

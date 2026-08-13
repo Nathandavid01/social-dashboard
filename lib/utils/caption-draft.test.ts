@@ -40,15 +40,13 @@ describe('displayCaptionDraft', () => {
     expect(displayCaptionDraft('texto plano')).toBe('texto plano')
   })
 
-  it('stacks one labeled block per network so the caja can show both', () => {
+  it('flattens a leftover per-network JSON draft to a single caption', () => {
     const shown = displayCaptionDraft(packCaptionDrafts([
-      { platform: 'instagram', text: 'hook IG' },
       { platform: 'tiktok', text: 'oral TT' },
+      { platform: 'instagram', text: 'hook IG' },
     ]))
-    expect(shown).toContain('[Instagram]')
-    expect(shown).toContain('hook IG')
-    expect(shown).toContain('[TikTok]')
-    expect(shown).toContain('oral TT')
+    expect(shown).toBe('hook IG')
+    expect(shown).not.toContain('[')
     expect(shown).not.toContain('{')
   })
 

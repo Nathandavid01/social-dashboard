@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.25 — 2026-08-13
+
+**Un solo caption para todas las redes.**
+
+Instagram, TikTok y Facebook publican el mismo texto. La IA ya no escribe un copy distinto por red.
+
+- Generar llama a la IA una vez, no una vez por red.
+- En la caja se ve un solo bloque. Si quedó un borrador viejo con `[Instagram]` / `[TikTok]`, se muestra solo uno (el de Instagram si existe).
+- Guardar sigue moviendo el video a Publicación con ese texto único.
+
+Vista: [preview HTML](/previews/v3.25-caption-unico.html)
+
 ## v3.24 — 2026-08-13
 
 **Cada red tiene su propio copy.**

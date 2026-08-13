@@ -1,18 +1,6 @@
-/** Persist one AI draft per network in `content_ideas.caption_draft` until 0030 lands. */
+/** Read leftover v3.24 per-network JSON in `caption_draft`. New drafts are plain text. */
 
 export type CaptionDraftItem = { platform: string; text: string }
-
-const LABEL: Record<string, string> = {
-  instagram: 'Instagram',
-  tiktok: 'TikTok',
-  facebook: 'Facebook',
-  linkedin: 'LinkedIn',
-  all: 'Todas las redes',
-}
-
-export function platformDraftLabel(platform: string): string {
-  return LABEL[platform] ?? platform
-}
 
 export function packCaptionDrafts(items: CaptionDraftItem[]): string {
   const by: Record<string, string> = {}
@@ -40,12 +28,13 @@ export function parseCaptionDrafts(raw: string | null | undefined): CaptionDraft
   return [{ platform: 'all', text: s }]
 }
 
-/** What the single textarea shows. One draft = the text; several = labeled blocks. */
+/** What the textarea shows. Always one caption — leftover JSON from v3.24 is flattened. */
 export function displayCaptionDraft(raw: string | null | undefined): string {
   const items = parseCaptionDrafts(raw)
   if (items.length === 0) return ''
-  if (items.length === 1) return items[0].text
-  return items
-    .map((item) => `[${platformDraftLabel(item.platform)}]\n${item.text}`)
-    .join('\n\n')
+  const preferred =
+    items.find((item) => item.platform === 'instagram') ??
+    items.find((item) => item.platform === 'all') ??
+    items[0]
+  return preferred.text
 }

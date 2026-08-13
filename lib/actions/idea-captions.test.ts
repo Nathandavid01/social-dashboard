@@ -87,9 +87,7 @@ import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { packCaptionDrafts } from '@/lib/utils/caption-draft'
 import { generateIdeaCaption, saveIdeaCaption } from './idea-captions'
 
-const igDraft = packCaptionDrafts([
-  { platform: 'instagram', text: 'Caption recién salido de la IA' },
-])
+const oneDraft = 'Caption recién salido de la IA'
 
 beforeEach(() => {
   h.updates.length = 0
@@ -132,14 +130,14 @@ describe('generateIdeaCaption — genera un BORRADOR, no publica', () => {
     vi.mocked(transcribeVideoFromUrl).mockClear()
     await generateIdeaCaption('i1')
     expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
-    expect(h.updates[0].caption_draft).toBe(igDraft)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
   })
 
   it('escribe el texto en caption_draft', async () => {
     const res = await generateIdeaCaption('i1')
     expect(res.caption).toBe('Caption recién salido de la IA')
     expect(h.updates).toHaveLength(1)
-    expect(h.updates[0].caption_draft).toBe(igDraft)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
   })
 
   it('NUNCA toca generated_caption — es lo que movería el video a Publicación', async () => {
@@ -158,7 +156,7 @@ describe('generateIdeaCaption — genera un BORRADOR, no publica', () => {
 
   it('regenerar con feedback sigue siendo sólo borrador', async () => {
     await generateIdeaCaption('i1', { feedback: 'más corto', previousCaption: 'viejo' })
-    expect(h.updates[0].caption_draft).toBe(igDraft)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
     expect(h.updates[0]).not.toHaveProperty('generated_caption')
   })
 })
@@ -184,17 +182,17 @@ describe('generateIdeaCaption — auto no pisa un draft existente', () => {
     h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
     const res = await generateIdeaCaption('i1', { auto: true })
     expect(res.ok).toBe(true)
-    expect(h.updates[0].caption_draft).toBe(igDraft)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
   })
 
   it('sin auto, regenerar sí pisa el draft a propósito', async () => {
     h.idea = { ...h.idea, caption_draft: 'viejo', generated_caption: null }
     await generateIdeaCaption('i1')
     expect(generateCaptionText).toHaveBeenCalled()
-    expect(h.updates[0].caption_draft).toBe(igDraft)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
   })
 
-  it('si el draft guardado es JSON por red, auto lo muestra sin el JSON crudo', async () => {
+  it('si el draft guardado es JSON por red, auto muestra un solo texto', async () => {
     h.idea = {
       ...h.idea,
       caption_draft: packCaptionDrafts([
@@ -204,53 +202,28 @@ describe('generateIdeaCaption — auto no pisa un draft existente', () => {
       generated_caption: null,
     }
     const res = await generateIdeaCaption('i1', { auto: true })
-    expect(res.caption).toContain('[Instagram]')
-    expect(res.caption).toContain('hook IG')
-    expect(res.caption).toContain('[TikTok]')
+    expect(res.caption).toBe('hook IG')
+    expect(res.caption).not.toContain('[TikTok]')
     expect(res.caption).not.toContain('"by"')
     expect(generateCaptionText).not.toHaveBeenCalled()
   })
 })
 
-describe('generateIdeaCaption — un draft por red', () => {
-  it('llama a la IA una vez por red con targetPlatform y guarda JSON', async () => {
+describe('generateIdeaCaption — un caption para todas las redes', () => {
+  it('llama a la IA una sola vez aunque el cliente tenga varias redes', async () => {
     const client = h.idea.client as { platforms: string[]; default_platforms: string[] }
     h.idea = {
       ...h.idea,
       client: { ...client, platforms: ['instagram', 'tiktok'], default_platforms: ['instagram', 'tiktok'] },
     }
-    vi.mocked(generateCaptionText)
-      .mockResolvedValueOnce('copy de Instagram')
-      .mockResolvedValueOnce('copy de TikTok')
 
     const res = await generateIdeaCaption('i1')
 
-    expect(generateCaptionText).toHaveBeenCalledTimes(2)
-    expect(generateCaptionText).toHaveBeenNthCalledWith(1, expect.stringContaining('RED ESPECÍFICA: instagram'))
-    expect(generateCaptionText).toHaveBeenNthCalledWith(2, expect.stringContaining('RED ESPECÍFICA: tiktok'))
-    expect(h.updates[0].caption_draft).toBe(packCaptionDrafts([
-      { platform: 'instagram', text: 'copy de Instagram' },
-      { platform: 'tiktok', text: 'copy de TikTok' },
-    ]))
-    expect(res.caption).toContain('[Instagram]')
-    expect(res.caption).toContain('copy de Instagram')
-    expect(res.caption).toContain('[TikTok]')
-    expect(res.caption).toContain('copy de TikTok')
-  })
-
-  it('no guarda nada si una red falla a mitad', async () => {
-    const client = h.idea.client as { platforms: string[]; default_platforms: string[] }
-    h.idea = {
-      ...h.idea,
-      client: { ...client, platforms: ['instagram', 'tiktok'], default_platforms: ['instagram', 'tiktok'] },
-    }
-    vi.mocked(generateCaptionText)
-      .mockResolvedValueOnce('copy de Instagram')
-      .mockResolvedValueOnce('')
-
-    const res = await generateIdeaCaption('i1')
-    expect(res.error).toMatch(/tiktok/i)
-    expect(h.updates).toHaveLength(0)
+    expect(generateCaptionText).toHaveBeenCalledTimes(1)
+    expect(generateCaptionText).toHaveBeenCalledWith(expect.stringMatching(/un solo caption/i))
+    expect(generateCaptionText).toHaveBeenCalledWith(expect.not.stringContaining('RED ESPECÍFICA'))
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
+    expect(res.caption).toBe(oneDraft)
   })
 })
 
