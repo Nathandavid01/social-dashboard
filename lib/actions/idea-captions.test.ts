@@ -23,7 +23,15 @@ const h = vi.hoisted(() => ({
     content_type: 'R',
     client: { name: 'Gym X', platforms: ['instagram'], default_platforms: ['instagram'] },
   } as Record<string, unknown>,
-  videos: [{ id: 'v1', status: 'uploaded' }] as { id: string; status: string }[],
+  videos: [
+    {
+      id: 'v1',
+      kind: 'raw',
+      status: 'uploaded',
+      drive_file_id: 'ideas/1/raw/a.mp4',
+      storage_provider: 'r2',
+    },
+  ],
 }))
 
 vi.mock('@/lib/auth/server', () => ({ requirePermission: vi.fn(async () => {}) }))
@@ -40,6 +48,12 @@ vi.mock('@/lib/llm/caption-llm', () => ({
   captionConfigError: () => null,
   generateCaptionText: vi.fn(async () => 'Caption recién salido de la IA'),
 }))
+vi.mock('@/lib/integrations/whisper', () => ({
+  transcribeVideoFromUrl: vi.fn(async () => 'el socio cuenta que bajó 15 libras'),
+}))
+vi.mock('@/lib/integrations/caption-listen-url', () => ({
+  listenUrlForCaptionVideo: vi.fn(async () => 'https://pipe.test/ideas/1/raw/a.mp4'),
+}))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => {
@@ -49,6 +63,8 @@ vi.mock('@/lib/supabase/server', () => ({
             eq: () => ({
               neq: () => ({
                 limit: async () => ({ data: h.videos, error: null }),
+                then: (resolve: (v: unknown) => unknown) =>
+                  resolve({ data: h.videos, error: null }),
               }),
             }),
           }),
@@ -65,11 +81,24 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }))
 
+import { generateCaptionText } from '@/lib/llm/caption-llm'
+import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
+import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { generateIdeaCaption, saveIdeaCaption } from './idea-captions'
 
 beforeEach(() => {
   h.updates.length = 0
-  h.videos = [{ id: 'v1', status: 'uploaded' }]
+  vi.mocked(listenUrlForCaptionVideo).mockResolvedValue('https://pipe.test/ideas/1/raw/a.mp4')
+  vi.mocked(transcribeVideoFromUrl).mockResolvedValue('el socio cuenta que bajó 15 libras')
+  h.videos = [
+    {
+      id: 'v1',
+      kind: 'raw',
+      status: 'uploaded',
+      drive_file_id: 'ideas/1/raw/a.mp4',
+      storage_provider: 'r2',
+    },
+  ]
 })
 
 describe('generateIdeaCaption — sin video no hay caption', () => {
@@ -82,6 +111,22 @@ describe('generateIdeaCaption — sin video no hay caption', () => {
 })
 
 describe('generateIdeaCaption — genera un BORRADOR, no publica', () => {
+  it('pasa al modelo lo que se oyó en el video', async () => {
+    await generateIdeaCaption('i1')
+    expect(listenUrlForCaptionVideo).toHaveBeenCalled()
+    expect(generateCaptionText).toHaveBeenCalledWith(
+      expect.stringContaining('el socio cuenta que bajó 15 libras'),
+    )
+  })
+
+  it('sigue generando desde el hook si no se pudo oír el video', async () => {
+    vi.mocked(listenUrlForCaptionVideo).mockResolvedValueOnce(null)
+    vi.mocked(transcribeVideoFromUrl).mockClear()
+    await generateIdeaCaption('i1')
+    expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
+    expect(h.updates[0].caption_draft).toBe('Caption recién salido de la IA')
+  })
+
   it('escribe el texto en caption_draft', async () => {
     const res = await generateIdeaCaption('i1')
     expect(res.caption).toBe('Caption recién salido de la IA')

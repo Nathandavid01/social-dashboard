@@ -11,6 +11,9 @@ import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
 import { hasCaptionableVideo, isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
+import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
+import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
+import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 
 /**
  * Generate a caption for a specific idea, grounded in the idea's hook +
@@ -48,12 +51,15 @@ export async function generateIdeaCaption(
 
   const { data: vids } = await supabase
     .from('content_idea_videos')
-    .select('id, status')
+    .select('id, kind, status, drive_file_id, storage_provider')
     .eq('content_idea_id', ideaId)
     .neq('status', 'archived')
-    .limit(1)
   const hasVideo = hasCaptionableVideo(vids)
   if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
+
+  const source = pickCaptionSourceVideo((vids ?? []) as Parameters<typeof pickCaptionSourceVideo>[0])
+  const videoUrl = await listenUrlForCaptionVideo(source)
+  const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
 
   if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
     return { error: 'Di de qué es el video para generar el caption.' }
@@ -98,6 +104,7 @@ export async function generateIdeaCaption(
     avoidExamples: ratings.avoid,
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
+    videoTranscript,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,

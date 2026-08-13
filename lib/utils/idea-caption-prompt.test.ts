@@ -67,6 +67,18 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).not.toMatch(/REDES:\s*\n/)
   })
 
+  it('grounds the caption in the video transcript when we heard it', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: 'un socio en el gym',
+      videoTranscript: 'Bajé 15 libras entrenando aquí todas las mañanas',
+    })
+    expect(p).toContain('LO QUE SE OYE EN EL VIDEO')
+    expect(p).toContain('Bajé 15 libras entrenando aquí todas las mañanas')
+    expect(p).toMatch(/transcripción/i)
+    expect(p).toMatch(/ocurre en el video/i)
+  })
+
   it('can target a single network for the daily-loop fan-out', () => {
     const p = buildIdeaCaptionPrompt({
       ...base,

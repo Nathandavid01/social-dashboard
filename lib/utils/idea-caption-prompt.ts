@@ -50,6 +50,8 @@ export interface IdeaCaptionPromptInput {
   feedback?: string | null
   /** The previous caption being revised — shown to the model so it improves on it. */
   previousCaption?: string | null
+  /** What was actually said in the video (Whisper). Beats the written hook. */
+  videoTranscript?: string | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -143,6 +145,13 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     ? `RED ESPECÍFICA: ${redes}${filled(input.targetFocus) ? ` — ${input.targetFocus}` : ''} (escribe el caption SOLO para esta red)`
     : `REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)`
 
+  const heard = filled(input.videoTranscript)
+    ? `LO QUE SE OYE EN EL VIDEO (transcripción — esto es lo que realmente pasa; úsalo por encima del hook si chocan):\n${input.videoTranscript!.trim()}\n\n`
+    : ''
+  const heardBullet = heard
+    ? '- El caption describe lo que se oye/pasa en el video, no un brief inventado\n'
+    : ''
+
   const taskLine = single
     ? `TAREA: Escribe UN caption completo para ${redes}.`
     : 'TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.'
@@ -155,11 +164,11 @@ ${redLine}
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
-${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
+${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
 ${taskLine}
-El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
-${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
+${heard ? 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.' : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
+${heardBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`

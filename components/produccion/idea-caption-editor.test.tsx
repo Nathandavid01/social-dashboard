@@ -46,6 +46,15 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
+  it('says the caption comes from what the video says', () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief visual" hasVideo />,
+    )
+    expect(screen.getByText(/lo que se oye en el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/la ia escucha el video/i)).toBeInTheDocument()
+  })
+
   it('offers AI generation when the user has captions.use and idea is ready', () => {
     mockRole = 'editor'
     render(
@@ -57,26 +66,26 @@ describe('IdeaCaptionEditor — caption único', () => {
         hasVideo
       />,
     )
-    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeInTheDocument()
   })
 
   it('enables AI generation with just the topic (hook) — like the idea generator', () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" hasVideo />)
-    expect(screen.getByRole('button', { name: /generar desde la idea/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).not.toBeDisabled()
   })
 
   it('disables AI generation until the topic exists, asking for it in plain Spanish', () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hasVideo />)
-    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeDisabled()
     expect(screen.getByText(/di de qué es el video/i)).toBeInTheDocument()
   })
 
   it('disables AI generation until there is a video', () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" hasVideo={false} />)
-    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeDisabled()
     expect(screen.getByText(/sube un video primero/i)).toBeInTheDocument()
   })
 
@@ -164,7 +173,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
     render(
       <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" hasVideo onSaved={onSaved} />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /generar desde la idea/i }))
+    fireEvent.click(screen.getByRole('button', { name: /generar desde el video/i }))
     await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
     expect(onSaved).not.toHaveBeenCalled()
   })

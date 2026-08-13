@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.22 — 2026-08-13
+
+**El caption ya no se inventa: escucha el video.**
+
+Al pulsar Generar, si hay clave de Whisper, la IA oye lo que se dice y escribe el copy sobre eso. El corte editado usa la URL pública; el raw se firma por 15 minutos para no hacerlo público. El hook queda como contexto. Si no se puede transcribir, sigue el brief como antes.
+
+Vista: [preview HTML](/previews/v3.22-caption-desde-el-video.html)
+
 ## v3.21 — 2026-08-13
 
 **Sin video, no hay caption.**
