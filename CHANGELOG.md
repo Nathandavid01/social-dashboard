@@ -4,6 +4,36 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.17 — 2026-08-13
+
+**Las pruebas de staging del log de sesión corren solas.**
+
+- `npm run test:staging` verifica contra natemedia-staging: que tú ves el tab Sesión, que un supervisor no, y que nadie puede leer el rastro de otro.
+- Si el entorno apunta a producción, las pruebas se niegan a correr.
+
+## v3.16 — 2026-08-13
+
+**Puedes ver qué clickeó cada persona hoy, sin salir del dashboard.**
+
+- En Actividad hay un tab Sesión: clicks y páginas de las últimas 24 horas del día en Puerto Rico, filtrable por persona. Abre en ti.
+- Solo el owner lo ve. El resto del equipo sigue generando el rastro, pero no puede leer el de los demás.
+- A los 7 días se borra solo. No se guarda lo que alguien escribe en un campo.
+
+## v3.15 — 2026-08-11
+
+**Ahora sabemos cuándo algo se rompe, sin que nadie tenga que contarlo.**
+
+### Reporte de errores
+- El dashboard reporta solo a Sentry cuando algo falla: en el servidor, en el navegador y en el middleware. Antes las variables de Sentry estaban puestas pero no había nada que las usara — no se reportaba absolutamente nada.
+- Los errores de las server actions también quedan cubiertos, que es donde vive casi toda la lógica de la app.
+
+### Cuando la pantalla se cae del todo
+- Si se rompe algo tan gordo que la página no puede pintarse, ya no sale una pantalla en blanco: sale un aviso en español, con un botón de reintentar y un código para reportar el problema.
+
+### Además
+- Cada error llega etiquetado con su entorno (producción, preview o local) y con el commit exacto que lo causó.
+- Se graba una muestra de sesiones para poder ver qué hizo la persona antes del error. El texto y las imágenes van tapados: no se ve ningún dato de cliente.
+
 ## v3.14 — 2026-08-10
 
 **Pruebas más duras para que el error de embed de Revisión no vuelva.**

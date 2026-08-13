@@ -11,10 +11,19 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/e2e/.auth/
 
 # next.js
 /.next/
+/.next-*/
 /out/
+
+# Worktrees de agentes: son repos git embebidos. Sin esta línea, un `git add -A`
+# los mete como submódulos rotos junto con el build de staging entero.
+/.claude/worktrees/
 
 # production
 /build

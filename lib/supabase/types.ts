@@ -483,6 +483,19 @@ export interface ContentIdeaActivity {
   idea?: Pick<ContentIdea, 'id' | 'title' | 'content_type'> | null
 }
 
+export type UiEventKind = 'click' | 'navigate'
+
+export interface UiEvent {
+  id: string
+  user_id: string
+  kind: UiEventKind
+  path: string
+  label: string
+  target: string | null
+  created_at: string
+  user?: Pick<Profile, 'id' | 'full_name'> | null
+}
+
 export interface SavedCaptionRow {
   id: string
   client_id: string | null
@@ -535,6 +548,7 @@ export interface Database {
       posting_drafts: { Row: PostingDraft }
       content_ideas: { Row: ContentIdea }
       saved_captions: { Row: SavedCaptionRow }
+      ui_events: { Row: UiEvent }
     }
   }
 }
