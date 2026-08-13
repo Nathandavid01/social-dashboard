@@ -31,7 +31,7 @@ export function ideaReadyMissingLabels(idea: CaptionReadyIdea): string[] {
 }
 
 /**
- * Day-2 will call generateIdeaCaption when this is true.
+ * True when opening the idea should fire generateIdeaCaption once.
  * Never overwrite a draft the team already has, nor an approved caption.
  */
 export function shouldAutoDraftCaption(idea: CaptionReadyIdea & {

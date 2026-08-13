@@ -10,6 +10,7 @@ import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-caption
 import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
+import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 interface Props {
@@ -57,6 +58,21 @@ export function IdeaCaptionEditor({
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+  const { autoDrafting } = useAutoDraftCaption({
+    ideaId,
+    hook,
+    hasVideo,
+    captionDraft: initialDraft,
+    generatedCaption: initialCaption,
+    enabled: canUse,
+    onDraft: (text) => {
+      setCaption((prev) => (prev.trim() ? prev : text))
+      if (!caption.trim()) {
+        toast({ title: 'Borrador listo', description: 'La IA lo escribió al abrir. Revísalo y guárdalo.' })
+      }
+    },
+  })
+  const drafting = isGenerating || autoDrafting
 
   const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief, hasVideo })
   const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle, hasVideo })
@@ -162,11 +178,11 @@ export function IdeaCaptionEditor({
             size="sm"
             variant="outline"
             onClick={generate}
-            disabled={isGenerating || !ideaReady}
+            disabled={drafting || !ideaReady}
             className="transition-transform hover:scale-105"
           >
-            {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
-            {caption ? 'Regenerar con IA' : 'Generar desde el video'}
+            {drafting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
+            {autoDrafting ? 'Escribiendo el copy…' : caption ? 'Regenerar con IA' : 'Generar desde el video'}
           </Button>
         )}
         {caption && (
@@ -193,7 +209,7 @@ export function IdeaCaptionEditor({
       />
 
       {/* THE shared caption feedback module — same everywhere captions are made. */}
-      <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
+      <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={drafting} />
 
       {dirty && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-border/60 pt-3">

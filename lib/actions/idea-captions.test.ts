@@ -88,6 +88,8 @@ import { generateIdeaCaption, saveIdeaCaption } from './idea-captions'
 
 beforeEach(() => {
   h.updates.length = 0
+  h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
+  vi.mocked(generateCaptionText).mockClear()
   vi.mocked(listenUrlForCaptionVideo).mockResolvedValue('https://pipe.test/ideas/1/raw/a.mp4')
   vi.mocked(transcribeVideoFromUrl).mockResolvedValue('el socio cuenta que bajó 15 libras')
   h.videos = [
@@ -152,6 +154,38 @@ describe('generateIdeaCaption — genera un BORRADOR, no publica', () => {
     await generateIdeaCaption('i1', { feedback: 'más corto', previousCaption: 'viejo' })
     expect(h.updates[0].caption_draft).toBe('Caption recién salido de la IA')
     expect(h.updates[0]).not.toHaveProperty('generated_caption')
+  })
+})
+
+describe('generateIdeaCaption — auto no pisa un draft existente', () => {
+  it('devuelve el borrador que ya hay y no llama a la IA', async () => {
+    h.idea = { ...h.idea, caption_draft: 'borrador del equipo', generated_caption: null }
+    const res = await generateIdeaCaption('i1', { auto: true })
+    expect(res).toEqual({ ok: true, caption: 'borrador del equipo' })
+    expect(generateCaptionText).not.toHaveBeenCalled()
+    expect(h.updates).toHaveLength(0)
+  })
+
+  it('tampoco pisa un caption ya aprobado', async () => {
+    h.idea = { ...h.idea, caption_draft: null, generated_caption: 'caption listo' }
+    const res = await generateIdeaCaption('i1', { auto: true })
+    expect(res.caption).toBe('caption listo')
+    expect(generateCaptionText).not.toHaveBeenCalled()
+    expect(h.updates).toHaveLength(0)
+  })
+
+  it('si no hay copy, el auto sí genera un borrador', async () => {
+    h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
+    const res = await generateIdeaCaption('i1', { auto: true })
+    expect(res.ok).toBe(true)
+    expect(h.updates[0].caption_draft).toBe('Caption recién salido de la IA')
+  })
+
+  it('sin auto, regenerar sí pisa el draft a propósito', async () => {
+    h.idea = { ...h.idea, caption_draft: 'viejo', generated_caption: null }
+    await generateIdeaCaption('i1')
+    expect(generateCaptionText).toHaveBeenCalled()
+    expect(h.updates[0].caption_draft).toBe('Caption recién salido de la IA')
   })
 })
 

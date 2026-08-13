@@ -14,7 +14,7 @@ Cada hora toma **el primer ítem `[ ]`**. Al cerrar el commit, márcalo `[x]` y 
 
 - [x] **Paso 0** — Asignaciones por empleado + color + quién cambió (`eric/asignaciones-por-empleado`).
 - [x] **Paso 1** — Contrato `captionJobsForPlatforms` + prompt puede apuntar a **una** red (`targetPlatform`). `shouldAutoDraftCaption` decide cuándo un video está listo para borrador solo. Nadie genera todavía en background.
-- [ ] **Paso 2** — Si `shouldAutoDraftCaption`, al abrir la idea / Entregas se llama `generateIdeaCaption` una vez (no pisa un draft existente).
+- [x] **Paso 2** — Si `shouldAutoDraftCaption`, al abrir la idea / Entregas se llama `generateIdeaCaption` una vez (no pisa un draft existente).
 - [ ] **Paso 3** — `generateIdeaCaption` recorre `captionJobsForPlatforms` y produce un draft por red (aún en un solo campo o JSON en `caption_draft` si 0030 no está).
 - [ ] **Paso 4** — Aplicar `0030_content_idea_captions.sql` en staging y persistir una fila por red.
 - [ ] **Paso 5** — UI: un caption editable por red en Copy / idea.

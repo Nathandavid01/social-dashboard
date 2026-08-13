@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
+import { useHasPermission } from '@/components/auth/role-gate'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
@@ -41,6 +43,7 @@ export function CopyOverlay({
 }) {
   const router = useRouter()
   const { toast } = useToast()
+  const canUse = useHasPermission('captions.use')
   const [videos, setVideos] = useState<CopyVideoRow[] | null>(null)
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -66,6 +69,21 @@ export function CopyOverlay({
   useEffect(() => { void load() }, [load])
 
   const current = videos?.[index] ?? null
+  const { autoDrafting } = useAutoDraftCaption({
+    ideaId: current?.id ?? '',
+    hook: current?.hook,
+    hasVideo: !!current?.videoFileId,
+    captionDraft: current?.caption_draft,
+    generatedCaption: current?.generated_caption,
+    enabled: canUse && !!current,
+    onDraft: (text) => {
+      setCaption((prev) => {
+        if (prev.trim()) return prev
+        toast({ title: 'Borrador listo', description: 'La IA lo escribió al abrir. Léelo y envíalo cuando esté bien.' })
+        return text
+      })
+    },
+  })
 
   // Reset the per-video fields whenever a different video comes on screen.
   useEffect(() => {
@@ -148,6 +166,7 @@ export function CopyOverlay({
   }
 
   const done = videos !== null && videos.length === 0
+  const writing = busy !== null || autoDrafting
   // Hay copy en pantalla que aún no es el del video: mientras se vea, el video
   // sigue en Copy. Es la señal de que generar no envió nada.
   const sinEnviar = !!caption.trim() && caption.trim() !== (current?.generated_caption ?? '').trim()
@@ -248,11 +267,11 @@ export function CopyOverlay({
                 </p>
               </div>
 
-              <Button size="sm" variant="outline" disabled={busy !== null} onClick={generate}>
-                {busy === 'generando'
+              <Button size="sm" variant="outline" disabled={writing} onClick={generate}>
+                {busy === 'generando' || autoDrafting
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
-                {caption.trim() ? 'Regenerar con IA' : 'Escribir copy con IA'}
+                {autoDrafting ? 'Escribiendo el copy…' : caption.trim() ? 'Regenerar con IA' : 'Escribir copy con IA'}
               </Button>
               </div>
             </section>
@@ -294,7 +313,7 @@ export function CopyOverlay({
                 <span className="text-[11px] tabular-nums text-muted-foreground">
                   {caption.trim().length} caracteres
                 </span>
-                <Button size="sm" disabled={busy !== null || !caption.trim()} onClick={sendToPublication}>
+                <Button size="sm" disabled={writing || !caption.trim()} onClick={sendToPublication}>
                   {busy === 'guardando'
                     ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                     : <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />}

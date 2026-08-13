@@ -98,7 +98,7 @@ export function IdeaStudioCompact({
   videos,
 }: {
   ideaId: string
-  idea: Pick<ContentIdea, 'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'title'>
+  idea: Pick<ContentIdea, 'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'>
   videos: ContentIdeaVideo[]
 }) {
   const [hook, setHook] = useState(idea.hook ?? '')
@@ -135,6 +135,7 @@ export function IdeaStudioCompact({
       <IdeaCaptionEditor
         ideaId={ideaId}
         initialCaption={savedCaption}
+        initialDraft={idea.caption_draft}
         hook={hook}
         visualBrief={visualBrief}
         captionAngle={captionAngle}

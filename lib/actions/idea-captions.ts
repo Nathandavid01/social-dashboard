@@ -28,8 +28,9 @@ import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 export async function generateIdeaCaption(
   ideaId: string,
   /** Optional feedback to revise a prior attempt — the user's instructions
-   *  ("más corto", "menos emojis") + the caption being revised. */
-  opts?: { feedback?: string | null; previousCaption?: string | null },
+   *  ("más corto", "menos emojis") + the caption being revised.
+   *  `auto` = opened the idea; never overwrite a draft the team already has. */
+  opts?: { feedback?: string | null; previousCaption?: string | null; auto?: boolean },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -43,11 +44,18 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, client_id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
+    .select('id, client_id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, caption_draft, generated_caption, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
     .eq('id', ideaId)
     .single()
 
   if (!idea) return { error: 'Idea no encontrada' }
+
+  // Auto-draft on open: return what is already there. Manual "Regenerar" still overwrites.
+  if (opts?.auto) {
+    const existing = [idea.caption_draft, idea.generated_caption]
+      .find((s) => typeof s === 'string' && s.trim().length > 0)
+    if (existing) return { ok: true, caption: existing.trim() }
+  }
 
   const { data: vids } = await supabase
     .from('content_idea_videos')

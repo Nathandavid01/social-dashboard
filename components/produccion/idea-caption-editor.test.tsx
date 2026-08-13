@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
+import { resetAutoDraftAttempts } from '@/lib/hooks/use-auto-draft-caption'
 import type { UserRole } from '@/lib/supabase/types'
 
 const generateIdeaCaption = vi.fn(async () => ({ ok: true as const, caption: 'hola' }))
@@ -35,7 +36,11 @@ vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }
 
 import { IdeaCaptionEditor } from './idea-caption-editor'
 
-afterEach(() => cleanup())
+afterEach(() => {
+  cleanup()
+  generateIdeaCaption.mockClear()
+  resetAutoDraftAttempts()
+})
 
 describe('IdeaCaptionEditor — caption único', () => {
   it('states the caption applies to all networks and has no per-platform selector', () => {
@@ -66,13 +71,13 @@ describe('IdeaCaptionEditor — caption único', () => {
         hasVideo
       />,
     )
-    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /generar desde el video|escribiendo el copy|regenerar con ia/i })).toBeInTheDocument()
   })
 
-  it('enables AI generation with just the topic (hook) — like the idea generator', () => {
+  it('enables AI generation with just the topic (hook) — like the idea generator', async () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" hasVideo />)
-    expect(screen.getByRole('button', { name: /generar desde el video/i })).not.toBeDisabled()
+    await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalled())
   })
 
   it('disables AI generation until the topic exists, asking for it in plain Spanish', () => {
@@ -173,7 +178,8 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
     render(
       <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" hasVideo onSaved={onSaved} />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /generar desde el video/i }))
+    const btn = await screen.findByRole('button', { name: /generar desde el video|regenerar con ia/i })
+    fireEvent.click(btn)
     await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
     expect(onSaved).not.toHaveBeenCalled()
   })
@@ -225,5 +231,57 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
       <IdeaCaptionEditor ideaId="i1" initialCaption="caption definitivo" hook="Gancho" visualBrief="Brief" hasVideo />,
     )
     expect(screen.queryByText(/sin guardar/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('IdeaCaptionEditor — al abrir se escribe el borrador solo', () => {
+  it('genera una vez si hay video + tema y todavía no hay copy', async () => {
+    mockRole = 'editor'
+    let resolveGen: (v: { ok: true; caption: string }) => void = () => {}
+    generateIdeaCaption.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveGen = resolve }),
+    )
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" hasVideo />)
+    expect(await screen.findByText(/escribiendo el copy/i)).toBeInTheDocument()
+    expect(generateIdeaCaption).toHaveBeenCalledTimes(1)
+    expect(generateIdeaCaption).toHaveBeenCalledWith('i1', { auto: true })
+    resolveGen({ ok: true, caption: 'hola' })
+    expect(await screen.findByDisplayValue('hola')).toBeInTheDocument()
+  })
+
+  it('no pisa un borrador que ya estaba', async () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor
+        ideaId="i1"
+        initialCaption={null}
+        initialDraft="borrador de ayer"
+        hook="Gancho"
+        hasVideo
+      />,
+    )
+    await Promise.resolve()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+    expect(screen.getByDisplayValue('borrador de ayer')).toBeInTheDocument()
+  })
+
+  it('no pisa un caption ya guardado', async () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption="caption definitivo" hook="Gancho" hasVideo />,
+    )
+    await Promise.resolve()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+    expect(screen.getByDisplayValue('caption definitivo')).toBeInTheDocument()
+  })
+
+  it('el auto-borrador no avisa onSaved — el video se queda en Copy', async () => {
+    mockRole = 'editor'
+    const onSaved = vi.fn()
+    render(
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" hasVideo onSaved={onSaved} />,
+    )
+    await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
+    expect(onSaved).not.toHaveBeenCalled()
   })
 })

@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.23 — 2026-08-13
+
+**Al abrir el video, el copy se escribe solo.**
+
+Si ya hay grabación y de qué va el video, y todavía no hay texto, la IA empieza a escribir el copy al entrar. No hay que pulsar Generar.
+
+- En la idea y en Entregas (Copy) pasa lo mismo: abres y el borrador llega.
+- Si el equipo ya dejó un borrador o un caption, no se toca.
+- El video se queda en Copy hasta que alguien lo lea y lo guarde.
+
+Vista: [preview HTML](/previews/v3.23-caption-al-abrir.html)
+
 ## v3.22 — 2026-08-13
 
 **El caption ya no se inventa: escucha el video.**
