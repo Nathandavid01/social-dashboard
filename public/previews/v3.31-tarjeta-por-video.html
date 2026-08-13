@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.31 — Una tarjeta por video</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --good:#22c55e; --bad:#f87171; --gold:#e8b31a; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 4px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 20px; }
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .col { background:#111; border:1px solid var(--border); border-radius:12px; padding:10px; }
+    .label { font-size:11px; font-weight:600; text-transform:uppercase; color:var(--muted-fg); margin-bottom:8px; }
+    .card { background:var(--card); border:1px solid #2a2a2a; border-radius:10px; padding:10px; font-size:13px; margin-bottom:8px; }
+    .tiny { font-size:11px; color:var(--muted-fg); margin-top:4px; }
+    .bad { color:var(--bad); }
+    .good { color:var(--good); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.31 — Gym X ya no se pisa a sí mismo</h1>
+    <p class="sub">Dos videos del mismo cliente en Revisión son dos tarjetas. Aprobar esta semana no deja puesta la de la semana pasada.</p>
+    <div class="cols">
+      <div class="col">
+        <div class="label">Antes</div>
+        <div class="card">Gym X <div class="tiny bad">Al aprobar, la misma tarjeta se convierte en “semana pasada” y Metricool se lleva ese archivo.</div></div>
+      </div>
+      <div class="col">
+        <div class="label">Ahora</div>
+        <div class="card">Gym X · esta semana <div class="tiny good">Esta se aprueba y avanza.</div></div>
+        <div class="card">Gym X · semana pasada <div class="tiny">Sigue aquí, aparte. No se publica al aprobar la otra.</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

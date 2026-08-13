@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.31 — 2026-08-13
+
+**Cada video tiene su tarjeta de verdad.**
+
+En Entregas, Gym X en Revisión reutilizaba la misma tarjeta para esta semana y la pasada. Al aprobar la de ahora, React dejaba puesta la de la semana pasada — y Metricool se llevaba ese archivo.
+
+Vista: [preview HTML](/previews/v3.31-tarjeta-por-video.html)
+
 ## v3.30 — 2026-08-13
 
 **Aprobar en el lote ya no manda el video viejo del pipeline.**
