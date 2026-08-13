@@ -24,6 +24,10 @@ const h = vi.hoisted(() => ({
   ] as Record<string, unknown>[],
 }))
 
+const maybeAutoPostIdea = vi.fn(async (): Promise<{ posted: boolean; skipped?: string } | null> => ({ posted: true }))
+vi.mock('@/lib/actions/idea-posting', () => ({
+  maybeAutoPostIdea: (...a: unknown[]) => maybeAutoPostIdea(...(a as [])),
+}))
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
   currentUserHas: vi.fn(async () => true),
@@ -54,6 +58,8 @@ import { getEntregaCopyVideos, saveCopyAndSchedule } from './entregas-copy'
 
 beforeEach(() => {
   h.updates.length = 0
+  maybeAutoPostIdea.mockClear()
+  maybeAutoPostIdea.mockResolvedValue({ posted: true })
 })
 
 describe('getEntregaCopyVideos — el overlay recupera el borrador', () => {
@@ -78,5 +84,20 @@ describe('saveCopyAndSchedule — promueve el borrador', () => {
     const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: '  ', publishDate: null })
     expect(res.error).toBeTruthy()
     expect(h.updates).toHaveLength(0)
+    expect(maybeAutoPostIdea).not.toHaveBeenCalled()
+  })
+
+  it('al guardar el copy pide publicar si ya hay video aprobado + Metricool', async () => {
+    const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: 'Copy final del equipo', publishDate: '2026-09-01' })
+    expect(maybeAutoPostIdea).toHaveBeenCalledWith('i1')
+    expect(res.autopost).toEqual({ posted: true })
+  })
+
+  it('si Metricool no está listo, el copy igual se guarda', async () => {
+    maybeAutoPostIdea.mockResolvedValueOnce({ posted: false, skipped: 'El cliente no tiene Metricool configurado (falta blog_id)' })
+    const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: 'Copy final del equipo', publishDate: null })
+    expect(res.ok).toBe(true)
+    expect(res.autopost?.posted).toBe(false)
+    expect(res.autopost?.skipped).toMatch(/metricool/i)
   })
 })

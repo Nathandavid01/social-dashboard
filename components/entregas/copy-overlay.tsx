@@ -162,7 +162,16 @@ export function CopyOverlay({
         toast({ title: 'Error', description: res.error, variant: 'destructive' })
         return
       }
-      toast({ title: 'Copy guardado — pasa a Publicación' })
+      if (res.autopost?.posted) {
+        toast({
+          title: 'Copy guardado y programado en Metricool',
+          description: 'Se publica en su fecha. El video ya no se queda esperando un botón extra.',
+        })
+      } else if (res.autopost?.skipped) {
+        toast({ title: 'Copy guardado — pasa a Publicación', description: res.autopost.skipped })
+      } else {
+        toast({ title: 'Copy guardado — pasa a Publicación' })
+      }
       await load()
       router.refresh()
     } finally {

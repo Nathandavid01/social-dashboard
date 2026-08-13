@@ -15,11 +15,16 @@ vi.mock('@/lib/actions/entregas-r2', () => ({
   getEntregasPreviewUrl: vi.fn(async () => ({ url: 'https://v.test/v.mp4' })),
 }))
 const getEntregaCopyVideos = vi.fn()
+const saveCopyAndSchedule = vi.fn(async (): Promise<{
+  ok?: true
+  error?: string
+  autopost?: { posted: boolean; skipped?: string } | null
+}> => ({ ok: true }))
 vi.mock('@/lib/actions/entregas-copy', () => ({
   getEntregaCopyVideos: (...a: unknown[]) => getEntregaCopyVideos(...(a as [])),
   updateIdeaHook: vi.fn(async () => ({ ok: true as const })),
   saveClientCaptionNotes: vi.fn(async () => ({ ok: true as const })),
-  saveCopyAndSchedule: vi.fn(async () => ({ ok: true as const })),
+  saveCopyAndSchedule: (...a: unknown[]) => saveCopyAndSchedule(...(a as [])),
 }))
 const rateCaption = vi.fn(async () => ({ ok: true as const }))
 vi.mock('@/lib/actions/caption-feedback', () => ({
@@ -27,7 +32,8 @@ vi.mock('@/lib/actions/caption-feedback', () => ({
   getCaptionLearningStats: vi.fn(async () => ({ approved: 0, loved: 0, rejected: 0, suggestions: [] })),
   appendClientCaptionRule: vi.fn(async () => ({ ok: true as const })),
 }))
-vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+const toast = vi.fn()
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }))
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: 'editor' }),
@@ -57,6 +63,8 @@ afterEach(() => {
   cleanup()
   generateIdeaCaption.mockClear()
   rateCaption.mockClear()
+  saveCopyAndSchedule.mockClear()
+  toast.mockClear()
   resetAutoDraftAttempts()
 })
 
@@ -113,5 +121,21 @@ describe('CopyOverlay — 👍/👎 del caption único', () => {
         note: undefined,
       }),
     )
+  })
+})
+
+describe('CopyOverlay — Enviar a Publicación programa en Metricool', () => {
+  it('dice que quedó programado cuando el copy ya puede publicarse', async () => {
+    saveCopyAndSchedule.mockResolvedValueOnce({ ok: true as const, autopost: { posted: true } })
+    getEntregaCopyVideos.mockResolvedValue({
+      data: { videos: [video({ caption_draft: 'Copy listo para enviar ya mismo' })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByDisplayValue('Copy listo para enviar ya mismo')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /enviar a publicación/i }))
+    await waitFor(() => expect(saveCopyAndSchedule).toHaveBeenCalled())
+    expect(toast).toHaveBeenCalledWith(expect.objectContaining({
+      title: expect.stringMatching(/metricool/i),
+    }))
   })
 })

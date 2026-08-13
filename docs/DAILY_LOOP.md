@@ -20,7 +20,7 @@ Cada hora toma **el primer ítem `[ ]`**. Al cerrar el commit, márcalo `[x]` y 
 - [x] **Paso 4** — Cancelado (persistir una fila por red). Ya no aplica.
 - [x] **Paso 5** — Cancelado (UI por red). Ya no aplica.
 - [x] **Paso 6** — Aplicar `0041_caption_feedback.sql` en staging; 👍/👎 del caption único alimenta el próximo generate.
-- [ ] **Paso 7** — Auto-publish al aprobar (depende de `0032` en staging): solo si hay caption aprobado + video editado + Metricool.
+- [x] **Paso 7** — Auto-publish al aprobar (depende de `0032` en staging): solo si hay caption aprobado + video editado + Metricool.
 
 ## Cómo corre el agente
 

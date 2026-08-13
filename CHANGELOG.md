@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.27 — 2026-08-13
+
+**Enviar el copy ya programa la publicación.**
+
+En Entregas, cuando el video está aprobado, tiene corte y el cliente tiene Metricool, pulsar **Enviar a Publicación** también lo agenda. No hay que ir a otra pantalla a publicar.
+
+- Si falta Metricool, el video o el copy, se guarda igual y te dice qué falta.
+- No se publica dos veces: si ya salió, no se toca.
+- Solo en staging/prod con la migración `0032`. Aprobar el video sin copy sigue sin mandar nada.
+
+Vista: [preview HTML](/previews/v3.27-enviar-programa.html)
+
 ## v3.26 — 2026-08-13
 
 **Un 👍 o 👎 en Entregas enseña al próximo copy.**

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas } from '@/lib/auth/server'
+import { maybeAutoPostIdea, type AutoPostOutcome } from '@/lib/actions/idea-posting'
 
 /**
  * Data for the Copy stage: approved videos still missing their caption, plus
@@ -164,7 +165,7 @@ export async function saveCopyAndSchedule(input: {
   caption: string
   /** YYYY-MM-DD, or null to let Metricool take +24h. */
   publishDate: string | null
-}): Promise<{ ok?: true; error?: string }> {
+}): Promise<{ ok?: true; error?: string; autopost?: AutoPostOutcome }> {
   try {
     await requirePermission('captions.edit')
   } catch (err) {
@@ -189,5 +190,8 @@ export async function saveCopyAndSchedule(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/entregas')
-  return { ok: true }
+  // Copy is what made the idea ready (caption + already-approved video).
+  // maybeAutoPostIdea no-ops unless caption + edited video + Metricool.
+  const autopost = await maybeAutoPostIdea(input.ideaId)
+  return { ok: true, autopost }
 }
