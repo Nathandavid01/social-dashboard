@@ -34,6 +34,7 @@ vi.mock('@/lib/context/auth-context', () => ({
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 
+import { packCaptionDrafts } from '@/lib/utils/caption-draft'
 import { IdeaCaptionEditor } from './idea-caption-editor'
 
 afterEach(() => {
@@ -99,6 +100,7 @@ describe('IdeaCaptionEditor — caption único', () => {
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} platforms={['instagram', 'tiktok']} />)
     expect(screen.getByLabelText(/instagram/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/tiktok/i)).toBeInTheDocument()
+    expect(screen.getByText(/un copy por cada red/i)).toBeInTheDocument()
   })
 
   it('regenerates with the user feedback + the previous caption', async () => {
@@ -273,6 +275,25 @@ describe('IdeaCaptionEditor — al abrir se escribe el borrador solo', () => {
     await Promise.resolve()
     expect(generateIdeaCaption).not.toHaveBeenCalled()
     expect(screen.getByDisplayValue('caption definitivo')).toBeInTheDocument()
+  })
+
+  it('un draft JSON por red se lee como texto, no como llaves crudas', () => {
+    mockRole = 'editor'
+    render(
+      <IdeaCaptionEditor
+        ideaId="i1"
+        initialCaption={null}
+        initialDraft={packCaptionDrafts([
+          { platform: 'instagram', text: 'hook IG' },
+          { platform: 'tiktok', text: 'oral TT' },
+        ])}
+        hook="Gancho"
+        hasVideo
+      />,
+    )
+    const box = screen.getByDisplayValue(/\[Instagram\]/)
+    expect(box).toHaveDisplayValue(/\[Instagram\][\s\S]*hook IG[\s\S]*\[TikTok\][\s\S]*oral TT/)
+    expect((box as HTMLTextAreaElement).value).not.toContain('"by"')
   })
 
   it('el auto-borrador no avisa onSaved — el video se queda en Copy', async () => {

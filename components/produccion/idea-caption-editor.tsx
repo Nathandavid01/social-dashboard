@@ -10,6 +10,7 @@ import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-caption
 import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
@@ -53,7 +54,7 @@ export function IdeaCaptionEditor({
   const canUse = useHasPermission('captions.use')
   // A saved caption wins over a leftover draft — the draft is only what's
   // pending when nothing has been settled yet.
-  const [caption, setCaption] = useState(initialCaption || initialDraft || '')
+  const [caption, setCaption] = useState(initialCaption || displayCaptionDraft(initialDraft) || '')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
@@ -166,7 +167,7 @@ export function IdeaCaptionEditor({
       <div className="flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
           <Globe className="h-3.5 w-3.5" />
-          Una caption para todas las redes
+          {platforms.length > 1 ? 'Un copy por cada red' : 'Una caption para todas las redes'}
           {platforms.length > 0 && (
             <span className="ml-0.5 flex items-center gap-1 [&_svg]:h-3.5 [&_svg]:w-3.5">
               <PlatformBadges platforms={platforms} />

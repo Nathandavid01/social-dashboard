@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.24 — 2026-08-13
+
+**Cada red tiene su propio copy.**
+
+Si el cliente está en Instagram y TikTok, la IA escribe dos textos: uno con hook y hashtags para Instagram, otro corto y oral para TikTok. En la caja se ven uno debajo del otro, con el nombre de la red.
+
+- Un cliente de una sola red sigue viendo un solo texto, como antes.
+- El video no se mueve de Copy. Hay que leer y guardar.
+- Todavía se guarda todo junto; el recuadro por red llega después.
+
+Vista: [preview HTML](/previews/v3.24-caption-por-red.html)
+
 ## v3.23 — 2026-08-13
 
 **Al abrir el video, el copy se escribe solo.**

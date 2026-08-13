@@ -14,6 +14,8 @@ import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
 import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
+import { captionJobsForPlatforms } from '@/lib/utils/caption-jobs'
+import { displayCaptionDraft, packCaptionDrafts } from '@/lib/utils/caption-draft'
 
 /**
  * Generate a caption for a specific idea, grounded in the idea's hook +
@@ -54,7 +56,7 @@ export async function generateIdeaCaption(
   if (opts?.auto) {
     const existing = [idea.caption_draft, idea.generated_caption]
       .find((s) => typeof s === 'string' && s.trim().length > 0)
-    if (existing) return { ok: true, caption: existing.trim() }
+    if (existing) return { ok: true, caption: displayCaptionDraft(existing) }
   }
 
   const { data: vids } = await supabase
@@ -85,9 +87,9 @@ export async function generateIdeaCaption(
     default_platforms?: string[] | null
   }
 
-  // One caption for ALL the client's networks — generated for exactly the
-  // platforms it will be published to (same resolution the publisher uses).
+  // Same networks the publisher will use. One LLM call per job (0030 table later).
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+  const jobs = captionJobsForPlatforms(platforms)
 
   // Learning loop (best-effort, all parallel): Metricool real style + the team's
   // APPROVED captions + explicit 👍/👎 ratings for this client.
@@ -100,8 +102,8 @@ export async function generateIdeaCaption(
   // 👍-rated captions are the strongest positive signal → lead the approved list.
   const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
 
-  const prompt = buildIdeaCaptionPrompt({
-    title: idea.title,
+  const sharedPrompt = {
+    title: idea.title as string,
     hook: idea.hook,
     visualBrief: idea.visual_brief,
     captionAngle: idea.caption_angle,
@@ -120,28 +122,38 @@ export async function generateIdeaCaption(
       defaultCta: client.default_cta,
       captionNotes: client.caption_notes,
     },
-  })
+  }
 
   try {
-    const caption = await generateCaptionText(prompt)
+    const drafts: { platform: string; text: string }[] = []
+    for (const job of jobs) {
+      const text = await generateCaptionText(buildIdeaCaptionPrompt({
+        ...sharedPrompt,
+        targetPlatform: job.platform,
+        targetFocus: job.focus,
+      }))
+      if (!text?.trim()) {
+        return { error: `La IA no devolvió caption para ${job.platform}` }
+      }
+      drafts.push({ platform: job.platform, text: text.trim() })
+    }
 
-    if (!caption) return { error: 'La IA no devolvió caption' }
-
+    const stored = packCaptionDrafts(drafts)
     // Draft only. The stage-driving field stays untouched until a human saves.
     const { error: updErr } = await supabase
       .from('content_ideas')
-      .update({ caption_draft: caption })
+      .update({ caption_draft: stored })
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
     // Persist the feedback text too (not just a bool) so a future per-client
     // learning loop can mine recurring instructions ("siempre menos emojis").
-    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms, examplesUsed: examples.length, revised: !!opts?.feedback, feedback: opts?.feedback?.trim() || null } })
+    await logIdeaActivity(supabase, { ideaId, action: 'caption_generated', metadata: { platforms: jobs.map((j) => j.platform), examplesUsed: examples.length, revised: !!opts?.feedback, feedback: opts?.feedback?.trim() || null } })
 
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
     revalidatePath('/pipeline')
-    return { ok: true, caption }
+    return { ok: true, caption: displayCaptionDraft(stored) }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al generar caption' }
   }

@@ -10,6 +10,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { useHasPermission } from '@/components/auth/role-gate'
 import {
   getEntregaCopyVideos,
@@ -90,7 +91,7 @@ export function CopyOverlay({
     setHook(current?.hook ?? '')
     // El caption guardado manda; si no hay, se recupera el borrador de la IA
     // para que una recarga no lo tire.
-    setCaption(current?.generated_caption || current?.caption_draft || '')
+    setCaption(current?.generated_caption || displayCaptionDraft(current?.caption_draft) || '')
     setPublishDate(current?.publishDate ?? '')
   }, [current?.id, current?.hook, current?.generated_caption, current?.caption_draft, current?.publishDate])
 

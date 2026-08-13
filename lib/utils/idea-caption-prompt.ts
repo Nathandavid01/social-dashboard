@@ -28,8 +28,8 @@ export interface IdeaCaptionPromptInput {
    */
   platforms?: string[]
   /**
-   * When set, the caption is written for THIS network only (daily-loop day 1).
-   * Day 3 fans out one prompt per captionJobsForPlatforms() job.
+   * When set, the caption is written for THIS network only.
+   * generateIdeaCaption fans out one prompt per captionJobsForPlatforms() job.
    */
   targetPlatform?: string
   /** Extra focus line for `targetPlatform` (from captionJobsForPlatforms). */
