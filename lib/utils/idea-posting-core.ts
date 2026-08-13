@@ -143,15 +143,15 @@ export function pickEditedVideoForPublish(
   const newest = (list: PublishableEditedVideo[]) =>
     [...list].sort((a, b) => ((a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1))[0] ?? null
 
-  const board = opts?.watchedOn ?? inferWatchBoard(live, ideaId)
-  const onBoard = board
-    ? live.filter((v) => v.storage_provider === (board === 'entregas' ? 'entregas-r2' : 'r2'))
-    : null
-  if (onBoard && onBoard.length > 0) return newest(onBoard)
+  if (opts?.watchedOn) {
+    const wanted = opts.watchedOn === 'entregas' ? 'entregas-r2' : 'r2'
+    return newest(live.filter((v) => v.storage_provider === wanted))
+  }
 
-  const entregas = live.filter((v) => v.storage_provider === 'entregas-r2')
-  if (entregas.length > 0) return newest(entregas)
-  return newest(live)
+  const board = inferWatchBoard(live, ideaId)
+  if (board === 'entregas') return newest(live.filter((v) => v.storage_provider === 'entregas-r2'))
+  if (board === 'pipeline') return newest(live.filter((v) => v.storage_provider === 'r2'))
+  return null
 }
 
 /** Networks to post to: the client's own platforms, else its defaults, else IG/FB/TikTok. */

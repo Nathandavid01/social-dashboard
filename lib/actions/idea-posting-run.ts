@@ -195,6 +195,7 @@ export async function runIdeaPost(
         videoId: editedVideo.id,
         videoKey: editedVideo.drive_file_id,
         storageProvider: editedVideo.storage_provider,
+        publicUrl: pub.url,
       },
     })
 

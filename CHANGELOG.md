@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.33 — 2026-08-13
+
+**Si el tablero no tiene ese corte, no se publica el del otro.**
+
+Aprobar en `/review` ya no puede mandar un archivo de Entregas por debajo. Al revés igual. Mejor no publicar que subir el video equivocado.
+
 ## v3.32 — 2026-08-13
 
 **Copy y captions miran ESTA idea, no todas las del cliente.**

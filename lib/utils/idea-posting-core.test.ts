@@ -142,6 +142,21 @@ describe('pickEditedVideoForPublish', () => {
     expect(picked?.id).toBe('old-r2')
   })
 
+  it('fails closed if the watched board has no live file', () => {
+    expect(
+      pickEditedVideoForPublish([thisWeekEntregas], {
+        ideaId: 'idea-this-week',
+        watchedOn: 'pipeline',
+      }),
+    ).toBeNull()
+    expect(
+      pickEditedVideoForPublish([lastWeekPipeline], {
+        ideaId: 'idea-this-week',
+        watchedOn: 'entregas',
+      }),
+    ).toBeNull()
+  })
+
   it('board-agnostic approve uses Entregas, not last week’s pipeline file', () => {
     expect(inferWatchBoard([lastWeekPipeline, thisWeekEntregas], 'idea-this-week')).toBe('entregas')
     const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
