@@ -76,6 +76,7 @@ describe('CopyOverlay — al abrir se escribe el copy solo', () => {
     )
     getEntregaCopyVideos.mockResolvedValueOnce({ data: { videos: [video()], captionNotes: '' } })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    await waitFor(() => expect(getEntregaCopyVideos).toHaveBeenCalledWith('c1', 'i1'))
     expect(await screen.findByText(/escribiendo el copy/i)).toBeInTheDocument()
     await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalledTimes(1))
     expect(generateIdeaCaption).toHaveBeenCalledWith('i1', { auto: true })

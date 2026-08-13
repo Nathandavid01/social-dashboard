@@ -61,7 +61,7 @@ export async function generateIdeaCaption(
   const { data: vids } = await supabase
     .from('content_idea_videos')
     .select('id, kind, status, drive_file_id, storage_provider')
-    .eq('content_idea_id', ideaId)
+    .eq('idea_id', ideaId)
     .neq('status', 'archived')
   const hasVideo = hasCaptionableVideo(vids)
   if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
@@ -173,7 +173,7 @@ export async function saveIdeaCaption(
   const { data: vids } = await supabase
     .from('content_idea_videos')
     .select('id, status')
-    .eq('content_idea_id', ideaId)
+    .eq('idea_id', ideaId)
     .neq('status', 'archived')
     .limit(1)
   if (!hasCaptionableVideo(vids)) {

@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.32 — 2026-08-13
+
+**Copy y captions miran ESTA idea, no todas las del cliente.**
+
+Al abrir Copy se pide solo el video de esa tarjeta. Generar caption busca archivos por `idea_id` (la columna real). El enlace `/review/` del pipeline no se crea si el corte vive en Entregas — ese se aprueba en la tarjeta.
+
+Vista: [preview HTML](/previews/v3.32-copy-esta-idea.html)
+
 ## v3.31 — 2026-08-13
 
 **Cada video tiene su tarjeta de verdad.**

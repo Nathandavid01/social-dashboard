@@ -58,11 +58,9 @@ export function CopyOverlay({
   const [publishDate, setPublishDate] = useState('')
 
   const load = useCallback(async () => {
-    const res = await getEntregaCopyVideos(clientId)
+    const res = await getEntregaCopyVideos(clientId, ideaId)
     if (res.error) return setError(res.error)
-    // Solo el video de la tarjeta. Se filtra aqui y no en el servidor para no
-    // tocar una accion que tambien usa el otro tablero.
-    const pending = (res.data?.videos ?? []).filter((v) => v.id === ideaId)
+    const pending = res.data?.videos ?? []
     setVideos(pending)
     setNotes(res.data?.captionNotes ?? '')
     setIndex(0)

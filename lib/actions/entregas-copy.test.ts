@@ -37,13 +37,22 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => ({
       // `.eq()` encadena consigo mismo: clients hace .eq().single() y
-      // content_ideas hace .eq().eq().order().
+      // content_ideas hace .eq().eq().order() — y a veces .eq('id', ideaId).
       select: () => {
+        let ideaFilter: string | null = null
         const chain: Record<string, unknown> = {
           single: async () => ({ data: h.client, error: null }),
-          order: async () => ({ data: h.ideas, error: null }),
+          order: async () => ({
+            data: table === 'content_ideas' && ideaFilter
+              ? h.ideas.filter((i) => i.id === ideaFilter)
+              : h.ideas,
+            error: null,
+          }),
         }
-        chain.eq = () => chain
+        chain.eq = (col: string, val: unknown) => {
+          if (table === 'content_ideas' && col === 'id') ideaFilter = String(val)
+          return chain
+        }
         return chain
       },
       update: (payload: Record<string, unknown>) => {
@@ -58,6 +67,20 @@ import { getEntregaCopyVideos, saveCopyAndSchedule } from './entregas-copy'
 
 beforeEach(() => {
   h.updates.length = 0
+  h.ideas = [
+    {
+      id: 'i1',
+      title: 'Testimonio',
+      hook: 'Bajó 15 lb',
+      visual_brief: null,
+      caption_angle: null,
+      hashtags_suggestion: null,
+      generated_caption: null,
+      caption_draft: 'Borrador que escribió la IA',
+      publish_date: null,
+      videos: [],
+    },
+  ]
   maybeAutoPostIdea.mockClear()
   maybeAutoPostIdea.mockResolvedValue({ posted: true })
 })
@@ -67,6 +90,16 @@ describe('getEntregaCopyVideos — el overlay recupera el borrador', () => {
     const res = await getEntregaCopyVideos('c1')
     expect(res.data?.videos[0].caption_draft).toBe('Borrador que escribió la IA')
     expect(res.data?.videos[0].generated_caption).toBeNull()
+  })
+
+  it('con ideaId no trae el video de la semana pasada del mismo cliente', async () => {
+    h.ideas = [
+      { ...h.ideas[0], id: 'idea-last-week', title: 'Semana pasada' },
+      { ...h.ideas[0], id: 'idea-this-week', title: 'Esta semana' },
+    ]
+    const res = await getEntregaCopyVideos('c1', 'idea-this-week')
+    expect(res.data?.videos).toHaveLength(1)
+    expect(res.data?.videos[0].id).toBe('idea-this-week')
   })
 })
 
