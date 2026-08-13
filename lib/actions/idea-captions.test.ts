@@ -23,6 +23,7 @@ const h = vi.hoisted(() => ({
     content_type: 'R',
     client: { name: 'Gym X', platforms: ['instagram'], default_platforms: ['instagram'] },
   } as Record<string, unknown>,
+  videos: [{ id: 'v1', status: 'uploaded' }] as { id: string; status: string }[],
 }))
 
 vi.mock('@/lib/auth/server', () => ({ requirePermission: vi.fn(async () => {}) }))
@@ -41,13 +42,26 @@ vi.mock('@/lib/llm/caption-llm', () => ({
 }))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
-    from: () => ({
-      select: () => ({ eq: () => ({ single: async () => ({ data: h.idea, error: null }) }) }),
-      update: (payload: Record<string, unknown>) => {
-        h.updates.push(payload)
-        return { eq: async () => ({ error: null }) }
-      },
-    }),
+    from: (table: string) => {
+      if (table === 'content_idea_videos') {
+        return {
+          select: () => ({
+            eq: () => ({
+              neq: () => ({
+                limit: async () => ({ data: h.videos, error: null }),
+              }),
+            }),
+          }),
+        }
+      }
+      return {
+        select: () => ({ eq: () => ({ single: async () => ({ data: h.idea, error: null }) }) }),
+        update: (payload: Record<string, unknown>) => {
+          h.updates.push(payload)
+          return { eq: async () => ({ error: null }) }
+        },
+      }
+    },
   }),
 }))
 
@@ -55,6 +69,16 @@ import { generateIdeaCaption, saveIdeaCaption } from './idea-captions'
 
 beforeEach(() => {
   h.updates.length = 0
+  h.videos = [{ id: 'v1', status: 'uploaded' }]
+})
+
+describe('generateIdeaCaption — sin video no hay caption', () => {
+  it('se niega si la idea no tiene video', async () => {
+    h.videos = []
+    const res = await generateIdeaCaption('i1')
+    expect(res.error).toMatch(/video/i)
+    expect(h.updates).toHaveLength(0)
+  })
 })
 
 describe('generateIdeaCaption — genera un BORRADOR, no publica', () => {

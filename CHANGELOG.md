@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.21 — 2026-08-13
+
+**Sin video, no hay caption.**
+
+Antes se podía generar copy para una idea que todavía no tenía grabación. Eso producía textos huérfanos.
+
+Ahora:
+
+- Hay que subir el video primero. El caption se escribe sobre lo que ya se grabó.
+- Generar o guardar sin footage se niega en el servidor, no solo en la pantalla.
+- En el lote, las ideas sin archivo no entran al botón de “Generar borradores”.
+
 ## v3.20 — 2026-08-13
 
 **El caption automático ya tiene receta: una red a la vez, y solo si el video aún no tiene texto.**

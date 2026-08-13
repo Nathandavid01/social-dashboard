@@ -24,6 +24,8 @@ interface Props {
   visualBrief?: string | null
   captionAngle?: string | null
   hashtags?: string | null
+  /** Caption is locked until there is footage. */
+  hasVideo?: boolean
   onSaved?: (caption: string) => void
 }
 
@@ -45,6 +47,7 @@ export function IdeaCaptionEditor({
   visualBrief,
   captionAngle,
   hashtags,
+  hasVideo = false,
   onSaved,
 }: Props) {
   const canUse = useHasPermission('captions.use')
@@ -56,8 +59,8 @@ export function IdeaCaptionEditor({
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
 
-  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief })
-  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle })
+  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief, hasVideo })
+  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle, hasVideo })
   const dirty = caption !== (initialCaption ?? '')
   // Hay texto en pantalla que todavía no es el caption del video. Se avisa
   // fuerte: mientras esto se vea, el video NO se ha movido de Copy.
@@ -138,7 +141,9 @@ export function IdeaCaptionEditor({
         </div>
       ) : (
         <p className="rounded-md border border-dashed border-amber-500/30 bg-amber-500/5 px-2.5 py-2 text-xs text-amber-600 dark:text-amber-400">
-          Di de qué es el video (arriba) y la AI escribe el caption — igual que en el generador de ideas.
+          {missing.includes('el video')
+            ? 'Sube un video primero. El caption se escribe sobre la grabación, no sobre la idea vacía.'
+            : 'Di de qué es el video (arriba) y la AI escribe el caption.'}
         </p>
       )}
 
@@ -179,7 +184,9 @@ export function IdeaCaptionEditor({
         placeholder={
           ideaReady
             ? 'Genera el caption desde la idea o escríbelo aquí…'
-            : 'Primero di de qué es el video…'
+            : missing.includes('el video')
+              ? 'Primero sube el video…'
+              : 'Primero di de qué es el video…'
         }
         className="resize-none text-sm leading-relaxed"
         disabled={!ideaReady}

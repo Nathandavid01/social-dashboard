@@ -1,34 +1,40 @@
 const filled = (s?: string | null) => !!s && s.trim().length > 0
 
-/**
- * Minimum before the AI can write the caption: just say WHAT the video is
- * about (the hook/topic) — same bar as the idea generator's quick captions.
- * Visual brief, angle, etc. are optional detail that enriches the prompt but
- * never blocks the team.
- */
-export function isIdeaReadyForCaption(idea: {
-  hook?: string | null
-  visual_brief?: string | null
-}): boolean {
-  return filled(idea.hook)
+/** True when the idea already has footage (any non-archived upload). */
+export function hasCaptionableVideo(
+  videos?: Array<{ status?: string | null } | null> | null,
+): boolean {
+  return (videos ?? []).some((v) => !!v && v.status !== 'archived')
 }
 
-/** Spanish labels for idea fields still missing before caption. */
-export function ideaReadyMissingLabels(idea: {
+export type CaptionReadyIdea = {
   hook?: string | null
   visual_brief?: string | null
   caption_angle?: string | null
-}): string[] {
-  return filled(idea.hook) ? [] : ['de qué es el video']
+  hasVideo?: boolean
+}
+
+/**
+ * Caption only after there is a topic AND a video. Writing copy for an idea
+ * with no footage produced captions that never shipped.
+ */
+export function isIdeaReadyForCaption(idea: CaptionReadyIdea): boolean {
+  return filled(idea.hook) && idea.hasVideo === true
+}
+
+/** Spanish labels for what is still missing before caption. */
+export function ideaReadyMissingLabels(idea: CaptionReadyIdea): string[] {
+  const missing: string[] = []
+  if (!filled(idea.hook)) missing.push('de qué es el video')
+  if (idea.hasVideo !== true) missing.push('el video')
+  return missing
 }
 
 /**
  * Day-2 will call generateIdeaCaption when this is true.
  * Never overwrite a draft the team already has, nor an approved caption.
  */
-export function shouldAutoDraftCaption(idea: {
-  hook?: string | null
-  visual_brief?: string | null
+export function shouldAutoDraftCaption(idea: CaptionReadyIdea & {
   caption_draft?: string | null
   generated_caption?: string | null
 }): boolean {

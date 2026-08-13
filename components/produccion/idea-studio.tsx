@@ -9,8 +9,7 @@ import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import type { ContentIdea, ContentIdeaVideo } from '@/lib/supabase/types'
 
 /**
- * Client-side idea → caption → recording flow. Caption must be saved from the
- * idea brief before uploads unlock, so recording follows a clear script.
+ * Client-side idea → video → caption flow. Caption only after there is footage.
  */
 export function IdeaStudio({
   ideaId,
@@ -57,7 +56,18 @@ export function IdeaStudio({
         }}
       />
 
-      <Card id="stage-caption" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
+      <Card id="stage-material" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Scissors className="h-4 w-4 text-cyan-500" /> Material de video
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos} publicEnabled={publicEnabled} />
+        </CardContent>
+      </Card>
+
+      <Card id="stage-caption" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" /> Caption
@@ -72,25 +82,9 @@ export function IdeaStudio({
             visualBrief={visualBrief}
             captionAngle={captionAngle}
             hashtags={hashtags}
+            hasVideo={videos.some((v) => v.status !== 'archived')}
             onSaved={setSavedCaption}
           />
-        </CardContent>
-      </Card>
-
-      <Card id="stage-material" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Scissors className="h-4 w-4 text-cyan-500" /> Material de video
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {savedCaption.trim() ? (
-            <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos} publicEnabled={publicEnabled} />
-          ) : (
-            <p className="rounded-lg border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-sm text-muted-foreground">
-              Guarda el caption basado en la idea antes de subir la grabación.
-            </p>
-          )}
         </CardContent>
       </Card>
     </>
@@ -137,6 +131,7 @@ export function IdeaStudioCompact({
           if ('hashtags_suggestion' in fields) setHashtags(fields.hashtags_suggestion ?? '')
         }}
       />
+      <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos} />
       <IdeaCaptionEditor
         ideaId={ideaId}
         initialCaption={savedCaption}
@@ -144,15 +139,9 @@ export function IdeaStudioCompact({
         visualBrief={visualBrief}
         captionAngle={captionAngle}
         hashtags={hashtags}
+        hasVideo={videos.some((v) => v.status !== 'archived')}
         onSaved={setSavedCaption}
       />
-      {savedCaption.trim() ? (
-        <IdeaVideoPanel ideaId={ideaId} ideaTitle={idea.title} videos={videos} />
-      ) : (
-        <p className="rounded-lg border border-dashed border-border bg-muted/30 px-3 py-3 text-center text-xs text-muted-foreground">
-          Guarda el caption antes de grabar.
-        </p>
-      )}
     </>
   )
 }

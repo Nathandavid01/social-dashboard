@@ -4,6 +4,7 @@ Cada hora toma **el primer ítem `[ ]`**. Al cerrar el commit, márcalo `[x]` y 
 
 **Reglas**
 - Un solo cambio observable. TDD. Changelog en español (captura si hay UI).
+- **Caption solo si hay video** (no generar/guardar copy de una idea sin footage).
 - Verificar: `npx vitest run` de los tests tocados + `npm run test:staging` si el cambio toca sesión/auth; si no, al menos merge-gate.
 - No push a `main`. PR → CI verde.
 - Tema: **flujo más lógico** o **captions automáticos**. Nada de rediseños laterales.

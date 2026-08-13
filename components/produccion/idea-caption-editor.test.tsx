@@ -54,6 +54,7 @@ describe('IdeaCaptionEditor — caption único', () => {
         initialCaption={null}
         hook="Gancho"
         visualBrief="Brief visual"
+        hasVideo
       />,
     )
     expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeInTheDocument()
@@ -61,15 +62,22 @@ describe('IdeaCaptionEditor — caption único', () => {
 
   it('enables AI generation with just the topic (hook) — like the idea generator', () => {
     mockRole = 'editor'
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" hasVideo />)
     expect(screen.getByRole('button', { name: /generar desde la idea/i })).not.toBeDisabled()
   })
 
   it('disables AI generation until the topic exists, asking for it in plain Spanish', () => {
     mockRole = 'editor'
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hasVideo />)
     expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
     expect(screen.getByText(/di de qué es el video/i)).toBeInTheDocument()
+  })
+
+  it('disables AI generation until there is a video', () => {
+    mockRole = 'editor'
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="solo el tema" hasVideo={false} />)
+    expect(screen.getByRole('button', { name: /generar desde la idea/i })).toBeDisabled()
+    expect(screen.getByText(/sube un video primero/i)).toBeInTheDocument()
   })
 
   it('shows the client platform badges when provided', () => {
@@ -82,7 +90,7 @@ describe('IdeaCaptionEditor — caption único', () => {
   it('regenerates with the user feedback + the previous caption', async () => {
     mockRole = 'editor'
     generateIdeaCaption.mockClear()
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption viejo" hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption viejo" hook="Gancho" visualBrief="Brief" hasVideo />)
     // The feedback control only appears once a caption exists.
     const fb = screen.getByPlaceholderText(/qué cambiar/i)
     fireEvent.change(fb, { target: { value: 'más corto, sin emojis' } })
@@ -97,14 +105,14 @@ describe('IdeaCaptionEditor — caption único', () => {
 
   it('hides the feedback control until there is a caption to revise', () => {
     mockRole = 'editor'
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" hasVideo />)
     expect(screen.queryByRole('button', { name: /regenerar con feedback/i })).not.toBeInTheDocument()
   })
 
   it('rates a caption 👍 with one click (rating=1)', async () => {
     mockRole = 'editor'
     rateCaption.mockClear()
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" hasVideo />)
     fireEvent.click(screen.getByRole('button', { name: /me gusta/i }))
     await waitFor(() =>
       expect(rateCaption).toHaveBeenCalledWith({ ideaId: 'i1', rating: 1, captionText: 'Caption a calificar', note: undefined }),
@@ -114,7 +122,7 @@ describe('IdeaCaptionEditor — caption único', () => {
   it('rates 👎 with a note after revealing the note box', async () => {
     mockRole = 'editor'
     rateCaption.mockClear()
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption a calificar" hook="Gancho" visualBrief="Brief" hasVideo />)
     fireEvent.click(screen.getByRole('button', { name: /no es/i }))
     fireEvent.change(screen.getByPlaceholderText(/qué estuvo mal/i), { target: { value: 'demasiados emojis' } })
     fireEvent.click(screen.getByRole('button', { name: /enviar voto/i }))
@@ -126,7 +134,7 @@ describe('IdeaCaptionEditor — caption único', () => {
   it('shows the transparency chip from learning stats', async () => {
     mockRole = 'editor'
     getCaptionLearningStats.mockResolvedValueOnce({ approved: 4, loved: 2, rejected: 1, suggestions: [] })
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" hasVideo />)
     expect(await screen.findByText(/aprendiendo de/i)).toBeInTheDocument()
     expect(screen.getByText('6')).toBeInTheDocument() // approved 4 + loved 2
   })
@@ -137,7 +145,7 @@ describe('IdeaCaptionEditor — caption único', () => {
     mockRole = 'supervisor'
     getCaptionLearningStats.mockResolvedValueOnce({ approved: 0, loved: 0, rejected: 3, suggestions: [{ phrase: 'menos emojis', count: 3 }] })
     appendClientCaptionRule.mockClear()
-    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" />)
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption="Caption existente" hook="Gancho" visualBrief="Brief" hasVideo />)
     const btn = await screen.findByRole('button', { name: /agregar a reglas/i })
     fireEvent.click(btn)
     await waitFor(() => expect(appendClientCaptionRule).toHaveBeenCalledWith({ ideaId: 'i1' }, 'menos emojis'))
@@ -154,7 +162,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
     mockRole = 'editor'
     const onSaved = vi.fn()
     render(
-      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" hasVideo onSaved={onSaved} />,
     )
     fireEvent.click(screen.getByRole('button', { name: /generar desde la idea/i }))
     await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
@@ -165,7 +173,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
     mockRole = 'editor'
     const onSaved = vi.fn()
     render(
-      <IdeaCaptionEditor ideaId="i1" initialCaption="Caption viejo" hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+      <IdeaCaptionEditor ideaId="i1" initialCaption="Caption viejo" hook="Gancho" visualBrief="Brief" hasVideo onSaved={onSaved} />,
     )
     fireEvent.change(screen.getByPlaceholderText(/qué cambiar/i), { target: { value: 'más corto' } })
     fireEvent.click(screen.getByRole('button', { name: /regenerar con feedback/i }))
@@ -178,7 +186,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
     const onSaved = vi.fn()
     saveIdeaCaption.mockClear()
     render(
-      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" onSaved={onSaved} />,
+      <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief" hasVideo onSaved={onSaved} />,
     )
     fireEvent.change(screen.getByPlaceholderText(/genera el caption/i), { target: { value: 'lo edité a mano' } })
     fireEvent.click(screen.getByRole('button', { name: /guardar caption/i }))
@@ -195,6 +203,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
         initialDraft="borrador de ayer"
         hook="Gancho"
         visualBrief="Brief"
+        hasVideo
       />,
     )
     expect(screen.getByDisplayValue('borrador de ayer')).toBeInTheDocument()
@@ -204,7 +213,7 @@ describe('IdeaCaptionEditor — generar no equivale a guardar', () => {
   it('un caption ya guardado no se anuncia como borrador', () => {
     mockRole = 'editor'
     render(
-      <IdeaCaptionEditor ideaId="i1" initialCaption="caption definitivo" hook="Gancho" visualBrief="Brief" />,
+      <IdeaCaptionEditor ideaId="i1" initialCaption="caption definitivo" hook="Gancho" visualBrief="Brief" hasVideo />,
     )
     expect(screen.queryByText(/sin guardar/i)).not.toBeInTheDocument()
   })

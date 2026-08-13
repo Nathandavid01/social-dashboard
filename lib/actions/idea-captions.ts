@@ -8,7 +8,7 @@ import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
 import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
-import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
+import { hasCaptionableVideo, isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 
@@ -46,7 +46,16 @@ export async function generateIdeaCaption(
 
   if (!idea) return { error: 'Idea no encontrada' }
 
-  if (!isIdeaReadyForCaption(idea)) {
+  const { data: vids } = await supabase
+    .from('content_idea_videos')
+    .select('id, status')
+    .eq('content_idea_id', ideaId)
+    .neq('status', 'archived')
+    .limit(1)
+  const hasVideo = hasCaptionableVideo(vids)
+  if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
+
+  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
 
@@ -146,6 +155,16 @@ export async function saveIdeaCaption(
   if (!clean) return { error: 'El caption no puede ir vacío' }
 
   const supabase = await createClient()
+  const { data: vids } = await supabase
+    .from('content_idea_videos')
+    .select('id, status')
+    .eq('content_idea_id', ideaId)
+    .neq('status', 'archived')
+    .limit(1)
+  if (!hasCaptionableVideo(vids)) {
+    return { error: 'Sube un video antes de guardar el caption.' }
+  }
+
   const { error } = await supabase
     .from('content_ideas')
     .update({

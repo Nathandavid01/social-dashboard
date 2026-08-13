@@ -38,7 +38,7 @@ function vid(id: string, caption: string | null, draft: string | null = null): B
     published_at: null,
     hook: 'h',
     visual_brief: 'v',
-    videos: { raw: [], broll: [], edited: [] },
+    videos: { raw: [{ id: `raw-${id}`, status: 'uploaded' }], broll: [], edited: [] },
   } as unknown as BatchVideo
 }
 
@@ -85,6 +85,13 @@ describe('BatchCaptionsButton', () => {
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({ description: expect.stringMatching(/1 fall(ó|aron)/i) }),
     )
+  })
+
+  it('skips ideas that have no uploaded video', () => {
+    const noFile = vid('empty', null)
+    noFile.videos = { raw: [], broll: [], edited: [] }
+    render(<BatchCaptionsButton videos={[noFile, vid('a', null)]} onDone={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /generar 1 borrador/i })).toBeInTheDocument()
   })
 
   it('renders nothing when every video already has a caption', () => {
