@@ -1,22 +1,21 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Search, Loader2, Check, AlertCircle } from 'lucide-react'
+import { Search, Loader2, Check, AlertCircle, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { setClientAssignment } from '@/lib/actions/client-assignments'
+import {
+  assignedMembers,
+  assignmentCount,
+  filterAssignmentRows,
+  groupAssignmentRows,
+  isIncomplete,
+  type AssignMember,
+  type AssignmentPersonFilter,
+  type AssignRow,
+} from '@/lib/utils/assignments-group'
 
-export interface AssignRow {
-  id: string
-  name: string
-  assigned_to: string | null
-  assigned_designer: string | null
-}
-
-export interface Member {
-  id: string
-  name: string
-  role: string
-}
+export type { AssignRow, AssignMember as Member }
 
 type Estado = 'guardando' | 'ok' | 'error'
 
@@ -30,12 +29,13 @@ export function AssignmentsTable({
   members,
 }: {
   clients: AssignRow[]
-  members: Member[]
+  members: AssignMember[]
 }) {
   const [rows, setRows] = useState(clients)
   const [estado, setEstado] = useState<Record<string, Estado>>({})
   const [q, setQ] = useState('')
   const [soloSinAsignar, setSoloSinAsignar] = useState(false)
+  const [person, setPerson] = useState<AssignmentPersonFilter>('todos')
 
   const editores = useMemo(
     () => members.filter((m) => ['editor', 'supervisor', 'owner'].includes(m.role)),
@@ -46,14 +46,14 @@ export function AssignmentsTable({
     [members],
   )
 
-  const visibles = useMemo(() => {
-    const t = q.trim().toLowerCase()
-    return rows.filter((c) => {
-      if (t && !c.name.toLowerCase().includes(t)) return false
-      if (soloSinAsignar && c.assigned_to && c.assigned_designer) return false
-      return true
-    })
-  }, [rows, q, soloSinAsignar])
+  const yaAsignados = useMemo(() => assignedMembers(rows, members), [rows, members])
+  const incompletos = useMemo(() => rows.filter(isIncomplete).length, [rows])
+
+  const visibles = useMemo(
+    () => filterAssignmentRows(rows, { query: q, soloIncompletos: soloSinAsignar, person }),
+    [rows, q, soloSinAsignar, person],
+  )
+  const grupos = useMemo(() => groupAssignmentRows(visibles, members), [visibles, members])
 
   const sinEditor = rows.filter((c) => !c.assigned_to).length
   const sinDisenador = rows.filter((c) => !c.assigned_designer).length
@@ -74,7 +74,11 @@ export function AssignmentsTable({
       return
     }
     setEstado((e) => ({ ...e, [key]: 'ok' }))
-    setTimeout(() => setEstado((e) => ({ ...e, [key]: undefined as unknown as Estado })), 1500)
+    setTimeout(() => setEstado((e) => {
+      const next = { ...e }
+      delete next[key]
+      return next
+    }), 1500)
   }
 
   return (
@@ -109,6 +113,55 @@ export function AssignmentsTable({
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => setPerson('todos')}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium transition',
+            person === 'todos'
+              ? 'border-border bg-muted text-foreground'
+              : 'border-transparent text-muted-foreground hover:bg-muted/60',
+          )}
+        >
+          <Users className="h-3.5 w-3.5" aria-hidden />
+          Todos
+          <span className="tabular-nums text-muted-foreground/70">{rows.length}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPerson('sin-asignar')}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium transition',
+            person === 'sin-asignar'
+              ? 'border-border bg-muted text-foreground'
+              : 'border-transparent text-muted-foreground hover:bg-muted/60',
+          )}
+        >
+          Sin asignar
+          <span className="tabular-nums text-muted-foreground/70">{incompletos}</span>
+        </button>
+        {yaAsignados.map((m) => (
+          <button
+            type="button"
+            key={m.id}
+            onClick={() => setPerson(m.id)}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium transition',
+              person === m.id
+                ? 'border-border bg-muted text-foreground'
+                : 'border-transparent text-muted-foreground hover:bg-muted/60',
+            )}
+          >
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+              {m.name.slice(0, 1).toUpperCase()}
+            </span>
+            {m.name}
+            <span className="tabular-nums text-muted-foreground/70">{assignmentCount(rows, m.id)}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
@@ -118,43 +171,53 @@ export function AssignmentsTable({
               <th className="pb-2 font-medium">Diseñador</th>
             </tr>
           </thead>
-          <tbody>
-            {visibles.map((c) => (
-              <tr key={c.id} className="border-b border-border/50 last:border-0">
-                <td className="py-2 pr-3">
-                  <span className="block max-w-[220px] truncate">{c.name}</span>
+          {grupos.map((g) => (
+            <tbody key={g.key} aria-label={g.label}>
+              <tr className="border-b border-border/60 bg-muted/40">
+                <td colSpan={3} className="py-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {g.label}
+                  <span className="ml-1.5 font-medium normal-case tabular-nums text-muted-foreground/70">
+                    {g.rows.length}
+                  </span>
                 </td>
-                {(['editor', 'disenador'] as const).map((campo) => {
-                  const valor = campo === 'editor' ? c.assigned_to : c.assigned_designer
-                  const opciones = campo === 'editor' ? editores : disenadores
-                  const st = estado[`${c.id}:${campo}`]
-                  return (
-                    <td key={campo} className="py-2 pr-3">
-                      <div className="flex items-center gap-1.5">
-                        <select
-                          aria-label={`${campo === 'editor' ? 'Editor' : 'Diseñador'} de ${c.name}`}
-                          value={valor ?? ''}
-                          onChange={(e) => cambiar(c.id, campo, e.target.value || null)}
-                          className={cn(
-                            'h-8 w-full max-w-[200px] rounded-md border bg-background px-2 text-xs outline-none focus:border-primary/50',
-                            !valor && 'text-muted-foreground',
-                          )}
-                        >
-                          <option value="">Sin asignar</option>
-                          {opciones.map((m) => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                          ))}
-                        </select>
-                        {st === 'guardando' && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />}
-                        {st === 'ok' && <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />}
-                        {st === 'error' && <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" aria-label="No se pudo guardar" />}
-                      </div>
-                    </td>
-                  )
-                })}
               </tr>
-            ))}
-          </tbody>
+              {g.rows.map((c) => (
+                <tr key={c.id} className="border-b border-border/50 last:border-0">
+                  <td className="py-2 pr-3">
+                    <span className="block max-w-[220px] truncate">{c.name}</span>
+                  </td>
+                  {(['editor', 'disenador'] as const).map((campo) => {
+                    const valor = campo === 'editor' ? c.assigned_to : c.assigned_designer
+                    const opciones = campo === 'editor' ? editores : disenadores
+                    const st = estado[`${c.id}:${campo}`]
+                    return (
+                      <td key={campo} className="py-2 pr-3">
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            aria-label={`${campo === 'editor' ? 'Editor' : 'Diseñador'} de ${c.name}`}
+                            value={valor ?? ''}
+                            onChange={(e) => cambiar(c.id, campo, e.target.value || null)}
+                            className={cn(
+                              'h-8 w-full max-w-[200px] rounded-md border bg-background px-2 text-xs outline-none focus:border-primary/50',
+                              !valor && 'text-muted-foreground',
+                            )}
+                          >
+                            <option value="">Sin asignar</option>
+                            {opciones.map((m) => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                          </select>
+                          {st === 'guardando' && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />}
+                          {st === 'ok' && <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />}
+                          {st === 'error' && <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" aria-label="No se pudo guardar" />}
+                        </div>
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          ))}
         </table>
 
         {visibles.length === 0 && (

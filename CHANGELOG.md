@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.18 — 2026-08-13
+
+**Asignaciones se lee por persona, no como una lista A–Z de 66 clientes.**
+
+- Filtros de la gente que ya tiene cartera: Jeander, Lisneidy, Joxandra… Quien no tiene ningún cliente no aparece.
+- En Todos, los clientes se agrupan por editor. “Sin editor” / “Sin asignar” siguen arriba y no se pierden.
+
 ## v3.17 — 2026-08-13
 
 **Las pruebas de staging del log de sesión corren solas.**
