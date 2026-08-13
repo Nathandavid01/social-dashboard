@@ -7,9 +7,11 @@ import { setClientAssignment } from '@/lib/actions/client-assignments'
 import {
   assignedMembers,
   assignmentCount,
+  editorTint,
   filterAssignmentRows,
   groupAssignmentRows,
   isIncomplete,
+  lastChangeLabel,
   type AssignMember,
   type AssignmentPersonFilter,
   type AssignRow,
@@ -27,9 +29,11 @@ type Estado = 'guardando' | 'ok' | 'error'
 export function AssignmentsTable({
   clients,
   members,
+  currentUserId = null,
 }: {
   clients: AssignRow[]
   members: AssignMember[]
+  currentUserId?: string | null
 }) {
   const [rows, setRows] = useState(clients)
   const [estado, setEstado] = useState<Record<string, Estado>>({})
@@ -47,6 +51,7 @@ export function AssignmentsTable({
   )
 
   const yaAsignados = useMemo(() => assignedMembers(rows, members), [rows, members])
+  const tintIds = useMemo(() => yaAsignados.map((m) => m.id), [yaAsignados])
   const incompletos = useMemo(() => rows.filter(isIncomplete).length, [rows])
 
   const visibles = useMemo(
@@ -63,7 +68,12 @@ export function AssignmentsTable({
     // Optimista: la fila se actualiza al momento y solo vuelve atrás si falla.
     const antes = rows.find((r) => r.id === clientId)
     setRows((rs) => rs.map((r) => (r.id === clientId
-      ? { ...r, [campo === 'editor' ? 'assigned_to' : 'assigned_designer']: userId }
+      ? {
+          ...r,
+          [campo === 'editor' ? 'assigned_to' : 'assigned_designer']: userId,
+          assignment_changed_by: currentUserId,
+          assignment_changed_at: new Date().toISOString(),
+        }
       : r)))
     setEstado((e) => ({ ...e, [key]: 'guardando' }))
 
@@ -153,7 +163,7 @@ export function AssignmentsTable({
                 : 'border-transparent text-muted-foreground hover:bg-muted/60',
             )}
           >
-            <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+            <span className={cn('grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold text-white', editorTint(m.id, tintIds).chip)}>
               {m.name.slice(0, 1).toUpperCase()}
             </span>
             {m.name}
@@ -168,23 +178,32 @@ export function AssignmentsTable({
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="pb-2 pr-3 font-medium">Cliente</th>
               <th className="pb-2 pr-3 font-medium">Editor</th>
-              <th className="pb-2 font-medium">Diseñador</th>
+              <th className="pb-2 pr-3 font-medium">Diseñador</th>
+              <th className="pb-2 font-medium">Último cambio</th>
             </tr>
           </thead>
-          {grupos.map((g) => (
+          {grupos.map((g) => {
+            const tint = editorTint(g.key === 'sin-editor' ? null : g.key, tintIds)
+            return (
             <tbody key={g.key} aria-label={g.label}>
-              <tr className="border-b border-border/60 bg-muted/40">
-                <td colSpan={3} className="py-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {g.label}
-                  <span className="ml-1.5 font-medium normal-case tabular-nums text-muted-foreground/70">
-                    {g.rows.length}
+              <tr data-editor-tint={tint.key} className={cn('border-b border-border/60', tint.bg)}>
+                <td colSpan={4} className="py-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span className="inline-flex items-center gap-2">
+                    <span className={cn('h-2 w-2 shrink-0 rounded-full', tint.bar)} aria-hidden />
+                    {g.label}
+                    <span className="font-medium normal-case tabular-nums text-muted-foreground/70">
+                      {g.rows.length}
+                    </span>
                   </span>
                 </td>
               </tr>
               {g.rows.map((c) => (
-                <tr key={c.id} className="border-b border-border/50 last:border-0">
+                <tr key={c.id} className={cn('border-b border-border/50 last:border-0', tint.bg)}>
                   <td className="py-2 pr-3">
-                    <span className="block max-w-[220px] truncate">{c.name}</span>
+                    <span className="flex items-center gap-2">
+                      <span className={cn('h-6 w-0.5 shrink-0 rounded-full', tint.bar)} aria-hidden />
+                      <span className="block max-w-[220px] truncate">{c.name}</span>
+                    </span>
                   </td>
                   {(['editor', 'disenador'] as const).map((campo) => {
                     const valor = campo === 'editor' ? c.assigned_to : c.assigned_designer
@@ -214,10 +233,14 @@ export function AssignmentsTable({
                       </td>
                     )
                   })}
+                  <td className="py-2 text-[11px] text-muted-foreground">
+                    {lastChangeLabel(c.assignment_changed_by, c.assignment_changed_at, members) ?? '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>
-          ))}
+            )
+          })}
         </table>
 
         {visibles.length === 0 && (

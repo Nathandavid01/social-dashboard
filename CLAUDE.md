@@ -70,6 +70,7 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 - **Card headers** that have title + badges/actions must use `flex-wrap items-center justify-between gap-x-3 gap-y-2` on the container, `min-w-0` + `truncate` on the title, `shrink-0` + `whitespace-nowrap` on the right-side children. Narrow grid columns are the rule, not the exception.
 - **Animations** use `tailwindcss-animate` utilities (`animate-in fade-in slide-in-from-bottom-1 duration-300`) with `animationDelay` for stagger. No framer-motion in this project.
 - **Spanish UI**, technical identifiers stay English.
+- **Changelog on every user-visible change.** Bump `lib/version.ts`, add a `## vX.Y` block to `CHANGELOG.md` in Spanish: one bold headline a non-technical person can forward, 2–5 bullets of what they will *see*, and a screenshot in `public/changelog/` when the change is visual (`![...](/changelog/vX.Y-….png)`). The `/changelog` page renders that file.
 - **Optimistic updates** in mutations: use `useTransition` + immediate state update + toast on error rollback.
 
 ## Project shape (high level)

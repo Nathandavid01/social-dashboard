@@ -62,6 +62,31 @@ describe('AssignmentsTable', () => {
     expect(screen.queryByText('Café El Bosque')).not.toBeInTheDocument()
   })
 
+  it('shows who last changed the row', () => {
+    render(
+      <AssignmentsTable
+        clients={[
+          {
+            ...clients[4],
+            assignment_changed_by: 'jeander',
+            assignment_changed_at: '2026-08-13T14:00:00.000Z',
+          },
+        ]}
+        members={members}
+      />,
+    )
+    expect(screen.getByText(/Lo cambió Jeander Loop/)).toBeInTheDocument()
+  })
+
+  it('tints each editor group so they are visually distinct', () => {
+    render(<AssignmentsTable clients={clients} members={members} />)
+    const jeander = screen.getByRole('rowgroup', { name: 'Jeander Loop' })
+    const lisneidy = screen.getByRole('rowgroup', { name: 'Lisneidy Lopez' })
+    expect(jeander.querySelector('[data-editor-tint]')?.getAttribute('data-editor-tint')).not.toBe(
+      lisneidy.querySelector('[data-editor-tint]')?.getAttribute('data-editor-tint'),
+    )
+  })
+
   it('changing an editor still saves through setClientAssignment', async () => {
     render(<AssignmentsTable clients={clients} members={members} />)
     fireEvent.change(screen.getByLabelText('Editor de Anibal Fuentes PNP'), {

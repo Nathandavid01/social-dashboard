@@ -15,11 +15,12 @@ export const revalidate = 0
 export default async function AsignacionesPage() {
   await requirePermission('clients.edit')
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const [{ data: clients }, { data: profiles }] = await Promise.all([
     supabase
       .from('clients')
-      .select('id, name, assigned_to, assigned_designer')
+      .select('id, name, assigned_to, assigned_designer, assignment_changed_by, assignment_changed_at')
       .eq('status', 'active')
       .order('name'),
     supabase
@@ -36,12 +37,15 @@ export default async function AsignacionesPage() {
         name: c.name,
         assigned_to: c.assigned_to ?? null,
         assigned_designer: c.assigned_designer ?? null,
+        assignment_changed_by: (c as { assignment_changed_by?: string | null }).assignment_changed_by ?? null,
+        assignment_changed_at: (c as { assignment_changed_at?: string | null }).assignment_changed_at ?? null,
       }))}
       members={(profiles ?? []).map((p) => ({
         id: p.id,
         name: p.full_name || p.email,
         role: p.role,
       }))}
+      currentUserId={user?.id ?? null}
     />
   )
 }

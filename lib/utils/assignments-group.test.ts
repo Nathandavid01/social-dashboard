@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   assignedMembers,
+  editorTint,
   filterAssignmentRows,
   groupAssignmentRows,
+  lastChangeLabel,
   type AssignRow,
   type AssignMember,
 } from './assignments-group'
@@ -81,5 +83,37 @@ describe('groupAssignmentRows', () => {
 
   it('returns no groups when the list is empty', () => {
     expect(groupAssignmentRows([], members)).toEqual([])
+  })
+})
+
+describe('editorTint', () => {
+  it('is stable for the same editor and muted when there is no editor', () => {
+    expect(editorTint('jeander')).toEqual(editorTint('jeander'))
+    expect(editorTint(null).key).toBe('muted')
+    expect(editorTint('sin-editor').key).toBe('muted')
+  })
+
+  it('gives two known editors different tints so groups are visually distinct', () => {
+    const order = ['jeander', 'lisneidy']
+    expect(editorTint('jeander', order).bg).not.toBe(editorTint('lisneidy', order).bg)
+  })
+})
+
+describe('lastChangeLabel', () => {
+  const people: AssignMember[] = [{ id: 'eric', name: 'Eric Pérez', role: 'owner' }]
+  const now = new Date('2026-08-13T15:00:00.000Z')
+
+  it('returns null when nobody has changed the row', () => {
+    expect(lastChangeLabel(null, null, people, now)).toBeNull()
+  })
+
+  it('names the person who made the change and how long ago', () => {
+    const label = lastChangeLabel('eric', '2026-08-13T14:00:00.000Z', people, now)
+    expect(label).toContain('Eric Pérez')
+    expect(label).toMatch(/hace/)
+  })
+
+  it('falls back to Alguien if the actor left the team', () => {
+    expect(lastChangeLabel('gone', '2026-08-13T14:00:00.000Z', people, now)).toContain('Alguien')
   })
 })

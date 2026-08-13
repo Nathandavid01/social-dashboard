@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.19 — 2026-08-13
+
+**Cada editor tiene su color, y ahora se ve quién hizo el último cambio.**
+
+Antes Asignaciones era una pared gris: 66 clientes, mismos dropdowns, imposible saber de un vistazo “estos son de Jeander” o “¿quién movió a Café El Bosque?”.
+
+Hoy:
+
+- Cada editor (y su grupo) lleva un color suave distinto. El chip de arriba y la franja de la tabla coinciden.
+- Una columna **Último cambio** dice *quién* tocó la asignación y *hace cuánto* — no solo a quién quedó asignado.
+- Si nadie ha tocado esa fila, se ve un guion. Si la persona ya no está en el equipo, dice “Alguien”.
+
+![Asignaciones agrupadas por color de editor, con columna de último cambio](/changelog/v3.19-asignaciones.jpg)
+
+Para que esto funcione en producción hay que aplicar la migración `0060_assignment_changed_by.sql` (dos columnas nuevas en `clients`).
+
 ## v3.18 — 2026-08-13
 
 **Asignaciones se lee por persona, no como una lista A–Z de 66 clientes.**

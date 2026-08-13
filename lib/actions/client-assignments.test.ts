@@ -7,10 +7,14 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 let filasDevueltas: { id: string }[] = [{ id: 'c1' }]
 let errorDeBase: { message: string } | null = null
 let columnaEscrita: string | null = null
+let payload: Record<string, unknown> | null = null
+const AUTH_ID = 'actor-1'
 
 const supa = {
+  auth: { getUser: vi.fn(async () => ({ data: { user: { id: AUTH_ID } } })) },
   from: vi.fn(() => ({
     update: (p: Record<string, unknown>) => {
+      payload = p
       columnaEscrita = Object.keys(p)[0]
       return {
         eq: () => ({
@@ -28,6 +32,7 @@ beforeEach(() => {
   filasDevueltas = [{ id: 'c1' }]
   errorDeBase = null
   columnaEscrita = null
+  payload = null
   requirePermission.mockReset().mockResolvedValue(undefined)
 })
 
@@ -76,5 +81,14 @@ describe('setClientAssignment', () => {
   it('desasignar (null) también cuenta como guardado', async () => {
     const res = await setClientAssignment({ clientId: 'c1', campo: 'editor', userId: null })
     expect(res.ok).toBe(true)
+  })
+
+  it('records who made the change and when', async () => {
+    await setClientAssignment({ clientId: 'c1', campo: 'editor', userId: 'u1' })
+    expect(payload).toMatchObject({
+      assigned_to: 'u1',
+      assignment_changed_by: AUTH_ID,
+    })
+    expect(typeof payload?.assignment_changed_at).toBe('string')
   })
 })
