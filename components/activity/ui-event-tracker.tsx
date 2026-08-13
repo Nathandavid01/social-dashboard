@@ -50,13 +50,16 @@ export function UiEventTracker() {
   useEffect(() => {
     pathRef.current = pathname
     const path = sanitizePath(pathname)
-    if (!path || isIgnoredPath(path)) return
-    queueRef.current?.enqueue({
-      kind: 'navigate',
-      path,
-      label: path,
-      target: null,
-    })
+    if (path && !isIgnoredPath(path)) {
+      queueRef.current?.enqueue({
+        kind: 'navigate',
+        path,
+        label: path,
+        target: null,
+      })
+    }
+    // Flush on every route change so a later visit to /actividad sees prior clicks.
+    void queueRef.current?.flush()
   }, [pathname])
 
   return null

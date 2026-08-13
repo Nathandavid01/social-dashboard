@@ -27,6 +27,12 @@ function postedEvents() {
 }
 
 describe('UiEventTracker', () => {
+  it('flushes a navigate on mount so a later page can see the trail', async () => {
+    render(<UiEventTracker />)
+    await Promise.resolve()
+    expect(postedEvents().some((e) => e.kind === 'navigate' && e.path === '/home')).toBe(true)
+  })
+
   it('records a button click on a dashboard page', async () => {
     const { container } = render(
       <div>

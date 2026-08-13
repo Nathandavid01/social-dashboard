@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.17 — 2026-08-13
+
+**Las pruebas de staging del log de sesión corren solas.**
+
+- `npm run test:staging` verifica contra natemedia-staging: que tú ves el tab Sesión, que un supervisor no, y que nadie puede leer el rastro de otro.
+- Si el entorno apunta a producción, las pruebas se niegan a correr.
+
 ## v3.16 — 2026-08-13
 
 **Puedes ver qué clickeó cada persona hoy, sin salir del dashboard.**
