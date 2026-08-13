@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.21 — Caption solo si hay video</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1f1f1f;
+      --muted-fg: #a6a6a6;
+      --border: #1f1f1f;
+      --primary: #e8b31a;
+      --amber: #f59e0b;
+      --cyan: #22d3ee;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tabs button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted-fg);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tabs button.on { background: var(--muted); color: var(--fg); border-color: #2a2a2a; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .card h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      margin: 0 0 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .hint { font-size: 10px; color: var(--muted-fg); }
+    .warn {
+      border: 1px dashed rgba(245,158,11,.3);
+      background: rgba(245,158,11,.05);
+      color: #fbbf24;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin: 10px 0;
+    }
+    .idea {
+      border: 1px solid #2a2a2a;
+      background: rgba(255,255,255,.03);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--muted-fg);
+      margin: 10px 0;
+    }
+    .idea strong { color: #d4d4d4; font-weight: 600; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); background: var(--muted);
+      border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--muted-fg);
+    }
+    .btn {
+      border: 1px solid #333; background: #141414; color: var(--fg);
+      border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 500;
+    }
+    .btn[disabled] { opacity: .45; }
+    .btn.gold { background: var(--primary); color: #111; border: 0; font-weight: 600; }
+    textarea, .box {
+      width: 100%; min-height: 140px; resize: none;
+      background: #0c0c0c; border: 1px solid #242424; border-radius: 8px;
+      color: var(--fg); padding: 10px; font-size: 13px; line-height: 1.5;
+    }
+    textarea[disabled] { opacity: .55; }
+    .upload {
+      border: 1px dashed #333; border-radius: 10px; padding: 18px;
+      text-align: center; color: var(--muted-fg); font-size: 13px;
+    }
+    .file {
+      display: flex; align-items: center; gap: 10px;
+      border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 12px;
+      font-size: 13px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 99px; background: #22c55e; }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.21 — Caption solo si hay video</h1>
+    <p class="sub">Así queda en producción. Cambia de estado para ver las dos pantallas reales.</p>
+    <div class="tabs">
+      <button class="on" data-tab="sin" type="button">Sin video</button>
+      <button data-tab="con" type="button">Con video</button>
+    </div>
+
+    <section id="sin" class="screen on">
+      <div class="card">
+        <div class="label">La idea</div>
+        <p style="margin:8px 0 0;font-size:14px">Un socio bajó 15 lb — habla a cámara en el gym</p>
+      </div>
+      <div class="card">
+        <h2><span style="color:var(--cyan)">✂</span> Material de video</h2>
+        <div class="upload">Arrastra el video o pulsa para subir. Todavía no hay footage.</div>
+      </div>
+      <div class="card">
+        <h2><span style="color:var(--primary)">✦</span> Caption</h2>
+        <div class="label" style="margin-bottom:8px">Caption <span class="hint">— basado en la idea de arriba</span></div>
+        <p class="warn">Sube un video primero. El caption se escribe sobre la grabación, no sobre la idea vacía.</p>
+        <div class="row">
+          <span class="pill">Una caption para todas las redes</span>
+          <button class="btn" disabled type="button">✦ Generar desde la idea</button>
+        </div>
+        <textarea disabled placeholder="Primero sube el video…"></textarea>
+      </div>
+    </section>
+
+    <section id="con" class="screen">
+      <div class="card">
+        <div class="label">La idea</div>
+        <p style="margin:8px 0 0;font-size:14px">Un socio bajó 15 lb — habla a cámara en el gym</p>
+      </div>
+      <div class="card">
+        <h2><span style="color:var(--cyan)">✂</span> Material de video</h2>
+        <div class="file"><span class="dot"></span> raw_socio_gym.mp4 <span class="tiny" style="margin:0">subido</span></div>
+      </div>
+      <div class="card">
+        <h2><span style="color:var(--primary)">✦</span> Caption</h2>
+        <div class="label" style="margin-bottom:8px">Caption <span class="hint">— basado en la idea de arriba</span></div>
+        <div class="idea">
+          <strong>Idea para este caption</strong><br />
+          <strong>De qué es:</strong> Un socio bajó 15 lb<br />
+          <strong>Brief visual:</strong> Habla a cámara en el gym
+        </div>
+        <div class="row">
+          <span class="pill">Una caption para todas las redes</span>
+          <button class="btn" type="button">✦ Generar desde la idea</button>
+        </div>
+        <textarea placeholder="Genera el caption desde la idea o escríbelo aquí…"></textarea>
+        <p class="tiny">Guardar es lo que mueve el video a Publicación.</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    const tabs = document.querySelectorAll('.tabs button')
+    tabs.forEach((b) => b.addEventListener('click', () => {
+      tabs.forEach((x) => x.classList.remove('on'))
+      b.classList.add('on')
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'))
+      document.getElementById(b.dataset.tab).classList.add('on')
+    }))
+  </script>
+</body>
+</html>

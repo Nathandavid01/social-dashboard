@@ -71,6 +71,7 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 - **Animations** use `tailwindcss-animate` utilities (`animate-in fade-in slide-in-from-bottom-1 duration-300`) with `animationDelay` for stagger. No framer-motion in this project.
 - **Spanish UI**, technical identifiers stay English.
 - **Changelog on every user-visible change.** Bump `lib/version.ts`, add a `## vX.Y` block to `CHANGELOG.md` in Spanish: one bold headline a non-technical person can forward, 2–5 bullets of what they will *see*, and a screenshot in `public/changelog/` when the change is visual (`![...](/changelog/vX.Y-….png)`). The `/changelog` page renders that file.
+- **HTML preview after every user-visible change.** Write a standalone file `public/previews/vX.Y-<slug>.html` that matches production (dark Nate Media: negro + dorado, same Spanish copy, both states if the change has a before/after). Tell the user the path so they can open it in the browser. Do not skip this.
 - **Optimistic updates** in mutations: use `useTransition` + immediate state update + toast on error rollback.
 
 ## Project shape (high level)

@@ -16,6 +16,8 @@ Ahora:
 - Generar o guardar sin footage se niega en el servidor, no solo en la pantalla.
 - En el lote, las ideas sin archivo no entran al botón de “Generar borradores”.
 
+Vista exacta: [abrir preview HTML](/previews/v3.21-caption-despues-del-video.html)
+
 ## v3.20 — 2026-08-13
 
 **El caption automático ya tiene receta: una red a la vez, y solo si el video aún no tiene texto.**
