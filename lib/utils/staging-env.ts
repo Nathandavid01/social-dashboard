@@ -20,6 +20,19 @@ export function parseDotEnv(contents: string): Record<string, string> {
   return out
 }
 
+/** Why local staging must not start. Null = safe to boot. */
+export function stagingBootError(opts: { envFileExists: boolean; supabaseUrl: string }): string | null {
+  if (!opts.envFileExists) {
+    return 'Falta .env.staging. No arranco contra .env.local (puede ser producción).'
+  }
+  try {
+    assertStagingUrl(opts.supabaseUrl)
+    return null
+  } catch (err) {
+    return err instanceof Error ? err.message : 'La URL no es staging.'
+  }
+}
+
 export function assertStagingUrl(url: string): void {
   if (!url || !url.includes(STAGING_PROJECT_REF)) {
     throw new Error(
