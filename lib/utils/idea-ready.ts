@@ -21,3 +21,18 @@ export function ideaReadyMissingLabels(idea: {
 }): string[] {
   return filled(idea.hook) ? [] : ['de qué es el video']
 }
+
+/**
+ * Day-2 will call generateIdeaCaption when this is true.
+ * Never overwrite a draft the team already has, nor an approved caption.
+ */
+export function shouldAutoDraftCaption(idea: {
+  hook?: string | null
+  visual_brief?: string | null
+  caption_draft?: string | null
+  generated_caption?: string | null
+}): boolean {
+  if (!isIdeaReadyForCaption(idea)) return false
+  if (filled(idea.caption_draft) || filled(idea.generated_caption)) return false
+  return true
+}

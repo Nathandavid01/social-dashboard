@@ -27,6 +27,13 @@ export interface IdeaCaptionPromptInput {
    * if omitted/empty the prompt uses generic "todas las redes" wording.
    */
   platforms?: string[]
+  /**
+   * When set, the caption is written for THIS network only (daily-loop day 1).
+   * Day 3 fans out one prompt per captionJobsForPlatforms() job.
+   */
+  targetPlatform?: string
+  /** Extra focus line for `targetPlatform` (from captionJobsForPlatforms). */
+  targetFocus?: string
   /** Past published captions for this client, pulled from Metricool, to imitate. */
   examples: StyleExample[]
   /**
@@ -53,7 +60,13 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
   const c = input.client ?? {}
 
   const nets = (input.platforms ?? []).filter((p) => filled(p))
-  const redes = nets.length > 0 ? nets.join(', ') : 'todas las redes del cliente'
+  const target = (input.targetPlatform ?? '').trim()
+  const single = filled(target) && target !== 'all'
+  const redes = single
+    ? target
+    : nets.length > 0
+      ? nets.join(', ')
+      : 'todas las redes del cliente'
 
   const constraints = [
     filled(c.captionLanguage) && `Idioma: ${c.captionLanguage} (IMPORTANTE: escribe el caption en este idioma)`,
@@ -126,17 +139,25 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     ? '- Aplica el FEEDBACK DEL EQUIPO de arriba manteniendo el mensaje central de la idea\n'
     : ''
 
+  const redLine = single
+    ? `RED ESPECÍFICA: ${redes}${filled(input.targetFocus) ? ` — ${input.targetFocus}` : ''} (escribe el caption SOLO para esta red)`
+    : `REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)`
+
+  const taskLine = single
+    ? `TAREA: Escribe UN caption completo para ${redes}.`
+    : 'TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.'
+
   return `Eres un copywriter profesional de redes sociales para NMedia PR, agencia de marketing puertorriqueña. Escribes captions que rinden bien en Instagram, TikTok y Facebook.
 
 CLIENTE: ${filled(c.name) ? c.name : 'cliente'}
-REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)
+${redLine}
 
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
 ${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
-TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
+${taskLine}
 El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
 ${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro

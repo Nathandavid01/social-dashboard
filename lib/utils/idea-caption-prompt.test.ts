@@ -67,6 +67,19 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).not.toMatch(/REDES:\s*\n/)
   })
 
+  it('can target a single network for the daily-loop fan-out', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      platforms: ['instagram', 'tiktok'],
+      targetPlatform: 'tiktok',
+      targetFocus: 'corto y oral, sin muro de hashtags',
+    })
+    expect(p).toContain('RED ESPECÍFICA: tiktok')
+    expect(p).toContain('corto y oral')
+    expect(p).toMatch(/SOLO para esta red/i)
+    expect(p).not.toMatch(/un solo caption que funcione igual en todas/i)
+  })
+
   it('ignores empty/blank platform entries', () => {
     const p = buildIdeaCaptionPrompt({ ...base, platforms: ['', '  '] })
     expect(p).toMatch(/todas las redes/i)

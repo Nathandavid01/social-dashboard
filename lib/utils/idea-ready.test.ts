@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isIdeaReadyForCaption, ideaReadyMissingLabels } from './idea-ready'
+import { isIdeaReadyForCaption, ideaReadyMissingLabels, shouldAutoDraftCaption } from './idea-ready'
 
 describe('isIdeaReadyForCaption', () => {
   it('only needs "de qué es el video" (hook) — like the idea generator', () => {
@@ -17,5 +17,14 @@ describe('ideaReadyMissingLabels', () => {
     expect(ideaReadyMissingLabels({})).toEqual(['de qué es el video'])
     expect(ideaReadyMissingLabels({ hook: 'h' })).toEqual([])
     expect(ideaReadyMissingLabels({ hook: 'h', visual_brief: 'v', caption_angle: 'a' })).toEqual([])
+  })
+})
+
+describe('shouldAutoDraftCaption', () => {
+  it('is true only when the idea has a hook and no caption yet', () => {
+    expect(shouldAutoDraftCaption({ hook: 'tips' })).toBe(true)
+    expect(shouldAutoDraftCaption({ hook: 'tips', caption_draft: 'ya hay draft' })).toBe(false)
+    expect(shouldAutoDraftCaption({ hook: 'tips', generated_caption: 'ya aprobado' })).toBe(false)
+    expect(shouldAutoDraftCaption({ hook: '' })).toBe(false)
   })
 })

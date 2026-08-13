@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.20 — 2026-08-13
+
+**El caption automático ya tiene receta: una red a la vez, y solo si el video aún no tiene texto.**
+
+Nadie va a ver un botón nuevo hoy. Lo que cambia es el cerebro:
+
+- Sabemos para cuáles redes hay que escribir (Instagram ≠ TikTok ≠ LinkedIn).
+- Sabemos cuándo se puede generar solo: hay hook y todavía no hay draft ni caption aprobado.
+- Mañana el dashboard puede llamar a la IA al abrir la idea, sin pisar lo que ya escribió el equipo.
+
+Siguiente: al abrir una idea lista, se genera el borrador solo.
+
 ## v3.19 — 2026-08-13
 
 **Cada editor tiene su color, y ahora se ve quién hizo el último cambio.**
