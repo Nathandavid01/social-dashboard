@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3020",
     "dev:local": "npm run check:local-env && next dev --port 3020",
+    "dev:staging": "node scripts/dev-staging.mjs",
     "predev": "node scripts/check-local-env.mjs",
     "prebuild": "npm run check:db-relationships",
     "build": "next build",

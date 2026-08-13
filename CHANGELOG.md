@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.16 — 2026-08-13
+
+**Puedes ver qué clickeó cada persona hoy, sin salir del dashboard.**
+
+- En Actividad hay un tab Sesión: clicks y páginas de las últimas 24 horas del día en Puerto Rico, filtrable por persona. Abre en ti.
+- Solo el owner lo ve. El resto del equipo sigue generando el rastro, pero no puede leer el de los demás.
+- A los 7 días se borra solo. No se guarda lo que alguien escribe en un campo.
+
 ## v3.15 — 2026-08-11
 
 **Ahora sabemos cuándo algo se rompe, sin que nadie tenga que contarlo.**
