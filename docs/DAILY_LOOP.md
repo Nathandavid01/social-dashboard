@@ -7,6 +7,7 @@ Cada hora toma **el primer ítem `[ ]`**. Al cerrar el commit, márcalo `[x]` y 
 - **Caption solo si hay video** (no generar/guardar copy de una idea sin footage).
 - **Caption grounded in the video** when we can hear it (Whisper, v3.22). Vision frames = later.
 - **Un solo caption para todas las redes** (v3.25). No fan-out por plataforma.
+- **Metricool publica el corte de Entregas / el archivo que se revisó**, no un edited viejo del pipeline (v3.28).
 - Verificar: `npx vitest run` de los tests tocados + `npm run test:staging` si el cambio toca sesión/auth; si no, al menos merge-gate.
 - No push a `main`. PR → CI verde.
 - Tema: **flujo más lógico** o **captions automáticos**. Nada de rediseños laterales.

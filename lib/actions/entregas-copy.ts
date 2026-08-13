@@ -165,6 +165,8 @@ export async function saveCopyAndSchedule(input: {
   caption: string
   /** YYYY-MM-DD, or null to let Metricool take +24h. */
   publishDate: string | null
+  /** Edited file the copywriter previewed — Metricool must send that one. */
+  videoFileId?: string | null
 }): Promise<{ ok?: true; error?: string; autopost?: AutoPostOutcome }> {
   try {
     await requirePermission('captions.edit')
@@ -192,6 +194,6 @@ export async function saveCopyAndSchedule(input: {
   revalidatePath('/entregas')
   // Copy is what made the idea ready (caption + already-approved video).
   // maybeAutoPostIdea no-ops unless caption + edited video + Metricool.
-  const autopost = await maybeAutoPostIdea(input.ideaId)
+  const autopost = await maybeAutoPostIdea(input.ideaId, { videoFileId: input.videoFileId })
   return { ok: true, autopost }
 }

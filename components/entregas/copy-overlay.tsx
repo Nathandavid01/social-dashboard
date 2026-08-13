@@ -157,6 +157,7 @@ export function CopyOverlay({
         ideaId: current.id,
         caption: caption.trim(),
         publishDate: publishDate || null,
+        videoFileId: current.videoFileId,
       })
       if (res.error) {
         toast({ title: 'Error', description: res.error, variant: 'destructive' })

@@ -133,7 +133,12 @@ describe('CopyOverlay — Enviar a Publicación programa en Metricool', () => {
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByDisplayValue('Copy listo para enviar ya mismo')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /enviar a publicación/i }))
-    await waitFor(() => expect(saveCopyAndSchedule).toHaveBeenCalled())
+    await waitFor(() =>
+      expect(saveCopyAndSchedule).toHaveBeenCalledWith(expect.objectContaining({
+        ideaId: 'i1',
+        videoFileId: 'f1',
+      })),
+    )
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({
       title: expect.stringMatching(/metricool/i),
     }))

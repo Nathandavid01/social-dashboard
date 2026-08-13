@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.28 — Metricool recibe este video</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1f1f1f;
+      --muted-fg: #a6a6a6;
+      --border: #1f1f1f;
+      --primary: #e8b31a;
+      --good: #22c55e;
+      --bad: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tabs button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted-fg);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .tabs button.on { background: var(--muted); color: var(--fg); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .file {
+      display: flex; align-items: center; gap: 10px;
+      border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 12px;
+      font-size: 13px; margin-top: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 99px; }
+    .dot.good { background: var(--good); }
+    .dot.bad { background: var(--bad); }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+    .arrow { text-align: center; color: var(--muted-fg); font-size: 12px; margin: 4px 0 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.28 — Metricool recibe el video que aprobaste</h1>
+    <p class="sub">El corte de Entregas es el que se publica. El archivo viejo del pipeline ya no gana por fecha.</p>
+    <div class="tabs">
+      <button class="on" data-tab="antes" type="button">Antes (mal)</button>
+      <button data-tab="ahora" type="button">Ahora</button>
+    </div>
+
+    <section id="antes" class="screen on">
+      <div class="card">
+        <div class="label">Lo que viste al aprobar</div>
+        <div class="file"><span class="dot good"></span> esta_semana_gym.mp4 <span class="tiny" style="margin:0">Entregas · esta semana</span></div>
+      </div>
+      <p class="arrow">↓ al programar en Metricool se elegía el edited más reciente de cualquier bucket</p>
+      <div class="card">
+        <div class="label">Lo que llegó a Metricool</div>
+        <div class="file"><span class="dot bad"></span> semana_pasada_gym.mp4 <span class="tiny" style="margin:0">Pipeline · archivo viejo con fecha más nueva</span></div>
+        <p class="tiny">El cliente veía el video correcto. Instagram recibía el de la semana anterior.</p>
+      </div>
+    </section>
+
+    <section id="ahora" class="screen">
+      <div class="card">
+        <div class="label">Lo que viste al aprobar</div>
+        <div class="file"><span class="dot good"></span> esta_semana_gym.mp4 <span class="tiny" style="margin:0">Entregas · esta semana</span></div>
+      </div>
+      <p class="arrow">↓ se manda ese mismo archivo</p>
+      <div class="card">
+        <div class="label">Lo que llega a Metricool</div>
+        <div class="file"><span class="dot good"></span> esta_semana_gym.mp4 <span class="tiny" style="margin:0">El corte que acabas de aprobar</span></div>
+        <p class="tiny">Si hay un corte viejo en el otro bucket, se ignora.</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach((x) => x.classList.remove('on'))
+      b.classList.add('on')
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'))
+      document.getElementById(b.dataset.tab).classList.add('on')
+    }))
+  </script>
+</body>
+</html>

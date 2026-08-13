@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms, type PostableIdea } from './idea-posting-core'
+import {
+  ideaPostReadiness,
+  buildPublishDateTime,
+  resolvePlatforms,
+  pickEditedVideoForPublish,
+  type PostableIdea,
+} from './idea-posting-core'
 
 const ready: PostableIdea = {
   approval_status: 'approved',
@@ -82,5 +88,63 @@ describe('resolvePlatforms', () => {
   it('falls back to default_platforms, then to the IG/FB/TikTok default', () => {
     expect(resolvePlatforms(null, ['Facebook'])).toEqual(['facebook'])
     expect(resolvePlatforms([], [])).toEqual(['instagram', 'facebook', 'tiktok'])
+  })
+})
+
+describe('pickEditedVideoForPublish', () => {
+  const lastWeekPipeline = {
+    id: 'old-r2',
+    drive_file_id: 'ideas/x/edited/last-week.mp4',
+    storage_provider: 'r2',
+    kind: 'edited',
+    status: 'uploaded',
+    uploaded_at: '2026-08-12T18:00:00Z',
+  }
+  const thisWeekEntregas = {
+    id: 'new-ent',
+    drive_file_id: 'entregas/x/edited/this-week.mp4',
+    storage_provider: 'entregas-r2',
+    kind: 'edited',
+    status: 'uploaded',
+    uploaded_at: '2026-08-06T10:00:00Z',
+  }
+
+  it('does not send last week’s pipeline file when this week lives in Entregas', () => {
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas])
+    expect(picked?.id).toBe('new-ent')
+    expect(picked?.drive_file_id).toContain('this-week')
+  })
+
+  it('uses the file the copywriter previewed, even if another edited is newer', () => {
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
+      preferredId: 'new-ent',
+    })
+    expect(picked?.id).toBe('new-ent')
+  })
+
+  it('ignores a preferred id that is not a live edited file on this idea', () => {
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
+      preferredId: 'other-idea-video',
+    })
+    expect(picked?.id).toBe('new-ent')
+  })
+
+  it('skips archived leftovers', () => {
+    const picked = pickEditedVideoForPublish([
+      { ...lastWeekPipeline, status: 'archived' },
+      thisWeekEntregas,
+    ])
+    expect(picked?.id).toBe('new-ent')
+  })
+
+  it('falls back to the newest pipeline file when there is no Entregas cut', () => {
+    const older = { ...lastWeekPipeline, id: 'older', uploaded_at: '2026-08-01T00:00:00Z' }
+    const newer = { ...lastWeekPipeline, id: 'newer', uploaded_at: '2026-08-10T00:00:00Z' }
+    expect(pickEditedVideoForPublish([older, newer])?.id).toBe('newer')
+  })
+
+  it('returns null when there is no usable edited file', () => {
+    expect(pickEditedVideoForPublish([])).toBeNull()
+    expect(pickEditedVideoForPublish([{ ...thisWeekEntregas, drive_file_id: null }])).toBeNull()
   })
 })

@@ -6,7 +6,7 @@ import { createDraftPost } from '@/lib/metricool/post'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
-import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms } from '@/lib/utils/idea-posting-core'
+import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms, pickEditedVideoForPublish } from '@/lib/utils/idea-posting-core'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
@@ -27,6 +27,8 @@ export async function runIdeaPost(
    * here — the browser's copy of the rule is a convenience, not the authority.
    */
   scheduleOverride?: string | null,
+  /** The edited file the human actually watched (copy preview / review). */
+  preferredVideoId?: string | null,
 ): Promise<PostResult> {
   // Before any DB work: a bad override must not burn the posting claim.
   let overrideIso: string | null = null
@@ -45,29 +47,18 @@ export async function runIdeaPost(
     .single()
   if (!idea) return { error: 'Idea no encontrada' }
 
-  // Most-recent non-archived edited video in R2 (the thing we attach).
-  //
-  // We select the R2 key HERE, with the caller's client, and build the public URL
-  // from it below — instead of calling `getR2PublicUrl`, which builds its own
-  // session-scoped client. That mattered: on the client-vote path there IS no
-  // session (the review link is anonymous), `content_idea_videos` has no RLS
-  // policy for `anon`, so the lookup would come back empty and every real
-  // client's approval would fail to publish — while still working for a logged-in
-  // staffer testing it. Resolve it with the client we were handed.
-  const { data: edited, error: editedErr } = await supabase
+  // All live edited files for THIS idea. Pick in JS so a leftover pipeline
+  // cut from last week cannot beat this week's Entregas file just because
+  // its uploaded_at is newer. See pickEditedVideoForPublish.
+  const { data: editedRows, error: editedErr } = await supabase
     .from('content_idea_videos')
-    .select('id, drive_file_id, storage_provider, kind')
+    .select('id, drive_file_id, storage_provider, kind, status, uploaded_at')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
-    // Los dos tableros publican por aquí, cada uno desde SU bucket.
     .in('storage_provider', ['r2', 'entregas-r2'])
     .neq('status', 'archived')
-    // uploaded_at, NO created_at: esa columna no existe en content_idea_videos.
-    // La consulta fallaba y el error se descartaba, así que `edited` venía
-    // vacío y readiness concluía "falta el video editado" con el archivo ahí.
-    .order('uploaded_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+
+  const edited = pickEditedVideoForPublish(editedRows ?? [], { preferredId: preferredVideoId })
 
   // Un fallo al buscar el video NO puede leerse como "no hay video": eso fue
   // exactamente lo que ocultó el bug de created_at durante todo este tiempo.
@@ -186,7 +177,16 @@ export async function runIdeaPost(
       ideaId,
       userId,
       action: 'posted_to_metricool',
-      metadata: { platforms, scheduledFor, scheduleOverridden: overrideIso != null, autoPublish: true, metricoolPostId: postId },
+      metadata: {
+        platforms,
+        scheduledFor,
+        scheduleOverridden: overrideIso != null,
+        autoPublish: true,
+        metricoolPostId: postId,
+        videoId: editedVideo.id,
+        videoKey: editedVideo.drive_file_id,
+        storageProvider: editedVideo.storage_provider,
+      },
     })
 
     revalidatePath('/pipeline')

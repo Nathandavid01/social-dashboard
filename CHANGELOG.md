@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.28 — 2026-08-13
+
+**Al aprobar, Metricool recibe ESTE video, no el de la semana pasada.**
+
+Si la idea tenía un corte viejo en el bucket del pipeline y el de esta semana en Entregas, se mandaba el más reciente por fecha. A veces era el de la semana anterior.
+
+Ahora se manda el archivo de Entregas (el que ves al revisar), o el que el copywriter tenía en pantalla.
+
+Vista: [preview HTML](/previews/v3.28-video-correcto-metricool.html)
+
 ## v3.27 — 2026-08-13
 
 **Enviar el copy ya programa la publicación.**

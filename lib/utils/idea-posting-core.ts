@@ -81,6 +81,51 @@ export function buildPublishDateTime(
   return new Date(nowMs + 24 * 60 * 60 * 1000).toISOString().slice(0, 19)
 }
 
+export type PublishableEditedVideo = {
+  id: string
+  drive_file_id: string | null
+  storage_provider: string | null
+  kind?: string | null
+  status?: string | null
+  uploaded_at?: string | null
+}
+
+/**
+ * Which edited file goes to Metricool.
+ *
+ * Entregas shows only `entregas-r2`. The publisher used to take the newest
+ * edited in EITHER bucket — so a leftover pipeline file from last week
+ * (touched later) beat this week's Entregas cut. Prefer the board they
+ * actually watched; a preferred id (the preview they saw) wins if it
+ * belongs to this idea.
+ */
+export function pickEditedVideoForPublish(
+  videos: PublishableEditedVideo[],
+  opts?: { preferredId?: string | null },
+): PublishableEditedVideo | null {
+  const live = videos.filter(
+    (v) =>
+      v &&
+      (v.kind ?? 'edited') === 'edited' &&
+      v.status !== 'archived' &&
+      !!v.drive_file_id &&
+      (v.storage_provider === 'r2' || v.storage_provider === 'entregas-r2'),
+  )
+  if (live.length === 0) return null
+
+  if (opts?.preferredId) {
+    const preferred = live.find((v) => v.id === opts.preferredId)
+    if (preferred) return preferred
+  }
+
+  const newest = (list: PublishableEditedVideo[]) =>
+    [...list].sort((a, b) => (a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1)[0] ?? null
+
+  const entregas = live.filter((v) => v.storage_provider === 'entregas-r2')
+  if (entregas.length > 0) return newest(entregas)
+  return newest(live)
+}
+
 /** Networks to post to: the client's own platforms, else its defaults, else IG/FB/TikTok. */
 export function resolvePlatforms(
   clientPlatforms?: string[] | null,

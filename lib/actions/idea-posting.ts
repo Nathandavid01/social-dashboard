@@ -36,12 +36,15 @@ export type AutoPostOutcome = { posted: boolean; skipped?: string } | null
  * idea isn't fully ready or was already posted. Returns the outcome (posted /
  * why it was skipped) purely as UI feedback; null = kill-switched or errored.
  */
-export async function maybeAutoPostIdea(ideaId: string): Promise<AutoPostOutcome> {
+export async function maybeAutoPostIdea(
+  ideaId: string,
+  opts?: { videoFileId?: string | null },
+): Promise<AutoPostOutcome> {
   if (AUTOPOST_ON_APPROVAL_DISABLED) return null
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const res = await runIdeaPost(supabase, ideaId, user?.id ?? null)
+    const res = await runIdeaPost(supabase, ideaId, user?.id ?? null, null, opts?.videoFileId)
     if (res.error) return null // recorded on the row; approval stays green
     if (res.skipped) return { posted: false, skipped: res.skipped }
     return { posted: true }
