@@ -98,7 +98,7 @@ export async function approveIdea(ideaId: string): Promise<Result> {
   // A fully-ready idea (caption + edited video) auto-posts to Metricool on its
   // planned date. Best-effort — never blocks or fails the approval. The outcome
   // rides back so the UI can say WHETHER it was scheduled (or why not).
-  if (res.ok) return { ...res, autopost: await maybeAutoPostIdea(ideaId, { watchedOn: 'pipeline' }) }
+  if (res.ok) return { ...res, autopost: await maybeAutoPostIdea(ideaId) }
   return res
 }
 

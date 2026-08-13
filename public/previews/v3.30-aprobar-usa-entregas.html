@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.30 — Aprobar usa el corte de Entregas</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --good:#22c55e; --bad:#f87171; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 4px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 20px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:12px; }
+    .file { display:flex; align-items:center; gap:10px; border:1px solid #2a2a2a; border-radius:10px; padding:10px 12px; font-size:13px; margin-top:8px; }
+    .dot { width:8px; height:8px; border-radius:99px; }
+    .good { background:var(--good); }
+    .bad { background:var(--bad); }
+    .tiny { font-size:11px; color:var(--muted-fg); margin-top:8px; }
+    .label { font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted-fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.30 — Aprobar manda el de esta semana</h1>
+    <p class="sub">En el lote, Aprobar ya no fuerza el archivo viejo del pipeline.</p>
+    <div class="card">
+      <div class="label">Misma idea, dos archivos</div>
+      <div class="file"><span class="dot bad"></span> semana_pasada.mp4 <span class="tiny" style="margin:0">pipeline r2 — se ignora</span></div>
+      <div class="file"><span class="dot good"></span> esta_semana.mp4 <span class="tiny" style="margin:0">Entregas — esto va a Metricool</span></div>
+      <p class="tiny">El enlace /review/ sigue usando el archivo que ve el cliente en esa pantalla.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -4,6 +4,7 @@ import {
   buildPublishDateTime,
   resolvePlatforms,
   pickEditedVideoForPublish,
+  inferWatchBoard,
   type PostableIdea,
 } from './idea-posting-core'
 
@@ -139,6 +140,14 @@ describe('pickEditedVideoForPublish', () => {
       watchedOn: 'pipeline',
     })
     expect(picked?.id).toBe('old-r2')
+  })
+
+  it('board-agnostic approve uses Entregas, not last week’s pipeline file', () => {
+    expect(inferWatchBoard([lastWeekPipeline, thisWeekEntregas], 'idea-this-week')).toBe('entregas')
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
+      ideaId: 'idea-this-week',
+    })
+    expect(picked?.id).toBe('new-ent')
   })
 
   it('when they approved on Entregas, does not swap in a pipeline leftover', () => {

@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.30 — 2026-08-13
+
+**Aprobar en el lote ya no manda el video viejo del pipeline.**
+
+Si esta semana el corte está en Entregas y la idea todavía tiene un edited de la semana pasada en el otro bucket, Aprobar / Publicar a Metricool usa el de Entregas. Solo el enlace `/review/` sigue atado al archivo que ve el cliente ahí.
+
+Vista: [preview HTML](/previews/v3.30-aprobar-usa-entregas.html)
+
 ## v3.29 — 2026-08-13
 
 **Metricool sube el archivo que se está aprobando, no otro de este cliente.**

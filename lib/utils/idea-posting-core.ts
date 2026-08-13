@@ -95,6 +95,30 @@ export type PublishableEditedVideo = {
 /** Where the human watched the video they are approving. */
 export type VideoWatchBoard = 'entregas' | 'pipeline'
 
+function isLiveEdited(v: PublishableEditedVideo, ideaId?: string | null): boolean {
+  if (!v) return false
+  if ((v.kind ?? 'edited') !== 'edited') return false
+  if (v.status === 'archived') return false
+  if (!v.drive_file_id) return false
+  if (v.storage_provider !== 'r2' && v.storage_provider !== 'entregas-r2') return false
+  if (ideaId && v.idea_id && v.idea_id !== ideaId) return false
+  return true
+}
+
+/**
+ * Board-agnostic edges (staff approve, generic publish) must not force
+ * pipeline. If this idea has a live Entregas cut, that is the file.
+ */
+export function inferWatchBoard(
+  videos: PublishableEditedVideo[],
+  ideaId?: string | null,
+): VideoWatchBoard | null {
+  const live = videos.filter((v) => isLiveEdited(v, ideaId))
+  if (live.some((v) => v.storage_provider === 'entregas-r2')) return 'entregas'
+  if (live.some((v) => v.storage_provider === 'r2')) return 'pipeline'
+  return null
+}
+
 /**
  * The file Metricool must receive: the one being approved, never another
  * idea of the same client and never the other board's leftover cut.
@@ -108,15 +132,7 @@ export function pickEditedVideoForPublish(
   },
 ): PublishableEditedVideo | null {
   const ideaId = opts?.ideaId?.trim() || null
-  const live = videos.filter((v) => {
-    if (!v) return false
-    if ((v.kind ?? 'edited') !== 'edited') return false
-    if (v.status === 'archived') return false
-    if (!v.drive_file_id) return false
-    if (v.storage_provider !== 'r2' && v.storage_provider !== 'entregas-r2') return false
-    if (ideaId && v.idea_id && v.idea_id !== ideaId) return false
-    return true
-  })
+  const live = videos.filter((v) => isLiveEdited(v, ideaId))
   if (live.length === 0) return null
 
   if (opts?.preferredId) {
@@ -127,11 +143,11 @@ export function pickEditedVideoForPublish(
   const newest = (list: PublishableEditedVideo[]) =>
     [...list].sort((a, b) => ((a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1))[0] ?? null
 
-  const board = opts?.watchedOn
+  const board = opts?.watchedOn ?? inferWatchBoard(live, ideaId)
   const onBoard = board
     ? live.filter((v) => v.storage_provider === (board === 'entregas' ? 'entregas-r2' : 'r2'))
     : null
-  if (onBoard) return newest(onBoard)
+  if (onBoard && onBoard.length > 0) return newest(onBoard)
 
   const entregas = live.filter((v) => v.storage_provider === 'entregas-r2')
   if (entregas.length > 0) return newest(entregas)
