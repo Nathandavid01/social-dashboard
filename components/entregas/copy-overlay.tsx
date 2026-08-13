@@ -12,6 +12,7 @@ import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { useHasPermission } from '@/components/auth/role-gate'
+import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
@@ -120,7 +121,7 @@ export function CopyOverlay({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  async function generate() {
+  async function generate(fb?: string) {
     if (!current) return
     if (!hook.trim()) {
       toast({ title: 'Falta "de qué es el video"', description: 'La IA lo necesita para escribir.', variant: 'destructive' })
@@ -132,7 +133,10 @@ export function CopyOverlay({
       // from the database, not from this form.
       await updateIdeaHook(current.id, hook)
       await saveClientCaptionNotes(clientId, notes)
-      const res = await generateIdeaCaption(current.id)
+      const res = await generateIdeaCaption(
+        current.id,
+        fb?.trim() ? { feedback: fb, previousCaption: caption } : undefined,
+      )
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         // Borrador: queda en pantalla y en `caption_draft`. El video sigue en
@@ -268,7 +272,7 @@ export function CopyOverlay({
                 </p>
               </div>
 
-              <Button size="sm" variant="outline" disabled={writing} onClick={generate}>
+              <Button size="sm" variant="outline" disabled={writing} onClick={() => void generate()}>
                 {busy === 'generando' || autoDrafting
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
@@ -294,6 +298,14 @@ export function CopyOverlay({
                 placeholder="Genera con IA o escríbelo a mano. Puedes editar lo que genere."
                 className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
               />
+              {caption.trim() && (
+                <CaptionFeedback
+                  caption={caption}
+                  target={{ ideaId: current.id }}
+                  onRegenerate={(fb) => { void generate(fb) }}
+                  isGenerating={writing}
+                />
+              )}
               <div className="space-y-1.5 rounded-lg border bg-muted/30 p-2.5">
                 <Label htmlFor="co-date" className="text-[11px]">Fecha de publicación</Label>
                 <Input

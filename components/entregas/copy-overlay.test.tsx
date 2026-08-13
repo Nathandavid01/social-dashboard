@@ -3,7 +3,7 @@
  * se genera un borrador una vez. Un draft existente no se pisa.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, waitFor } from '@testing-library/react'
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react'
 import { resetAutoDraftAttempts } from '@/lib/hooks/use-auto-draft-caption'
 import type { CopyVideoRow } from '@/lib/actions/entregas-copy'
 
@@ -20,6 +20,12 @@ vi.mock('@/lib/actions/entregas-copy', () => ({
   updateIdeaHook: vi.fn(async () => ({ ok: true as const })),
   saveClientCaptionNotes: vi.fn(async () => ({ ok: true as const })),
   saveCopyAndSchedule: vi.fn(async () => ({ ok: true as const })),
+}))
+const rateCaption = vi.fn(async () => ({ ok: true as const }))
+vi.mock('@/lib/actions/caption-feedback', () => ({
+  rateCaption: (...a: unknown[]) => rateCaption(...(a as [])),
+  getCaptionLearningStats: vi.fn(async () => ({ approved: 0, loved: 0, rejected: 0, suggestions: [] })),
+  appendClientCaptionRule: vi.fn(async () => ({ ok: true as const })),
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }))
@@ -50,6 +56,7 @@ function video(over: Partial<CopyVideoRow> = {}): CopyVideoRow {
 afterEach(() => {
   cleanup()
   generateIdeaCaption.mockClear()
+  rateCaption.mockClear()
   resetAutoDraftAttempts()
 })
 
@@ -87,5 +94,24 @@ describe('CopyOverlay — al abrir se escribe el copy solo', () => {
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
     await Promise.resolve()
     expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
+
+describe('CopyOverlay — 👍/👎 del caption único', () => {
+  it('deja votar el copy y manda el voto de esa idea', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ caption_draft: 'Borrador largo para poder calificarlo ya' })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByDisplayValue('Borrador largo para poder calificarlo ya')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /me gusta/i }))
+    await waitFor(() =>
+      expect(rateCaption).toHaveBeenCalledWith({
+        ideaId: 'i1',
+        rating: 1,
+        captionText: 'Borrador largo para poder calificarlo ya',
+        note: undefined,
+      }),
+    )
   })
 })

@@ -84,6 +84,7 @@ vi.mock('@/lib/supabase/server', () => ({
 import { generateCaptionText } from '@/lib/llm/caption-llm'
 import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
 import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
+import { fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
 import { packCaptionDrafts } from '@/lib/utils/caption-draft'
 import { generateIdeaCaption, saveIdeaCaption } from './idea-captions'
 
@@ -94,6 +95,8 @@ beforeEach(() => {
   h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
   vi.mocked(generateCaptionText).mockReset()
   vi.mocked(generateCaptionText).mockResolvedValue('Caption recién salido de la IA')
+  vi.mocked(fetchCaptionFeedbackForPrompt).mockReset()
+  vi.mocked(fetchCaptionFeedbackForPrompt).mockResolvedValue({ loved: [], avoid: [] })
   vi.mocked(listenUrlForCaptionVideo).mockResolvedValue('https://pipe.test/ideas/1/raw/a.mp4')
   vi.mocked(transcribeVideoFromUrl).mockResolvedValue('el socio cuenta que bajó 15 libras')
   h.videos = [
@@ -224,6 +227,19 @@ describe('generateIdeaCaption — un caption para todas las redes', () => {
     expect(generateCaptionText).toHaveBeenCalledWith(expect.not.stringContaining('RED ESPECÍFICA'))
     expect(h.updates[0].caption_draft).toBe(oneDraft)
     expect(res.caption).toBe(oneDraft)
+  })
+
+  it('el próximo generate usa los 👍 como ejemplo y los 👎 como evitar', async () => {
+    vi.mocked(fetchCaptionFeedbackForPrompt).mockResolvedValueOnce({
+      loved: ['Caption amado con largo suficiente para pasar el piso'],
+      avoid: [{ text: 'Caption rechazado con demasiados emojis 🔥🔥🔥', note: 'demasiados emojis' }],
+    })
+    await generateIdeaCaption('i1')
+    const prompt = vi.mocked(generateCaptionText).mock.calls[0][0]
+    expect(prompt).toContain('Caption amado con largo suficiente para pasar el piso')
+    expect(prompt).toContain('CAPTIONS QUE EL EQUIPO RECHAZÓ')
+    expect(prompt).toContain('Caption rechazado con demasiados emojis')
+    expect(prompt).toContain('demasiados emojis')
   })
 })
 

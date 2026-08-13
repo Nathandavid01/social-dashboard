@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.26 — 2026-08-13
+
+**Un 👍 o 👎 en Entregas enseña al próximo copy.**
+
+Cuando escribes el caption único, puedes decir si te gustó. El siguiente generate de ese cliente usa los que gustaron y evita los que no.
+
+- En Copy (Entregas) aparecen **Me gusta** y **No es**, igual que en la idea.
+- Si marcas 👎, puedes dejar una nota (p. ej. “menos emojis”) y la IA lo recuerda.
+- La tabla de votos ya está en staging. En producción todavía hay que pegar `0041_caption_feedback.sql`.
+
+Vista: [preview HTML](/previews/v3.26-voto-alimenta-generate.html)
+
 ## v3.25 — 2026-08-13
 
 **Un solo caption para todas las redes.**
