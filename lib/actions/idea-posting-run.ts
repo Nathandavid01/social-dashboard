@@ -6,7 +6,13 @@ import { createDraftPost } from '@/lib/metricool/post'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
-import { ideaPostReadiness, buildPublishDateTime, resolvePlatforms, pickEditedVideoForPublish } from '@/lib/utils/idea-posting-core'
+import {
+  ideaPostReadiness,
+  buildPublishDateTime,
+  resolvePlatforms,
+  pickEditedVideoForPublish,
+  type VideoWatchBoard,
+} from '@/lib/utils/idea-posting-core'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
@@ -27,8 +33,7 @@ export async function runIdeaPost(
    * here — the browser's copy of the rule is a convenience, not the authority.
    */
   scheduleOverride?: string | null,
-  /** The edited file the human actually watched (copy preview / review). */
-  preferredVideoId?: string | null,
+  opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null },
 ): Promise<PostResult> {
   // Before any DB work: a bad override must not burn the posting claim.
   let overrideIso: string | null = null
@@ -52,13 +57,17 @@ export async function runIdeaPost(
   // its uploaded_at is newer. See pickEditedVideoForPublish.
   const { data: editedRows, error: editedErr } = await supabase
     .from('content_idea_videos')
-    .select('id, drive_file_id, storage_provider, kind, status, uploaded_at')
+    .select('id, idea_id, drive_file_id, storage_provider, kind, status, uploaded_at')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
     .in('storage_provider', ['r2', 'entregas-r2'])
     .neq('status', 'archived')
 
-  const edited = pickEditedVideoForPublish(editedRows ?? [], { preferredId: preferredVideoId })
+  const edited = pickEditedVideoForPublish(editedRows ?? [], {
+    preferredId: opts?.videoFileId,
+    ideaId,
+    watchedOn: opts?.watchedOn,
+  })
 
   // Un fallo al buscar el video NO puede leerse como "no hay video": eso fue
   // exactamente lo que ocultó el bug de created_at durante todo este tiempo.

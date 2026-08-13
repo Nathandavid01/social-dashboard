@@ -71,7 +71,9 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
     fireEvent.change(screen.getByLabelText(/fecha y hora/i), { target: { value: '2026-07-29T14:30' } })
     fireEvent.click(screen.getByRole('button', { name: /enviar a metricool/i }))
 
-    await waitFor(() => expect(publishIdeaToMetricool).toHaveBeenCalledWith('i1', '2026-07-29T14:30'))
+    await waitFor(() =>
+      expect(publishIdeaToMetricool).toHaveBeenCalledWith('i1', '2026-07-29T14:30', { watchedOn: 'entregas' }),
+    )
   })
 
   it('refleja la hora elegida en la etiqueta del borrador', () => {
@@ -110,7 +112,9 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
     expect(screen.getByText(/3 ago 2026 · 10:00/i)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /enviar a metricool/i }))
-    await waitFor(() => expect(publishIdeaToMetricool).toHaveBeenCalledWith('i1', undefined))
+    await waitFor(() =>
+      expect(publishIdeaToMetricool).toHaveBeenCalledWith('i1', undefined, { watchedOn: 'entregas' }),
+    )
   })
 
   it('sin permiso de publicar no se ofrece cambiar la hora ni enviar', () => {

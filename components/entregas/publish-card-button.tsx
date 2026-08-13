@@ -47,7 +47,7 @@ export function PublishCardButton({
     const errors: string[] = []
 
     for (const id of ideaIds) {
-      const res = await publishIdeaToMetricool(id, scheduleOverride)
+      const res = await publishIdeaToMetricool(id, scheduleOverride, { watchedOn: 'entregas' })
       if (res.error) errors.push(res.error)
       else if (res.skipped) errors.push(res.skipped)
       else ok++

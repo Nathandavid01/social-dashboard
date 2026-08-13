@@ -53,7 +53,7 @@ export function PublishToMetricoolButton({
       disabled={pending}
       onClick={() =>
         start(async () => {
-          const res = await publishIdeaToMetricool(ideaId)
+          const res = await publishIdeaToMetricool(ideaId, null, { watchedOn: 'pipeline' })
           if (res?.error) {
             toast({ title: 'No se pudo publicar', description: res.error, variant: 'destructive' })
           } else if (res?.skipped) {

@@ -62,6 +62,7 @@ export async function generateReviewLink(
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
     .neq('status', 'archived')
+    .order('uploaded_at', { ascending: false })
     .limit(1)
   if (!edited || edited.length === 0) {
     return { error: 'Primero sube el video editado; es lo que verá el cliente.' }

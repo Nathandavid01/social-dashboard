@@ -88,29 +88,35 @@ export type PublishableEditedVideo = {
   kind?: string | null
   status?: string | null
   uploaded_at?: string | null
+  /** When present, a file from another idea (last week, same client) is dropped. */
+  idea_id?: string | null
 }
 
+/** Where the human watched the video they are approving. */
+export type VideoWatchBoard = 'entregas' | 'pipeline'
+
 /**
- * Which edited file goes to Metricool.
- *
- * Entregas shows only `entregas-r2`. The publisher used to take the newest
- * edited in EITHER bucket — so a leftover pipeline file from last week
- * (touched later) beat this week's Entregas cut. Prefer the board they
- * actually watched; a preferred id (the preview they saw) wins if it
- * belongs to this idea.
+ * The file Metricool must receive: the one being approved, never another
+ * idea of the same client and never the other board's leftover cut.
  */
 export function pickEditedVideoForPublish(
   videos: PublishableEditedVideo[],
-  opts?: { preferredId?: string | null },
+  opts?: {
+    preferredId?: string | null
+    ideaId?: string | null
+    watchedOn?: VideoWatchBoard | null
+  },
 ): PublishableEditedVideo | null {
-  const live = videos.filter(
-    (v) =>
-      v &&
-      (v.kind ?? 'edited') === 'edited' &&
-      v.status !== 'archived' &&
-      !!v.drive_file_id &&
-      (v.storage_provider === 'r2' || v.storage_provider === 'entregas-r2'),
-  )
+  const ideaId = opts?.ideaId?.trim() || null
+  const live = videos.filter((v) => {
+    if (!v) return false
+    if ((v.kind ?? 'edited') !== 'edited') return false
+    if (v.status === 'archived') return false
+    if (!v.drive_file_id) return false
+    if (v.storage_provider !== 'r2' && v.storage_provider !== 'entregas-r2') return false
+    if (ideaId && v.idea_id && v.idea_id !== ideaId) return false
+    return true
+  })
   if (live.length === 0) return null
 
   if (opts?.preferredId) {
@@ -119,7 +125,13 @@ export function pickEditedVideoForPublish(
   }
 
   const newest = (list: PublishableEditedVideo[]) =>
-    [...list].sort((a, b) => (a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1)[0] ?? null
+    [...list].sort((a, b) => ((a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1))[0] ?? null
+
+  const board = opts?.watchedOn
+  const onBoard = board
+    ? live.filter((v) => v.storage_provider === (board === 'entregas' ? 'entregas-r2' : 'r2'))
+    : null
+  if (onBoard) return newest(onBoard)
 
   const entregas = live.filter((v) => v.storage_provider === 'entregas-r2')
   if (entregas.length > 0) return newest(entregas)

@@ -89,7 +89,7 @@ describe('saveCopyAndSchedule — promueve el borrador', () => {
 
   it('al guardar el copy pide publicar si ya hay video aprobado + Metricool', async () => {
     const res = await saveCopyAndSchedule({ ideaId: 'i1', caption: 'Copy final del equipo', publishDate: '2026-09-01' })
-    expect(maybeAutoPostIdea).toHaveBeenCalledWith('i1', { videoFileId: undefined })
+    expect(maybeAutoPostIdea).toHaveBeenCalledWith('i1', { videoFileId: undefined, watchedOn: 'entregas' })
     expect(res.autopost).toEqual({ posted: true })
   })
 
@@ -100,7 +100,7 @@ describe('saveCopyAndSchedule — promueve el borrador', () => {
       publishDate: '2026-09-01',
       videoFileId: 'vid-this-week',
     })
-    expect(maybeAutoPostIdea).toHaveBeenCalledWith('i1', { videoFileId: 'vid-this-week' })
+    expect(maybeAutoPostIdea).toHaveBeenCalledWith('i1', { videoFileId: 'vid-this-week', watchedOn: 'entregas' })
   })
 
   it('si Metricool no está listo, el copy igual se guarda', async () => {

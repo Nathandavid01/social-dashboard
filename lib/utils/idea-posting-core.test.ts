@@ -94,6 +94,7 @@ describe('resolvePlatforms', () => {
 describe('pickEditedVideoForPublish', () => {
   const lastWeekPipeline = {
     id: 'old-r2',
+    idea_id: 'idea-this-week',
     drive_file_id: 'ideas/x/edited/last-week.mp4',
     storage_provider: 'r2',
     kind: 'edited',
@@ -102,6 +103,7 @@ describe('pickEditedVideoForPublish', () => {
   }
   const thisWeekEntregas = {
     id: 'new-ent',
+    idea_id: 'idea-this-week',
     drive_file_id: 'entregas/x/edited/this-week.mp4',
     storage_provider: 'entregas-r2',
     kind: 'edited',
@@ -113,6 +115,38 @@ describe('pickEditedVideoForPublish', () => {
     const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas])
     expect(picked?.id).toBe('new-ent')
     expect(picked?.drive_file_id).toContain('this-week')
+  })
+
+  it('never picks another idea’s file from the same client', () => {
+    const lastWeekOtherIdea = {
+      ...lastWeekPipeline,
+      id: 'other-idea-file',
+      idea_id: 'idea-last-week',
+      drive_file_id: 'entregas/last-week/edited/old.mp4',
+      storage_provider: 'entregas-r2',
+      uploaded_at: '2026-08-13T20:00:00Z',
+    }
+    const picked = pickEditedVideoForPublish([lastWeekOtherIdea, thisWeekEntregas], {
+      ideaId: 'idea-this-week',
+    })
+    expect(picked?.id).toBe('new-ent')
+    expect(picked?.idea_id).toBe('idea-this-week')
+  })
+
+  it('when they approved on the pipeline, does not swap in an Entregas leftover', () => {
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
+      ideaId: 'idea-this-week',
+      watchedOn: 'pipeline',
+    })
+    expect(picked?.id).toBe('old-r2')
+  })
+
+  it('when they approved on Entregas, does not swap in a pipeline leftover', () => {
+    const picked = pickEditedVideoForPublish([lastWeekPipeline, thisWeekEntregas], {
+      ideaId: 'idea-this-week',
+      watchedOn: 'entregas',
+    })
+    expect(picked?.id).toBe('new-ent')
   })
 
   it('uses the file the copywriter previewed, even if another edited is newer', () => {

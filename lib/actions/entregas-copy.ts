@@ -194,6 +194,9 @@ export async function saveCopyAndSchedule(input: {
   revalidatePath('/entregas')
   // Copy is what made the idea ready (caption + already-approved video).
   // maybeAutoPostIdea no-ops unless caption + edited video + Metricool.
-  const autopost = await maybeAutoPostIdea(input.ideaId, { videoFileId: input.videoFileId })
+  const autopost = await maybeAutoPostIdea(input.ideaId, {
+    videoFileId: input.videoFileId,
+    watchedOn: 'entregas',
+  })
   return { ok: true, autopost }
 }
