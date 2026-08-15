@@ -11,9 +11,10 @@ import { RequestNotifier } from '@/components/shared/request-notifier'
 import { AvatarSetupGate } from '@/components/account/avatar-setup-gate'
 import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
+import { UpdateNotice } from '@/components/shared/update-notice'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
 import { getCurrentRole } from '@/lib/auth/server'
-import { resolveApprovalRedirect } from '@/lib/utils/approval-core'
+import { resolveDashboardRedirect } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 export default async function DashboardLayout({
@@ -24,39 +25,38 @@ export default async function DashboardLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let profile: Profile | null = null
-  let role: UserRole | null = null
+  // Sin sesión no hay dashboard: antes el shell se renderizaba anónimo con un
+  // usuario placeholder y el sitio "salía logueado" sin estarlo.
+  if (!user) redirect(resolveDashboardRedirect(false, null)!)
 
-  if (user) {
-    // Backfills profile if the signup trigger never ran.
-    const ensuredRole = await getCurrentRole()
+  // Backfills profile if the signup trigger never ran.
+  const ensuredRole = await getCurrentRole()
 
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    profile = data as Profile | null
-    role = profile?.role ?? ensuredRole
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle()
+  const profile = data as Profile | null
+  const role: UserRole | null = profile?.role ?? ensuredRole
 
-    // Deactivated accounts are locked out of the entire dashboard.
-    if (profile && profile.status === 'inactive') {
-      await supabase.auth.signOut()
-      redirect('/login?deactivated=1')
-    }
-
-    // Accounts awaiting approval (or rejected) can't enter the dashboard. Pending
-    // users see the waiting screen; rejected users get signed out at /login.
-    const approvalRedirect = resolveApprovalRedirect(profile)
-    if (approvalRedirect) {
-      if (profile?.approval_status === 'rejected') {
-        await supabase.auth.signOut()
-      }
-      redirect(approvalRedirect)
-    }
+  // Deactivated accounts are locked out of the entire dashboard.
+  if (profile && profile.status === 'inactive') {
+    await supabase.auth.signOut()
+    redirect('/login?deactivated=1')
   }
 
-  const authUser = user ? { id: user.id, email: user.email ?? '' } : null
+  // Accounts awaiting approval (or rejected) can't enter the dashboard. Pending
+  // users see the waiting screen; rejected users get signed out at /login.
+  const approvalRedirect = resolveDashboardRedirect(true, profile)
+  if (approvalRedirect) {
+    if (profile?.approval_status === 'rejected') {
+      await supabase.auth.signOut()
+    }
+    redirect(approvalRedirect)
+  }
+
+  const authUser = { id: user.id, email: user.email ?? '' }
 
   // Only /video-reviews shows a badge in the nav. The counts for /operations,
   // /inbox and /planning were queried on EVERY page render for badges that could
@@ -95,6 +95,7 @@ export default async function DashboardLayout({
           </main>
         </SidebarAwareContent>
         <Toaster />
+        <UpdateNotice />
         <ChatBubble />
         <CommandPalette />
         <RequestNotifier />

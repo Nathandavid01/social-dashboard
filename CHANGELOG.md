@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.34 — 2026-08-15
+
+**Lo enviado a Metricool es clickable, los updates avisan, y sin sesión ya no se ve el dashboard.**
+
+- En Entregas, un video ya enviado a Metricool muestra el enlace **"Ver post enviado"** que abre el archivo exacto que se agendó, aunque después se suba otro corte.
+- Cuando sale una versión nueva del dashboard, aparece el aviso **"Hay una versión nueva"** con un botón para actualizar — sin esperar a que alguien recargue por casualidad.
+- Entrar al sitio sin sesión ya no enseña el dashboard con un usuario vacío: ahora siempre recibe la pantalla de login.
+
+Vista: [preview HTML](/previews/v3.34-ver-post-enviado.html) · [aviso de versión](/previews/v3.34-aviso-update.html)
+
 ## v3.33 — 2026-08-13
 
 **Si el tablero no tiene ese corte, no se publica el del otro.**

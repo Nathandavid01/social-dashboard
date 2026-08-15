@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { buildPostedLinks } from '@/lib/entregas/posted-links'
 import type { EstadoCliente } from '@/lib/entregas/marca-cliente'
 
 export const dynamic = 'force-dynamic'
@@ -44,22 +45,35 @@ export default async function EntregasPage() {
     (i.videos ?? []).some((v) => v.kind === 'edited' && v.storage_provider === 'entregas-r2'),
   )
 
-  // Lo que el cliente respondió, por video. Solo de lo visible: la tarjeta lo
-  // usa para decir "aprobado por el cliente" aunque el copy aún no exista.
-  const { data: votos } = entregas.length
-    ? await supabase
-        .from('entregas_client_review_items')
-        .select('idea_id, status')
-        .in('idea_id', entregas.map((i) => i.id))
-    : { data: [] }
+  // Dos lecturas independientes sobre lo visible, en paralelo:
+  // - votos: lo que el cliente respondió, para decir "aprobado por el cliente".
+  // - envios: la URL exacta que Metricool recibió (log posted_to_metricool),
+  //   para el enlace "Ver post enviado". Viene del log, no del archivo actual:
+  //   el enlace audita lo que SE ENVIÓ.
+  const ids = entregas.map((i) => i.id)
+  const enviadasIds = entregas.filter((i) => i.metricool_post_id != null).map((i) => i.id)
+  const [{ data: votos }, { data: envios }] = await Promise.all([
+    ids.length
+      ? supabase.from('entregas_client_review_items').select('idea_id, status').in('idea_id', ids)
+      : { data: [] },
+    enviadasIds.length
+      ? supabase
+          .from('content_idea_activity')
+          .select('content_idea_id, created_at, metadata')
+          .eq('action', 'posted_to_metricool')
+          .in('content_idea_id', enviadasIds)
+      : { data: [] },
+  ])
   const clientApprovals = Object.fromEntries(
     (votos ?? []).map((v) => [v.idea_id as string, v.status as EstadoCliente]),
   )
+  const postedLinks = buildPostedLinks(envios ?? [])
 
   return (
     <EntregasBoard
       ideas={entregas}
       clientApprovals={clientApprovals}
+      postedLinks={postedLinks}
       allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
       postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
       stages={['copy', 'publication']}

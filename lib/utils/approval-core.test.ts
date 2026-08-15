@@ -4,6 +4,7 @@ import {
   isPending,
   filterPendingApprovals,
   resolveApprovalRedirect,
+  resolveDashboardRedirect,
   validateApprovalRole,
 } from './approval-core'
 import type { Profile } from '@/lib/supabase/types'
@@ -88,5 +89,23 @@ describe('validateApprovalRole', () => {
     expect(validateApprovalRole('team_member' as never).ok).toBe(false)
     expect(validateApprovalRole('nope' as never).ok).toBe(false)
     expect(validateApprovalRole(undefined as never).ok).toBe(false)
+  })
+})
+
+describe('resolveDashboardRedirect', () => {
+  it('sin sesión manda a /login — el dashboard nunca se enseña anónimo', () => {
+    expect(resolveDashboardRedirect(false, null)).toBe('/login')
+  })
+
+  it('con sesión aplica la regla de aprobación (pending → /pending)', () => {
+    expect(resolveDashboardRedirect(true, makeProfile({ approval_status: 'pending' }))).toBe('/pending')
+  })
+
+  it('con sesión aprobada deja pasar', () => {
+    expect(resolveDashboardRedirect(true, makeProfile({ approval_status: 'approved' }))).toBeNull()
+  })
+
+  it('con sesión pero sin profile todavía (trigger no corrió) deja pasar', () => {
+    expect(resolveDashboardRedirect(true, null)).toBeNull()
   })
 })

@@ -554,3 +554,43 @@ describe('EntregasBoard — el contador de la pestaña', () => {
     expect(screen.getByRole('button', { name: 'Lunes' }).textContent).not.toMatch(/[0-9]/)
   })
 })
+
+describe('EntregasBoard — enlace al post enviado', () => {
+  const enviada = (over: Partial<IdeaWithPipeline> = {}) =>
+    idea({
+      approval_status: 'approved',
+      generated_caption: 'listo',
+      metricool_post_id: 123,
+      publish_date: fechaEntregaDelDia(1),
+      ...over,
+    } as Partial<IdeaWithPipeline>)
+
+  it('la tarjeta enviada a Metricool enlaza a la URL pública exacta que se envió', () => {
+    render(<EntregasBoard stages={['copy','publication']} modoDia="publicacion"
+      ideas={[enviada()]} postedLinks={{ i: 'https://cdn.example.com/edited/x.mp4' }} />)
+    const link = screen.getByRole('link', { name: /ver post enviado/i })
+    expect(link).toHaveAttribute('href', 'https://cdn.example.com/edited/x.mp4')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('sin registro del envío (post viejo) no hay enlace y la tarjeta no rompe', () => {
+    render(<EntregasBoard stages={['copy','publication']} modoDia="publicacion"
+      ideas={[enviada()]} postedLinks={{}} />)
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /ver post enviado/i })).toBeNull()
+  })
+
+  it('una idea aún no enviada no enseña enlace aunque el mapa traiga su id', () => {
+    render(<EntregasBoard stages={['copy','publication']} modoDia="publicacion"
+      ideas={[enviada({ metricool_post_id: null } as Partial<IdeaWithPipeline>)]}
+      postedLinks={{ i: 'https://cdn.example.com/edited/x.mp4' }} />)
+    expect(screen.queryByRole('link', { name: /ver post enviado/i })).toBeNull()
+  })
+
+  it('el click en el enlace no abre el overlay de la tarjeta', () => {
+    render(<EntregasBoard stages={['copy','publication']} modoDia="publicacion"
+      ideas={[enviada()]} postedLinks={{ i: 'https://cdn.example.com/edited/x.mp4' }} />)
+    fireEvent.click(screen.getByRole('link', { name: /ver post enviado/i }))
+    expect(screen.queryByTestId('review-overlay')).toBeNull()
+  })
+})

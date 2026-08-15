@@ -44,6 +44,18 @@ export function resolveApprovalRedirect(profile: ProfileLike): string | null {
   }
 }
 
+/**
+ * The dashboard's front door. Without a session it ALWAYS goes to /login —
+ * before this guard the shell rendered anonymous with a placeholder user, and
+ * whoever opened the site "looked" logged in without being logged in. With a
+ * session, the approval rule decides (pending/rejected). A session without a
+ * profile passes: the layout backfills the profile right after.
+ */
+export function resolveDashboardRedirect(hasSession: boolean, profile: ProfileLike): string | null {
+  if (!hasSession) return '/login'
+  return resolveApprovalRedirect(profile)
+}
+
 export type ApprovalRoleValidation = { ok: true } | { ok: false; error: string }
 
 /** An owner approving a signup must assign a real, assignable role (not legacy). */
