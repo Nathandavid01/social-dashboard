@@ -129,6 +129,9 @@ export interface Client {
   assigned_to: string | null
   /** Diseñador asignado — columna aparte: no es la misma persona. */
   assigned_designer?: string | null
+  /** Quién hizo el último cambio de editor/diseñador (migración 0060). */
+  assignment_changed_by?: string | null
+  assignment_changed_at?: string | null
   notes: string | null
   brand_voice: string | null
   caption_language: string | null

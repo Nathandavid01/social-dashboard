@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import {
-  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, splitBatchesByStage, ENTREGA_BATCH_STAGES,
+  ideaStage, batchStage, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, splitBatchesByStage, ENTREGA_BATCH_STAGES, entregaCardKey,
 } from './batches'
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
@@ -71,6 +71,20 @@ describe('batchStage — moves together (least advanced active video)', () => {
  * misma tarjeta videos de dias distintos, y con la fecha elegida video a video
  * eso ya no tiene sentido: cada uno tiene que caer en su dia.
  */
+describe('entregaCardKey', () => {
+  it('two videos of the same client in the same column stay distinct', () => {
+    const lastWeek = groupIntoBatches([
+      idea({ id: 'idea-last-week', client_id: 'c1', approval_status: 'submitted', status: 'producida' }),
+    ])[0]
+    const thisWeek = groupIntoBatches([
+      idea({ id: 'idea-this-week', client_id: 'c1', approval_status: 'submitted', status: 'producida' }),
+    ])[0]
+    expect(lastWeek.stage).toBe(thisWeek.stage)
+    expect(entregaCardKey(lastWeek)).not.toBe(entregaCardKey(thisWeek))
+    expect(entregaCardKey(thisWeek)).toContain('idea-this-week')
+  })
+})
+
 describe('groupIntoBatches', () => {
   it('produce una tarjeta por video, no una por cliente', () => {
     const ann = { id: 'a', full_name: 'Ana' }

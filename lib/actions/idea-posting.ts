@@ -15,7 +15,11 @@ const AUTOPOST_ON_APPROVAL_DISABLED = process.env.METRICOOL_AUTOPOST_ON_APPROVAL
  * at `scheduleOverride` ("YYYY-MM-DDTHH:MM", Puerto Rico wall-clock) when the
  * Publicación card picked a time by hand.
  */
-export async function publishIdeaToMetricool(ideaId: string, scheduleOverride?: string | null): Promise<Result> {
+export async function publishIdeaToMetricool(
+  ideaId: string,
+  scheduleOverride?: string | null,
+  opts?: { videoFileId?: string | null; watchedOn?: 'entregas' | 'pipeline' },
+): Promise<Result> {
   try {
     await requirePermission('posting.publish')
   } catch (err) {
@@ -23,7 +27,7 @@ export async function publishIdeaToMetricool(ideaId: string, scheduleOverride?: 
   }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  return runIdeaPost(supabase, ideaId, user?.id ?? null, scheduleOverride)
+  return runIdeaPost(supabase, ideaId, user?.id ?? null, scheduleOverride, opts)
 }
 
 /** Outcome of the best-effort auto-post, so the approval UI can tell the user. */
@@ -36,12 +40,15 @@ export type AutoPostOutcome = { posted: boolean; skipped?: string } | null
  * idea isn't fully ready or was already posted. Returns the outcome (posted /
  * why it was skipped) purely as UI feedback; null = kill-switched or errored.
  */
-export async function maybeAutoPostIdea(ideaId: string): Promise<AutoPostOutcome> {
+export async function maybeAutoPostIdea(
+  ideaId: string,
+  opts?: { videoFileId?: string | null; watchedOn?: 'entregas' | 'pipeline' },
+): Promise<AutoPostOutcome> {
   if (AUTOPOST_ON_APPROVAL_DISABLED) return null
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const res = await runIdeaPost(supabase, ideaId, user?.id ?? null)
+    const res = await runIdeaPost(supabase, ideaId, user?.id ?? null, null, opts)
     if (res.error) return null // recorded on the row; approval stays green
     if (res.skipped) return { posted: false, skipped: res.skipped }
     return { posted: true }

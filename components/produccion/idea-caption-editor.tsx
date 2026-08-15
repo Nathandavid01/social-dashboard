@@ -10,6 +10,8 @@ import { generateIdeaCaption, saveIdeaCaption } from '@/lib/actions/idea-caption
 import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
+import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 interface Props {
@@ -24,13 +26,14 @@ interface Props {
   visualBrief?: string | null
   captionAngle?: string | null
   hashtags?: string | null
+  /** Caption is locked until there is footage. */
+  hasVideo?: boolean
   onSaved?: (caption: string) => void
 }
 
 /**
  * Caption único: a single caption per video that goes to ALL the client's
- * networks. Generated from the idea brief (hook + visual brief + angle) so
- * recording follows a clear script.
+ * networks. Generated from what the video says (Whisper) plus the idea brief.
  *
  * Generar ≠ guardar. What the AI writes is a draft nobody has read yet; only
  * "Guardar caption" persists it as the real caption and fires `onSaved`, which
@@ -45,19 +48,35 @@ export function IdeaCaptionEditor({
   visualBrief,
   captionAngle,
   hashtags,
+  hasVideo = false,
   onSaved,
 }: Props) {
   const canUse = useHasPermission('captions.use')
   // A saved caption wins over a leftover draft — the draft is only what's
   // pending when nothing has been settled yet.
-  const [caption, setCaption] = useState(initialCaption || initialDraft || '')
+  const [caption, setCaption] = useState(initialCaption || displayCaptionDraft(initialDraft) || '')
   const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+  const { autoDrafting } = useAutoDraftCaption({
+    ideaId,
+    hook,
+    hasVideo,
+    captionDraft: initialDraft,
+    generatedCaption: initialCaption,
+    enabled: canUse,
+    onDraft: (text) => {
+      setCaption((prev) => (prev.trim() ? prev : text))
+      if (!caption.trim()) {
+        toast({ title: 'Borrador listo', description: 'La IA lo escribió al abrir. Revísalo y guárdalo.' })
+      }
+    },
+  })
+  const drafting = isGenerating || autoDrafting
 
-  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief })
-  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle })
+  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief, hasVideo })
+  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle, hasVideo })
   const dirty = caption !== (initialCaption ?? '')
   // Hay texto en pantalla que todavía no es el caption del video. Se avisa
   // fuerte: mientras esto se vea, el video NO se ha movido de Copy.
@@ -117,7 +136,7 @@ export function IdeaCaptionEditor({
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-3">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</span>
-        <span className="min-w-0 text-[10px] text-muted-foreground">— basado en la idea de arriba</span>
+        <span className="min-w-0 text-[10px] text-muted-foreground">— basado en lo que se oye en el video</span>
         {unsaved && (
           <span className="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
             <AlertCircle className="h-3 w-3" aria-hidden /> Borrador sin guardar
@@ -129,8 +148,9 @@ export function IdeaCaptionEditor({
         <div className="space-y-1 rounded-md border border-border/60 bg-muted/30 px-2.5 py-2 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5 font-medium text-foreground/80">
             <Lightbulb className="h-3 w-3 text-purple-500" aria-hidden />
-            Idea para este caption
+            La IA escucha el video
           </p>
+          <p>Escribe el copy sobre lo que se dice. El hook de abajo es contexto.</p>
           {hook && <p><span className="font-medium text-foreground/70">De qué es:</span> {hook}</p>}
           {visualBrief && <p><span className="font-medium text-foreground/70">Brief visual:</span> {visualBrief}</p>}
           {captionAngle && <p><span className="font-medium text-foreground/70">Ángulo:</span> {captionAngle}</p>}
@@ -138,14 +158,16 @@ export function IdeaCaptionEditor({
         </div>
       ) : (
         <p className="rounded-md border border-dashed border-amber-500/30 bg-amber-500/5 px-2.5 py-2 text-xs text-amber-600 dark:text-amber-400">
-          Di de qué es el video (arriba) y la AI escribe el caption — igual que en el generador de ideas.
+          {missing.includes('el video')
+            ? 'Sube un video primero. El caption se escribe sobre la grabación, no sobre la idea vacía.'
+            : 'Di de qué es el video (arriba) y la AI escribe el caption.'}
         </p>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
           <Globe className="h-3.5 w-3.5" />
-          Una caption para todas las redes
+          {platforms.length > 1 ? 'Un copy por cada red' : 'Una caption para todas las redes'}
           {platforms.length > 0 && (
             <span className="ml-0.5 flex items-center gap-1 [&_svg]:h-3.5 [&_svg]:w-3.5">
               <PlatformBadges platforms={platforms} />
@@ -157,11 +179,11 @@ export function IdeaCaptionEditor({
             size="sm"
             variant="outline"
             onClick={generate}
-            disabled={isGenerating || !ideaReady}
+            disabled={drafting || !ideaReady}
             className="transition-transform hover:scale-105"
           >
-            {isGenerating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
-            {caption ? 'Regenerar con IA' : 'Generar desde la idea'}
+            {drafting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
+            {autoDrafting ? 'Escribiendo el copy…' : caption ? 'Regenerar con IA' : 'Generar desde el video'}
           </Button>
         )}
         {caption && (
@@ -178,15 +200,17 @@ export function IdeaCaptionEditor({
         rows={8}
         placeholder={
           ideaReady
-            ? 'Genera el caption desde la idea o escríbelo aquí…'
-            : 'Primero di de qué es el video…'
+            ? 'Genera el caption desde el video o escríbelo aquí…'
+            : missing.includes('el video')
+              ? 'Primero sube el video…'
+              : 'Primero di de qué es el video…'
         }
         className="resize-none text-sm leading-relaxed"
         disabled={!ideaReady}
       />
 
       {/* THE shared caption feedback module — same everywhere captions are made. */}
-      <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={isGenerating} />
+      <CaptionFeedback caption={caption} target={{ ideaId }} onRegenerate={regenerateWithFeedback} isGenerating={drafting} />
 
       {dirty && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-border/60 pt-3">

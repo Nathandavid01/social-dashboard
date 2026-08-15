@@ -61,10 +61,12 @@ export async function generateReviewLink(
     .select('id')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
+    .eq('storage_provider', 'r2')
     .neq('status', 'archived')
+    .order('uploaded_at', { ascending: false })
     .limit(1)
   if (!edited || edited.length === 0) {
-    return { error: 'Primero sube el video editado; es lo que verá el cliente.' }
+    return { error: 'Este enlace es del pipeline. El corte de Entregas se aprueba con el enlace de la tarjeta, no aquí.' }
   }
 
   // Sending the link IS submitting the video for review. This has to be recorded:

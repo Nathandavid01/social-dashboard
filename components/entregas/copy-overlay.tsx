@@ -9,6 +9,10 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
+import { useHasPermission } from '@/components/auth/role-gate'
+import { CaptionFeedback } from '@/components/captions/caption-feedback'
 import {
   getEntregaCopyVideos,
   updateIdeaHook,
@@ -41,6 +45,7 @@ export function CopyOverlay({
 }) {
   const router = useRouter()
   const { toast } = useToast()
+  const canUse = useHasPermission('captions.use')
   const [videos, setVideos] = useState<CopyVideoRow[] | null>(null)
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -53,11 +58,9 @@ export function CopyOverlay({
   const [publishDate, setPublishDate] = useState('')
 
   const load = useCallback(async () => {
-    const res = await getEntregaCopyVideos(clientId)
+    const res = await getEntregaCopyVideos(clientId, ideaId)
     if (res.error) return setError(res.error)
-    // Solo el video de la tarjeta. Se filtra aqui y no en el servidor para no
-    // tocar una accion que tambien usa el otro tablero.
-    const pending = (res.data?.videos ?? []).filter((v) => v.id === ideaId)
+    const pending = res.data?.videos ?? []
     setVideos(pending)
     setNotes(res.data?.captionNotes ?? '')
     setIndex(0)
@@ -66,13 +69,28 @@ export function CopyOverlay({
   useEffect(() => { void load() }, [load])
 
   const current = videos?.[index] ?? null
+  const { autoDrafting } = useAutoDraftCaption({
+    ideaId: current?.id ?? '',
+    hook: current?.hook,
+    hasVideo: !!current?.videoFileId,
+    captionDraft: current?.caption_draft,
+    generatedCaption: current?.generated_caption,
+    enabled: canUse && !!current,
+    onDraft: (text) => {
+      setCaption((prev) => {
+        if (prev.trim()) return prev
+        toast({ title: 'Borrador listo', description: 'La IA lo escribió al abrir. Léelo y envíalo cuando esté bien.' })
+        return text
+      })
+    },
+  })
 
   // Reset the per-video fields whenever a different video comes on screen.
   useEffect(() => {
     setHook(current?.hook ?? '')
     // El caption guardado manda; si no hay, se recupera el borrador de la IA
     // para que una recarga no lo tire.
-    setCaption(current?.generated_caption || current?.caption_draft || '')
+    setCaption(current?.generated_caption || displayCaptionDraft(current?.caption_draft) || '')
     setPublishDate(current?.publishDate ?? '')
   }, [current?.id, current?.hook, current?.generated_caption, current?.caption_draft, current?.publishDate])
 
@@ -101,7 +119,7 @@ export function CopyOverlay({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  async function generate() {
+  async function generate(fb?: string) {
     if (!current) return
     if (!hook.trim()) {
       toast({ title: 'Falta "de qué es el video"', description: 'La IA lo necesita para escribir.', variant: 'destructive' })
@@ -113,7 +131,10 @@ export function CopyOverlay({
       // from the database, not from this form.
       await updateIdeaHook(current.id, hook)
       await saveClientCaptionNotes(clientId, notes)
-      const res = await generateIdeaCaption(current.id)
+      const res = await generateIdeaCaption(
+        current.id,
+        fb?.trim() ? { feedback: fb, previousCaption: caption } : undefined,
+      )
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
       else if (res.caption) {
         // Borrador: queda en pantalla y en `caption_draft`. El video sigue en
@@ -134,12 +155,22 @@ export function CopyOverlay({
         ideaId: current.id,
         caption: caption.trim(),
         publishDate: publishDate || null,
+        videoFileId: current.videoFileId,
       })
       if (res.error) {
         toast({ title: 'Error', description: res.error, variant: 'destructive' })
         return
       }
-      toast({ title: 'Copy guardado — pasa a Publicación' })
+      if (res.autopost?.posted) {
+        toast({
+          title: 'Copy guardado y programado en Metricool',
+          description: 'Se publica en su fecha. El video ya no se queda esperando un botón extra.',
+        })
+      } else if (res.autopost?.skipped) {
+        toast({ title: 'Copy guardado — pasa a Publicación', description: res.autopost.skipped })
+      } else {
+        toast({ title: 'Copy guardado — pasa a Publicación' })
+      }
       await load()
       router.refresh()
     } finally {
@@ -148,6 +179,7 @@ export function CopyOverlay({
   }
 
   const done = videos !== null && videos.length === 0
+  const writing = busy !== null || autoDrafting
   // Hay copy en pantalla que aún no es el del video: mientras se vea, el video
   // sigue en Copy. Es la señal de que generar no envió nada.
   const sinEnviar = !!caption.trim() && caption.trim() !== (current?.generated_caption ?? '').trim()
@@ -248,11 +280,11 @@ export function CopyOverlay({
                 </p>
               </div>
 
-              <Button size="sm" variant="outline" disabled={busy !== null} onClick={generate}>
-                {busy === 'generando'
+              <Button size="sm" variant="outline" disabled={writing} onClick={() => void generate()}>
+                {busy === 'generando' || autoDrafting
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                   : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}
-                {caption.trim() ? 'Regenerar con IA' : 'Escribir copy con IA'}
+                {autoDrafting ? 'Escribiendo el copy…' : caption.trim() ? 'Regenerar con IA' : 'Escribir copy con IA'}
               </Button>
               </div>
             </section>
@@ -274,6 +306,14 @@ export function CopyOverlay({
                 placeholder="Genera con IA o escríbelo a mano. Puedes editar lo que genere."
                 className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
               />
+              {caption.trim() && (
+                <CaptionFeedback
+                  caption={caption}
+                  target={{ ideaId: current.id }}
+                  onRegenerate={(fb) => { void generate(fb) }}
+                  isGenerating={writing}
+                />
+              )}
               <div className="space-y-1.5 rounded-lg border bg-muted/30 p-2.5">
                 <Label htmlFor="co-date" className="text-[11px]">Fecha de publicación</Label>
                 <Input
@@ -294,7 +334,7 @@ export function CopyOverlay({
                 <span className="text-[11px] tabular-nums text-muted-foreground">
                   {caption.trim().length} caracteres
                 </span>
-                <Button size="sm" disabled={busy !== null || !caption.trim()} onClick={sendToPublication}>
+                <Button size="sm" disabled={writing || !caption.trim()} onClick={sendToPublication}>
                   {busy === 'guardando'
                     ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
                     : <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />}

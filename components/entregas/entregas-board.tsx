@@ -5,7 +5,7 @@ import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRigh
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
+import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, entregaCardKey, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ClientLogo } from '@/components/clients/client-logo'
@@ -183,8 +183,7 @@ export function EntregasBoard({
 
   const batches = useMemo(() => splitBatchesByStage(groupIntoBatches(ideasDelDia)), [ideasDelDia])
 
-  /** Cards share a clientId now, so anything per-card must key on stage too. */
-  const cardKey = useCallback((b: EntregaBatch) => `${b.clientId}:${b.stage}`, [])
+  const cardKey = useCallback((b: EntregaBatch) => entregaCardKey(b), [])
 
   const pipelineByClient = useMemo(
     () => buildClientPipelineIndex(ideas, clientCadence),
@@ -492,7 +491,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes 
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={`${b.clientId}:${b.stage}`} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />)}
+            {batches.map((b) => <BatchCard key={entregaCardKey(b)} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />)}
           </>
         )}
       </div>

@@ -67,6 +67,31 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).not.toMatch(/REDES:\s*\n/)
   })
 
+  it('grounds the caption in the video transcript when we heard it', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: 'un socio en el gym',
+      videoTranscript: 'Bajé 15 libras entrenando aquí todas las mañanas',
+    })
+    expect(p).toContain('LO QUE SE OYE EN EL VIDEO')
+    expect(p).toContain('Bajé 15 libras entrenando aquí todas las mañanas')
+    expect(p).toMatch(/transcripción/i)
+    expect(p).toMatch(/ocurre en el video/i)
+  })
+
+  it('can target a single network for the daily-loop fan-out', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      platforms: ['instagram', 'tiktok'],
+      targetPlatform: 'tiktok',
+      targetFocus: 'corto y oral, sin muro de hashtags',
+    })
+    expect(p).toContain('RED ESPECÍFICA: tiktok')
+    expect(p).toContain('corto y oral')
+    expect(p).toMatch(/SOLO para esta red/i)
+    expect(p).not.toMatch(/un solo caption que funcione igual en todas/i)
+  })
+
   it('ignores empty/blank platform entries', () => {
     const p = buildIdeaCaptionPrompt({ ...base, platforms: ['', '  '] })
     expect(p).toMatch(/todas las redes/i)

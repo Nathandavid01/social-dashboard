@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.24 — Un copy por red</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1f1f1f;
+      --muted-fg: #a6a6a6;
+      --border: #1f1f1f;
+      --primary: #e8b31a;
+      --amber: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tabs button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted-fg);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tabs button.on { background: var(--muted); color: var(--fg); border-color: #2a2a2a; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .card h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      margin: 0 0 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .hint { font-size: 10px; color: var(--muted-fg); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); background: var(--muted);
+      border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--muted-fg);
+    }
+    .pill.amber { border-color: rgba(245,158,11,.35); color: #fbbf24; }
+    .btn {
+      border: 1px solid #333; background: #141414; color: var(--fg);
+      border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 500;
+    }
+    textarea {
+      width: 100%; min-height: 180px; resize: none;
+      background: #0c0c0c; border: 1px solid #242424; border-radius: 8px;
+      color: var(--fg); padding: 10px; font-size: 13px; line-height: 1.5;
+    }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.24 — Cada red tiene su propio copy</h1>
+    <p class="sub">La IA escribe uno para Instagram y otro para TikTok. En la caja se ven uno debajo del otro. Guardar sigue siendo lo que mueve el video.</p>
+    <div class="tabs">
+      <button class="on" data-tab="dos" type="button">Instagram + TikTok</button>
+      <button data-tab="una" type="button">Solo Instagram</button>
+    </div>
+
+    <section id="dos" class="screen on">
+      <div class="card">
+        <h2><span style="color:var(--primary)">✦</span> Caption</h2>
+        <div class="label" style="margin-bottom:8px">Caption <span class="hint">— basado en lo que se oye en el video</span></div>
+        <div class="row">
+          <span class="pill">Un copy por cada red · IG · TT</span>
+          <button class="btn" type="button">✦ Regenerar con IA</button>
+          <span class="pill amber">Borrador sin guardar</span>
+        </div>
+        <textarea>[Instagram]
+Bajé 15 libras entrenando aquí todas las mañanas 💪
+
+El coach me midió la primera semana y no lo creía. Ven a probar una clase.
+
+Agenda tu visita → link in bio
+#GymX #Transformación
+
+[TikTok]
+Bajé 15 libras aquí. El coach no lo creía. Ven a una clase y lo ves.</textarea>
+        <p class="tiny">Dos textos distintos. Mañana cada red tendrá su propio recuadro.</p>
+      </div>
+    </section>
+
+    <section id="una" class="screen">
+      <div class="card">
+        <h2><span style="color:var(--primary)">✦</span> Caption</h2>
+        <div class="row">
+          <span class="pill">Una caption para todas las redes · IG</span>
+          <button class="btn" type="button">✦ Regenerar con IA</button>
+          <span class="pill amber">Borrador sin guardar</span>
+        </div>
+        <textarea>Bajé 15 libras entrenando aquí todas las mañanas 💪
+
+El coach me midió la primera semana y no lo creía. Si estás buscando un gym donde se vea el cambio, ven a probar una clase.
+
+Agenda tu visita → link in bio</textarea>
+        <p class="tiny">Un cliente de una sola red sigue viendo un solo texto.</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    const tabs = document.querySelectorAll('.tabs button')
+    tabs.forEach((b) => b.addEventListener('click', () => {
+      tabs.forEach((x) => x.classList.remove('on'))
+      b.classList.add('on')
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'))
+      document.getElementById(b.dataset.tab).classList.add('on')
+    }))
+  </script>
+</body>
+</html>

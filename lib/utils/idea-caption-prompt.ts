@@ -27,6 +27,13 @@ export interface IdeaCaptionPromptInput {
    * if omitted/empty the prompt uses generic "todas las redes" wording.
    */
   platforms?: string[]
+  /**
+   * When set, the caption is written for THIS network only.
+   * generateIdeaCaption fans out one prompt per captionJobsForPlatforms() job.
+   */
+  targetPlatform?: string
+  /** Extra focus line for `targetPlatform` (from captionJobsForPlatforms). */
+  targetFocus?: string
   /** Past published captions for this client, pulled from Metricool, to imitate. */
   examples: StyleExample[]
   /**
@@ -43,6 +50,8 @@ export interface IdeaCaptionPromptInput {
   feedback?: string | null
   /** The previous caption being revised — shown to the model so it improves on it. */
   previousCaption?: string | null
+  /** What was actually said in the video (Whisper). Beats the written hook. */
+  videoTranscript?: string | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -53,7 +62,13 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
   const c = input.client ?? {}
 
   const nets = (input.platforms ?? []).filter((p) => filled(p))
-  const redes = nets.length > 0 ? nets.join(', ') : 'todas las redes del cliente'
+  const target = (input.targetPlatform ?? '').trim()
+  const single = filled(target) && target !== 'all'
+  const redes = single
+    ? target
+    : nets.length > 0
+      ? nets.join(', ')
+      : 'todas las redes del cliente'
 
   const constraints = [
     filled(c.captionLanguage) && `Idioma: ${c.captionLanguage} (IMPORTANTE: escribe el caption en este idioma)`,
@@ -126,19 +141,34 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     ? '- Aplica el FEEDBACK DEL EQUIPO de arriba manteniendo el mensaje central de la idea\n'
     : ''
 
+  const redLine = single
+    ? `RED ESPECÍFICA: ${redes}${filled(input.targetFocus) ? ` — ${input.targetFocus}` : ''} (escribe el caption SOLO para esta red)`
+    : `REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)`
+
+  const heard = filled(input.videoTranscript)
+    ? `LO QUE SE OYE EN EL VIDEO (transcripción — esto es lo que realmente pasa; úsalo por encima del hook si chocan):\n${input.videoTranscript!.trim()}\n\n`
+    : ''
+  const heardBullet = heard
+    ? '- El caption describe lo que se oye/pasa en el video, no un brief inventado\n'
+    : ''
+
+  const taskLine = single
+    ? `TAREA: Escribe UN caption completo para ${redes}.`
+    : 'TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.'
+
   return `Eres un copywriter profesional de redes sociales para NMedia PR, agencia de marketing puertorriqueña. Escribes captions que rinden bien en Instagram, TikTok y Facebook.
 
 CLIENTE: ${filled(c.name) ? c.name : 'cliente'}
-REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)
+${redLine}
 
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
-${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
+${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
-TAREA: Escribe UN SOLO caption completo para este video, que sirva igual en todas las redes indicadas.
-El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.
-${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
+${taskLine}
+${heard ? 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.' : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
+${heardBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`

@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
+import { hasCaptionableVideo } from '@/lib/utils/idea-ready'
 import type { BatchVideo } from '@/lib/utils/batch-view'
 
 const filled = (s?: string | null) => !!s && s.trim().length > 0
+const hasFile = (v: BatchVideo) =>
+  hasCaptionableVideo([...v.videos.raw, ...v.videos.broll, ...v.videos.edited])
 
 /**
  * One click → AI caption DRAFTS for every video in the batch that has neither a
@@ -35,7 +38,14 @@ export function BatchCaptionsButton({
   // Un borrador pendiente ya ocupa el hueco: regenerarlo encima pisaría el
   // texto que alguien está por revisar.
   const missing = useMemo(
-    () => videos.filter((v) => v.status !== 'descartada' && !filled(v.generated_caption) && !filled(v.caption_draft)),
+    () =>
+      videos.filter(
+        (v) =>
+          v.status !== 'descartada' &&
+          hasFile(v) &&
+          !filled(v.generated_caption) &&
+          !filled(v.caption_draft),
+      ),
     [videos],
   )
 

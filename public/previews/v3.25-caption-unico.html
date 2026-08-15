@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.25 — Un caption para todas las redes</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1f1f1f;
+      --muted-fg: #a6a6a6;
+      --border: #1f1f1f;
+      --primary: #e8b31a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tabs button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted-fg);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tabs button.on { background: var(--muted); color: var(--fg); border-color: #2a2a2a; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .card h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      margin: 0 0 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .hint { font-size: 10px; color: var(--muted-fg); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); background: var(--muted);
+      border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--muted-fg);
+    }
+    .btn {
+      border: 1px solid #333; background: #141414; color: var(--fg);
+      border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 500;
+    }
+    textarea {
+      width: 100%; min-height: 160px; resize: none;
+      background: #0c0c0c; border: 1px solid #242424; border-radius: 8px;
+      color: var(--fg); padding: 10px; font-size: 13px; line-height: 1.5;
+    }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+    .file {
+      display: flex; align-items: center; gap: 10px;
+      border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 12px;
+      font-size: 13px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 99px; background: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.25 — El mismo caption en todas las redes</h1>
+    <p class="sub">Así queda en producción. Instagram y TikTok publican el mismo texto.</p>
+    <div class="tabs">
+      <button class="on" data-tab="ahora" type="button">Ahora (un caption)</button>
+      <button data-tab="antes" type="button">Antes (uno por red)</button>
+    </div>
+
+    <section id="ahora" class="screen on">
+      <div class="card">
+        <div class="label">La idea</div>
+        <p style="margin:8px 0 0;font-size:14px">Un socio bajó 15 lb — habla a cámara en el gym</p>
+      </div>
+      <div class="card">
+        <h2>Caption</h2>
+        <div class="label" style="margin-bottom:8px">Caption <span class="hint">— basado en lo que se oye en el video</span></div>
+        <div class="row">
+          <span class="pill">Una caption para todas las redes</span>
+          <span class="pill">IG</span>
+          <span class="pill">TT</span>
+          <button class="btn" type="button">✦ Regenerar con IA</button>
+        </div>
+        <textarea>Bajé 15 libras entrenando aquí todas las mañanas 💪
+
+El coach me midió la primera semana y no lo creía. Si estás buscando un gym donde se vea el cambio, ven a probar una clase.
+
+Agenda tu visita → link in bio
+
+#GymX #Transformación #PuertoRico</textarea>
+        <p class="tiny">Este mismo texto se publica en Instagram y TikTok. Guardar es lo que mueve el video a Publicación.</p>
+      </div>
+    </section>
+
+    <section id="antes" class="screen">
+      <div class="card">
+        <div class="label">La idea</div>
+        <p style="margin:8px 0 0;font-size:14px">Un socio bajó 15 lb — habla a cámara en el gym</p>
+      </div>
+      <div class="card">
+        <h2>Caption</h2>
+        <div class="row">
+          <span class="pill">Ya no se usa</span>
+        </div>
+        <textarea>[Instagram]
+Bajé 15 libras entrenando aquí todas las mañanas 💪
+Agenda tu visita → link in bio
+#GymX #Transformación
+
+[TikTok]
+Bajé 15 libras aquí. El coach no lo creía.
+Ven a probar una clase.</textarea>
+        <p class="tiny">Eso era v3.24. Ya no se genera así.</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    const tabs = document.querySelectorAll('.tabs button')
+    tabs.forEach((b) => b.addEventListener('click', () => {
+      tabs.forEach((x) => x.classList.remove('on'))
+      b.classList.add('on')
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'))
+      document.getElementById(b.dataset.tab).classList.add('on')
+    }))
+  </script>
+</body>
+</html>

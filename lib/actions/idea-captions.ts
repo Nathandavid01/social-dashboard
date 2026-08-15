@@ -8,9 +8,13 @@ import { fetchClientStyleExamples } from '@/lib/integrations/metricool-style'
 import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/lib/integrations/caption-learning'
 import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
-import { isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
+import { hasCaptionableVideo, isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
+import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
+import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
+import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 
 /**
  * Generate a caption for a specific idea, grounded in the idea's hook +
@@ -25,8 +29,9 @@ import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
 export async function generateIdeaCaption(
   ideaId: string,
   /** Optional feedback to revise a prior attempt — the user's instructions
-   *  ("más corto", "menos emojis") + the caption being revised. */
-  opts?: { feedback?: string | null; previousCaption?: string | null },
+   *  ("más corto", "menos emojis") + the caption being revised.
+   *  `auto` = opened the idea; never overwrite a draft the team already has. */
+  opts?: { feedback?: string | null; previousCaption?: string | null; auto?: boolean },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePermission('captions.use')
@@ -40,13 +45,32 @@ export async function generateIdeaCaption(
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('id, client_id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
+    .select('id, client_id, title, hook, visual_brief, caption_angle, hashtags_suggestion, content_type, caption_draft, generated_caption, client:clients(name, brand_voice, caption_language, default_cta, default_hashtags, caption_notes, metricool_blog_id, platforms, default_platforms)')
     .eq('id', ideaId)
     .single()
 
   if (!idea) return { error: 'Idea no encontrada' }
 
-  if (!isIdeaReadyForCaption(idea)) {
+  // Auto-draft on open: return what is already there. Manual "Regenerar" still overwrites.
+  if (opts?.auto) {
+    const existing = [idea.caption_draft, idea.generated_caption]
+      .find((s) => typeof s === 'string' && s.trim().length > 0)
+    if (existing) return { ok: true, caption: displayCaptionDraft(existing) }
+  }
+
+  const { data: vids } = await supabase
+    .from('content_idea_videos')
+    .select('id, kind, status, drive_file_id, storage_provider')
+    .eq('idea_id', ideaId)
+    .neq('status', 'archived')
+  const hasVideo = hasCaptionableVideo(vids)
+  if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
+
+  const source = pickCaptionSourceVideo((vids ?? []) as Parameters<typeof pickCaptionSourceVideo>[0])
+  const videoUrl = await listenUrlForCaptionVideo(source)
+  const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
+
+  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
 
@@ -62,8 +86,7 @@ export async function generateIdeaCaption(
     default_platforms?: string[] | null
   }
 
-  // One caption for ALL the client's networks — generated for exactly the
-  // platforms it will be published to (same resolution the publisher uses).
+  // Same networks the publisher will use. ONE caption for all of them.
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   // Learning loop (best-effort, all parallel): Metricool real style + the team's
@@ -77,8 +100,8 @@ export async function generateIdeaCaption(
   // 👍-rated captions are the strongest positive signal → lead the approved list.
   const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
 
-  const prompt = buildIdeaCaptionPrompt({
-    title: idea.title,
+  const sharedPrompt = {
+    title: idea.title as string,
     hook: idea.hook,
     visualBrief: idea.visual_brief,
     captionAngle: idea.caption_angle,
@@ -89,6 +112,7 @@ export async function generateIdeaCaption(
     avoidExamples: ratings.avoid,
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
+    videoTranscript,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,
@@ -96,17 +120,17 @@ export async function generateIdeaCaption(
       defaultCta: client.default_cta,
       captionNotes: client.caption_notes,
     },
-  })
+  }
 
   try {
-    const caption = await generateCaptionText(prompt)
-
-    if (!caption) return { error: 'La IA no devolvió caption' }
+    const caption = await generateCaptionText(buildIdeaCaptionPrompt(sharedPrompt))
+    if (!caption?.trim()) return { error: 'La IA no devolvió caption' }
+    const stored = caption.trim()
 
     // Draft only. The stage-driving field stays untouched until a human saves.
     const { error: updErr } = await supabase
       .from('content_ideas')
-      .update({ caption_draft: caption })
+      .update({ caption_draft: stored })
       .eq('id', ideaId)
     if (updErr) return { error: updErr.message }
 
@@ -117,7 +141,7 @@ export async function generateIdeaCaption(
     revalidatePath(`/produccion/idea/${ideaId}`)
     revalidatePath('/planning')
     revalidatePath('/pipeline')
-    return { ok: true, caption }
+    return { ok: true, caption: stored }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error al generar caption' }
   }
@@ -146,6 +170,16 @@ export async function saveIdeaCaption(
   if (!clean) return { error: 'El caption no puede ir vacío' }
 
   const supabase = await createClient()
+  const { data: vids } = await supabase
+    .from('content_idea_videos')
+    .select('id, status')
+    .eq('idea_id', ideaId)
+    .neq('status', 'archived')
+    .limit(1)
+  if (!hasCaptionableVideo(vids)) {
+    return { error: 'Sube un video antes de guardar el caption.' }
+  }
+
   const { error } = await supabase
     .from('content_ideas')
     .update({

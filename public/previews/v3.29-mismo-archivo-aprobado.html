@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.29 — El mismo archivo que se aprueba</title>
+  <style>
+    :root {
+      --bg: #0a0a0a; --fg: #fafafa; --card: #121212; --muted: #1f1f1f;
+      --muted-fg: #a6a6a6; --border: #1f1f1f; --good: #22c55e; --bad: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--fg); padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tabs button {
+      border: 1px solid var(--border); background: transparent; color: var(--muted-fg);
+      border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .tabs button.on { background: var(--muted); color: var(--fg); }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .file {
+      display: flex; align-items: center; gap: 10px;
+      border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px 12px;
+      font-size: 13px; margin-top: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 99px; }
+    .dot.good { background: var(--good); }
+    .dot.bad { background: var(--bad); }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+    .row { display: grid; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.29 — El archivo que apruebas es el que se publica</h1>
+    <p class="sub">Mismo cliente, dos semanas. Aprobar el de esta semana no puede mandar el de la pasada.</p>
+    <div class="tabs">
+      <button class="on" data-tab="antes" type="button">Antes</button>
+      <button data-tab="ahora" type="button">Ahora</button>
+    </div>
+    <section id="antes" class="screen on">
+      <div class="card">
+        <div class="label">Cliente Gym X</div>
+        <div class="row">
+          <div class="file"><span class="dot bad"></span> semana_pasada.mp4 <span class="tiny" style="margin:0">otra idea, mismo cliente</span></div>
+          <div class="file"><span class="dot good"></span> esta_semana.mp4 <span class="tiny" style="margin:0">la que estás aprobando</span></div>
+        </div>
+        <p class="tiny">Metricool a veces recibía semana_pasada.mp4 porque era “el edited más reciente”.</p>
+      </div>
+    </section>
+    <section id="ahora" class="screen">
+      <div class="card">
+        <div class="label">Aprobando esta semana</div>
+        <div class="file"><span class="dot good"></span> esta_semana.mp4 <span class="tiny" style="margin:0">este archivo, esta idea</span></div>
+        <p class="tiny">semana_pasada.mp4 ni se considera. Es de otra idea.</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach((x) => x.classList.remove('on'))
+      b.classList.add('on')
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'))
+      document.getElementById(b.dataset.tab).classList.add('on')
+    }))
+  </script>
+</body>
+</html>

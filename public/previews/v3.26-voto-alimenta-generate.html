@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.26 — El voto enseña al próximo copy</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1f1f1f;
+      --muted-fg: #a6a6a6;
+      --border: #1f1f1f;
+      --primary: #e8b31a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 24px 16px 48px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: var(--muted-fg); font-size: 13px; margin: 0 0 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-fg); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+    .btn {
+      border: 1px solid #333; background: #141414; color: var(--fg);
+      border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 500;
+    }
+    .btn.ok { border-color: rgba(16,185,129,.45); color: #34d399; }
+    textarea {
+      width: 100%; min-height: 120px; resize: none;
+      background: #0c0c0c; border: 1px solid #242424; border-radius: 8px;
+      color: var(--fg); padding: 10px; font-size: 13px; line-height: 1.5;
+    }
+    .tiny { font-size: 11px; color: var(--muted-fg); margin-top: 8px; }
+    .learn {
+      border: 1px solid rgba(232,179,26,.25);
+      background: rgba(232,179,26,.06);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #e8d48a;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.26 — Un 👍 enseña al próximo copy</h1>
+    <p class="sub">En Entregas (Copy) votas el caption único. El siguiente generate de ese cliente usa lo que gustó y evita lo que no.</p>
+
+    <div class="card">
+      <div class="label">Copy — Gym X</div>
+      <p style="margin:8px 0 12px;font-size:14px">Socio baja 15 lb</p>
+      <textarea>Bajé 15 libras entrenando aquí todas las mañanas 💪
+
+El coach me midió la primera semana y no lo creía. Ven a probar una clase.
+
+Agenda tu visita → link in bio</textarea>
+      <p class="tiny" style="margin-top:12px">¿Qué tal este caption? La IA aprende de tu voto.</p>
+      <div class="row">
+        <button class="btn ok" type="button">👍 Me gusta</button>
+        <button class="btn" type="button">👎 No es</button>
+        <span style="font-size:11px;color:#34d399">¡Gracias! Guardado.</span>
+      </div>
+      <p class="learn">La IA está aprendiendo de 6 captions de este cliente (y evita 2 rechazados).</p>
+    </div>
+  </div>
+</body>
+</html>

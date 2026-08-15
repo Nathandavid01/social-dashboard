@@ -81,6 +81,79 @@ export function buildPublishDateTime(
   return new Date(nowMs + 24 * 60 * 60 * 1000).toISOString().slice(0, 19)
 }
 
+export type PublishableEditedVideo = {
+  id: string
+  drive_file_id: string | null
+  storage_provider: string | null
+  kind?: string | null
+  status?: string | null
+  uploaded_at?: string | null
+  /** When present, a file from another idea (last week, same client) is dropped. */
+  idea_id?: string | null
+}
+
+/** Where the human watched the video they are approving. */
+export type VideoWatchBoard = 'entregas' | 'pipeline'
+
+function isLiveEdited(v: PublishableEditedVideo, ideaId?: string | null): boolean {
+  if (!v) return false
+  if ((v.kind ?? 'edited') !== 'edited') return false
+  if (v.status === 'archived') return false
+  if (!v.drive_file_id) return false
+  if (v.storage_provider !== 'r2' && v.storage_provider !== 'entregas-r2') return false
+  if (ideaId && v.idea_id && v.idea_id !== ideaId) return false
+  return true
+}
+
+/**
+ * Board-agnostic edges (staff approve, generic publish) must not force
+ * pipeline. If this idea has a live Entregas cut, that is the file.
+ */
+export function inferWatchBoard(
+  videos: PublishableEditedVideo[],
+  ideaId?: string | null,
+): VideoWatchBoard | null {
+  const live = videos.filter((v) => isLiveEdited(v, ideaId))
+  if (live.some((v) => v.storage_provider === 'entregas-r2')) return 'entregas'
+  if (live.some((v) => v.storage_provider === 'r2')) return 'pipeline'
+  return null
+}
+
+/**
+ * The file Metricool must receive: the one being approved, never another
+ * idea of the same client and never the other board's leftover cut.
+ */
+export function pickEditedVideoForPublish(
+  videos: PublishableEditedVideo[],
+  opts?: {
+    preferredId?: string | null
+    ideaId?: string | null
+    watchedOn?: VideoWatchBoard | null
+  },
+): PublishableEditedVideo | null {
+  const ideaId = opts?.ideaId?.trim() || null
+  const live = videos.filter((v) => isLiveEdited(v, ideaId))
+  if (live.length === 0) return null
+
+  if (opts?.preferredId) {
+    const preferred = live.find((v) => v.id === opts.preferredId)
+    if (preferred) return preferred
+  }
+
+  const newest = (list: PublishableEditedVideo[]) =>
+    [...list].sort((a, b) => ((a.uploaded_at ?? '') < (b.uploaded_at ?? '') ? 1 : -1))[0] ?? null
+
+  if (opts?.watchedOn) {
+    const wanted = opts.watchedOn === 'entregas' ? 'entregas-r2' : 'r2'
+    return newest(live.filter((v) => v.storage_provider === wanted))
+  }
+
+  const board = inferWatchBoard(live, ideaId)
+  if (board === 'entregas') return newest(live.filter((v) => v.storage_provider === 'entregas-r2'))
+  if (board === 'pipeline') return newest(live.filter((v) => v.storage_provider === 'r2'))
+  return null
+}
+
 /** Networks to post to: the client's own platforms, else its defaults, else IG/FB/TikTok. */
 export function resolvePlatforms(
   clientPlatforms?: string[] | null,

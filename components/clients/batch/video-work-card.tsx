@@ -155,6 +155,9 @@ export function VideoWorkCard({
         visualBrief={visualBrief}
         captionAngle={captionAngle}
         hashtags={hashtags}
+        hasVideo={
+          video.videos.raw.length + video.videos.broll.length + video.videos.edited.length > 0
+        }
         onSaved={setSavedCaption}
       />
 

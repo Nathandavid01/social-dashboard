@@ -46,6 +46,15 @@ export default async function ChangelogPage() {
               code: ({ children }) => (
                 <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{children}</code>
               ),
+              img: ({ src, alt }) =>
+                src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={src}
+                    alt={alt ?? ''}
+                    className="my-4 w-full max-w-3xl rounded-xl border border-border shadow-sm"
+                  />
+                ) : null,
             }}
           >
             {md}

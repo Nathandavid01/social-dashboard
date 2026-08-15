@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas } from '@/lib/auth/server'
+import { maybeAutoPostIdea, type AutoPostOutcome } from '@/lib/actions/idea-posting'
 
 /**
  * Data for the Copy stage: approved videos still missing their caption, plus
@@ -40,6 +41,7 @@ export interface CopyStageData {
 
 export async function getEntregaCopyVideos(
   clientId: string,
+  ideaId?: string,
 ): Promise<{ data?: CopyStageData; error?: string }> {
   // Cualquiera de las dos pantallas del flujo: el editor vive en /revision y
   // el copy en /entregas, pero ambos necesitan mirar el mismo video.
@@ -55,12 +57,15 @@ export async function getEntregaCopyVideos(
       .select('name, caption_notes, platforms, default_platforms')
       .eq('id', clientId)
       .single(),
-    supabase
-      .from('content_ideas')
-      .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, caption_draft, publish_date, videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at)')
-      .eq('client_id', clientId)
-      .eq('approval_status', 'approved')
-      .order('approved_at', { ascending: true }),
+    (() => {
+      let q = supabase
+        .from('content_ideas')
+        .select('id, title, hook, visual_brief, caption_angle, hashtags_suggestion, generated_caption, caption_draft, publish_date, videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at)')
+        .eq('client_id', clientId)
+        .eq('approval_status', 'approved')
+      if (ideaId) q = q.eq('id', ideaId)
+      return q.order('approved_at', { ascending: true })
+    })(),
   ])
 
   if (error) return { error: error.message }
@@ -164,7 +169,9 @@ export async function saveCopyAndSchedule(input: {
   caption: string
   /** YYYY-MM-DD, or null to let Metricool take +24h. */
   publishDate: string | null
-}): Promise<{ ok?: true; error?: string }> {
+  /** Edited file the copywriter previewed — Metricool must send that one. */
+  videoFileId?: string | null
+}): Promise<{ ok?: true; error?: string; autopost?: AutoPostOutcome }> {
   try {
     await requirePermission('captions.edit')
   } catch (err) {
@@ -189,5 +196,11 @@ export async function saveCopyAndSchedule(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/entregas')
-  return { ok: true }
+  // Copy is what made the idea ready (caption + already-approved video).
+  // maybeAutoPostIdea no-ops unless caption + edited video + Metricool.
+  const autopost = await maybeAutoPostIdea(input.ideaId, {
+    videoFileId: input.videoFileId,
+    watchedOn: 'entregas',
+  })
+  return { ok: true, autopost }
 }

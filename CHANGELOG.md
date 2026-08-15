@@ -4,6 +4,175 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.33 — 2026-08-13
+
+**Si el tablero no tiene ese corte, no se publica el del otro.**
+
+Aprobar en `/review` ya no puede mandar un archivo de Entregas por debajo. Al revés igual. Mejor no publicar que subir el video equivocado.
+
+## v3.32 — 2026-08-13
+
+**Copy y captions miran ESTA idea, no todas las del cliente.**
+
+Al abrir Copy se pide solo el video de esa tarjeta. Generar caption busca archivos por `idea_id` (la columna real). El enlace `/review/` del pipeline no se crea si el corte vive en Entregas — ese se aprueba en la tarjeta.
+
+Vista: [preview HTML](/previews/v3.32-copy-esta-idea.html)
+
+## v3.31 — 2026-08-13
+
+**Cada video tiene su tarjeta de verdad.**
+
+En Entregas, Gym X en Revisión reutilizaba la misma tarjeta para esta semana y la pasada. Al aprobar la de ahora, React dejaba puesta la de la semana pasada — y Metricool se llevaba ese archivo.
+
+Vista: [preview HTML](/previews/v3.31-tarjeta-por-video.html)
+
+## v3.30 — 2026-08-13
+
+**Aprobar en el lote ya no manda el video viejo del pipeline.**
+
+Si esta semana el corte está en Entregas y la idea todavía tiene un edited de la semana pasada en el otro bucket, Aprobar / Publicar a Metricool usa el de Entregas. Solo el enlace `/review/` sigue atado al archivo que ve el cliente ahí.
+
+Vista: [preview HTML](/previews/v3.30-aprobar-usa-entregas.html)
+
+## v3.29 — 2026-08-13
+
+**Metricool sube el archivo que se está aprobando, no otro de este cliente.**
+
+Si el cliente tiene el video de la semana pasada y el de esta, al aprobar ESTE se manda ESTE. No se busca “el edited más nuevo del cliente” ni se cambia de tablero.
+
+- En Entregas: el corte que ves en la tarjeta.
+- En el review del pipeline: el mismo archivo que ve el cliente en el enlace.
+- Un video de otra idea (semana pasada) no entra aunque esté en la lista.
+
+Vista: [preview HTML](/previews/v3.29-mismo-archivo-aprobado.html)
+
+## v3.28 — 2026-08-13
+
+**Al aprobar, Metricool recibe ESTE video, no el de la semana pasada.**
+
+Si la idea tenía un corte viejo en el bucket del pipeline y el de esta semana en Entregas, se mandaba el más reciente por fecha. A veces era el de la semana anterior.
+
+Ahora se manda el archivo de Entregas (el que ves al revisar), o el que el copywriter tenía en pantalla.
+
+Vista: [preview HTML](/previews/v3.28-video-correcto-metricool.html)
+
+## v3.27 — 2026-08-13
+
+**Enviar el copy ya programa la publicación.**
+
+En Entregas, cuando el video está aprobado, tiene corte y el cliente tiene Metricool, pulsar **Enviar a Publicación** también lo agenda. No hay que ir a otra pantalla a publicar.
+
+- Si falta Metricool, el video o el copy, se guarda igual y te dice qué falta.
+- No se publica dos veces: si ya salió, no se toca.
+- Solo en staging/prod con la migración `0032`. Aprobar el video sin copy sigue sin mandar nada.
+
+Vista: [preview HTML](/previews/v3.27-enviar-programa.html)
+
+## v3.26 — 2026-08-13
+
+**Un 👍 o 👎 en Entregas enseña al próximo copy.**
+
+Cuando escribes el caption único, puedes decir si te gustó. El siguiente generate de ese cliente usa los que gustaron y evita los que no.
+
+- En Copy (Entregas) aparecen **Me gusta** y **No es**, igual que en la idea.
+- Si marcas 👎, puedes dejar una nota (p. ej. “menos emojis”) y la IA lo recuerda.
+- La tabla de votos ya está en staging. En producción todavía hay que pegar `0041_caption_feedback.sql`.
+
+Vista: [preview HTML](/previews/v3.26-voto-alimenta-generate.html)
+
+## v3.25 — 2026-08-13
+
+**Un solo caption para todas las redes.**
+
+Instagram, TikTok y Facebook publican el mismo texto. La IA ya no escribe un copy distinto por red.
+
+- Generar llama a la IA una vez, no una vez por red.
+- En la caja se ve un solo bloque. Si quedó un borrador viejo con `[Instagram]` / `[TikTok]`, se muestra solo uno (el de Instagram si existe).
+- Guardar sigue moviendo el video a Publicación con ese texto único.
+
+Vista: [preview HTML](/previews/v3.25-caption-unico.html)
+
+## v3.24 — 2026-08-13
+
+**Cada red tiene su propio copy.**
+
+Si el cliente está en Instagram y TikTok, la IA escribe dos textos: uno con hook y hashtags para Instagram, otro corto y oral para TikTok. En la caja se ven uno debajo del otro, con el nombre de la red.
+
+- Un cliente de una sola red sigue viendo un solo texto, como antes.
+- El video no se mueve de Copy. Hay que leer y guardar.
+- Todavía se guarda todo junto; el recuadro por red llega después.
+
+Vista: [preview HTML](/previews/v3.24-caption-por-red.html)
+
+## v3.23 — 2026-08-13
+
+**Al abrir el video, el copy se escribe solo.**
+
+Si ya hay grabación y de qué va el video, y todavía no hay texto, la IA empieza a escribir el copy al entrar. No hay que pulsar Generar.
+
+- En la idea y en Entregas (Copy) pasa lo mismo: abres y el borrador llega.
+- Si el equipo ya dejó un borrador o un caption, no se toca.
+- El video se queda en Copy hasta que alguien lo lea y lo guarde.
+
+Vista: [preview HTML](/previews/v3.23-caption-al-abrir.html)
+
+## v3.22 — 2026-08-13
+
+**El caption ya no se inventa: escucha el video.**
+
+Al pulsar Generar, si hay clave de Whisper, la IA oye lo que se dice y escribe el copy sobre eso. El corte editado usa la URL pública; el raw se firma por 15 minutos para no hacerlo público. El hook queda como contexto. Si no se puede transcribir, sigue el brief como antes.
+
+Vista: [preview HTML](/previews/v3.22-caption-desde-el-video.html)
+
+## v3.21 — 2026-08-13
+
+**Sin video, no hay caption.**
+
+Antes se podía generar copy para una idea que todavía no tenía grabación. Eso producía textos huérfanos.
+
+Ahora:
+
+- Hay que subir el video primero. El caption se escribe sobre lo que ya se grabó.
+- Generar o guardar sin footage se niega en el servidor, no solo en la pantalla.
+- En el lote, las ideas sin archivo no entran al botón de “Generar borradores”.
+
+Vista exacta: [abrir preview HTML](/previews/v3.21-caption-despues-del-video.html)
+
+## v3.20 — 2026-08-13
+
+**El caption automático ya tiene receta: una red a la vez, y solo si el video aún no tiene texto.**
+
+Nadie va a ver un botón nuevo hoy. Lo que cambia es el cerebro:
+
+- Sabemos para cuáles redes hay que escribir (Instagram ≠ TikTok ≠ LinkedIn).
+- Sabemos cuándo se puede generar solo: hay hook y todavía no hay draft ni caption aprobado.
+- Mañana el dashboard puede llamar a la IA al abrir la idea, sin pisar lo que ya escribió el equipo.
+
+Siguiente: al abrir una idea lista, se genera el borrador solo.
+
+## v3.19 — 2026-08-13
+
+**Cada editor tiene su color, y ahora se ve quién hizo el último cambio.**
+
+Antes Asignaciones era una pared gris: 66 clientes, mismos dropdowns, imposible saber de un vistazo “estos son de Jeander” o “¿quién movió a Café El Bosque?”.
+
+Hoy:
+
+- Cada editor (y su grupo) lleva un color suave distinto. El chip de arriba y la franja de la tabla coinciden.
+- Una columna **Último cambio** dice *quién* tocó la asignación y *hace cuánto* — no solo a quién quedó asignado.
+- Si nadie ha tocado esa fila, se ve un guion. Si la persona ya no está en el equipo, dice “Alguien”.
+
+![Asignaciones agrupadas por color de editor, con columna de último cambio](/changelog/v3.19-asignaciones.jpg)
+
+Para que esto funcione en producción hay que aplicar la migración `0060_assignment_changed_by.sql` (dos columnas nuevas en `clients`).
+
+## v3.18 — 2026-08-13
+
+**Asignaciones se lee por persona, no como una lista A–Z de 66 clientes.**
+
+- Filtros de la gente que ya tiene cartera: Jeander, Lisneidy, Joxandra… Quien no tiene ningún cliente no aparece.
+- En Todos, los clientes se agrupan por editor. “Sin editor” / “Sin asignar” siguen arriba y no se pierden.
+
 ## v3.17 — 2026-08-13
 
 **Las pruebas de staging del log de sesión corren solas.**

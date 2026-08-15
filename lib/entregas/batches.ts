@@ -261,6 +261,11 @@ function dominantAssignee(ideas: IdeaWithPipeline[]): { id: string; name: string
  * Se conserva la estructura de "batch" —de un solo video— para no reescribir el
  * tablero entero: lo que cambia es por qué se agrupa.
  */
+/** React / override key: one card per video, never client+stage (that reused last week). */
+export function entregaCardKey(b: Pick<EntregaBatch, 'clientId' | 'stage' | 'ideas'>): string {
+  return `${b.clientId}:${b.stage}:${b.ideas[0]?.id ?? 'none'}`
+}
+
 export function groupIntoBatches(ideas: IdeaWithPipeline[]): EntregaBatch[] {
   const byClient = new Map<string, IdeaWithPipeline[]>()
   for (const i of ideas) {

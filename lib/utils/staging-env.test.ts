@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { STAGING_PROJECT_REF, assertStagingUrl, parseDotEnv } from './staging-env'
+import { STAGING_PROJECT_REF, assertStagingUrl, parseDotEnv, stagingBootError } from './staging-env'
 
 describe('assertStagingUrl', () => {
   it('accepts the natemedia-staging project and rejects production', () => {
@@ -10,6 +10,21 @@ describe('assertStagingUrl', () => {
       /producción|production|staging/i,
     )
     expect(() => assertStagingUrl('')).toThrow()
+  })
+})
+
+describe('stagingBootError', () => {
+  it('refuses a missing file or a production URL', () => {
+    expect(stagingBootError({ envFileExists: false, supabaseUrl: '' })).toMatch(/\.env\.staging/)
+    expect(
+      stagingBootError({ envFileExists: true, supabaseUrl: 'https://bgqdtfhelknmfudcvrzz.supabase.co' }),
+    ).toMatch(/staging/i)
+    expect(
+      stagingBootError({
+        envFileExists: true,
+        supabaseUrl: `https://${STAGING_PROJECT_REF}.supabase.co`,
+      }),
+    ).toBeNull()
   })
 })
 

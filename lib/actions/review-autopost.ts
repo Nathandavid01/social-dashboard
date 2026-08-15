@@ -1,5 +1,6 @@
 import 'server-only'
 
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runIdeaPost } from '@/lib/actions/idea-posting-run'
@@ -91,7 +92,10 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
     // Retry path: the video is already approved and the client re-voted 'approved'
     // because the first publish attempt failed. Post without re-approving.
     if (!decision.approve && decision.post) {
-      const retry = await runIdeaPost(supabase, ideaId, null)
+      const retry = await runIdeaPost(supabase, ideaId, null, null, {
+        videoFileId: await reviewedPipelineVideoId(supabase, ideaId),
+        watchedOn: 'pipeline',
+      })
       revalidateStaffViews(ideaId)
       if (retry.error || retry.skipped) {
         return {
@@ -140,7 +144,10 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
 
     // Same engine as the manual button — including the atomic claim that makes
     // double-posting impossible if a staffer hits Publicar at the same moment.
-    const res = await runIdeaPost(supabase, ideaId, null)
+    const res = await runIdeaPost(supabase, ideaId, null, null, {
+      videoFileId: await reviewedPipelineVideoId(supabase, ideaId),
+      watchedOn: 'pipeline',
+    })
     revalidateStaffViews(ideaId)
 
     if (res.error) {
@@ -155,6 +162,24 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
     console.error('[review-autopost] failed for', ideaId, err)
     return { acted: false, reason: err instanceof Error ? err.message : 'Error inesperado' }
   }
+}
+
+/** Same file get_review_by_token shows the client (latest pipeline edited). */
+async function reviewedPipelineVideoId(
+  supabase: SupabaseClient,
+  ideaId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('content_idea_videos')
+    .select('id')
+    .eq('idea_id', ideaId)
+    .eq('kind', 'edited')
+    .eq('storage_provider', 'r2')
+    .neq('status', 'archived')
+    .order('uploaded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return (data as { id?: string } | null)?.id ?? null
 }
 
 function revalidateStaffViews(ideaId: string) {
