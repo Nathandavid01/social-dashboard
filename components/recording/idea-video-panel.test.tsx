@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 /**
@@ -64,14 +64,22 @@ function uploadSlots(label: string) {
   return screen.queryAllByText(new RegExp(`^Subir ${label}$`, 'i'))
 }
 
+// The 'edited' SlotGroup always mounts VideoAnalysisReport, which resolves
+// getVideoAnalysis (mocked) in a useEffect after mount. Flush that settle
+// inside act() so React doesn't warn about an unwrapped state update.
+async function flush() {
+  await act(async () => {})
+}
+
 beforeEach(() => {
   canUpload = true
   vi.clearAllMocks()
 })
 
 describe('IdeaVideoPanel — compact upload view', () => {
-  it('renders one uploader per group and summarizes what is missing', () => {
+  it('renders one uploader per group and summarizes what is missing', async () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
 
     expect(uploadSlots('video crudo')).toHaveLength(1)
     expect(uploadSlots('b-roll')).toHaveLength(1)
@@ -81,7 +89,7 @@ describe('IdeaVideoPanel — compact upload view', () => {
     expect(screen.getByText('Opcional')).toBeInTheDocument()
   })
 
-  it('shows existing files plus one "Subir más" action', () => {
+  it('shows existing files plus one "Subir más" action', async () => {
     const videos = [
       makeVideo('raw', 0),
       makeVideo('raw', 1),
@@ -89,6 +97,7 @@ describe('IdeaVideoPanel — compact upload view', () => {
       makeVideo('edited', 0),
     ]
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} />)
+    await flush()
 
     expect(uploadSlots('más video crudo')).toHaveLength(1)
     expect(screen.getByText('raw-0.mp4')).toBeInTheDocument()
@@ -99,18 +108,20 @@ describe('IdeaVideoPanel — compact upload view', () => {
     expect(screen.getByText('Completo')).toBeInTheDocument()
   })
 
-  it('keeps one uploader when the required count is complete', () => {
+  it('keeps one uploader when the required count is complete', async () => {
     const videos = Array.from({ length: 5 }, (_, i) => makeVideo('raw', i))
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} />)
+    await flush()
 
     videos.forEach((v) => expect(screen.getByText(v.name)).toBeInTheDocument())
     expect(uploadSlots('más video crudo')).toHaveLength(1)
     expect(screen.getByText('Completo')).toBeInTheDocument()
   })
 
-  it('ignores non-uploaded (e.g. archived) videos when counting filled slots', () => {
+  it('ignores non-uploaded (e.g. archived) videos when counting filled slots', async () => {
     const archived = { ...makeVideo('raw', 99), status: 'archived' as const }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[archived]} />)
+    await flush()
 
     expect(screen.queryByText('raw-99.mp4')).not.toBeInTheDocument()
     expect(uploadSlots('video crudo')).toHaveLength(1)
@@ -119,57 +130,65 @@ describe('IdeaVideoPanel — compact upload view', () => {
 })
 
 describe('IdeaVideoPanel — per-video status badges', () => {
-  it('shows a "Subido" badge and the R2 storage tag for an uploaded R2 video', () => {
+  it('shows a "Subido" badge and the R2 storage tag for an uploaded R2 video', async () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    await flush()
     expect(screen.getByText('Subido')).toBeInTheDocument()
     expect(screen.getAllByText('R2').length).toBeGreaterThan(0)
   })
 
-  it('shows a "Público" badge ONLY for edited videos when public access is enabled', () => {
+  it('shows a "Público" badge ONLY for edited videos when public access is enabled', async () => {
     const videos = [makeVideo('raw', 0), makeVideo('edited', 0)]
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} publicEnabled />)
+    await flush()
     // One Público badge — the edited one; the raw video is not public.
     expect(screen.getAllByText('Público')).toHaveLength(1)
   })
 
-  it('does NOT show "Público" when public access is disabled', () => {
+  it('does NOT show "Público" when public access is disabled', async () => {
     const videos = [makeVideo('edited', 0)]
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} publicEnabled={false} />)
+    await flush()
     expect(screen.queryByText('Público')).not.toBeInTheDocument()
   })
 
-  it('does NOT mark a Drive-stored edited video as Público', () => {
+  it('does NOT mark a Drive-stored edited video as Público', async () => {
     const driveEdited = { ...makeVideo('edited', 0), storage_provider: 'drive' as const, drive_view_link: 'https://drive/x' }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), driveEdited]} publicEnabled />)
+    await flush()
     expect(screen.queryByText('Público')).not.toBeInTheDocument()
     expect(screen.getAllByText('Drive').length).toBeGreaterThan(0)
   })
 
-  it('shows the upload time of an uploaded video', () => {
+  it('shows the upload time of an uploaded video', async () => {
     const v = { ...makeVideo('edited', 0), uploaded_at: '2026-06-02T15:42:00.000Z' }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), v]} />)
+    await flush()
     // "subido <fecha/hora>" appears for the uploaded video.
     expect(screen.getAllByText(/subido/i).length).toBeGreaterThan(0)
   })
 
-  it('labels Entregas R2 files with their real storage provider', () => {
+  it('labels Entregas R2 files with their real storage provider', async () => {
     const entregasVideo = { ...makeVideo('edited', 0), storage_provider: 'entregas-r2' as const }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregasVideo]} />)
+    await flush()
     expect(screen.getByText('Entregas R2')).toBeInTheDocument()
     expect(screen.queryByText('Drive')).not.toBeInTheDocument()
   })
 
-  it('shows the editor name from the joined uploader profile', () => {
+  it('shows the editor name from the joined uploader profile', async () => {
     const v = { ...makeVideo('edited', 0), uploader: { id: 'user-1', full_name: 'Alexa Kerocen', email: 'alexa@example.com' } }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[v]} />)
+    await flush()
     expect(screen.getByText(/subido por Alexa Kerocen/i)).toBeInTheDocument()
   })
 })
 
 describe('IdeaVideoPanel — permission gating', () => {
-  it('does not render upload dropzones when the user lacks video.upload', () => {
+  it('does not render upload dropzones when the user lacks video.upload', async () => {
     canUpload = false
     render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
 
     // No uploadable "Subir ..." buttons.
     expect(screen.queryByText(/^Subir /i)).not.toBeInTheDocument()
@@ -181,24 +200,27 @@ describe('IdeaVideoPanel — permission gating', () => {
 })
 
 describe('IdeaVideoPanel — inline preview', () => {
-  it('shows a "Ver" button for an uploaded R2 video', () => {
+  it('shows a "Ver" button for an uploaded R2 video', async () => {
     canUpload = true
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    await flush()
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
   })
 
-  it('shows a "Ver" button for entregas-r2 videos so dual-R2 files stay viewable', () => {
+  it('shows a "Ver" button for entregas-r2 videos so dual-R2 files stay viewable', async () => {
     canUpload = true
     const entregas = { ...makeVideo('edited', 0), storage_provider: 'entregas-r2' as const }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
+    await flush()
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
   })
 })
 
 describe('IdeaVideoPanel — multi-file upload', () => {
-  it('every upload input accepts multiple files', () => {
+  it('every upload input accepts multiple files', async () => {
     canUpload = true
     const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
     const inputs = container.querySelectorAll('input[type="file"]')
     expect(inputs).toHaveLength(3)
     inputs.forEach((input) => expect(input).toHaveAttribute('multiple'))
