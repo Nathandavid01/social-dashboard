@@ -92,6 +92,19 @@ describe('getThumbUploadUrls', () => {
     const res = await getThumbUploadUrls('vid-3', 5)
     expect(res.error).toBeDefined()
   })
+
+  it('count desproporcionado (ej. 1e6) se limita a lo sumo 8 URLs', async () => {
+    videoRow = { drive_file_id: 'ideas/idea-1/edited/123-final.mp4', storage_provider: 'r2' }
+    const res = await getThumbUploadUrls('vid-1', 100)
+    expect(res.urls!.length).toBeLessThanOrEqual(8)
+    expect(res.keys!.length).toBeLessThanOrEqual(8)
+  })
+
+  it('count <= 0 se sube a 1 (nunca 0 URLs)', async () => {
+    videoRow = { drive_file_id: 'ideas/idea-1/edited/123-final.mp4', storage_provider: 'r2' }
+    const res = await getThumbUploadUrls('vid-1', 0)
+    expect(res.urls).toHaveLength(1)
+  })
 })
 
 describe('registerVideoThumbs', () => {

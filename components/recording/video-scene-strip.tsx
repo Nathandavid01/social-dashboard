@@ -71,27 +71,58 @@ export function VideoSceneStrip({ videoId, onOpen }: { videoId: string; onOpen?:
 
   // Camino 2 (continuación): con el <video> oculto ya montado (src=previewUrl),
   // busca los timestamps y pinta cada uno en su <canvas>. No es testeable en
-  // jsdom (canvas 2D + seek de <video> no están implementados ahí) — cubierto
-  // por los tests puros de frameTimestamps/scaleDimensions en video-frames.test.ts.
+  // jsdom (canvas 2D + seek de <video> no están implementados ahí) — el caso
+  // "duración degenerada → sin timestamps" SÍ está cubierto vía el helper puro
+  // (frameTimestamps(Infinity/0, ...) === [] en video-frames.test.ts).
   useEffect(() => {
     if (state.kind !== 'live') return
     const video = videoRef.current
     if (!video) return
     let alive = true
+    let settled = false
+
+    // Un video "vivo" pero mudo (metadata que nunca llega, seek que nunca
+    // dispara 'seeked') no debe dejar la tira colgada para siempre — a los
+    // ~10s se rinde y cae a 'none'. La promesa de fondo puede seguir viva,
+    // pero `alive`/`settled` la vuelven un no-op inofensivo.
+    const giveUp = window.setTimeout(() => {
+      if (!settled && alive) { settled = true; setState({ kind: 'none' }) }
+    }, 10_000)
+
+    function waitForMetadata(): Promise<void> {
+      // readyState >= 1 (HAVE_METADATA) significa que 'loadedmetadata' ya
+      // disparó ANTES de que este efecto conectara el listener — sin este
+      // chequeo, esa carrera deja la promesa esperando un evento que ya pasó.
+      if (video!.readyState >= 1) return Promise.resolve()
+      return new Promise<void>((resolve, reject) => {
+        video!.onloadedmetadata = () => resolve()
+        video!.onerror = () => reject(new Error('el browser no pudo decodificar el video'))
+      })
+    }
 
     ;(async () => {
       try {
-        await new Promise<void>((resolve, reject) => {
-          video.onloadedmetadata = () => resolve()
-          video.onerror = () => reject(new Error('el browser no pudo decodificar el video'))
-        })
-        if (!alive) return
+        await waitForMetadata()
+        if (!alive || settled) return
+
+        const duration = video.duration
+        if (!Number.isFinite(duration) || duration <= 0) {
+          // webm/MediaRecorder sin duración fija (Infinity) o metadata corrupta.
+          settled = true
+          setState({ kind: 'none' })
+          return
+        }
+
         const { width, height } = scaleDimensions(video.videoWidth, video.videoHeight, 320)
-        if (!width || !height) return
-        const times = frameTimestamps(video.duration, THUMB_COUNT)
+        if (!width || !height) { settled = true; setState({ kind: 'none' }); return }
+
+        const times = frameTimestamps(duration, THUMB_COUNT)
+        if (times.length === 0) { settled = true; setState({ kind: 'none' }); return }
+
         for (let i = 0; i < times.length; i++) {
-          if (!alive) return
+          if (!alive || settled) return
           await seekTo(video, times[i])
+          if (!alive || settled) return
           const canvas = canvasRefs.current[i]
           const ctx = canvas?.getContext('2d')
           if (canvas && ctx) {
@@ -100,12 +131,15 @@ export function VideoSceneStrip({ videoId, onOpen }: { videoId: string; onOpen?:
             ctx.drawImage(video, 0, 0, width, height)
           }
         }
+        settled = true
       } catch {
-        if (alive) setState({ kind: 'none' })
+        if (alive && !settled) { settled = true; setState({ kind: 'none' }) }
+      } finally {
+        window.clearTimeout(giveUp)
       }
     })()
 
-    return () => { alive = false }
+    return () => { alive = false; window.clearTimeout(giveUp) }
   }, [state])
 
   if (state.kind === 'loading') {
