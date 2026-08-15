@@ -23,8 +23,11 @@ vi.mock('@/lib/actions/video-preview', () => ({
 vi.mock('@/lib/actions/video-analysis', () => ({
   getVideoAnalysis: vi.fn(async () => ({ analysis: null })),
 }))
-vi.mock('@/lib/utils/video-analysis-client', () => ({
-  analyzeUploadedVideo: vi.fn().mockResolvedValue(undefined),
+vi.mock('@/lib/utils/video-postupload-client', () => ({
+  processUploadedVideo: vi.fn().mockResolvedValue(undefined),
+}))
+vi.mock('@/lib/actions/video-thumbs', () => ({
+  getVideoThumbViewUrls: vi.fn(async () => ({ urls: [] })),
 }))
 
 vi.mock('@/lib/hooks/use-toast', () => ({
@@ -40,7 +43,7 @@ vi.mock('@/components/auth/role-gate', () => ({
 
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { registerR2Video } from '@/lib/actions/idea-videos-r2'
-import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
+import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 
 function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   return {
@@ -248,7 +251,7 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     global.XMLHttpRequest = OriginalXHR
   })
 
-  it('subir en el slot "edited" dispara analyzeUploadedVideo con el id registrado', async () => {
+  it('subir en el slot "edited" dispara processUploadedVideo con el id registrado', async () => {
     vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-9' })
     const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
@@ -261,10 +264,10 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     })
     await flush()
 
-    expect(vi.mocked(analyzeUploadedVideo)).toHaveBeenCalledWith('vid-9', expect.any(File))
+    expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('vid-9', expect.any(File))
   })
 
-  it('subir en el slot "raw" NO dispara analyzeUploadedVideo', async () => {
+  it('subir en el slot "raw" NO dispara processUploadedVideo', async () => {
     vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-raw' })
     const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
@@ -277,7 +280,31 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     })
     await flush()
 
-    expect(vi.mocked(analyzeUploadedVideo)).not.toHaveBeenCalled()
+    expect(vi.mocked(processUploadedVideo)).not.toHaveBeenCalled()
+  })
+})
+
+describe('IdeaVideoPanel — tira de 5 escenas', () => {
+  it('muestra la tira de 5 escenas debajo de un video editado', async () => {
+    const { getVideoThumbViewUrls } = await import('@/lib/actions/video-thumbs')
+    vi.mocked(getVideoThumbViewUrls).mockResolvedValue({
+      urls: ['t0', 't1', 't2', 't3', 't4'],
+    })
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('edited', 0)]} />)
+    await flush()
+    await flush()
+
+    expect(screen.getAllByRole('img', { name: /^Escena \d/ })).toHaveLength(5)
+  })
+
+  it('no muestra la tira para videos crudos ni b-roll', async () => {
+    const { getVideoThumbViewUrls } = await import('@/lib/actions/video-thumbs')
+    vi.mocked(getVideoThumbViewUrls).mockResolvedValue({ urls: ['t0'] })
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), makeVideo('broll', 0)]} />)
+    await flush()
+    await flush()
+
+    expect(screen.queryAllByRole('img', { name: /^Escena \d/ })).toHaveLength(0)
   })
 })
 
