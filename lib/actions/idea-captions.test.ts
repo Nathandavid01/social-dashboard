@@ -70,6 +70,21 @@ vi.mock('@/lib/supabase/server', () => ({
           }),
         }
       }
+      if (table === 'content_idea_video_analysis') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                order: () => ({
+                  limit: () => ({
+                    maybeSingle: async () => ({ data: null, error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }
+      }
       return {
         select: () => ({ eq: () => ({ single: async () => ({ data: h.idea, error: null }) }) }),
         update: (payload: Record<string, unknown>) => {
