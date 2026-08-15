@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.36 — 2026-08-15
+
+**Ahora ves 5 escenas de cada video editado sin darle play.**
+
+- Debajo de cada video editado subido aparece una tira de 5 imágenes con escenas del video, en orden.
+- Click en cualquier escena abre el video completo en el mismo lugar donde antes estaba el botón "Ver".
+- Los videos subidos antes de este cambio también muestran su tira — el dashboard la pinta al momento la primera vez que se abre el video.
+- Nunca bloquea ni retrasa una subida: si algo falla al generar las escenas, simplemente no aparece la tira.
+
+Vista: [preview HTML](/previews/v3.36-escenas-video.html)
+
 ## v3.35 — 2026-08-15
 
 **La IA ahora revisa cada video editado antes de aprobarlo.**
