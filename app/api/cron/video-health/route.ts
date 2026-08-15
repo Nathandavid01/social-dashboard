@@ -58,17 +58,9 @@ export async function GET(req: NextRequest) {
     }),
   )
 
-  const failures = results.filter((r) => !r.ok)
-  if (failures.length > 0) {
-    // Non-200 → the Vercel cron run shows as failed and is visible in logs.
-    console.error('[video-health] videos no reproducibles:', JSON.stringify(failures))
-    return NextResponse.json(
-      { ok: false, checked: results.length, failures },
-      { status: 503 },
-    )
-  }
-
-  // QC IA: cerrar análisis que nunca van a llegar (editor cerró el tab).
+  // QC IA: cerrar análisis que nunca van a llegar (editor cerró el tab). Corre
+  // ANTES del early-return de fallas para que un Worker caído no deje huérfanos
+  // los análisis en "Analizando…" indefinidamente.
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     const [{ data: edited }, { data: analyses }] = await Promise.all([
@@ -90,6 +82,16 @@ export async function GET(req: NextRequest) {
       )
     }
   } catch { /* best-effort: el health-check principal no depende de esto */ }
+
+  const failures = results.filter((r) => !r.ok)
+  if (failures.length > 0) {
+    // Non-200 → the Vercel cron run shows as failed and is visible in logs.
+    console.error('[video-health] videos no reproducibles:', JSON.stringify(failures))
+    return NextResponse.json(
+      { ok: false, checked: results.length, failures },
+      { status: 503 },
+    )
+  }
 
   return NextResponse.json({ ok: true, checked: results.length })
 }

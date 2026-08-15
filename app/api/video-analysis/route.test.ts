@@ -24,7 +24,10 @@ vi.mock('@/lib/actions/idea-captions', () => ({
 }))
 
 let videoResult: { data: unknown } = { data: null }
-let upsertError: { message: string } | null = null
+/** Plain value applies to every upsert; a function receives the 0-based upsert
+ *  call index so a test can fail just the pending upsert (index 0) and leave
+ *  the rest healthy, without weakening the existing all-calls-fail tests. */
+let upsertError: { message: string } | null | ((callIndex: number) => { message: string } | null) = null
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -41,8 +44,10 @@ vi.mock('@/lib/supabase/server', () => ({
       if (table === 'content_idea_video_analysis') {
         return {
           upsert: (payload: Record<string, unknown>, opts: unknown) => {
+            const callIndex = calls.filter((c) => c.op === 'upsert').length
             calls.push({ op: 'upsert', payload, opts })
-            return Promise.resolve({ error: upsertError })
+            const error = typeof upsertError === 'function' ? upsertError(callIndex) : upsertError
+            return Promise.resolve({ error })
           },
         }
       }
@@ -173,6 +178,17 @@ describe('POST /api/video-analysis', () => {
     const errorUpsert = upserts[1].payload as Record<string, unknown>
     expect(errorUpsert).toMatchObject({ status: 'error', error_note: 'Grok API 429: rate' })
 
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+
+  it('upsert pending falla → 503 y NO gasta la llamada a Grok (analyzeVideoFrames no se invoca)', async () => {
+    upsertError = (callIndex) => (callIndex === 0 ? { message: 'db down' } : null)
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(503)
+    await expect(res.json()).resolves.toEqual({ error: 'Análisis no disponible' })
+
+    expect(analyzeVideoFrames).not.toHaveBeenCalled()
+    expect(calls.map((c) => c.op)).toEqual(['upsert'])
     expect(generateIdeaCaption).not.toHaveBeenCalled()
   })
 

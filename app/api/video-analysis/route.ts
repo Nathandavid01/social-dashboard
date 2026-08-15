@@ -48,7 +48,8 @@ export async function POST(request: Request) {
       { onConflict: 'video_id' },
     )
 
-  await upsert({ status: 'pending', findings: null, visual_summary: null, error_note: null })
+  const { error: pendingError } = await upsert({ status: 'pending', findings: null, visual_summary: null, error_note: null })
+  if (pendingError) return NextResponse.json({ error: 'Análisis no disponible' }, { status: 503 })
 
   const idea = video.idea as {
     title?: string | null; hook?: string | null
