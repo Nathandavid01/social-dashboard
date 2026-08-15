@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
+import { staleAnalysisCandidates } from '@/lib/utils/video-analysis-sweep'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -66,6 +67,29 @@ export async function GET(req: NextRequest) {
       { status: 503 },
     )
   }
+
+  // QC IA: cerrar análisis que nunca van a llegar (editor cerró el tab).
+  try {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const [{ data: edited }, { data: analyses }] = await Promise.all([
+      sb.from('content_idea_videos')
+        .select('id, idea_id, uploaded_at')
+        .eq('kind', 'edited').neq('status', 'archived').gte('uploaded_at', since),
+      sb.from('content_idea_video_analysis')
+        .select('video_id, status, updated_at').gte('updated_at', since),
+    ])
+    const stale = staleAnalysisCandidates(edited ?? [], analyses ?? [], new Date())
+    for (const s of stale) {
+      await sb.from('content_idea_video_analysis').upsert(
+        {
+          video_id: s.videoId, idea_id: s.ideaId, status: 'error',
+          error_note: 'No se recibieron frames (posible tab cerrado durante la subida).',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'video_id' },
+      )
+    }
+  } catch { /* best-effort: el health-check principal no depende de esto */ }
 
   return NextResponse.json({ ok: true, checked: results.length })
 }
