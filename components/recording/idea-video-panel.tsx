@@ -8,6 +8,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+import { VideoAnalysisReport } from '@/components/video-analysis/video-analysis-report'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -156,6 +157,7 @@ function SlotGroup({
         {videos.map((v) => (
           <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} publicEnabled={publicEnabled} />
         ))}
+        {kind === 'edited' && <VideoAnalysisReport ideaId={ideaId} />}
         <Slot
           kind={kind}
           ideaId={ideaId}

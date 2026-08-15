@@ -20,6 +20,9 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
+vi.mock('@/lib/actions/video-analysis', () => ({
+  getVideoAnalysis: vi.fn(async () => ({ analysis: null })),
+}))
 
 vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
