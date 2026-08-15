@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.37 — Calendario: publicado vs pendiente</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:760px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 20px; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:20px 0 8px; }
+
+    table { width:100%; border-collapse:collapse; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    thead th { background:rgba(255,255,255,.03); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); padding:8px; text-align:center; border-left:1px solid var(--border); }
+    thead th:first-child { text-align:left; border-left:none; }
+    tbody td { padding:8px; border-left:1px solid var(--border); border-top:1px solid var(--border); vertical-align:top; }
+    tbody td:first-child { border-left:none; font-size:12px; font-weight:600; }
+
+    .chip { display:inline-flex; flex-direction:column; gap:2px; border-radius:6px; padding:3px 6px; font-size:10px; font-weight:700; line-height:1.2; }
+    .chip.reel { background:rgba(250,204,21,.14); color:#facc15; }
+    .chip.post { background:#18181b; color:#facc15; border:1px solid #27272a; }
+    .chip.published { box-shadow: 0 0 0 1px rgba(34,197,94,.4); }
+    .chip-top { display:flex; align-items:center; gap:4px; }
+    .check { color:var(--good); font-size:10px; line-height:1; }
+    .badge { display:inline-block; margin-top:1px; border-radius:999px; padding:1px 6px; font-size:9px; font-weight:500; }
+    .badge.pendiente { background:#27272a; color:#a1a1aa; }
+    .badge.en_edicion { background:rgba(59,130,246,.18); color:#60a5fa; }
+    .badge.aprobado { background:rgba(16,185,129,.18); color:#34d399; }
+    .badge.publicado { background:rgba(34,197,94,.18); color:#4ade80; }
+
+    .note { margin-top:18px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .note b { color:var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.37 — El calendario marca con ✓ verde lo que ya se publicó de verdad</h1>
+    <p class="sub">Cada chip Reel/Post del calendario semanal ahora distingue lo publicado (Metricool confirmó que salió) de lo pendiente. Sin cambiar el tamaño de la celda.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Lun</th>
+          <th>Mar</th>
+          <th>Mié</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gym X</td>
+          <td>
+            <span class="chip reel published">
+              <span class="chip-top">Reel <span class="check">✓</span></span>
+              <span class="badge publicado">Publicado</span>
+            </span>
+          </td>
+          <td>
+            <span class="chip post">
+              <span class="chip-top">Post</span>
+              <span class="badge aprobado">Aprobado</span>
+            </span>
+          </td>
+          <td>
+            <span class="chip reel">
+              <span class="chip-top">Reel</span>
+              <span class="badge en_edicion">En Edición</span>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td>Café Luna</td>
+          <td>
+            <span class="chip post published">
+              <span class="chip-top">Post <span class="check">✓</span></span>
+              <span class="badge publicado">Publicado</span>
+            </span>
+          </td>
+          <td>
+            <span class="chip reel">
+              <span class="chip-top">Reel</span>
+              <span class="badge pendiente">Pendiente</span>
+            </span>
+          </td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="note">
+      <b>Publicado de verdad</b> = la tarea de producción llegó a estado Publicado, o la idea ligada quedó marcada
+      publicada, o tiene fecha de publicación. Ese chip suma un ✓ verde + un borde sutil. Todo lo demás (Pendiente,
+      En Edición, En Revisión, Aprobado) se ve exactamente como antes.
+    </p>
+  </div>
+</body>
+</html>
