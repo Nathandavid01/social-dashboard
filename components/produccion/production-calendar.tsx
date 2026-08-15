@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { todayISO } from '@/lib/utils/deadlines'
 import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from 'lucide-react'
 import { StatusBadge } from './status-badge'
+import { CalendarChip } from './calendar-chip'
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
@@ -262,27 +263,13 @@ export function ProductionCalendar({ schedules, initialTasks, profiles, currentW
                   const isTodayCol = todayISO(weekDates[dayNum - 1]) === todayISO()
                   return (
                     <div key={dayNum} className={cn('border-l border-border px-1.5 py-1.5 flex flex-col gap-1 min-h-[44px]', isTodayCol && 'bg-primary/5')}>
-                      {cells.map((cell) => {
-                        const taskForCell = cell.tasks[0]
-                        return (
-                          <div
-                            key={cell.scheduleId + cell.contentType}
-                            className={cn(
-                              'rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-tight',
-                              cell.contentType === 'R'
-                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
-                                : 'bg-zinc-900 text-yellow-300 dark:bg-zinc-700'
-                            )}
-                          >
-                            <div>{cell.contentType === 'R' ? 'Reel' : 'Post'}</div>
-                            {taskForCell && (
-                              <div className="mt-0.5">
-                                <StatusBadge status={taskForCell.status} size="xs" />
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
+                      {cells.map((cell) => (
+                        <CalendarChip
+                          key={cell.scheduleId + cell.contentType}
+                          contentType={cell.contentType}
+                          task={cell.tasks[0]}
+                        />
+                      ))}
                     </div>
                   )
                 })}
