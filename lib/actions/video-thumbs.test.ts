@@ -7,8 +7,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  * `thumb_keys` column or a failed presign never throws past these actions.
  */
 
+let canView = true
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
+  currentUserHas: vi.fn(async () => canView),
 }))
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -57,6 +59,7 @@ beforeEach(() => {
   videoRow = null
   selectError = null
   updateError = null
+  canView = true
 })
 
 describe('getThumbUploadUrls', () => {
@@ -93,16 +96,39 @@ describe('getThumbUploadUrls', () => {
 
 describe('registerVideoThumbs', () => {
   it('actualiza thumb_keys en la fila', async () => {
-    const res = await registerVideoThumbs('vid-1', ['a.jpg', 'b.jpg'])
+    videoRow = { drive_file_id: 'ideas/idea-1/edited/123-final.mp4' }
+    const res = await registerVideoThumbs('vid-1', [
+      'ideas/idea-1/edited/thumbs/1-0.jpg',
+      'ideas/idea-1/edited/thumbs/1-1.jpg',
+    ])
     expect(res.error).toBeUndefined()
     expect(res.ok).toBe(true)
   })
 
   it('columna inexistente → {error}, no lanza', async () => {
+    videoRow = { drive_file_id: 'ideas/idea-1/edited/123-final.mp4' }
     updateError = { message: 'column "thumb_keys" does not exist' }
-    await expect(registerVideoThumbs('vid-1', ['a.jpg'])).resolves.toEqual(
-      expect.objectContaining({ error: expect.any(String) }),
-    )
+    await expect(
+      registerVideoThumbs('vid-1', ['ideas/idea-1/edited/thumbs/1-0.jpg']),
+    ).resolves.toEqual(expect.objectContaining({ error: expect.any(String) }))
+  })
+
+  it('key de OTRO video/carpeta → rechaza toda la llamada sin actualizar', async () => {
+    videoRow = { drive_file_id: 'ideas/idea-1/edited/123-final.mp4' }
+    const res = await registerVideoThumbs('vid-1', [
+      'ideas/idea-1/edited/thumbs/1-0.jpg', // legítima
+      'ideas/OTRO-CLIENTE/edited/thumbs/9-9.jpg', // ajena — debe tumbar la llamada completa
+    ])
+    expect(res.error).toBeDefined()
+    expect(res.ok).toBeUndefined()
+  })
+
+  it('video no encontrado → error, no lanza', async () => {
+    videoRow = null
+    selectError = { message: 'no rows' }
+    await expect(
+      registerVideoThumbs('missing', ['x/thumbs/1-0.jpg']),
+    ).resolves.toEqual(expect.objectContaining({ error: expect.any(String) }))
   })
 })
 
@@ -129,6 +155,19 @@ describe('getVideoThumbViewUrls', () => {
   it('video no encontrado → { urls: [] }', async () => {
     videoRow = null
     const res = await getVideoThumbViewUrls('missing')
+    expect(res.urls).toEqual([])
+  })
+
+  it('sesión sin revision.read/entregas.read/planning.read → { urls: [] }, ni siquiera consulta la fila', async () => {
+    canView = false
+    videoRow = { thumb_keys: ['ideas/i1/edited/thumbs/1-0.jpg'], storage_provider: 'r2', status: 'uploaded' }
+    const res = await getVideoThumbViewUrls('vid-1')
+    expect(res.urls).toEqual([])
+  })
+
+  it('video archivado/failed → { urls: [] } aunque tenga thumb_keys', async () => {
+    videoRow = { thumb_keys: ['ideas/i1/edited/thumbs/1-0.jpg'], storage_provider: 'r2', status: 'archived' }
+    const res = await getVideoThumbViewUrls('vid-1')
     expect(res.urls).toEqual([])
   })
 })

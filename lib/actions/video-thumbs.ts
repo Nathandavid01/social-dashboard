@@ -13,7 +13,7 @@
 import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
 import { entregasR2Client, entregasR2Bucket, isEntregasR2Configured } from '@/lib/integrations/entregas-r2'
 
@@ -91,6 +91,20 @@ export async function registerVideoThumbs(
   }
 
   const supabase = await createClient()
+  const { data: video, error: fetchError } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id')
+    .eq('id', videoId)
+    .single()
+  if (fetchError || !video?.drive_file_id) return { error: 'Video no encontrado' }
+
+  // Un video.upload no debe poder registrar keys de OTRO video/carpeta —
+  // eso permitiría luego presign-GET de material ajeno vía getVideoThumbViewUrls.
+  const allowedPrefix = `${dirnameOf(video.drive_file_id as string)}/thumbs/`
+  if (!keys.every((k) => k.startsWith(allowedPrefix))) {
+    return { error: 'Keys de thumbnail inválidas para este video' }
+  }
+
   const { error } = await supabase
     .from('content_idea_videos')
     .update({ thumb_keys: keys })
@@ -102,14 +116,23 @@ export async function registerVideoThumbs(
 }
 
 export async function getVideoThumbViewUrls(videoId: string): Promise<{ urls: string[] }> {
+  // Mismo gating que getEntregasPreviewUrl: pipeline, /revision y /entregas
+  // comparten esta lectura, así que cualquiera de esos permisos basta.
+  const canView =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canView) return { urls: [] }
+
   const supabase = await createClient()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
-    .select('thumb_keys, storage_provider')
+    .select('thumb_keys, storage_provider, status')
     .eq('id', videoId)
     .single()
   // Sin fila, error de query (p.ej. columna no existe aún) → fallback silencioso.
   if (error || !video) return { urls: [] }
+  if (video.status === 'archived' || video.status === 'failed') return { urls: [] }
 
   const keys = (video.thumb_keys as string[] | null) ?? []
   if (keys.length === 0) return { urls: [] }
