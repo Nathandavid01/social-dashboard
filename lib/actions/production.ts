@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { requirePermission } from '@/lib/auth/server'
-import type { ProductionContentType, ProductionPriority, ProductionTaskStatus } from '@/lib/supabase/types'
+import type { ProductionContentType, ProductionPriority, ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 
 // ── Schedules ────────────────────────────────────────────────────────────────
 
@@ -98,7 +98,7 @@ export async function getProductionTasks(filters?: {
   assignedToId?: string
   status?: ProductionTaskStatus | 'all'
   clientId?: string
-}) {
+}): Promise<ProductionTask[]> {
   const supabase = await createClient()
   let query = supabase
     .from('production_tasks')
