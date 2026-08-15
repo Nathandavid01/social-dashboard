@@ -76,5 +76,16 @@ export async function runMetricoolPublishedSync(): Promise<MetricoolSyncResult> 
     .in('id', toMark)
   if (updErr) return { updated: 0, checked: ideas.length, error: updErr.message }
 
+  // Close the loop: the DB trigger `sync_idea_status_from_task` propagates
+  // task → idea, not the reverse. We just marked these ideas 'publicada'
+  // directly, so push their linked production_tasks to 'publicado' too —
+  // otherwise the calendar chip stays stuck on its old status. Best-effort:
+  // a failure here must not turn the idea sync itself into an error.
+  await supabase
+    .from('production_tasks')
+    .update({ status: 'publicado' })
+    .in('idea_id', toMark)
+    .neq('status', 'publicado')
+
   return { updated: toMark.length, checked: ideas.length }
 }
