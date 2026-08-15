@@ -157,3 +157,24 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(buildIdeaCaptionPrompt(base)).not.toContain('CAPTIONS QUE EL EQUIPO RECHAZÓ')
   })
 })
+
+describe('bloque de análisis visual (QC IA)', () => {
+  const base = { title: 'Promo', examples: [] as { text: string; provider: string }[] }
+
+  it('incluye resumen visual y captions quemados cuando hay análisis', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      videoAnalysis: { visualSummary: 'doctora muestra el consultorio', burnedCaptionsText: 'Agenda tu cita hoy' },
+    })
+    expect(p).toContain('LO QUE SE VE EN EL VIDEO')
+    expect(p).toContain('doctora muestra el consultorio')
+    expect(p).toContain('Agenda tu cita hoy')
+  })
+
+  it('sin análisis (o vacío) el prompt no cambia', () => {
+    const sin = buildIdeaCaptionPrompt({ ...base })
+    const vacio = buildIdeaCaptionPrompt({ ...base, videoAnalysis: { visualSummary: '  ', burnedCaptionsText: null } })
+    expect(sin).toBe(vacio)
+    expect(sin).not.toContain('LO QUE SE VE EN EL VIDEO')
+  })
+})
