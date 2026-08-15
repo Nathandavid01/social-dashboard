@@ -69,4 +69,51 @@ describe('VideoSceneStrip', () => {
     img.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(onOpen).toHaveBeenCalled()
   })
+
+  // Camino "live" (fallback al vuelo): el canvas real / seek de <video> no son
+  // testeables en jsdom, pero SÍ el guard de duración degenerada — es el mismo
+  // chequeo (Number.isFinite(duration) && duration > 0) que hace que
+  // frameTimestamps() devuelva [] para Infinity/0 en video-frames.test.ts.
+  describe('camino "live" — duración degenerada (webm/MediaRecorder)', () => {
+    it('duration === Infinity → cae a \'none\' (no se queda pintando canvases vacíos)', async () => {
+      vi.mocked(getVideoThumbViewUrls).mockResolvedValue({ urls: [] })
+      vi.mocked(getVideoPreviewUrl).mockResolvedValue({ url: 'https://r2/preview.mp4', provider: 'r2' })
+      const { container } = render(<VideoSceneStrip videoId="vid-6" />)
+      await flush()
+
+      // Estado 'live': el <video> oculto ya está montado con el preview.
+      const video = container.querySelector('video') as HTMLVideoElement
+      expect(video).toBeTruthy()
+
+      Object.defineProperty(video, 'duration', { value: Infinity, configurable: true })
+      await act(async () => { video.dispatchEvent(new Event('loadedmetadata')) })
+
+      // Duración no finita → ningún timestamp que pintar → el componente
+      // se rinde a 'none' en vez de dejar 5 <canvas> vacíos para siempre.
+      expect(container).toBeEmptyDOMElement()
+    })
+
+    it('readyState ya en HAVE_METADATA antes del efecto (carrera) no cuelga esperando el evento', async () => {
+      vi.mocked(getVideoThumbViewUrls).mockResolvedValue({ urls: [] })
+      vi.mocked(getVideoPreviewUrl).mockResolvedValue({ url: 'https://r2/preview.mp4', provider: 'r2' })
+
+      // Simula que 'loadedmetadata' YA disparó antes de que el efecto
+      // conectara el listener: readyState alto, sin evento por venir.
+      const proto = HTMLMediaElement.prototype
+      const original = Object.getOwnPropertyDescriptor(proto, 'readyState')
+      Object.defineProperty(proto, 'readyState', { configurable: true, get: () => 1 })
+
+      try {
+        const { container } = render(<VideoSceneStrip videoId="vid-7" />)
+        await flush()
+        // jsdom's default video.duration es NaN → falla el guard de duración
+        // igual, pero sin depender de esperar 'loadedmetadata' — si el
+        // readyState check no existiera, esto se quedaría colgado en 'live'
+        // con 5 canvases vacíos hasta el timeout de 10s.
+        expect(container).toBeEmptyDOMElement()
+      } finally {
+        if (original) Object.defineProperty(proto, 'readyState', original)
+      }
+    })
+  })
 })

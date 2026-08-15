@@ -68,7 +68,12 @@ export async function processUploadedVideo(
     deps?.putThumb ??
     (async (url: string, dataUri: string) => {
       const blob = await dataUriToBlob(dataUri)
-      await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob })
+      const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob })
+      // R2 puede rechazar sin lanzar (403 de presign vencido, 5xx) — un PUT
+      // "exitoso" que en realidad no subió nada dejaría thumb_keys apuntando
+      // a objetos que no existen. Lanzar aquí hace que uploadThumbs() no
+      // registre ninguna key de este lote (todo o nada).
+      if (!res.ok) throw new Error(`R2 ${res.status} subiendo thumbnail`)
     })
 
   let frames: string[]

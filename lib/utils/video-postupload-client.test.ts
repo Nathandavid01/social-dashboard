@@ -80,4 +80,33 @@ describe('processUploadedVideo', () => {
     const deps = makeDeps({ register: vi.fn().mockResolvedValue({ error: 'columna no existe' }) })
     await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
   })
+
+  it('el PUT por defecto verifica res.ok — si R2 rechaza (403/5xx) sin lanzar, NO registra las keys', async () => {
+    const register = vi.fn().mockResolvedValue({ ok: true })
+    const getUploadUrls = vi.fn().mockResolvedValue({ urls: ['https://put/0'], keys: ['k0'] })
+    const extract = vi.fn().mockResolvedValue(['data:image/jpeg;base64,AAA'])
+    const post = vi.fn().mockResolvedValue({ ok: true })
+
+    const originalFetch = global.fetch
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.startsWith('data:')) {
+        // dataUriToBlob(dataUri) — convierte el frame a Blob antes del PUT.
+        return new Response(new Blob(['x'], { type: 'image/jpeg' }))
+      }
+      // El PUT a la URL firmada "resuelve" pero con un status de error —
+      // exactamente el caso que un simple `await fetch(...)` sin chequear
+      // .ok se traga en silencio.
+      return new Response(null, { status: 403 })
+    }) as unknown as typeof fetch
+
+    try {
+      await expect(
+        processUploadedVideo('vid-1', file, { extract, getUploadUrls, register, post }),
+      ).resolves.toBeUndefined()
+      expect(register).not.toHaveBeenCalled()
+    } finally {
+      global.fetch = originalFetch
+    }
+  })
 })

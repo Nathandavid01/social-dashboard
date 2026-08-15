@@ -39,6 +39,14 @@ function dirnameOf(key: string): string {
   return i === -1 ? '' : key.slice(0, i)
 }
 
+const MAX_THUMB_COUNT = 8
+
+/** Nunca confiar en el count del caller: 1..8, sin importar lo que llegue. */
+function clampCount(count: number): number {
+  if (!Number.isFinite(count)) return 1
+  return Math.max(1, Math.min(MAX_THUMB_COUNT, Math.floor(count)))
+}
+
 export async function getThumbUploadUrls(
   videoId: string,
   count: number,
@@ -62,9 +70,10 @@ export async function getThumbUploadUrls(
 
   const folder = dirnameOf(video.drive_file_id as string)
   const ts = Date.now()
+  const n = clampCount(count)
 
   try {
-    const keys = Array.from({ length: count }, (_, i) => `${folder}/thumbs/${ts}-${i}.jpg`)
+    const keys = Array.from({ length: n }, (_, i) => `${folder}/thumbs/${ts}-${i}.jpg`)
     const urls = await Promise.all(
       keys.map((key) =>
         getSignedUrl(
