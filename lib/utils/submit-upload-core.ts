@@ -29,7 +29,9 @@ export interface SubmitDeps {
     name: string
     sizeBytes: number
     mimeType: string
-  }) => Promise<{ ok?: true; error?: string }>
+    /** El File subido, para poder disparar el QC IA tras registrar. */
+    file: File
+  }) => Promise<{ ok?: true; id?: string; error?: string }>
 }
 
 export interface SubmitInput {
@@ -108,6 +110,7 @@ export async function submitOneVideo(
       name: input.file.name,
       sizeBytes: input.file.size,
       mimeType: input.file.type || 'video/mp4',
+      file: input.file,
     })
     if (reg.error) return { ok: false, ideaId, stage: 'registrando', error: reg.error }
   } catch (err) {

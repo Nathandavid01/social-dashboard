@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 /**
@@ -23,6 +23,9 @@ vi.mock('@/lib/actions/video-preview', () => ({
 vi.mock('@/lib/actions/video-analysis', () => ({
   getVideoAnalysis: vi.fn(async () => ({ analysis: null })),
 }))
+vi.mock('@/lib/utils/video-analysis-client', () => ({
+  analyzeUploadedVideo: vi.fn().mockResolvedValue(undefined),
+}))
 
 vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
@@ -36,6 +39,8 @@ vi.mock('@/components/auth/role-gate', () => ({
 }))
 
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
 
 function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   return {
@@ -213,6 +218,66 @@ describe('IdeaVideoPanel — inline preview', () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
     await flush()
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+  })
+})
+
+describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
+  const OriginalXHR = global.XMLHttpRequest
+
+  // getR2UploadUrl/registerR2Video are mocked at module scope; the actual
+  // R2 PUT goes through XMLHttpRequest, which jsdom leaves unmocked (a real
+  // request to it would hang). Stub it to succeed synchronously so uploadOne
+  // reaches registerR2Video.
+  class FakeXHR {
+    status = 200
+    upload: { onprogress: ((e: ProgressEvent) => void) | null } = { onprogress: null }
+    onload: (() => void) | null = null
+    onerror: (() => void) | null = null
+    open() {}
+    setRequestHeader() {}
+    send() {
+      this.onload?.()
+    }
+  }
+
+  beforeEach(() => {
+    // @ts-expect-error test stub, not a full XMLHttpRequest
+    global.XMLHttpRequest = FakeXHR
+  })
+  afterEach(() => {
+    global.XMLHttpRequest = OriginalXHR
+  })
+
+  it('subir en el slot "edited" dispara analyzeUploadedVideo con el id registrado', async () => {
+    vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-9' })
+    const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
+
+    const inputs = container.querySelectorAll('input[type="file"]')
+    const editedInput = inputs[2] as HTMLInputElement
+    const file = new File(['x'], 'final.mp4', { type: 'video/mp4' })
+    await act(async () => {
+      fireEvent.change(editedInput, { target: { files: [file] } })
+    })
+    await flush()
+
+    expect(vi.mocked(analyzeUploadedVideo)).toHaveBeenCalledWith('vid-9', expect.any(File))
+  })
+
+  it('subir en el slot "raw" NO dispara analyzeUploadedVideo', async () => {
+    vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-raw' })
+    const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
+
+    const inputs = container.querySelectorAll('input[type="file"]')
+    const rawInput = inputs[0] as HTMLInputElement
+    const file = new File(['x'], 'raw.mp4', { type: 'video/mp4' })
+    await act(async () => {
+      fireEvent.change(rawInput, { target: { files: [file] } })
+    })
+    await flush()
+
+    expect(vi.mocked(analyzeUploadedVideo)).not.toHaveBeenCalled()
   })
 })
 

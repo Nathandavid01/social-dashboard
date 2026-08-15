@@ -52,10 +52,11 @@ describe('submitOneVideo — cadena completa', () => {
 
   it('registra con la key que devolvió el presign y el peso real', async () => {
     const d = deps()
-    await submitOneVideo(d, { ...input, file: file('otro.mp4', 4242) })
+    const f = file('otro.mp4', 4242)
+    await submitOneVideo(d, { ...input, file: f })
     expect(d.registerVideo).toHaveBeenCalledWith({
       ideaId: 'idea-1', kind: 'edited', key: 'ideas/idea-1/edited/reel.mp4',
-      name: 'otro.mp4', sizeBytes: 4242, mimeType: 'video/mp4',
+      name: 'otro.mp4', sizeBytes: 4242, mimeType: 'video/mp4', file: f,
     })
   })
 

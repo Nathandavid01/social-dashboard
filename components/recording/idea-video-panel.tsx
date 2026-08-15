@@ -8,6 +8,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
 import { VideoAnalysisReport } from '@/components/video-analysis/video-analysis-report'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
@@ -231,6 +232,8 @@ function Slot({
       ideaId, kind, key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4',
     })
     if (res.error) throw new Error(res.error)
+    // QC IA solo del corte final. void: si falla, la subida ya está completa.
+    if (kind === 'edited' && res.id) void analyzeUploadedVideo(res.id, file)
   }
 
   // Accepts one OR many files; uploads them sequentially into this kind.

@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
+import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
 import type { SubmitVideoPayload } from './submit-video-card'
 
@@ -64,8 +65,11 @@ const deps: SubmitDeps = {
   createIdea: (i) => createSubmittedIdea(i),
   getUploadUrl: (i) => getEntregasUploadUrl({ ideaId: i.ideaId, fileName: i.fileName, contentType: i.contentType }),
   putFile: putWithProgress,
-  registerVideo: (i) =>
-    registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType }),
+  registerVideo: async (i) => {
+    const res = await registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType })
+    if (res.ok && res.id) void analyzeUploadedVideo(res.id, i.file)
+    return res
+  },
 }
 
 /** `dia` viene de la pestaña activa del tablero: entregar estando en Lunes
