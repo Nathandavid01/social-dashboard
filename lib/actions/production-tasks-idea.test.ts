@@ -12,6 +12,9 @@ const tasks = [
   { id: 'task-1', idea_id: 'idea-1', status: 'aprobado', publish_date: '2026-08-18', content_type: 'R' },
   { id: 'task-2', idea_id: 'idea-2', status: 'pendiente', publish_date: '2026-08-19', content_type: 'P' },
   { id: 'task-3', idea_id: null, status: 'pendiente', publish_date: '2026-08-20', content_type: 'R' },
+  // idea_id points at a row that doesn't exist in `ideas` below (e.g. deleted
+  // idea) — must not throw and must fall back to null, not undefined.
+  { id: 'task-4', idea_id: 'idea-missing', status: 'pendiente', publish_date: '2026-08-21', content_type: 'P' },
 ]
 
 const ideas = [
@@ -67,12 +70,17 @@ describe('getProductionTasks — idea attachment', () => {
     expect(t3?.idea).toBeNull()
   })
 
+  it('attaches the found idea shape correctly (status + published_at, not dropped)', async () => {
+    const { getProductionTasks } = await import('./production')
+    const result = await getProductionTasks()
+    const t2 = result.find((t) => t.id === 'task-2')
+    expect(t2?.idea).toEqual({ status: 'aprobado', published_at: null })
+  })
+
   it('sets idea to null when the idea_id has no matching content_ideas row', async () => {
     const { getProductionTasks } = await import('./production')
     const result = await getProductionTasks()
-    // idea-2 exists so this checks the shape, not the missing case directly —
-    // but confirms the merge doesn't silently drop tasks whose idea *is* found.
-    const t2 = result.find((t) => t.id === 'task-2')
-    expect(t2?.idea).toEqual({ status: 'aprobado', published_at: null })
+    const t4 = result.find((t) => t.id === 'task-4')
+    expect(t4?.idea).toBeNull()
   })
 })

@@ -81,11 +81,14 @@ export async function runMetricoolPublishedSync(): Promise<MetricoolSyncResult> 
   // directly, so push their linked production_tasks to 'publicado' too —
   // otherwise the calendar chip stays stuck on its old status. Best-effort:
   // a failure here must not turn the idea sync itself into an error.
-  await supabase
+  const { error: taskUpdErr } = await supabase
     .from('production_tasks')
     .update({ status: 'publicado' })
     .in('idea_id', toMark)
     .neq('status', 'publicado')
+  if (taskUpdErr) {
+    console.error('runMetricoolPublishedSync: failed to sync production_tasks status', taskUpdErr.message)
+  }
 
   return { updated: toMark.length, checked: ideas.length }
 }
