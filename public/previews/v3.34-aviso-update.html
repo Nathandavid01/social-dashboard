@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.34 — Aviso de versión nueva</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; }
+    .stage { position:relative; margin-top:20px; height:160px; border:1px dashed var(--border); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
+    .pill { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:12px; border:1px solid var(--border); background:var(--card); border-radius:999px; padding:8px 16px; box-shadow:0 8px 30px rgba(0,0,0,.5); white-space:nowrap; }
+    .pill p { margin:0; font-size:12px; }
+    .pill b { font-weight:600; }
+    .btn { display:flex; align-items:center; gap:6px; background:var(--fg); color:var(--bg); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:600; }
+    .tiny { font-size:12px; color:var(--muted-fg); margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.34 — Cuando hay un update nuevo, sale en pantalla</h1>
+    <p class="sub">El dashboard compara su versión con la del servidor al abrir, al volver a la pestaña y cada 5 minutos. Si hay deploy nuevo, aparece este aviso abajo al centro.</p>
+    <div class="stage">
+      <div class="pill">
+        <p>Hay una versión nueva <b>v3.35</b></p>
+        <span class="btn">⟳ Actualizar</span>
+      </div>
+    </div>
+    <p class="tiny">Un clic en Actualizar recarga la página con la versión nueva. Si no hay red, el aviso simplemente no sale.</p>
+  </div>
+</body>
+</html>

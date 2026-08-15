@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2 } from 'lucide-react'
+import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2, ExternalLink } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -70,6 +70,7 @@ export function EntregasBoard({
   postingTimes = {},
   reviewNotes = {},
   clientApprovals = {},
+  postedLinks = {},
   modoDia = 'entrega',
 }: {
   ideas: Idea[]
@@ -94,6 +95,9 @@ export function EntregasBoard({
   reviewNotes?: Record<string, ReviewNote>
   /** Lo que el cliente respondió por video, para marcarlo en la tarjeta. */
   clientApprovals?: Record<string, EstadoCliente>
+  /** idea id → URL pública que Metricool recibió (log posted_to_metricool).
+   *  Alimenta el enlace "Ver post enviado" de la tarjeta ya programada. */
+  postedLinks?: Record<string, string>
   /** Desde qué lado se mira la fecha. Revisión razona en día de entrega; Copy y
    *  Publicación en día de publicación, que es la cadencia del cliente. */
   modoDia?: ModoDia
@@ -440,7 +444,7 @@ export function EntregasBoard({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {ENTREGA_BATCH_STAGES.filter((s) => visibleStages.includes(s.key)).map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />
+            <BatchColumn key={stage.key} stageKey={stage.key} label={ENTREGA_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'edited' ? visiblePlanned : undefined} topSlot={stage.key === 'edited' && dia !== 'sin' && submitClients ? <EditorSubmitSlot clients={submitClients} dia={dia} semanaOffset={semanaOffset} /> : undefined} postingTimes={postingTimes} onMove={moveCard} onOpen={openEntregaBatch} reviewNotes={reviewNotes} clientApprovals={clientApprovals} postedLinks={postedLinks} />
           ))}
         </div>
       </div>
@@ -468,7 +472,7 @@ export function EntregasBoard({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes = {}, onMove, onOpen, reviewNotes = {}, clientApprovals = {}, postedLinks = {} }: { stageKey: EntregaStageKey; label: string; batches: EntregaBatch[]; planned?: PlannedClient[]; topSlot?: React.ReactNode; postingTimes?: Record<string, string | null>; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente>; postedLinks?: Record<string, string> }) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
   return (
@@ -491,7 +495,7 @@ function BatchColumn({ stageKey, label, batches, planned, topSlot, postingTimes 
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={entregaCardKey(b)} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} />)}
+            {batches.map((b) => <BatchCard key={entregaCardKey(b)} batch={b} stage={stageKey} postingTime={postingTimes[b.clientId] ?? null} onMove={onMove} onOpen={onOpen} reviewNotes={reviewNotes} clientApprovals={clientApprovals} postedLinks={postedLinks} />)}
           </>
         )}
       </div>
@@ -636,7 +640,7 @@ function PipelineVideoThumb({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente> }) {
+const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, onMove, onOpen, reviewNotes = {}, clientApprovals = {}, postedLinks = {} }: { batch: EntregaBatch; stage: EntregaStageKey; postingTime?: string | null; onMove: (b: EntregaBatch, dir: 1 | -1) => void; onOpen: (clientId: string, stage: EntregaStageKey, ideaId: string) => void; reviewNotes?: Record<string, ReviewNote>; clientApprovals?: Record<string, EstadoCliente>; postedLinks?: Record<string, string> }) {
   const a = userAccent(batch.assignee?.id)
   const pct = Math.round(batchProgress(stage) * 100)
   const thumbs = Math.min(3, batch.total)
@@ -658,6 +662,10 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
     .map((i) => reviewNotes[i.id])
     .filter(Boolean)
     .sort((a, b) => (a.at < b.at ? 1 : -1))[0]
+
+  // Solo lo realmente enviado (metricool_post_id) enseña su enlace de auditoría.
+  const enviado = batch.ideas[0]
+  const postedLink = enviado?.metricool_post_id != null ? postedLinks[enviado.id] : undefined
 
   return (
     <article onClick={() => onOpen(batch.clientId, stage, batch.ideas[0].id)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
@@ -777,6 +785,23 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             publishDate={batch.ideas[0]?.publish_date ?? null}
             postingTime={postingTime}
           />
+        )}
+
+        {/* Lo ya enviado se puede VERIFICAR desde la tarjeta: el enlace abre la
+            URL pública exacta que Metricool recibió (log posted_to_metricool),
+            no el archivo actual de la idea — el punto es auditar el envío.
+            Un batch es UN video (groupIntoBatches), así que hay un solo enlace. */}
+        {stage === 'publication' && postedLink && (
+          <a
+            href={postedLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-2 py-1.5 text-[10px] font-medium text-emerald-600 transition hover:border-emerald-500/50 hover:bg-emerald-500/10 dark:text-emerald-400"
+          >
+            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="min-w-0 truncate">Ver post enviado</span>
+          </a>
         )}
       </div>
     </article>

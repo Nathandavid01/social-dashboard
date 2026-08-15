@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.34 — Ver post enviado</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; }
+    .board-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-top:16px; box-shadow: inset 3px 0 0 0 var(--gold); }
+    .client { font-weight:600; font-size:14px; }
+    .stage { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.06em; color:var(--good); border:1px solid rgba(34,197,94,.3); border-radius:6px; padding:2px 6px; margin-top:6px; }
+    .sched { margin-top:10px; border:1px solid var(--border); background:rgba(255,255,255,.03); border-radius:10px; padding:8px 10px; font-size:11px; color:var(--muted-fg); }
+    .sched b { color:var(--fg); font-size:12px; }
+    .link { display:flex; align-items:center; gap:6px; margin-top:8px; border:1px solid rgba(16,185,129,.25); background:rgba(16,185,129,.06); border-radius:10px; padding:7px 10px; font-size:10px; font-weight:600; color:#34d399; text-decoration:none; }
+    .link:hover { border-color:rgba(16,185,129,.45); background:rgba(16,185,129,.1); }
+    .tiny { font-size:12px; color:var(--muted-fg); margin-top:10px; }
+    .before, .after { margin-top:20px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.34 — El post enviado a Metricool ahora es clickable</h1>
+    <p class="sub">En la columna Publicación de Entregas, cada video ya enviado enlaza a la URL pública exacta que Metricool recibió — el archivo que va al perfil del cliente.</p>
+
+    <p class="before">Antes</p>
+    <div class="board-card">
+      <div class="client">Gym X</div>
+      <span class="stage">Programado en Metricool</span>
+      <div class="sched">Borrador en Metricool<br /><b>lun 17 ago, 10:00 AM</b></div>
+      <p class="tiny">Para verificar QUÉ archivo se agendó había que entrar a Metricool.</p>
+    </div>
+
+    <p class="after">Ahora</p>
+    <div class="board-card">
+      <div class="client">Gym X</div>
+      <span class="stage">Programado en Metricool</span>
+      <div class="sched">Borrador en Metricool<br /><b>lun 17 ago, 10:00 AM</b></div>
+      <a class="link" href="#" onclick="return false">⧉ Ver post enviado</a>
+      <p class="tiny">Un clic abre en otra pestaña el video exacto que se envió, aunque después se suba otro corte.</p>
+    </div>
+  </div>
+</body>
+</html>
