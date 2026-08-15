@@ -5,9 +5,17 @@ import { CheckCircle2, AlertTriangle, Loader2, EyeOff, ChevronDown } from 'lucid
 import { cn } from '@/lib/utils'
 import { getVideoAnalysis, type VideoAnalysisView } from '@/lib/actions/video-analysis'
 
+const POLL_MS = 10_000
+const POLL_GIVE_UP_MS = 5 * 60_000
+
 /**
  * Reporte ADVISORY del QC IA (Grok 4.6). Solo superficies internas — nunca
  * montarlo en /review/<token> ni /aprobacion (links públicos de cliente).
+ *
+ * Mientras el análisis está 'pending' (el editor puede tener el panel abierto
+ * mientras Grok procesa) reconsulta cada 10s hasta que el estado cambie, se
+ * desmonte, o pasen ~5min — ahí se da por vencido y deja la tarjeta "Analizando…"
+ * (nunca inventa un error).
  */
 export function VideoAnalysisReport({ ideaId }: { ideaId: string }) {
   const [analysis, setAnalysis] = useState<VideoAnalysisView | null | undefined>(undefined)
@@ -15,10 +23,27 @@ export function VideoAnalysisReport({ ideaId }: { ideaId: string }) {
 
   useEffect(() => {
     let alive = true
-    getVideoAnalysis(ideaId)
-      .then((res) => { if (alive) setAnalysis(res.analysis ?? null) })
-      .catch(() => { if (alive) setAnalysis(null) })
-    return () => { alive = false }
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const startedAt = Date.now()
+
+    const fetchOnce = () => {
+      getVideoAnalysis(ideaId)
+        .then((res) => {
+          if (!alive) return
+          const next = res.analysis ?? null
+          setAnalysis(next)
+          if (next?.status === 'pending' && Date.now() - startedAt < POLL_GIVE_UP_MS) {
+            timer = setTimeout(fetchOnce, POLL_MS)
+          }
+        })
+        .catch(() => { if (alive) setAnalysis(null) })
+    }
+    fetchOnce()
+
+    return () => {
+      alive = false
+      if (timer) clearTimeout(timer)
+    }
   }, [ideaId])
 
   if (analysis === undefined || analysis === null) return null

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import { VideoAnalysisReport } from './video-analysis-report'
 import * as actions from '@/lib/actions/video-analysis'
 
@@ -51,5 +51,61 @@ describe('VideoAnalysisReport', () => {
     const { container } = render(<VideoAnalysisReport ideaId="i1" />)
     await waitFor(() => expect(mockGet).toHaveBeenCalled())
     expect(container.textContent).toBe('')
+  })
+
+  describe('pending: re-consulta hasta que cambia (timers falsos)', () => {
+    beforeEach(() => vi.useFakeTimers())
+    afterEach(() => vi.useRealTimers())
+
+    it('pending → poll cada 10s → done: deja de mostrar "Analizando…" y muestra el reporte, sin más llamadas tras el cambio', async () => {
+      mockGet
+        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null } })
+        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null } })
+        .mockResolvedValue({ analysis: { status: 'done', findings } })
+
+      render(<VideoAnalysisReport ideaId="i1" />)
+      await act(async () => {})
+      expect(screen.getByText(/Analizando/)).toBeInTheDocument()
+      expect(mockGet).toHaveBeenCalledTimes(1)
+
+      await act(() => vi.advanceTimersByTimeAsync(10_000))
+      expect(mockGet).toHaveBeenCalledTimes(2)
+      expect(screen.getByText(/Analizando/)).toBeInTheDocument()
+
+      await act(() => vi.advanceTimersByTimeAsync(10_000))
+      expect(mockGet).toHaveBeenCalledTimes(3)
+      expect(screen.getByText(/Captions del video/)).toBeInTheDocument()
+
+      // Ya en 'done': ya no debe seguir sondeando.
+      await act(() => vi.advanceTimersByTimeAsync(30_000))
+      expect(mockGet).toHaveBeenCalledTimes(3)
+    })
+
+    it('se desmonta con pending: no sigue sondeando (interval limpio)', async () => {
+      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null } })
+      const { unmount } = render(<VideoAnalysisReport ideaId="i1" />)
+      await act(async () => {})
+      expect(mockGet).toHaveBeenCalledTimes(1)
+
+      unmount()
+      await act(() => vi.advanceTimersByTimeAsync(30_000))
+      expect(mockGet).toHaveBeenCalledTimes(1)
+    })
+
+    it('pending que nunca resuelve: se da por vencido a los ~5min y deja de sondear, sin inventar un error', async () => {
+      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null } })
+      render(<VideoAnalysisReport ideaId="i1" />)
+      await act(async () => {})
+
+      await act(() => vi.advanceTimersByTimeAsync(5 * 60_000))
+      const callsAtCap = mockGet.mock.calls.length
+      expect(callsAtCap).toBeGreaterThan(1)
+      expect(screen.getByText(/Analizando/)).toBeInTheDocument()
+
+      // Pasado el tope, ya no sondea más.
+      await act(() => vi.advanceTimersByTimeAsync(60_000))
+      expect(mockGet).toHaveBeenCalledTimes(callsAtCap)
+      expect(screen.getByText(/Analizando/)).toBeInTheDocument()
+    })
   })
 })

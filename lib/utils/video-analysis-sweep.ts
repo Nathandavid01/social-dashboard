@@ -11,7 +11,7 @@ export function staleAnalysisCandidates(
   videos: { id: string; idea_id: string; uploaded_at: string }[],
   analyses: { video_id: string; status: string; updated_at: string }[],
   now: Date,
-): { videoId: string; ideaId: string }[] {
+): { videoId: string; ideaId: string; hasRow: boolean }[] {
   const byVideo = new Map(analyses.map((a) => [a.video_id, a]))
   const isOld = (iso: string) => now.getTime() - new Date(iso).getTime() > STALE_MS
   return videos
@@ -21,5 +21,5 @@ export function staleAnalysisCandidates(
       if (!row) return true
       return row.status === 'pending' && isOld(row.updated_at)
     })
-    .map((v) => ({ videoId: v.id, ideaId: v.idea_id }))
+    .map((v) => ({ videoId: v.id, ideaId: v.idea_id, hasRow: byVideo.has(v.id) }))
 }

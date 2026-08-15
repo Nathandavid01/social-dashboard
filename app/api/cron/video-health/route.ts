@@ -71,15 +71,29 @@ export async function GET(req: NextRequest) {
         .select('video_id, status, updated_at').gte('updated_at', since),
     ])
     const stale = staleAnalysisCandidates(edited ?? [], analyses ?? [], new Date())
+    const ERROR_NOTE = 'No se recibieron frames (posible tab cerrado durante la subida).'
     for (const s of stale) {
-      await sb.from('content_idea_video_analysis').upsert(
-        {
-          video_id: s.videoId, idea_id: s.ideaId, status: 'error',
-          error_note: 'No se recibieron frames (posible tab cerrado durante la subida).',
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'video_id' },
-      )
+      if (s.hasRow) {
+        // La fila ya existe como 'pending': el guard .eq('status','pending')
+        // cierra la carrera con una ruta concurrente que acaba de escribir
+        // 'done' — si eso pasó entre el SELECT y este UPDATE, no matchea y no
+        // pisa nada (TOCTOU-safe).
+        await sb.from('content_idea_video_analysis')
+          .update({ status: 'error', error_note: ERROR_NOTE, updated_at: new Date().toISOString() })
+          .eq('video_id', s.videoId)
+          .eq('status', 'pending')
+      } else {
+        // Sin fila todavía: insert-ignore — si una ruta concurrente ya insertó
+        // el 'done' entre el SELECT y aquí, ignoreDuplicates deja que gane esa
+        // fila en vez de pisarla con 'error'.
+        await sb.from('content_idea_video_analysis').upsert(
+          {
+            video_id: s.videoId, idea_id: s.ideaId, status: 'error',
+            error_note: ERROR_NOTE, updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'video_id', ignoreDuplicates: true },
+        )
+      }
     }
   } catch { /* best-effort: el health-check principal no depende de esto */ }
 
