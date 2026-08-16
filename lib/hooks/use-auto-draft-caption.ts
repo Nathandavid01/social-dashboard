@@ -35,6 +35,7 @@ export function useAutoDraftCaption({
   ideaId,
   hook,
   hasVideo = false,
+  hasVisualAnalysis = false,
   captionDraft,
   generatedCaption,
   enabled = true,
@@ -43,6 +44,9 @@ export function useAutoDraftCaption({
   ideaId: string
   hook?: string | null
   hasVideo?: boolean
+  /** true cuando la IA ya vio el video: el hook deja de ser obligatorio para
+   *  disparar el auto-borrador (decisión de Eric, ver lib/utils/idea-ready.ts). */
+  hasVisualAnalysis?: boolean
   captionDraft?: string | null
   generatedCaption?: string | null
   enabled?: boolean
@@ -57,6 +61,7 @@ export function useAutoDraftCaption({
     if (!shouldAutoDraftCaption({
       hook,
       hasVideo,
+      hasVisualAnalysis,
       caption_draft: captionDraft,
       generated_caption: generatedCaption,
     })) return
@@ -71,7 +76,7 @@ export function useAutoDraftCaption({
     return () => {
       cancelled = true
     }
-  }, [ideaId, hook, hasVideo, captionDraft, generatedCaption, enabled])
+  }, [ideaId, hook, hasVideo, hasVisualAnalysis, captionDraft, generatedCaption, enabled])
 
   return { autoDrafting }
 }
