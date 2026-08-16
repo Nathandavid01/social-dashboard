@@ -6,6 +6,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v3.54 — 2026-08-16
 
+> ⚠️ **REQUISITO OBLIGATORIO ANTES (O A LA VEZ) DE HACER MERGE**: aplicar la migración
+> `supabase/migrations/0065_multipart_uploads_ownership.sql`. A diferencia de otras migraciones de
+> este changelog, que degradan suave si se retrasan, **esta NO es opcional ni de "luego se aplica"**:
+> sin ella, la subida por partes (videos de 8 MB+) crea el multipart en R2, no puede registrar quién
+> es el dueño, lo aborta correctamente (no queda huérfano) y le devuelve un error al usuario — la
+> subida completa falla. Aplícala con el flujo de siempre (`supabase db push` / el pipeline de
+> Supabase del proyecto) antes de que este código llegue a producción.
+
 **Las subidas de video ya no se caen con internet flojo — ahora se ven con el logo de Nate Media llenándose poco a poco, dicen qué están haciendo, y puedes irte a otra pantalla sin que se pierdan.**
 
 - **Antes**, un corte de internet a mitad de una subida grande perdía TODO el progreso y había que empezar de cero. **Ahora**, los videos de 8 MB o más se suben en pedazos: si uno falla por la conexión, solo se reintenta ESE pedazo (hasta 5 veces), no el archivo completo.
