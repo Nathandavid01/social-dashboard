@@ -16,7 +16,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Cuando la casilla tiene contenido, el generador de captions la usa como **base** del texto — la transcripción del audio queda como apoyo, no al revés como quedaba antes por error.
 - El generador de captions ya no inventa años, fechas, nombres de eventos, precios ni promociones que no consten en el video, el hook, el brief, las reglas del cliente o los captions de referencia — si algo no consta, se omite.
 
-Vista: [preview HTML](/previews/v3.42-de-que-es-el-video.html)
+Vista: [preview HTML](/previews/v3.44-de-que-es-el-video.html)
 
 ## v3.43 — 2026-08-16
 
