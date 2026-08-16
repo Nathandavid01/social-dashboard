@@ -13,7 +13,17 @@ import type { UserRole } from '@/lib/supabase/types'
 
 vi.mock('@/components/produccion/idea-brief-card', () => ({ IdeaBriefCard: () => null }))
 vi.mock('@/components/produccion/idea-caption-editor', () => ({ IdeaCaptionEditor: () => null }))
-vi.mock('@/components/recording/idea-video-panel', () => ({ IdeaVideoPanel: () => null }))
+vi.mock('@/components/recording/idea-video-panel', () => ({
+  IdeaVideoPanel: () => <div data-testid="idea-video-panel" />,
+}))
+vi.mock('@/components/recording/video-scene-strip', () => ({
+  VideoSceneStrip: ({ videoId }: { videoId: string }) => <div data-testid="scene-strip" data-video-id={videoId} />,
+}))
+vi.mock('@/components/video-analysis/qc-progress-dots', () => ({
+  QcProgressDots: ({ ideaId, videoId }: { ideaId: string; videoId?: string }) => (
+    <div data-testid="qc-dots" data-idea-id={ideaId} data-video-id={videoId ?? ''} />
+  ),
+}))
 vi.mock('@/components/shared/inline-edit', () => ({
   InlineEdit: ({ value }: { value?: string | null }) => <span>{value}</span>,
 }))
@@ -214,5 +224,61 @@ describe('VideoWorkCard — agenda de publicación (fecha, hora, formato)', () =
     )
     expect(screen.getByText(/post en instagram/i)).toBeInTheDocument()
     expect(screen.queryByText(/reel en instagram/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('VideoWorkCard — lo que se mira, arriba (tira de escenas + QC, una sola vez)', () => {
+  it('shows the scene strip and QC dots exactly once, above the file list', () => {
+    render(
+      <VideoWorkCard
+        video={video({
+          videos: {
+            raw: [],
+            broll: [],
+            edited: [
+              { id: 'e-old', status: 'uploaded', uploaded_at: '2026-08-01T00:00:00.000Z' },
+              { id: 'e-new', status: 'uploaded', uploaded_at: '2026-08-10T00:00:00.000Z' },
+            ],
+          },
+        } as never)}
+        index={0}
+      />,
+    )
+    // Exactly one strip, for the most recently uploaded (vigente) edited cut.
+    const strips = screen.getAllByTestId('scene-strip')
+    expect(strips).toHaveLength(1)
+    expect(strips[0]).toHaveAttribute('data-video-id', 'e-new')
+
+    const dots = screen.getAllByTestId('qc-dots')
+    expect(dots).toHaveLength(1)
+    expect(dots[0]).toHaveAttribute('data-video-id', 'e-new')
+
+    // Above the file list: the strip/dots come before the (mocked) file panel in the DOM.
+    const panel = screen.getByTestId('idea-video-panel')
+    expect(strips[0].compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(dots[0].compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('does not render the scene strip (nothing to show) when there is no edited video yet', () => {
+    render(<VideoWorkCard video={video()} index={0} />)
+    expect(screen.queryByTestId('scene-strip')).not.toBeInTheDocument()
+    // QC dots still mount (ideaId-only) — it decides on its own whether to show anything real.
+    expect(screen.getByTestId('qc-dots')).toBeInTheDocument()
+  })
+
+  it('ignores a non-uploaded (e.g. archived) edited video when picking the vigente cut', () => {
+    render(
+      <VideoWorkCard
+        video={video({
+          videos: {
+            raw: [],
+            broll: [],
+            edited: [{ id: 'e-archived', status: 'archived', uploaded_at: '2026-08-10T00:00:00.000Z' }],
+          },
+        } as never)}
+        index={0}
+      />,
+    )
+    expect(screen.queryByTestId('scene-strip')).not.toBeInTheDocument()
   })
 })

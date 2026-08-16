@@ -12,6 +12,8 @@ import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
+import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
 import { ApprovalButton } from '@/components/produccion/approval-button'
 import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import { ReviewLinkPanel } from '@/components/review/review-link-panel'
@@ -70,6 +72,13 @@ export function VideoWorkCard({
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
 
+  // The "vigente" edited cut — same criterion as getVideoAnalysis: the most
+  // recent uploaded edited file, not the first in the array. Feeds the scene
+  // strip + QC dots at the top of the card (once per video, above the files).
+  const currentEditedId = [...video.videos.edited]
+    .filter((v) => v.status === 'uploaded')
+    .sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))[0]?.id
+
   // published_at also suppresses the badge (the auto-post path may set it without
   // flipping status to 'publicada').
   const dl = deadlineStatus(video.deadline, video.status, undefined, video.published_at)
@@ -109,8 +118,8 @@ export function VideoWorkCard({
             <span className="text-[11px] text-muted-foreground">
               Video {index + 1} · {contentTypeLabel(video.content_type)}
             </span>
-            <span className="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11px] text-muted-foreground">
-              <CalendarClock className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-1 text-[11px] text-foreground">
+              <CalendarClock className="h-3 w-3 shrink-0 text-primary" aria-hidden />
               {agenda.hasDate ? (
                 <span className="min-w-0 truncate">
                   Se publica el {agenda.dateLabel}
@@ -122,7 +131,7 @@ export function VideoWorkCard({
                   )}
                 </span>
               ) : (
-                <span>Sin fecha de publicación</span>
+                <span className="text-muted-foreground">Sin fecha de publicación</span>
               )}
             </span>
           </div>
@@ -152,6 +161,13 @@ export function VideoWorkCard({
           )}
         </div>
       </header>
+
+      {/* 0) lo que se mira, arriba: la tira de escenas + las bolitas QC del corte
+          vigente — antes de la lista de archivos, y solo una vez por video. */}
+      <div className="flex flex-col gap-2">
+        {currentEditedId && <VideoSceneStrip videoId={currentEditedId} />}
+        <QcProgressDots ideaId={video.id} videoId={currentEditedId} />
+      </div>
 
       {/* 1) el video — lo primero: súbelo */}
       <div className="flex flex-col gap-2">
