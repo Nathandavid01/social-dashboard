@@ -12,8 +12,19 @@ const POLL_GIVE_UP_MS = 5 * 60_000
  * reconsulta cada 10s hasta que el estado cambie, se desmonte, o pasen ~5min
  * (ahí se da por vencido y deja el último estado visto — nunca inventa un
  * error). Un solo hook = un solo fetch/poll por punto de montaje.
+ *
+ * `keepPolling` extiende esa condición más allá de 'pending' (mismo tope de
+ * ~5min): `/api/video-analysis` hace upsert 'done' y LUEGO llama a
+ * `generateIdeaCaption`, así que hay una ventana real donde el análisis ya
+ * está 'done' pero el caption todavía no existe — sin este predicado la 3ra
+ * bolita ("Generando caption…") se queda pulsando para siempre. Quien no lo
+ * pasa (p.ej. `review-overlay` vía `VideoAnalysisReport`) mantiene el
+ * comportamiento de siempre: para de sondear en cuanto sale de 'pending'.
  */
-export function useVideoAnalysisPolling(ideaId: string): VideoAnalysisView | null | undefined {
+export function useVideoAnalysisPolling(
+  ideaId: string,
+  keepPolling?: (analysis: VideoAnalysisView) => boolean,
+): VideoAnalysisView | null | undefined {
   const [analysis, setAnalysis] = useState<VideoAnalysisView | null | undefined>(undefined)
 
   useEffect(() => {
@@ -27,7 +38,8 @@ export function useVideoAnalysisPolling(ideaId: string): VideoAnalysisView | nul
           if (!alive) return
           const next = res.analysis ?? null
           setAnalysis(next)
-          if (next?.status === 'pending' && Date.now() - startedAt < POLL_GIVE_UP_MS) {
+          const shouldPoll = !!next && (next.status === 'pending' || !!keepPolling?.(next))
+          if (shouldPoll && Date.now() - startedAt < POLL_GIVE_UP_MS) {
             timer = setTimeout(fetchOnce, POLL_MS)
           }
         })
@@ -39,6 +51,7 @@ export function useVideoAnalysisPolling(ideaId: string): VideoAnalysisView | nul
       alive = false
       if (timer) clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keepPolling se pasa como closure estable desde cada llamador (arrow inline); no se re-suscribe por cambios de identidad, solo por ideaId.
   }, [ideaId])
 
   return analysis

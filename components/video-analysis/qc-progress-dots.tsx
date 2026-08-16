@@ -19,7 +19,10 @@ type DotState = 'working' | 'ok' | 'warning' | 'unavailable'
  *    video: se alimenta de `hasCaption`, no de `status`.
  */
 export function QcProgressDots({ ideaId }: { ideaId: string }) {
-  const analysis = useVideoAnalysisPolling(ideaId)
+  // Sigue sondeando más allá de 'done' mientras el caption todavía no
+  // exista: el análisis de video y generateIdeaCaption terminan en
+  // momentos distintos (ver comentario del hook).
+  const analysis = useVideoAnalysisPolling(ideaId, (a) => !a.hasCaption)
   const [openRelevance, setOpenRelevance] = useState(false)
   const [openCaptions, setOpenCaptions] = useState(false)
 
