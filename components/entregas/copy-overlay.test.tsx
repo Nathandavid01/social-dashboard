@@ -140,7 +140,8 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalledWith('i1', undefined))
     expect(toast).not.toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) }))
     // La etiqueta ya no marca el campo como obligatorio con "*" cuando la IA vio el video.
-    expect(screen.getByText('¿De qué es el video?')).toBeInTheDocument()
+    // findByText (no getByText): depende del mismo estado async que el hint de abajo.
+    expect(await screen.findByText('¿De qué es el video?')).toBeInTheDocument()
   })
 
   // Regresión: antes este texto se mostraba con solo `hasVisualAnalysis`,
@@ -156,7 +157,13 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
-    expect(screen.getByText(/la ia vio el video y escribió esto/i)).toBeInTheDocument()
+    // El hint depende de OTRA promesa (useVideoAnalysisPolling vía mockAnalysis),
+    // no de la lista de videos — hay que esperarlo con su propio findBy, no
+    // asumir que ya está pintado por haber esperado la lista.
+    expect(await screen.findByText(/la ia vio el video y escribió esto/i)).toBeInTheDocument()
+    // Negativo DESPUÉS de confirmar el estado final (el findByText de arriba
+    // ya asentó el re-render con el hint puesto) — así el queryBy realmente
+    // prueba "nunca aparece", no "no apareció todavía".
     expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
   })
 
@@ -167,7 +174,9 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
-    expect(screen.getByText(/es la base del copy: la ia escribe a partir de esto/i)).toBeInTheDocument()
+    // Mismo motivo que arriba: el hint depende del análisis (mockAnalysis),
+    // una promesa distinta a la de la lista de videos.
+    expect(await screen.findByText(/es la base del copy: la ia escribe a partir de esto/i)).toBeInTheDocument()
     expect(screen.queryByText(/la ia vio el video y escribió esto/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
   })
@@ -179,8 +188,11 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
-    expect(screen.getByText('¿De qué es el video? *')).toBeInTheDocument()
-    expect(screen.getByText(/es la base del copy/i)).toBeInTheDocument()
+    // Ambos dependen del mismo estado async que el hint de los tests de arriba
+    // (aunque hoy no serían racy con este mockAnalysis, findByText los hace
+    // robustos ante cualquier cambio futuro en cómo se deriva el texto).
+    expect(await screen.findByText('¿De qué es el video? *')).toBeInTheDocument()
+    expect(await screen.findByText(/es la base del copy/i)).toBeInTheDocument()
     generateIdeaCaption.mockClear()
     fireEvent.click(screen.getByRole('button', { name: /escribir copy con ia/i }))
     await waitFor(() =>
