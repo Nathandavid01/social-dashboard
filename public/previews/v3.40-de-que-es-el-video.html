@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.40 — De qué es el video</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --warn:#f59e0b; --purple:#a78bfa; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:760px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 24px; line-height:1.5; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:20px 0 8px; }
+
+    .flow { display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; font-size:12px; flex-wrap:wrap; }
+    .flow .step { display:flex; flex-direction:column; gap:2px; }
+    .flow .step b { font-size:12px; }
+    .flow .step span { color:var(--muted-fg); font-size:11px; }
+    .flow .arrow { color:#52525b; font-size:16px; }
+
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:600px) { .cols { grid-template-columns:1fr; } }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .card-title { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); margin:0 0 10px; display:flex; align-items:center; gap:6px; }
+    .card-title.before { color:#f87171; }
+    .card-title.after { color:var(--good); }
+
+    .field-label { font-size:11px; color:var(--muted-fg); margin:0 0 4px; }
+    .field { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12.5px; background:#0d0d0d; color:var(--fg); }
+    .empty { color:#52525b; font-style:italic; }
+
+    .badge-ai { display:flex; align-items:center; gap:5px; font-size:10.5px; font-style:italic; color:var(--muted-fg); margin-top:6px; }
+    .badge-ai .spark { color:var(--purple); }
+
+    .note { margin-top:24px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; line-height:1.5; }
+    .note b { color:var(--fg); }
+    .note + .note { margin-top:10px; }
+
+    .rule { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-top:8px; }
+    .rule .ok { color:var(--good); flex-shrink:0; }
+    .rule .no { color:#f87171; flex-shrink:0; }
+
+    code { background:#1c1c1c; border-radius:4px; padding:1px 5px; font-size:11px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.40 — La IA ya no se inventa el caption</h1>
+    <p class="sub">Antes, la IA escribía el caption a su aire cuando faltaba el hook. Ahora solo aporta el DATO de qué es el video — y ese dato entra por la misma casilla que llenaría una persona. El caption lo sigue escribiendo el generador de siempre, con todo su aprendizaje, pero ahora con un contexto real en vez de improvisado.</p>
+
+    <div class="row-label">Cómo fluye el dato</div>
+    <div class="flow">
+      <div class="step"><b>🎬 Video sube</b><span>QC IA lo analiza</span></div>
+      <span class="arrow">→</span>
+      <div class="step"><b>📝 "¿De qué es?"</b><span>se llena SOLO si estaba vacía</span></div>
+      <span class="arrow">→</span>
+      <div class="step"><b>✨ Caption</b><span>generador de siempre, con dato real</span></div>
+    </div>
+
+    <div class="row-label">La casilla "¿De qué es este video?" — antes vs. ahora</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title before">Antes</p>
+        <p class="field-label">¿De qué es este video?</p>
+        <div class="field empty">— sin escribir —</div>
+        <p style="font-size:11px; color:var(--muted-fg); margin:10px 0 0;">Nadie la llenó. La IA improvisaba el caption sin ese dato (o alguien tenía que escribirlo a mano).</p>
+      </div>
+      <div class="card">
+        <p class="card-title after">Ahora</p>
+        <p class="field-label">¿De qué es este video?</p>
+        <div class="field">Cómo sellar una picanha en parrilla Santa María con roble rojo</div>
+        <div class="badge-ai"><span class="spark">✨</span> Escrito por la IA a partir del video · edítalo si no cuadra</div>
+      </div>
+    </div>
+
+    <div class="row-label">Reglas duras</div>
+    <div class="rule"><span class="ok">✓</span><span>Solo escribe la casilla si estaba <b>vacía</b> — nunca pisa texto que ya escribió una persona.</span></div>
+    <div class="rule"><span class="ok">✓</span><span>Queda <b>visible y editable</b> como cualquier hook — se corrige y se regenera el caption igual que siempre.</span></div>
+    <div class="rule"><span class="ok">✓</span><span>La marca "escrito por la IA" <b>desaparece al guardar</b> una corrección — no al abrir o enfocar el campo.</span></div>
+    <div class="rule"><span class="no">✗</span><span>La IA <b>no</b> escribe el caption directamente — sigue siendo <code>generateIdeaCaption</code>, con captions aprobados, 👍/👎, voz de marca y reglas del cliente.</span></div>
+
+    <div class="row-label">Dónde se ve la marca</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title">Idea → tarjeta del brief</p>
+        <p class="field-label">¿De qué es este video?</p>
+        <div class="field">Cómo sellar una picanha…</div>
+        <div class="badge-ai"><span class="spark">✨</span> Escrito por la IA a partir del video · edítalo si no cuadra</div>
+      </div>
+      <div class="card">
+        <p class="card-title">Entregas → Copy</p>
+        <p class="field-label">¿De qué es el video?</p>
+        <div class="field">Cómo sellar una picanha…</div>
+        <div class="badge-ai"><span class="spark">✨</span> Escrito por la IA a partir del video · edítalo si no cuadra</div>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>Qué es "video_topic":</b> el análisis de video (Grok, sobre los fotogramas) ahora también devuelve una frase
+      factual de qué ES el video — distinta del resumen visual técnico que ya usaba el reporte de QC. Una es para
+      el reporte, la otra es el dato que llena la casilla.
+    </p>
+    <p class="note">
+      <b>Cuándo se escribe:</b> justo después de guardar el análisis, y ANTES de encadenar el generador de
+      caption — así el generador ya lee el dato real. Con videos largos troceados en varias tandas, solo la
+      última tanda (con todo el video ya visto) escribe la casilla.
+    </p>
+    <p class="note">
+      <b>Best-effort, nunca bloquea nada:</b> si escribir la casilla falla por cualquier motivo, el análisis y
+      el caption siguen su curso igual — la única consecuencia es que la casilla se queda como estaba.
+    </p>
+  </div>
+</body>
+</html>
