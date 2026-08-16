@@ -34,6 +34,14 @@ vi.mock('@/lib/actions/caption-feedback', () => ({
 }))
 const toast = vi.fn()
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
+
+// Mismo hook compartido que IdeaCaptionEditor (useVideoAnalysisPolling): por
+// defecto, sin análisis (comportamiento de siempre); los tests de la sección
+// "análisis visual" lo sobreescriben.
+let mockAnalysis: { status: 'pending' | 'done' | 'error'; findings: { visual_summary?: string } | null } | null | undefined = null
+vi.mock('@/lib/hooks/use-video-analysis-polling', () => ({
+  useVideoAnalysisPolling: () => mockAnalysis,
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }))
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: 'editor' }),
@@ -66,6 +74,7 @@ afterEach(() => {
   saveCopyAndSchedule.mockClear()
   toast.mockClear()
   resetAutoDraftAttempts()
+  mockAnalysis = null
 })
 
 describe('CopyOverlay — al abrir se escribe el copy solo', () => {
@@ -102,6 +111,47 @@ describe('CopyOverlay — al abrir se escribe el copy solo', () => {
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
     await Promise.resolve()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * Entregas Copy es la SEGUNDA superficie viva de generación de captions
+ * (además de IdeaCaptionEditor) y debe respetar el mismo criterio: sin hook
+ * pero con análisis visual done, "Escribir copy con IA" genera igual.
+ */
+describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
+  it('sin tema pero con análisis visual done: genera al apretar el botón, sin el toast de bloqueo', async () => {
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: '', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    // Sin hook + análisis listo también dispara el auto-borrador (mismo
+    // criterio que shouldAutoDraftCaption); se espera a que asiente.
+    await waitFor(() => expect(screen.getByDisplayValue('copy solo')).toBeInTheDocument())
+    generateIdeaCaption.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: /regenerar con ia/i }))
+    await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalledWith('i1', undefined))
+    expect(toast).not.toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) }))
+    // La etiqueta ya no marca el campo como obligatorio con "*" cuando la IA vio el video.
+    expect(screen.getByText('¿De qué es el video?')).toBeInTheDocument()
+  })
+
+  it('sin tema y sin análisis: sigue bloqueando con el mensaje de siempre', async () => {
+    mockAnalysis = { status: 'pending', findings: null }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: '', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    expect(screen.getByText('¿De qué es el video? *')).toBeInTheDocument()
+    generateIdeaCaption.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: /escribir copy con ia/i }))
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) })),
+    )
     expect(generateIdeaCaption).not.toHaveBeenCalled()
   })
 })

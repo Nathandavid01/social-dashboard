@@ -10,6 +10,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
+import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { CaptionFeedback } from '@/components/captions/caption-feedback'
@@ -69,10 +70,18 @@ export function CopyOverlay({
   useEffect(() => { void load() }, [load])
 
   const current = videos?.[index] ?? null
+  // Mismo hook compartido que IdeaCaptionEditor y el reporte de QC
+  // (useVideoAnalysisPolling): si la IA ya vio el video, el hook ("¿De qué es
+  // el video?") deja de ser obligatorio aquí también — esta es la SEGUNDA
+  // superficie viva que genera captions (la etapa Copy de Entregas), y debe
+  // aplicar el mismo criterio que el editor, no reintroducir el bloqueo.
+  const videoAnalysis = useVideoAnalysisPolling(current?.id ?? '')
+  const hasVisualAnalysis = videoAnalysis?.status === 'done' && !!videoAnalysis.findings?.visual_summary?.trim()
   const { autoDrafting } = useAutoDraftCaption({
     ideaId: current?.id ?? '',
     hook: current?.hook,
     hasVideo: !!current?.videoFileId,
+    hasVisualAnalysis,
     captionDraft: current?.caption_draft,
     generatedCaption: current?.generated_caption,
     enabled: canUse && !!current,
@@ -121,7 +130,7 @@ export function CopyOverlay({
 
   async function generate(fb?: string) {
     if (!current) return
-    if (!hook.trim()) {
+    if (!hook.trim() && !hasVisualAnalysis) {
       toast({ title: 'Falta "de qué es el video"', description: 'La IA lo necesita para escribir.', variant: 'destructive' })
       return
     }
@@ -250,7 +259,9 @@ export function CopyOverlay({
               <h3 className="truncate text-sm font-semibold">{current.title}</h3>
 
               <div className="space-y-1.5">
-                <Label htmlFor="co-hook" className="text-[11px]">¿De qué es el video? *</Label>
+                <Label htmlFor="co-hook" className="text-[11px]">
+                  ¿De qué es el video?{!hasVisualAnalysis && ' *'}
+                </Label>
                 <Input
                   id="co-hook"
                   value={hook}
@@ -259,7 +270,9 @@ export function CopyOverlay({
                   className="h-9"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Es lo único que la IA necesita para escribir el copy.
+                  {hasVisualAnalysis
+                    ? 'La IA ya vio el video — esto es contexto opcional, no obligatorio.'
+                    : 'Es lo único que la IA necesita para escribir el copy.'}
                 </p>
               </div>
 

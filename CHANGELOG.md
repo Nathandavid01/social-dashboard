@@ -8,7 +8,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 **El caption ya no exige que escribas "de qué es el video" cuando la IA ya lo vio.**
 
-- Si el QC IA ya analizó el video (bolita verde de captions/relevancia), el campo "¿De qué es este video?" deja de ser obligatorio para generar el caption — la casilla sigue ahí por si lo quieres escribir a mano, y si la llenas se usa igual.
+- Si el QC IA ya analizó el video (bolita verde de captions/relevancia), el campo "¿De qué es este video?" deja de ser obligatorio para generar el caption — la casilla sigue ahí por si lo quieres escribir a mano, y si la llenas se usa igual. Esto aplica tanto al caption del video en producción como al copy de la etapa Copy en Entregas.
 - El análisis de video ahora cubre videos largos completos, no solo los primeros segundos: revisa a 4 fotogramas por segundo troceando la revisión en tandas, así que un video de un minuto se ve entero en vez de perder el final.
 - El caption con IA solo se dispara automáticamente cuando terminó de revisar la última tanda del video, para que no salga a medio análisis.
 
