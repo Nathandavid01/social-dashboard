@@ -24,6 +24,23 @@ vi.mock('@/lib/actions/idea-captions', () => ({
   generateIdeaCaption: (ideaId: string, opts?: unknown) => generateIdeaCaption(ideaId, opts),
 }))
 
+/** Log separado de las llamadas de transcripción, para no romper `calls.map(op)`. */
+let transcribeCalls: Array<{ op: string }> = []
+const listenUrlForCaptionVideo = vi.fn(async (_video?: unknown) => 'https://example.com/audio.mp4' as string | null)
+vi.mock('@/lib/integrations/caption-listen-url', () => ({
+  listenUrlForCaptionVideo: (video: unknown) => {
+    transcribeCalls.push({ op: 'listenUrl' })
+    return listenUrlForCaptionVideo(video)
+  },
+}))
+const transcribeVideoFromUrl = vi.fn(async (_url: string) => 'Transcripción de prueba' as string | null)
+vi.mock('@/lib/integrations/whisper', () => ({
+  transcribeVideoFromUrl: (url: string) => {
+    transcribeCalls.push({ op: 'transcribe' })
+    return transcribeVideoFromUrl(url)
+  },
+}))
+
 let videoResult: { data: unknown } = { data: null }
 /** Plain value applies to every upsert; a function receives the 0-based upsert
  *  call index so a test can fail just the pending upsert (index 0) and leave
@@ -38,6 +55,14 @@ let existingFrameCount: number | null = null
 let frameCountUpdates: Array<{ payload: Record<string, unknown>; videoId?: string }> = []
 /** Simula "la columna frame_count no existe todavía" (migración 0063 pendiente). */
 let frameCountUpdateThrows = false
+/** Log SEPARADO de los UPDATE best-effort sobre content_ideas (hook / hook_source). */
+let hookUpdates: Array<{ payload: Record<string, unknown>; id?: string }> = []
+/** Simula "la columna hook_source no existe todavía" (migración 0064 pendiente):
+ *  solo el UPDATE que trae hook_source lanza — el UPDATE del hook en sí sigue vivo. */
+let hookSourceUpdateThrows = false
+/** Simula TOCTOU: una persona escribió el hook A MANO mientras analyzeVideoFrames
+ *  corría — el UPDATE condicional (`.is('hook', null)`) no matchea ninguna fila. */
+let hookUpdateNoMatch = false
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -76,6 +101,36 @@ vi.mock('@/lib/supabase/server', () => ({
           }),
         }
       }
+      if (table === 'content_ideas') {
+        return {
+          // `.eq()` es un thenable (para el UPDATE directo de hook_source,
+          // que se awaitea sin encadenar más) que TAMBIÉN expone `.is()` (para
+          // el UPDATE condicional del hook: `.eq('id', id).is('hook', null).select('id')`).
+          update: (payload: Record<string, unknown>) => ({
+            eq: (_col: string, id: string) => {
+              const commit = async () => {
+                if ('hook_source' in payload && hookSourceUpdateThrows) {
+                  throw new Error('column "hook_source" does not exist')
+                }
+                hookUpdates.push({ payload, id })
+                return { error: null }
+              }
+              return {
+                is: (_col2: string, _val: null) => ({
+                  select: async (_cols: string) => {
+                    if (hookUpdateNoMatch) return { data: [], error: null }
+                    hookUpdates.push({ payload, id })
+                    return { data: [{ id }], error: null }
+                  },
+                }),
+                then: (resolve: (v: unknown) => void, reject: (e: unknown) => void) => {
+                  commit().then(resolve, reject)
+                },
+              }
+            },
+          }),
+        }
+      }
       throw new Error(`unexpected table ${table}`)
     },
   }),
@@ -87,7 +142,10 @@ const IDEA = {
   id: 'idea-1', title: 'Título', hook: 'hook',
   client: { name: 'Cliente', brand_voice: 'voz', caption_language: 'es', caption_notes: null },
 }
-const VIDEO = { id: 'video-1', idea_id: 'idea-1', kind: 'edited', idea: IDEA }
+const VIDEO = {
+  id: 'video-1', idea_id: 'idea-1', kind: 'edited', idea: IDEA,
+  drive_file_id: 'edited/video-1.mp4', storage_provider: 'entregas-r2',
+}
 const FRAME = 'data:image/jpeg;base64,AAAA'
 const GOOD_FINDINGS = {
   burned_captions: { text: 'Ven hoy', issues: [] },
@@ -111,12 +169,18 @@ beforeEach(() => {
   existingFrameCount = null
   frameCountUpdates = []
   frameCountUpdateThrows = false
+  hookUpdates = []
+  hookSourceUpdateThrows = false
+  hookUpdateNoMatch = false
+  transcribeCalls = []
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
     calls.push({ op: 'generateIdeaCaption', payload: [ideaId, opts] })
     return { ok: true }
   })
+  listenUrlForCaptionVideo.mockReset().mockResolvedValue('https://example.com/audio.mp4')
+  transcribeVideoFromUrl.mockReset().mockResolvedValue('Transcripción de prueba')
 })
 
 describe('POST /api/video-analysis', () => {
@@ -354,5 +418,177 @@ describe('POST /api/video-analysis — frame_count (contador de fotogramas)', ()
     const doneUpserts = calls.filter((c) => c.op === 'upsert')
     expect(doneUpserts).toHaveLength(2)
     expect(frameCountUpdates).toHaveLength(1)
+  })
+})
+
+describe('POST /api/video-analysis — video_topic escribe el hook ("¿De qué es este video?")', () => {
+  const findingsWithTopic = (topic: string) => ({
+    burned_captions: { text: 'Ven hoy', issues: [] },
+    relevance: { verdict: 'ok', explanation: 'coincide' },
+    visual_summary: 'persona a cámara',
+    video_topic: topic,
+  })
+
+  it('hook vacío + video_topic → escribe hook y hook_source=\'ai\', DESPUÉS del upsert done y ANTES de generateIdeaCaption', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha en parrilla Santa María'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha en parrilla Santa María' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
+    // El upsert 'done' (calls[1]) ya sucedió antes de tocar content_ideas, y el
+    // caption se encadena después de escribir el hook.
+    const upsertCount = calls.filter((c) => c.op === 'upsert').length
+    expect(upsertCount).toBe(2)
+    expect(calls[calls.length - 1]).toEqual({ op: 'generateIdeaCaption', payload: ['idea-1', { auto: true }] })
+  })
+
+  it('hook con texto humano → NO lo toca, aunque venga video_topic (el UPDATE condicional .is(\'hook\',null) no matchea)', async () => {
+    // IDEA por defecto ya trae hook: 'hook' (texto humano) → en la DB real
+    // el filtro .is('hook', null) no matchearía ninguna fila.
+    hookUpdateNoMatch = true
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('TOCTOU: el hook cambia a mano ENTRE la lectura inicial (vacío) y el write (analyzeVideoFrames tardó) → no pisa, no marca, y el caption se encadena igual', async () => {
+    // La lectura del principio de la petición ve el hook vacío (analysisCtx
+    // usa esto solo para el prompt), pero mientras `analyzeVideoFrames`
+    // corre, una persona lo llena — así que el UPDATE condicional en la
+    // PROPIA query (.is('hook', null)) ya no matchea ninguna fila para
+    // cuando llega el momento de escribir.
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    hookUpdateNoMatch = true
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha en parrilla Santa María'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+
+    // (a) hook_source nunca se escribe
+    expect(hookUpdates.some((u) => 'hook_source' in u.payload)).toBe(false)
+    // (b) el texto humano no se pierde: ni siquiera se intenta un write que gane la carrera
+    expect(hookUpdates).toEqual([])
+    // (c) el caption se encadena igual (y generateIdeaCaption lee el hook humano ya persistido)
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('sin video_topic en los findings → no escribe nada en content_ideas', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    // GOOD_FINDINGS (default mock) no trae video_topic.
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+  })
+
+  it('el UPDATE de hook_source falla (columna sin migrar) → el hook igual se escribe y el caption se encadena igual', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    hookSourceUpdateThrows = true
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toEqual({ ok: true })
+    expect(hookUpdates).toEqual([{ payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' }])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('con troceado: chunk 0 de 3 (no es el último) NO escribe el hook aunque traiga video_topic', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+  })
+
+  it('con troceado: solo el ÚLTIMO chunk escribe, usando el video_topic ya fundido de chunks previos', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    existingFindings = { ...findingsWithTopic('Cómo sellar una picanha'), }
+    // El chunk final no trae video_topic propio — el merge conserva el del previo.
+    analyzeVideoFrames.mockResolvedValueOnce({
+      burned_captions: { text: 'cierra con logo', issues: [] },
+      relevance: { verdict: 'ok', explanation: 'coincide' },
+      visual_summary: 'cierra con el logo',
+    })
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 2, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+})
+
+describe('POST /api/video-analysis — transcripción (escucha el video en paralelo)', () => {
+  it('chunk único: pide la transcripción y la pasa a analyzeVideoFrames en el ctx', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(listenUrlForCaptionVideo).toHaveBeenCalledTimes(1)
+    expect(transcribeVideoFromUrl).toHaveBeenCalledTimes(1)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: 'Transcripción de prueba' }),
+      undefined,
+    )
+  })
+
+  it('chunk 0 de 3 (primero): también pide la transcripción', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(transcribeVideoFromUrl).toHaveBeenCalledTimes(1)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: 'Transcripción de prueba' }),
+      undefined,
+    )
+  })
+
+  it('chunk > 0 (no es el primero): NO vuelve a pedir la transcripción', async () => {
+    existingFindings = GOOD_FINDINGS
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 1, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(listenUrlForCaptionVideo).not.toHaveBeenCalled()
+    expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+  })
+
+  it('sin URL de audio (listenUrlForCaptionVideo → null): transcript null, sigue solo con lo visual', async () => {
+    listenUrlForCaptionVideo.mockResolvedValueOnce(null)
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+  })
+
+  it('Whisper falla (rechaza): el análisis y la escritura del hook siguen igual, best-effort', async () => {
+    transcribeVideoFromUrl.mockRejectedValueOnce(new Error('whisper 500'))
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce({
+      ...GOOD_FINDINGS,
+      video_topic: 'Cómo sellar una picanha',
+    })
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
   })
 })

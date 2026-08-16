@@ -47,6 +47,32 @@ describe('IdeaBriefCard — simple por defecto', () => {
     expect(screen.getAllByText(/fecha de publicación/i).length).toBeGreaterThanOrEqual(1)
   })
 
+  it('hookSource="ai": muestra la marca discreta junto al campo del hook', () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Cómo sellar una picanha" hookSource="ai" />)
+    expect(screen.getByText(/escrito por la ia/i)).toBeInTheDocument()
+  })
+
+  it('sin hookSource (o null): no muestra la marca', () => {
+    render(<IdeaBriefCard ideaId="i1" hook="Cómo sellar una picanha" />)
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
+  it('editar y guardar el hook hace desaparecer la marca (el padre limpia hookSource)', async () => {
+    const { rerender } = render(<IdeaBriefCard ideaId="i1" hook="Viejo tema" hookSource="ai" />)
+    expect(screen.getByText(/escrito por la ia/i)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /editar ¿de qué es este video\?/i }))
+    const input = screen.getByLabelText('¿De qué es este video?')
+    fireEvent.change(input, { target: { value: 'Nuevo tema, escrito a mano' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(updateIdeaBrief).toHaveBeenCalledWith('i1', { hook: 'Nuevo tema, escrito a mano' }))
+
+    // El padre (IdeaStudio) es quien de verdad limpia hookSource tras el save
+    // — simulado aquí re-renderizando con hookSource=null.
+    rerender(<IdeaBriefCard ideaId="i1" hook="Nuevo tema, escrito a mano" hookSource={null} />)
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
   it('persists the edited topic via updateIdeaBrief (as the hook)', async () => {
     render(<IdeaBriefCard ideaId="i1" hook="Viejo tema" />)
     fireEvent.click(screen.getByRole('button', { name: /editar ¿de qué es este video\?/i }))

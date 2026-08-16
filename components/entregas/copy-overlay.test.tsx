@@ -20,9 +20,10 @@ const saveCopyAndSchedule = vi.fn(async (): Promise<{
   error?: string
   autopost?: { posted: boolean; skipped?: string } | null
 }> => ({ ok: true }))
+const updateIdeaHook = vi.fn(async () => ({ ok: true as const }))
 vi.mock('@/lib/actions/entregas-copy', () => ({
   getEntregaCopyVideos: (...a: unknown[]) => getEntregaCopyVideos(...(a as [])),
-  updateIdeaHook: vi.fn(async () => ({ ok: true as const })),
+  updateIdeaHook: (...a: unknown[]) => updateIdeaHook(...(a as [])),
   saveClientCaptionNotes: vi.fn(async () => ({ ok: true as const })),
   saveCopyAndSchedule: (...a: unknown[]) => saveCopyAndSchedule(...(a as [])),
 }))
@@ -63,6 +64,7 @@ function video(over: Partial<CopyVideoRow> = {}): CopyVideoRow {
     caption_draft: null,
     publishDate: null,
     platforms: ['instagram'],
+    hookSource: null,
     ...over,
   }
 }
@@ -72,6 +74,8 @@ afterEach(() => {
   generateIdeaCaption.mockClear()
   rateCaption.mockClear()
   saveCopyAndSchedule.mockClear()
+  updateIdeaHook.mockClear()
+  updateIdeaHook.mockResolvedValue({ ok: true as const })
   toast.mockClear()
   resetAutoDraftAttempts()
   mockAnalysis = null
@@ -136,7 +140,45 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalledWith('i1', undefined))
     expect(toast).not.toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) }))
     // La etiqueta ya no marca el campo como obligatorio con "*" cuando la IA vio el video.
-    expect(screen.getByText('¿De qué es el video?')).toBeInTheDocument()
+    // findByText (no getByText): depende del mismo estado async que el hint de abajo.
+    expect(await screen.findByText('¿De qué es el video?')).toBeInTheDocument()
+  })
+
+  // Regresión: antes este texto se mostraba con solo `hasVisualAnalysis`,
+  // sin mirar `hookSource` — aparecía igual si el hook lo escribió una
+  // persona, o si Whisper falló en silencio. Ahora solo afirma "la IA lo
+  // escribió" cuando `hookSource === 'ai'` lo confirma, y solo promete lo
+  // que el análisis visual garantiza (nunca "escuchó": Whisper es best-effort
+  // y no hay señal fiable de si funcionó).
+  it('hookSource=\'ai\': el texto dice que la IA VIO el video y lo escribió — nunca afirma "escuchó"', async () => {
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: 'Cómo sellar picanha', hookSource: 'ai', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    // El hint depende de OTRA promesa (useVideoAnalysisPolling vía mockAnalysis),
+    // no de la lista de videos — hay que esperarlo con su propio findBy, no
+    // asumir que ya está pintado por haber esperado la lista.
+    expect(await screen.findByText(/la ia vio el video y escribió esto/i)).toBeInTheDocument()
+    // Negativo DESPUÉS de confirmar el estado final (el findByText de arriba
+    // ya asentó el re-render con el hint puesto) — así el queryBy realmente
+    // prueba "nunca aparece", no "no apareció todavía".
+    expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
+  })
+
+  it('hook humano (hookSource=null) con análisis visual done: NO afirma que la IA lo escribió', async () => {
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: 'Cómo sellar picanha', hookSource: null, caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    // Mismo motivo que arriba: el hint depende del análisis (mockAnalysis),
+    // una promesa distinta a la de la lista de videos.
+    expect(await screen.findByText(/es la base del copy: la ia escribe a partir de esto/i)).toBeInTheDocument()
+    expect(screen.queryByText(/la ia vio el video y escribió esto/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
   })
 
   it('sin tema y sin análisis: sigue bloqueando con el mensaje de siempre', async () => {
@@ -146,13 +188,55 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
-    expect(screen.getByText('¿De qué es el video? *')).toBeInTheDocument()
+    // Ambos dependen del mismo estado async que el hint de los tests de arriba
+    // (aunque hoy no serían racy con este mockAnalysis, findByText los hace
+    // robustos ante cualquier cambio futuro en cómo se deriva el texto).
+    expect(await screen.findByText('¿De qué es el video? *')).toBeInTheDocument()
+    expect(await screen.findByText(/es la base del copy/i)).toBeInTheDocument()
     generateIdeaCaption.mockClear()
     fireEvent.click(screen.getByRole('button', { name: /escribir copy con ia/i }))
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) })),
     )
     expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
+
+describe('CopyOverlay — marca "escrito por la IA" en el hook (hookSource)', () => {
+  it('hookSource=\'ai\' muestra la marca discreta junto al campo', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: 'ai' })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText(/escrito por la ia/i)).toBeInTheDocument()
+  })
+
+  it('hookSource=null (o ausente): no muestra la marca', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
+  it('editar el hook y generar hace desaparecer la marca (se guarda como edición humana)', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: 'ai', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText(/escrito por la ia/i)).toBeInTheDocument()
+
+    // El auto-borrador ya corrió al abrir (hook + sin caption previo) —
+    // el botón queda en "Regenerar con IA".
+    await waitFor(() => expect(screen.getByDisplayValue('copy solo')).toBeInTheDocument())
+    const hookInput = screen.getByLabelText(/de qué es el video/i)
+    fireEvent.change(hookInput, { target: { value: 'Un hook nuevo, escrito a mano' } })
+    generateIdeaCaption.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: /regenerar con ia/i }))
+
+    await waitFor(() => expect(updateIdeaHook).toHaveBeenCalledWith('i1', 'Un hook nuevo, escrito a mano'))
+    await waitFor(() => expect(screen.queryByText(/escrito por la ia/i)).toBeNull())
   })
 })
 

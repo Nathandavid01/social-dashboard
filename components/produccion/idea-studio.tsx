@@ -20,12 +20,16 @@ export function IdeaStudio({
   ideaId: string
   idea: Pick<
     ContentIdea,
-    'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'
+    'hook' | 'hook_source' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'
   >
   videos: ContentIdeaVideo[]
   publicEnabled?: boolean
 }) {
   const [hook, setHook] = useState(idea.hook ?? '')
+  // 'ai' cuando este hook lo escribió el análisis de video (v3.40). Se apaga
+  // localmente en cuanto onBriefUpdated confirma que una persona guardó un
+  // hook nuevo — el server ya lo limpió (updateIdeaBrief).
+  const [hookSource, setHookSource] = useState<'ai' | null>(idea.hook_source ?? null)
   const [visualBrief, setVisualBrief] = useState(idea.visual_brief ?? '')
   const [captionAngle, setCaptionAngle] = useState(idea.caption_angle ?? '')
   const [hashtags, setHashtags] = useState(idea.hashtags_suggestion ?? '')
@@ -33,23 +37,28 @@ export function IdeaStudio({
 
   useEffect(() => {
     setHook(idea.hook ?? '')
+    setHookSource(idea.hook_source ?? null)
     setVisualBrief(idea.visual_brief ?? '')
     setCaptionAngle(idea.caption_angle ?? '')
     setHashtags(idea.hashtags_suggestion ?? '')
     setSavedCaption(idea.generated_caption ?? '')
-  }, [ideaId, idea.hook, idea.visual_brief, idea.caption_angle, idea.hashtags_suggestion, idea.generated_caption])
+  }, [ideaId, idea.hook, idea.hook_source, idea.visual_brief, idea.caption_angle, idea.hashtags_suggestion, idea.generated_caption])
 
   return (
     <>
       <IdeaBriefCard
         ideaId={ideaId}
         hook={hook}
+        hookSource={hookSource}
         visualBrief={visualBrief}
         captionAngle={captionAngle}
         hashtags={hashtags}
         publishDate={idea.publish_date}
         onBriefUpdated={(fields) => {
-          if ('hook' in fields) setHook(fields.hook ?? '')
+          if ('hook' in fields) {
+            setHook(fields.hook ?? '')
+            setHookSource(null)
+          }
           if ('visual_brief' in fields) setVisualBrief(fields.visual_brief ?? '')
           if ('caption_angle' in fields) setCaptionAngle(fields.caption_angle ?? '')
           if ('hashtags_suggestion' in fields) setHashtags(fields.hashtags_suggestion ?? '')
@@ -79,6 +88,7 @@ export function IdeaStudio({
             initialCaption={savedCaption}
             initialDraft={idea.caption_draft}
             hook={hook}
+            hookSource={hookSource}
             visualBrief={visualBrief}
             captionAngle={captionAngle}
             hashtags={hashtags}
@@ -98,10 +108,11 @@ export function IdeaStudioCompact({
   videos,
 }: {
   ideaId: string
-  idea: Pick<ContentIdea, 'hook' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'>
+  idea: Pick<ContentIdea, 'hook' | 'hook_source' | 'visual_brief' | 'caption_angle' | 'hashtags_suggestion' | 'publish_date' | 'generated_caption' | 'caption_draft' | 'title'>
   videos: ContentIdeaVideo[]
 }) {
   const [hook, setHook] = useState(idea.hook ?? '')
+  const [hookSource, setHookSource] = useState<'ai' | null>(idea.hook_source ?? null)
   const [visualBrief, setVisualBrief] = useState(idea.visual_brief ?? '')
   const [captionAngle, setCaptionAngle] = useState(idea.caption_angle ?? '')
   const [hashtags, setHashtags] = useState(idea.hashtags_suggestion ?? '')
@@ -109,23 +120,28 @@ export function IdeaStudioCompact({
 
   useEffect(() => {
     setHook(idea.hook ?? '')
+    setHookSource(idea.hook_source ?? null)
     setVisualBrief(idea.visual_brief ?? '')
     setCaptionAngle(idea.caption_angle ?? '')
     setHashtags(idea.hashtags_suggestion ?? '')
     setSavedCaption(idea.generated_caption ?? '')
-  }, [ideaId, idea.hook, idea.visual_brief, idea.caption_angle, idea.hashtags_suggestion, idea.generated_caption])
+  }, [ideaId, idea.hook, idea.hook_source, idea.visual_brief, idea.caption_angle, idea.hashtags_suggestion, idea.generated_caption])
 
   return (
     <>
       <IdeaBriefCard
         ideaId={ideaId}
         hook={hook}
+        hookSource={hookSource}
         visualBrief={visualBrief}
         captionAngle={captionAngle}
         hashtags={hashtags}
         publishDate={idea.publish_date}
         onBriefUpdated={(fields) => {
-          if ('hook' in fields) setHook(fields.hook ?? '')
+          if ('hook' in fields) {
+            setHook(fields.hook ?? '')
+            setHookSource(null)
+          }
           if ('visual_brief' in fields) setVisualBrief(fields.visual_brief ?? '')
           if ('caption_angle' in fields) setCaptionAngle(fields.caption_angle ?? '')
           if ('hashtags_suggestion' in fields) setHashtags(fields.hashtags_suggestion ?? '')
@@ -137,6 +153,7 @@ export function IdeaStudioCompact({
         initialCaption={savedCaption}
         initialDraft={idea.caption_draft}
         hook={hook}
+        hookSource={hookSource}
         visualBrief={visualBrief}
         captionAngle={captionAngle}
         hashtags={hashtags}

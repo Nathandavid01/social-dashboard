@@ -14,6 +14,9 @@ interface Props {
   hashtags?: string | null
   publishDate?: string | null
   deadline?: string | null
+  /** 'ai' cuando este hook lo escribió el análisis de video (v3.40) — muestra
+   *  una marca discreta junto al campo, editable como cualquier hook. */
+  hookSource?: 'ai' | null
   /** Fired after a brief field is saved so parents can unlock caption/recording UI. */
   onBriefUpdated?: (fields: {
     hook?: string | null
@@ -37,6 +40,7 @@ export function IdeaBriefCard({
   hashtags,
   publishDate,
   deadline,
+  hookSource,
   onBriefUpdated,
 }: Props) {
   const [hookVal, setHookVal] = useState(hook ?? '')
@@ -79,6 +83,12 @@ export function IdeaBriefCard({
           placeholder="Ej: tips para escoger el uniforme correcto para tu clínica…"
           onSave={(v) => saveBrief({ hook: v }, () => setHookVal(v))}
         />
+        {hookSource === 'ai' && hookVal.trim() && (
+          <p className="flex items-center gap-1 px-2 text-[11px] italic text-muted-foreground">
+            <Sparkles className="h-3 w-3 shrink-0 text-purple-400" aria-hidden />
+            Escrito por la IA a partir del video · edítalo si no cuadra
+          </p>
+        )}
 
         <button
           type="button"

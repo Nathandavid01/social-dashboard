@@ -31,6 +31,10 @@ export interface CopyVideoRow {
   /** YYYY-MM-DD — the date the copywriter picked, if any. */
   publishDate: string | null
   platforms: string[]
+  /** 'ai' cuando este hook lo escribió el análisis de video (v3.40). Siempre
+   *  null si la migración 0064 no está aplicada (se lee en un SELECT aparte,
+   *  best-effort — nunca tumba el resto de la respuesta). */
+  hookSource: 'ai' | null
 }
 
 export interface CopyStageData {
@@ -72,6 +76,27 @@ export async function getEntregaCopyVideos(
 
   const platforms = (client?.platforms?.length ? client.platforms : client?.default_platforms) ?? []
 
+  // hook_source vive en un SELECT aparte del crítico de arriba: si la
+  // migración 0064 no está aplicada, este select falla solo y cada video
+  // queda con hookSource: null — nunca tumba el resto del overlay.
+  const hookSources: Record<string, 'ai' | null> = {}
+  try {
+    const ids = (ideas ?? []).map((i) => i.id)
+    if (ids.length > 0) {
+      const { data: hsRows, error: hsError } = await supabase
+        .from('content_ideas')
+        .select('id, hook_source')
+        .in('id', ids)
+      if (!hsError) {
+        for (const row of (hsRows ?? []) as { id: string; hook_source?: string | null }[]) {
+          hookSources[row.id] = row.hook_source === 'ai' ? 'ai' : null
+        }
+      }
+    }
+  } catch {
+    // Columna sin migrar todavía: todos quedan sin marca.
+  }
+
   return {
     data: {
       captionNotes: client?.caption_notes ?? null,
@@ -94,6 +119,7 @@ export async function getEntregaCopyVideos(
         caption_draft: (i as { caption_draft?: string | null }).caption_draft ?? null,
         publishDate: (i.publish_date as string | null) ?? null,
         platforms: platforms as string[],
+        hookSource: hookSources[i.id] ?? null,
         }
       }),
     },
@@ -116,11 +142,29 @@ export async function updateIdeaHook(
   }
 
   const supabase = await createClient()
+  const trimmed = hook.trim() || null
+
+  // CopyOverlay llama esto en CADA click de "Generar", no solo cuando el
+  // copywriter editó el campo a mano — comparar contra lo ya guardado evita
+  // pisar la marca "escrito por la IA" (hook_source) cuando en realidad nada
+  // cambió. Si no hay nada que cambiar, tampoco hay nada que escribir.
+  const { data: existing } = await supabase.from('content_ideas').select('hook').eq('id', ideaId).maybeSingle()
+  const changed = !existing || (existing as { hook?: string | null }).hook !== trimmed
+  if (!changed) return { ok: true }
+
   const { error } = await supabase
     .from('content_ideas')
-    .update({ hook: hook.trim() || null })
+    .update({ hook: trimmed })
     .eq('id', ideaId)
   if (error) return { error: error.message }
+
+  // Update separado y best-effort: si la migración 0064 (hook_source) no está
+  // aplicada, el hook ya quedó guardado arriba.
+  try {
+    await supabase.from('content_ideas').update({ hook_source: null }).eq('id', ideaId)
+  } catch {
+    // Columna sin migrar todavía: degrada seguro.
+  }
 
   revalidatePath('/entregas')
   return { ok: true }

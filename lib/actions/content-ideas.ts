@@ -267,6 +267,18 @@ export async function updateIdeaBrief(
 
   const { error } = await supabase.from('content_ideas').update(allowed).eq('id', ideaId)
   if (error) return { error: error.message }
+
+  // Una persona acaba de escribir el hook a mano: la marca "escrito por la
+  // IA" (v3.40) deja de aplicar. Update separado y best-effort — si la
+  // migración 0064 no está aplicada, el hook ya quedó guardado arriba.
+  if ('hook' in fields) {
+    try {
+      await supabase.from('content_ideas').update({ hook_source: null }).eq('id', ideaId)
+    } catch {
+      // Columna sin migrar todavía: degrada seguro.
+    }
+  }
+
   revalidatePath('/planning')
   revalidatePath(`/produccion/idea/${ideaId}`)
   return { success: true }

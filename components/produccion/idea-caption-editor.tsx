@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, AlertCircle } from 'lucide-react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, AlertCircle, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -24,6 +24,10 @@ interface Props {
   /** The client's networks — shown as badges. ONE caption is written for all of them. */
   platforms?: SocialPlatform[]
   hook?: string | null
+  /** 'ai' cuando este hook lo escribió el análisis de video (v3.40). Este
+   *  campo es de solo lectura aquí (se edita en IdeaBriefCard) — la marca es
+   *  informativa, misma señal que ahí. */
+  hookSource?: 'ai' | null
   visualBrief?: string | null
   captionAngle?: string | null
   hashtags?: string | null
@@ -46,6 +50,7 @@ export function IdeaCaptionEditor({
   initialDraft,
   platforms = [],
   hook,
+  hookSource,
   visualBrief,
   captionAngle,
   hashtags,
@@ -145,7 +150,7 @@ export function IdeaCaptionEditor({
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-3">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</span>
-        <span className="min-w-0 text-[10px] text-muted-foreground">— basado en lo que se oye en el video</span>
+        <span className="min-w-0 text-[10px] text-muted-foreground">— generado a partir de "de qué es el video"</span>
         {unsaved && (
           <span className="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
             <AlertCircle className="h-3 w-3" aria-hidden /> Borrador sin guardar
@@ -157,10 +162,20 @@ export function IdeaCaptionEditor({
         <div className="space-y-1 rounded-md border border-border/60 bg-muted/30 px-2.5 py-2 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5 font-medium text-foreground/80">
             <Lightbulb className="h-3 w-3 text-purple-500" aria-hidden />
-            La IA escucha el video
+            La IA ve y escucha el video
           </p>
-          <p>Escribe el copy sobre lo que se dice. El hook de abajo es contexto.</p>
-          {hook && <p><span className="font-medium text-foreground/70">De qué es:</span> {hook}</p>}
+          <p>Escribe de qué es aquí abajo — el caption se genera a partir de eso.</p>
+          {hook && (
+            <p>
+              <span className="font-medium text-foreground/70">De qué es:</span> {hook}
+              {hookSource === 'ai' && (
+                <span className="ml-1.5 inline-flex items-center gap-1 italic text-muted-foreground/80">
+                  <Wand2 className="h-3 w-3 shrink-0 text-purple-400" aria-hidden />
+                  escrito por la IA a partir del video · edítalo si no cuadra
+                </span>
+              )}
+            </p>
+          )}
           {visualBrief && <p><span className="font-medium text-foreground/70">Brief visual:</span> {visualBrief}</p>}
           {captionAngle && <p><span className="font-medium text-foreground/70">Ángulo:</span> {captionAngle}</p>}
           {hashtags && <p className="font-mono text-[11px]">{hashtags}</p>}

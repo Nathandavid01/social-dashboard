@@ -147,19 +147,36 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     ? `RED ESPECÍFICA: ${redes}${filled(input.targetFocus) ? ` — ${input.targetFocus}` : ''} (escribe el caption SOLO para esta red)`
     : `REDES: ${redes} (escribe UN SOLO caption que funcione igual en todas)`
 
+  // Criterio simétrico (v3.42): el hook es la fuente de verdad cuando tiene
+  // contenido — la IA lo escribió a partir de lo que VIO y OYÓ (ver route.ts
+  // / video-analysis-core.ts), y una persona puede haberlo corregido después;
+  // en ambos casos es lo que se ve/edita en pantalla. Con hook vacío, la
+  // transcripción vuelve a mandar — es la misma red de seguridad de siempre
+  // (nunca se bloquea el caption por falta de hook si se pudo oír el video).
+  const hookIsBase = filled(hook)
   const heard = filled(input.videoTranscript)
-    ? `LO QUE SE OYE EN EL VIDEO (transcripción — esto es lo que realmente pasa; úsalo por encima del hook si chocan):\n${input.videoTranscript!.trim()}\n\n`
+    ? hookIsBase
+      ? `LO QUE SE OYE EN EL VIDEO (transcripción — apoyo secundario; el HOOK de arriba, "¿de qué es el video?", es la base del caption):\n${input.videoTranscript!.trim()}\n\n`
+      : `LO QUE SE OYE EN EL VIDEO (transcripción — esto es lo que realmente pasa; úsalo por encima del hook si chocan):\n${input.videoTranscript!.trim()}\n\n`
     : ''
   const heardBullet = heard
-    ? '- El caption describe lo que se oye/pasa en el video, no un brief inventado\n'
+    ? hookIsBase
+      ? '- Usa la transcripción como apoyo, pero la BASE del caption es el HOOK de arriba ("de qué es el video")\n'
+      : '- El caption describe lo que se oye/pasa en el video, no un brief inventado\n'
     : ''
 
+  // Fuente de verdad = el hook (v3.42): desde que la IA describe el video en
+  // "¿de qué es este video?" (visto Y oído — ver route.ts/video-analysis-core.ts),
+  // ese campo YA es la base del caption, visible y editable en pantalla. El
+  // bloque visual de abajo es SOLO el plan B de v3.38 para cuando el hook está
+  // vacío (migración sin aplicar, escritura fallida, o alguien lo borró) — no
+  // se elimina, solo deja de inyectarse cuando ya hay hook.
   const va = input.videoAnalysis
   const seenParts = [
     filled(va?.visualSummary) && `Resumen visual: ${va!.visualSummary!.trim()}`,
     filled(va?.burnedCaptionsText) && `Texto que aparece EN PANTALLA dentro del video: ${va!.burnedCaptionsText!.trim()}`,
   ].filter(Boolean)
-  const seen = seenParts.length > 0
+  const seen = !hookIsBase && seenParts.length > 0
     ? `LO QUE SE VE EN EL VIDEO (análisis visual de IA — úsalo para que el caption hable de lo que realmente se muestra):\n${seenParts.join('\n')}\n\n`
     : ''
   const seenBullet = seen
@@ -181,9 +198,14 @@ ${ideaLines}
 ${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${seen}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
 ${taskLine}
-${heard ? 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.' : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
+${heard
+    ? (hookIsBase
+        ? 'El caption se basa en el HOOK de arriba (de qué es el video) — la transcripción es apoyo secundario, no el guion.'
+        : 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.')
+    : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
 ${heardBullet}${seenBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
+- No inventes años, fechas, nombres de eventos, precios, promociones ni ningún otro dato que no conste en el video, el hook, el brief, las RESTRICCIONES del cliente de arriba (CTA, reglas, hashtags) o los captions de referencia — si algo no consta, se omite
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`
 }
