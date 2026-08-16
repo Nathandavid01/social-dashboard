@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.44 — Agenda en la tarjeta</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --amber:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:760px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 24px; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:20px 0 8px; }
+
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:600px) { .cols { grid-template-columns:1fr; } }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .card-title { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); margin:0 0 10px; display:flex; align-items:center; gap:6px; }
+    .card-title.before { color:#f87171; }
+    .card-title.after { color:var(--good); }
+
+    /* Video work card mock */
+    .video-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .head-row { display:flex; align-items:center; gap:10px; }
+    .num { width:28px; height:28px; border-radius:8px; background:#1f1f1f; color:var(--muted-fg); font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .title { font-size:13px; font-weight:600; margin:0; }
+    .kind { font-size:11px; color:var(--muted-fg); margin:2px 0 0; }
+
+    .agenda-line { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--muted-fg); }
+    .agenda-line svg { flex-shrink:0; }
+    .agenda-line .past { color:var(--amber); }
+    .agenda-line .empty { color:#6b6b6b; font-style:italic; }
+    .agenda-line .no-time { color:#6b6b6b; }
+
+    .note { margin-top:24px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .note b { color:var(--fg); }
+    .note + .note { margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.44 — Cuándo y cómo se publica, de un vistazo</h1>
+    <p class="sub">En la tarjeta de cada video del lote, bajo "Video N · Tipo", ahora hay una línea con fecha, hora y el formato exacto que Metricool recibirá cuando el video se apruebe.</p>
+
+    <div class="row-label">Antes vs. ahora</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title before">Antes</p>
+        <div class="video-card">
+          <div class="head-row">
+            <div class="num">1</div>
+            <div>
+              <p class="title">Rutina de fuerza 5x5</p>
+              <p class="kind">Video 1 · Reel</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title after">Ahora</p>
+        <div class="video-card">
+          <div class="head-row">
+            <div class="num">1</div>
+            <div>
+              <p class="title">Rutina de fuerza 5x5</p>
+              <p class="kind">Video 1 · Reel</p>
+              <p class="agenda-line">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="M18 16.5V18l1 1"/></svg>
+                Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-label">Sin fecha de publicación — no se inventa nada</div>
+    <div class="video-card">
+      <div class="head-row">
+        <div class="num">2</div>
+        <div>
+          <p class="title">Detrás de cámara del gym</p>
+          <p class="kind">Video 2 · Post</p>
+          <p class="agenda-line">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="M18 16.5V18l1 1"/></svg>
+            <span class="empty">Sin fecha de publicación</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-label">Cliente sin hora configurada — la fecha se ve, la hora no se inventa</div>
+    <div class="video-card">
+      <div class="head-row">
+        <div class="num">3</div>
+        <div>
+          <p class="title">Nuevo menú de temporada</p>
+          <p class="kind">Video 3 · Carrusel</p>
+          <p class="agenda-line">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="M18 16.5V18l1 1"/></svg>
+            Se publica el mié 19 ago · <span class="no-time">hora no configurada</span> · Carrusel en Instagram
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-label">Fecha ya pasada — mismo aviso que usa el resto de la app</div>
+    <div class="video-card">
+      <div class="head-row">
+        <div class="num">4</div>
+        <div>
+          <p class="title">Testimonio de cliente</p>
+          <p class="kind">Video 4 · Story</p>
+          <p class="agenda-line">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="M18 16.5V18l1 1"/></svg>
+            Se publica el vie 7 ago · 10:00 a. m. · Story en Instagram <span class="past">· Fecha pasada — se corre a +24h</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>Formato por Metricool, no adivinado:</b> cuando el video ya tiene un formato elegido por red
+      (<code>content_ideas.platform_formats</code>), se usa exactamente ese; si no, se usa el tipo del video
+      (Reel/Post/Carrusel/Story) para cada red conectada del cliente.
+    </p>
+    <p class="note">
+      <b>Formatos distintos por red</b> se muestran por separado, por ejemplo
+      "Reel en Instagram, Imagen en Facebook" — nunca se mezclan en una sola frase engañosa.
+    </p>
+    <p class="note">
+      <b>La hora respeta el día:</b> si el cliente tiene una hora distinta para ese día de la semana
+      (<code>posting_schedule</code>), esa gana sobre la hora general del cliente.
+    </p>
+  </div>
+</body>
+</html>

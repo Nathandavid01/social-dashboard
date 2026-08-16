@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Check, Film, Flag } from 'lucide-react'
+import { CalendarClock, Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, videoNextStep, type NextStepTone, type BatchVideo } from '@/lib/utils/batch-view'
 import { deadlineStatus, deadlineTone, formatDateShortES } from '@/lib/utils/deadlines'
+import { buildVideoAgendaLine } from '@/lib/utils/client-pipeline-publish'
+import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
@@ -39,16 +41,32 @@ export function VideoWorkCard({
   video,
   index,
   platforms,
+  defaultPlatforms,
+  postingTime,
+  postingSchedule,
   clientName,
   clientLogoUrl,
 }: {
   video: BatchVideo
   index: number
   platforms?: SocialPlatform[]
+  /** Client's default networks — used when `platforms` is empty (see resolvePlatforms). */
+  defaultPlatforms?: string[] | null
+  /** Client's default posting_time; a posting_schedule override for the video's weekday wins. */
+  postingTime?: string | null
+  postingSchedule?: Record<string, string> | null
   clientName?: string | null
   clientLogoUrl?: string | null
 }) {
   const recorded = isRecorded(video)
+  const agenda = buildVideoAgendaLine({
+    publishDate: video.publish_date,
+    postingTime,
+    postingSchedule,
+    platforms: resolvePlatforms(platforms, defaultPlatforms),
+    platformFormats: video.platform_formats,
+    fallbackFormatLabel: contentTypeLabel(video.content_type),
+  })
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
 
@@ -90,6 +108,22 @@ export function VideoWorkCard({
             />
             <span className="text-[11px] text-muted-foreground">
               Video {index + 1} · {contentTypeLabel(video.content_type)}
+            </span>
+            <span className="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11px] text-muted-foreground">
+              <CalendarClock className="h-3 w-3 shrink-0" aria-hidden />
+              {agenda.hasDate ? (
+                <span className="min-w-0 truncate">
+                  Se publica el {agenda.dateLabel}
+                  {' · '}
+                  {agenda.timeConfigured ? agenda.timeLabel : 'hora no configurada'}
+                  {agenda.formatsLabel ? <> · {agenda.formatsLabel}</> : null}
+                  {agenda.pastDue && (
+                    <span className="text-amber-600 dark:text-amber-400"> · Fecha pasada — se corre a +24h</span>
+                  )}
+                </span>
+              ) : (
+                <span>Sin fecha de publicación</span>
+              )}
             </span>
           </div>
         </div>

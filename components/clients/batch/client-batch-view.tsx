@@ -328,6 +328,9 @@ export function ClientBatchView({
                       video={v}
                       index={videos.indexOf(v)}
                       platforms={client.platforms}
+                      defaultPlatforms={client.default_platforms}
+                      postingTime={client.posting_time}
+                      postingSchedule={client.posting_schedule}
                       clientName={client.name}
                       clientLogoUrl={client.logo_url}
                     />

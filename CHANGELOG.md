@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.45 — 2026-08-16
+
+**Cada video del lote ahora dice, de un vistazo, cuándo y cómo se publica.**
+
+- En la tarjeta de cada video, bajo "Video 1 · Reel", hay una línea nueva con un ícono de calendario: fecha, hora y formato de publicación.
+- Ejemplo: "Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook" — así se sabe qué recibirá Metricool en cuanto se apruebe el video.
+- Si el video todavía no tiene fecha, dice "Sin fecha de publicación" — no se inventa una.
+- Si el cliente no tiene una hora de publicación configurada, se ve la fecha y un aviso de "hora no configurada", en vez de una hora inventada.
+- Si la fecha ya pasó, se avisa con el mismo texto que usa el resto de la app: "Fecha pasada — se corre a +24h".
+- Cuando un video se manda a distintas redes con formatos distintos (por ejemplo Reel en Instagram pero Imagen en Facebook), la línea lo separa correctamente.
+
+Vista: [preview HTML](/previews/v3.45-agenda-en-tarjeta.html)
+
 ## v3.44 — 2026-08-16
 
 **La IA ya no se inventa el caption — ve y escucha el video, escribe de qué es en la casilla de siempre, y el generador de captions vuelve a trabajar como cuando el proceso era manual.**
