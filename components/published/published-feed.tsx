@@ -105,7 +105,7 @@ function PostCard({ post }: { post: PublishedPost }) {
         {/* Thumbnail */}
         <div className="relative h-16 w-16 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
           {post.media?.[0]?.url ? (
-            <img src={post.media[0].url} alt="" className="h-full w-full object-cover" />
+            <img src={post.media[0].url} alt="" width={64} height={64} loading="lazy" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <ImageIcon className="h-5 w-5 text-muted-foreground opacity-40" />
           )}
@@ -153,7 +153,7 @@ function PostCard({ post }: { post: PublishedPost }) {
           {hasMedia && (
             <div className="flex gap-2 flex-wrap">
               {post.media!.filter(m => m.url).slice(0, 8).map((m, i) => (
-                <img key={i} src={m.url} alt="" className="h-24 w-24 rounded-lg object-cover border border-border" />
+                <img key={i} src={m.url} alt="" width={96} height={96} loading="lazy" decoding="async" className="h-24 w-24 rounded-lg object-cover border border-border" />
               ))}
             </div>
           )}

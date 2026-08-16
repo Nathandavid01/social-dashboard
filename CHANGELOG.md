@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.43 — 2026-08-16
+
+**La app carga más rápido, sobre todo las pantallas de Inicio y Rendimiento.**
+
+- Los gráficos de Inicio y Rendimiento (barras, cumplimiento semanal, torta por plataforma) ahora se cargan aparte del resto de la página en vez de venir empaquetados con todo. Se ven exactamente igual; solo aparecen medio instante después, con un espacio reservado del mismo tamaño para que nada salte en pantalla.
+- Las miniaturas de clientes y de posts publicados ahora se cargan de forma diferida (no se descargan hasta que están cerca de la vista) y reservan su espacio de antemano, para que las pantallas con muchas tarjetas (tableros de producción, publicados) no salten mientras cargan.
+- Los tableros de producción (Entregas y Pipeline) pintan más rápido cuando hay muchas tarjetas: el navegador deja de trabajar en las que están fuera de la pantalla hasta que se necesitan.
+- Se quitaron dos archivos de fuente que ya no se usaban (la app usa Inter desde hace tiempo).
+- No hecho a propósito: la pantalla de entrada (`/`) sigue igual — optimizarla exigía tocar el flujo de recuperación de contraseña (el enlace de "olvidé mi contraseña" solo puede detectarse en el navegador, nunca en el servidor) y el riesgo de romper esa pantalla no se justificaba por la ganancia. Queda pendiente para revisarlo con más cuidado.
+
 ## v3.41 — 2026-08-16
 
 **Desde la tarjeta del tablero ya se puede abrir y bajar el video, sin entrar a la idea.**

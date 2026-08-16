@@ -11,6 +11,27 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  experimental: {
+    // Solo re-exporta lo que cada archivo realmente importa de estos paquetes
+    // en vez de arrastrar el módulo entero al chunk. lucide-react y date-fns
+    // quedan fuera: Next 14.2 ya los optimiza por defecto.
+    optimizePackageImports: ['recharts', '@dnd-kit/core', '@dnd-kit/sortable', 'react-markdown'],
+  },
+  images: {
+    remotePatterns: [
+      // Supabase Storage (avatares, logos, contratos) — NEXT_PUBLIC_SUPABASE_URL.
+      {
+        protocol: 'https',
+        hostname: 'bgqdtfhelknmfudcvrzz.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Entregas R2 (videos/miniaturas editados) — ENTREGAS_R2_PUBLIC_BASE_URL.
+      {
+        protocol: 'https',
+        hostname: 'pub-b4f609f9a23747649ed8bc1e9cb43be0.r2.dev',
+      },
+    ],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

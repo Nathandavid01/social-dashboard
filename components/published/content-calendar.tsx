@@ -149,7 +149,7 @@ function CalendarPostPill({ post, compact = false }: { post: PublishedPost; comp
             </div>
           )}
           {post.media?.[0]?.url && (
-            <img src={post.media[0].url} alt="" className="h-24 w-full object-cover rounded-lg border" />
+            <img src={post.media[0].url} alt="" width={400} height={96} loading="lazy" decoding="async" className="h-24 w-full object-cover rounded-lg border" />
           )}
           <button
             className="text-[10px] text-muted-foreground hover:text-foreground"

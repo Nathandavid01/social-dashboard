@@ -2,18 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Target, Radio } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -21,6 +12,15 @@ import {
   COMPLIANCE_META,
   type WeeklyComplianceSummary,
 } from '@/lib/utils/weekly-compliance-types'
+
+// recharts (~300-400kB) loaded lazily: /home shouldn't pay for it in the
+// initial JS bundle (see weekly-compliance-chart.tsx). The wrapper below owns
+// the height so the skeleton reserves the exact space the chart will fill —
+// no layout jump once it loads.
+const WeeklyComplianceChart = dynamic(
+  () => import('./weekly-compliance-chart').then((m) => m.WeeklyComplianceChart),
+  { ssr: false, loading: () => <Skeleton className="h-full w-full" /> },
+)
 
 export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }) {
   const router = useRouter()
@@ -105,47 +105,9 @@ export function WeeklyComplianceCard({ data }: { data: WeeklyComplianceSummary }
           </p>
         ) : (
           <>
-            <ResponsiveContainer width="100%" height={chartHeight}>
-              <BarChart
-                data={chartData}
-                layout="vertical"
-                margin={{ top: 0, right: 16, left: 8, bottom: 0 }}
-                barGap={2}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis
-                  type="number"
-                  allowDecimals={false}
-                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={110}
-                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.4 }}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--popover))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="Meta" fill="hsl(var(--muted))" radius={[0, 3, 3, 0]} barSize={9} />
-                <Bar dataKey="Publicado" radius={[0, 3, 3, 0]} barSize={9}>
-                  {chartData.map((d, i) => (
-                    <Cell key={i} fill={COMPLIANCE_META[d.status].bar} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ height: chartHeight }}>
+              <WeeklyComplianceChart chartData={chartData} chartHeight={chartHeight} />
+            </div>
 
             {/* Per-client status list with badges */}
             <ul className="space-y-1.5">
