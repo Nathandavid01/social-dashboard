@@ -24,6 +24,14 @@ const POLL_GIVE_UP_MS = 5 * 60_000
 export function useVideoAnalysisPolling(
   ideaId: string,
   keepPolling?: (analysis: VideoAnalysisView) => boolean,
+  /**
+   * Cambiar este valor fuerza un fetch inmediato (mismo efecto que si
+   * `ideaId` cambiara), sin abrir un segundo fetch en paralelo — lo usa el
+   * botón "Analizar con IA" / "Re-analizar" (`QcProgressDots`) para refrescar
+   * apenas termina de postear, en vez de esperar a que el análisis ya en
+   * curso (o el próximo poll) lo haga por su cuenta.
+   */
+  resetToken?: unknown,
 ): VideoAnalysisView | null | undefined {
   const [analysis, setAnalysis] = useState<VideoAnalysisView | null | undefined>(undefined)
 
@@ -51,8 +59,8 @@ export function useVideoAnalysisPolling(
       alive = false
       if (timer) clearTimeout(timer)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keepPolling se pasa como closure estable desde cada llamador (arrow inline); no se re-suscribe por cambios de identidad, solo por ideaId.
-  }, [ideaId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keepPolling se pasa como closure estable desde cada llamador (arrow inline); no se re-suscribe por cambios de identidad, solo por ideaId/resetToken.
+  }, [ideaId, resetToken])
 
   return analysis
 }

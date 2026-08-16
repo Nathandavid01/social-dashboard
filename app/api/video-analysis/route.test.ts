@@ -31,6 +31,13 @@ let videoResult: { data: unknown } = { data: null }
 let upsertError: { message: string } | null | ((callIndex: number) => { message: string } | null) = null
 /** Findings ya persistidos en la fila, leídos por el merge de un chunk > 0. */
 let existingFindings: unknown = null
+/** frame_count ya persistido en la fila, leído junto con findings (misma fila). */
+let existingFrameCount: number | null = null
+/** Log SEPARADO (no `calls`) del UPDATE best-effort de frame_count, para no
+ *  romper las ~15 aserciones existentes de `calls.map(op)`. */
+let frameCountUpdates: Array<{ payload: Record<string, unknown>; videoId?: string }> = []
+/** Simula "la columna frame_count no existe todavía" (migración 0063 pendiente). */
+let frameCountUpdateThrows = false
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -56,9 +63,16 @@ vi.mock('@/lib/supabase/server', () => ({
             eq: () => ({
               maybeSingle: async () => {
                 calls.push({ op: 'select-findings' })
-                return { data: { findings: existingFindings }, error: null }
+                return { data: { findings: existingFindings, frame_count: existingFrameCount }, error: null }
               },
             }),
+          }),
+          update: (payload: Record<string, unknown>) => ({
+            eq: async (_col: string, videoId: string) => {
+              if (frameCountUpdateThrows) throw new Error('column "frame_count" does not exist')
+              frameCountUpdates.push({ payload, videoId })
+              return { error: null }
+            },
           }),
         }
       }
@@ -94,6 +108,9 @@ beforeEach(() => {
   videoResult = { data: VIDEO }
   upsertError = null
   existingFindings = null
+  existingFrameCount = null
+  frameCountUpdates = []
+  frameCountUpdateThrows = false
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
@@ -290,5 +307,52 @@ describe('POST /api/video-analysis — troceado (chunk)', () => {
     expect(res.status).toBe(502)
     expect(calls.map((c) => c.op)).toEqual(['select-findings'])
     expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /api/video-analysis — frame_count (contador de fotogramas)', () => {
+  it('chunk único (sin campo chunk): escribe frame_count = cantidad de frames de este request', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(frameCountUpdates).toEqual([{ payload: { frame_count: 1 }, videoId: 'video-1' }])
+  })
+
+  it('chunk 0 de 3: frame_count = solo los frames de este chunk (sin previo que sumar)', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(frameCountUpdates).toEqual([{ payload: { frame_count: 1 }, videoId: 'video-1' }])
+  })
+
+  it('chunk 2 de 3 (último): frame_count = previo (leído de la misma fila) + los de este chunk', async () => {
+    existingFrameCount = 47
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 2, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(frameCountUpdates).toEqual([{ payload: { frame_count: 48 }, videoId: 'video-1' }])
+  })
+
+  it('sin frame_count previo (columna nueva, fila vieja): trata el previo como 0', async () => {
+    existingFrameCount = null
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 1, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(frameCountUpdates).toEqual([{ payload: { frame_count: 1 }, videoId: 'video-1' }])
+  })
+
+  it('columna frame_count no existe todavía (UPDATE lanza) → el análisis igual responde 200 y encadena caption', async () => {
+    frameCountUpdateThrows = true
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toEqual({ ok: true })
+    expect(frameCountUpdates).toEqual([]) // nunca llegó a registrarse: el UPDATE lanzó
+    expect(calls.map((c) => c.op)).toEqual(['upsert', 'upsert', 'generateIdeaCaption'])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('el UPDATE de frame_count ocurre DESPUÉS del upsert done exitoso (nunca antes de persistir status/findings)', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    // 2 upserts (pending, done) ya sucedieron para cuando frameCountUpdates se llenó.
+    const doneUpserts = calls.filter((c) => c.op === 'upsert')
+    expect(doneUpserts).toHaveLength(2)
+    expect(frameCountUpdates).toHaveLength(1)
   })
 })

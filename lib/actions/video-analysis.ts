@@ -11,6 +11,11 @@ export interface VideoAnalysisView {
    *  guardado por un humano (`generated_caption`). Independiente del estado
    *  del QC de video: alimenta la 3ra bolita ("Caption generado"). */
   hasCaption: boolean
+  /** Total de fotogramas que la IA analizó (acumulado entre chunks, v3.39).
+   *  Opcional/null cuando no hay dato — columna sin migrar (0063 pendiente)
+   *  o fila vieja de antes de esa migración: la UI simplemente no muestra
+   *  el número. */
+  frameCount?: number | null
 }
 
 /**
@@ -54,6 +59,25 @@ export async function getVideoAnalysis(
   if (error) return { analysis: null } // tabla sin migrar u otro fallo: degrada
   if (!data) return { analysis: null }
 
+  // frame_count vive en un SELECT aparte del crítico de arriba (status/
+  // findings): si la columna todavía no está migrada (0063 pendiente), este
+  // select falla solo — nunca tumba el análisis ya resuelto. Un fallo aquí
+  // SOLO apaga el contador.
+  let frameCount: number | null = null
+  try {
+    const { data: fcRow, error: fcError } = await supabase
+      .from('content_idea_video_analysis')
+      .select('frame_count')
+      .eq('video_id', video.id)
+      .maybeSingle()
+    if (!fcError) {
+      const n = (fcRow as { frame_count?: number | null } | null)?.frame_count
+      frameCount = typeof n === 'number' ? n : null
+    }
+  } catch {
+    frameCount = null
+  }
+
   // hasCaption es independiente del QC de video (no hay `if` que lo bloquee
   // en pending/error): un fallo aquí SOLO apaga esta bandera, nunca tumba el
   // análisis ya resuelto arriba.
@@ -76,6 +100,7 @@ export async function getVideoAnalysis(
       status: data.status as VideoAnalysisView['status'],
       findings: (data.findings as VideoAnalysisFindings | null) ?? null,
       hasCaption,
+      frameCount,
     },
   }
 }

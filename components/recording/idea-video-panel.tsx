@@ -159,7 +159,16 @@ function SlotGroup({
         {videos.map((v) => (
           <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} publicEnabled={publicEnabled} />
         ))}
-        {kind === 'edited' && <QcProgressDots ideaId={ideaId} />}
+        {kind === 'edited' && (
+          <QcProgressDots
+            ideaId={ideaId}
+            videoId={
+              // El mismo criterio de "video vigente" que usa getVideoAnalysis:
+              // el edited/uploaded más reciente por uploaded_at, no el primero del array.
+              [...videos].sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))[0]?.id
+            }
+          />
+        )}
         <Slot
           kind={kind}
           ideaId={ideaId}

@@ -1,11 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react'
+import { CheckCircle2, AlertCircle, ChevronDown, Sparkles, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/lib/hooks/use-toast'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
+import { analyzeExistingVideo } from '@/lib/utils/video-analysis-client'
 
 type DotState = 'working' | 'ok' | 'warning' | 'unavailable'
+type RunPhase = 'extracting' | 'analyzing'
 
 /**
  * Tira de 3 bolitas QC ("de un vistazo"): es la nueva cara del reporte QC IA
@@ -17,18 +22,67 @@ type DotState = 'working' | 'ok' | 'warning' | 'unavailable'
  * 2. Captions quemados sin faltas ("Libre de errores")
  * 3. Caption ya escrito ("Caption generado") — independiente del QC de
  *    video: se alimenta de `hasCaption`, no de `status`.
+ *
+ * `videoId` habilita el botón "Analizar con IA" (sin análisis todavía) /
+ * "Re-analizar" (ya hay uno): dispara `analyzeExistingVideo`, que hace en el
+ * browser exactamente lo mismo que al subir pero sacando el video del proxy
+ * de mismo origen (`/api/video-file/[videoId]`) en vez del disco — una URL
+ * firmada de R2 no serviría: sin CORS ahí, el canvas quedaría "tainted" y
+ * `toDataURL()` lanzaría (v3.39).
  */
-export function QcProgressDots({ ideaId }: { ideaId: string }) {
+export function QcProgressDots({ ideaId, videoId }: { ideaId: string; videoId?: string }) {
+  const { toast } = useToast()
+  const canAnalyze = useHasPermission('video.upload')
+  const [refreshToken, setRefreshToken] = useState(0)
+  const [phase, setPhase] = useState<RunPhase | null>(null)
   // Sigue sondeando más allá de 'done' mientras el caption todavía no
   // exista: el análisis de video y generateIdeaCaption terminan en
   // momentos distintos (ver comentario del hook).
-  const analysis = useVideoAnalysisPolling(ideaId, (a) => !a.hasCaption)
+  const analysis = useVideoAnalysisPolling(ideaId, (a) => !a.hasCaption, refreshToken)
   const [openRelevance, setOpenRelevance] = useState(false)
   const [openCaptions, setOpenCaptions] = useState(false)
 
-  if (analysis === undefined || analysis === null) return null
+  const running = phase !== null
 
-  const { status, findings, hasCaption } = analysis
+  async function runAnalysis() {
+    if (!videoId || running) return
+    setPhase('extracting')
+    const res = await analyzeExistingVideo(videoId, { onProgress: setPhase })
+    setPhase(null)
+    // Refresca vía el mismo hook (sin fetch paralelo): para cuando esta
+    // promesa resuelve, la ruta ya terminó de escribir status/findings.
+    setRefreshToken((t) => t + 1)
+    if ('error' in res) {
+      toast({ title: 'No se pudo analizar el video', description: res.error, variant: 'destructive' })
+    }
+  }
+
+  if (analysis === undefined) return null // cargando: nada que mostrar todavía
+
+  if (analysis === null) {
+    // Sin fila de análisis: puede ser "no hay video editado" (no hay nada
+    // que ofrecer) o "hay video pero nunca se analizó" (videoId presente) —
+    // solo en el 2do caso, y solo con permiso, se ofrece el botón.
+    if (!videoId || !canAnalyze) return null
+    return (
+      <div className="rounded-lg border border-dashed bg-card p-3 animate-in fade-in slide-in-from-bottom-1 duration-300">
+        <Button type="button" size="sm" variant="outline" onClick={runAnalysis} disabled={running} className="w-full">
+          {running ? (
+            <>
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              {phase === 'extracting' ? 'Extrayendo fotogramas…' : 'Analizando…'}
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Analizar con IA
+            </>
+          )}
+        </Button>
+      </div>
+    )
+  }
+
+  const { status, findings, hasCaption, frameCount } = analysis
   const dataAvailable = status === 'done' && !!findings
   const captionIssues = findings?.burned_captions.issues ?? []
   const relevanceOk = findings?.relevance.verdict === 'ok'
@@ -55,7 +109,26 @@ export function QcProgressDots({ ideaId }: { ideaId: string }) {
 
   return (
     <div className="space-y-1.5 rounded-lg border bg-card p-3 animate-in fade-in slide-in-from-bottom-1 duration-300">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">QC con IA (advisory)</p>
+      <div className="flex items-center justify-between gap-x-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">QC con IA (advisory)</p>
+        {videoId && canAnalyze && (
+          <button
+            type="button"
+            onClick={runAnalysis}
+            disabled={running}
+            className="shrink-0 whitespace-nowrap text-[10px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {running ? (
+              <span className="inline-flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {phase === 'extracting' ? 'Extrayendo fotogramas…' : 'Analizando…'}
+              </span>
+            ) : (
+              'Re-analizar'
+            )}
+          </button>
+        )}
+      </div>
 
       <QcDot state={relevanceState} text={relevanceText} expanded={openRelevance} onToggle={relevanceState === 'warning' ? () => setOpenRelevance((o) => !o) : undefined} />
       {openRelevance && relevanceState === 'warning' && (
@@ -74,6 +147,12 @@ export function QcProgressDots({ ideaId }: { ideaId: string }) {
       )}
 
       <QcDot state={captionDraftState} text={captionDraftText} />
+
+      {typeof frameCount === 'number' && frameCount > 0 && (
+        <p className="ml-[22px] text-[10px] text-muted-foreground">
+          {frameCount} {frameCount === 1 ? 'fotograma analizado' : 'fotogramas analizados'}
+        </p>
+      )}
     </div>
   )
 }
