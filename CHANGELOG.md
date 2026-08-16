@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.39 — 2026-08-16
+
+**Los videos que ya estaban subidos ahora también se pueden analizar con IA — con un botón.**
+
+- Antes, el QC con IA (las bolitas de "es del cliente", "libre de errores" y "caption generado") solo se calculaba en el momento de subir el video. Los videos subidos antes de ese cambio se quedaban sin bolitas para siempre.
+- Ahora, si un video editado no tiene análisis, aparece un botón **"Analizar con IA"** — con un click, revisa el video igual que si se acabara de subir y las bolitas se llenan solas.
+- Si un video ya tiene análisis, aparece un enlace discreto **"Re-analizar"** junto a las bolitas, por si quieres refrescarlo.
+- Mientras corre, el botón se deshabilita y muestra el progreso ("Extrayendo fotogramas…" → "Analizando…"); si algo falla, sale un aviso claro sin romper el panel.
+- Debajo de las bolitas ahora también se ve **cuántos fotogramas revisó la IA** (p.ej. "48 fotogramas analizados"), para tener una idea de qué tan a fondo se vio el video.
+
+Vista: [preview HTML](/previews/v3.39-analizar-existentes.html)
+
 ## v3.38 — 2026-08-16
 
 **El caption ya no exige que escribas "de qué es el video" cuando la IA ya lo vio.**
