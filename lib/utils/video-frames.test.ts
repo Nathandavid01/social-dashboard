@@ -1,25 +1,70 @@
 import { describe, it, expect } from 'vitest'
 import {
-  frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget,
-  FRAME_FPS, FRAME_MAX_COUNT, FRAME_BUDGET_BYTES,
+  frameTimestamps, evenTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
+  FRAME_FPS, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
 } from './video-frames'
+
+/**
+ * evenTimestamps es la matemática que video-scene-strip.tsx necesita: un
+ * conteo FIJO de escenas repartidas por todo el video, no un muestreo por
+ * fps. Bug de producción (v3.36): la tira llamaba a `frameTimestamps(duration,
+ * THUMB_COUNT)`, colando 5 como `fps` en vez de como cantidad — con
+ * duration=18s eso da count=min(ceil(18*5)=90, FRAME_CHUNK_SIZE)=64
+ * timestamps, todos apretados en el primer segundo del video (porque solo
+ * había 5 <canvas> para pintarlos, los primeros 5 de 64 caían todos ahí).
+ */
+describe('evenTimestamps', () => {
+  it('5 timestamps en un video de 18s: 5 valores crecientes repartidos por todo el video', () => {
+    const ts = evenTimestamps(18, 5)
+    expect(ts).toHaveLength(5)
+    expect(ts).toEqual([...ts].sort((a, b) => a - b))
+    for (let i = 1; i < ts.length; i++) expect(ts[i]).toBeGreaterThan(ts[i - 1])
+  })
+  it('regresión del bug de producción: cubre el video ENTERO, no solo el primer segundo', () => {
+    const ts = evenTimestamps(18, 5)
+    expect(ts.length).toBe(5)
+    // El último timestamp debe caer en la segunda mitad del video — si la
+    // tira solo mostrara el arranque (el bug viejo), estaría por debajo de 1s.
+    expect(ts[ts.length - 1]).toBeGreaterThan(9)
+  })
+  it('duración 0 o negativa: lista vacía', () => {
+    expect(evenTimestamps(0, 5)).toEqual([])
+    expect(evenTimestamps(-3, 5)).toEqual([])
+  })
+  it('count 0 (o negativo): lista vacía', () => {
+    expect(evenTimestamps(18, 0)).toEqual([])
+    expect(evenTimestamps(18, -1)).toEqual([])
+  })
+  it('video muy corto: sin duplicados y todos estrictamente dentro de (0, duration)', () => {
+    const ts = evenTimestamps(0.5, 5)
+    expect(new Set(ts).size).toBe(ts.length)
+    for (const t of ts) { expect(t).toBeGreaterThan(0); expect(t).toBeLessThan(0.5) }
+  })
+  it('frameTimestamps delega en evenTimestamps: mismo resultado con el mismo count', () => {
+    expect(frameTimestamps(60, 4, 4)).toEqual(evenTimestamps(60, 4))
+  })
+})
 
 describe('frameTimestamps', () => {
   it('devuelve N timestamps equiespaciados dentro de (0, duration) con count explícito', () => {
     const ts = frameTimestamps(60, 4, 4)
     expect(ts).toEqual([12, 24, 36, 48])
   })
-  it('usa FRAME_FPS/FRAME_MAX_COUNT por defecto: video de 13s a 4fps → ceil(13*4)=52, tope 48', () => {
-    const ts = frameTimestamps(13)
-    expect(ts).toHaveLength(FRAME_MAX_COUNT)
+  it('usa FRAME_FPS/FRAME_CHUNK_SIZE por defecto: video de 23s a 4fps → ceil(23*4)=92, tope 64', () => {
+    const ts = frameTimestamps(23)
+    expect(ts).toHaveLength(FRAME_CHUNK_SIZE)
   })
   it('video de 3s → ceil(3*4)=12 frames (no llega al tope)', () => {
     const ts = frameTimestamps(3)
     expect(ts).toHaveLength(12)
   })
-  it('video largo (120s) → exactamente el tope FRAME_MAX_COUNT', () => {
+  it('video largo (120s) → exactamente el tope FRAME_CHUNK_SIZE por defecto', () => {
     const ts = frameTimestamps(120)
-    expect(ts).toHaveLength(FRAME_MAX_COUNT)
+    expect(ts).toHaveLength(FRAME_CHUNK_SIZE)
+  })
+  it('con maxCount=FRAME_HARD_MAX puede generar hasta 240 (video de 60s a 4fps)', () => {
+    const ts = frameTimestamps(60, FRAME_FPS, FRAME_HARD_MAX)
+    expect(ts).toHaveLength(FRAME_HARD_MAX)
   })
   it('video muy corto: al menos 1 frame en el medio, sin duplicados', () => {
     const ts = frameTimestamps(0.5, 8, 8)
@@ -31,9 +76,47 @@ describe('frameTimestamps', () => {
     expect(frameTimestamps(0)).toEqual([])
     expect(frameTimestamps(-3)).toEqual([])
   })
-  it('FRAME_FPS es 4 y FRAME_MAX_COUNT es 48', () => {
+  it('FRAME_FPS es 4, FRAME_CHUNK_SIZE es 64, FRAME_HARD_MAX es 240', () => {
     expect(FRAME_FPS).toBe(4)
-    expect(FRAME_MAX_COUNT).toBe(48)
+    expect(FRAME_CHUNK_SIZE).toBe(64)
+    expect(FRAME_HARD_MAX).toBe(240)
+  })
+})
+
+describe('chunkFrames', () => {
+  const frames = Array.from({ length: 5 }, (_, i) => `f${i}`)
+  const timestamps = [0, 1, 2, 3, 4]
+
+  it('menos de un chunk: un solo chunk con todo', () => {
+    const out = chunkFrames(frames, timestamps, 10)
+    expect(out).toEqual([{ frames, timestamps }])
+  })
+
+  it('exacto: un chunk sin resto', () => {
+    const out = chunkFrames(frames, timestamps, 5)
+    expect(out).toEqual([{ frames, timestamps }])
+  })
+
+  it('con resto: varios chunks, el último más corto', () => {
+    const out = chunkFrames(frames, timestamps, 2)
+    expect(out).toEqual([
+      { frames: ['f0', 'f1'], timestamps: [0, 1] },
+      { frames: ['f2', 'f3'], timestamps: [2, 3] },
+      { frames: ['f4'], timestamps: [4] },
+    ])
+  })
+
+  it('vacío: lista de chunks vacía', () => {
+    expect(chunkFrames([], [], 90)).toEqual([])
+  })
+
+  it('usa FRAME_CHUNK_SIZE por defecto', () => {
+    const many = Array.from({ length: FRAME_CHUNK_SIZE + 1 }, (_, i) => `f${i}`)
+    const ts = Array.from({ length: FRAME_CHUNK_SIZE + 1 }, (_, i) => i)
+    const out = chunkFrames(many, ts)
+    expect(out).toHaveLength(2)
+    expect(out[0].frames).toHaveLength(FRAME_CHUNK_SIZE)
+    expect(out[1].frames).toHaveLength(1)
   })
 })
 
@@ -83,6 +166,17 @@ describe('capFramesToBudget', () => {
     expect(totalWireBytes).toBeLessThanOrEqual(3_500_000)
     expect(out.length).toBeLessThan(48)
   })
+  it('invariante de diseño: un chunk de FRAME_CHUNK_SIZE frames al tamaño real de producción NO se recorta', () => {
+    // Medición real de producción (video de Arasibo, 768px lado largo, q0.7):
+    // 71 fotogramas = 3.54MB de cable → ~50KB por fotograma. FRAME_CHUNK_SIZE
+    // (64) debe caber por DISEÑO en FRAME_BUDGET_BYTES, no por suerte — si
+    // esto se recorta, un chunk entero pierde frames del final en silencio,
+    // exactamente el bug que este paquete arregla.
+    const PROD_FRAME_WIRE_BYTES = 50_000
+    const frames = Array.from({ length: FRAME_CHUNK_SIZE }, () => frame(PROD_FRAME_WIRE_BYTES))
+    const out = capFramesToBudget(frames, FRAME_BUDGET_BYTES)
+    expect(out).toHaveLength(FRAME_CHUNK_SIZE)
+  })
 })
 
 describe('capFramesAndTimestampsToBudget', () => {
@@ -98,5 +192,13 @@ describe('capFramesAndTimestampsToBudget', () => {
     const frames = [frame(10_000), frame(10_000)]
     const timestamps = [0.5, 1.5]
     expect(capFramesAndTimestampsToBudget(frames, timestamps, 1_000_000)).toEqual({ frames, timestamps })
+  })
+  it('un chunk completo de FRAME_CHUNK_SIZE frames+timestamps al tamaño real de producción no pierde ninguno', () => {
+    const PROD_FRAME_WIRE_BYTES = 50_000
+    const frames = Array.from({ length: FRAME_CHUNK_SIZE }, () => frame(PROD_FRAME_WIRE_BYTES))
+    const timestamps = Array.from({ length: FRAME_CHUNK_SIZE }, (_, i) => i)
+    const out = capFramesAndTimestampsToBudget(frames, timestamps, FRAME_BUDGET_BYTES)
+    expect(out.frames).toHaveLength(FRAME_CHUNK_SIZE)
+    expect(out.timestamps).toHaveLength(FRAME_CHUNK_SIZE)
   })
 })

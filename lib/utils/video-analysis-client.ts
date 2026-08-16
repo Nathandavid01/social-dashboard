@@ -6,6 +6,8 @@
  * dirá "Análisis no disponible".
  */
 import { extractVideoFrames } from './video-frames-dom'
+import { chunkFrames } from './video-frames'
+import { postVideoAnalysisChunks } from './video-analysis-chunks'
 
 export async function analyzeUploadedVideo(
   videoId: string,
@@ -20,11 +22,7 @@ export async function analyzeUploadedVideo(
   try {
     const { frames, timestamps } = await extract(file)
     if (frames.length === 0) return
-    await post('/api/video-analysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId, frames, timestamps }),
-    })
+    await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post)
   } catch {
     // Silencioso a propósito: el análisis es advisory, la subida ya terminó.
   }

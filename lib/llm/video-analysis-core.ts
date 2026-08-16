@@ -149,3 +149,48 @@ export function parseVideoAnalysisResponse(json: unknown): VideoAnalysisFindings
     visual_summary: typeof r.visual_summary === 'string' ? r.visual_summary : '',
   }
 }
+
+/** Concatena dos fragmentos de texto sin repetir si b ya es sufijo/igual de a. */
+function mergeText(a: string, b: string): string {
+  const at = a.trim()
+  const bt = b.trim()
+  if (!at) return bt
+  if (!bt) return at
+  if (at === bt) return at
+  return `${at} ${bt}`
+}
+
+/**
+ * Funde los findings de dos chunks de frames del MISMO video (troceado por
+ * FRAME_CHUNK_SIZE): burned_captions.text se concatena sin repetir, issues se
+ * unen deduplicando por quote+t, relevance se queda con el peor veredicto
+ * ('warning' manda), y visual_summary conserva el primer texto no vacío y
+ * añade lo nuevo si aporta. Pura — sin red, sin async.
+ *
+ * `a` puede ser null (el chunk 0 falló y no dejó findings previos): el
+ * resultado es `b` tal cual.
+ */
+export function mergeVideoAnalysisFindings(
+  a: VideoAnalysisFindings | null,
+  b: VideoAnalysisFindings,
+): VideoAnalysisFindings {
+  if (!a) return b
+
+  const seen = new Set(a.burned_captions.issues.map((i) => `${i.quote}|${i.t ?? ''}`))
+  const mergedIssues = [...a.burned_captions.issues]
+  for (const issue of b.burned_captions.issues) {
+    const key = `${issue.quote}|${issue.t ?? ''}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    mergedIssues.push(issue)
+  }
+
+  return {
+    burned_captions: {
+      text: mergeText(a.burned_captions.text, b.burned_captions.text),
+      issues: mergedIssues,
+    },
+    relevance: a.relevance.verdict === 'warning' ? a.relevance : b.relevance,
+    visual_summary: mergeText(a.visual_summary, b.visual_summary),
+  }
+}

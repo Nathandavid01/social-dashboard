@@ -12,6 +12,7 @@ import { PlatformBadges } from '@/components/clients/platform-badges'
 import { isIdeaReadyForCaption, ideaReadyMissingLabels } from '@/lib/utils/idea-ready'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { useAutoDraftCaption } from '@/lib/hooks/use-auto-draft-caption'
+import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 interface Props {
@@ -59,10 +60,18 @@ export function IdeaCaptionEditor({
   const [isSaving, startSave] = useTransition()
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+  // Mismo hook compartido que el reporte de QC (useVideoAnalysisPolling): si
+  // la IA ya vio el video, el hook ("¿De qué es este video?") deja de ser
+  // obligatorio. Fetch propio del editor — enseñar esta señal exigía pasarla
+  // por 3 puntos de montaje (idea-studio x2, video-work-card); consultarla
+  // aquí evita eso y reutiliza el patrón ya establecido para este dato.
+  const videoAnalysis = useVideoAnalysisPolling(ideaId)
+  const hasVisualAnalysis = videoAnalysis?.status === 'done' && !!videoAnalysis.findings?.visual_summary?.trim()
   const { autoDrafting } = useAutoDraftCaption({
     ideaId,
     hook,
     hasVideo,
+    hasVisualAnalysis,
     captionDraft: initialDraft,
     generatedCaption: initialCaption,
     enabled: canUse,
@@ -75,8 +84,8 @@ export function IdeaCaptionEditor({
   })
   const drafting = isGenerating || autoDrafting
 
-  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief, hasVideo })
-  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle, hasVideo })
+  const ideaReady = isIdeaReadyForCaption({ hook, visual_brief: visualBrief, hasVideo, hasVisualAnalysis })
+  const missing = ideaReadyMissingLabels({ hook, visual_brief: visualBrief, caption_angle: captionAngle, hasVideo, hasVisualAnalysis })
   const dirty = caption !== (initialCaption ?? '')
   // Hay texto en pantalla que todavía no es el caption del video. Se avisa
   // fuerte: mientras esto se vea, el video NO se ha movido de Copy.

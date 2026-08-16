@@ -9,6 +9,8 @@
  * analyzeUploadedVideo sigue existiendo intacto para quien no quiera thumbs.
  */
 import { extractVideoFrames } from './video-frames-dom'
+import { chunkFrames } from './video-frames'
+import { postVideoAnalysisChunks } from './video-analysis-chunks'
 import { pickThumbFrames, THUMB_COUNT } from './video-thumbs'
 import { getThumbUploadUrls, registerVideoThumbs } from '@/lib/actions/video-thumbs'
 
@@ -32,16 +34,9 @@ async function analyze(
   post: typeof fetch,
 ): Promise<void> {
   if (frames.length === 0) return
-  try {
-    await post('/api/video-analysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // Los timestamps dejan que la IA reporte el segundo exacto del error.
-      body: JSON.stringify({ videoId, frames, timestamps }),
-    })
-  } catch {
-    // Silencioso: el análisis es advisory, la subida ya terminó.
-  }
+  // Un POST secuencial por chunk (videos largos → varios); los timestamps
+  // dejan que la IA reporte el segundo exacto del error.
+  await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post)
 }
 
 async function uploadThumbs(

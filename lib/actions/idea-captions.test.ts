@@ -12,7 +12,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const h = vi.hoisted(() => ({
   updates: [] as Record<string, unknown>[],
-  idea: {
+  // Base inmutable: cada test parte de aquí (beforeEach), no del h.idea de la
+  // corrida anterior — mutar h.idea.hook en un test no debe filtrarse al siguiente.
+  ideaBase: {
     id: 'i1',
     client_id: 'c1',
     title: 'Video de prueba',
@@ -23,6 +25,7 @@ const h = vi.hoisted(() => ({
     content_type: 'R',
     client: { name: 'Gym X', platforms: ['instagram'], default_platforms: ['instagram'] },
   } as Record<string, unknown>,
+  idea: {} as Record<string, unknown>,
   videos: [
     {
       id: 'v1',
@@ -32,6 +35,7 @@ const h = vi.hoisted(() => ({
       storage_provider: 'r2',
     },
   ],
+  analysis: null as { findings: unknown; visual_summary: string | null; status: string } | null,
 }))
 
 vi.mock('@/lib/auth/server', () => ({ requirePermission: vi.fn(async () => {}) }))
@@ -77,7 +81,7 @@ vi.mock('@/lib/supabase/server', () => ({
               eq: () => ({
                 order: () => ({
                   limit: () => ({
-                    maybeSingle: async () => ({ data: null, error: null }),
+                    maybeSingle: async () => ({ data: h.analysis, error: null }),
                   }),
                 }),
               }),
@@ -107,7 +111,8 @@ const oneDraft = 'Caption recién salido de la IA'
 
 beforeEach(() => {
   h.updates.length = 0
-  h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
+  h.idea = { ...h.ideaBase, caption_draft: null, generated_caption: null }
+  h.analysis = null
   vi.mocked(generateCaptionText).mockReset()
   vi.mocked(generateCaptionText).mockResolvedValue('Caption recién salido de la IA')
   vi.mocked(fetchCaptionFeedbackForPrompt).mockReset()
@@ -130,6 +135,25 @@ describe('generateIdeaCaption — sin video no hay caption', () => {
     h.videos = []
     const res = await generateIdeaCaption('i1')
     expect(res.error).toMatch(/video/i)
+    expect(h.updates).toHaveLength(0)
+  })
+})
+
+describe('generateIdeaCaption — el análisis visual reemplaza el hook', () => {
+  it('sin hook pero con análisis visual done: genera igual (Eric: el hook queda para uso manual)', async () => {
+    h.idea = { ...h.idea, hook: null }
+    h.analysis = { findings: { burned_captions: { text: '' } }, visual_summary: 'persona cocina picanha en parrilla', status: 'done' }
+    const res = await generateIdeaCaption('i1')
+    expect(res.ok).toBe(true)
+    expect(res.error).toBeUndefined()
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
+  })
+
+  it('sin hook y sin análisis: sigue devolviendo el error de siempre', async () => {
+    h.idea = { ...h.idea, hook: null }
+    h.analysis = null
+    const res = await generateIdeaCaption('i1')
+    expect(res.error).toMatch(/de qué es el video/i)
     expect(h.updates).toHaveLength(0)
   })
 })

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { processUploadedVideo, type ProcessUploadedVideoDeps } from './video-postupload-client'
+import { FRAME_CHUNK_SIZE } from './video-frames'
 
 const file = new File(['x'], 'v.mp4', { type: 'video/mp4' })
 const frames8 = Array.from({ length: 8 }, (_, i) => `data:image/jpeg;base64,F${i}`)
@@ -83,6 +84,21 @@ describe('processUploadedVideo', () => {
     await processUploadedVideo('vid-1', file, deps)
     expect(deps.post).not.toHaveBeenCalled()
     expect(deps.getUploadUrls).not.toHaveBeenCalled()
+  })
+
+  it('video largo: el análisis se postea en varios chunks secuenciales; los thumbnails no se ven afectados', async () => {
+    const n = FRAME_CHUNK_SIZE + 3
+    const frames = Array.from({ length: n }, (_, i) => `data:image/jpeg;base64,F${i}`)
+    const timestamps = frames.map((_, i) => i * 0.25)
+    const posted: number[] = []
+    const post = vi.fn().mockImplementation(async (_url: string, init: RequestInit) => {
+      posted.push(JSON.parse(init.body as string).chunk.index)
+      return { ok: true }
+    })
+    const deps = makeDeps({ extract: vi.fn().mockResolvedValue({ frames, timestamps }), post })
+    await processUploadedVideo('vid-1', file, deps)
+    expect(posted).toEqual([0, 1])
+    expect(deps.register).toHaveBeenCalledWith('vid-1', ['k0', 'k1', 'k2', 'k3', 'k4'])
   })
 
   it('registerVideoThumbs falla (p.ej. columna no existe) → no lanza', async () => {

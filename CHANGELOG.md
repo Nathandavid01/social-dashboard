@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.38 — 2026-08-16
+
+**El caption ya no exige que escribas "de qué es el video" cuando la IA ya lo vio.**
+
+- Si el QC IA ya analizó el video (bolita verde de captions/relevancia), el campo "¿De qué es este video?" deja de ser obligatorio para generar el caption — la casilla sigue ahí por si lo quieres escribir a mano, y si la llenas se usa igual. Esto aplica tanto al caption del video en producción como al copy de la etapa Copy en Entregas.
+- El análisis de video ahora cubre videos largos completos, no solo los primeros segundos: revisa a 4 fotogramas por segundo troceando la revisión en tandas, así que un video de un minuto se ve entero en vez de perder el final.
+- El caption con IA solo se dispara automáticamente cuando terminó de revisar la última tanda del video, para que no salga a medio análisis.
+- La tira de 5 escenas debajo de un video (para videos viejos, sin thumbnails guardados) ahora sí reparte las imágenes por todo el video — antes, por un error de cálculo, las 5 salían apretadas dentro del primer segundo, así que la tira mostraba el arranque una y otra vez en vez de escenas del video completo.
+
+Vista: [preview HTML](/previews/v3.38-caption-sin-hook.html)
+
 ## v3.37 — 2026-08-15
 
 **El calendario ahora marca con ✓ verde lo que ya se publicó de verdad.**

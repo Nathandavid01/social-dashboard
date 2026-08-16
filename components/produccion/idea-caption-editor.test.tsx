@@ -34,6 +34,15 @@ vi.mock('@/lib/context/auth-context', () => ({
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 
+// El editor consulta el QC de video con el mismo hook compartido que el
+// reporte de análisis (useVideoAnalysisPolling) para saber si la IA ya vio
+// el video y así no exigir el hook. Por defecto: sin análisis (comportamiento
+// de siempre); los tests de la sección "análisis visual" lo sobreescriben.
+let mockAnalysis: { status: 'pending' | 'done' | 'error'; findings: { visual_summary?: string } | null } | null | undefined = null
+vi.mock('@/lib/hooks/use-video-analysis-polling', () => ({
+  useVideoAnalysisPolling: () => mockAnalysis,
+}))
+
 import { packCaptionDrafts } from '@/lib/utils/caption-draft'
 import { IdeaCaptionEditor } from './idea-caption-editor'
 
@@ -41,6 +50,7 @@ afterEach(() => {
   cleanup()
   generateIdeaCaption.mockClear()
   resetAutoDraftAttempts()
+  mockAnalysis = null
 })
 
 describe('IdeaCaptionEditor — caption único', () => {
@@ -305,5 +315,48 @@ describe('IdeaCaptionEditor — al abrir se escribe el borrador solo', () => {
     )
     await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
     expect(onSaved).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * El hook ("¿De qué es este video?") deja de ser obligatorio cuando la IA ya
+ * vio el video (QC visual 'done' con visual_summary). Decisión de Eric: el
+ * campo sigue existiendo para uso manual, con prioridad como contexto.
+ */
+describe('IdeaCaptionEditor — el análisis visual reemplaza el hook', () => {
+  it('sin hook pero con análisis visual done: habilita "Generar desde el video" sin pedir el hook', async () => {
+    mockRole = 'editor'
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hasVideo />)
+    // Lista → dispara el auto-borrador; se espera a que asiente antes de leer el botón.
+    await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /regenerar con ia/i })).not.toBeDisabled()
+    expect(screen.queryByText(/di de qué es el video/i)).not.toBeInTheDocument()
+  })
+
+  it('sin hook y sin análisis (pending): sigue pidiendo el hook, como hoy', () => {
+    mockRole = 'editor'
+    mockAnalysis = { status: 'pending', findings: null }
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hasVideo />)
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeDisabled()
+    expect(screen.getByText(/di de qué es el video/i)).toBeInTheDocument()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+
+  it('con hook Y con análisis: sigue listo (comportamiento de siempre, sin cambios)', async () => {
+    mockRole = 'editor'
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'algo' } }
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" hasVideo />)
+    await waitFor(() => expect(screen.getByDisplayValue('hola')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /regenerar con ia/i })).not.toBeDisabled()
+  })
+
+  it('sin video, aunque haya análisis, sigue sin estar listo', () => {
+    mockRole = 'editor'
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'algo' } }
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hasVideo={false} />)
+    expect(screen.getByRole('button', { name: /generar desde el video/i })).toBeDisabled()
+    expect(screen.getByText(/sube un video primero/i)).toBeInTheDocument()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
   })
 })

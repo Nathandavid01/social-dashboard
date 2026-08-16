@@ -77,6 +77,18 @@ describe('useAutoDraftCaption', () => {
     expect(generateIdeaCaption).toHaveBeenLastCalledWith('i2', { auto: true })
   })
 
+  it('llama aunque falte el hook si hasVisualAnalysis es true (la IA ya vio el video)', async () => {
+    renderHook(() => useAutoDraftCaption({ ideaId: 'i1', hook: '', hasVideo: true, hasVisualAnalysis: true }))
+    await waitFor(() => expect(generateIdeaCaption).toHaveBeenCalledTimes(1))
+    expect(generateIdeaCaption).toHaveBeenCalledWith('i1', { auto: true })
+  })
+
+  it('sigue sin llamar sin hook si hasVisualAnalysis es false/ausente', async () => {
+    renderHook(() => useAutoDraftCaption({ ideaId: 'i1', hook: '', hasVideo: true, hasVisualAnalysis: false }))
+    await Promise.resolve()
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+
   it('muestra autoDrafting mientras espera y lo apaga al terminar', async () => {
     let resolveGen: (v: { ok: true; caption: string }) => void = () => {}
     generateIdeaCaption.mockImplementationOnce(

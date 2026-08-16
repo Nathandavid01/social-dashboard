@@ -73,7 +73,7 @@ describe('VideoSceneStrip', () => {
   // Camino "live" (fallback al vuelo): el canvas real / seek de <video> no son
   // testeables en jsdom, pero SÍ el guard de duración degenerada — es el mismo
   // chequeo (Number.isFinite(duration) && duration > 0) que hace que
-  // frameTimestamps() devuelva [] para Infinity/0 en video-frames.test.ts.
+  // evenTimestamps() devuelva [] para Infinity/0 en video-frames.test.ts.
   describe('camino "live" — duración degenerada (webm/MediaRecorder)', () => {
     it('duration === Infinity → cae a \'none\' (no se queda pintando canvases vacíos)', async () => {
       vi.mocked(getVideoThumbViewUrls).mockResolvedValue({ urls: [] })

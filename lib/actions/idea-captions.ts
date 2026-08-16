@@ -66,12 +66,10 @@ export async function generateIdeaCaption(
   const hasVideo = hasCaptionableVideo(vids)
   if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
 
-  const source = pickCaptionSourceVideo((vids ?? []) as Parameters<typeof pickCaptionSourceVideo>[0])
-  const videoUrl = await listenUrlForCaptionVideo(source)
-  const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
-
   // QC IA: el análisis visual más reciente de un video editado de esta idea.
   // Best-effort — sin tabla (migración pendiente) o sin fila, el caption sale igual.
+  // Leído ANTES del check de "listo": si la IA ya vio el video, el hook
+  // ("¿De qué es este video?") deja de ser obligatorio (decisión de Eric).
   const { data: analysis } = await supabase
     .from('content_idea_video_analysis')
     .select('findings, visual_summary, status')
@@ -82,7 +80,12 @@ export async function generateIdeaCaption(
     .maybeSingle()
     .then((r) => r, () => ({ data: null }))
 
-  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
+  const hasVisualAnalysis = !!analysis?.visual_summary
+  const source = pickCaptionSourceVideo((vids ?? []) as Parameters<typeof pickCaptionSourceVideo>[0])
+  const videoUrl = await listenUrlForCaptionVideo(source)
+  const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
+
+  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo, hasVisualAnalysis })) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
 

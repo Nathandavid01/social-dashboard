@@ -12,20 +12,26 @@ export type CaptionReadyIdea = {
   visual_brief?: string | null
   caption_angle?: string | null
   hasVideo?: boolean
+  /** true cuando la IA ya vio el video (análisis visual QC listo). Decisión de
+   *  Eric: el hook ("¿De qué es este video?") deja de ser obligatorio cuando
+   *  ya hay análisis — sigue existiendo como contexto de uso manual. */
+  hasVisualAnalysis?: boolean
 }
 
 /**
- * Caption only after there is a topic AND a video. Writing copy for an idea
- * with no footage produced captions that never shipped.
+ * Caption only after there is a video AND (un hook escrito a mano O la IA ya
+ * vio el video). Writing copy for an idea with no footage produced captions
+ * that never shipped; exigir el hook cuando el análisis visual ya describe el
+ * video era trabajo duplicado.
  */
 export function isIdeaReadyForCaption(idea: CaptionReadyIdea): boolean {
-  return filled(idea.hook) && idea.hasVideo === true
+  return idea.hasVideo === true && (filled(idea.hook) || idea.hasVisualAnalysis === true)
 }
 
 /** Spanish labels for what is still missing before caption. */
 export function ideaReadyMissingLabels(idea: CaptionReadyIdea): string[] {
   const missing: string[] = []
-  if (!filled(idea.hook)) missing.push('de qué es el video')
+  if (!filled(idea.hook) && idea.hasVisualAnalysis !== true) missing.push('de qué es el video')
   if (idea.hasVideo !== true) missing.push('el video')
   return missing
 }
