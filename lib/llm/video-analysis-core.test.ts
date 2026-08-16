@@ -39,6 +39,16 @@ describe('buildVideoAnalysisPrompt', () => {
     const p = buildVideoAnalysisPrompt({ ideaTitle: 'X' })
     expect(p).toContain('X')
   })
+  it('pide video_topic con la definición correcta: una frase factual "de qué es", distinta de visual_summary', () => {
+    const p = buildVideoAnalysisPrompt({ ideaTitle: 'Promo agosto' })
+    expect(p).toContain('"video_topic"')
+    // Debe explicar que es UNA frase para explicarle a un copywriter de qué va
+    // el video, no el resumen visual técnico ni marketing.
+    expect(p.toLowerCase()).toMatch(/de qué (es|va) el video/)
+    expect(p.toLowerCase()).toMatch(/copywriter/)
+    // El JSON de salida trae ambos campos, claramente distintos.
+    expect(p).toContain('"visual_summary"')
+  })
 })
 
 describe('buildVideoAnalysisRequest', () => {
@@ -117,6 +127,18 @@ describe('parseVideoAnalysisResponse', () => {
     expect(parseVideoAnalysisResponse(wrap('no es json'))).toBeNull()
     expect(parseVideoAnalysisResponse(null)).toBeNull()
     expect(parseVideoAnalysisResponse({})).toBeNull()
+  })
+
+  it('video_topic: se conserva cuando viene', () => {
+    const withTopic = { ...good, video_topic: 'Cómo sellar una picanha en parrilla Santa María con roble rojo' }
+    const out = parseVideoAnalysisResponse(wrap(JSON.stringify(withTopic)))
+    expect(out?.video_topic).toBe('Cómo sellar una picanha en parrilla Santa María con roble rojo')
+  })
+
+  it('video_topic ausente o de tipo raro: undefined, nunca revienta', () => {
+    expect(parseVideoAnalysisResponse(wrap(JSON.stringify(good)))?.video_topic).toBeUndefined()
+    const weirdType = wrap(JSON.stringify({ ...good, video_topic: 42 }))
+    expect(parseVideoAnalysisResponse(weirdType)?.video_topic).toBeUndefined()
   })
 
   it('issues[].t: se conserva cuando viene, se omite cuando no', () => {
@@ -209,5 +231,21 @@ describe('mergeVideoAnalysisFindings', () => {
 
   it('campos vacíos en ambos lados no revientan', () => {
     expect(mergeVideoAnalysisFindings(findings(), findings())).toEqual(findings())
+  })
+
+  it('video_topic: conserva el primero no vacío', () => {
+    const a = findings({ video_topic: 'Cómo sellar picanha' })
+    const b = findings({ video_topic: 'otra cosa' })
+    expect(mergeVideoAnalysisFindings(a, b).video_topic).toBe('Cómo sellar picanha')
+  })
+
+  it('video_topic: si el primer chunk no lo trajo, usa el del segundo', () => {
+    const a = findings({ video_topic: undefined })
+    const b = findings({ video_topic: 'Cómo sellar picanha' })
+    expect(mergeVideoAnalysisFindings(a, b).video_topic).toBe('Cómo sellar picanha')
+  })
+
+  it('video_topic: ninguno lo trajo → undefined', () => {
+    expect(mergeVideoAnalysisFindings(findings(), findings()).video_topic).toBeUndefined()
   })
 })
