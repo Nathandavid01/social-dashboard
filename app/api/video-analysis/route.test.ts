@@ -24,6 +24,23 @@ vi.mock('@/lib/actions/idea-captions', () => ({
   generateIdeaCaption: (ideaId: string, opts?: unknown) => generateIdeaCaption(ideaId, opts),
 }))
 
+/** Log separado de las llamadas de transcripción, para no romper `calls.map(op)`. */
+let transcribeCalls: Array<{ op: string }> = []
+const listenUrlForCaptionVideo = vi.fn(async (_video?: unknown) => 'https://example.com/audio.mp4' as string | null)
+vi.mock('@/lib/integrations/caption-listen-url', () => ({
+  listenUrlForCaptionVideo: (video: unknown) => {
+    transcribeCalls.push({ op: 'listenUrl' })
+    return listenUrlForCaptionVideo(video)
+  },
+}))
+const transcribeVideoFromUrl = vi.fn(async (_url: string) => 'Transcripción de prueba' as string | null)
+vi.mock('@/lib/integrations/whisper', () => ({
+  transcribeVideoFromUrl: (url: string) => {
+    transcribeCalls.push({ op: 'transcribe' })
+    return transcribeVideoFromUrl(url)
+  },
+}))
+
 let videoResult: { data: unknown } = { data: null }
 /** Plain value applies to every upsert; a function receives the 0-based upsert
  *  call index so a test can fail just the pending upsert (index 0) and leave
@@ -125,7 +142,10 @@ const IDEA = {
   id: 'idea-1', title: 'Título', hook: 'hook',
   client: { name: 'Cliente', brand_voice: 'voz', caption_language: 'es', caption_notes: null },
 }
-const VIDEO = { id: 'video-1', idea_id: 'idea-1', kind: 'edited', idea: IDEA }
+const VIDEO = {
+  id: 'video-1', idea_id: 'idea-1', kind: 'edited', idea: IDEA,
+  drive_file_id: 'edited/video-1.mp4', storage_provider: 'entregas-r2',
+}
 const FRAME = 'data:image/jpeg;base64,AAAA'
 const GOOD_FINDINGS = {
   burned_captions: { text: 'Ven hoy', issues: [] },
@@ -152,12 +172,15 @@ beforeEach(() => {
   hookUpdates = []
   hookSourceUpdateThrows = false
   hookUpdateNoMatch = false
+  transcribeCalls = []
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
     calls.push({ op: 'generateIdeaCaption', payload: [ideaId, opts] })
     return { ok: true }
   })
+  listenUrlForCaptionVideo.mockReset().mockResolvedValue('https://example.com/audio.mp4')
+  transcribeVideoFromUrl.mockReset().mockResolvedValue('Transcripción de prueba')
 })
 
 describe('POST /api/video-analysis', () => {
@@ -497,5 +520,75 @@ describe('POST /api/video-analysis — video_topic escribe el hook ("¿De qué e
       { payload: { hook_source: 'ai' }, id: 'idea-1' },
     ])
     expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+})
+
+describe('POST /api/video-analysis — transcripción (escucha el video en paralelo)', () => {
+  it('chunk único: pide la transcripción y la pasa a analyzeVideoFrames en el ctx', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(listenUrlForCaptionVideo).toHaveBeenCalledTimes(1)
+    expect(transcribeVideoFromUrl).toHaveBeenCalledTimes(1)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: 'Transcripción de prueba' }),
+      undefined,
+    )
+  })
+
+  it('chunk 0 de 3 (primero): también pide la transcripción', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(transcribeVideoFromUrl).toHaveBeenCalledTimes(1)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: 'Transcripción de prueba' }),
+      undefined,
+    )
+  })
+
+  it('chunk > 0 (no es el primero): NO vuelve a pedir la transcripción', async () => {
+    existingFindings = GOOD_FINDINGS
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 1, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(listenUrlForCaptionVideo).not.toHaveBeenCalled()
+    expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+  })
+
+  it('sin URL de audio (listenUrlForCaptionVideo → null): transcript null, sigue solo con lo visual', async () => {
+    listenUrlForCaptionVideo.mockResolvedValueOnce(null)
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(transcribeVideoFromUrl).not.toHaveBeenCalled()
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+  })
+
+  it('Whisper falla (rechaza): el análisis y la escritura del hook siguen igual, best-effort', async () => {
+    transcribeVideoFromUrl.mockRejectedValueOnce(new Error('whisper 500'))
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce({
+      ...GOOD_FINDINGS,
+      video_topic: 'Cómo sellar una picanha',
+    })
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith(
+      [FRAME],
+      expect.objectContaining({ transcript: null }),
+      undefined,
+    )
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
   })
 })

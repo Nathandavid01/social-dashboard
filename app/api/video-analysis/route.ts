@@ -4,6 +4,8 @@ import { requirePermission } from '@/lib/auth/server'
 import { analyzeVideoFrames, videoAnalysisModelId } from '@/lib/llm/video-analysis'
 import { mergeVideoAnalysisFindings, type VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
+import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
+import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
 
 /** El análisis con hasta 90 imágenes por chunk tarda; sin esto Vercel corta a los 10-15s. */
 export const maxDuration = 300
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: video } = await supabase
     .from('content_idea_videos')
-    .select('id, idea_id, kind, idea:content_ideas!content_idea_videos_idea_id_fkey(id, title, hook, client:clients(name, brand_voice, caption_language, caption_notes))')
+    .select('id, idea_id, kind, drive_file_id, storage_provider, idea:content_ideas!content_idea_videos_idea_id_fkey(id, title, hook, client:clients(name, brand_voice, caption_language, caption_notes))')
     .eq('id', videoId)
     .single()
   if (!video || video.kind !== 'edited') {
@@ -80,6 +82,35 @@ export async function POST(request: Request) {
       { video_id: video.id, idea_id: video.idea_id, updated_at: new Date().toISOString(), ...row },
       { onConflict: 'video_id' },
     )
+
+  // Transcripción del audio (Whisper), lanzada AQUÍ (antes del upsert
+  // 'pending' de abajo) para que se solape con esa escritura y con la lectura
+  // de `previousFindings` más abajo, en vez de esperarlas en serie — no se
+  // await todavía. Solo en el PRIMER chunk: la transcripción es del video
+  // COMPLETO (no cambia entre chunks), así que pedirla de nuevo en cada tanda
+  // gastaría Whisper sin necesidad; mergeVideoAnalysisFindings conserva el
+  // video_topic del primer chunk que traiga uno, así que es ahí donde importa.
+  // No se puede solapar con la llamada a Grok (analyzeVideoFrames): su prompt
+  // necesita el TEXTO ya transcrito, así que se await justo antes de construir
+  // analysisCtx. Best-effort: sin URL de audio o si Whisper falla, transcript
+  // queda null y el análisis sigue solo con lo visual — nunca bloquea ni
+  // rompe la ruta.
+  const transcriptPromise: Promise<string | null> = isFirstChunk
+    ? (async () => {
+        try {
+          const listenUrl = await listenUrlForCaptionVideo({
+            id: video.id,
+            kind: video.kind,
+            status: null,
+            drive_file_id: (video as { drive_file_id?: string | null }).drive_file_id ?? null,
+            storage_provider: (video as { storage_provider?: string | null }).storage_provider ?? null,
+          })
+          return listenUrl ? await transcribeVideoFromUrl(listenUrl) : null
+        } catch {
+          return null
+        }
+      })()
+    : Promise.resolve(null)
 
   // Solo el primer chunk inicializa la fila a 'pending': un chunk >0 sobre una
   // fila que ya tiene findings de chunks anteriores NO debe borrarlos.
@@ -113,6 +144,7 @@ export async function POST(request: Request) {
       previousFrameCount = typeof prevRow?.frame_count === 'number' ? prevRow.frame_count : 0
     }
 
+    const transcript = await transcriptPromise
     const analysisCtx = {
       ideaTitle: idea?.title?.trim() || 'Sin título',
       hook: idea?.hook,
@@ -120,6 +152,7 @@ export async function POST(request: Request) {
       brandVoice: idea?.client?.brand_voice,
       captionLanguage: idea?.client?.caption_language,
       captionNotes: idea?.client?.caption_notes,
+      transcript,
     }
     const chunkFindings = await analyzeVideoFrames(frames, analysisCtx, timestamps)
     const findings = isFirstChunk ? chunkFindings : mergeVideoAnalysisFindings(previousFindings, chunkFindings)
