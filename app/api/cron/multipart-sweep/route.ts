@@ -56,10 +56,16 @@ async function sweepProvider(provider: Provider) {
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET
-  const authed =
-    (secret && req.headers.get('authorization') === `Bearer ${secret}`) ||
-    req.headers.get('x-vercel-cron') !== null
-  if (!authed) {
+  // Fail closed: no secret configured means we CANNOT verify the caller, so
+  // we do nothing rather than run unauthenticated. No `x-vercel-cron`
+  // fallback here on purpose — that header is caller-supplied and trivially
+  // forgeable with a plain curl from the internet (an audit exploited exactly
+  // this on the other crons, in production). Only a real Bearer secret runs this.
+  if (!secret) {
+    console.error('[multipart-sweep] CRON_SECRET no configurado — rechazando la petición (fail closed)')
+    return NextResponse.json({ error: 'CRON_SECRET no configurado' }, { status: 503 })
+  }
+  if (req.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
