@@ -33,8 +33,15 @@ vi.mock('@/lib/hooks/use-toast', () => ({
 
 // Drives whether the user can see upload slots. Mutable across tests.
 let canUpload = true
+// Drives the read gate (revision/entregas/planning). Mutable across tests.
+let canManageVideos = true
+// The logged-in user's id — 'user-1' matches makeVideo()'s default uploaded_by,
+// so existing tests (which don't care about ownership) keep passing unchanged.
+let currentUserId: string | null = 'user-1'
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => canUpload,
+  useHasAnyPermission: () => canManageVideos,
+  useCurrentUserId: () => currentUserId,
   RoleGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
@@ -70,6 +77,8 @@ async function flush() {
 
 beforeEach(() => {
   canUpload = true
+  canManageVideos = true
+  currentUserId = 'user-1'
   vi.clearAllMocks()
 })
 
@@ -266,6 +275,48 @@ describe('IdeaVideoPanel — inline preview', () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
     await flush()
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+  })
+})
+
+describe('IdeaVideoPanel — "Ver"/"Bajar" solo cuando el permiso o la autoría los respalda (coordinator follow-up)', () => {
+  it('con permiso de lectura (revision/entregas/planning), muestra Ver y Bajar aunque el video sea de OTRO usuario', async () => {
+    canManageVideos = true
+    currentUserId = 'user-1'
+    const video = { ...makeVideo('raw', 0), uploaded_by: 'otro-usuario' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+    expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Bajar/ })).toBeInTheDocument()
+  })
+
+  it('sin permiso pero es SU PROPIA subida (uploaded_by === yo), igual muestra Ver y Bajar', async () => {
+    canManageVideos = false
+    currentUserId = 'video-role-user'
+    const video = { ...makeVideo('raw', 0), uploaded_by: 'video-role-user' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+    expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Bajar/ })).toBeInTheDocument()
+  })
+
+  it('sin permiso Y de otro usuario → ni Ver ni Bajar se renderizan (un botón que siempre falla es peor que ninguno)', async () => {
+    canManageVideos = false
+    currentUserId = 'video-role-user'
+    const video = { ...makeVideo('raw', 0), uploaded_by: 'otro-usuario-cualquiera' }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+    expect(screen.queryByRole('button', { name: 'Ver' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Bajar/ })).not.toBeInTheDocument()
+  })
+
+  it('sin permiso y sin sesión (uploaded_by null) → tampoco se renderizan', async () => {
+    canManageVideos = false
+    currentUserId = null
+    const video = { ...makeVideo('raw', 0), uploaded_by: null }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+    expect(screen.queryByRole('button', { name: 'Ver' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Bajar/ })).not.toBeInTheDocument()
   })
 })
 

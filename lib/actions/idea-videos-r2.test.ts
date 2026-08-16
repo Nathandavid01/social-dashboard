@@ -29,6 +29,7 @@ vi.mock('@/lib/utils/idea-activity', () => ({
 
 let publicBase: string | null = 'https://videos.natemedia.com'
 let videoKind = 'edited'
+let videoUploadedBy: string | null = 'user-1'
 vi.mock('@/lib/integrations/r2', () => ({
   r2Client: vi.fn(() => ({ send: vi.fn() })),
   r2Bucket: vi.fn(() => 'nmedia-videos'),
@@ -58,6 +59,7 @@ function makeChain() {
       storage_provider: 'r2',
       kind: videoKind,
       name: 'final.mp4',
+      uploaded_by: videoUploadedBy,
     },
     error: null,
   }))
@@ -113,6 +115,10 @@ beforeEach(() => {
   vi.clearAllMocks()
   publicBase = 'https://videos.natemedia.com'
   videoKind = 'edited'
+  // Default: video was uploaded by SOMEONE ELSE, not the logged-in user
+  // ('user-1'). Tests that need the own-upload exception set this to
+  // 'user-1' explicitly.
+  videoUploadedBy = 'someone-else-id'
   canRead = true
   supabaseMock.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 })
@@ -280,6 +286,60 @@ describe('getR2DownloadUrl / getR2PublicUrl / getR2PreviewUrl — audit: gate de
     const res = await getR2PublicUrl('vid-1')
     expect(res.url).toBeUndefined()
     expect(res.error).toMatch(/no autorizado/i)
+  })
+})
+
+describe('excepción "lo propio" — quien subió el archivo siempre puede verlo/bajarlo (coordinator follow-up)', () => {
+  // El videógrafo (rol `video`) no tiene revision.read/entregas.read/planning.read,
+  // pero SÍ debe poder ver y bajar lo que él mismo grabó y subió — ese es el
+  // caso real que "Ver"/"Bajar" cubren en el panel de grabación (onsite).
+  it('getR2DownloadUrl: sin ningún permiso pero uploaded_by === yo → funciona', async () => {
+    canRead = false
+    videoUploadedBy = 'user-1' // == supabaseMock.auth.getUser() id
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBe('https://signed.example/presigned')
+  })
+
+  it('getR2PreviewUrl: sin ningún permiso pero uploaded_by === yo → funciona', async () => {
+    canRead = false
+    videoUploadedBy = 'user-1'
+    const res = await getR2PreviewUrl('vid-1')
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBe('https://signed.example/presigned')
+  })
+
+  it('getR2PublicUrl: sin ningún permiso pero uploaded_by === yo → funciona (video editado)', async () => {
+    canRead = false
+    videoUploadedBy = 'user-1'
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBe('https://videos.natemedia.com/ideas/idea-1/edited/1-final.mp4')
+  })
+
+  it('getR2DownloadUrl: sin permiso Y de otro usuario → sigue negado (no es un bypass general)', async () => {
+    canRead = false
+    videoUploadedBy = 'un-tercero-cualquiera'
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no autorizado/i)
+  })
+
+  it('getR2DownloadUrl: sin sesión (usuario anónimo) → nunca pasa por dueño, sigue negado', async () => {
+    canRead = false
+    videoUploadedBy = null
+    supabaseMock.auth.getUser.mockResolvedValueOnce({ data: { user: null } } as never)
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no autorizado/i)
+  })
+
+  it('con permiso normal (revision/entregas/planning), sigue funcionando igual aunque no sea el dueño', async () => {
+    canRead = true
+    videoUploadedBy = 'un-tercero-cualquiera'
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBe('https://signed.example/presigned')
   })
 })
 

@@ -168,22 +168,29 @@ export async function registerR2Video(input: {
 /**
  * Presigned GET URL so an editor downloads straight from R2 (fast, CDN).
  * Same read gate as getEntregasPreviewUrl — video/copy/team_member could
- * pull raw material of ANY client without this (audit finding).
+ * pull raw material of ANY client without this (audit finding). Exception:
+ * whoever UPLOADED the file can always see/download their own upload — a
+ * videógrafo confirming their own recording landed OK is not the abuse the
+ * gate targets.
  */
 export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider, name, uploaded_by')
+    .eq('id', videoId)
+    .single()
+  if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
   const canDownload =
+    isOwnUpload ||
     (await currentUserHas('revision.read')) ||
     (await currentUserHas('entregas.read')) ||
     (await currentUserHas('planning.read'))
   if (!canDownload) return { error: 'No autorizado' }
 
-  const supabase = await createClient()
-  const { data: video, error } = await supabase
-    .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, name')
-    .eq('id', videoId)
-    .single()
-  if (error || !video) return { error: 'Video no encontrado' }
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }
@@ -218,22 +225,27 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
  * same `/edited/` restriction at the edge so the bucket itself never goes
  * fully public. Requires public access configured + R2_PUBLIC_BASE_URL set.
  *
- * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl).
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl),
+ * with the same own-upload exception.
  */
 export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider, kind, uploaded_by')
+    .eq('id', videoId)
+    .single()
+  if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
   const canRead =
+    isOwnUpload ||
     (await currentUserHas('revision.read')) ||
     (await currentUserHas('entregas.read')) ||
     (await currentUserHas('planning.read'))
   if (!canRead) return { error: 'No autorizado' }
 
-  const supabase = await createClient()
-  const { data: video, error } = await supabase
-    .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, kind')
-    .eq('id', videoId)
-    .single()
-  if (error || !video) return { error: 'Video no encontrado' }
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }
@@ -250,22 +262,27 @@ export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; e
 
 /**
  * Presigned GET URL for inline playback (no attachment), usable as a <video src>.
- * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl).
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl),
+ * with the same own-upload exception.
  */
 export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider, uploaded_by')
+    .eq('id', videoId)
+    .single()
+  if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
   const canPreview =
+    isOwnUpload ||
     (await currentUserHas('revision.read')) ||
     (await currentUserHas('entregas.read')) ||
     (await currentUserHas('planning.read'))
   if (!canPreview) return { error: 'No autorizado' }
 
-  const supabase = await createClient()
-  const { data: video, error } = await supabase
-    .from('content_idea_videos')
-    .select('drive_file_id, storage_provider')
-    .eq('id', videoId)
-    .single()
-  if (error || !video) return { error: 'Video no encontrado' }
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }

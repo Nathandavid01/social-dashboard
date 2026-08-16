@@ -37,3 +37,14 @@ export function useHasPermission(perm: Permission): boolean {
   const { role } = useAuth()
   return hasPermission(role, perm)
 }
+
+export function useHasAnyPermission(perms: Permission[]): boolean {
+  const { role } = useAuth()
+  return hasAnyPermission(role, perms)
+}
+
+/** The logged-in user's id, or null when signed out. For "is this mine?" UI checks. */
+export function useCurrentUserId(): string | null {
+  const { user } = useAuth()
+  return user?.id ?? null
+}
