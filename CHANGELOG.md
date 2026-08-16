@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.48 — 2026-08-16
+
+**Se reforzó la seguridad de tres puntos internos del sistema — sin cambios visibles.**
+
+- El proceso automático que sincroniza publicaciones de Metricool ahora exige siempre una clave secreta configurada en el servidor; si esa clave no está presente, el proceso no corre (antes de esto, cualquier persona podía dispararlo desde fuera).
+- Las subidas de video (equipo y portal de clientes) ahora solo aceptan y sirven archivos de tipo video real — cualquier otro tipo de archivo se rechaza al subir, o se entrega de forma segura (forzando su descarga) si ya existía.
+- Las descargas de material crudo del flujo de producción ahora piden el mismo permiso que ya se exigía en Entregas — antes, algunos roles del equipo podían descargar material de cualquier cliente sin ese permiso.
+
+Sin preview visual: estos cambios son internos, no afectan la interfaz.
+
 ## v3.46 — 2026-08-16
 
 **Los nombres largos en las notificaciones ya no salen cortados a la mitad.**
