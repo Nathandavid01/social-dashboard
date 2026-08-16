@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.46 — 2026-08-16
+
+**Los nombres largos en las notificaciones ya no salen cortados a la mitad.**
+
+- En el panel de notificaciones, títulos y textos largos ("Video editado subido — Dr. Rodriguez Cardiología…", "Cafe Don Rogelio…") ahora terminan en **puntos suspensivos (…)** en vez de cortarse de golpe en medio de una palabra.
+- El título se recorta a una línea; el texto debajo, hasta dos líneas — el panel ya no se ve "roto" con nombres de clientes largos.
+- Es un arreglo interno del componente que muestra listas con scroll (`ScrollArea`): se usa en el panel de notificaciones y en el diálogo de "Auto-aplicar a todos" de Clientes, así que ambos quedan protegidos del mismo problema.
+
+Vista: [preview HTML](/previews/v3.46-notificaciones-texto.html)
+
 ## v3.45 — 2026-08-16
 
 **La tarjeta de cada video del lote se rediseñó: menos banner, más lo que importa — cuándo se publica, cómo se ve, y subir archivos en un clic.**
