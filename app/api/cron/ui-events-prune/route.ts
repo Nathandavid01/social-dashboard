@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { pruneBefore } from '@/lib/utils/ui-events-core'
+import { cronAuthDenial } from '@/lib/auth/cron'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Drops ui_events older than 7 days. Same CRON_SECRET / Vercel cron auth as
- * the other nightly jobs. Uses the service role so RLS does not block deletes.
+ * Drops ui_events older than 7 days. Same CRON_SECRET gate as the other
+ * nightly jobs (lib/auth/cron.ts) — fails closed. Uses the service role so
+ * RLS does not block deletes.
  */
 function admin() {
   return createClient(
@@ -16,13 +18,8 @@ function admin() {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET
-  const authed =
-    (secret && req.headers.get('authorization') === `Bearer ${secret}`) ||
-    req.headers.get('x-vercel-cron') !== null
-  if (!authed) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const denial = cronAuthDenial(req)
+  if (denial) return NextResponse.json(denial.body, { status: denial.status })
 
   const cutoff = pruneBefore().toISOString()
   const { error, count } = await admin()

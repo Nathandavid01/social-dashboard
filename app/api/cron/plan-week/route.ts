@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { addDaysISO, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { planWeekInserts, type PlanWeekClient, type PlanWeekExistingIdea } from '@/lib/utils/plan-week-core'
+import { cronAuthDenial } from '@/lib/auth/cron'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -25,7 +26,7 @@ const POST_TZ = 'America/Puerto_Rico'
  *   client with a full plate gets NO new cards until work ships. This keeps
  *   the cron from spamming worked clients, dragging batch cards back to the
  *   Video column, or accumulating rows without bound.
- * Protected by CRON_SECRET, same as the other crons.
+ * Protected by CRON_SECRET — see lib/auth/cron.ts. Fails closed.
  */
 function admin() {
   return createClient(
@@ -45,13 +46,8 @@ function admin() {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET
-  const authed =
-    (secret && req.headers.get('authorization') === `Bearer ${secret}`) ||
-    req.headers.get('x-vercel-cron') !== null
-  if (!authed) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const denial = cronAuthDenial(req)
+  if (denial) return NextResponse.json(denial.body, { status: denial.status })
 
   const sb = admin()
   const todayISO = todayISOInTimeZone(POST_TZ)

@@ -169,4 +169,49 @@ describe('GET /api/video-file/[videoId]', () => {
     const cc = res.headers.get('Cache-Control') ?? ''
     expect(cc).toMatch(/no-store|private/)
   })
+
+  describe('audit: nunca sirve un tipo ejecutable, sin importar lo que diga R2', () => {
+    it('un objeto con Content-Type text/html guardado → se sirve como octet-stream + nosniff + attachment', async () => {
+      sendResult = {
+        Body: { transformToWebStream: () => webStreamOf('<script>alert(1)</script>') },
+        ContentType: 'text/html',
+        ContentLength: 26,
+      }
+      const res = await GET(req(), ctx())
+      expect(res.headers.get('Content-Type')).toBe('application/octet-stream')
+      expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff')
+      expect(res.headers.get('Content-Disposition')).toBe('attachment')
+    })
+
+    it('un objeto con Content-Type image/svg+xml guardado → también degrada a octet-stream', async () => {
+      sendResult = {
+        Body: { transformToWebStream: () => webStreamOf('<svg onload=alert(1)>') },
+        ContentType: 'image/svg+xml',
+        ContentLength: 22,
+      }
+      const res = await GET(req(), ctx())
+      expect(res.headers.get('Content-Type')).toBe('application/octet-stream')
+      expect(res.headers.get('Content-Disposition')).toBe('attachment')
+    })
+
+    it('un mp4 normal sigue sirviéndose igual: Content-Type intacto, sin forzar descarga, con nosniff', async () => {
+      const res = await GET(req(), ctx())
+      expect(res.headers.get('Content-Type')).toBe('video/mp4')
+      expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff')
+      expect(res.headers.get('Content-Disposition')).toBeNull()
+    })
+
+    it('streaming y Range siguen intactos para un mp4 normal', async () => {
+      sendResult = {
+        Body: { transformToWebStream: () => webStreamOf('by') },
+        ContentType: 'video/mp4',
+        ContentLength: 2,
+        ContentRange: 'bytes 0-1/5',
+      }
+      const res = await GET(req({ Range: 'bytes=0-1' }), ctx())
+      expect(res.status).toBe(206)
+      expect(res.headers.get('Content-Range')).toBe('bytes 0-1/5')
+      expect(sendCalls[0].input.Range).toBe('bytes=0-1')
+    })
+  })
 })

@@ -5,7 +5,7 @@ import { Video, Plus, Download, Trash2, Loader2, Camera, Clapperboard, ExternalL
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
-import { useHasPermission } from '@/components/auth/role-gate'
+import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
@@ -71,6 +71,12 @@ const REQUIRED_FILES: Partial<Record<ContentIdeaVideoKind, number>> = { raw: 4, 
 
 export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
   const canUpload = useHasPermission('video.upload')
+  // Same read gate as the server actions (getR2DownloadUrl/PreviewUrl/PublicUrl):
+  // revision/entregas/planning read lets you manage ANY client's material.
+  // Without it, "Ver"/"Bajar" only apply to what THIS user uploaded — computed
+  // per-row below via ownUploadUserId, no per-row fetch.
+  const canManageVideos = useHasAnyPermission(['revision.read', 'entregas.read', 'planning.read'])
+  const ownUploadUserId = useCurrentUserId()
   const uploaded = videos.filter((v) => v.status === 'uploaded')
   const byKind: Record<ContentIdeaVideoKind, ContentIdeaVideo[]> = {
     edited: uploaded.filter((v) => v.kind === 'edited'),
@@ -88,6 +94,8 @@ export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props)
           ideaId={ideaId}
           videos={byKind[kind]}
           canUpload={canUpload}
+          canManageVideos={canManageVideos}
+          ownUploadUserId={ownUploadUserId}
           publicEnabled={publicEnabled}
           disabledReason={kind === 'edited' && !hasRaw ? 'Sube el video crudo primero' : undefined}
         />
@@ -144,12 +152,14 @@ function VideoStatusBadges({
  * box; the whole group is still a drop target so drag-and-drop keeps working.
  */
 function SlotGroup({
-  kind, ideaId, videos, canUpload, publicEnabled, disabledReason,
+  kind, ideaId, videos, canUpload, canManageVideos, ownUploadUserId, publicEnabled, disabledReason,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
   videos: ContentIdeaVideo[]
   canUpload: boolean
+  canManageVideos: boolean
+  ownUploadUserId: string | null
   publicEnabled: boolean
   disabledReason?: string
 }) {
@@ -322,6 +332,7 @@ function SlotGroup({
               ideaId={ideaId}
               video={v}
               canUpload={canUpload}
+              canSee={canManageVideos || (!!ownUploadUserId && v.uploaded_by === ownUploadUserId)}
               publicEnabled={publicEnabled}
               allowDelete={kind !== 'raw'}
             />
@@ -334,12 +345,16 @@ function SlotGroup({
 
 /** One uploaded file's row: preview / download / (maybe) delete + status. */
 function FileRow({
-  kind, ideaId, video, canUpload, publicEnabled, allowDelete,
+  kind, ideaId, video, canUpload, canSee, publicEnabled, allowDelete,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
   video: ContentIdeaVideo
   canUpload: boolean
+  /** Read gate (revision/entregas/planning) OR "I uploaded this myself". If
+   * false, "Ver"/"Bajar" would only fail server-side — don't render them; a
+   * button that always fails is worse than no button. */
+  canSee: boolean
   publicEnabled: boolean
   allowDelete: boolean
 }) {
@@ -401,7 +416,7 @@ function FileRow({
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {isCloudR2 && (
+          {isCloudR2 && canSee && (
             <Button size="sm" variant="outline" onClick={togglePreview} disabled={previewLoading}>
               {previewLoading ? (
                 <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
@@ -413,7 +428,7 @@ function FileRow({
               Ver
             </Button>
           )}
-          {canDownloadR2 ? (
+          {canDownloadR2 && canSee ? (
             <Button size="sm" variant="outline" onClick={download}>
               <Download className="mr-1 h-3.5 w-3.5" /> Bajar
             </Button>

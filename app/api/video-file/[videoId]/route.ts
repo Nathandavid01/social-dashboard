@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { currentUserHas } from '@/lib/auth/server'
 import { r2Client, r2Bucket } from '@/lib/integrations/r2'
 import { entregasR2Client, entregasR2Bucket } from '@/lib/integrations/entregas-r2'
+import { safeServeContentType } from '@/lib/utils/video-upload-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,13 +62,23 @@ export async function GET(
     const body = obj.Body as { transformToWebStream?: () => ReadableStream } | undefined
     if (!body?.transformToWebStream) return new Response('Video no encontrado', { status: 404 })
 
+    // Nunca confiar en el Content-Type guardado (audit finding: se podía
+    // subir un .html y este proxy lo servía tal cual, ejecutable en el
+    // dominio del dashboard). Si no es un video/* conocido, degrada a
+    // application/octet-stream + descarga forzada — el navegador nunca lo
+    // renderiza inline ni lo "adivina" (nosniff).
+    const contentType = safeServeContentType(obj.ContentType)
     const headers = new Headers({
-      'Content-Type': obj.ContentType ?? 'video/mp4',
+      'Content-Type': contentType,
       'Accept-Ranges': 'bytes',
+      'X-Content-Type-Options': 'nosniff',
       // Nunca público: gateado por permiso, no queremos que un CDN/proxy lo
       // cachee para cualquiera.
       'Cache-Control': 'private, no-store',
     })
+    if (contentType === 'application/octet-stream') {
+      headers.set('Content-Disposition', 'attachment')
+    }
     if (obj.ContentLength != null) headers.set('Content-Length', String(obj.ContentLength))
     if (obj.ContentRange) headers.set('Content-Range', obj.ContentRange)
 

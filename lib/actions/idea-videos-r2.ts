@@ -4,10 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
+import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 function slugify(name: string): string {
@@ -29,6 +30,9 @@ export async function getR2UploadUrl(input: {
     await requirePermission('video.upload')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!isAllowedVideoUploadType(input.contentType)) {
+    return { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' }
   }
   const client = r2Client()
   if (!client || !isR2Configured()) return { error: 'R2 no está configurado' }
@@ -63,6 +67,9 @@ export async function getQuickUploadUrl(input: {
     await requirePermission('posting.publish')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!isAllowedVideoUploadType(input.contentType)) {
+    return { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' }
   }
   const client = r2Client()
   if (!client || !isR2Configured()) return { error: 'R2 no está configurado (falta R2_ACCOUNT_ID).' }
@@ -158,15 +165,32 @@ export async function registerR2Video(input: {
   return { ok: true, id: data.id }
 }
 
-/** Presigned GET URL so an editor downloads straight from R2 (fast, CDN). */
+/**
+ * Presigned GET URL so an editor downloads straight from R2 (fast, CDN).
+ * Same read gate as getEntregasPreviewUrl — video/copy/team_member could
+ * pull raw material of ANY client without this (audit finding). Exception:
+ * whoever UPLOADED the file can always see/download their own upload — a
+ * videógrafo confirming their own recording landed OK is not the abuse the
+ * gate targets.
+ */
 export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, name')
+    .select('drive_file_id, storage_provider, name, uploaded_by')
     .eq('id', videoId)
     .single()
   if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
+  const canDownload =
+    isOwnUpload ||
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canDownload) return { error: 'No autorizado' }
+
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }
@@ -200,15 +224,28 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
  * guard; the Cloudflare Worker (infra/r2-public-edited-worker.js) enforces the
  * same `/edited/` restriction at the edge so the bucket itself never goes
  * fully public. Requires public access configured + R2_PUBLIC_BASE_URL set.
+ *
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl),
+ * with the same own-upload exception.
  */
 export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, kind')
+    .select('drive_file_id, storage_provider, kind, uploaded_by')
     .eq('id', videoId)
     .single()
   if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
+  const canRead =
+    isOwnUpload ||
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canRead) return { error: 'No autorizado' }
+
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }
@@ -223,15 +260,29 @@ export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; e
   return { url }
 }
 
-/** Presigned GET URL for inline playback (no attachment), usable as a <video src>. */
+/**
+ * Presigned GET URL for inline playback (no attachment), usable as a <video src>.
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl),
+ * with the same own-upload exception.
+ */
 export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
-    .select('drive_file_id, storage_provider')
+    .select('drive_file_id, storage_provider, uploaded_by')
     .eq('id', videoId)
     .single()
   if (error || !video) return { error: 'Video no encontrado' }
+
+  const isOwnUpload = !!user && video.uploaded_by === user.id
+  const canPreview =
+    isOwnUpload ||
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canPreview) return { error: 'No autorizado' }
+
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
   }
