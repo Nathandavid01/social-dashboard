@@ -150,7 +150,7 @@ export function IdeaCaptionEditor({
     <div className="space-y-3 rounded-xl border border-border bg-card/50 p-3">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Caption</span>
-        <span className="min-w-0 text-[10px] text-muted-foreground">— basado en lo que se oye en el video</span>
+        <span className="min-w-0 text-[10px] text-muted-foreground">— generado a partir de "de qué es el video"</span>
         {unsaved && (
           <span className="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
             <AlertCircle className="h-3 w-3" aria-hidden /> Borrador sin guardar
@@ -162,9 +162,9 @@ export function IdeaCaptionEditor({
         <div className="space-y-1 rounded-md border border-border/60 bg-muted/30 px-2.5 py-2 text-xs text-muted-foreground">
           <p className="flex items-center gap-1.5 font-medium text-foreground/80">
             <Lightbulb className="h-3 w-3 text-purple-500" aria-hidden />
-            La IA escucha el video
+            La IA ve y escucha el video
           </p>
-          <p>Escribe el copy sobre lo que se dice. El hook de abajo es contexto.</p>
+          <p>Escribe de qué es aquí abajo — el caption se genera a partir de eso.</p>
           {hook && (
             <p>
               <span className="font-medium text-foreground/70">De qué es:</span> {hook}

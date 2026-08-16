@@ -281,8 +281,8 @@ export function CopyOverlay({
                 />
                 <p className="text-[11px] text-muted-foreground">
                   {hasVisualAnalysis
-                    ? 'La IA ya vio el video — esto es contexto opcional, no obligatorio.'
-                    : 'Es lo único que la IA necesita para escribir el copy.'}
+                    ? 'La IA ya vio y escuchó el video, y lo escribió aquí — revísalo, es la base del copy.'
+                    : 'Es la base del copy: la IA escribe a partir de esto.'}
                 </p>
                 {hookSource === 'ai' && (
                   <p className="flex items-center gap-1 text-[11px] italic text-muted-foreground">

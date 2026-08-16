@@ -143,6 +143,17 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     expect(screen.getByText('¿De qué es el video?')).toBeInTheDocument()
   })
 
+  it('con análisis visual done: el texto dice que la IA vio Y escuchó el video, y que es la base del copy (v3.42)', async () => {
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: 'Cómo sellar picanha', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    expect(screen.getByText(/la ia ya vio y escuchó el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/es la base del copy/i)).toBeInTheDocument()
+  })
+
   it('sin tema y sin análisis: sigue bloqueando con el mensaje de siempre', async () => {
     mockAnalysis = { status: 'pending', findings: null }
     getEntregaCopyVideos.mockResolvedValueOnce({
@@ -151,6 +162,7 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
     expect(screen.getByText('¿De qué es el video? *')).toBeInTheDocument()
+    expect(screen.getByText(/es la base del copy/i)).toBeInTheDocument()
     generateIdeaCaption.mockClear()
     fireEvent.click(screen.getByRole('button', { name: /escribir copy con ia/i }))
     await waitFor(() =>

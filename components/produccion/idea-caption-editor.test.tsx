@@ -62,13 +62,13 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
-  it('says the caption comes from what the video says', () => {
+  it('says the AI sees and hears the video, and that the caption is written from that (v3.42)', () => {
     mockRole = 'editor'
     render(
       <IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Gancho" visualBrief="Brief visual" hasVideo />,
     )
-    expect(screen.getByText(/lo que se oye en el video/i)).toBeInTheDocument()
-    expect(screen.getByText(/la ia escucha el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/la ia ve y escucha el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/el caption se genera a partir de eso/i)).toBeInTheDocument()
   })
 
   it('offers AI generation when the user has captions.use and idea is ready', () => {
