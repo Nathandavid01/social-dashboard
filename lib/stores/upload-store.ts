@@ -122,11 +122,10 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
 
   cancelUpload(id) {
     const eng = engines.get(id)
-    if (!eng) return
-    eng.controller.abort()
+    eng?.controller.abort()
     patchUpload(id, { phase: 'cancelado' })
     const item = get().uploads[id]
-    if (item && eng.uploadId && eng.key) {
+    if (item && eng?.uploadId && eng.key) {
       void abortMultipartUpload({ provider: item.provider, key: eng.key, uploadId: eng.uploadId })
     }
   },
