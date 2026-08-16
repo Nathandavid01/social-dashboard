@@ -13,7 +13,29 @@
  * efectivo al toparse con FRAME_MAX_COUNT (presupuesto de payload/latencia).
  */
 export const FRAME_FPS = 4
-export const FRAME_MAX_COUNT = 48
+/**
+ * Tope de frames POR REQUEST. Medido en producción: un frame ≈ 340 tokens de
+ * entrada / ~46KB de data-URI; 90 frames ≈ 3.2MB de cable, dentro de
+ * FRAME_BUDGET_BYTES. DEBE moverse en lockstep con FRAME_CHUNK_SIZE (mismo
+ * valor) y con MAX_FRAMES en app/api/video-analysis/route.ts.
+ */
+export const FRAME_MAX_COUNT = 90
+/**
+ * Tamaño de cada chunk que el cliente envía por POST — mismo valor que
+ * FRAME_MAX_COUNT a propósito: frameTimestamps() ya limita a esto por
+ * defecto, así que un solo POST siempre cabe en un chunk. chunkFrames()
+ * trocea cuando frameTimestamps() se llamó con un maxCount mayor (hasta
+ * FRAME_HARD_MAX) para videos largos.
+ */
+export const FRAME_CHUNK_SIZE = 90
+/**
+ * Tope duro GLOBAL de frames por video (60s a 4fps): sin esto un video
+ * de varios minutos generaría decenas de chunks y de llamadas a Grok.
+ * frameTimestamps() puede generar hasta este valor cuando se le pide
+ * explícitamente (el troceado por request lo aplica FRAME_CHUNK_SIZE, no
+ * el muestreo).
+ */
+export const FRAME_HARD_MAX = 240
 export const FRAME_MAX_SIDE = 768
 export const FRAME_JPEG_QUALITY = 0.7
 /**
@@ -75,4 +97,21 @@ export function capFramesAndTimestampsToBudget(
 ): { frames: string[]; timestamps: number[] } {
   const capped = capFramesToBudget(frames, maxTotalBytes)
   return { frames: capped, timestamps: timestamps.slice(0, capped.length) }
+}
+
+/**
+ * Trocea frames+timestamps en grupos de `size` para videos largos: cada
+ * grupo es un POST independiente y secuencial a /api/video-analysis
+ * (ver video-analysis-client.ts). Pura — sin red, sin async.
+ */
+export function chunkFrames(
+  frames: string[],
+  timestamps: number[],
+  size = FRAME_CHUNK_SIZE,
+): { frames: string[]; timestamps: number[] }[] {
+  const out: { frames: string[]; timestamps: number[] }[] = []
+  for (let i = 0; i < frames.length; i += size) {
+    out.push({ frames: frames.slice(i, i + size), timestamps: timestamps.slice(i, i + size) })
+  }
+  return out
 }

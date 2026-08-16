@@ -6,7 +6,7 @@
  * Lanza si el codec no decodifica; el caller lo trata como "sin análisis".
  */
 import {
-  frameTimestamps, scaleDimensions, capFramesAndTimestampsToBudget, FRAME_JPEG_QUALITY,
+  frameTimestamps, scaleDimensions, FRAME_FPS, FRAME_HARD_MAX, FRAME_JPEG_QUALITY,
 } from './video-frames'
 
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
@@ -44,13 +44,16 @@ export async function extractVideoFrames(file: File): Promise<{ frames: string[]
     if (!ctx) throw new Error('canvas no disponible')
 
     const frames: string[] = []
-    const timestamps = frameTimestamps(video.duration)
+    // Muestrea hasta FRAME_HARD_MAX (60s a 4fps): el presupuesto de bytes de
+    // cable se aplica por CHUNK, no aquí — ver chunkFrames() en
+    // video-frames.ts y el troceado en video-analysis-client.ts.
+    const timestamps = frameTimestamps(video.duration, FRAME_FPS, FRAME_HARD_MAX)
     for (const t of timestamps) {
       await seekTo(video, t)
       ctx.drawImage(video, 0, 0, width, height)
       frames.push(canvas.toDataURL('image/jpeg', FRAME_JPEG_QUALITY))
     }
-    return capFramesAndTimestampsToBudget(frames, timestamps)
+    return { frames, timestamps }
   } finally {
     URL.revokeObjectURL(url)
     video.src = ''

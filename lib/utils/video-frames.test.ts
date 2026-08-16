@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget,
-  FRAME_FPS, FRAME_MAX_COUNT, FRAME_BUDGET_BYTES,
+  frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
+  FRAME_FPS, FRAME_MAX_COUNT, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
 } from './video-frames'
 
 describe('frameTimestamps', () => {
@@ -9,17 +9,21 @@ describe('frameTimestamps', () => {
     const ts = frameTimestamps(60, 4, 4)
     expect(ts).toEqual([12, 24, 36, 48])
   })
-  it('usa FRAME_FPS/FRAME_MAX_COUNT por defecto: video de 13s a 4fps → ceil(13*4)=52, tope 48', () => {
-    const ts = frameTimestamps(13)
+  it('usa FRAME_FPS/FRAME_MAX_COUNT por defecto: video de 23s a 4fps → ceil(23*4)=92, tope 90', () => {
+    const ts = frameTimestamps(23)
     expect(ts).toHaveLength(FRAME_MAX_COUNT)
   })
   it('video de 3s → ceil(3*4)=12 frames (no llega al tope)', () => {
     const ts = frameTimestamps(3)
     expect(ts).toHaveLength(12)
   })
-  it('video largo (120s) → exactamente el tope FRAME_MAX_COUNT', () => {
+  it('video largo (120s) → exactamente el tope FRAME_MAX_COUNT por defecto', () => {
     const ts = frameTimestamps(120)
     expect(ts).toHaveLength(FRAME_MAX_COUNT)
+  })
+  it('con maxCount=FRAME_HARD_MAX puede generar hasta 240 (video de 60s a 4fps)', () => {
+    const ts = frameTimestamps(60, FRAME_FPS, FRAME_HARD_MAX)
+    expect(ts).toHaveLength(FRAME_HARD_MAX)
   })
   it('video muy corto: al menos 1 frame en el medio, sin duplicados', () => {
     const ts = frameTimestamps(0.5, 8, 8)
@@ -31,9 +35,48 @@ describe('frameTimestamps', () => {
     expect(frameTimestamps(0)).toEqual([])
     expect(frameTimestamps(-3)).toEqual([])
   })
-  it('FRAME_FPS es 4 y FRAME_MAX_COUNT es 48', () => {
+  it('FRAME_FPS es 4, FRAME_MAX_COUNT es 90 (= FRAME_CHUNK_SIZE), FRAME_HARD_MAX es 240', () => {
     expect(FRAME_FPS).toBe(4)
-    expect(FRAME_MAX_COUNT).toBe(48)
+    expect(FRAME_MAX_COUNT).toBe(90)
+    expect(FRAME_CHUNK_SIZE).toBe(90)
+    expect(FRAME_HARD_MAX).toBe(240)
+  })
+})
+
+describe('chunkFrames', () => {
+  const frames = Array.from({ length: 5 }, (_, i) => `f${i}`)
+  const timestamps = [0, 1, 2, 3, 4]
+
+  it('menos de un chunk: un solo chunk con todo', () => {
+    const out = chunkFrames(frames, timestamps, 10)
+    expect(out).toEqual([{ frames, timestamps }])
+  })
+
+  it('exacto: un chunk sin resto', () => {
+    const out = chunkFrames(frames, timestamps, 5)
+    expect(out).toEqual([{ frames, timestamps }])
+  })
+
+  it('con resto: varios chunks, el último más corto', () => {
+    const out = chunkFrames(frames, timestamps, 2)
+    expect(out).toEqual([
+      { frames: ['f0', 'f1'], timestamps: [0, 1] },
+      { frames: ['f2', 'f3'], timestamps: [2, 3] },
+      { frames: ['f4'], timestamps: [4] },
+    ])
+  })
+
+  it('vacío: lista de chunks vacía', () => {
+    expect(chunkFrames([], [], 90)).toEqual([])
+  })
+
+  it('usa FRAME_CHUNK_SIZE por defecto', () => {
+    const many = Array.from({ length: 91 }, (_, i) => `f${i}`)
+    const ts = Array.from({ length: 91 }, (_, i) => i)
+    const out = chunkFrames(many, ts)
+    expect(out).toHaveLength(2)
+    expect(out[0].frames).toHaveLength(90)
+    expect(out[1].frames).toHaveLength(1)
   })
 })
 
