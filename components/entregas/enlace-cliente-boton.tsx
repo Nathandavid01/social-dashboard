@@ -1,11 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Link2, Copy, Check, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { Link2, Copy, Check, Loader2, CheckCircle2, XCircle, ExternalLink, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { DIAS_DE_VIGENCIA } from '@/lib/entregas/client-review'
 import { crearEnlaceCliente, getEnlaceCliente, type EnlaceGuardado } from '@/lib/actions/entregas-client-review'
+import { getEntregaVideoEditado, getEntregasDownloadUrl } from '@/lib/actions/entregas-r2'
 
 /**
  * El enlace de aprobación, en la propia tarjeta del tablero.
@@ -13,6 +14,10 @@ import { crearEnlaceCliente, getEnlaceCliente, type EnlaceGuardado } from '@/lib
  * Un enlace por VIDEO: la tarjeta es un video, así que lo que sale de ella
  * también. Un clic desde el tablero, que es cuando de verdad se manda por
  * WhatsApp, sin tener que abrir nada.
+ *
+ * Con el enlace ya generado, la tarjeta ofrece además "Abrir" —para revisar
+ * exactamente lo que ve el cliente— y "Bajar" —el video editado vigente, sin
+ * entrar a la idea.
  */
 export function EnlaceClienteBoton({
   clientId,
@@ -26,13 +31,19 @@ export function EnlaceClienteBoton({
 }) {
   const { toast } = useToast()
   const [enlace, setEnlace] = useState<EnlaceGuardado | null>(null)
+  const [editedVideoId, setEditedVideoId] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
   const [generando, setGenerando] = useState(false)
   const [copiado, setCopiado] = useState(false)
+  const [bajando, setBajando] = useState(false)
 
   const cargar = useCallback(async () => {
-    const res = await getEnlaceCliente(ideaId)
-    setEnlace(res.enlace ?? null)
+    const [enlaceRes, videoRes] = await Promise.all([
+      getEnlaceCliente(ideaId),
+      getEntregaVideoEditado(ideaId),
+    ])
+    setEnlace(enlaceRes.enlace ?? null)
+    setEditedVideoId(videoRes.id ?? null)
     setCargando(false)
   }, [ideaId])
 
@@ -47,7 +58,7 @@ export function EnlaceClienteBoton({
   const totalEnlace = enlace?.videos.length ?? 0
 
   // Detiene la propagación en todo el bloque: la tarjeta entera abre el overlay
-  // al pulsarla, y generar el enlace no debe abrirlo.
+  // al pulsarla, y ninguna de estas acciones debe abrirlo.
   function parar(e: React.MouseEvent) {
     e.stopPropagation()
   }
@@ -73,6 +84,19 @@ export function EnlaceClienteBoton({
     toast({ title: 'Enlace copiado' })
   }
 
+  async function bajar(e: React.MouseEvent) {
+    parar(e)
+    if (!editedVideoId || bajando) return
+    setBajando(true)
+    const res = await getEntregasDownloadUrl(editedVideoId)
+    setBajando(false)
+    if (res.error || !res.url) {
+      toast({ title: 'No se pudo descargar', description: res.error ?? 'Error inesperado', variant: 'destructive' })
+      return
+    }
+    window.open(res.url, '_blank')
+  }
+
   if (cargando) return null
 
   return (
@@ -89,6 +113,30 @@ export function EnlaceClienteBoton({
               : <Copy className="h-3 w-3 shrink-0" aria-hidden="true" />}
             Enlace
           </button>
+          <a
+            href={`/aprobacion/${enlace.token}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={parar}
+            aria-label={`Abrir lo que ve ${clientName} en su enlace de aprobación`}
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 py-1 text-[10px] font-medium transition hover:bg-muted"
+          >
+            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
+            Abrir
+          </a>
+          {editedVideoId && (
+            <button
+              onClick={bajar}
+              disabled={bajando}
+              aria-label={`Bajar el video editado de ${clientName}`}
+              className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 py-1 text-[10px] font-medium transition hover:bg-muted disabled:opacity-50"
+            >
+              {bajando
+                ? <Loader2 className="h-3 w-3 shrink-0 animate-spin" aria-hidden="true" />
+                : <Download className="h-3 w-3 shrink-0" aria-hidden="true" />}
+              Bajar
+            </button>
+          )}
           {votados > 0 && (
             <span
               className={cn(

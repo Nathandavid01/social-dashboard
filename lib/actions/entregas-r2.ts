@@ -90,6 +90,77 @@ export async function registerEntregasVideo(input: {
   return { ok: true, id: data.id }
 }
 
+/**
+ * El video EDITADO vigente de una idea: el más reciente que no esté
+ * archivado ni fallido y que sí tenga archivo en el bucket — mismo criterio
+ * que getVideoAnalysis (lib/actions/video-analysis.ts), aplicado al bucket de
+ * Entregas. Null si la tarjeta todavía no tiene corte editado utilizable.
+ */
+export async function getEntregaVideoEditado(
+  ideaId: string,
+): Promise<{ id?: string | null; error?: string }> {
+  const canRead =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canRead) return { error: 'No autorizado' }
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('content_idea_videos')
+    .select('id')
+    .eq('idea_id', ideaId)
+    .eq('kind', 'edited')
+    .eq('storage_provider', ENTREGAS_PROVIDER)
+    .not('status', 'in', '(archived,failed)')
+    .not('drive_file_id', 'is', null)
+    .order('uploaded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return { id: (data as { id?: string } | null)?.id ?? null }
+}
+
+/** Presigned GET, forzando descarga — para "Bajar" desde la tarjeta del tablero. */
+export async function getEntregasDownloadUrl(
+  videoId: string,
+): Promise<{ url?: string; error?: string }> {
+  const canDownload =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canDownload) return { error: 'No autorizado' }
+
+  const supabase = await createClient()
+  const { data: video, error } = await supabase
+    .from('content_idea_videos')
+    .select('drive_file_id, storage_provider, name')
+    .eq('id', videoId)
+    .single()
+  if (error || !video?.drive_file_id) return { error: 'Video no encontrado' }
+  if (video.storage_provider !== ENTREGAS_PROVIDER) {
+    return { error: 'Este video no está en R2 de Entregas' }
+  }
+
+  const client = entregasR2Client()
+  if (!client) return { error: 'R2 de Entregas no está configurado' }
+
+  try {
+    const url = await getSignedUrl(
+      client,
+      new GetObjectCommand({
+        Bucket: entregasR2Bucket(),
+        Key: video.drive_file_id,
+        ResponseContentDisposition: `attachment; filename="${video.name}"`,
+      }),
+      { expiresIn: 60 * 60 },
+    )
+    return { url }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Error generando URL de descarga' }
+  }
+}
+
 /** Presigned GET for inline playback — usable straight as a <video src>. */
 export async function getEntregasPreviewUrl(
   videoId: string,
