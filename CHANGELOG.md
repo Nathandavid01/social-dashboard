@@ -6,12 +6,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v3.44 — 2026-08-16
 
-**La IA ya no se inventa el caption — mira el video, escribe de qué es en la casilla de siempre, y el generador de captions trabaja con ese dato real.**
+**La IA ya no se inventa el caption — ve y escucha el video, escribe de qué es en la casilla de siempre, y el generador de captions vuelve a trabajar como cuando el proceso era manual.**
 
-- Cuando la IA analiza un video subido, ahora también escribe de qué se trata en la casilla **"¿De qué es este video?"** — la misma que llenaría una persona del equipo. No es un caption inventado: es el dato factual (ej. "Cómo sellar una picanha en parrilla Santa María con roble rojo").
-- El generador de captions sigue siendo el de siempre, con todo su aprendizaje (captions aprobados, 👍/👎, voz de marca, reglas del cliente) — solo que ahora arranca con un dato real del video en vez de tener que adivinar.
+- Cuando la IA analiza un video subido, ahora lo **ve y lo escucha** (fotogramas + transcripción del audio) y escribe de qué se trata en la casilla **"¿De qué es este video?"** — la misma que llenaría una persona del equipo. No es un caption inventado: es el dato factual (ej. "Cómo sellar una picanha en parrilla Santa María con roble rojo"), y si lo que se ve y lo que se dice no cuadran, manda lo que se dice.
+- El generador de captions **vuelve al camino manual de siempre**: lee esa casilla como base, más el aprendizaje de siempre (captions aprobados, 👍/👎, voz de marca, reglas del cliente, ejemplos de Metricool) — ya no arrastra un bloque aparte de "análisis visual de IA" cuando la casilla tiene contenido. Ese bloque solo reaparece como red de seguridad si la casilla quedara vacía.
 - **Nunca pisa lo que ya escribió una persona**: solo llena la casilla si estaba vacía.
 - Cuando lo escribió la IA, aparece una marca discreta ("escrito por la IA a partir del video · edítalo si no cuadra") junto al campo — en la tarjeta de la idea, en el caption del video y en el copy de Entregas. En cuanto lo corriges y guardas, la marca desaparece.
+- Los textos de la pantalla del caption ahora dicen la verdad del flujo: la IA ve **y** escucha el video, y el caption se escribe a partir de la casilla "¿de qué es?", no al revés.
+- El generador de captions ya no inventa años, fechas, nombres de eventos, precios ni promociones que no consten en el video, el hook, el brief o los captions de referencia — si algo no consta, se omite.
 
 Vista: [preview HTML](/previews/v3.42-de-que-es-el-video.html)
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>v3.40 — De qué es el video</title>
+  <title>v3.42 — De qué es el video</title>
   <style>
     :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --warn:#f59e0b; --purple:#a78bfa; }
     * { box-sizing: border-box; }
@@ -47,16 +47,16 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>v3.40 — La IA ya no se inventa el caption</h1>
-    <p class="sub">Antes, la IA escribía el caption a su aire cuando faltaba el hook. Ahora solo aporta el DATO de qué es el video — y ese dato entra por la misma casilla que llenaría una persona. El caption lo sigue escribiendo el generador de siempre, con todo su aprendizaje, pero ahora con un contexto real en vez de improvisado.</p>
+    <h1>v3.42 — La IA ve y escucha el video, y el caption vuelve al camino manual</h1>
+    <p class="sub">La IA ya no se inventa el caption. Al subir el video, lo mira Y lo escucha (fotogramas + transcripción del audio) y escribe de qué se trata en la misma casilla que llenaría una persona. Desde ahí, el caption se genera exactamente como cuando el proceso era manual: leyendo esa casilla, más el aprendizaje de siempre (captions aprobados, 👍/👎, voz de marca, reglas del cliente).</p>
 
     <div class="row-label">Cómo fluye el dato</div>
     <div class="flow">
-      <div class="step"><b>🎬 Video sube</b><span>QC IA lo analiza</span></div>
+      <div class="step"><b>🎬 Video sube</b><span>QC IA ve los fotogramas y escucha el audio</span></div>
       <span class="arrow">→</span>
-      <div class="step"><b>📝 "¿De qué es?"</b><span>se llena SOLO si estaba vacía</span></div>
+      <div class="step"><b>📝 "¿De qué es?"</b><span>se llena SOLO si estaba vacía — visible y editable</span></div>
       <span class="arrow">→</span>
-      <div class="step"><b>✨ Caption</b><span>generador de siempre, con dato real</span></div>
+      <div class="step"><b>✨ Caption</b><span>generador de siempre, leyendo esa casilla como base</span></div>
     </div>
 
     <div class="row-label">La casilla "¿De qué es este video?" — antes vs. ahora</div>
@@ -76,10 +76,12 @@
     </div>
 
     <div class="row-label">Reglas duras</div>
+    <div class="rule"><span class="ok">✓</span><span><b>Ve y escucha:</b> "de qué es el video" combina lo que se VE en los fotogramas y lo que se DICE en la transcripción del audio; si chocan, manda lo que se dice.</span></div>
     <div class="rule"><span class="ok">✓</span><span>Solo escribe la casilla si estaba <b>vacía</b> — nunca pisa texto que ya escribió una persona.</span></div>
     <div class="rule"><span class="ok">✓</span><span>Queda <b>visible y editable</b> como cualquier hook — se corrige y se regenera el caption igual que siempre.</span></div>
     <div class="rule"><span class="ok">✓</span><span>La marca "escrito por la IA" <b>desaparece al guardar</b> una corrección — no al abrir o enfocar el campo.</span></div>
-    <div class="rule"><span class="no">✗</span><span>La IA <b>no</b> escribe el caption directamente — sigue siendo <code>generateIdeaCaption</code>, con captions aprobados, 👍/👎, voz de marca y reglas del cliente.</span></div>
+    <div class="rule"><span class="no">✗</span><span>La IA <b>no</b> escribe el caption directamente — sigue siendo <code>generateIdeaCaption</code>, con captions aprobados, 👍/👎, voz de marca y reglas del cliente: el camino manual de siempre, ahora leyendo un hook real.</span></div>
+    <div class="rule"><span class="no">✗</span><span>El generador <b>no inventa</b> años, fechas, eventos, precios ni promociones que no consten en el video, el hook, el brief o los captions de referencia.</span></div>
 
     <div class="row-label">Dónde se ve la marca</div>
     <div class="cols">
@@ -98,14 +100,25 @@
     </div>
 
     <p class="note">
-      <b>Qué es "video_topic":</b> el análisis de video (Grok, sobre los fotogramas) ahora también devuelve una frase
-      factual de qué ES el video — distinta del resumen visual técnico que ya usaba el reporte de QC. Una es para
-      el reporte, la otra es el dato que llena la casilla.
+      <b>Qué es "video_topic":</b> el análisis de video (Grok, sobre los fotogramas, sumando la transcripción de
+      Whisper cuando hay audio) devuelve una o dos frases factuales de qué ES el video — distintas del resumen
+      visual técnico que ya usaba el reporte de QC. Una es para el reporte, la otra es el dato que llena la casilla.
     </p>
     <p class="note">
-      <b>Cuándo se escribe:</b> justo después de guardar el análisis, y ANTES de encadenar el generador de
-      caption — así el generador ya lee el dato real. Con videos largos troceados en varias tandas, solo la
-      última tanda (con todo el video ya visto) escribe la casilla.
+      <b>La transcripción se pide una sola vez:</b> se lanza junto con el resto de la preparación del primer
+      fotograma del video (no repetida por cada tanda de un video troceado) y corre en paralelo con lo que se
+      pueda — si Whisper falla o no hay audio accesible, el análisis sigue solo con lo visual, nunca se bloquea.
+    </p>
+    <p class="note">
+      <b>El caption vuelve al camino manual:</b> ahora que la casilla "¿de qué es el video?" trae un dato real,
+      <code>buildIdeaCaptionPrompt</code> deja de inyectar el bloque de análisis visual aparte — lee el hook como
+      fuente de verdad, igual que cuando alguien lo escribía a mano. Ese bloque visual solo reaparece como red de
+      seguridad si la casilla quedara vacía (migración pendiente, fallo de escritura, o alguien la borró).
+    </p>
+    <p class="note">
+      <b>Cuándo se escribe la casilla:</b> justo después de guardar el análisis, y ANTES de encadenar el
+      generador de caption — así el generador ya lee el dato real. Con videos largos troceados en varias tandas,
+      solo la última tanda (con todo el video ya visto) escribe la casilla.
     </p>
     <p class="note">
       <b>Best-effort, nunca bloquea nada:</b> si escribir la casilla falla por cualquier motivo, el análisis y
