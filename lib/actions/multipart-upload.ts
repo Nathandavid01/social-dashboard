@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { requirePermission } from '@/lib/auth/server'
+import { createClient } from '@/lib/supabase/server'
 import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
 import { entregasR2Client, entregasR2Bucket, isEntregasR2Configured } from '@/lib/integrations/entregas-r2'
 
@@ -17,6 +18,14 @@ import { entregasR2Client, entregasR2Bucket, isEntregasR2Configured } from '@/li
  * ('entregas-r2', the editor deliveries bucket) — same dual-R2 split, same
  * `video.upload` gate as the existing single-PUT actions. Never merge these
  * two buckets' credentials.
+ *
+ * Ownership: `video.upload` is shared by owner/supervisor/editor/video, so
+ * the role gate alone doesn't stop one holder from completing/aborting
+ * ANOTHER holder's upload if they learn its { key, uploadId } (both flow
+ * through the client). `multipart_uploads` (0065 migration) is the ownership
+ * record; its RLS scopes every row to `created_by = auth.uid()`, so a
+ * foreign uploadId resolves to "no row" — same as "not found" — without this
+ * file doing any manual identity comparison.
  */
 export type MultipartProvider = 'r2' | 'entregas-r2'
 
@@ -49,6 +58,44 @@ function notConfiguredMessage(provider: MultipartProvider): string {
   return provider === 'entregas-r2' ? 'R2 de Entregas no está configurado (faltan ENTREGAS_R2_*)' : 'R2 no está configurado'
 }
 
+/** Records who started this multipart upload — the ownership check for complete/abort/presign. */
+async function recordOwnership(input: { uploadId: string; key: string; ideaId: string; provider: MultipartProvider }): Promise<{ ok?: true; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+  const { error } = await supabase.from('multipart_uploads').insert({
+    upload_id: input.uploadId,
+    key: input.key,
+    idea_id: input.ideaId,
+    provider: input.provider,
+    created_by: user.id,
+  })
+  if (error) return { error: error.message }
+  return { ok: true }
+}
+
+/** True only if the CURRENT user is the one who started this uploadId (RLS-enforced, not a manual compare). */
+async function ownsUpload(uploadId: string, key: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('multipart_uploads')
+    .select('upload_id')
+    .eq('upload_id', uploadId)
+    .eq('key', key)
+    .maybeSingle()
+  return !!data
+}
+
+/** Best-effort cleanup once a multipart is done (completed or aborted) — never blocks the outer result. */
+async function clearOwnership(uploadId: string): Promise<void> {
+  try {
+    const supabase = await createClient()
+    await supabase.from('multipart_uploads').delete().eq('upload_id', uploadId)
+  } catch {
+    // Nothing pending in R2 anymore either way; a stale ownership row is harmless.
+  }
+}
+
 /** Creates the multipart upload and returns the object key to use for every part. */
 export async function startMultipartUpload(input: {
   provider: MultipartProvider
@@ -71,13 +118,27 @@ export async function startMultipartUpload(input: {
   // idea's id so downloads/listing keep working identically.
   const key = `${keyPrefixFor(input.provider)}/${input.ideaId}/${input.kind === 'edited' ? 'edited' : input.kind}/${Date.now()}-${slugify(input.fileName)}`
 
+  let uploadId: string
   try {
     const res = await client.send(new CreateMultipartUploadCommand({ Bucket: bucket, Key: key, ContentType: input.contentType }))
     if (!res.UploadId) return { error: 'No se pudo iniciar la subida por partes' }
-    return { uploadId: res.UploadId, key }
+    uploadId = res.UploadId
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error iniciando la subida por partes' }
   }
+
+  const owned = await recordOwnership({ uploadId, key, ideaId: input.ideaId, provider: input.provider })
+  if (owned.error) {
+    // Don't leave an untracked multipart nobody can prove ownership of.
+    try {
+      await client.send(new AbortMultipartUploadCommand({ Bucket: bucket, Key: key, UploadId: uploadId }))
+    } catch {
+      // Best-effort; surfacing the real (recordOwnership) error matters more.
+    }
+    return { error: owned.error }
+  }
+
+  return { uploadId, key }
 }
 
 /** Presigns a batch of part-PUT URLs in one call (not one round-trip per part). */
@@ -95,6 +156,7 @@ export async function presignUploadParts(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
+  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
 
   try {
     const entries = await Promise.all(
@@ -127,6 +189,7 @@ export async function completeMultipartUpload(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
+  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
 
   try {
     await client.send(
@@ -141,10 +204,11 @@ export async function completeMultipartUpload(input: {
         },
       }),
     )
-    return { ok: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error ensamblando el archivo' }
   }
+  await clearOwnership(input.uploadId)
+  return { ok: true }
 }
 
 /** Cancel/cleanup: aborts server-side so no orphaned parts keep paying for R2 storage. */
@@ -161,11 +225,13 @@ export async function abortMultipartUpload(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
+  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
 
   try {
     await client.send(new AbortMultipartUploadCommand({ Bucket: bucket, Key: input.key, UploadId: input.uploadId }))
-    return { ok: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error cancelando la subida' }
   }
+  await clearOwnership(input.uploadId)
+  return { ok: true }
 }
