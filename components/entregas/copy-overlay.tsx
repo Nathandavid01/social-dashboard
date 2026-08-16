@@ -280,9 +280,16 @@ export function CopyOverlay({
                   className="h-9"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  {hasVisualAnalysis
-                    ? 'La IA ya vio y escuchó el video, y lo escribió aquí — revísalo, es la base del copy.'
-                    : 'Es la base del copy: la IA escribe a partir de esto.'}
+                  {/* Solo afirmamos "la IA escribió esto" cuando hookSource lo confirma — no
+                      basta con que exista análisis visual (el hook puede ser humano, o la
+                      escritura de la IA pudo fallar en silencio). Tampoco afirmamos "escuchó":
+                      Whisper es best-effort y no hay señal fiable en pantalla de si funcionó,
+                      así que solo prometemos lo que el análisis visual garantiza (ver el video). */}
+                  {hookSource === 'ai'
+                    ? 'La IA vio el video y escribió esto — revísalo, es la base del copy.'
+                    : !hasVisualAnalysis || hook.trim()
+                      ? 'Es la base del copy: la IA escribe a partir de esto.'
+                      : 'La IA ya vio el video — este campo es opcional aquí, complétalo si quieres darle más contexto.'}
                 </p>
                 {hookSource === 'ai' && (
                   <p className="flex items-center gap-1 text-[11px] italic text-muted-foreground">

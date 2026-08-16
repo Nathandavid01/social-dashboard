@@ -143,15 +143,33 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
     expect(screen.getByText('¿De qué es el video?')).toBeInTheDocument()
   })
 
-  it('con análisis visual done: el texto dice que la IA vio Y escuchó el video, y que es la base del copy (v3.42)', async () => {
+  // Regresión: antes este texto se mostraba con solo `hasVisualAnalysis`,
+  // sin mirar `hookSource` — aparecía igual si el hook lo escribió una
+  // persona, o si Whisper falló en silencio. Ahora solo afirma "la IA lo
+  // escribió" cuando `hookSource === 'ai'` lo confirma, y solo promete lo
+  // que el análisis visual garantiza (nunca "escuchó": Whisper es best-effort
+  // y no hay señal fiable de si funcionó).
+  it('hookSource=\'ai\': el texto dice que la IA VIO el video y lo escribió — nunca afirma "escuchó"', async () => {
     mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
     getEntregaCopyVideos.mockResolvedValueOnce({
-      data: { videos: [video({ hook: 'Cómo sellar picanha', caption_draft: null })], captionNotes: '' },
+      data: { videos: [video({ hook: 'Cómo sellar picanha', hookSource: 'ai', caption_draft: null })], captionNotes: '' },
     })
     render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
     expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
-    expect(screen.getByText(/la ia ya vio y escuchó el video/i)).toBeInTheDocument()
-    expect(screen.getByText(/es la base del copy/i)).toBeInTheDocument()
+    expect(screen.getByText(/la ia vio el video y escribió esto/i)).toBeInTheDocument()
+    expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
+  })
+
+  it('hook humano (hookSource=null) con análisis visual done: NO afirma que la IA lo escribió', async () => {
+    mockAnalysis = { status: 'done', findings: { visual_summary: 'cocina picanha en parrilla, cierra con el logo' } }
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hook: 'Cómo sellar picanha', hookSource: null, caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    expect(screen.getByText(/es la base del copy: la ia escribe a partir de esto/i)).toBeInTheDocument()
+    expect(screen.queryByText(/la ia vio el video y escribió esto/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/escuchó/i)).not.toBeInTheDocument()
   })
 
   it('sin tema y sin análisis: sigue bloqueando con el mensaje de siempre', async () => {
