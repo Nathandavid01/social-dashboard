@@ -105,7 +105,7 @@ export function UpcomingSchedule() {
                       <div key={post.id} className="flex items-center gap-2.5 rounded-lg border bg-muted/20 p-2.5">
                         <div className="h-8 w-8 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                           {post.media?.[0]?.url ? (
-                            <img src={post.media[0].url} alt="" className="h-full w-full object-cover" />
+                            <img src={post.media[0].url} alt="" width={32} height={32} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                           ) : (
                             <ImageIcon className="h-3.5 w-3.5 text-muted-foreground opacity-40" />
                           )}

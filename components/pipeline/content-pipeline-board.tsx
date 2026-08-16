@@ -369,7 +369,7 @@ function PlannedSessionCard({
           publishLabel: session.publishDate ? session.label : null,
         })
       }
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md [content-visibility:auto] [contain-intrinsic-size:0_220px]"
     >
       <div className="space-y-2.5 p-3">
         <div className="flex items-start justify-between gap-2">
@@ -482,6 +482,10 @@ function PipelineVideoThumb({
           src={src}
           alt=""
           referrerPolicy="no-referrer"
+          width={42}
+          height={42}
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
         />
       </div>
@@ -598,7 +602,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
 
   return (
-    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted [content-visibility:auto] [contain-intrinsic-size:0_260px]" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
         <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(batch, -1) }} />
         <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(batch, 1) }} />

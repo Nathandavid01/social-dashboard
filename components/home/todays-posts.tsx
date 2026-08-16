@@ -82,7 +82,7 @@ export function TodaysPosts() {
                 <div key={post.id} className="flex items-start gap-3 rounded-lg border bg-muted/20 p-3">
                   <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                     {post.media?.[0]?.url ? (
-                      <img src={post.media[0].url} alt="" className="h-full w-full object-cover" />
+                      <img src={post.media[0].url} alt="" width={40} height={40} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     ) : (
                       <ImageIcon className="h-4 w-4 text-muted-foreground opacity-40" />
                     )}

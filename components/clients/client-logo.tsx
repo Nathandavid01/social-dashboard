@@ -22,6 +22,10 @@ export function ClientLogo({
         src={logoUrl}
         alt={name ?? 'Cliente'}
         referrerPolicy="no-referrer"
+        width={44}
+        height={44}
+        loading="lazy"
+        decoding="async"
         className={cn('shrink-0 rounded-lg border object-contain bg-background p-0.5', className ?? 'h-11 w-11')}
       />
     )

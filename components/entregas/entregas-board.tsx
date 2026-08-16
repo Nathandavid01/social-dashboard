@@ -527,7 +527,7 @@ function PlannedSessionCard({
       // Sin video todavia: es un hueco planificado. Abre la columna Editado,
       // que no tiene overlay, asi que el id vacio no llega a usarse.
       onClick={() => onOpen(client.clientId, 'edited', '')}
-      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md"
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md [content-visibility:auto] [contain-intrinsic-size:0_220px]"
     >
       <div className="space-y-2.5 p-3">
         <div className="flex items-start justify-between gap-2">
@@ -629,7 +629,7 @@ function PipelineVideoThumb({
     return (
       <div className="relative h-[42px] overflow-hidden rounded-lg border border-border/60 bg-muted/30 ring-1 ring-inset ring-white/5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+        <img src={src} alt="" referrerPolicy="no-referrer" width={42} height={42} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
       </div>
     )
   }
@@ -668,7 +668,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
   const postedLink = enviado?.metricool_post_id != null ? postedLinks[enviado.id] : undefined
 
   return (
-    <article onClick={() => onOpen(batch.clientId, stage, batch.ideas[0].id)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article onClick={() => onOpen(batch.clientId, stage, batch.ideas[0].id)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted [content-visibility:auto] [contain-intrinsic-size:0_260px]" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
       <div className="absolute right-1.5 top-1.5 z-10 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
         <DiscardCardButton ideaIds={batch.ideas.map((i) => i.id)} clientName={batch.clientName} />
       </div>
