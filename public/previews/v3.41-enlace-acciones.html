@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.41 — Abrir y bajar desde la tarjeta</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:760px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 24px; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:20px 0 8px; }
+
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:600px) { .cols { grid-template-columns:1fr; } }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .card-title { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); margin:0 0 10px; display:flex; align-items:center; gap:6px; }
+    .card-title.before { color:#f87171; }
+    .card-title.after { color:var(--good); }
+
+    /* Board card mock */
+    .board-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; max-width:340px; box-shadow: inset 3px 0 0 0 var(--gold); }
+    .client-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .avatar { width:28px; height:28px; border-radius:8px; background:var(--gold); color:#0a0a0a; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .client-name { font-size:13px; font-weight:600; margin:0; }
+    .client-sub { font-size:10px; color:var(--muted-fg); margin:2px 0 0; }
+
+    .btn-row { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:10px; }
+    .btn { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0; border:1px solid var(--border); border-radius:6px; padding:5px 7px; font-size:10px; font-weight:500; background:transparent; color:var(--fg); }
+    .btn.muted { color:var(--muted-fg); }
+    .badge-count { display:inline-flex; align-items:center; gap:2px; font-size:10px; font-weight:500; color:var(--good); }
+
+    .note { margin-top:24px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .note b { color:var(--fg); }
+    .note + .note { margin-top:10px; }
+    .empty-note { font-size:12px; color:#52525b; text-align:center; padding:24px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.41 — Abrir y bajar, sin salir del tablero</h1>
+    <p class="sub">Donde ya se copiaba el enlace de aprobación (columnas Copy y Publicación), la tarjeta ahora ofrece dos acciones más junto al texto: abrir lo que ve el cliente y bajar el video editado.</p>
+
+    <div class="row-label">Antes vs. ahora — con enlace ya generado</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title before">Antes</p>
+        <div class="board-card">
+          <div class="client-row">
+            <div class="avatar">A</div>
+            <div>
+              <p class="client-name">Acme</p>
+              <p class="client-sub">Reel de lanzamiento</p>
+            </div>
+          </div>
+          <div class="btn-row">
+            <span class="btn">📋 Enlace</span>
+            <span class="badge-count">✓ 1/2</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title after">Ahora</p>
+        <div class="board-card">
+          <div class="client-row">
+            <div class="avatar">A</div>
+            <div>
+              <p class="client-name">Acme</p>
+              <p class="client-sub">Reel de lanzamiento</p>
+            </div>
+          </div>
+          <div class="btn-row">
+            <span class="btn">📋 Enlace</span>
+            <span class="btn">↗ Abrir</span>
+            <span class="btn">⬇ Bajar</span>
+            <span class="badge-count">✓ 1/2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-label">Sin video editado todavía — "Bajar" no aparece</div>
+    <div class="board-card">
+      <div class="client-row">
+        <div class="avatar">B</div>
+        <div>
+          <p class="client-name">Beta Studio</p>
+          <p class="client-sub">Post de producto</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <span class="btn">📋 Enlace</span>
+        <span class="btn">↗ Abrir</span>
+      </div>
+    </div>
+
+    <div class="row-label">Sin enlace generado todavía — solo la acción original</div>
+    <div class="board-card">
+      <div class="client-row">
+        <div class="avatar">C</div>
+        <div>
+          <p class="client-name">Corp Wear</p>
+          <p class="client-sub">Story de temporada</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <span class="btn muted">🔗 Enlace cliente</span>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>Copiar sigue igual:</b> el clic en el texto "Enlace" copia la URL al portapapeles y muestra el aviso
+      "Enlace copiado", como siempre.
+    </p>
+    <p class="note">
+      <b>Abrir:</b> lleva a <code>/aprobacion/&lt;token&gt;</code> en una pestaña nueva — exactamente lo que
+      recibió el cliente, para revisarlo antes de mandarlo o para ver qué respondió.
+    </p>
+    <p class="note">
+      <b>Bajar:</b> descarga el video editado vigente de esa tarjeta directo del bucket de Entregas, sin abrir
+      la idea. Mientras resuelve el enlace de descarga, el botón muestra un spinner; si algo falla, sale un
+      aviso claro y la tarjeta sigue funcionando.
+    </p>
+    <p class="note">
+      <b>Ninguno de los tres clics abre el overlay de la tarjeta</b> — la tarjeta entera es clicable para
+      abrir el detalle, así que estos controles detienen la propagación como ya hacía "Enlace".
+    </p>
+  </div>
+</body>
+</html>

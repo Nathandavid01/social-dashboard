@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.41 — 2026-08-16
+
+**Desde la tarjeta del tablero ya se puede abrir y bajar el video, sin entrar a la idea.**
+
+- Donde ya se copiaba el enlace de aprobación (columnas Copy y Publicación), ahora hay dos botones nuevos junto a él.
+- **Abrir**: abre en una pestaña nueva exactamente lo que el cliente ve en su enlace de aprobación — para revisarlo antes de mandarlo.
+- **Bajar**: descarga directo el video editado de esa tarjeta, sin tener que entrar a la idea primero.
+- Si la tarjeta todavía no tiene un corte editado subido, "Bajar" no aparece — nada de botones que no hacen nada.
+- Copiar el enlace sigue funcionando igual que antes (clic en el texto, con su aviso de "Enlace copiado").
+
+Vista: [preview HTML](/previews/v3.41-enlace-acciones.html)
+
 ## v3.39 — 2026-08-16
 
 **Los videos que ya estaban subidos ahora también se pueden analizar con IA — con un botón.**

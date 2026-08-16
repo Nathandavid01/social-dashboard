@@ -11,6 +11,18 @@ vi.mock('@/lib/actions/pipeline-submit', () => ({
   discardEntregaVideos: (...a: unknown[]) => discardEntregaVideos(...(a as [])),
 }))
 vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
+// EnlaceClienteBoton hits both actions on mount inside every card; unmocked
+// they call currentUserHas → cookies() outside a request scope (jsdom, no
+// Next request context) and blow up as an unhandled rejection after the test
+// already passed.
+vi.mock('@/lib/actions/entregas-client-review', () => ({
+  getEnlaceCliente: vi.fn(async () => ({ enlace: null })),
+  crearEnlaceCliente: vi.fn(async () => ({ token: 'tok' })),
+}))
+vi.mock('@/lib/actions/entregas-r2', () => ({
+  getEntregaVideoEditado: vi.fn(async () => ({ id: null })),
+  getEntregasDownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
+}))
 let mockRole: UserRole | null = 'supervisor'
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: mockRole }),
