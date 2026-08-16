@@ -6,14 +6,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v3.45 — 2026-08-16
 
-**Cada video del lote ahora dice, de un vistazo, cuándo y cómo se publica.**
+**La tarjeta de cada video del lote se rediseñó: menos banner, más lo que importa — cuándo se publica, cómo se ve, y subir archivos en un clic.**
 
-- En la tarjeta de cada video, bajo "Video 1 · Reel", hay una línea nueva con un ícono de calendario: fecha, hora y formato de publicación.
-- Ejemplo: "Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook" — así se sabe qué recibirá Metricool en cuanto se apruebe el video.
-- Si el video todavía no tiene fecha, dice "Sin fecha de publicación" — no se inventa una.
-- Si el cliente no tiene una hora de publicación configurada, se ve la fecha y un aviso de "hora no configurada", en vez de una hora inventada.
-- Si la fecha ya pasó, se avisa con el mismo texto que usa el resto de la app: "Fecha pasada — se corre a +24h".
-- Cuando un video se manda a distintas redes con formatos distintos (por ejemplo Reel en Instagram pero Imagen en Facebook), la línea lo separa correctamente.
+- **Fuera el banner de "esta lote está en la etapa…"**: la barra de pasos de arriba (Video › Edición › Aprobación › Publicación) ya lo decía.
+- **Agenda de publicación, justo bajo el título**, en una cajita con el dorado de la marca: "Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook" — de un vistazo, sin adivinar.
+- **La tira de 5 escenas y las 3 bolitas de QC suben arriba de todo**, encima de los archivos — así se ve de qué trata el video y su estado de calidad antes de ponerte a revisar uno por uno.
+- **El video editado va primero**, luego el material crudo y el b-roll — el orden en que de verdad se trabaja: primero la entrega, después el insumo.
+- **Las cajas grandes de "arrastra aquí" se convirtieron en un botón "+"** compacto junto a cada cabecera — arrastrar un archivo sobre la tarjeta sigue funcionando exactamente igual.
+- **El material crudo ya no tiene botón de borrar** — se etiqueta "Se conserva": en el servidor de producción, borrarlo lo destruye para siempre (a diferencia de Entregas, donde solo se archiva), así que aquí no se ofrece esa opción.
+- **B-roll ahora es una línea simple** ("B-ROLL — opcional" + "+"), sin caja, ya que es el material que menos se usa.
+- **Metadatos de archivo más cortos**: "8.7 MB · Nathan · 3 ago" en vez de la línea larga con el nombre completo y la hora exacta — ese detalle completo sigue disponible al pasar el mouse.
 
 Vista: [preview HTML](/previews/v3.45-agenda-en-tarjeta.html)
 
