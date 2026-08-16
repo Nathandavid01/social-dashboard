@@ -41,6 +41,13 @@ vi.mock('./client-profile', () => ({ getClientAssets: (id: string) => getClientA
 let updatePayload: Record<string, unknown> | null = null
 let updateShouldError = false
 let ideaRow: Record<string, unknown> | null = { id: 'idea-1', client_id: 'client-1', status: 'idea' }
+// Log of EVERY .update() call (in order) — updatePayload only keeps the last,
+// which isn't enough for actions that do two separate best-effort updates
+// (updateIdeaBrief: hook, then hook_source).
+let updateCalls: Record<string, unknown>[] = []
+/** Simula "la columna hook_source no existe todavía" (migración 0064 pendiente):
+ *  solo el UPDATE que trae hook_source lanza. */
+let hookSourceUpdateThrows = false
 
 function makeSupabase() {
   const builder: Record<string, unknown> = {}
@@ -48,7 +55,14 @@ function makeSupabase() {
   builder.eq = vi.fn(() => builder)
   builder.in = vi.fn(() => builder)
   builder.update = vi.fn((payload: Record<string, unknown>) => {
+    if ('hook_source' in payload && hookSourceUpdateThrows) {
+      return {
+        eq: () => { throw new Error('column "hook_source" does not exist') },
+        then: () => { throw new Error('column "hook_source" does not exist') },
+      }
+    }
     updatePayload = payload
+    updateCalls.push(payload)
     return builder
   })
   builder.single = vi.fn(async () => ({ data: ideaRow, error: ideaRow ? null : { message: 'not found' } }))
@@ -63,11 +77,13 @@ function makeSupabase() {
 let supabaseMock = makeSupabase()
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => supabaseMock }))
 
-import { updateIdeaStatus, getIdeaDetailBundle } from './content-ideas'
+import { updateIdeaStatus, getIdeaDetailBundle, updateIdeaBrief } from './content-ideas'
 
 beforeEach(() => {
   updatePayload = null
   updateShouldError = false
+  updateCalls = []
+  hookSourceUpdateThrows = false
   ideaRow = { id: 'idea-1', client_id: 'client-1', status: 'idea' }
   supabaseMock = makeSupabase()
   currentUserHas.mockReset()
@@ -145,5 +161,31 @@ describe('getIdeaDetailBundle', () => {
     const { bundle, error } = await getIdeaDetailBundle('missing')
     expect(bundle).toBeUndefined()
     expect(error).toBeTruthy()
+  })
+})
+
+// ── updateIdeaBrief: editar el hook a mano limpia hook_source ───────────────
+
+describe('updateIdeaBrief — editar el hook a mano limpia hook_source', () => {
+  it('al guardar un nuevo hook, escribe el hook y limpia hook_source a null (best-effort, en un update separado)', async () => {
+    const res = await updateIdeaBrief('idea-1', { hook: 'Nuevo hook escrito a mano' })
+    expect(res.success).toBe(true)
+    expect(updateCalls).toEqual([
+      { hook: 'Nuevo hook escrito a mano' },
+      { hook_source: null },
+    ])
+  })
+
+  it('si el update de hook_source falla (columna sin migrar), el hook igual se guarda', async () => {
+    hookSourceUpdateThrows = true
+    const res = await updateIdeaBrief('idea-1', { hook: 'Nuevo hook' })
+    expect(res.success).toBe(true)
+    expect(updateCalls).toEqual([{ hook: 'Nuevo hook' }])
+  })
+
+  it('editar OTRO campo del brief (sin hook) no toca hook_source', async () => {
+    const res = await updateIdeaBrief('idea-1', { visual_brief: 'nuevo brief' })
+    expect(res.success).toBe(true)
+    expect(updateCalls).toEqual([{ visual_brief: 'nuevo brief' }])
   })
 })

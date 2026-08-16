@@ -116,11 +116,29 @@ export async function updateIdeaHook(
   }
 
   const supabase = await createClient()
+  const trimmed = hook.trim() || null
+
+  // CopyOverlay llama esto en CADA click de "Generar", no solo cuando el
+  // copywriter editó el campo a mano — comparar contra lo ya guardado evita
+  // pisar la marca "escrito por la IA" (hook_source) cuando en realidad nada
+  // cambió. Si no hay nada que cambiar, tampoco hay nada que escribir.
+  const { data: existing } = await supabase.from('content_ideas').select('hook').eq('id', ideaId).maybeSingle()
+  const changed = !existing || (existing as { hook?: string | null }).hook !== trimmed
+  if (!changed) return { ok: true }
+
   const { error } = await supabase
     .from('content_ideas')
-    .update({ hook: hook.trim() || null })
+    .update({ hook: trimmed })
     .eq('id', ideaId)
   if (error) return { error: error.message }
+
+  // Update separado y best-effort: si la migración 0064 (hook_source) no está
+  // aplicada, el hook ya quedó guardado arriba.
+  try {
+    await supabase.from('content_ideas').update({ hook_source: null }).eq('id', ideaId)
+  } catch {
+    // Columna sin migrar todavía: degrada seguro.
+  }
 
   revalidatePath('/entregas')
   return { ok: true }
