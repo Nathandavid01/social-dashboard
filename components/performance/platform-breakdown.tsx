@@ -1,9 +1,16 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+
+// recharts loaded lazily: /performance shouldn't pay for it in the initial
+// JS bundle (see platform-pie-chart.tsx).
+const PlatformPieChart = dynamic(
+  () => import('./platform-pie-chart').then((m) => m.PlatformPieChart),
+  { ssr: false, loading: () => <Skeleton className="h-[280px] w-full" /> },
+)
 
 const PLATFORM_COLORS: Record<string, string> = {
   instagram: '#ec4899',
@@ -60,33 +67,7 @@ export function PlatformBreakdown() {
             Sin datos de Metricool
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={3}
-                dataKey="value"
-              >
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--popover))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                }}
-                formatter={(value) => [value, 'posts']}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-            </PieChart>
-          </ResponsiveContainer>
+          <PlatformPieChart data={data} />
         )}
       </CardContent>
     </Card>
