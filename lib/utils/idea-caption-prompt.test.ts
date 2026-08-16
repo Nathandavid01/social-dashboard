@@ -67,7 +67,25 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(p).not.toMatch(/REDES:\s*\n/)
   })
 
-  it('grounds the caption in the video transcript when we heard it', () => {
+  // Criterio simétrico (v3.42): sin hook, la transcripción manda — red de
+  // seguridad de siempre para que nunca se bloquee el caption si se pudo oír
+  // el video pero nadie (ni la IA) llenó "de qué es".
+  it('sin hook: la transcripción manda (red de seguridad)', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: null,
+      videoTranscript: 'Bajé 15 libras entrenando aquí todas las mañanas',
+    })
+    expect(p).toContain('LO QUE SE OYE EN EL VIDEO')
+    expect(p).toContain('Bajé 15 libras entrenando aquí todas las mañanas')
+    expect(p).toMatch(/transcripción/i)
+    expect(p).toMatch(/ocurre en el video/i)
+    expect(p).toMatch(/el hook es contexto, no el guion/i)
+  })
+
+  // Regresión: antes esta rama decía "el hook es contexto, no el guion"
+  // incluso con el hook lleno — justo lo contrario de lo que pidió Eric.
+  it('con hook lleno: el HOOK es la base y la transcripción queda como apoyo secundario', () => {
     const p = buildIdeaCaptionPrompt({
       ...base,
       hook: 'un socio en el gym',
@@ -75,8 +93,10 @@ describe('buildIdeaCaptionPrompt', () => {
     })
     expect(p).toContain('LO QUE SE OYE EN EL VIDEO')
     expect(p).toContain('Bajé 15 libras entrenando aquí todas las mañanas')
-    expect(p).toMatch(/transcripción/i)
-    expect(p).toMatch(/ocurre en el video/i)
+    expect(p).toMatch(/apoyo secundario/i)
+    expect(p).toMatch(/el caption se basa en el hook de arriba/i)
+    expect(p).not.toMatch(/el hook es contexto, no el guion/i)
+    expect(p).not.toMatch(/ocurre en el video \(transcripción\)/i)
   })
 
   it('can target a single network for the daily-loop fan-out', () => {
@@ -212,5 +232,19 @@ describe('regla anti-invención', () => {
     expect(p.toLowerCase()).toContain('fechas')
     expect(p.toLowerCase()).toMatch(/precios|promociones/)
     expect(p.toLowerCase()).toMatch(/si algo no consta, se omite/)
+  })
+
+  // Regresión: el CTA por defecto y las notas del cliente viven en
+  // RESTRICCIONES, que no estaba en la lista de fuentes permitidas — un
+  // modelo literal podía leer la regla y omitir la dirección del CTA por
+  // "no constar", contradiciendo el bullet de "incluye un CTA claro".
+  it('no excluye las RESTRICCIONES del cliente (CTA, notas) como fuente válida — conviven en el prompt', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      client: { name: 'Restauco', defaultCta: 'Visítanos en Calle 5, Bayamón', captionNotes: 'Abierto 9am-6pm' },
+    })
+    expect(p).toContain('Visítanos en Calle 5, Bayamón')
+    expect(p).toContain('Abierto 9am-6pm')
+    expect(p.toLowerCase()).toMatch(/restricciones del cliente/)
   })
 })
