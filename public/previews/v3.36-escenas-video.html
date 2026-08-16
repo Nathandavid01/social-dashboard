@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.36 — Tira de 5 escenas</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --purple:#a855f7; --green:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 48px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; line-height:1.5; margin:0 0 24px; }
+    h2.section { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:28px 0 10px; }
+
+    /* --- video row card, same shape as Slot in idea-video-panel.tsx --- */
+    .row { display:flex; align-items:center; gap:12px; border-radius:10px; padding:12px; background:rgba(168,85,247,.06); border:1px solid rgba(168,85,247,.25); }
+    .thumb-icon { display:grid; place-items:center; width:56px; height:44px; border-radius:6px; background:rgba(168,85,247,.12); flex-shrink:0; }
+    .row .meta { min-width:0; flex:1; }
+    .row .kicker { display:flex; align-items:center; gap:6px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:#c9a6f7; margin:0 0 2px; }
+    .row .name { font-size:13px; font-weight:500; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row .detail { font-size:11px; color:var(--muted-fg); }
+    .badges { margin-top:4px; display:flex; gap:4px; flex-wrap:wrap; }
+    .pill { border-radius:4px; border:1px solid; padding:1px 6px; font-size:9px; font-weight:500; }
+    .pill.green { color:var(--green); border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.15); }
+    .pill.muted { color:var(--muted-fg); border-color:var(--border); background:rgba(255,255,255,.04); }
+    .ver-btn { flex-shrink:0; border:1px solid var(--border); background:transparent; color:var(--fg); border-radius:6px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer; font-family:inherit; }
+    .ver-btn:hover { background:rgba(255,255,255,.06); }
+
+    /* --- scene strip --- */
+    .strip { display:flex; gap:6px; margin-top:10px; }
+    .scene { position:relative; flex:1; aspect-ratio:9/16; border-radius:6px; border:1px solid var(--border); overflow:hidden; cursor:pointer; transition:opacity .15s; }
+    .scene:hover { opacity:.8; }
+    .scene .num { position:absolute; bottom:3px; right:4px; font-size:9px; font-weight:600; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8); }
+    .scene.s1 { background:linear-gradient(135deg,#3b2f5e,#1a1530); }
+    .scene.s2 { background:linear-gradient(135deg,#5e2f4a,#301522); }
+    .scene.s3 { background:linear-gradient(135deg,#2f4a5e,#152230); }
+    .scene.s4 { background:linear-gradient(135deg,#4a5e2f,#223015); }
+    .scene.s5 { background:linear-gradient(135deg,#5e4a2f,#302215); }
+
+    .skeleton-strip { display:flex; gap:6px; margin-top:10px; }
+    .skel { flex:1; aspect-ratio:9/16; border-radius:6px; background:#1a1a1a; animation:pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    .note { display:flex; align-items:flex-start; gap:8px; border:1px solid var(--border); background:rgba(255,255,255,.02); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--muted-fg); line-height:1.5; margin-top:10px; }
+    .note b { color:var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.36 — Ahora ves 5 escenas de cada video editado sin darle play</h1>
+    <p class="sub">Debajo de cada video editado aparece una tira de 5 imágenes con escenas del video, equiespaciadas de principio a fin. Click en cualquiera abre el video completo. Nunca bloquea ni retrasa la subida: si algo falla generando las escenas, simplemente no aparece la tira.</p>
+
+    <h2 class="section">Video editado recién subido</h2>
+    <div class="row">
+      <div class="thumb-icon">🎬</div>
+      <div class="meta">
+        <p class="kicker">🎬 Video editado</p>
+        <p class="name">promo-verano-final.mp4</p>
+        <p class="detail">42.3 MB · subido por Alexa Kerocen · 15 ago, 3:42 p. m.</p>
+        <div class="badges">
+          <span class="pill green">Subido</span>
+          <span class="pill muted">R2</span>
+        </div>
+      </div>
+      <button class="ver-btn">▶ Ver</button>
+    </div>
+    <div class="strip">
+      <div class="scene s1"><span class="num">1</span></div>
+      <div class="scene s2"><span class="num">2</span></div>
+      <div class="scene s3"><span class="num">3</span></div>
+      <div class="scene s4"><span class="num">4</span></div>
+      <div class="scene s5"><span class="num">5</span></div>
+    </div>
+
+    <h2 class="section">Mientras se generan las escenas</h2>
+    <div class="row">
+      <div class="thumb-icon">🎬</div>
+      <div class="meta">
+        <p class="kicker">🎬 Video editado</p>
+        <p class="name">reel-lanzamiento.mp4</p>
+        <p class="detail">18.9 MB · subido por Marco Díaz · 15 ago, 4:10 p. m.</p>
+        <div class="badges">
+          <span class="pill green">Subido</span>
+          <span class="pill muted">Entregas R2</span>
+        </div>
+      </div>
+      <button class="ver-btn">▶ Ver</button>
+    </div>
+    <div class="skeleton-strip">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+
+    <div class="note">
+      <span>ℹ️</span>
+      <span><b>Videos subidos antes de este cambio</b> no tienen las 5 escenas guardadas — el dashboard las pinta al vuelo desde el mismo video la primera vez que abres su tarjeta, y quedan igual de rápidas de revisar. Si el navegador no puede leer ese video (raro, pero pasa), la tira simplemente no aparece y el botón "Ver" sigue funcionando normal.</span>
+    </div>
+  </div>
+</body>
+</html>

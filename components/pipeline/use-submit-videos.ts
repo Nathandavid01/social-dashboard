@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
-import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
+import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
 import type { SubmitVideoPayload } from './submit-video-card'
 
@@ -67,7 +67,7 @@ const deps: SubmitDeps = {
   putFile: putWithProgress,
   registerVideo: async (i) => {
     const res = await registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType })
-    if (res.ok && res.id) void analyzeUploadedVideo(res.id, i.file)
+    if (res.ok && res.id) void processUploadedVideo(res.id, i.file)
     return res
   },
 }

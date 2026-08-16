@@ -8,8 +8,9 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
-import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
+import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
+import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -233,7 +234,7 @@ function Slot({
     })
     if (res.error) throw new Error(res.error)
     // QC IA solo del corte final. void: si falla, la subida ya está completa.
-    if (kind === 'edited' && res.id) void analyzeUploadedVideo(res.id, file)
+    if (kind === 'edited' && res.id) void processUploadedVideo(res.id, file)
   }
 
   // Accepts one OR many files; uploads them sequentially into this kind.
@@ -347,6 +348,7 @@ function Slot({
             className="aspect-video w-full rounded-lg border bg-black"
           />
         )}
+        {kind === 'edited' && !previewUrl && <VideoSceneStrip videoId={video.id} onOpen={togglePreview} />}
       </div>
     )
   }
