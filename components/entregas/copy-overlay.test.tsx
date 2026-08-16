@@ -20,9 +20,10 @@ const saveCopyAndSchedule = vi.fn(async (): Promise<{
   error?: string
   autopost?: { posted: boolean; skipped?: string } | null
 }> => ({ ok: true }))
+const updateIdeaHook = vi.fn(async () => ({ ok: true as const }))
 vi.mock('@/lib/actions/entregas-copy', () => ({
   getEntregaCopyVideos: (...a: unknown[]) => getEntregaCopyVideos(...(a as [])),
-  updateIdeaHook: vi.fn(async () => ({ ok: true as const })),
+  updateIdeaHook: (...a: unknown[]) => updateIdeaHook(...(a as [])),
   saveClientCaptionNotes: vi.fn(async () => ({ ok: true as const })),
   saveCopyAndSchedule: (...a: unknown[]) => saveCopyAndSchedule(...(a as [])),
 }))
@@ -63,6 +64,7 @@ function video(over: Partial<CopyVideoRow> = {}): CopyVideoRow {
     caption_draft: null,
     publishDate: null,
     platforms: ['instagram'],
+    hookSource: null,
     ...over,
   }
 }
@@ -72,6 +74,8 @@ afterEach(() => {
   generateIdeaCaption.mockClear()
   rateCaption.mockClear()
   saveCopyAndSchedule.mockClear()
+  updateIdeaHook.mockClear()
+  updateIdeaHook.mockResolvedValue({ ok: true as const })
   toast.mockClear()
   resetAutoDraftAttempts()
   mockAnalysis = null
@@ -153,6 +157,44 @@ describe('CopyOverlay — el análisis visual reemplaza el hook', () => {
       expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/falta/i) })),
     )
     expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
+
+describe('CopyOverlay — marca "escrito por la IA" en el hook (hookSource)', () => {
+  it('hookSource=\'ai\' muestra la marca discreta junto al campo', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: 'ai' })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText(/escrito por la ia/i)).toBeInTheDocument()
+  })
+
+  it('hookSource=null (o ausente): no muestra la marca', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText('Socio baja 15 lb')).toBeInTheDocument()
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
+  it('editar el hook y generar hace desaparecer la marca (se guarda como edición humana)', async () => {
+    getEntregaCopyVideos.mockResolvedValueOnce({
+      data: { videos: [video({ hookSource: 'ai', caption_draft: null })], captionNotes: '' },
+    })
+    render(<CopyOverlay clientId="c1" ideaId="i1" clientName="Gym X" onClose={() => {}} />)
+    expect(await screen.findByText(/escrito por la ia/i)).toBeInTheDocument()
+
+    // El auto-borrador ya corrió al abrir (hook + sin caption previo) —
+    // el botón queda en "Regenerar con IA".
+    await waitFor(() => expect(screen.getByDisplayValue('copy solo')).toBeInTheDocument())
+    const hookInput = screen.getByLabelText(/de qué es el video/i)
+    fireEvent.change(hookInput, { target: { value: 'Un hook nuevo, escrito a mano' } })
+    generateIdeaCaption.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: /regenerar con ia/i }))
+
+    await waitFor(() => expect(updateIdeaHook).toHaveBeenCalledWith('i1', 'Un hook nuevo, escrito a mano'))
+    await waitFor(() => expect(screen.queryByText(/escrito por la ia/i)).toBeNull())
   })
 })
 

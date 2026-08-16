@@ -24,6 +24,10 @@ const h = vi.hoisted(() => ({
   ] as Record<string, unknown>[],
   /** Simula "la columna hook_source no existe todavía" (migración 0064 pendiente). */
   hookSourceUpdateThrows: false,
+  /** id → hook_source, para el SELECT aparte de getEntregaCopyVideos. */
+  hookSourceById: {} as Record<string, string | null>,
+  /** Simula "el SELECT de hook_source falla" (columna sin migrar). */
+  hookSourceSelectFails: false,
 }))
 
 const maybeAutoPostIdea = vi.fn(async (): Promise<{ posted: boolean; skipped?: string } | null> => ({ posted: true }))
@@ -56,6 +60,14 @@ vi.mock('@/lib/supabase/server', () => ({
               : null,
             error: null,
           }),
+          in: async (col: string, ids: string[]) => {
+            if (h.hookSourceSelectFails) return { data: null, error: { message: 'column "hook_source" does not exist' } }
+            if (table !== 'content_ideas' || col !== 'id') return { data: [], error: null }
+            return {
+              data: ids.map((id) => ({ id, hook_source: h.hookSourceById[id] ?? null })),
+              error: null,
+            }
+          },
         }
         chain.eq = (col: string, val: unknown) => {
           if (table === 'content_ideas' && col === 'id') ideaFilter = String(val)
@@ -79,6 +91,8 @@ import { getEntregaCopyVideos, saveCopyAndSchedule, updateIdeaHook } from './ent
 beforeEach(() => {
   h.updates.length = 0
   h.hookSourceUpdateThrows = false
+  h.hookSourceById = {}
+  h.hookSourceSelectFails = false
   h.ideas = [
     {
       id: 'i1',
@@ -102,6 +116,23 @@ describe('getEntregaCopyVideos — el overlay recupera el borrador', () => {
     const res = await getEntregaCopyVideos('c1')
     expect(res.data?.videos[0].caption_draft).toBe('Borrador que escribió la IA')
     expect(res.data?.videos[0].generated_caption).toBeNull()
+  })
+
+  it('trae hookSource=\'ai\' cuando la IA escribió el hook, y null por defecto', async () => {
+    h.hookSourceById = { i1: 'ai' }
+    const res = await getEntregaCopyVideos('c1')
+    expect(res.data?.videos[0].hookSource).toBe('ai')
+
+    h.hookSourceById = {}
+    const res2 = await getEntregaCopyVideos('c1')
+    expect(res2.data?.videos[0].hookSource).toBeNull()
+  })
+
+  it('si el SELECT de hook_source falla (columna sin migrar), el overlay igual responde — todos con hookSource null', async () => {
+    h.hookSourceSelectFails = true
+    const res = await getEntregaCopyVideos('c1')
+    expect(res.error).toBeUndefined()
+    expect(res.data?.videos[0].hookSource).toBeNull()
   })
 
   it('con ideaId no trae el video de la semana pasada del mismo cliente', async () => {

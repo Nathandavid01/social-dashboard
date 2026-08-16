@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Loader2, Sparkles, Save, Send, Check, AlertCircle } from 'lucide-react'
+import { X, Loader2, Sparkles, Save, Send, Check, AlertCircle, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -52,6 +52,10 @@ export function CopyOverlay({
   const [error, setError] = useState<string | null>(null)
   const [index, setIndex] = useState(0)
   const [hook, setHook] = useState('')
+  // 'ai' cuando la IA escribió este hook a partir del video (v3.40). Se apaga
+  // localmente en cuanto se guarda una edición humana (dentro de generate()),
+  // no al escribir en el campo — abrir y no tocar nada no debe borrar la marca.
+  const [hookSource, setHookSource] = useState<'ai' | null>(null)
   const [caption, setCaption] = useState('')
   const [busy, setBusy] = useState<'generando' | 'guardando' | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
@@ -97,11 +101,12 @@ export function CopyOverlay({
   // Reset the per-video fields whenever a different video comes on screen.
   useEffect(() => {
     setHook(current?.hook ?? '')
+    setHookSource(current?.hookSource ?? null)
     // El caption guardado manda; si no hay, se recupera el borrador de la IA
     // para que una recarga no lo tire.
     setCaption(current?.generated_caption || displayCaptionDraft(current?.caption_draft) || '')
     setPublishDate(current?.publishDate ?? '')
-  }, [current?.id, current?.hook, current?.generated_caption, current?.caption_draft, current?.publishDate])
+  }, [current?.id, current?.hook, current?.hookSource, current?.generated_caption, current?.caption_draft, current?.publishDate])
 
   // Sign only the video on screen: getR2PreviewUrl firma por 1 hora, así que
   // firmar el lote entero de golpe daría enlaces muertos al llegar al final.
@@ -138,7 +143,12 @@ export function CopyOverlay({
     try {
       // Persist the hook and the client rules FIRST — the prompt reads them
       // from the database, not from this form.
+      const hookEdited = hook.trim() !== (current.hook ?? '').trim()
       await updateIdeaHook(current.id, hook)
+      // La persona acaba de guardar un hook distinto: apaga la marca "IA" en
+      // pantalla (el server ya la limpió — ver updateIdeaHook). Si no cambió
+      // nada (p. ej. solo apretó "Regenerar"), la marca se queda.
+      if (hookEdited) setHookSource(null)
       await saveClientCaptionNotes(clientId, notes)
       const res = await generateIdeaCaption(
         current.id,
@@ -274,6 +284,12 @@ export function CopyOverlay({
                     ? 'La IA ya vio el video — esto es contexto opcional, no obligatorio.'
                     : 'Es lo único que la IA necesita para escribir el copy.'}
                 </p>
+                {hookSource === 'ai' && (
+                  <p className="flex items-center gap-1 text-[11px] italic text-muted-foreground">
+                    <Wand2 className="h-3 w-3 shrink-0 text-purple-400" aria-hidden="true" />
+                    Escrito por la IA a partir del video · edítalo si no cuadra
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">

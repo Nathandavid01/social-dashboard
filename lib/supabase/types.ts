@@ -405,6 +405,11 @@ export interface ContentIdea {
   content_type: ContentIdeaType
   title: string
   hook: string | null
+  /** 'ai' cuando el hook lo escribió el análisis de video (v3.40, video_topic);
+   *  null cuando lo escribió una persona o no se ha tocado. Se limpia a null
+   *  en cuanto alguien edita el campo a mano. Columna opcional: migración
+   *  0064_hook_source.sql. */
+  hook_source?: 'ai' | null
   visual_brief: string | null
   caption_angle: string | null
   hashtags_suggestion: string | null

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, AlertCircle } from 'lucide-react'
+import { Sparkles, Loader2, Save, Copy, Check, Globe, Lightbulb, AlertCircle, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -24,6 +24,10 @@ interface Props {
   /** The client's networks — shown as badges. ONE caption is written for all of them. */
   platforms?: SocialPlatform[]
   hook?: string | null
+  /** 'ai' cuando este hook lo escribió el análisis de video (v3.40). Este
+   *  campo es de solo lectura aquí (se edita en IdeaBriefCard) — la marca es
+   *  informativa, misma señal que ahí. */
+  hookSource?: 'ai' | null
   visualBrief?: string | null
   captionAngle?: string | null
   hashtags?: string | null
@@ -46,6 +50,7 @@ export function IdeaCaptionEditor({
   initialDraft,
   platforms = [],
   hook,
+  hookSource,
   visualBrief,
   captionAngle,
   hashtags,
@@ -160,7 +165,17 @@ export function IdeaCaptionEditor({
             La IA escucha el video
           </p>
           <p>Escribe el copy sobre lo que se dice. El hook de abajo es contexto.</p>
-          {hook && <p><span className="font-medium text-foreground/70">De qué es:</span> {hook}</p>}
+          {hook && (
+            <p>
+              <span className="font-medium text-foreground/70">De qué es:</span> {hook}
+              {hookSource === 'ai' && (
+                <span className="ml-1.5 inline-flex items-center gap-1 italic text-muted-foreground/80">
+                  <Wand2 className="h-3 w-3 shrink-0 text-purple-400" aria-hidden />
+                  escrito por la IA a partir del video · edítalo si no cuadra
+                </span>
+              )}
+            </p>
+          )}
           {visualBrief && <p><span className="font-medium text-foreground/70">Brief visual:</span> {visualBrief}</p>}
           {captionAngle && <p><span className="font-medium text-foreground/70">Ángulo:</span> {captionAngle}</p>}
           {hashtags && <p className="font-mono text-[11px]">{hashtags}</p>}

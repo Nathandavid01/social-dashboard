@@ -31,6 +31,10 @@ export interface CopyVideoRow {
   /** YYYY-MM-DD — the date the copywriter picked, if any. */
   publishDate: string | null
   platforms: string[]
+  /** 'ai' cuando este hook lo escribió el análisis de video (v3.40). Siempre
+   *  null si la migración 0064 no está aplicada (se lee en un SELECT aparte,
+   *  best-effort — nunca tumba el resto de la respuesta). */
+  hookSource: 'ai' | null
 }
 
 export interface CopyStageData {
@@ -72,6 +76,27 @@ export async function getEntregaCopyVideos(
 
   const platforms = (client?.platforms?.length ? client.platforms : client?.default_platforms) ?? []
 
+  // hook_source vive en un SELECT aparte del crítico de arriba: si la
+  // migración 0064 no está aplicada, este select falla solo y cada video
+  // queda con hookSource: null — nunca tumba el resto del overlay.
+  const hookSources: Record<string, 'ai' | null> = {}
+  try {
+    const ids = (ideas ?? []).map((i) => i.id)
+    if (ids.length > 0) {
+      const { data: hsRows, error: hsError } = await supabase
+        .from('content_ideas')
+        .select('id, hook_source')
+        .in('id', ids)
+      if (!hsError) {
+        for (const row of (hsRows ?? []) as { id: string; hook_source?: string | null }[]) {
+          hookSources[row.id] = row.hook_source === 'ai' ? 'ai' : null
+        }
+      }
+    }
+  } catch {
+    // Columna sin migrar todavía: todos quedan sin marca.
+  }
+
   return {
     data: {
       captionNotes: client?.caption_notes ?? null,
@@ -94,6 +119,7 @@ export async function getEntregaCopyVideos(
         caption_draft: (i as { caption_draft?: string | null }).caption_draft ?? null,
         publishDate: (i.publish_date as string | null) ?? null,
         platforms: platforms as string[],
+        hookSource: hookSources[i.id] ?? null,
         }
       }),
     },

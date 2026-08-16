@@ -105,6 +105,26 @@ describe('IdeaCaptionEditor — caption único', () => {
     expect(screen.getByText(/sube un video primero/i)).toBeInTheDocument()
   })
 
+  it('hookSource="ai": muestra la marca discreta junto a "De qué es"', () => {
+    mockRole = 'editor'
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Cómo sellar picanha" hasVideo hookSource="ai" />)
+    expect(screen.getByText(/escrito por la ia/i)).toBeInTheDocument()
+  })
+
+  it('sin hookSource: no muestra la marca', () => {
+    mockRole = 'editor'
+    render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Cómo sellar picanha" hasVideo />)
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
+  it('hookSource pasa a null (edición humana en otro lugar): la marca desaparece', () => {
+    mockRole = 'editor'
+    const { rerender } = render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Cómo sellar picanha" hasVideo hookSource="ai" />)
+    expect(screen.getByText(/escrito por la ia/i)).toBeInTheDocument()
+    rerender(<IdeaCaptionEditor ideaId="i1" initialCaption={null} hook="Editado a mano" hasVideo hookSource={null} />)
+    expect(screen.queryByText(/escrito por la ia/i)).toBeNull()
+  })
+
   it('shows the client platform badges when provided', () => {
     mockRole = 'editor'
     render(<IdeaCaptionEditor ideaId="i1" initialCaption={null} platforms={['instagram', 'tiktok']} />)
