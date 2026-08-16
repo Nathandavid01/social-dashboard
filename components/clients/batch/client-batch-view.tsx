@@ -2,14 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Calendar, ChevronLeft, ChevronRight, LayoutGrid, Lightbulb, MessageSquare, Plus, Users, X, Zap } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, LayoutGrid, MessageSquare, Plus, Users, X, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { NewVideoDialog } from '@/components/pipeline/new-video-dialog'
 import { cn } from '@/lib/utils'
 import {
-  batchHint,
   buildStepper,
   cardStatus,
   summarizeBatchVideos,
@@ -81,7 +80,6 @@ export function ClientBatchView({
   const refresh = onChanged ?? (() => router.refresh())
 
   const stepper = useMemo(() => buildStepper(videos), [videos])
-  const hint = useMemo(() => batchHint(videos), [videos])
   const pendientes = useMemo(
     () => videos.filter((v) => cardStatus(v).key === 'por_grabar').length,
     [videos],
@@ -208,27 +206,6 @@ export function ClientBatchView({
       {/* stepper */}
       <div className="border-b border-border px-6 py-5">
         <BatchStepper stages={stepper} />
-      </div>
-
-      {/* guidance banner */}
-      <div className="px-6 py-3.5">
-        <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/[0.06] px-3.5 py-3">
-          <span className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-primary/15">
-            <Lightbulb className="h-4 w-4 text-primary" aria-hidden />
-          </span>
-          <div className="flex flex-col">
-            <span className="text-[13px] font-semibold text-foreground">
-              {singleVideoMode
-                ? 'Flujo del próximo video'
-                : `Este lote está en la etapa ${hint.stageLabel}`}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {singleVideoMode
-                ? 'Sube el video, di de qué es y genera el caption con AI.'
-                : hint.tip}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* body: editable video cards */}
