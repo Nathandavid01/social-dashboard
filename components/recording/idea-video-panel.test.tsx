@@ -69,9 +69,9 @@ function uploadSlots(label: string) {
   return screen.queryAllByText(new RegExp(`^Subir ${label}$`, 'i'))
 }
 
-// The 'edited' SlotGroup always mounts VideoAnalysisReport, which resolves
-// getVideoAnalysis (mocked) in a useEffect after mount. Flush that settle
-// inside act() so React doesn't warn about an unwrapped state update.
+// The 'edited' SlotGroup always mounts QcProgressDots (tira de bolitas QC),
+// which resolves getVideoAnalysis (mocked) in a useEffect after mount. Flush
+// that settle inside act() so React doesn't warn about an unwrapped state update.
 async function flush() {
   await act(async () => {})
 }
