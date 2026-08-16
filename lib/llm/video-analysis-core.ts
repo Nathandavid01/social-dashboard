@@ -29,6 +29,12 @@ export interface VideoAnalysisContext {
   brandVoice?: string | null
   captionLanguage?: string | null
   captionNotes?: string | null
+  /** Transcripción del audio (Whisper), best-effort — ver
+   *  app/api/video-analysis/route.ts. Cuando está presente, "video_topic" la
+   *  combina con lo visual: lo que se DICE manda sobre lo que se intuye de
+   *  las imágenes si chocan. Ausente cuando Whisper falló o no hay URL de
+   *  audio — el análisis sigue solo con lo visual. */
+  transcript?: string | null
 }
 
 export interface VideoAnalysisIssue { quote: string; problem: string; suggestion: string; t?: string }
@@ -37,12 +43,14 @@ export interface VideoAnalysisFindings {
   burned_captions: { text: string; issues: VideoAnalysisIssue[] }
   relevance: { verdict: 'ok' | 'warning'; explanation: string }
   visual_summary: string
-  /** UNA frase factual, en español, de qué ES el video — tal como la
-   *  escribiría alguien del equipo para un copywriter. NO es el resumen
-   *  visual técnico (visual_summary), ni marketing, ni el caption. Llena la
-   *  casilla "¿De qué es este video?" (content_ideas.hook) cuando esa casilla
-   *  está vacía — ver app/api/video-analysis/route.ts. Opcional: ausente en
-   *  respuestas viejas o cuando el modelo no lo trajo. */
+  /** Una o dos frases factuales, en español, de qué ES el video —
+   *  combinando lo que se VE en los fotogramas y lo que se DICE en la
+   *  transcripción (cuando la hay; en ese caso lo que se dice manda). Tal
+   *  como la escribiría alguien del equipo para un copywriter. NO es el
+   *  resumen visual técnico (visual_summary), ni marketing, ni el caption.
+   *  Llena la casilla "¿De qué es este video?" (content_ideas.hook) cuando
+   *  esa casilla está vacía — ver app/api/video-analysis/route.ts. Opcional:
+   *  ausente en respuestas viejas o cuando el modelo no lo trajo. */
   video_topic?: string
 }
 
@@ -61,13 +69,20 @@ export function buildVideoAnalysisPrompt(ctx: VideoAnalysisContext): string {
     filled(ctx.hook) && `- Hook: ${ctx.hook}`,
   ].filter(Boolean).join('\n')
 
+  // Best-effort (Whisper): puede faltar sin que el análisis se rompa — ver
+  // transcribeVideoFromUrl. Cuando está, task 4 la usa como fuente que manda
+  // sobre lo que se intuye de las imágenes.
+  const transcriptBlock = filled(ctx.transcript)
+    ? `\n\nTRANSCRIPCIÓN DEL AUDIO (lo que se DICE en el video):\n${ctx.transcript!.trim()}`
+    : ''
+
   return `Eres el control de calidad de NMedia PR, agencia de marketing puertorriqueña. Te paso fotogramas en orden cronológico de un video editado listo para aprobar.
 
 CLIENTE:
 ${clientLines}
 
 LA IDEA DEL VIDEO:
-${ideaLines}
+${ideaLines}${transcriptBlock}
 
 Los fotogramas vienen en orden cronológico, muestreados a varios por segundo (no son 8 tomas espaciadas: es casi cada fotograma del video). Los subtítulos quemados cambian rápido y un error puede aparecer en UN SOLO fotograma y desaparecer en el siguiente — revisa CADA fotograma sin saltarte ninguno, incluso si el texto se parece al del fotograma anterior.
 
@@ -75,7 +90,7 @@ TAREAS (en este orden):
 1. CAPTIONS QUEMADOS: transcribe el texto que aparece EN PANTALLA dentro del video (subtítulos/captions integrados), fotograma por fotograma. Señala SOLO faltas objetivas: ortografía, tildes, concordancia, typos, palabras cortadas. IMPORTANTE: el español puertorriqueño, los anglicismos y el slang deliberado de la voz de marca NO son errores — no los "corrijas". Cuando puedas, incluye en cada issue el segundo aproximado ("t") donde aparece el error, tomándolo de la etiqueta "--- Fotograma N · t=Xs ---" que precede a cada imagen.
 2. RELEVANCIA: ¿el contenido del video corresponde a este cliente y a esta idea? "ok" si claramente sí; "warning" si no se ve relación o parece de otro cliente, explicando por qué.
 3. RESUMEN VISUAL: describe en 2-4 frases qué se ve (escenas, personas, acciones, tono, texto destacado) para que un copywriter escriba el caption sin ver el video.
-4. DE QUÉ ES EL VIDEO: escribe UNA SOLA frase, en español, factual, tal como la escribiría alguien del equipo en la casilla "¿De qué es este video?" para explicarle a un copywriter de qué va el video — ej. "Cómo sellar una picanha en parrilla Santa María con roble rojo". NO es el resumen visual técnico de la tarea anterior (que describe la escena para el reporte), no es marketing ni es el caption: es el DATO factual del contenido, tal cual lo escribiría una persona del equipo que vio el video.
+4. DE QUÉ ES EL VIDEO: escribe una o dos frases, en español, factuales, tal como las escribiría alguien del equipo en la casilla "¿De qué es este video?" para explicarle a un copywriter de qué va el video — combinando lo que se VE en los fotogramas y lo que se DICE en la transcripción del audio (cuando la hay). Si choca lo que se dice con lo que se intuye de las imágenes, lo que se dice manda sobre lo que se ve. Ej.: "Cómo sellar una picanha en parrilla Santa María con roble rojo". NO es el resumen visual técnico de la tarea anterior (que describe la escena para el reporte), no es marketing ni es el caption: es el DATO factual del contenido, tal cual lo escribiría una persona del equipo que vio y escuchó el video.
 
 Devuelve SOLO este JSON, sin explicaciones fuera de él:
 {

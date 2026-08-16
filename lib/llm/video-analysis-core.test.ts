@@ -49,6 +49,26 @@ describe('buildVideoAnalysisPrompt', () => {
     // El JSON de salida trae ambos campos, claramente distintos.
     expect(p).toContain('"visual_summary"')
   })
+
+  it('sin transcripción: no inyecta el bloque de transcripción', () => {
+    const p = buildVideoAnalysisPrompt({ ideaTitle: 'Promo agosto' })
+    expect(p).not.toMatch(/TRANSCRIPCIÓN DEL AUDIO \(lo que se DICE/)
+  })
+
+  it('con transcripción: la incluye en el prompt y explica que lo que se dice manda sobre lo que se ve', () => {
+    const p = buildVideoAnalysisPrompt({
+      ideaTitle: 'Promo agosto',
+      transcript: 'Hoy les traigo la mejor picanha con roble rojo, vengan antes de las 6pm',
+    })
+    expect(p).toContain('Hoy les traigo la mejor picanha con roble rojo, vengan antes de las 6pm')
+    expect(p.toLowerCase()).toMatch(/lo que se dice manda sobre lo que se (intuye|ve)/)
+  })
+
+  it('video_topic combina ver + oír: la instrucción menciona ambas fuentes', () => {
+    const p = buildVideoAnalysisPrompt({ ideaTitle: 'Promo agosto' })
+    expect(p.toLowerCase()).toMatch(/se ve/)
+    expect(p.toLowerCase()).toMatch(/se dice/)
+  })
 })
 
 describe('buildVideoAnalysisRequest', () => {
