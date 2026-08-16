@@ -4,17 +4,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v3.36 — 2026-08-15
-
-**El QC con IA ahora revisa el video casi fotograma a fotograma, no cada segundo y medio.**
-
-- Antes se le mandaban a la IA 8 fotogramas por video, sin importar cuánto durara: en un video de 13s eso son ~1.6s entre foto y foto, y un caption que solo aparece medio segundo se saltaba entero.
-- Ahora se muestrea a 4 fotogramas por segundo (hasta 48 por video), así que la IA ve prácticamente todos los cambios de subtítulo.
-- Prueba real: el mismo video de 13s pasó de **0 errores detectados** (8 fotogramas) a **3 errores reales encontrados** (48 fotogramas) — incluido un typo que solo se veía medio segundo.
-- Cada issue que reporta la IA ahora puede traer el segundo aproximado donde aparece el error.
-
-Vista: [preview HTML](/previews/v3.36-muestreo-denso.html)
-
 ## v3.35 — 2026-08-15
 
 **La IA ahora revisa cada video editado antes de aprobarlo.**
@@ -23,6 +12,8 @@ Vista: [preview HTML](/previews/v3.36-muestreo-denso.html)
 - También verifica que el contenido del video corresponda al cliente.
 - El resultado aparece como un reporte junto al video en la pantalla de aprobación — la IA nunca aprueba ni rechaza sola.
 - El caption ahora se escribe sabiendo lo que se VE en el video, no solo lo que se oye.
+- **Lee el video casi fotograma a fotograma:** se muestrea a 4 fotogramas por segundo (hasta 48 por video) en vez de 8 fijos, porque un caption que solo aparece medio segundo se saltaba entero. Prueba real: el mismo video pasó de 0 errores detectados a 3 errores reales encontrados.
+- Cada error que reporta la IA trae el segundo aproximado donde aparece.
 
 Vista: [preview HTML](/previews/v3.35-qc-video-ia.html)
 
