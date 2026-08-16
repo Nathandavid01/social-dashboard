@@ -1,19 +1,28 @@
 import { describe, it, expect } from 'vitest'
 import {
-  frameTimestamps, scaleDimensions, capFramesToBudget,
-  FRAME_COUNT, FRAME_BUDGET_BYTES,
+  frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget,
+  FRAME_FPS, FRAME_MAX_COUNT, FRAME_BUDGET_BYTES,
 } from './video-frames'
 
 describe('frameTimestamps', () => {
-  it('devuelve N timestamps equiespaciados dentro de (0, duration)', () => {
-    const ts = frameTimestamps(60, 4)
+  it('devuelve N timestamps equiespaciados dentro de (0, duration) con count explícito', () => {
+    const ts = frameTimestamps(60, 4, 4)
     expect(ts).toEqual([12, 24, 36, 48])
   })
-  it('usa FRAME_COUNT por defecto', () => {
-    expect(frameTimestamps(90)).toHaveLength(FRAME_COUNT)
+  it('usa FRAME_FPS/FRAME_MAX_COUNT por defecto: video de 13s a 4fps → ceil(13*4)=52, tope 48', () => {
+    const ts = frameTimestamps(13)
+    expect(ts).toHaveLength(FRAME_MAX_COUNT)
+  })
+  it('video de 3s → ceil(3*4)=12 frames (no llega al tope)', () => {
+    const ts = frameTimestamps(3)
+    expect(ts).toHaveLength(12)
+  })
+  it('video largo (120s) → exactamente el tope FRAME_MAX_COUNT', () => {
+    const ts = frameTimestamps(120)
+    expect(ts).toHaveLength(FRAME_MAX_COUNT)
   })
   it('video muy corto: al menos 1 frame en el medio, sin duplicados', () => {
-    const ts = frameTimestamps(0.5, 8)
+    const ts = frameTimestamps(0.5, 8, 8)
     expect(ts.length).toBeGreaterThanOrEqual(1)
     expect(new Set(ts).size).toBe(ts.length)
     for (const t of ts) { expect(t).toBeGreaterThan(0); expect(t).toBeLessThan(0.5) }
@@ -21,6 +30,10 @@ describe('frameTimestamps', () => {
   it('duración 0 o negativa: lista vacía', () => {
     expect(frameTimestamps(0)).toEqual([])
     expect(frameTimestamps(-3)).toEqual([])
+  })
+  it('FRAME_FPS es 4 y FRAME_MAX_COUNT es 48', () => {
+    expect(FRAME_FPS).toBe(4)
+    expect(FRAME_MAX_COUNT).toBe(48)
   })
 })
 
@@ -36,6 +49,9 @@ describe('scaleDimensions', () => {
     const { width, height } = scaleDimensions(1013, 771, 960)
     expect(Number.isInteger(width)).toBe(true)
     expect(Number.isInteger(height)).toBe(true)
+  })
+  it('el default de maxSide bajó a 768', () => {
+    expect(scaleDimensions(1920, 1080)).toEqual({ width: 768, height: 432 })
   })
 })
 
@@ -54,5 +70,21 @@ describe('capFramesToBudget', () => {
   it('lista vacía → vacía; usa FRAME_BUDGET_BYTES por defecto', () => {
     expect(capFramesToBudget([])).toEqual([])
     expect(FRAME_BUDGET_BYTES).toBe(3_500_000)
+  })
+})
+
+describe('capFramesAndTimestampsToBudget', () => {
+  const frame = (bytes: number) => 'x'.repeat(Math.ceil((bytes * 4) / 3))
+  it('recorta timestamps al mismo largo que los frames recortados', () => {
+    const frames = [frame(200_000), frame(200_000), frame(200_000)]
+    const timestamps = [1, 2, 3]
+    const out = capFramesAndTimestampsToBudget(frames, timestamps, 450_000)
+    expect(out.frames).toHaveLength(2)
+    expect(out.timestamps).toEqual([1, 2])
+  })
+  it('nada que recortar: deja ambos intactos', () => {
+    const frames = [frame(10_000), frame(10_000)]
+    const timestamps = [0.5, 1.5]
+    expect(capFramesAndTimestampsToBudget(frames, timestamps, 1_000_000)).toEqual({ frames, timestamps })
   })
 })

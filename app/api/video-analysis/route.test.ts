@@ -7,7 +7,8 @@ vi.mock('@/lib/auth/server', () => ({
 
 const analyzeVideoFrames = vi.fn()
 vi.mock('@/lib/llm/video-analysis', () => ({
-  analyzeVideoFrames: (frames: string[], ctx: unknown) => analyzeVideoFrames(frames, ctx),
+  analyzeVideoFrames: (frames: string[], ctx: unknown, timestamps?: number[]) =>
+    analyzeVideoFrames(frames, ctx, timestamps),
   videoAnalysisModelId: () => 'grok-4.6',
 }))
 
@@ -158,13 +159,25 @@ describe('POST /api/video-analysis', () => {
     expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
   })
 
+  it('timestamps válidos (misma longitud que frames tras filtro): llegan a analyzeVideoFrames', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], timestamps: [1.5] }))
+    expect(res.status).toBe(200)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith([FRAME], expect.anything(), [1.5])
+  })
+
+  it('timestamps de longitud distinta a frames: se ignoran, sigue 200', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], timestamps: [1.5, 2.5] }))
+    expect(res.status).toBe(200)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith([FRAME], expect.anything(), undefined)
+  })
+
   it('video sin idea/cliente: usa defaults sin lanzar', async () => {
     videoResult = { data: { id: 'video-1', idea_id: 'idea-1', kind: 'edited', idea: null } }
     const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
     expect(res.status).toBe(200)
     expect(analyzeVideoFrames).toHaveBeenCalledWith([FRAME], expect.objectContaining({
       ideaTitle: 'Sin título', hook: undefined, clientName: undefined,
-    }))
+    }), undefined)
   })
 
   it('analyzeVideoFrames lanza → upsert error con error_note, 502, y NO encadena generateIdeaCaption', async () => {

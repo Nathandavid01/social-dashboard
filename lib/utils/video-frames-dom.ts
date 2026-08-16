@@ -6,7 +6,7 @@
  * Lanza si el codec no decodifica; el caller lo trata como "sin análisis".
  */
 import {
-  frameTimestamps, scaleDimensions, capFramesToBudget, FRAME_JPEG_QUALITY,
+  frameTimestamps, scaleDimensions, capFramesAndTimestampsToBudget, FRAME_JPEG_QUALITY,
 } from './video-frames'
 
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
@@ -23,7 +23,7 @@ function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
   })
 }
 
-export async function extractVideoFrames(file: File): Promise<string[]> {
+export async function extractVideoFrames(file: File): Promise<{ frames: string[]; timestamps: number[] }> {
   const url = URL.createObjectURL(file)
   const video = document.createElement('video')
   video.muted = true
@@ -44,12 +44,13 @@ export async function extractVideoFrames(file: File): Promise<string[]> {
     if (!ctx) throw new Error('canvas no disponible')
 
     const frames: string[] = []
-    for (const t of frameTimestamps(video.duration)) {
+    const timestamps = frameTimestamps(video.duration)
+    for (const t of timestamps) {
       await seekTo(video, t)
       ctx.drawImage(video, 0, 0, width, height)
       frames.push(canvas.toDataURL('image/jpeg', FRAME_JPEG_QUALITY))
     }
-    return capFramesToBudget(frames)
+    return capFramesAndTimestampsToBudget(frames, timestamps)
   } finally {
     URL.revokeObjectURL(url)
     video.src = ''

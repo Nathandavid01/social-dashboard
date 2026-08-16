@@ -4,15 +4,30 @@
  * hay funciones sin DOM para poder testearlas sin mocks.
  */
 
-export const FRAME_COUNT = 8
-export const FRAME_MAX_SIDE = 960
+/**
+ * Muestreo por densidad, no por conteo fijo: los captions quemados cambian
+ * cada ~1s o menos, así que 8 fotogramas equiespaciados se saltan errores
+ * reales (verificado en producción: video de 13s, 8 frames → 0 errores;
+ * 53 frames (~4fps) → 3 errores reales, uno visible medio segundo).
+ * A 4 fps un video de hasta 12s cabe entero; videos más largos bajan el fps
+ * efectivo al toparse con FRAME_MAX_COUNT (presupuesto de payload/latencia).
+ */
+export const FRAME_FPS = 4
+export const FRAME_MAX_COUNT = 48
+export const FRAME_MAX_SIDE = 768
 export const FRAME_JPEG_QUALITY = 0.7
 /** Vercel corta el body ~4.5 MB; margen para JSON + resto del payload. */
 export const FRAME_BUDGET_BYTES = 3_500_000
 
-/** N timestamps equiespaciados en (0, duration), sin el frame 0 ni el final. */
-export function frameTimestamps(durationSeconds: number, count = FRAME_COUNT): number[] {
-  if (!(durationSeconds > 0) || count < 1) return []
+/**
+ * Timestamps equiespaciados en (0, duration), muestreados a `fps` con tope
+ * `maxCount`. Para videos largos el fps efectivo baja (12s*4fps=48=tope; un
+ * video de 60s cae a ~0.8fps real) — es el trade-off de mantener el payload
+ * dentro de presupuesto.
+ */
+export function frameTimestamps(durationSeconds: number, fps = FRAME_FPS, maxCount = FRAME_MAX_COUNT): number[] {
+  if (!(durationSeconds > 0) || fps < 1 || maxCount < 1) return []
+  const count = Math.min(Math.ceil(durationSeconds * fps), maxCount)
   const step = durationSeconds / (count + 1)
   const ts = Array.from({ length: count }, (_, i) => step * (i + 1))
   return Array.from(new Set(ts)).filter((t) => t > 0 && t < durationSeconds)
@@ -39,4 +54,18 @@ export function capFramesToBudget(frames: string[], maxTotalBytes = FRAME_BUDGET
   const out = [...frames]
   while (out.length > 1 && out.reduce((n, f) => n + bytes(f), 0) > maxTotalBytes) out.pop()
   return out
+}
+
+/**
+ * Igual que capFramesToBudget pero recorta timestamps en paralelo — el
+ * caller necesita que frames[i] y timestamps[i] sigan correspondiéndose
+ * después del recorte.
+ */
+export function capFramesAndTimestampsToBudget(
+  frames: string[],
+  timestamps: number[],
+  maxTotalBytes = FRAME_BUDGET_BYTES,
+): { frames: string[]; timestamps: number[] } {
+  const capped = capFramesToBudget(frames, maxTotalBytes)
+  return { frames: capped, timestamps: timestamps.slice(0, capped.length) }
 }

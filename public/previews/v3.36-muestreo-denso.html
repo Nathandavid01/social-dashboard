@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.36 — QC IA: muestreo denso de fotogramas</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --warn:#ef4444; --amber-bg:rgba(239,68,68,.1); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 48px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; line-height:1.5; margin:0 0 24px; }
+    h2.section { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:28px 0 10px; }
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width:560px) { .cols { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
+    .card h3 { margin:0 0 4px; font-size:13px; }
+    .card .n { font-size:28px; font-weight:700; margin:6px 0; }
+    .card.before .n { color:var(--muted-fg); }
+    .card.after .n { color:var(--gold); }
+    .card p { margin:0; color:var(--muted-fg); font-size:12px; line-height:1.5; }
+    .frames { display:flex; gap:3px; margin:10px 0; }
+    .f { height:20px; flex:1; border-radius:2px; background:#2a2a2a; }
+    .f.on { background:var(--gold); }
+    .issue { background:var(--amber-bg); border-radius:6px; padding:8px 10px; margin-top:8px; font-size:12px; line-height:1.5; }
+    .issue b { font-weight:600; }
+    .tag { display:inline-block; font-size:10px; color:var(--muted-fg); border:1px solid var(--border); border-radius:999px; padding:1px 6px; margin-left:6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.36 — El QC con IA ahora casi no se salta fotogramas</h1>
+    <p class="sub">Antes se muestreaban 8 fotogramas por video sin importar la duración. En un video de 13s eso deja ~1.6s entre foto y foto — un caption quemado que solo dura medio segundo se pierde entero. Ahora se muestrea a 4 fotogramas por segundo (hasta 48 por video).</p>
+
+    <h2 class="section">Ejemplo real — mismo video de 13s</h2>
+    <div class="cols">
+      <div class="card before">
+        <h3>Antes — 8 fotogramas</h3>
+        <div class="frames">
+          <div class="f on"></div><div class="f"></div><div class="f"></div><div class="f on"></div>
+          <div class="f"></div><div class="f"></div><div class="f on"></div><div class="f"></div>
+          <div class="f"></div><div class="f on"></div><div class="f"></div><div class="f"></div>
+          <div class="f on"></div><div class="f"></div><div class="f"></div><div class="f on"></div>
+        </div>
+        <div class="n">0 errores</div>
+        <p>La IA se saltó los fotogramas donde aparecían los typos.</p>
+      </div>
+      <div class="card after">
+        <h3>Ahora — 4 fps (48 fotogramas)</h3>
+        <div class="frames">
+          <div class="f on"></div><div class="f on"></div><div class="f on"></div><div class="f on"></div>
+          <div class="f on"></div><div class="f on"></div><div class="f on"></div><div class="f on"></div>
+          <div class="f on"></div><div class="f on"></div><div class="f on"></div><div class="f on"></div>
+          <div class="f on"></div><div class="f on"></div><div class="f on"></div><div class="f on"></div>
+        </div>
+        <div class="n">3 errores</div>
+        <p>Se revisa casi cada fotograma — nada de captions "invisibles" para la IA.</p>
+      </div>
+    </div>
+
+    <h2 class="section">Errores que antes se perdían</h2>
+    <div class="issue">«roostop» <span class="tag">t≈4.2s</span> — falta letra en "rooftop", visible solo <b>medio segundo</b>.</div>
+    <div class="issue">«Pa ' ya» <span class="tag">t≈7.8s</span> — apóstrofe suelto, debería ir pegado: <b>"Pa'ya"</b>.</div>
+    <div class="issue">Tercer error de concordancia detectado en un fotograma que el muestreo anterior nunca vio.</div>
+  </div>
+</body>
+</html>

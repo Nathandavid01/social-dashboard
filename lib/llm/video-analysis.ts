@@ -12,6 +12,7 @@ export type { VideoAnalysisContext, VideoAnalysisFindings } from './video-analys
 export async function analyzeVideoFrames(
   frames: string[],
   ctx: VideoAnalysisContext,
+  timestamps?: number[],
 ): Promise<VideoAnalysisFindings> {
   const env = process.env as VideoAnalysisEnv
   const configError = videoAnalysisConfigError(env)
@@ -19,6 +20,7 @@ export async function analyzeVideoFrames(
 
   const req = buildVideoAnalysisRequest({
     frames,
+    timestamps,
     prompt: buildVideoAnalysisPrompt(ctx),
     apiKey: env.XAI_API_KEY!,
     model: videoAnalysisModelId(env),

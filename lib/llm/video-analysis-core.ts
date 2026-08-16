@@ -31,7 +31,7 @@ export interface VideoAnalysisContext {
   captionNotes?: string | null
 }
 
-export interface VideoAnalysisIssue { quote: string; problem: string; suggestion: string }
+export interface VideoAnalysisIssue { quote: string; problem: string; suggestion: string; t?: string }
 
 export interface VideoAnalysisFindings {
   burned_captions: { text: string; issues: VideoAnalysisIssue[] }
@@ -62,14 +62,16 @@ ${clientLines}
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
+Los fotogramas vienen en orden cronológico, muestreados a varios por segundo (no son 8 tomas espaciadas: es casi cada fotograma del video). Los subtítulos quemados cambian rápido y un error puede aparecer en UN SOLO fotograma y desaparecer en el siguiente — revisa CADA fotograma sin saltarte ninguno, incluso si el texto se parece al del fotograma anterior.
+
 TAREAS (en este orden):
-1. CAPTIONS QUEMADOS: transcribe el texto que aparece EN PANTALLA dentro del video (subtítulos/captions integrados). Señala SOLO faltas objetivas: ortografía, tildes, concordancia, typos, palabras cortadas. IMPORTANTE: el español puertorriqueño, los anglicismos y el slang deliberado de la voz de marca NO son errores — no los "corrijas".
+1. CAPTIONS QUEMADOS: transcribe el texto que aparece EN PANTALLA dentro del video (subtítulos/captions integrados), fotograma por fotograma. Señala SOLO faltas objetivas: ortografía, tildes, concordancia, typos, palabras cortadas. IMPORTANTE: el español puertorriqueño, los anglicismos y el slang deliberado de la voz de marca NO son errores — no los "corrijas". Cuando puedas, incluye en cada issue el segundo aproximado ("t") donde aparece el error, tomándolo de la etiqueta "--- Fotograma N · t=Xs ---" que precede a cada imagen.
 2. RELEVANCIA: ¿el contenido del video corresponde a este cliente y a esta idea? "ok" si claramente sí; "warning" si no se ve relación o parece de otro cliente, explicando por qué.
 3. RESUMEN VISUAL: describe en 2-4 frases qué se ve (escenas, personas, acciones, tono, texto destacado) para que un copywriter escriba el caption sin ver el video.
 
 Devuelve SOLO este JSON, sin explicaciones fuera de él:
 {
-  "burned_captions": { "text": "...", "issues": [{ "quote": "...", "problem": "...", "suggestion": "..." }] },
+  "burned_captions": { "text": "...", "issues": [{ "quote": "...", "problem": "...", "suggestion": "...", "t": "0.3s" }] },
   "relevance": { "verdict": "ok" | "warning", "explanation": "..." },
   "visual_summary": "..."
 }`
@@ -77,10 +79,19 @@ Devuelve SOLO este JSON, sin explicaciones fuera de él:
 
 export function buildVideoAnalysisRequest(input: {
   frames: string[]
+  timestamps?: number[]
   prompt: string
   apiKey: string
   model: string
 }): { url: string; headers: Record<string, string>; body: string } {
+  const hasTimestamps = !!input.timestamps && input.timestamps.length === input.frames.length
+  const imageContent = hasTimestamps
+    ? input.frames.flatMap((url, i) => [
+        { type: 'text', text: `--- Fotograma ${i + 1} · t=${input.timestamps![i]}s ---` },
+        { type: 'image_url', image_url: { url } },
+      ])
+    : input.frames.map((url) => ({ type: 'image_url', image_url: { url } }))
+
   return {
     url: GROK_CHAT_COMPLETIONS_URL,
     headers: {
@@ -89,12 +100,12 @@ export function buildVideoAnalysisRequest(input: {
     },
     body: JSON.stringify({
       model: input.model,
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{
         role: 'user',
         content: [
           { type: 'text', text: input.prompt },
-          ...input.frames.map((url) => ({ type: 'image_url', image_url: { url } })),
+          ...imageContent,
         ],
       }],
     }),
@@ -124,6 +135,7 @@ export function parseVideoAnalysisResponse(json: unknown): VideoAnalysisFindings
           quote: typeof i.quote === 'string' ? i.quote : '',
           problem: typeof i.problem === 'string' ? i.problem : '',
           suggestion: typeof i.suggestion === 'string' ? i.suggestion : '',
+          ...(typeof i.t === 'string' ? { t: i.t } : {}),
         }))
     : []
   const rel = (r.relevance ?? {}) as { verdict?: unknown; explanation?: unknown }

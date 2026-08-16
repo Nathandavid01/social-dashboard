@@ -4,10 +4,10 @@ import { requirePermission } from '@/lib/auth/server'
 import { analyzeVideoFrames, videoAnalysisModelId } from '@/lib/llm/video-analysis'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 
-/** El análisis con ~8 imágenes tarda; sin esto Vercel corta a los 10-15s. */
+/** El análisis con hasta 48 imágenes tarda; sin esto Vercel corta a los 10-15s. */
 export const maxDuration = 300
 
-const MAX_FRAMES = 12
+const MAX_FRAMES = 48
 
 /**
  * QC IA del video editado. Lo dispara el browser del editor tras registrar la
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
-  const body = await request.json().catch(() => null) as { videoId?: unknown; frames?: unknown } | null
+  const body = await request.json().catch(() => null) as
+    { videoId?: unknown; frames?: unknown; timestamps?: unknown } | null
   const videoId = typeof body?.videoId === 'string' ? body.videoId : null
   const frames = Array.isArray(body?.frames)
     ? (body!.frames as unknown[]).filter(
@@ -31,6 +32,15 @@ export async function POST(request: Request) {
   if (!videoId || frames.length === 0) {
     return NextResponse.json({ error: 'videoId y frames son requeridos' }, { status: 400 })
   }
+
+  // Los timestamps son solo un extra para el prompt (etiquetas de tiempo);
+  // si no cuadran con los frames, se ignoran silenciosamente — nunca 400.
+  const rawTimestamps = Array.isArray(body?.timestamps) ? (body!.timestamps as unknown[]) : null
+  const timestamps = rawTimestamps
+    && rawTimestamps.length === frames.length
+    && rawTimestamps.every((t): t is number => typeof t === 'number' && Number.isFinite(t))
+    ? (rawTimestamps as number[])
+    : undefined
 
   const supabase = await createClient()
   const { data: video } = await supabase
@@ -56,14 +66,15 @@ export async function POST(request: Request) {
     client?: { name?: string | null; brand_voice?: string | null; caption_language?: string | null; caption_notes?: string | null } | null
   } | null
   try {
-    const findings = await analyzeVideoFrames(frames, {
+    const analysisCtx = {
       ideaTitle: idea?.title?.trim() || 'Sin título',
       hook: idea?.hook,
       clientName: idea?.client?.name,
       brandVoice: idea?.client?.brand_voice,
       captionLanguage: idea?.client?.caption_language,
       captionNotes: idea?.client?.caption_notes,
-    })
+    }
+    const findings = await analyzeVideoFrames(frames, analysisCtx, timestamps)
     const { error } = await upsert({
       status: 'done',
       findings,

@@ -24,6 +24,14 @@ describe('analyzeVideoFrames', () => {
     expect(JSON.parse((init as RequestInit).body as string).model).toBe('grok-4.6')
   })
 
+  it('pasa timestamps al builder cuando se proveen: quedan intercalados en el body', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(okResponse as Response)
+    await analyzeVideoFrames(['data:image/jpeg;base64,A'], { ideaTitle: 'T' }, [1.2])
+    const [, init] = fetchMock.mock.calls[0]
+    const content = JSON.parse((init as RequestInit).body as string).messages[0].content
+    expect(content).toContainEqual({ type: 'text', text: '--- Fotograma 1 · t=1.2s ---' })
+  })
+
   it('sin XAI_API_KEY → lanza con mensaje claro', async () => {
     delete process.env.XAI_API_KEY
     await expect(analyzeVideoFrames(['d'], { ideaTitle: 'T' })).rejects.toThrow(/XAI_API_KEY/)
