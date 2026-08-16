@@ -10,8 +10,10 @@ export const maxDuration = 300
 
 // DEBE moverse en lockstep con FRAME_CHUNK_SIZE en lib/utils/video-frames.ts —
 // el cliente nunca manda más de un chunk por request, así que este tope solo
-// protege contra un caller que no pasó por chunkFrames().
-const MAX_FRAMES = 90
+// protege contra un caller que no pasó por chunkFrames(). 64, no 90: medido en
+// producción un frame pesa ~50KB de cable (no ~46KB), así que 90 por chunk
+// excedía FRAME_BUDGET_BYTES y hacía que se recortaran ~20 frames en silencio.
+const MAX_FRAMES = 64
 
 interface ChunkInfo { index: number; total: number }
 

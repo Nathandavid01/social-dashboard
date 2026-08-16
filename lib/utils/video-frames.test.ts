@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
-  FRAME_FPS, FRAME_MAX_COUNT, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
+  FRAME_FPS, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
 } from './video-frames'
 
 describe('frameTimestamps', () => {
@@ -9,17 +9,17 @@ describe('frameTimestamps', () => {
     const ts = frameTimestamps(60, 4, 4)
     expect(ts).toEqual([12, 24, 36, 48])
   })
-  it('usa FRAME_FPS/FRAME_MAX_COUNT por defecto: video de 23s a 4fps → ceil(23*4)=92, tope 90', () => {
+  it('usa FRAME_FPS/FRAME_CHUNK_SIZE por defecto: video de 23s a 4fps → ceil(23*4)=92, tope 64', () => {
     const ts = frameTimestamps(23)
-    expect(ts).toHaveLength(FRAME_MAX_COUNT)
+    expect(ts).toHaveLength(FRAME_CHUNK_SIZE)
   })
   it('video de 3s → ceil(3*4)=12 frames (no llega al tope)', () => {
     const ts = frameTimestamps(3)
     expect(ts).toHaveLength(12)
   })
-  it('video largo (120s) → exactamente el tope FRAME_MAX_COUNT por defecto', () => {
+  it('video largo (120s) → exactamente el tope FRAME_CHUNK_SIZE por defecto', () => {
     const ts = frameTimestamps(120)
-    expect(ts).toHaveLength(FRAME_MAX_COUNT)
+    expect(ts).toHaveLength(FRAME_CHUNK_SIZE)
   })
   it('con maxCount=FRAME_HARD_MAX puede generar hasta 240 (video de 60s a 4fps)', () => {
     const ts = frameTimestamps(60, FRAME_FPS, FRAME_HARD_MAX)
@@ -35,10 +35,9 @@ describe('frameTimestamps', () => {
     expect(frameTimestamps(0)).toEqual([])
     expect(frameTimestamps(-3)).toEqual([])
   })
-  it('FRAME_FPS es 4, FRAME_MAX_COUNT es 90 (= FRAME_CHUNK_SIZE), FRAME_HARD_MAX es 240', () => {
+  it('FRAME_FPS es 4, FRAME_CHUNK_SIZE es 64, FRAME_HARD_MAX es 240', () => {
     expect(FRAME_FPS).toBe(4)
-    expect(FRAME_MAX_COUNT).toBe(90)
-    expect(FRAME_CHUNK_SIZE).toBe(90)
+    expect(FRAME_CHUNK_SIZE).toBe(64)
     expect(FRAME_HARD_MAX).toBe(240)
   })
 })
@@ -71,11 +70,11 @@ describe('chunkFrames', () => {
   })
 
   it('usa FRAME_CHUNK_SIZE por defecto', () => {
-    const many = Array.from({ length: 91 }, (_, i) => `f${i}`)
-    const ts = Array.from({ length: 91 }, (_, i) => i)
+    const many = Array.from({ length: FRAME_CHUNK_SIZE + 1 }, (_, i) => `f${i}`)
+    const ts = Array.from({ length: FRAME_CHUNK_SIZE + 1 }, (_, i) => i)
     const out = chunkFrames(many, ts)
     expect(out).toHaveLength(2)
-    expect(out[0].frames).toHaveLength(90)
+    expect(out[0].frames).toHaveLength(FRAME_CHUNK_SIZE)
     expect(out[1].frames).toHaveLength(1)
   })
 })
@@ -126,6 +125,17 @@ describe('capFramesToBudget', () => {
     expect(totalWireBytes).toBeLessThanOrEqual(3_500_000)
     expect(out.length).toBeLessThan(48)
   })
+  it('invariante de diseño: un chunk de FRAME_CHUNK_SIZE frames al tamaño real de producción NO se recorta', () => {
+    // Medición real de producción (video de Arasibo, 768px lado largo, q0.7):
+    // 71 fotogramas = 3.54MB de cable → ~50KB por fotograma. FRAME_CHUNK_SIZE
+    // (64) debe caber por DISEÑO en FRAME_BUDGET_BYTES, no por suerte — si
+    // esto se recorta, un chunk entero pierde frames del final en silencio,
+    // exactamente el bug que este paquete arregla.
+    const PROD_FRAME_WIRE_BYTES = 50_000
+    const frames = Array.from({ length: FRAME_CHUNK_SIZE }, () => frame(PROD_FRAME_WIRE_BYTES))
+    const out = capFramesToBudget(frames, FRAME_BUDGET_BYTES)
+    expect(out).toHaveLength(FRAME_CHUNK_SIZE)
+  })
 })
 
 describe('capFramesAndTimestampsToBudget', () => {
@@ -141,5 +151,13 @@ describe('capFramesAndTimestampsToBudget', () => {
     const frames = [frame(10_000), frame(10_000)]
     const timestamps = [0.5, 1.5]
     expect(capFramesAndTimestampsToBudget(frames, timestamps, 1_000_000)).toEqual({ frames, timestamps })
+  })
+  it('un chunk completo de FRAME_CHUNK_SIZE frames+timestamps al tamaño real de producción no pierde ninguno', () => {
+    const PROD_FRAME_WIRE_BYTES = 50_000
+    const frames = Array.from({ length: FRAME_CHUNK_SIZE }, () => frame(PROD_FRAME_WIRE_BYTES))
+    const timestamps = Array.from({ length: FRAME_CHUNK_SIZE }, (_, i) => i)
+    const out = capFramesAndTimestampsToBudget(frames, timestamps, FRAME_BUDGET_BYTES)
+    expect(out.frames).toHaveLength(FRAME_CHUNK_SIZE)
+    expect(out.timestamps).toHaveLength(FRAME_CHUNK_SIZE)
   })
 })

@@ -10,24 +10,21 @@
  * reales (verificado en producción: video de 13s, 8 frames → 0 errores;
  * 53 frames (~4fps) → 3 errores reales, uno visible medio segundo).
  * A 4 fps un video de hasta 12s cabe entero; videos más largos bajan el fps
- * efectivo al toparse con FRAME_MAX_COUNT (presupuesto de payload/latencia).
+ * efectivo al toparse con FRAME_CHUNK_SIZE (presupuesto de payload/latencia).
  */
 export const FRAME_FPS = 4
 /**
- * Tope de frames POR REQUEST. Medido en producción: un frame ≈ 340 tokens de
- * entrada / ~46KB de data-URI; 90 frames ≈ 3.2MB de cable, dentro de
- * FRAME_BUDGET_BYTES. DEBE moverse en lockstep con FRAME_CHUNK_SIZE (mismo
- * valor) y con MAX_FRAMES en app/api/video-analysis/route.ts.
+ * Tope de frames POR REQUEST — y tamaño de cada chunk que el cliente envía
+ * por POST (frameTimestamps() ya limita a esto por defecto, así que un solo
+ * POST siempre cabe en un chunk sin necesitar un segundo tope separado).
+ * Medido en producción REAL (video de Arasibo, 768px lado largo, q0.7): 71
+ * fotogramas = 3.54MB de cable → ~50KB por fotograma, no ~46KB. A 90 frames
+ * eso son ~4.5MB — por ENCIMA de FRAME_BUDGET_BYTES (3.5MB), lo que hacía que
+ * capFramesAndTimestampsToBudget recortara ~20 frames del final de cada chunk
+ * en silencio. 64 × ~50KB ≈ 3.2MB, con margen para el resto del JSON. DEBE
+ * moverse en lockstep con MAX_FRAMES en app/api/video-analysis/route.ts.
  */
-export const FRAME_MAX_COUNT = 90
-/**
- * Tamaño de cada chunk que el cliente envía por POST — mismo valor que
- * FRAME_MAX_COUNT a propósito: frameTimestamps() ya limita a esto por
- * defecto, así que un solo POST siempre cabe en un chunk. chunkFrames()
- * trocea cuando frameTimestamps() se llamó con un maxCount mayor (hasta
- * FRAME_HARD_MAX) para videos largos.
- */
-export const FRAME_CHUNK_SIZE = 90
+export const FRAME_CHUNK_SIZE = 64
 /**
  * Tope duro GLOBAL de frames por video (60s a 4fps): sin esto un video
  * de varios minutos generaría decenas de chunks y de llamadas a Grok.
@@ -52,7 +49,7 @@ export const FRAME_BUDGET_BYTES = 3_500_000
  * video de 60s cae a ~0.8fps real) — es el trade-off de mantener el payload
  * dentro de presupuesto.
  */
-export function frameTimestamps(durationSeconds: number, fps = FRAME_FPS, maxCount = FRAME_MAX_COUNT): number[] {
+export function frameTimestamps(durationSeconds: number, fps = FRAME_FPS, maxCount = FRAME_CHUNK_SIZE): number[] {
   if (!(durationSeconds > 0) || fps < 1 || maxCount < 1) return []
   const count = Math.min(Math.ceil(durationSeconds * fps), maxCount)
   const step = durationSeconds / (count + 1)
