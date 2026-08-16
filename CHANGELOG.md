@@ -13,7 +13,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - **Nunca pisa lo que ya escribió una persona**: solo llena la casilla si estaba vacía.
 - Cuando lo escribió la IA, aparece una marca discreta ("escrito por la IA a partir del video · edítalo si no cuadra") junto al campo — en la tarjeta de la idea, en el caption del video y en el copy de Entregas. En cuanto lo corriges y guardas, la marca desaparece.
 
-Vista: [preview HTML](/previews/v3.40-de-que-es-el-video.html)
+Vista: [preview HTML](/previews/v3.42-de-que-es-el-video.html)
 
 ## v3.43 — 2026-08-16
 
