@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { analyzeUploadedVideo } from './video-analysis-client'
+import { analyzeUploadedVideo, analyzeExistingVideo } from './video-analysis-client'
 import { FRAME_CHUNK_SIZE } from './video-frames'
 
 const file = new File(['x'], 'v.mp4', { type: 'video/mp4' })
@@ -78,5 +78,93 @@ describe('analyzeUploadedVideo', () => {
     const extract = vi.fn().mockResolvedValue({ frames, timestamps })
     await expect(analyzeUploadedVideo('vid-1', file, { extract, post })).resolves.toBeUndefined()
     expect(post).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('analyzeExistingVideo', () => {
+  it('pide la URL firmada, extrae desde ella y postea un único chunk → { ok: true }', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const extract = vi.fn().mockResolvedValue({ frames: ['data:image/jpeg;base64,AAA'], timestamps: [0.5] })
+    const post = vi.fn().mockResolvedValue({ ok: true })
+
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post })
+    expect(res).toEqual({ ok: true })
+    expect(getPreviewUrl).toHaveBeenCalledWith('vid-9')
+    expect(extract).toHaveBeenCalledWith('https://r2/preview.mp4')
+
+    const body = JSON.parse((post.mock.calls[0][1] as RequestInit).body as string)
+    expect(body).toEqual({
+      videoId: 'vid-9', frames: ['data:image/jpeg;base64,AAA'], timestamps: [0.5],
+      chunk: { index: 0, total: 1 },
+    })
+  })
+
+  it('la URL firmada falla → { error }, sin llamar a extract ni postear', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ error: 'Video no encontrado' })
+    const extract = vi.fn()
+    const post = vi.fn()
+
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post })
+    expect(res).toEqual({ error: 'Video no encontrado' })
+    expect(extract).not.toHaveBeenCalled()
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('sin URL ni error explícito → { error } genérico', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({})
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract: vi.fn(), post: vi.fn() })
+    expect(res).toEqual({ error: 'No se pudo cargar el video para analizarlo' })
+  })
+
+  it('la extracción no devuelve frames → { error }, sin postear', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const extract = vi.fn().mockResolvedValue({ frames: [], timestamps: [] })
+    const post = vi.fn()
+
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post })
+    expect(res).toEqual({ error: 'No se pudieron extraer fotogramas de este video' })
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('la extracción lanza (timeout/codec) → { error } con el mensaje, nunca lanza', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const extract = vi.fn().mockRejectedValue(new Error('tiempo de espera agotado extrayendo fotogramas'))
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post: vi.fn() })
+    expect(res).toEqual({ error: 'tiempo de espera agotado extrayendo fotogramas' })
+  })
+
+  it('video largo: trocea en varios POST secuenciales, igual que analyzeUploadedVideo', async () => {
+    const n = FRAME_CHUNK_SIZE + 5
+    const frames = Array.from({ length: n }, (_, i) => `data:image/jpeg;base64,F${i}`)
+    const timestamps = frames.map((_, i) => i * 0.25)
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const extract = vi.fn().mockResolvedValue({ frames, timestamps })
+    const post = vi.fn().mockResolvedValue({ ok: true })
+
+    const res = await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post })
+    expect(res).toEqual({ ok: true })
+    expect(post).toHaveBeenCalledTimes(2)
+  })
+
+  it('onProgress: "extracting" antes de extraer, "analyzing" antes de postear', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const phases: string[] = []
+    const extract = vi.fn().mockImplementation(async () => {
+      phases.push('extract-called')
+      return { frames: ['data:image/jpeg;base64,A'], timestamps: [0.1] }
+    })
+    const post = vi.fn().mockImplementation(async () => { phases.push('post-called'); return { ok: true } })
+    const onProgress = vi.fn((p: string) => phases.push(`progress:${p}`))
+
+    await analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post, onProgress })
+    expect(phases).toEqual(['progress:extracting', 'extract-called', 'progress:analyzing', 'post-called'])
+  })
+
+  it('el POST del único chunk falla en red → igual devuelve { ok: true } (postVideoAnalysisChunks es resiliente por chunk)', async () => {
+    const getPreviewUrl = vi.fn().mockResolvedValue({ url: 'https://r2/preview.mp4' })
+    const extract = vi.fn().mockResolvedValue({ frames: ['data:image/jpeg;base64,A'], timestamps: [0.1] })
+    const post = vi.fn().mockRejectedValue(new Error('red caída'))
+
+    await expect(analyzeExistingVideo('vid-9', { getPreviewUrl, extract, post })).resolves.toEqual({ ok: true })
   })
 })
