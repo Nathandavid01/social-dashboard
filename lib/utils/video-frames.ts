@@ -44,6 +44,20 @@ export const FRAME_JPEG_QUALITY = 0.7
 export const FRAME_BUDGET_BYTES = 3_500_000
 
 /**
+ * `count` timestamps equiespaciados en (0, duration), sin duplicados. La
+ * matemática pura que comparten `frameTimestamps` (muestreo por fps) y
+ * cualquier caller que ya sabe cuántos frames quiere de antemano — como la
+ * tira de escenas (5 fijos, no un fps). Una sola implementación evita que
+ * las dos deriven la misma fórmula por separado y se desincronicen.
+ */
+export function evenTimestamps(durationSeconds: number, count: number): number[] {
+  if (!(durationSeconds > 0) || count < 1) return []
+  const step = durationSeconds / (count + 1)
+  const ts = Array.from({ length: count }, (_, i) => step * (i + 1))
+  return Array.from(new Set(ts)).filter((t) => t > 0 && t < durationSeconds)
+}
+
+/**
  * Timestamps equiespaciados en (0, duration), muestreados a `fps` con tope
  * `maxCount`. Para videos largos el fps efectivo baja (12s*4fps=48=tope; un
  * video de 60s cae a ~0.8fps real) — es el trade-off de mantener el payload
@@ -52,9 +66,7 @@ export const FRAME_BUDGET_BYTES = 3_500_000
 export function frameTimestamps(durationSeconds: number, fps = FRAME_FPS, maxCount = FRAME_CHUNK_SIZE): number[] {
   if (!(durationSeconds > 0) || fps < 1 || maxCount < 1) return []
   const count = Math.min(Math.ceil(durationSeconds * fps), maxCount)
-  const step = durationSeconds / (count + 1)
-  const ts = Array.from({ length: count }, (_, i) => step * (i + 1))
-  return Array.from(new Set(ts)).filter((t) => t > 0 && t < durationSeconds)
+  return evenTimestamps(durationSeconds, count)
 }
 
 /** Reduce al lado largo maxSide manteniendo aspecto; nunca agranda. */

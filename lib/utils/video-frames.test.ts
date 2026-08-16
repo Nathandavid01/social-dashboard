@@ -1,8 +1,49 @@
 import { describe, it, expect } from 'vitest'
 import {
-  frameTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
+  frameTimestamps, evenTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
   FRAME_FPS, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
 } from './video-frames'
+
+/**
+ * evenTimestamps es la matemática que video-scene-strip.tsx necesita: un
+ * conteo FIJO de escenas repartidas por todo el video, no un muestreo por
+ * fps. Bug de producción (v3.36): la tira llamaba a `frameTimestamps(duration,
+ * THUMB_COUNT)`, colando 5 como `fps` en vez de como cantidad — con
+ * duration=18s eso da count=min(ceil(18*5)=90, FRAME_CHUNK_SIZE)=64
+ * timestamps, todos apretados en el primer segundo del video (porque solo
+ * había 5 <canvas> para pintarlos, los primeros 5 de 64 caían todos ahí).
+ */
+describe('evenTimestamps', () => {
+  it('5 timestamps en un video de 18s: 5 valores crecientes repartidos por todo el video', () => {
+    const ts = evenTimestamps(18, 5)
+    expect(ts).toHaveLength(5)
+    expect(ts).toEqual([...ts].sort((a, b) => a - b))
+    for (let i = 1; i < ts.length; i++) expect(ts[i]).toBeGreaterThan(ts[i - 1])
+  })
+  it('regresión del bug de producción: cubre el video ENTERO, no solo el primer segundo', () => {
+    const ts = evenTimestamps(18, 5)
+    expect(ts.length).toBe(5)
+    // El último timestamp debe caer en la segunda mitad del video — si la
+    // tira solo mostrara el arranque (el bug viejo), estaría por debajo de 1s.
+    expect(ts[ts.length - 1]).toBeGreaterThan(9)
+  })
+  it('duración 0 o negativa: lista vacía', () => {
+    expect(evenTimestamps(0, 5)).toEqual([])
+    expect(evenTimestamps(-3, 5)).toEqual([])
+  })
+  it('count 0 (o negativo): lista vacía', () => {
+    expect(evenTimestamps(18, 0)).toEqual([])
+    expect(evenTimestamps(18, -1)).toEqual([])
+  })
+  it('video muy corto: sin duplicados y todos estrictamente dentro de (0, duration)', () => {
+    const ts = evenTimestamps(0.5, 5)
+    expect(new Set(ts).size).toBe(ts.length)
+    for (const t of ts) { expect(t).toBeGreaterThan(0); expect(t).toBeLessThan(0.5) }
+  })
+  it('frameTimestamps delega en evenTimestamps: mismo resultado con el mismo count', () => {
+    expect(frameTimestamps(60, 4, 4)).toEqual(evenTimestamps(60, 4))
+  })
+})
 
 describe('frameTimestamps', () => {
   it('devuelve N timestamps equiespaciados dentro de (0, duration) con count explícito', () => {

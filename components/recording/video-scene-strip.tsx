@@ -5,15 +5,16 @@
  * de qué se trata. Dos caminos:
  *  1. Guardado al subir (thumb_keys en R2) → 5 <img> directas.
  *  2. Fallback al vuelo (videos viejos, sin thumb_keys) → <video> oculto +
- *     canvas, pintando 5 frames equiespaciados con el mismo helper puro del
- *     QC IA (frameTimestamps/scaleDimensions).
+ *     canvas, pintando 5 frames equiespaciados con el mismo helper puro que
+ *     usa el QC IA para la matemática de espaciado (evenTimestamps/scaleDimensions) —
+ *     NO frameTimestamps(), que muestrea por fps y no por cantidad fija.
  * Nunca rompe nada: cualquier fallo → no renderiza (return null).
  */
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { getVideoThumbViewUrls } from '@/lib/actions/video-thumbs'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
-import { frameTimestamps, scaleDimensions } from '@/lib/utils/video-frames'
+import { evenTimestamps, scaleDimensions } from '@/lib/utils/video-frames'
 import { THUMB_COUNT } from '@/lib/utils/video-thumbs'
 
 type State =
@@ -73,7 +74,7 @@ export function VideoSceneStrip({ videoId, onOpen }: { videoId: string; onOpen?:
   // busca los timestamps y pinta cada uno en su <canvas>. No es testeable en
   // jsdom (canvas 2D + seek de <video> no están implementados ahí) — el caso
   // "duración degenerada → sin timestamps" SÍ está cubierto vía el helper puro
-  // (frameTimestamps(Infinity/0, ...) === [] en video-frames.test.ts).
+  // (evenTimestamps(Infinity/0, ...) === [] en video-frames.test.ts).
   useEffect(() => {
     if (state.kind !== 'live') return
     const video = videoRef.current
@@ -116,7 +117,7 @@ export function VideoSceneStrip({ videoId, onOpen }: { videoId: string; onOpen?:
         const { width, height } = scaleDimensions(video.videoWidth, video.videoHeight, 320)
         if (!width || !height) { settled = true; setState({ kind: 'none' }); return }
 
-        const times = frameTimestamps(duration, THUMB_COUNT)
+        const times = evenTimestamps(duration, THUMB_COUNT)
         if (times.length === 0) { settled = true; setState({ kind: 'none' }); return }
 
         for (let i = 0; i < times.length; i++) {
