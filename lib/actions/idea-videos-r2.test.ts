@@ -15,8 +15,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
+let canRead = true
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
+  currentUserHas: vi.fn(async () => canRead),
 }))
 
 // Activity logging is an orthogonal side effect; stub it so the op recorder
@@ -32,6 +34,10 @@ vi.mock('@/lib/integrations/r2', () => ({
   r2Bucket: vi.fn(() => 'nmedia-videos'),
   isR2Configured: vi.fn(() => true),
   r2PublicUrl: vi.fn((key: string) => (publicBase ? `${publicBase}/${key}` : null)),
+}))
+
+vi.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: vi.fn(async () => 'https://signed.example/presigned'),
 }))
 
 // Spy registry so each test can inspect what the action did to Supabase.
@@ -92,13 +98,14 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 // Import AFTER mocks are registered.
-import { registerR2Video, getR2PublicUrl } from '@/lib/actions/idea-videos-r2'
+import { registerR2Video, getR2PublicUrl, getR2DownloadUrl, getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
 
 beforeEach(() => {
   ops.length = 0
   vi.clearAllMocks()
   publicBase = 'https://videos.natemedia.com'
   videoKind = 'edited'
+  canRead = true
   supabaseMock.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 })
 
@@ -195,6 +202,43 @@ describe('registerR2Video — accumulate semantics', () => {
     expect(archiveUpdates()).toHaveLength(0)
   })
 
+})
+
+describe('getR2DownloadUrl / getR2PublicUrl / getR2PreviewUrl — audit: gate de lectura obligatorio', () => {
+  it('getR2DownloadUrl sin ningún permiso de lectura (revision/entregas/planning) → error, no presigna', async () => {
+    canRead = false
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no autorizado/i)
+  })
+
+  it('getR2DownloadUrl con permiso → funciona como hoy', async () => {
+    canRead = true
+    const res = await getR2DownloadUrl('vid-1')
+    expect(res.url).toBe('https://signed.example/presigned')
+    expect(res.error).toBeUndefined()
+  })
+
+  it('getR2PreviewUrl sin ningún permiso de lectura → error, no presigna', async () => {
+    canRead = false
+    const res = await getR2PreviewUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no autorizado/i)
+  })
+
+  it('getR2PreviewUrl con permiso → funciona como hoy', async () => {
+    canRead = true
+    const res = await getR2PreviewUrl('vid-1')
+    expect(res.url).toBe('https://signed.example/presigned')
+    expect(res.error).toBeUndefined()
+  })
+
+  it('getR2PublicUrl sin ningún permiso de lectura → error, ni siquiera llega a construir la URL', async () => {
+    canRead = false
+    const res = await getR2PublicUrl('vid-1')
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no autorizado/i)
+  })
 })
 
 describe('getR2PublicUrl — permanent public link', () => {

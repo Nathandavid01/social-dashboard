@@ -7,10 +7,11 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({ from: fromSpy })),
 }))
 
+import type { NextRequest } from 'next/server'
 import { GET } from './route'
 
-function req(headers: Record<string, string> = {}) {
-  return new Request('http://localhost/api/cron/ui-events-prune', { headers })
+function req(headers: Record<string, string> = {}): NextRequest {
+  return new Request('http://localhost/api/cron/ui-events-prune', { headers }) as unknown as NextRequest
 }
 
 beforeEach(() => {

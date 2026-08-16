@@ -2,18 +2,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const runMetricoolPublishedSync = vi.fn(async () => ({ moved: 1 }))
 vi.mock('@/lib/metricool/sync', () => ({
-  runMetricoolPublishedSync: (...args: unknown[]) => runMetricoolPublishedSync(...args),
+  runMetricoolPublishedSync: () => runMetricoolPublishedSync(),
 }))
 
 const getAgencyReach = vi.fn(async () => ({ total: 1 }))
 vi.mock('@/lib/actions/agency-reach', () => ({
-  getAgencyReach: (...args: unknown[]) => getAgencyReach(...args),
+  getAgencyReach: () => getAgencyReach(),
 }))
 
+import type { NextRequest } from 'next/server'
 import { GET } from './route'
 
-function req(headers: Record<string, string> = {}) {
-  return new Request('http://localhost/api/cron/metricool-sync', { headers })
+function req(headers: Record<string, string> = {}): NextRequest {
+  return new Request('http://localhost/api/cron/metricool-sync', { headers }) as unknown as NextRequest
 }
 
 beforeEach(() => {

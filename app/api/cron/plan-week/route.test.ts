@@ -10,10 +10,11 @@ vi.mock('@supabase/supabase-js', () => ({
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
+import type { NextRequest } from 'next/server'
 import { GET } from './route'
 
-function req(headers: Record<string, string> = {}) {
-  return new Request('http://localhost/api/cron/plan-week', { headers })
+function req(headers: Record<string, string> = {}): NextRequest {
+  return new Request('http://localhost/api/cron/plan-week', { headers }) as unknown as NextRequest
 }
 
 beforeEach(() => {

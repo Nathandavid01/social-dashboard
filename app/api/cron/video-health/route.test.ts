@@ -10,10 +10,11 @@ vi.mock('@/lib/integrations/r2', () => ({ r2PublicUrl: vi.fn(() => 'https://x/y'
 vi.mock('@/lib/integrations/video-health', () => ({ checkVideoPlayable: vi.fn(async () => ({ ok: true })) }))
 vi.mock('@/lib/utils/video-analysis-sweep', () => ({ staleAnalysisCandidates: vi.fn(() => []) }))
 
+import type { NextRequest } from 'next/server'
 import { GET } from './route'
 
-function req(headers: Record<string, string> = {}) {
-  return new Request('http://localhost/api/cron/video-health', { headers })
+function req(headers: Record<string, string> = {}): NextRequest {
+  return new Request('http://localhost/api/cron/video-health', { headers }) as unknown as NextRequest
 }
 
 beforeEach(() => {

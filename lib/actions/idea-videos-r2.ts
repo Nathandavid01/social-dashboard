@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
@@ -158,8 +158,18 @@ export async function registerR2Video(input: {
   return { ok: true, id: data.id }
 }
 
-/** Presigned GET URL so an editor downloads straight from R2 (fast, CDN). */
+/**
+ * Presigned GET URL so an editor downloads straight from R2 (fast, CDN).
+ * Same read gate as getEntregasPreviewUrl — video/copy/team_member could
+ * pull raw material of ANY client without this (audit finding).
+ */
 export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const canDownload =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canDownload) return { error: 'No autorizado' }
+
   const supabase = await createClient()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
@@ -200,8 +210,16 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
  * guard; the Cloudflare Worker (infra/r2-public-edited-worker.js) enforces the
  * same `/edited/` restriction at the edge so the bucket itself never goes
  * fully public. Requires public access configured + R2_PUBLIC_BASE_URL set.
+ *
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl).
  */
 export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const canRead =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canRead) return { error: 'No autorizado' }
+
   const supabase = await createClient()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
@@ -223,8 +241,17 @@ export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; e
   return { url }
 }
 
-/** Presigned GET URL for inline playback (no attachment), usable as a <video src>. */
+/**
+ * Presigned GET URL for inline playback (no attachment), usable as a <video src>.
+ * Same read gate as getEntregasPreviewUrl (audit finding — see getR2DownloadUrl).
+ */
 export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const canPreview =
+    (await currentUserHas('revision.read')) ||
+    (await currentUserHas('entregas.read')) ||
+    (await currentUserHas('planning.read'))
+  if (!canPreview) return { error: 'No autorizado' }
+
   const supabase = await createClient()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
