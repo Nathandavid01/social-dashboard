@@ -3,6 +3,8 @@ import { processUploadedVideo, type ProcessUploadedVideoDeps } from './video-pos
 
 const file = new File(['x'], 'v.mp4', { type: 'video/mp4' })
 const frames8 = Array.from({ length: 8 }, (_, i) => `data:image/jpeg;base64,F${i}`)
+// Coherentes con frames8: un timestamp (en segundos) por frame, en el mismo orden.
+const timestamps8 = frames8.map((_, i) => i * 0.5)
 
 function makeDeps(overrides: Partial<{
   extract: ReturnType<typeof vi.fn>
@@ -12,7 +14,7 @@ function makeDeps(overrides: Partial<{
   putThumb: ReturnType<typeof vi.fn>
 }> = {}) {
   return {
-    extract: vi.fn().mockResolvedValue(frames8),
+    extract: vi.fn().mockResolvedValue({ frames: frames8, timestamps: timestamps8 }),
     post: vi.fn().mockResolvedValue({ ok: true }),
     getUploadUrls: vi.fn().mockResolvedValue({
       urls: ['https://put/0', 'https://put/1', 'https://put/2', 'https://put/3', 'https://put/4'],
@@ -36,6 +38,13 @@ describe('processUploadedVideo', () => {
     const body = JSON.parse((vi.mocked(deps.post).mock.calls[0][1] as RequestInit).body as string)
     expect(body.videoId).toBe('vid-1')
     expect(body.frames).toEqual(frames8)
+    expect(body.timestamps).toEqual(timestamps8)
+    // Alineación: el timestamp[i] describe al frame[i], no un array cualquiera del mismo tamaño.
+    expect(body.timestamps).toHaveLength(body.frames.length)
+    body.frames.forEach((frameUri: string, i: number) => {
+      const frameIndex = Number(frameUri.match(/F(\d+)$/)?.[1])
+      expect(body.timestamps[i]).toBe(frameIndex * 0.5)
+    })
 
     expect(deps.getUploadUrls).toHaveBeenCalledWith('vid-1', 5)
     expect(deps.putThumb).toHaveBeenCalledTimes(5)
@@ -70,7 +79,7 @@ describe('processUploadedVideo', () => {
   })
 
   it('0 frames extraídos → no postea ni sube nada', async () => {
-    const deps = makeDeps({ extract: vi.fn().mockResolvedValue([]) })
+    const deps = makeDeps({ extract: vi.fn().mockResolvedValue({ frames: [], timestamps: [] }) })
     await processUploadedVideo('vid-1', file, deps)
     expect(deps.post).not.toHaveBeenCalled()
     expect(deps.getUploadUrls).not.toHaveBeenCalled()
@@ -84,7 +93,7 @@ describe('processUploadedVideo', () => {
   it('el PUT por defecto verifica res.ok — si R2 rechaza (403/5xx) sin lanzar, NO registra las keys', async () => {
     const register = vi.fn().mockResolvedValue({ ok: true })
     const getUploadUrls = vi.fn().mockResolvedValue({ urls: ['https://put/0'], keys: ['k0'] })
-    const extract = vi.fn().mockResolvedValue(['data:image/jpeg;base64,AAA'])
+    const extract = vi.fn().mockResolvedValue({ frames: ['data:image/jpeg;base64,AAA'], timestamps: [1.5] })
     const post = vi.fn().mockResolvedValue({ ok: true })
 
     const originalFetch = global.fetch

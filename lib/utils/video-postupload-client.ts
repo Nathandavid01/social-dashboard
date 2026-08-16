@@ -18,20 +18,26 @@ async function dataUriToBlob(dataUri: string): Promise<Blob> {
 }
 
 export interface ProcessUploadedVideoDeps {
-  extract?: (f: File) => Promise<string[]>
+  extract?: (f: File) => Promise<{ frames: string[]; timestamps: number[] }>
   post?: typeof fetch
   getUploadUrls?: (videoId: string, count: number) => Promise<{ urls?: string[]; keys?: string[]; error?: string }>
   register?: (videoId: string, keys: string[]) => Promise<{ ok?: true; error?: string }>
   putThumb?: (url: string, dataUri: string) => Promise<void>
 }
 
-async function analyze(videoId: string, frames: string[], post: typeof fetch): Promise<void> {
+async function analyze(
+  videoId: string,
+  frames: string[],
+  timestamps: number[],
+  post: typeof fetch,
+): Promise<void> {
   if (frames.length === 0) return
   try {
     await post('/api/video-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId, frames }),
+      // Los timestamps dejan que la IA reporte el segundo exacto del error.
+      body: JSON.stringify({ videoId, frames, timestamps }),
     })
   } catch {
     // Silencioso: el análisis es advisory, la subida ya terminó.
@@ -77,8 +83,9 @@ export async function processUploadedVideo(
     })
 
   let frames: string[]
+  let timestamps: number[]
   try {
-    frames = await extract(file)
+    ;({ frames, timestamps } = await extract(file))
   } catch {
     // Silencioso: el navegador no pudo decodificar el video — ni análisis ni thumbs.
     return
@@ -87,7 +94,7 @@ export async function processUploadedVideo(
 
   // Ambos son independientes: uno puede fallar sin tumbar al otro.
   await Promise.allSettled([
-    analyze(videoId, frames, post),
+    analyze(videoId, frames, timestamps, post),
     uploadThumbs(videoId, frames, { getUploadUrls, register, putThumb }),
   ])
 }
