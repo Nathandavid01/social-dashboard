@@ -17,6 +17,12 @@ vi.mock('@/components/pipeline/new-video-dialog', () => ({
 vi.mock('@/components/recording/idea-video-panel', () => ({
   IdeaVideoPanel: ({ ideaId }: { ideaId: string }) => <div data-testid="video-panel">upload:{ideaId}</div>,
 }))
+vi.mock('@/components/recording/video-scene-strip', () => ({
+  VideoSceneStrip: () => null,
+}))
+vi.mock('@/components/video-analysis/qc-progress-dots', () => ({
+  QcProgressDots: () => null,
+}))
 vi.mock('@/components/produccion/idea-brief-card', () => ({
   IdeaBriefCard: ({ ideaId }: { ideaId: string }) => <div data-testid="brief">brief:{ideaId}</div>,
 }))
@@ -97,8 +103,9 @@ describe('ClientBatchView', () => {
     expect(screen.getByText('AQUÍ')).toBeInTheDocument()
   })
 
-  it('shows a beginner-friendly guidance hint with the current stage', () => {
-    expect(screen.getByText(/Este lote está en la etapa/i)).toBeInTheDocument()
+  it('does not render the stage guidance banner — the stepper above already says the stage', () => {
+    expect(screen.queryByText(/Este lote está en la etapa/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Flujo del próximo video/i)).not.toBeInTheDocument()
   })
 
   it('shows ONE video at a time (single-video focus) with its editable idea, caption and uploads', () => {
@@ -135,7 +142,6 @@ describe('ClientBatchView', () => {
         plannedPublishLabel="Lun 9 jun"
       />,
     )
-    expect(screen.getByText(/Flujo del próximo video/i)).toBeInTheDocument()
     expect(screen.getByText(/Publicación · Lun 9 jun/i)).toBeInTheDocument()
     expect(screen.getByText('Este video')).toBeInTheDocument()
     expect(screen.queryByText(/Videos de este lote/i)).not.toBeInTheDocument()

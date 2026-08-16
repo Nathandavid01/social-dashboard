@@ -28,6 +28,8 @@ function makePipeline(overrides: Partial<ClientVideoPipeline['client']> = {}): C
     metricool_blog_id: null,
     posting_days: [],
     posting_time: null,
+    posting_schedule: {},
+    default_platforms: [],
     ...overrides,
   }
 

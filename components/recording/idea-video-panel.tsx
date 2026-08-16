@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
-import { Video, Upload, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Play, X } from 'lucide-react'
+import { Video, Plus, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Play, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -9,8 +9,6 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
-import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
-import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -23,10 +21,22 @@ interface Props {
 }
 
 const META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon: typeof Camera; tone: string }> = {
+  edited: { label: 'Video editado', sub: 'Versión final para QC',               icon: Clapperboard, tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30' },
   raw:    { label: 'Video crudo',   sub: 'Material grabado, listo para editar', icon: Camera,       tone: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30' },
   broll:  { label: 'B-roll',        sub: 'Tomas de apoyo',                      icon: Video,        tone: 'text-teal-500 bg-teal-500/10 border-teal-500/30' },
-  edited: { label: 'Video editado', sub: 'Versión final para QC',               icon: Clapperboard, tone: 'text-purple-500 bg-purple-500/10 border-purple-500/30' },
 }
+
+/** Order the deliverable first: editado (entrega) → crudo (insumo) → b-roll. */
+const KIND_ORDER: ContentIdeaVideoKind[] = ['edited', 'raw', 'broll']
+
+/** Exact aria-labels for the "+" trigger per slot (raw reads "material", not "video"). */
+const ADD_LABEL: Record<ContentIdeaVideoKind, string> = {
+  edited: 'Añadir video editado',
+  raw: 'Añadir material crudo',
+  broll: 'Añadir b-roll',
+}
+
+const MONTH_SHORT_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'] as const
 
 function formatBytes(n: number | null): string {
   if (!n) return ''
@@ -35,7 +45,7 @@ function formatBytes(n: number | null): string {
   return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
-/** Upload time, e.g. "2 jun, 3:42 p. m." — so it's clear WHEN the video landed. */
+/** Full upload time, e.g. "2 jun, 3:42 p. m." — kept as the hover `title`. */
 function formatUploadedAt(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -43,28 +53,45 @@ function formatUploadedAt(iso: string | null): string {
   return d.toLocaleString('es-PR', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
+/** Short date for the visible row, e.g. "3 ago" — no time, no year. */
+function formatUploadedAtShort(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${d.getDate()} ${MONTH_SHORT_ES[d.getMonth()]}`
+}
+
+/** First name only, e.g. "Nathan Torres" → "Nathan" — the row stays scannable. */
+function firstName(fullName: string | null | undefined): string {
+  const t = fullName?.trim()
+  return t ? t.split(/\s+/)[0] : ''
+}
+
 const REQUIRED_FILES: Partial<Record<ContentIdeaVideoKind, number>> = { raw: 4, edited: 1 }
 
 export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
   const canUpload = useHasPermission('video.upload')
   const uploaded = videos.filter((v) => v.status === 'uploaded')
-  const rawVideos = uploaded.filter((v) => v.kind === 'raw')
-  const brollVideos = uploaded.filter((v) => v.kind === 'broll')
-  const editedVideos = uploaded.filter((v) => v.kind === 'edited')
-  const hasRaw = rawVideos.length > 0
+  const byKind: Record<ContentIdeaVideoKind, ContentIdeaVideo[]> = {
+    edited: uploaded.filter((v) => v.kind === 'edited'),
+    raw: uploaded.filter((v) => v.kind === 'raw'),
+    broll: uploaded.filter((v) => v.kind === 'broll'),
+  }
+  const hasRaw = byKind.raw.length > 0
 
   return (
     <div className="space-y-5">
-      <SlotGroup kind="raw" ideaId={ideaId} videos={rawVideos} canUpload={canUpload} publicEnabled={publicEnabled} />
-      <SlotGroup kind="broll" ideaId={ideaId} videos={brollVideos} canUpload={canUpload} publicEnabled={publicEnabled} />
-      <SlotGroup
-        kind="edited"
-        ideaId={ideaId}
-        videos={editedVideos}
-        canUpload={canUpload}
-        publicEnabled={publicEnabled}
-        disabledReason={!hasRaw ? 'Sube el video crudo primero' : undefined}
-      />
+      {KIND_ORDER.map((kind) => (
+        <SlotGroup
+          key={kind}
+          kind={kind}
+          ideaId={ideaId}
+          videos={byKind[kind]}
+          canUpload={canUpload}
+          publicEnabled={publicEnabled}
+          disabledReason={kind === 'edited' && !hasRaw ? 'Sube el video crudo primero' : undefined}
+        />
+      ))}
     </div>
   )
 }
@@ -111,6 +138,11 @@ function VideoStatusBadges({
   )
 }
 
+/**
+ * One video group (edited/raw/broll): a compact header — icon, label, count,
+ * requirement badge, and a "+" trigger — plus the file rows. No big dropzone
+ * box; the whole group is still a drop target so drag-and-drop keeps working.
+ */
 function SlotGroup({
   kind, ideaId, videos, canUpload, publicEnabled, disabledReason,
 }: {
@@ -132,94 +164,13 @@ function SlotGroup({
       ? `Faltan ${missing}`
       : 'Completo'
 
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-x-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          <Icon className="h-3.5 w-3.5" /> {meta.label}
-          <span className="tabular-nums font-normal normal-case text-muted-foreground/70">
-            {uploadedLabel}
-          </span>
-        </p>
-        <span
-          className={cn(
-            'rounded-full border px-2 py-0.5 text-[10px] font-medium',
-            required == null
-              ? 'border-border bg-muted/50 text-muted-foreground'
-              : missing > 0
-                ? 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-          )}
-        >
-          {requirementLabel}
-        </span>
-      </div>
-
-      <div className="space-y-2.5">
-        {videos.map((v) => (
-          <Slot key={v.id} kind={kind} ideaId={ideaId} video={v} canUpload={canUpload} publicEnabled={publicEnabled} />
-        ))}
-        {kind === 'edited' && (
-          <QcProgressDots
-            ideaId={ideaId}
-            videoId={
-              // El mismo criterio de "video vigente" que usa getVideoAnalysis:
-              // el edited/uploaded más reciente por uploaded_at, no el primero del array.
-              [...videos].sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))[0]?.id
-            }
-          />
-        )}
-        <Slot
-          kind={kind}
-          ideaId={ideaId}
-          video={undefined}
-          canUpload={canUpload}
-          publicEnabled={publicEnabled}
-          disabledReason={disabledReason}
-          additional={videos.length > 0}
-        />
-      </div>
-    </div>
-  )
-}
-
-function Slot({
-  kind, ideaId, video, canUpload, publicEnabled, disabledReason, additional = false,
-}: {
-  kind: ContentIdeaVideoKind
-  ideaId: string
-  video: ContentIdeaVideo | undefined
-  canUpload: boolean
-  publicEnabled: boolean
-  disabledReason?: string
-  additional?: boolean
-}) {
-  const meta = META[kind]
-  const Icon = meta.icon
   const fileRef = useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState<number | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [previewLoading, setPreviewLoading] = useState(false)
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null)
+  const [dragOver, setDragOver] = useState(false)
   const { toast } = useToast()
 
-  async function togglePreview() {
-    if (!video) return
-    if (previewUrl) {
-      setPreviewUrl(null)
-      return
-    }
-    setPreviewLoading(true)
-    // Routes by storage_provider so pipeline r2 AND entregas-r2 remain viewable.
-    const res = await getVideoPreviewUrl(video.id)
-    setPreviewLoading(false)
-    if (res.error || !res.url) {
-      toast({ title: 'Error', description: res.error ?? 'No se pudo cargar el preview', variant: 'destructive' })
-      return
-    }
-    setPreviewUrl(res.url)
-  }
+  const canDrop = canUpload && !disabledReason
 
   const MAX_BYTES = 5 * 1024 * 1024 * 1024
 
@@ -277,21 +228,166 @@ function Slot({
     }
   }
 
+  return (
+    <div
+      data-slot-group={kind}
+      className={cn(
+        'space-y-2 rounded-lg transition-colors',
+        dragOver && 'outline outline-2 outline-offset-2 outline-primary/50',
+      )}
+      onDragOver={(e) => {
+        if (!canDrop) return
+        e.preventDefault()
+        setDragOver(true)
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        if (!canDrop) return
+        e.preventDefault()
+        setDragOver(false)
+        handleFiles(e.dataTransfer.files)
+      }}
+    >
+      <div className="flex items-center justify-between gap-x-3">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <Icon className="h-3.5 w-3.5" /> {meta.label}
+          <span className="tabular-nums font-normal normal-case text-muted-foreground/70">
+            {uploadedLabel}
+          </span>
+        </p>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {kind === 'raw' && videos.length > 0 && (
+            <span className="rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground" title="En el pipeline, borrar el crudo lo destruye — se conserva a propósito.">
+              Se conserva
+            </span>
+          )}
+          <span
+            className={cn(
+              'rounded-full border px-2 py-0.5 text-[10px] font-medium',
+              required == null
+                ? 'border-border bg-muted/50 text-muted-foreground'
+                : missing > 0
+                  ? 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+            )}
+          >
+            {requirementLabel}
+          </span>
+          {canUpload && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={!!disabledReason}
+              title={disabledReason ?? `${meta.sub} · arrastra o haz click`}
+              aria-label={ADD_LABEL[kind]}
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-border text-muted-foreground transition hover:border-primary hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="video/*"
+            multiple
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+        </div>
+      </div>
+
+      {progress !== null && (
+        <div className={cn('rounded-lg border p-3', meta.tone)}>
+          <div className="mb-2 flex items-center justify-between text-xs font-medium">
+            <span className="flex items-center gap-1.5">
+              <Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…
+              {batch && batch.total > 1 && (
+                <span className="text-muted-foreground">({batch.done + 1} de {batch.total})</span>
+              )}
+            </span>
+            <span className="tabular-nums">{progress}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-background/60">
+            <div className="h-full bg-current transition-all duration-200" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      )}
+
+      {videos.length > 0 && (
+        <div className="space-y-2">
+          {videos.map((v) => (
+            <FileRow
+              key={v.id}
+              kind={kind}
+              ideaId={ideaId}
+              video={v}
+              canUpload={canUpload}
+              publicEnabled={publicEnabled}
+              allowDelete={kind !== 'raw'}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** One uploaded file's row: preview / download / (maybe) delete + status. */
+function FileRow({
+  kind, ideaId, video, canUpload, publicEnabled, allowDelete,
+}: {
+  kind: ContentIdeaVideoKind
+  ideaId: string
+  video: ContentIdeaVideo
+  canUpload: boolean
+  publicEnabled: boolean
+  allowDelete: boolean
+}) {
+  const meta = META[kind]
+  const Icon = meta.icon
+  const [isPending, startTransition] = useTransition()
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const { toast } = useToast()
+
+  async function togglePreview() {
+    if (previewUrl) {
+      setPreviewUrl(null)
+      return
+    }
+    setPreviewLoading(true)
+    // Routes by storage_provider so pipeline r2 AND entregas-r2 remain viewable.
+    const res = await getVideoPreviewUrl(video.id)
+    setPreviewLoading(false)
+    if (res.error || !res.url) {
+      toast({ title: 'Error', description: res.error ?? 'No se pudo cargar el preview', variant: 'destructive' })
+      return
+    }
+    setPreviewUrl(res.url)
+  }
+
   async function download() {
-    if (!video) return
     const res = await getR2DownloadUrl(video.id)
     if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
     else if (res.url) window.open(res.url, '_blank')
   }
 
-  if (video) {
-    // Both pipeline R2 and Entregas R2 support signed preview via getVideoPreviewUrl.
-    // Download still uses pipeline R2 signer (old-bucket rows only); entregas uses preview URL as fallback for now.
-    const isCloudR2 =
-      video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
-    const canDownloadR2 = video.storage_provider === 'r2'
-    return (
-      <div className="space-y-2">
+  // Both pipeline R2 and Entregas R2 support signed preview via getVideoPreviewUrl.
+  // Download still uses pipeline R2 signer (old-bucket rows only); entregas uses preview URL as fallback for now.
+  const isCloudR2 = video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
+  const canDownloadR2 = video.storage_provider === 'r2'
+
+  const uploaderFirst = firstName(video.uploader?.full_name)
+  const shortDate = formatUploadedAtShort(video.uploaded_at)
+  const shortMeta = [formatBytes(video.size_bytes), uploaderFirst, shortDate].filter(Boolean).join(' · ')
+  const fullMeta = [
+    formatBytes(video.size_bytes),
+    video.uploader?.full_name?.trim() ? `subido por ${video.uploader.full_name.trim()}` : '',
+    video.uploaded_at ? formatUploadedAt(video.uploaded_at) : '',
+  ].filter(Boolean).join(' · ')
+
+  return (
+    <div className="space-y-2">
       <div className={cn('flex items-center gap-3 rounded-lg border p-3', meta.tone)}>
         <div className={cn('grid h-11 w-14 shrink-0 place-items-center rounded', meta.tone)}>
           <Icon className="h-5 w-5" />
@@ -301,11 +397,7 @@ function Slot({
             <Icon className="h-3 w-3" /> {meta.label}
           </p>
           <p className="truncate text-sm font-medium">{video.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {formatBytes(video.size_bytes)}
-            {video.uploader?.full_name?.trim() ? ` · subido por ${video.uploader.full_name.trim()}` : ''}
-            {video.uploaded_at ? ` · ${formatUploadedAt(video.uploaded_at)}` : ''}
-          </p>
+          <p className="text-xs text-muted-foreground" title={fullMeta}>{shortMeta}</p>
           <VideoStatusBadges video={video} kind={kind} publicEnabled={publicEnabled} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -330,7 +422,7 @@ function Slot({
               <ExternalLink className="h-3 w-3" /> Drive
             </a>
           ) : null}
-          {canUpload && (
+          {canUpload && allowDelete && (
             <button
               onClick={() => {
                 if (!confirm(`¿Quitar este ${meta.label.toLowerCase()}?`)) return
@@ -349,67 +441,14 @@ function Slot({
           )}
         </div>
       </div>
-        {previewUrl && (
-          <video
-            src={previewUrl}
-            controls
-            playsInline
-            className="aspect-video w-full rounded-lg border bg-black"
-          />
-        )}
-        {kind === 'edited' && !previewUrl && <VideoSceneStrip videoId={video.id} onOpen={togglePreview} />}
-      </div>
-    )
-  }
-
-  if (!canUpload) {
-    return null
-  }
-
-  if (progress !== null) {
-    return (
-      <div className={cn('rounded-lg border p-3', meta.tone)}>
-        <div className="mb-2 flex items-center justify-between text-xs font-medium">
-          <span className="flex items-center gap-1.5">
-            <Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…
-            {batch && batch.total > 1 && (
-              <span className="text-muted-foreground">({batch.done + 1} de {batch.total})</span>
-            )}
-          </span>
-          <span className="tabular-nums">{progress}%</span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-background/60">
-          <div className="h-full bg-current transition-all duration-200" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <button
-      type="button"
-      disabled={!!disabledReason}
-      onClick={() => fileRef.current?.click()}
-      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-primary/5') }}
-      onDragLeave={(e) => e.currentTarget.classList.remove('border-primary', 'bg-primary/5')}
-      onDrop={(e) => {
-        e.preventDefault()
-        e.currentTarget.classList.remove('border-primary', 'bg-primary/5')
-        handleFiles(e.dataTransfer.files)
-      }}
-      className={cn(
-        'group flex w-full items-center gap-2 rounded-lg border border-dashed p-3 text-left text-sm transition-all',
-        'hover:border-primary hover:bg-primary/5',
-        disabledReason && 'cursor-not-allowed opacity-50 hover:border-dashed hover:bg-transparent',
+      {previewUrl && (
+        <video
+          src={previewUrl}
+          controls
+          playsInline
+          className="aspect-video w-full rounded-lg border bg-black"
+        />
       )}
-    >
-      <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', meta.tone)}><Icon className="h-4 w-4" /></div>
-      <div className="min-w-0 flex-1">
-        <p className="font-medium">{additional ? 'Subir más' : 'Subir'} {meta.label.toLowerCase()}</p>
-        <p className="text-[10px] text-muted-foreground">{disabledReason ?? meta.sub} · arrastra uno o varios o haz click</p>
-      </div>
-      <Upload className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:scale-110 group-hover:text-primary" />
-      <input ref={fileRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-    </button>
+    </div>
   )
 }

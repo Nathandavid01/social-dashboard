@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.45 — Tarjeta de video rediseñada</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --amber:#f59e0b; --cyan:#22d3ee; --purple:#a78bfa; --teal:#2dd4bf; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 64px; }
+    .wrap { max-width:640px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 22px; line-height:1.5; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:22px 0 8px; }
+    .row-label.before { color:#f87171; }
+    .row-label.after { color:var(--good); }
+
+    /* Video work card */
+    .video-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:14px; }
+
+    .head-row { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .head-left { display:flex; align-items:center; gap:10px; min-width:0; }
+    .num { width:28px; height:28px; border-radius:8px; background:#1f1f1f; color:var(--muted-fg); font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .title-block { min-width:0; display:flex; flex-direction:column; gap:2px; }
+    .title { font-size:13px; font-weight:600; margin:0; }
+    .kind { font-size:11px; color:var(--muted-fg); margin:0; }
+    .status-pill { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:4px 9px; font-size:10px; font-weight:600; background:rgba(245,158,11,.12); color:var(--amber); white-space:nowrap; }
+    .status-pill .dot { width:6px; height:6px; border-radius:999px; background:var(--amber); }
+
+    .agenda { display:flex; align-items:center; gap:6px; border:1px solid rgba(212,175,55,.35); background:rgba(212,175,55,.08); border-radius:8px; padding:6px 9px; font-size:11px; color:var(--fg); }
+    .agenda svg { flex-shrink:0; color:var(--gold); }
+
+    /* Old banner (removed) */
+    .banner-old { display:flex; align-items:center; gap:10px; border-radius:10px; padding:10px 12px; background:rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.2); }
+    .banner-old .ico { width:26px; height:26px; border-radius:8px; background:rgba(212,175,55,.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; }
+    .banner-old .t1 { font-size:12px; font-weight:600; }
+    .banner-old .t2 { font-size:11px; color:var(--muted-fg); }
+    .strike { text-decoration: line-through; opacity:.55; }
+
+    /* Scene strip + QC */
+    .scene-strip { display:flex; gap:5px; }
+    .scene-thumb { flex:1; aspect-ratio:16/9; border-radius:5px; background:linear-gradient(135deg,#242424,#171717); border:1px solid var(--border); }
+
+    .qc-box { border:1px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:7px; }
+    .qc-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); }
+    .qc-row { display:flex; align-items:center; gap:8px; font-size:12px; }
+    .qc-dot { width:13px; height:13px; border-radius:999px; flex-shrink:0; }
+    .qc-dot.ok { background:transparent; border:2px solid var(--good); }
+    .qc-dot.ok::after { content:''; }
+    .qc-frames { font-size:10px; color:var(--muted-fg); margin-left:21px; }
+
+    /* Slot groups */
+    .slot-group { display:flex; flex-direction:column; gap:8px; }
+    .slot-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .slot-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-fg); }
+    .slot-label .count { font-weight:400; text-transform:none; color:#6b6b6b; }
+    .slot-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .badge { border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.03); padding:2px 8px; font-size:10px; font-weight:500; color:var(--muted-fg); }
+    .badge.complete { border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.1); color:#4ade80; }
+    .badge.missing { border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.1); color:var(--amber); }
+    .badge.keep { border-color:var(--border); background:rgba(255,255,255,.04); color:var(--muted-fg); }
+    .add-btn { width:22px; height:22px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; line-height:1; }
+    .add-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+    .file-row { display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:8px; padding:9px 10px; }
+    .file-row .ficon { width:38px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .file-row.edited .ficon { background:rgba(167,139,250,.12); color:var(--purple); }
+    .file-row.raw .ficon { background:rgba(34,211,238,.12); color:var(--cyan); }
+    .file-row.broll .ficon { background:rgba(45,212,191,.12); color:var(--teal); }
+    .file-meta { min-width:0; flex:1; }
+    .file-name { font-size:12.5px; font-weight:500; }
+    .file-sub { font-size:10.5px; color:var(--muted-fg); }
+    .file-btns { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    .mini-btn { border:1px solid var(--border); border-radius:6px; background:transparent; color:var(--fg); font-size:10px; padding:4px 7px; }
+    .del-btn { color:#f87171; font-size:12px; padding:4px 6px; }
+
+    .broll-line { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:11px; color:var(--muted-fg); }
+    .broll-line .lbl { display:flex; align-items:center; gap:6px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+
+    .note { margin-top:22px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; line-height:1.5; }
+    .note b { color:var(--fg); }
+    .note + .note { margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.45 — La tarjeta de video, sin ruido</h1>
+    <p class="sub">Seis cambios en la tarjeta de "Videos de este lote": menos banner, la agenda de publicación al frente, la tira de escenas y el QC arriba de todo, el orden invertido (editado primero), botones "+" en vez de cajas grandes, y el crudo protegido de borrarse por accidente.</p>
+
+    <div class="row-label before">Antes — banner de etapa repetido</div>
+    <div class="video-card">
+      <div class="banner-old">
+        <span class="ico">💡</span>
+        <div>
+          <p class="t1 strike">Este lote está en la etapa Aprobación</p>
+          <p class="t2 strike">Envía los videos al cliente para su aprobación.</p>
+        </div>
+      </div>
+      <p class="t2" style="font-size:11px;color:var(--muted-fg);margin:0;">↑ la barra de pasos de arriba (Video › Edición › <b>Aprobación</b> › Publicación) ya lo decía — se quitó.</p>
+    </div>
+
+    <div class="row-label after">Ahora — tarjeta completa rediseñada</div>
+    <div class="video-card">
+      <div class="head-row">
+        <div class="head-left">
+          <div class="num">1</div>
+          <div class="title-block">
+            <p class="title">Rutina de fuerza 5x5</p>
+            <p class="kind">Video 1 · Reel</p>
+            <div class="agenda">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="18" cy="18" r="3"/><path d="M18 16.5V18l1 1"/></svg>
+              Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook
+            </div>
+          </div>
+        </div>
+        <span class="status-pill"><span class="dot"></span>Por grabar</span>
+      </div>
+
+      <!-- Lo que se mira, arriba: tira de escenas + QC, antes de la lista de archivos -->
+      <div class="scene-strip">
+        <div class="scene-thumb"></div><div class="scene-thumb"></div><div class="scene-thumb"></div><div class="scene-thumb"></div><div class="scene-thumb"></div>
+      </div>
+      <div class="qc-box">
+        <div class="qc-label">QC con IA (advisory)</div>
+        <div class="qc-row"><span class="qc-dot ok"></span> Es del cliente</div>
+        <div class="qc-row"><span class="qc-dot ok"></span> Libre de errores</div>
+        <div class="qc-row"><span class="qc-dot ok"></span> Caption generado</div>
+        <div class="qc-frames">96 fotogramas analizados</div>
+      </div>
+
+      <!-- Editado primero -->
+      <div class="slot-group">
+        <div class="slot-head">
+          <span class="slot-label">🎬 Video editado <span class="count">1 subido</span></span>
+          <div class="slot-actions">
+            <span class="badge complete">Completo</span>
+            <button class="add-btn" title="Añadir video editado">+</button>
+          </div>
+        </div>
+        <div class="file-row edited">
+          <div class="ficon">🎬</div>
+          <div class="file-meta">
+            <div class="file-name">final_rutina_5x5.mp4</div>
+            <div class="file-sub">184 MB · Nathan · 12 ago</div>
+          </div>
+          <div class="file-btns">
+            <button class="mini-btn">▶ Ver</button>
+            <button class="mini-btn">⬇ Bajar</button>
+            <button class="mini-btn del-btn">🗑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crudo segundo, sin papelera -->
+      <div class="slot-group">
+        <div class="slot-head">
+          <span class="slot-label">📷 Video crudo <span class="count">4 subidos</span></span>
+          <div class="slot-actions">
+            <span class="badge keep">Se conserva</span>
+            <span class="badge complete">Completo</span>
+            <button class="add-btn" title="Añadir material crudo">+</button>
+          </div>
+        </div>
+        <div class="file-row raw">
+          <div class="ficon">📷</div>
+          <div class="file-meta">
+            <div class="file-name">raw_toma1.mp4</div>
+            <div class="file-sub">1.2 GB · Nathan · 10 ago</div>
+          </div>
+          <div class="file-btns">
+            <button class="mini-btn">▶ Ver</button>
+            <button class="mini-btn">⬇ Bajar</button>
+            <!-- sin botón de borrar: en el pipeline, borrarlo lo destruye -->
+          </div>
+        </div>
+      </div>
+
+      <!-- B-roll: una línea, sin caja -->
+      <div class="broll-line">
+        <span class="lbl">📹 B-roll — opcional</span>
+        <button class="add-btn" title="Añadir b-roll">+</button>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>El "+" no rompe el arrastre:</b> soltar un archivo sobre la tarjeta sigue subiéndolo igual que antes —
+      solo cambió la caja grande de "arrastra aquí" por un botón compacto junto a cada cabecera.
+    </p>
+    <p class="note">
+      <b>Por qué el crudo no se borra desde aquí:</b> el bucket del pipeline destruye el archivo al eliminarlo
+      (en Entregas solo se archiva). El chip "Se conserva" avisa esa diferencia en vez de ofrecer un botón que
+      lleva a una pérdida sin vuelta atrás. Editado y b-roll siguen con su papelera de siempre.
+    </p>
+    <p class="note">
+      <b>Metadatos abreviados:</b> la fila muestra "184 MB · Nathan · 12 ago"; pasa el mouse sobre el texto para
+      ver el detalle completo ("184 MB · subido por Nathan Torres · 12 ago, 4:05 p. m.").
+    </p>
+  </div>
+</body>
+</html>

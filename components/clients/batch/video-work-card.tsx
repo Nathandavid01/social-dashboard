@@ -1,15 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Check, Film, Flag } from 'lucide-react'
+import { CalendarClock, Check, Film, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cardStatus, contentTypeLabel, isRecorded, videoNextStep, type NextStepTone, type BatchVideo } from '@/lib/utils/batch-view'
 import { deadlineStatus, deadlineTone, formatDateShortES } from '@/lib/utils/deadlines'
+import { buildVideoAgendaLine } from '@/lib/utils/client-pipeline-publish'
+import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import { InlineEdit } from '@/components/shared/inline-edit'
 import { updateIdeaTitle } from '@/lib/actions/content-ideas'
 import { IdeaBriefCard } from '@/components/produccion/idea-brief-card'
 import { IdeaCaptionEditor } from '@/components/produccion/idea-caption-editor'
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
+import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
+import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
 import { ApprovalButton } from '@/components/produccion/approval-button'
 import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import { ReviewLinkPanel } from '@/components/review/review-link-panel'
@@ -39,18 +43,41 @@ export function VideoWorkCard({
   video,
   index,
   platforms,
+  defaultPlatforms,
+  postingTime,
+  postingSchedule,
   clientName,
   clientLogoUrl,
 }: {
   video: BatchVideo
   index: number
   platforms?: SocialPlatform[]
+  /** Client's default networks — used when `platforms` is empty (see resolvePlatforms). */
+  defaultPlatforms?: string[] | null
+  /** Client's default posting_time; a posting_schedule override for the video's weekday wins. */
+  postingTime?: string | null
+  postingSchedule?: Record<string, string> | null
   clientName?: string | null
   clientLogoUrl?: string | null
 }) {
   const recorded = isRecorded(video)
+  const agenda = buildVideoAgendaLine({
+    publishDate: video.publish_date,
+    postingTime,
+    postingSchedule,
+    platforms: resolvePlatforms(platforms, defaultPlatforms),
+    platformFormats: video.platform_formats,
+    fallbackFormatLabel: contentTypeLabel(video.content_type),
+  })
   const status = cardStatus(video)
   const ideaVideos = [...video.videos.raw, ...video.videos.broll, ...video.videos.edited]
+
+  // The "vigente" edited cut — same criterion as getVideoAnalysis: the most
+  // recent uploaded edited file, not the first in the array. Feeds the scene
+  // strip + QC dots at the top of the card (once per video, above the files).
+  const currentEditedId = [...video.videos.edited]
+    .filter((v) => v.status === 'uploaded')
+    .sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))[0]?.id
 
   // published_at also suppresses the badge (the auto-post path may set it without
   // flipping status to 'publicada').
@@ -91,6 +118,22 @@ export function VideoWorkCard({
             <span className="text-[11px] text-muted-foreground">
               Video {index + 1} · {contentTypeLabel(video.content_type)}
             </span>
+            <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-1 text-[11px] text-foreground">
+              <CalendarClock className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+              {agenda.hasDate ? (
+                <span className="min-w-0 truncate">
+                  Se publica el {agenda.dateLabel}
+                  {' · '}
+                  {agenda.timeConfigured ? agenda.timeLabel : 'hora no configurada'}
+                  {agenda.formatsLabel ? <> · {agenda.formatsLabel}</> : null}
+                  {agenda.pastDue && (
+                    <span className="text-amber-600 dark:text-amber-400"> · Fecha pasada — se corre a +24h</span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Sin fecha de publicación</span>
+              )}
+            </span>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -118,6 +161,13 @@ export function VideoWorkCard({
           )}
         </div>
       </header>
+
+      {/* 0) lo que se mira, arriba: la tira de escenas + las bolitas QC del corte
+          vigente — antes de la lista de archivos, y solo una vez por video. */}
+      <div className="flex flex-col gap-2">
+        {currentEditedId && <VideoSceneStrip videoId={currentEditedId} />}
+        <QcProgressDots ideaId={video.id} videoId={currentEditedId} />
+      </div>
 
       {/* 1) el video — lo primero: súbelo */}
       <div className="flex flex-col gap-2">

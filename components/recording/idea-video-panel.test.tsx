@@ -4,7 +4,10 @@ import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/type
 
 /**
  * IdeaVideoPanel keeps uploads compact: existing files stay visible, each group
- * gets one multi-file uploader, and the header says what is still missing.
+ * has a compact "+" trigger (no big dropzone box) that still accepts a drop on
+ * the group, and the header says what is still missing. Slot order is
+ * edited → raw → broll (the deliverable first). The scene strip and QC dots
+ * live ABOVE this panel now (in VideoWorkCard), not inside it.
  */
 
 // --- Mocks --------------------------------------------------------------
@@ -20,14 +23,8 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
-vi.mock('@/lib/actions/video-analysis', () => ({
-  getVideoAnalysis: vi.fn(async () => ({ analysis: null })),
-}))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn().mockResolvedValue(undefined),
-}))
-vi.mock('@/lib/actions/video-thumbs', () => ({
-  getVideoThumbViewUrls: vi.fn(async () => ({ urls: [] })),
 }))
 
 vi.mock('@/lib/hooks/use-toast', () => ({
@@ -67,14 +64,6 @@ function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   }
 }
 
-// An empty uploadable slot renders a "Subir <label>" button.
-function uploadSlots(label: string) {
-  return screen.queryAllByText(new RegExp(`^Subir ${label}$`, 'i'))
-}
-
-// The 'edited' SlotGroup always mounts QcProgressDots (tira de bolitas QC),
-// which resolves getVideoAnalysis (mocked) in a useEffect after mount. Flush
-// that settle inside act() so React doesn't warn about an unwrapped state update.
 async function flush() {
   await act(async () => {})
 }
@@ -85,19 +74,19 @@ beforeEach(() => {
 })
 
 describe('IdeaVideoPanel — compact upload view', () => {
-  it('renders one uploader per group and summarizes what is missing', async () => {
+  it('renders one "+" per group and summarizes what is missing', async () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
 
-    expect(uploadSlots('video crudo')).toHaveLength(1)
-    expect(uploadSlots('b-roll')).toHaveLength(1)
-    expect(uploadSlots('video editado')).toHaveLength(1)
-    expect(screen.getByText('Faltan 4')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir video editado' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir material crudo' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Añadir b-roll' })).toBeInTheDocument()
     expect(screen.getByText('Faltan 1')).toBeInTheDocument()
+    expect(screen.getByText('Faltan 4')).toBeInTheDocument()
     expect(screen.getByText('Opcional')).toBeInTheDocument()
   })
 
-  it('shows existing files plus one "Subir más" action', async () => {
+  it('shows existing files under each group', async () => {
     const videos = [
       makeVideo('raw', 0),
       makeVideo('raw', 1),
@@ -107,22 +96,21 @@ describe('IdeaVideoPanel — compact upload view', () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} />)
     await flush()
 
-    expect(uploadSlots('más video crudo')).toHaveLength(1)
     expect(screen.getByText('raw-0.mp4')).toBeInTheDocument()
     expect(screen.getByText('raw-1.mp4')).toBeInTheDocument()
-    expect(uploadSlots('más b-roll')).toHaveLength(1)
-    expect(uploadSlots('más video editado')).toHaveLength(1)
+    expect(screen.getByText('broll-0.mp4')).toBeInTheDocument()
+    expect(screen.getByText('edited-0.mp4')).toBeInTheDocument()
     expect(screen.getByText('Faltan 2')).toBeInTheDocument()
     expect(screen.getByText('Completo')).toBeInTheDocument()
   })
 
-  it('keeps one uploader when the required count is complete', async () => {
+  it('keeps a single "+" when the required count is complete', async () => {
     const videos = Array.from({ length: 5 }, (_, i) => makeVideo('raw', i))
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} />)
     await flush()
 
     videos.forEach((v) => expect(screen.getByText(v.name)).toBeInTheDocument())
-    expect(uploadSlots('más video crudo')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Añadir material crudo' })).toBeInTheDocument()
     expect(screen.getByText('Completo')).toBeInTheDocument()
   })
 
@@ -132,8 +120,58 @@ describe('IdeaVideoPanel — compact upload view', () => {
     await flush()
 
     expect(screen.queryByText('raw-99.mp4')).not.toBeInTheDocument()
-    expect(uploadSlots('video crudo')).toHaveLength(1)
     expect(screen.getByText('Faltan 4')).toBeInTheDocument()
+  })
+})
+
+describe('IdeaVideoPanel — orden: editado → crudo → b-roll', () => {
+  it('renders the group headers top to bottom as Video editado, Video crudo, B-roll', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
+
+    const headers = screen.getAllByText(/Video editado|Video crudo|B-roll/)
+    const order = headers.map((h) => h.textContent)
+    const editedIdx = order.findIndex((t) => t?.includes('Video editado'))
+    const rawIdx = order.findIndex((t) => t?.includes('Video crudo'))
+    const brollIdx = order.findIndex((t) => t?.includes('B-roll'))
+    expect(editedIdx).toBeGreaterThanOrEqual(0)
+    expect(editedIdx).toBeLessThan(rawIdx)
+    expect(rawIdx).toBeLessThan(brollIdx)
+  })
+
+  it('the hidden file inputs exist in edited → raw → broll order (3 groups)', async () => {
+    const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    await flush()
+
+    const inputs = container.querySelectorAll('input[type="file"]')
+    expect(inputs).toHaveLength(3)
+    // Structural order check: the "edited" group's "+" (and its input) come
+    // before "raw"'s in the DOM — actual upload-triggers-QC is covered below.
+    const editedBtn = screen.getByRole('button', { name: 'Añadir video editado' })
+    const rawBtn = screen.getByRole('button', { name: 'Añadir material crudo' })
+    expect(editedBtn.compareDocumentPosition(rawBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+describe('IdeaVideoPanel — borrado: el crudo no lo tiene, editado y b-roll sí', () => {
+  it('no renders a delete button on a raw video', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    await flush()
+    expect(screen.queryByRole('button', { name: /eliminar/i })).not.toBeInTheDocument()
+    // Labeled instead: the file is kept, never destructively deleted.
+    expect(screen.getByText(/se conserva/i)).toBeInTheDocument()
+  })
+
+  it('renders a delete button on an edited video', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('edited', 0)]} />)
+    await flush()
+    expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
+  })
+
+  it('renders a delete button on a b-roll video', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('broll', 0)]} />)
+    await flush()
+    expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
   })
 })
 
@@ -149,7 +187,6 @@ describe('IdeaVideoPanel — per-video status badges', () => {
     const videos = [makeVideo('raw', 0), makeVideo('edited', 0)]
     render(<IdeaVideoPanel ideaId="idea-1" videos={videos} publicEnabled />)
     await flush()
-    // One Público badge — the edited one; the raw video is not public.
     expect(screen.getAllByText('Público')).toHaveLength(1)
   })
 
@@ -168,14 +205,6 @@ describe('IdeaVideoPanel — per-video status badges', () => {
     expect(screen.getAllByText('Drive').length).toBeGreaterThan(0)
   })
 
-  it('shows the upload time of an uploaded video', async () => {
-    const v = { ...makeVideo('edited', 0), uploaded_at: '2026-06-02T15:42:00.000Z' }
-    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), v]} />)
-    await flush()
-    // "subido <fecha/hora>" appears for the uploaded video.
-    expect(screen.getAllByText(/subido/i).length).toBeGreaterThan(0)
-  })
-
   it('labels Entregas R2 files with their real storage provider', async () => {
     const entregasVideo = { ...makeVideo('edited', 0), storage_provider: 'entregas-r2' as const }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregasVideo]} />)
@@ -183,26 +212,42 @@ describe('IdeaVideoPanel — per-video status badges', () => {
     expect(screen.getByText('Entregas R2')).toBeInTheDocument()
     expect(screen.queryByText('Drive')).not.toBeInTheDocument()
   })
+})
 
-  it('shows the editor name from the joined uploader profile', async () => {
-    const v = { ...makeVideo('edited', 0), uploader: { id: 'user-1', full_name: 'Alexa Kerocen', email: 'alexa@example.com' } }
+describe('IdeaVideoPanel — metadatos abreviados', () => {
+  it('shows size · first name · short date, with the full detail in the title', async () => {
+    const v = {
+      ...makeVideo('edited', 0),
+      uploaded_at: '2026-06-02T15:42:00.000Z',
+      uploader: { id: 'user-1', full_name: 'Alexa Kerocen', email: 'alexa@example.com' },
+    }
     render(<IdeaVideoPanel ideaId="idea-1" videos={[v]} />)
     await flush()
-    expect(screen.getByText(/subido por Alexa Kerocen/i)).toBeInTheDocument()
+
+    const meta = screen.getByText(/Alexa/i)
+    expect(meta.textContent).not.toMatch(/kerocen/i)
+    expect(meta.textContent).not.toMatch(/subido por/i)
+    expect(meta.textContent).not.toMatch(/\d{1,2}:\d{2}/) // no time in the short label
+    expect(meta).toHaveAttribute('title', expect.stringMatching(/subido por Alexa Kerocen/i))
+  })
+
+  it('omits the uploader segment when there is no uploader profile', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0)]} />)
+    await flush()
+    expect(screen.queryByText(/subido por/i)).not.toBeInTheDocument()
   })
 })
 
 describe('IdeaVideoPanel — permission gating', () => {
-  it('does not render upload dropzones when the user lacks video.upload', async () => {
+  it('does not render "+" triggers when the user lacks video.upload', async () => {
     canUpload = false
     render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
 
-    // No uploadable "Subir ..." buttons.
-    expect(screen.queryByText(/^Subir /i)).not.toBeInTheDocument()
+    expect(screen.queryAllByRole('button', { name: /^Añadir /i })).toHaveLength(0)
     // The compact headers still communicate the missing requirements.
-    expect(screen.getByText('Faltan 4')).toBeInTheDocument()
     expect(screen.getByText('Faltan 1')).toBeInTheDocument()
+    expect(screen.getByText('Faltan 4')).toBeInTheDocument()
     expect(screen.getByText('Opcional')).toBeInTheDocument()
   })
 })
@@ -256,8 +301,9 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
 
+    // Order is edited → raw → broll.
     const inputs = container.querySelectorAll('input[type="file"]')
-    const editedInput = inputs[2] as HTMLInputElement
+    const editedInput = inputs[0] as HTMLInputElement
     const file = new File(['x'], 'final.mp4', { type: 'video/mp4' })
     await act(async () => {
       fireEvent.change(editedInput, { target: { files: [file] } })
@@ -273,7 +319,7 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     await flush()
 
     const inputs = container.querySelectorAll('input[type="file"]')
-    const rawInput = inputs[0] as HTMLInputElement
+    const rawInput = inputs[1] as HTMLInputElement
     const file = new File(['x'], 'raw.mp4', { type: 'video/mp4' })
     await act(async () => {
       fireEvent.change(rawInput, { target: { files: [file] } })
@@ -284,27 +330,39 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
   })
 })
 
-describe('IdeaVideoPanel — tira de 5 escenas', () => {
-  it('muestra la tira de 5 escenas debajo de un video editado', async () => {
-    const { getVideoThumbViewUrls } = await import('@/lib/actions/video-thumbs')
-    vi.mocked(getVideoThumbViewUrls).mockResolvedValue({
-      urls: ['t0', 't1', 't2', 't3', 't4'],
-    })
-    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('edited', 0)]} />)
-    await flush()
-    await flush()
-
-    expect(screen.getAllByRole('img', { name: /^Escena \d/ })).toHaveLength(5)
+describe('IdeaVideoPanel — arrastrar y soltar (sin la caja grande)', () => {
+  const OriginalXHR = global.XMLHttpRequest
+  class FakeXHR {
+    status = 200
+    upload: { onprogress: ((e: ProgressEvent) => void) | null } = { onprogress: null }
+    onload: (() => void) | null = null
+    onerror: (() => void) | null = null
+    open() {}
+    setRequestHeader() {}
+    send() { this.onload?.() }
+  }
+  beforeEach(() => {
+    // @ts-expect-error test stub, not a full XMLHttpRequest
+    global.XMLHttpRequest = FakeXHR
+  })
+  afterEach(() => {
+    global.XMLHttpRequest = OriginalXHR
   })
 
-  it('no muestra la tira para videos crudos ni b-roll', async () => {
-    const { getVideoThumbViewUrls } = await import('@/lib/actions/video-thumbs')
-    vi.mocked(getVideoThumbViewUrls).mockResolvedValue({ urls: ['t0'] })
-    render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('raw', 0), makeVideo('broll', 0)]} />)
-    await flush()
+  it('a drop on the group still registers the upload', async () => {
+    vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-drop' })
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
     await flush()
 
-    expect(screen.queryAllByRole('img', { name: /^Escena \d/ })).toHaveLength(0)
+    const group = screen.getByRole('button', { name: 'Añadir material crudo' }).closest('[data-slot-group="raw"]')
+    expect(group).not.toBeNull()
+    const file = new File(['x'], 'dropped.mp4', { type: 'video/mp4' })
+    await act(async () => {
+      fireEvent.drop(group as Element, { dataTransfer: { files: [file] } })
+    })
+    await flush()
+
+    expect(vi.mocked(registerR2Video)).toHaveBeenCalled()
   })
 })
 

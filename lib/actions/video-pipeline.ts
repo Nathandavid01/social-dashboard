@@ -40,6 +40,8 @@ export interface ClientVideoPipeline {
     | 'metricool_blog_id'
     | 'posting_days'
     | 'posting_time'
+    | 'posting_schedule'
+    | 'default_platforms'
   > &
     Partial<Pick<Client, 'assigned_to'>> & {
       assignee?: { id: string; full_name: string | null; avatar_url: string | null } | null
@@ -69,7 +71,7 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms',
       )
       .order('name', { ascending: true }),
     supabase
@@ -156,7 +158,7 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
       )
       .eq('id', clientId)
       .maybeSingle(),

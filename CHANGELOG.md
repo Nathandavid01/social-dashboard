@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.45 — 2026-08-16
+
+**La tarjeta de cada video del lote se rediseñó: menos banner, más lo que importa — cuándo se publica, cómo se ve, y subir archivos en un clic.**
+
+- **Fuera el banner de "esta lote está en la etapa…"**: la barra de pasos de arriba (Video › Edición › Aprobación › Publicación) ya lo decía.
+- **Agenda de publicación, justo bajo el título**, en una cajita con el dorado de la marca: "Se publica el lun 17 ago · 3:20 p. m. · Reel en Instagram y Facebook" — de un vistazo, sin adivinar.
+- **La tira de 5 escenas y las 3 bolitas de QC suben arriba de todo**, encima de los archivos — así se ve de qué trata el video y su estado de calidad antes de ponerte a revisar uno por uno.
+- **El video editado va primero**, luego el material crudo y el b-roll — el orden en que de verdad se trabaja: primero la entrega, después el insumo.
+- **Las cajas grandes de "arrastra aquí" se convirtieron en un botón "+"** compacto junto a cada cabecera — arrastrar un archivo sobre la tarjeta sigue funcionando exactamente igual.
+- **El material crudo ya no tiene botón de borrar** — se etiqueta "Se conserva": en el servidor de producción, borrarlo lo destruye para siempre (a diferencia de Entregas, donde solo se archiva), así que aquí no se ofrece esa opción.
+- **B-roll ahora es una línea simple** ("B-ROLL — opcional" + "+"), sin caja, ya que es el material que menos se usa.
+- **Metadatos de archivo más cortos**: "8.7 MB · Nathan · 3 ago" en vez de la línea larga con el nombre completo y la hora exacta — ese detalle completo sigue disponible al pasar el mouse.
+
+Vista: [preview HTML](/previews/v3.45-agenda-en-tarjeta.html)
+
 ## v3.44 — 2026-08-16
 
 **La IA ya no se inventa el caption — ve y escucha el video, escribe de qué es en la casilla de siempre, y el generador de captions vuelve a trabajar como cuando el proceso era manual.**
