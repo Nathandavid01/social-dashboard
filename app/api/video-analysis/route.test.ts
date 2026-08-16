@@ -38,6 +38,11 @@ let existingFrameCount: number | null = null
 let frameCountUpdates: Array<{ payload: Record<string, unknown>; videoId?: string }> = []
 /** Simula "la columna frame_count no existe todavía" (migración 0063 pendiente). */
 let frameCountUpdateThrows = false
+/** Log SEPARADO de los UPDATE best-effort sobre content_ideas (hook / hook_source). */
+let hookUpdates: Array<{ payload: Record<string, unknown>; id?: string }> = []
+/** Simula "la columna hook_source no existe todavía" (migración 0064 pendiente):
+ *  solo el UPDATE que trae hook_source lanza — el UPDATE del hook en sí sigue vivo. */
+let hookSourceUpdateThrows = false
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -71,6 +76,19 @@ vi.mock('@/lib/supabase/server', () => ({
             eq: async (_col: string, videoId: string) => {
               if (frameCountUpdateThrows) throw new Error('column "frame_count" does not exist')
               frameCountUpdates.push({ payload, videoId })
+              return { error: null }
+            },
+          }),
+        }
+      }
+      if (table === 'content_ideas') {
+        return {
+          update: (payload: Record<string, unknown>) => ({
+            eq: async (_col: string, id: string) => {
+              if ('hook_source' in payload && hookSourceUpdateThrows) {
+                throw new Error('column "hook_source" does not exist')
+              }
+              hookUpdates.push({ payload, id })
               return { error: null }
             },
           }),
@@ -111,6 +129,8 @@ beforeEach(() => {
   existingFrameCount = null
   frameCountUpdates = []
   frameCountUpdateThrows = false
+  hookUpdates = []
+  hookSourceUpdateThrows = false
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
@@ -354,5 +374,84 @@ describe('POST /api/video-analysis — frame_count (contador de fotogramas)', ()
     const doneUpserts = calls.filter((c) => c.op === 'upsert')
     expect(doneUpserts).toHaveLength(2)
     expect(frameCountUpdates).toHaveLength(1)
+  })
+})
+
+describe('POST /api/video-analysis — video_topic escribe el hook ("¿De qué es este video?")', () => {
+  const findingsWithTopic = (topic: string) => ({
+    burned_captions: { text: 'Ven hoy', issues: [] },
+    relevance: { verdict: 'ok', explanation: 'coincide' },
+    visual_summary: 'persona a cámara',
+    video_topic: topic,
+  })
+
+  it('hook vacío + video_topic → escribe hook y hook_source=\'ai\', DESPUÉS del upsert done y ANTES de generateIdeaCaption', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha en parrilla Santa María'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha en parrilla Santa María' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
+    // El upsert 'done' (calls[1]) ya sucedió antes de tocar content_ideas, y el
+    // caption se encadena después de escribir el hook.
+    const upsertCount = calls.filter((c) => c.op === 'upsert').length
+    expect(upsertCount).toBe(2)
+    expect(calls[calls.length - 1]).toEqual({ op: 'generateIdeaCaption', payload: ['idea-1', { auto: true }] })
+  })
+
+  it('hook con texto humano → NO lo toca, aunque venga video_topic', async () => {
+    // IDEA por defecto ya trae hook: 'hook' (texto humano).
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+  })
+
+  it('sin video_topic en los findings → no escribe nada en content_ideas', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    // GOOD_FINDINGS (default mock) no trae video_topic.
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+  })
+
+  it('el UPDATE de hook_source falla (columna sin migrar) → el hook igual se escribe y el caption se encadena igual', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    hookSourceUpdateThrows = true
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    await expect(res.json()).resolves.toEqual({ ok: true })
+    expect(hookUpdates).toEqual([{ payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' }])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('con troceado: chunk 0 de 3 (no es el último) NO escribe el hook aunque traiga video_topic', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([])
+  })
+
+  it('con troceado: solo el ÚLTIMO chunk escribe, usando el video_topic ya fundido de chunks previos', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    existingFindings = { ...findingsWithTopic('Cómo sellar una picanha'), }
+    // El chunk final no trae video_topic propio — el merge conserva el del previo.
+    analyzeVideoFrames.mockResolvedValueOnce({
+      burned_captions: { text: 'cierra con logo', issues: [] },
+      relevance: { verdict: 'ok', explanation: 'coincide' },
+      visual_summary: 'cierra con el logo',
+    })
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 2, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(hookUpdates).toEqual([
+      { payload: { hook: 'Cómo sellar una picanha' }, id: 'idea-1' },
+      { payload: { hook_source: 'ai' }, id: 'idea-1' },
+    ])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
   })
 })

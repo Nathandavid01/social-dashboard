@@ -17,6 +17,8 @@ const MAX_FRAMES = 64
 
 interface ChunkInfo { index: number; total: number }
 
+const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
+
 /** Chunk tolerante: cualquier forma inesperada (índice no numérico, fuera de
  *  rango, total<1) se trata como "chunk único" — nunca 400 por esto. */
 function parseChunk(raw: unknown): ChunkInfo {
@@ -145,10 +147,36 @@ export async function POST(request: Request) {
       // Columna sin migrar todavía: degrada seguro, simplemente no se cuenta.
     }
 
+    // La IA no inventa el caption: solo aporta el DATO de qué es el video, y
+    // entra por la MISMA casilla que llenaría una persona ("¿De qué es este
+    // video?" = content_ideas.hook) — el caption lo sigue escribiendo
+    // generateIdeaCaption con su aprendizaje de siempre. Regla dura: nunca
+    // pisa texto humano (solo si el hook está vacío) y solo en el ÚLTIMO
+    // chunk, con el video_topic ya fundido de todos los chunks. Best-effort
+    // en DOS updates separados (hook, luego hook_source) para que si la
+    // migración 0064 no está aplicada, el hook se escriba igual — ver
+    // supabase/migrations/0064_hook_source.sql.
+    if (isLastChunk) {
+      const videoTopic = findings.video_topic?.trim()
+      if (videoTopic && !filled(idea?.hook)) {
+        try {
+          await supabase.from('content_ideas').update({ hook: videoTopic }).eq('id', video.idea_id)
+          try {
+            await supabase.from('content_ideas').update({ hook_source: 'ai' }).eq('id', video.idea_id)
+          } catch {
+            // Columna hook_source sin migrar todavía: el hook ya quedó escrito arriba.
+          }
+        } catch {
+          // Nunca bloquea el análisis ni el encadenado del caption.
+        }
+      }
+    }
+
     // Encadena el auto-draft del caption SOLO tras el último chunk — antes de
     // eso el análisis está incompleto. generateIdeaCaption lo lee de la tabla
-    // ya persistida arriba. Best-effort: sus errores ("falta hook", draft ya
-    // existente) no son errores del análisis.
+    // ya persistida arriba (incluido el hook que se acaba de escribir, si
+    // aplica). Best-effort: sus errores ("falta hook", draft ya existente) no
+    // son errores del análisis.
     if (isLastChunk) {
       await generateIdeaCaption(video.idea_id, { auto: true }).catch(() => null)
     }
