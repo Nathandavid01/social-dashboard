@@ -72,6 +72,14 @@ interface Engine {
   key?: string
   inFlight?: Map<number, number>
   completedBytes?: number
+  /** Part numbers currently in backoff/retry — phase is only "reintentando" while this is non-empty. */
+  retryingParts?: Set<number>
+  /** Per-part attempt counters, so a slow part failing doesn't get its attempt count clobbered by a fast one succeeding. */
+  partAttempts?: Map<number, number>
+  /** Set synchronously by cancelUpload — checked even before uploadId/key exist. */
+  cancelled?: boolean
+  /** Guards abortServerSideOnce so a multipart is never aborted twice. */
+  serverAborted?: boolean
 }
 const engines = new Map<string, Engine>()
 
@@ -122,12 +130,14 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
 
   cancelUpload(id) {
     const eng = engines.get(id)
+    // Set BEFORE aborting/patching: runMultipart checks this right after
+    // startMultipartUpload resolves, which can happen after this call returns
+    // (that server action isn't tied to the AbortController) — without this
+    // flag, cancelling during "preparando" would leave an orphaned multipart.
+    if (eng) eng.cancelled = true
     eng?.controller.abort()
     patchUpload(id, { phase: 'cancelado' })
-    const item = get().uploads[id]
-    if (item && eng?.uploadId && eng.key) {
-      void abortMultipartUpload({ provider: item.provider, key: eng.key, uploadId: eng.uploadId })
-    }
+    abortServerSideOnce(id)
   },
 
   dismissUpload(id) {
@@ -156,26 +166,102 @@ function isAbortError(err: unknown): boolean {
   return (err instanceof DOMException && err.name === 'AbortError') || (err instanceof Error && err.name === 'AbortError')
 }
 
+/**
+ * Aborts the multipart upload server-side, at most once per upload. Called
+ * from three places that can race each other (cancelUpload before uploadId
+ * exists, runMultipart noticing a cancel right after it DOES get one, and
+ * runEngine's catch-all on error) — the serverAborted flag is what keeps a
+ * flaky connection or a fast double-cancel from firing the abort twice.
+ */
+function abortServerSideOnce(id: string): void {
+  const eng = engines.get(id)
+  if (!eng || eng.serverAborted) return
+  if (!eng.uploadId || !eng.key) return
+  const item = useUploadStore.getState().uploads[id]
+  if (!item) return
+  eng.serverAborted = true
+  void abortMultipartUpload({ provider: item.provider, key: eng.key, uploadId: eng.uploadId })
+}
+
 function sumMap(m: Map<number, number>): number {
   let total = 0
   m.forEach((v) => { total += v })
   return total
 }
 
-/** Retries fn up to MAX_ATTEMPTS with exponential backoff + jitter; abort short-circuits immediately. */
-async function withRetry<T>(id: string, fn: (attempt: number) => Promise<T>): Promise<T> {
+function maxMapValue(m: Map<number, number> | undefined): number {
+  let max = 0
+  m?.forEach((v) => { if (v > max) max = v })
+  return max
+}
+
+/**
+ * Marks a single part as retrying (or not) and recomputes the item's overall
+ * phase from the whole set — with 3 parts in parallel, one part backing off
+ * while the other two keep sending must show "reintentando", but never flip
+ * back to "subiendo" while ANY part is still waiting on its retry, and never
+ * flicker back and forth as parts individually settle.
+ */
+function setPartRetrying(id: string, partNumber: number, retrying: boolean): void {
+  const eng = engines.get(id)
+  if (!eng) return
+  if (!eng.retryingParts) eng.retryingParts = new Set()
+  if (retrying) eng.retryingParts.add(partNumber)
+  else eng.retryingParts.delete(partNumber)
+
+  // A part that just failed hasn't actually kept any of its in-flight bytes —
+  // it restarts the PUT from 0 on the next attempt — so its old progress must
+  // be cleared immediately, not left showing until the retry's first
+  // onProgress event overtakes it.
+  if (retrying) eng.inFlight?.delete(partNumber)
+
+  const cur = useUploadStore.getState().uploads[id]
+  if (!cur) return
+  const changes: Partial<UploadItem> = {}
+  if (cur.phase === 'subiendo' || cur.phase === 'reintentando') {
+    changes.phase = eng.retryingParts.size > 0 ? 'reintentando' : 'subiendo'
+  }
+  if (retrying && eng.inFlight) {
+    changes.pct = aggregateProgress({ totalBytes: eng.file.size, completedBytes: eng.completedBytes ?? 0, inFlightBytes: sumMap(eng.inFlight) })
+  }
+  patchUpload(id, changes)
+}
+
+/**
+ * Retries fn up to MAX_ATTEMPTS with exponential backoff + jitter; abort
+ * short-circuits immediately. `partNumber` is omitted for the single-PUT
+ * path (no concurrency there, so the item's phase/attempt track it 1:1);
+ * for multipart parts it drives the per-part retry bookkeeping above.
+ */
+async function withRetry<T>(id: string, fn: (attempt: number) => Promise<T>, partNumber?: number): Promise<T> {
   let attempt = 0
   // eslint-disable-next-line no-constant-condition
   while (true) {
     attempt += 1
-    patchUpload(id, { attempt, phase: attempt === 1 ? 'subiendo' : 'reintentando' })
+    if (partNumber == null) {
+      patchUpload(id, { attempt, phase: attempt === 1 ? 'subiendo' : 'reintentando' })
+    } else {
+      const eng = engines.get(id)
+      if (eng) {
+        if (!eng.partAttempts) eng.partAttempts = new Map()
+        eng.partAttempts.set(partNumber, attempt)
+      }
+      patchUpload(id, { attempt: maxMapValue(eng?.partAttempts) })
+    }
     try {
-      return await fn(attempt)
+      const result = await fn(attempt)
+      if (partNumber != null) setPartRetrying(id, partNumber, false)
+      return result
     } catch (err) {
-      if (isAbortError(err)) throw err
+      if (isAbortError(err)) {
+        if (partNumber != null) setPartRetrying(id, partNumber, false)
+        throw err
+      }
       if (attempt >= MAX_ATTEMPTS) {
+        if (partNumber != null) setPartRetrying(id, partNumber, false)
         throw new Error(`Se cayó la conexión y no se pudo subir después de ${MAX_ATTEMPTS} intentos`)
       }
+      if (partNumber != null) setPartRetrying(id, partNumber, true)
       await sleep(backoffDelayMs(attempt))
     }
   }
@@ -200,16 +286,19 @@ async function uploadPart(id: string, plan: UploadPartPlan, url: string): Promis
   const total = eng.file.size
   const blob = eng.file.slice(plan.start, plan.end)
 
-  const result = await withRetry(id, () =>
-    putBlob(url, blob, eng.file.type || 'video/mp4', {
-      signal: eng.controller.signal,
-      onProgress: (loaded) => {
-        eng.inFlight!.set(plan.partNumber, loaded)
-        patchUpload(id, {
-          pct: aggregateProgress({ totalBytes: total, completedBytes: eng.completedBytes ?? 0, inFlightBytes: sumMap(eng.inFlight!) }),
-        })
-      },
-    }),
+  const result = await withRetry(
+    id,
+    () =>
+      putBlob(url, blob, eng.file.type || 'video/mp4', {
+        signal: eng.controller.signal,
+        onProgress: (loaded) => {
+          eng.inFlight!.set(plan.partNumber, loaded)
+          patchUpload(id, {
+            pct: aggregateProgress({ totalBytes: total, completedBytes: eng.completedBytes ?? 0, inFlightBytes: sumMap(eng.inFlight!) }),
+          })
+        },
+      }),
+    plan.partNumber,
   )
 
   eng.inFlight!.delete(plan.partNumber)
@@ -258,8 +347,23 @@ async function runMultipart(id: string): Promise<void> {
   eng.inFlight = new Map()
   eng.completedBytes = 0
 
+  // cancelUpload may have already run while startMultipartUpload was still in
+  // flight — that server action isn't tied to the AbortController, so this is
+  // the first point where we CAN abort it server-side. Without this check the
+  // multipart would be created and then just sit there, orphaned.
+  if (eng.cancelled) {
+    abortServerSideOnce(id)
+    throw new DOMException('Aborted', 'AbortError')
+  }
+
   const plans = planParts(eng.file.size)
   patchUpload(id, { partsTotal: plans.length })
+
+  // withRetry only sets 'subiendo'/'reintentando' when a per-part attempt
+  // actually fails — mark the overall phase as uploading now, before any
+  // part has had the chance to fail (or the item would sit at "preparando"
+  // for the whole happy path).
+  patchUpload(id, { phase: 'subiendo' })
 
   const presigned = await presignUploadParts({
     provider: item.provider,
@@ -330,13 +434,11 @@ async function runEngine(id: string): Promise<void> {
   } catch (err) {
     if (isAbortError(err)) {
       patchUpload(id, { phase: 'cancelado' })
+      abortServerSideOnce(id)
       return
     }
     const message = err instanceof Error ? err.message : 'Error subiendo el video'
     patchUpload(id, { phase: 'error', error: message })
-    if (eng.uploadId && eng.key) {
-      const item = useUploadStore.getState().uploads[id]
-      if (item) void abortMultipartUpload({ provider: item.provider, key: eng.key, uploadId: eng.uploadId })
-    }
+    abortServerSideOnce(id)
   }
 }

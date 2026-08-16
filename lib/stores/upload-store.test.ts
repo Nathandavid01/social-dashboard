@@ -126,6 +126,67 @@ describe('upload-store — a part fails then recovers', () => {
   })
 })
 
+describe('upload-store — un part reintentando no debe "parpadear" el estado general', () => {
+  it('the overall phase settles into "reintentando" once, not repeatedly toggling with "subiendo" as other parts dequeue/succeed around it', async () => {
+    let part1FirstTry = true
+    putBlobMock.mockImplementation(async (url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
+      if (url.includes('part-1') && part1FirstTry) {
+        part1FirstTry = false
+        throw new Error('Falla de red simulada')
+      }
+      opts?.onProgress?.(blob.size)
+      return { etag: `"etag-${url}"` }
+    })
+
+    // 5 parts / concurrency 3: after part-1 fails, workers keep dequeuing
+    // part-4 and part-5 while part-1 is still "reintentando" — under the old
+    // code, each of THOSE parts starting their first attempt overwrote the
+    // shared phase back to "subiendo", flickering.
+    const file = new File([new Uint8Array(PART_SIZE_BYTES * 5)], 'five-parts.mp4', { type: 'video/mp4' })
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    const seenPhases: string[] = []
+    const unsub = useUploadStore.subscribe((s) => {
+      const p = s.uploads[id]?.phase
+      if (p && seenPhases[seenPhases.length - 1] !== p) seenPhases.push(p)
+    })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    unsub()
+
+    expect(item.phase).toBe('listo')
+    expect(seenPhases.filter((p) => p === 'reintentando')).toHaveLength(1)
+  })
+
+  it('a failed part does not leave its stale in-flight bytes counted in pct after it starts retrying', async () => {
+    let part1FirstTry = true
+    putBlobMock.mockImplementation(async (url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
+      if (url.includes('part-1') && part1FirstTry) {
+        part1FirstTry = false
+        opts?.onProgress?.(Math.floor(blob.size / 2)) // reports progress, THEN fails
+        throw new Error('Falla de red simulada')
+      }
+      opts?.onProgress?.(blob.size)
+      return { etag: `"etag-${url}"` }
+    })
+
+    let pctAtFirstRetry: number | null = null
+    const file = new File([new Uint8Array(PART_SIZE_BYTES * 3)], 'three-parts.mp4', { type: 'video/mp4' })
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    const unsub = useUploadStore.subscribe((s) => {
+      const it = s.uploads[id]
+      if (it?.phase === 'reintentando' && pctAtFirstRetry === null) pctAtFirstRetry = it.pct
+    })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    unsub()
+
+    expect(item.phase).toBe('listo')
+    // part-1 had reported ~half its bytes before failing; once marked
+    // retrying, that half must be dropped from the aggregate immediately —
+    // it can't still count toward pct while part-1 sits at 0 bytes resent.
+    expect(pctAtFirstRetry).not.toBeNull()
+    expect(pctAtFirstRetry as unknown as number).toBeLessThanOrEqual(67) // <= the 2 healthy parts' share (~66.7%)
+  })
+})
+
 describe('upload-store — a part exhausts all retries', () => {
   it('stops after 5 attempts, ends in error, aborts server-side, and never registers the video', async () => {
     putBlobMock.mockImplementation(async (url: string) => {
@@ -147,7 +208,7 @@ describe('upload-store — a part exhausts all retries', () => {
 })
 
 describe('upload-store — cancelar', () => {
-  it('aborts in-flight requests and calls the server-side multipart abort', async () => {
+  it('aborts in-flight requests and calls the server-side multipart abort exactly once', async () => {
     let releasePart1: (() => void) | null = null
     putBlobMock.mockImplementation(async (url: string, blob: Blob, _ct: string, opts?: { signal?: AbortSignal }) => {
       if (url.includes('part-1')) {
@@ -171,6 +232,34 @@ describe('upload-store — cancelar', () => {
     expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledWith(
       expect.objectContaining({ provider: 'r2', uploadId: 'up-1' }),
     )
+    expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
+  })
+
+  it('cancelling during "preparando" — before startMultipartUpload has even resolved — still aborts server-side exactly once (no orphaned multipart)', async () => {
+    const deferred: { resolve?: (v: { uploadId: string; key: string }) => void } = {}
+    vi.mocked(startMultipartUpload).mockImplementationOnce(
+      () => new Promise((resolve) => { deferred.resolve = resolve }),
+    )
+
+    const file = bigFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['preparando'])
+
+    // Cancel fires while startMultipartUpload is still in flight — nobody has
+    // an uploadId/key yet, so a naive cancelUpload would have nothing to abort.
+    useUploadStore.getState().cancelUpload(id)
+    expect(useUploadStore.getState().uploads[id].phase).toBe('cancelado')
+    expect(vi.mocked(abortMultipartUpload)).not.toHaveBeenCalled()
+
+    // The server action resolves AFTER the cancel — this is the race.
+    deferred.resolve?.({ uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' })
+
+    await new Promise((r) => setTimeout(r, 20))
+    expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'r2', uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' }),
+    )
+    expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledTimes(1)
     expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
   })
 })
