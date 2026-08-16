@@ -14,7 +14,21 @@ const ScrollArea = React.forwardRef<
     className={cn("relative overflow-hidden", className)}
     {...props}
   >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+    {/*
+      Radix's ScrollAreaPrimitive.Viewport renders one wrapper div *inside*
+      itself with an inline `style="min-width:100%; display:table"`. A
+      `display:table` element sizes itself to its content, not to its
+      parent's width — so `truncate` (white-space:nowrap + text-overflow:
+      ellipsis) and `line-clamp-2` on children never get a width to clamp
+      against: the table just grows, and whatever cuts it off (e.g. an
+      `overflow-hidden` ancestor) chops the text mid-word with no ellipsis.
+      `[&>div]:!block [&>div]:!w-full` forces that injected div to a normal
+      block box at the viewport's width, restoring the constraint. The `!`
+      is required to beat Radix's inline style. Do not remove this — it
+      looks redundant/unused until you put a `truncate` child inside a
+      narrow ScrollArea.
+    */}
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] [&>div]:!block [&>div]:!w-full">
       {children}
     </ScrollAreaPrimitive.Viewport>
     <ScrollBar />
