@@ -17,8 +17,6 @@ const MAX_FRAMES = 64
 
 interface ChunkInfo { index: number; total: number }
 
-const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
-
 /** Chunk tolerante: cualquier forma inesperada (índice no numérico, fuera de
  *  rango, total<1) se trata como "chunk único" — nunca 400 por esto. */
 function parseChunk(raw: unknown): ChunkInfo {
@@ -151,20 +149,39 @@ export async function POST(request: Request) {
     // entra por la MISMA casilla que llenaría una persona ("¿De qué es este
     // video?" = content_ideas.hook) — el caption lo sigue escribiendo
     // generateIdeaCaption con su aprendizaje de siempre. Regla dura: nunca
-    // pisa texto humano (solo si el hook está vacío) y solo en el ÚLTIMO
-    // chunk, con el video_topic ya fundido de todos los chunks. Best-effort
-    // en DOS updates separados (hook, luego hook_source) para que si la
-    // migración 0064 no está aplicada, el hook se escriba igual — ver
-    // supabase/migrations/0064_hook_source.sql.
+    // pisa texto humano, y solo en el ÚLTIMO chunk, con el video_topic ya
+    // fundido de todos los chunks.
+    //
+    // TOCTOU: NO basta con mirar `idea?.hook` (leído al PRINCIPIO de la
+    // petición, antes de analyzeVideoFrames) para decidir si escribir —
+    // analyzeVideoFrames llama a Grok con hasta 64 fotogramas y puede tardar
+    // decenas de segundos (maxDuration=300); justo en esa ventana es cuando
+    // el editor está más probablemente viendo la idea recién subida y puede
+    // escribir el hook a mano. Por eso el "sigue vacío" se comprueba en la
+    // PROPIA query (`.is('hook', null)`), no en una lectura vieja: si una
+    // persona escribió mientras tanto, el UPDATE no matchea ninguna fila y no
+    // se toca nada (ni hook ni hook_source) — el caption de abajo igual se
+    // encadena, y lee el hook humano ya persistido en la tabla.
+    // El filtro `.is('hook', null)` (no `.or('hook.is.null,hook.eq.')`)
+    // porque el hook SIEMPRE se normaliza a null cuando está vacío — nunca
+    // queda como cadena vacía (ver updateIdeaBrief y updateIdeaHook: ambos
+    // hacen `'' → null` antes de escribir).
     if (isLastChunk) {
       const videoTopic = findings.video_topic?.trim()
-      if (videoTopic && !filled(idea?.hook)) {
+      if (videoTopic) {
         try {
-          await supabase.from('content_ideas').update({ hook: videoTopic }).eq('id', video.idea_id)
-          try {
-            await supabase.from('content_ideas').update({ hook_source: 'ai' }).eq('id', video.idea_id)
-          } catch {
-            // Columna hook_source sin migrar todavía: el hook ya quedó escrito arriba.
+          const { data: updated } = await supabase
+            .from('content_ideas')
+            .update({ hook: videoTopic })
+            .eq('id', video.idea_id)
+            .is('hook', null)
+            .select('id')
+          if (updated && updated.length > 0) {
+            try {
+              await supabase.from('content_ideas').update({ hook_source: 'ai' }).eq('id', video.idea_id)
+            } catch {
+              // Columna hook_source sin migrar todavía: el hook ya quedó escrito arriba.
+            }
           }
         } catch {
           // Nunca bloquea el análisis ni el encadenado del caption.

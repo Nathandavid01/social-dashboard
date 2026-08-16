@@ -43,6 +43,9 @@ let hookUpdates: Array<{ payload: Record<string, unknown>; id?: string }> = []
 /** Simula "la columna hook_source no existe todavía" (migración 0064 pendiente):
  *  solo el UPDATE que trae hook_source lanza — el UPDATE del hook en sí sigue vivo. */
 let hookSourceUpdateThrows = false
+/** Simula TOCTOU: una persona escribió el hook A MANO mientras analyzeVideoFrames
+ *  corría — el UPDATE condicional (`.is('hook', null)`) no matchea ninguna fila. */
+let hookUpdateNoMatch = false
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -83,13 +86,30 @@ vi.mock('@/lib/supabase/server', () => ({
       }
       if (table === 'content_ideas') {
         return {
+          // `.eq()` es un thenable (para el UPDATE directo de hook_source,
+          // que se awaitea sin encadenar más) que TAMBIÉN expone `.is()` (para
+          // el UPDATE condicional del hook: `.eq('id', id).is('hook', null).select('id')`).
           update: (payload: Record<string, unknown>) => ({
-            eq: async (_col: string, id: string) => {
-              if ('hook_source' in payload && hookSourceUpdateThrows) {
-                throw new Error('column "hook_source" does not exist')
+            eq: (_col: string, id: string) => {
+              const commit = async () => {
+                if ('hook_source' in payload && hookSourceUpdateThrows) {
+                  throw new Error('column "hook_source" does not exist')
+                }
+                hookUpdates.push({ payload, id })
+                return { error: null }
               }
-              hookUpdates.push({ payload, id })
-              return { error: null }
+              return {
+                is: (_col2: string, _val: null) => ({
+                  select: async (_cols: string) => {
+                    if (hookUpdateNoMatch) return { data: [], error: null }
+                    hookUpdates.push({ payload, id })
+                    return { data: [{ id }], error: null }
+                  },
+                }),
+                then: (resolve: (v: unknown) => void, reject: (e: unknown) => void) => {
+                  commit().then(resolve, reject)
+                },
+              }
             },
           }),
         }
@@ -131,6 +151,7 @@ beforeEach(() => {
   frameCountUpdateThrows = false
   hookUpdates = []
   hookSourceUpdateThrows = false
+  hookUpdateNoMatch = false
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
@@ -402,12 +423,35 @@ describe('POST /api/video-analysis — video_topic escribe el hook ("¿De qué e
     expect(calls[calls.length - 1]).toEqual({ op: 'generateIdeaCaption', payload: ['idea-1', { auto: true }] })
   })
 
-  it('hook con texto humano → NO lo toca, aunque venga video_topic', async () => {
-    // IDEA por defecto ya trae hook: 'hook' (texto humano).
+  it('hook con texto humano → NO lo toca, aunque venga video_topic (el UPDATE condicional .is(\'hook\',null) no matchea)', async () => {
+    // IDEA por defecto ya trae hook: 'hook' (texto humano) → en la DB real
+    // el filtro .is('hook', null) no matchearía ninguna fila.
+    hookUpdateNoMatch = true
     analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha'))
     const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
     expect(res.status).toBe(200)
     expect(hookUpdates).toEqual([])
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('TOCTOU: el hook cambia a mano ENTRE la lectura inicial (vacío) y el write (analyzeVideoFrames tardó) → no pisa, no marca, y el caption se encadena igual', async () => {
+    // La lectura del principio de la petición ve el hook vacío (analysisCtx
+    // usa esto solo para el prompt), pero mientras `analyzeVideoFrames`
+    // corre, una persona lo llena — así que el UPDATE condicional en la
+    // PROPIA query (.is('hook', null)) ya no matchea ninguna fila para
+    // cuando llega el momento de escribir.
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    hookUpdateNoMatch = true
+    analyzeVideoFrames.mockResolvedValueOnce(findingsWithTopic('Cómo sellar una picanha en parrilla Santa María'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+
+    // (a) hook_source nunca se escribe
+    expect(hookUpdates.some((u) => 'hook_source' in u.payload)).toBe(false)
+    // (b) el texto humano no se pierde: ni siquiera se intenta un write que gane la carrera
+    expect(hookUpdates).toEqual([])
+    // (c) el caption se encadena igual (y generateIdeaCaption lee el hook humano ya persistido)
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
   })
 
   it('sin video_topic en los findings → no escribe nada en content_ideas', async () => {
