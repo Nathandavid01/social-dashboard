@@ -154,12 +154,18 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
     ? '- El caption describe lo que se oye/pasa en el video, no un brief inventado\n'
     : ''
 
+  // Fuente de verdad = el hook (v3.42): desde que la IA describe el video en
+  // "¿de qué es este video?" (visto Y oído — ver route.ts/video-analysis-core.ts),
+  // ese campo YA es la base del caption, visible y editable en pantalla. El
+  // bloque visual de abajo es SOLO el plan B de v3.38 para cuando el hook está
+  // vacío (migración sin aplicar, escritura fallida, o alguien lo borró) — no
+  // se elimina, solo deja de inyectarse cuando ya hay hook.
   const va = input.videoAnalysis
   const seenParts = [
     filled(va?.visualSummary) && `Resumen visual: ${va!.visualSummary!.trim()}`,
     filled(va?.burnedCaptionsText) && `Texto que aparece EN PANTALLA dentro del video: ${va!.burnedCaptionsText!.trim()}`,
   ].filter(Boolean)
-  const seen = seenParts.length > 0
+  const seen = !filled(hook) && seenParts.length > 0
     ? `LO QUE SE VE EN EL VIDEO (análisis visual de IA — úsalo para que el caption hable de lo que realmente se muestra):\n${seenParts.join('\n')}\n\n`
     : ''
   const seenBullet = seen
@@ -185,5 +191,6 @@ ${heard ? 'El caption se basa en lo que ocurre en el video (transcripción). El 
 ${heardBullet}${seenBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
+- No inventes años, fechas, nombres de eventos, precios, promociones ni ningún otro dato que no aparezca en el video, el hook, el brief o los captions de referencia de arriba — si algo no consta, se omite
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`
 }

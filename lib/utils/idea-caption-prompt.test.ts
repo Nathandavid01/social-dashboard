@@ -177,4 +177,40 @@ describe('bloque de análisis visual (QC IA)', () => {
     expect(sin).toBe(vacio)
     expect(sin).not.toContain('LO QUE SE VE EN EL VIDEO')
   })
+
+  // Fuente de verdad = el hook (v3.42): la IA ya lo escribe combinando lo que
+  // vio y oyó, visible y editable en pantalla. El bloque visual de abajo es
+  // solo el plan B de v3.38 para cuando el hook está vacío.
+  it('con hook lleno: NO inyecta el bloque visual aunque haya análisis (camino manual de siempre)', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: 'Cómo sellar una picanha en parrilla Santa María con roble rojo',
+      videoAnalysis: { visualSummary: 'doctora muestra el consultorio', burnedCaptionsText: 'Agenda tu cita hoy' },
+    })
+    expect(p).not.toContain('LO QUE SE VE EN EL VIDEO')
+    expect(p).not.toContain('doctora muestra el consultorio')
+  })
+
+  it('con hook vacío: SÍ inyecta el bloque visual como red de seguridad (regresión v3.38)', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: null,
+      videoAnalysis: { visualSummary: 'doctora muestra el consultorio', burnedCaptionsText: 'Agenda tu cita hoy' },
+    })
+    expect(p).toContain('LO QUE SE VE EN EL VIDEO')
+    expect(p).toContain('doctora muestra el consultorio')
+  })
+})
+
+describe('regla anti-invención', () => {
+  const base = { title: 'Promo', examples: [] as { text: string; provider: string }[] }
+
+  it('el prompt prohíbe inventar años, fechas, eventos, precios o promociones que no consten', () => {
+    const p = buildIdeaCaptionPrompt(base)
+    expect(p.toLowerCase()).toMatch(/no invent/)
+    expect(p.toLowerCase()).toContain('años')
+    expect(p.toLowerCase()).toContain('fechas')
+    expect(p.toLowerCase()).toMatch(/precios|promociones/)
+    expect(p.toLowerCase()).toMatch(/si algo no consta, se omite/)
+  })
 })
