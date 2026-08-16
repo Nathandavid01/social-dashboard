@@ -3,36 +3,11 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useUploadStore, type UploadItem, type UploadPhase } from '@/lib/stores/upload-store'
+import { useUploadStore, type UploadPhase } from '@/lib/stores/upload-store'
+import { uploadPhaseText as phaseText } from '@/lib/utils/upload-phase-text'
 import { NateUploadLogo } from './nate-upload-logo'
 
 const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set<UploadPhase>(['listo', 'error', 'cancelado'])
-
-/** Spanish, says-what's-happening copy per phase — never a mute bar. */
-function phaseText(item: UploadItem): string {
-  switch (item.phase) {
-    case 'preparando':
-      return 'Preparando…'
-    case 'subiendo':
-      return item.partsTotal > 1
-        ? `Subiendo… ${item.pct}% · parte ${Math.min(item.partsDone + 1, item.partsTotal)} de ${item.partsTotal}`
-        : `Subiendo… ${item.pct}%`
-    case 'reintentando':
-      return `Se cayó la conexión — reintentando (${item.attempt} de 5)…`
-    case 'ensamblando':
-      return 'Ensamblando el archivo'
-    case 'registrando':
-      return 'Registrando el video'
-    case 'analizando':
-      return 'La IA está viendo el video…'
-    case 'listo':
-      return 'Listo'
-    case 'error':
-      return item.error ? `Falló: ${item.error}` : 'Falló la subida'
-    case 'cancelado':
-      return 'Cancelado'
-  }
-}
 
 /**
  * Small, always-visible corner indicator for uploads in flight — the whole

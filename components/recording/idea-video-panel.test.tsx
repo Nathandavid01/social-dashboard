@@ -71,8 +71,16 @@ function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   }
 }
 
+// Uploads now go through the store engine (presign → PUT → register → maybe
+// analyze), each step its own microtask hop — one act(async () => {}) only
+// drains a single tick, so loop enough passes to settle the whole chain.
 async function flush() {
-  await act(async () => {})
+  for (let i = 0; i < 20; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await act(async () => {
+      await Promise.resolve()
+    })
+  }
 }
 
 beforeEach(() => {
@@ -334,6 +342,7 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     onerror: (() => void) | null = null
     open() {}
     setRequestHeader() {}
+    getResponseHeader() { return null }
     send() {
       this.onload?.()
     }
@@ -390,6 +399,7 @@ describe('IdeaVideoPanel — arrastrar y soltar (sin la caja grande)', () => {
     onerror: (() => void) | null = null
     open() {}
     setRequestHeader() {}
+    getResponseHeader() { return null }
     send() { this.onload?.() }
   }
   beforeEach(() => {
