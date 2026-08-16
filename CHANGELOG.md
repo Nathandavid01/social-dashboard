@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.38 — 2026-08-15
+
+**Los videos que sube el editor ahora sí completan las 3 verificaciones.**
+
+- Al entregar un video editado, la IA revisa las tres cosas: que sea del cliente, que los captions quemados no tengan faltas, y que quede escrito el caption.
+- Antes la tercera (el caption) se quedaba colgada porque el editor no escribe “de qué es el video” — ahora la IA usa lo que ya vio en el video para escribirlo.
+- En Revisión las tres bolitas aparecen juntas, así se ve de un vistazo si falta algo antes de aprobar.
+
+Vista: [preview HTML](/previews/v3.38-qc-tres-checks.html)
+
 ## v3.37 — 2026-08-15
 
 **El calendario ahora marca con ✓ verde lo que ya se publicó de verdad.**

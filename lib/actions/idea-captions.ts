@@ -82,7 +82,7 @@ export async function generateIdeaCaption(
     .maybeSingle()
     .then((r) => r, () => ({ data: null }))
 
-  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
+  if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo, hasVisualAnalysis: !!analysis })) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
 

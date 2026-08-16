@@ -171,6 +171,15 @@ describe('bloque de análisis visual (QC IA)', () => {
     expect(p).toContain('Agenda tu cita hoy')
   })
 
+  it('sin hook, el análisis visual es el tema — no pide alinear con un hook que no existe', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      videoAnalysis: { visualSummary: 'doctora en el rooftop', burnedCaptionsText: null },
+    })
+    expect(p).toMatch(/se VE en el video/i)
+    expect(p).not.toMatch(/el video se grabará/i)
+  })
+
   it('sin análisis (o vacío) el prompt no cambia', () => {
     const sin = buildIdeaCaptionPrompt({ ...base })
     const vacio = buildIdeaCaptionPrompt({ ...base, videoAnalysis: { visualSummary: '  ', burnedCaptionsText: null } })

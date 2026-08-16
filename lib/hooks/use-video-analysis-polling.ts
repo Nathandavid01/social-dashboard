@@ -18,7 +18,7 @@ const POLL_GIVE_UP_MS = 5 * 60_000
  * `generateIdeaCaption`, así que hay una ventana real donde el análisis ya
  * está 'done' pero el caption todavía no existe — sin este predicado la 3ra
  * bolita ("Generando caption…") se queda pulsando para siempre. Quien no lo
- * pasa (p.ej. `review-overlay` vía `VideoAnalysisReport`) mantiene el
+ * pasa (p.ej. `VideoAnalysisReport` si se monta solo) mantiene el
  * comportamiento de siempre: para de sondear en cuanto sale de 'pending'.
  */
 export function useVideoAnalysisPolling(

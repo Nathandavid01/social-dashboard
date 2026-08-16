@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
-import { VideoAnalysisReport } from '@/components/video-analysis/video-analysis-report'
+import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
 import { getEntregaReviewVideos } from '@/lib/actions/entregas-review'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { decideReview } from '@/lib/actions/pipeline-submit'
@@ -102,7 +102,7 @@ export function ReviewOverlay({
 
         {videos && (
           <div className="mb-4">
-            <VideoAnalysisReport ideaId={ideaId} />
+            <QcProgressDots ideaId={ideaId} />
           </div>
         )}
 

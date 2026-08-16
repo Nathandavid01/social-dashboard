@@ -9,9 +9,8 @@ type DotState = 'working' | 'ok' | 'warning' | 'unavailable'
 
 /**
  * Tira de 3 bolitas QC ("de un vistazo"): es la nueva cara del reporte QC IA
- * — reemplaza `VideoAnalysisReport` en `IdeaVideoPanel` (mismo fetch/poll,
- * compartido vía `useVideoAnalysisPolling`, así que no hay doble fetch).
- * `VideoAnalysisReport` sigue viva para `review-overlay.tsx`.
+ * — reemplaza `VideoAnalysisReport` en `IdeaVideoPanel` y `review-overlay`
+ * (mismo fetch/poll, compartido vía `useVideoAnalysisPolling`).
  *
  * 1. Relevancia ("Es del cliente")
  * 2. Captions quemados sin faltas ("Libre de errores")

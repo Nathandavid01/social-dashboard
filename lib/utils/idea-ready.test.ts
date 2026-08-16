@@ -24,6 +24,12 @@ describe('isIdeaReadyForCaption', () => {
     expect(isIdeaReadyForCaption({ hook: '   ', hasVideo: true })).toBe(false)
     expect(isIdeaReadyForCaption({ visual_brief: 'v', hasVideo: true })).toBe(false)
   })
+
+  it('el análisis visual del video editado sustituye al hook (el editor no lo escribe)', () => {
+    expect(isIdeaReadyForCaption({ hasVideo: true, hasVisualAnalysis: true })).toBe(true)
+    expect(isIdeaReadyForCaption({ hasVideo: false, hasVisualAnalysis: true })).toBe(false)
+    expect(isIdeaReadyForCaption({ hasVideo: true, hasVisualAnalysis: false })).toBe(false)
+  })
 })
 
 describe('ideaReadyMissingLabels', () => {
@@ -32,6 +38,7 @@ describe('ideaReadyMissingLabels', () => {
     expect(ideaReadyMissingLabels({ hook: 'h' })).toEqual(['el video'])
     expect(ideaReadyMissingLabels({ hook: 'h', hasVideo: true })).toEqual([])
     expect(ideaReadyMissingLabels({ hasVideo: true })).toEqual(['de qué es el video'])
+    expect(ideaReadyMissingLabels({ hasVideo: true, hasVisualAnalysis: true })).toEqual([])
   })
 })
 
@@ -42,5 +49,6 @@ describe('shouldAutoDraftCaption', () => {
     expect(shouldAutoDraftCaption({ hook: 'tips', hasVideo: true, caption_draft: 'ya hay draft' })).toBe(false)
     expect(shouldAutoDraftCaption({ hook: 'tips', hasVideo: true, generated_caption: 'ya aprobado' })).toBe(false)
     expect(shouldAutoDraftCaption({ hook: '', hasVideo: true })).toBe(false)
+    expect(shouldAutoDraftCaption({ hasVideo: true, hasVisualAnalysis: true })).toBe(true)
   })
 })

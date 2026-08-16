@@ -32,6 +32,11 @@ const h = vi.hoisted(() => ({
       storage_provider: 'r2',
     },
   ],
+  analysis: null as {
+    findings: unknown
+    visual_summary: string | null
+    status: string
+  } | null,
 }))
 
 vi.mock('@/lib/auth/server', () => ({ requirePermission: vi.fn(async () => {}) }))
@@ -77,7 +82,7 @@ vi.mock('@/lib/supabase/server', () => ({
               eq: () => ({
                 order: () => ({
                   limit: () => ({
-                    maybeSingle: async () => ({ data: null, error: null }),
+                    maybeSingle: async () => ({ data: h.analysis, error: null }),
                   }),
                 }),
               }),
@@ -107,7 +112,8 @@ const oneDraft = 'Caption recién salido de la IA'
 
 beforeEach(() => {
   h.updates.length = 0
-  h.idea = { ...h.idea, caption_draft: null, generated_caption: null }
+  h.analysis = null
+  h.idea = { ...h.idea, caption_draft: null, generated_caption: null, hook: 'Un socio bajó 15 lb' }
   vi.mocked(generateCaptionText).mockReset()
   vi.mocked(generateCaptionText).mockResolvedValue('Caption recién salido de la IA')
   vi.mocked(fetchCaptionFeedbackForPrompt).mockReset()
@@ -224,6 +230,34 @@ describe('generateIdeaCaption — auto no pisa un draft existente', () => {
     expect(res.caption).not.toContain('[TikTok]')
     expect(res.caption).not.toContain('"by"')
     expect(generateCaptionText).not.toHaveBeenCalled()
+  })
+})
+
+describe('generateIdeaCaption — video del editor sin hook', () => {
+  it('sin hook y sin análisis se niega (no sabe de qué es el video)', async () => {
+    h.idea = { ...h.idea, hook: null }
+    const res = await generateIdeaCaption('i1', { auto: true })
+    expect(res.error).toMatch(/de qué es el video/i)
+    expect(generateCaptionText).not.toHaveBeenCalled()
+    expect(h.updates).toHaveLength(0)
+  })
+
+  it('sin hook, el análisis visual ya hecho SÍ genera el caption (las 3 verificaciones)', async () => {
+    h.idea = { ...h.idea, hook: null }
+    h.analysis = {
+      status: 'done',
+      visual_summary: 'doctora hablando a cámara en el rooftop',
+      findings: { burned_captions: { text: 'Bajé 15 lb', issues: [] } },
+    }
+    const res = await generateIdeaCaption('i1', { auto: true })
+    expect(res.ok).toBe(true)
+    expect(h.updates[0].caption_draft).toBe(oneDraft)
+    expect(generateCaptionText).toHaveBeenCalledWith(
+      expect.stringContaining('doctora hablando a cámara en el rooftop'),
+    )
+    expect(generateCaptionText).toHaveBeenCalledWith(
+      expect.stringContaining('Bajé 15 lb'),
+    )
   })
 })
 

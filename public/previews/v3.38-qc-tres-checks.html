@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.38 — Las 3 verificaciones del video editado</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --amber:#f59e0b; --amber-bg:rgba(245,158,11,.1); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 48px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; line-height:1.5; margin:0 0 24px; }
+    h2.section { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:28px 0 10px; }
+    .dots-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px; box-shadow: inset 3px 0 0 0 var(--gold); }
+    .kicker { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:0 0 4px; }
+    .dot-row { display:flex; align-items:center; gap:8px; }
+    .dot { flex-shrink:0; width:14px; height:14px; }
+    .dot-text { font-size:12px; font-weight:500; }
+    .dot-text.ok { color:var(--fg); }
+    .dot-text.warn { color:var(--amber); }
+    .dot-text.working { color:var(--muted-fg); font-weight:400; }
+    .note { font-size:12px; color:var(--muted-fg); line-height:1.5; margin:8px 0 0; }
+    .issue { background:var(--amber-bg); border-radius:6px; padding:6px 8px; font-size:12px; line-height:1.5; margin:4px 0 0 22px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.38 — Los videos del editor completan las 3 verificaciones</h1>
+    <p class="sub">Al subir el editado, la IA revisa las tres cosas que queremos: que el video sea del cliente, que los captions quemados no tengan faltas, y que quede escrito el caption. El editor no tiene que escribir “de qué es el video” — la IA ya lo vio.</p>
+
+    <h2 class="section">Mientras trabaja</h2>
+    <div class="dots-card">
+      <p class="kicker">QC con IA (advisory)</p>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+        <span class="dot-text working">Analizando…</span>
+      </div>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+        <span class="dot-text working">Analizando…</span>
+      </div>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+        <span class="dot-text working">Generando caption…</span>
+      </div>
+    </div>
+
+    <h2 class="section">Todo bien — listo para revisar</h2>
+    <div class="dots-card">
+      <p class="kicker">QC con IA (advisory)</p>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span class="dot-text ok">Es del cliente</span>
+      </div>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span class="dot-text ok">Libre de errores</span>
+      </div>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span class="dot-text ok">Caption generado</span>
+      </div>
+      <p class="note">Las tres bolitas verdes: relevancia, captions quemados y caption escrito. Así se ve en Revisión.</p>
+    </div>
+
+    <h2 class="section">Hay algo que revisar</h2>
+    <div class="dots-card">
+      <p class="kicker">QC con IA (advisory)</p>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span class="dot-text ok">Es del cliente</span>
+      </div>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span class="dot-text warn">2 errores a revisar</span>
+      </div>
+      <p class="issue">«Pa ' ya» — apóstrofe suelto. Sugerencia: <b>Pa’ ya</b></p>
+      <p class="issue">«roostop» — typo. Sugerencia: <b>rooftop</b></p>
+      <div class="dot-row">
+        <svg class="dot" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span class="dot-text ok">Caption generado</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

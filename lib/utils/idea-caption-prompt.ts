@@ -181,7 +181,11 @@ ${ideaLines}
 ${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${seen}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
 
 ${taskLine}
-${heard ? 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.' : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
+${heard
+    ? 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.'
+    : seen
+      ? 'El caption se basa en lo que se VE en el video (análisis visual). El título es contexto, no el guion.'
+      : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
 ${heardBullet}${seenBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
