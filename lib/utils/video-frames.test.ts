@@ -56,7 +56,9 @@ describe('scaleDimensions', () => {
 })
 
 describe('capFramesToBudget', () => {
-  const frame = (bytes: number) => 'x'.repeat(Math.ceil((bytes * 4) / 3))
+  // Bytes de CABLE: el presupuesto se mide sobre la longitud de la cadena tal
+  // como viaja serializada en el JSON, no sobre el tamaño decodificado.
+  const frame = (wireBytes: number) => 'x'.repeat(wireBytes)
   it('deja pasar frames que caben', () => {
     const frames = [frame(100_000), frame(100_000)]
     expect(capFramesToBudget(frames, 300_000)).toHaveLength(2)
@@ -71,10 +73,20 @@ describe('capFramesToBudget', () => {
     expect(capFramesToBudget([])).toEqual([])
     expect(FRAME_BUDGET_BYTES).toBe(3_500_000)
   })
+  it('invariante: la suma de .length de lo devuelto nunca excede el presupuesto (48 frames a 4fps)', () => {
+    // Simula el caso real que disparó el bug: 48 frames de ~80KB de data-URI
+    // cada uno suman ~3.84MB de cable, por encima del presupuesto — se debe
+    // recortar y el total resultante debe respetar el tope.
+    const frames = Array.from({ length: 48 }, () => frame(80_000))
+    const out = capFramesToBudget(frames, 3_500_000)
+    const totalWireBytes = out.reduce((n, f) => n + f.length, 0)
+    expect(totalWireBytes).toBeLessThanOrEqual(3_500_000)
+    expect(out.length).toBeLessThan(48)
+  })
 })
 
 describe('capFramesAndTimestampsToBudget', () => {
-  const frame = (bytes: number) => 'x'.repeat(Math.ceil((bytes * 4) / 3))
+  const frame = (wireBytes: number) => 'x'.repeat(wireBytes)
   it('recorta timestamps al mismo largo que los frames recortados', () => {
     const frames = [frame(200_000), frame(200_000), frame(200_000)]
     const timestamps = [1, 2, 3]

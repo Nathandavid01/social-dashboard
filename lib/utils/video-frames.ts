@@ -16,7 +16,12 @@ export const FRAME_FPS = 4
 export const FRAME_MAX_COUNT = 48
 export const FRAME_MAX_SIDE = 768
 export const FRAME_JPEG_QUALITY = 0.7
-/** Vercel corta el body ~4.5 MB; margen para JSON + resto del payload. */
+/**
+ * Presupuesto de BYTES DE CABLE: la suma de `.length` de las data-URIs tal
+ * como se serializan en el body JSON (no el tamaño decodificado — la base64
+ * pesa ~4/3 de eso). Vercel corta el body ~4.5 MB; este margen deja espacio
+ * para el resto del JSON (prompt, timestamps, etc).
+ */
 export const FRAME_BUDGET_BYTES = 3_500_000
 
 /**
@@ -46,11 +51,13 @@ export function scaleDimensions(
 }
 
 /**
- * Recorta la lista de data-URIs (desde el final) hasta caber en el presupuesto.
+ * Recorta la lista de data-URIs (desde el final) hasta caber en el presupuesto,
+ * medido en bytes de cable (longitud de la cadena tal como viaja en el JSON,
+ * NO el tamaño decodificado — la base64 serializada es ~4/3 más grande).
  * El primero siempre se conserva: un solo frame ya permite leer el caption quemado.
  */
 export function capFramesToBudget(frames: string[], maxTotalBytes = FRAME_BUDGET_BYTES): string[] {
-  const bytes = (s: string) => Math.floor((s.length * 3) / 4)
+  const bytes = (s: string) => s.length
   const out = [...frames]
   while (out.length > 1 && out.reduce((n, f) => n + bytes(f), 0) > maxTotalBytes) out.pop()
   return out
