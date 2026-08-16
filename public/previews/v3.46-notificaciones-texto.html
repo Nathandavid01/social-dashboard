@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.46 — Texto de notificaciones ya no se corta</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --bad:#f87171; --blue:#3b82f6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 64px; }
+    .wrap { max-width:640px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 22px; line-height:1.5; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:22px 0 8px; }
+    .row-label.before { color:var(--bad); }
+    .row-label.after { color:var(--good); }
+
+    /* Notification bell dropdown mock */
+    .panel { width:360px; max-width:100%; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.03); padding:10px 12px; }
+    .panel-head .t { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; }
+    .panel-head .badge { border-radius:999px; background:rgba(248,113,113,.1); color:var(--bad); font-size:10px; font-weight:500; padding:2px 8px; }
+
+    .n-list { list-style:none; margin:0; padding:0; }
+    .n-item { display:flex; align-items:flex-start; gap:10px; padding:12px; border-bottom:1px solid var(--border); position:relative; }
+    .n-item:last-child { border-bottom:none; }
+    .n-item.unread { background:rgba(212,175,55,.03); }
+    .n-dot { position:absolute; left:4px; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:999px; background:var(--blue); }
+    .n-ico { width:32px; height:32px; border-radius:8px; background:rgba(59,130,246,.1); color:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; margin-left:12px; }
+    .n-body { min-width:0; flex:1; }
+    .n-title { font-size:13px; font-weight:600; margin:0; }
+    .n-text { font-size:11.5px; color:var(--muted-fg); margin:2px 0 0; }
+    .n-time { font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:#6b6b6b; margin:3px 0 0; }
+
+    /* BEFORE: hard clip, no width constraint, no ellipsis */
+    .before .n-title, .before .n-text { white-space:nowrap; overflow:hidden; }
+    .before .panel { max-width:360px; }
+
+    /* AFTER: truncate title (1 line, ellipsis) + line-clamp-2 body */
+    .after .n-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .after .n-text { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .note { margin-top:22px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; line-height:1.5; }
+    .note code { background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; font-size:11px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.46 — Notificaciones: texto largo ya no se corta a hachazo</h1>
+    <p class="sub">El panel de Notificaciones (🔔) es de 360px. Con nombres de clientes largos, el título y el
+      texto se salían del panel y quedaban recortados en medio de una palabra, sin puntos suspensivos.</p>
+
+    <div class="row-label before">Antes</div>
+    <div class="before">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="t">🔔 Notificaciones</div>
+          <span class="badge">1 nueva</span>
+        </div>
+        <ul class="n-list">
+          <li class="n-item unread">
+            <span class="n-dot"></span>
+            <div class="n-ico">🎬</div>
+            <div class="n-body">
+              <p class="n-title">Video editado subido — Dr. Rodriguez Ca</p>
+              <p class="n-text">Cafe Don Rogeli</p>
+              <p class="n-time">hace 4 min</p>
+            </div>
+          </li>
+          <li class="n-item">
+            <div class="n-ico">🎨</div>
+            <div class="n-body">
+              <p class="n-title">Arte Digital Onli</p>
+              <p class="n-text">Nueva idea de contenido lista para revisió</p>
+              <p class="n-time">hace 1 h</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row-label after">Después</div>
+    <div class="after">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="t">🔔 Notificaciones</div>
+          <span class="badge">1 nueva</span>
+        </div>
+        <ul class="n-list">
+          <li class="n-item unread">
+            <span class="n-dot"></span>
+            <div class="n-ico">🎬</div>
+            <div class="n-body">
+              <p class="n-title">Video editado subido — Dr. Rodriguez Cardiología y Medicina Interna de Puerto Rico</p>
+              <p class="n-text">Cafe Don Rogelio actualizó el material creativo con un nombre de archivo bastante largo y descriptivo</p>
+              <p class="n-time">hace 4 min</p>
+            </div>
+          </li>
+          <li class="n-item">
+            <div class="n-ico">🎨</div>
+            <div class="n-body">
+              <p class="n-title">Arte Digital Online y Producciones Audiovisuales del Caribe</p>
+              <p class="n-text">Nueva idea de contenido lista para revisión del equipo creativo antes de pasar a edición</p>
+              <p class="n-time">hace 1 h</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Qué cambió por dentro:</strong> el componente de lista con scroll (<code>ScrollArea</code>) tenía un
+      div interno que crecía con el contenido en vez de respetar el ancho del panel — eso impedía que el texto se
+      recortara con "…". Ahora ese div se fuerza a ancho completo, así que el título queda en una línea con
+      puntos suspensivos y el texto en hasta dos líneas. Afecta al panel de Notificaciones y al diálogo
+      "Auto-aplicar a todos" en Clientes.
+    </div>
+  </div>
+</body>
+</html>
