@@ -12,8 +12,9 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - El generador de captions **vuelve al camino manual de siempre**: lee esa casilla como base, más el aprendizaje de siempre (captions aprobados, 👍/👎, voz de marca, reglas del cliente, ejemplos de Metricool) — ya no arrastra un bloque aparte de "análisis visual de IA" cuando la casilla tiene contenido. Ese bloque solo reaparece como red de seguridad si la casilla quedara vacía.
 - **Nunca pisa lo que ya escribió una persona**: solo llena la casilla si estaba vacía.
 - Cuando lo escribió la IA, aparece una marca discreta ("escrito por la IA a partir del video · edítalo si no cuadra") junto al campo — en la tarjeta de la idea, en el caption del video y en el copy de Entregas. En cuanto lo corriges y guardas, la marca desaparece.
-- Los textos de la pantalla del caption ahora dicen la verdad del flujo: la IA ve **y** escucha el video, y el caption se escribe a partir de la casilla "¿de qué es?", no al revés.
-- El generador de captions ya no inventa años, fechas, nombres de eventos, precios ni promociones que no consten en el video, el hook, el brief o los captions de referencia — si algo no consta, se omite.
+- El texto de "¿de qué es el video?" solo afirma "la IA escribió esto" cuando de verdad lo hizo (no con solo tener análisis visual) — y nunca dice "escuchó", porque eso no siempre se puede confirmar en pantalla. Solo promete lo que sí es seguro: que la IA vio el video.
+- Cuando la casilla tiene contenido, el generador de captions la usa como **base** del texto — la transcripción del audio queda como apoyo, no al revés como quedaba antes por error.
+- El generador de captions ya no inventa años, fechas, nombres de eventos, precios ni promociones que no consten en el video, el hook, el brief, las reglas del cliente o los captions de referencia — si algo no consta, se omite.
 
 Vista: [preview HTML](/previews/v3.42-de-que-es-el-video.html)
 

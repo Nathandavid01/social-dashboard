@@ -81,7 +81,8 @@
     <div class="rule"><span class="ok">✓</span><span>Queda <b>visible y editable</b> como cualquier hook — se corrige y se regenera el caption igual que siempre.</span></div>
     <div class="rule"><span class="ok">✓</span><span>La marca "escrito por la IA" <b>desaparece al guardar</b> una corrección — no al abrir o enfocar el campo.</span></div>
     <div class="rule"><span class="no">✗</span><span>La IA <b>no</b> escribe el caption directamente — sigue siendo <code>generateIdeaCaption</code>, con captions aprobados, 👍/👎, voz de marca y reglas del cliente: el camino manual de siempre, ahora leyendo un hook real.</span></div>
-    <div class="rule"><span class="no">✗</span><span>El generador <b>no inventa</b> años, fechas, eventos, precios ni promociones que no consten en el video, el hook, el brief o los captions de referencia.</span></div>
+    <div class="rule"><span class="ok">✓</span><span><b>El hook manda sobre la transcripción:</b> al generar el caption, si la casilla tiene contenido es la BASE (la transcripción del audio queda como apoyo secundario) — con la casilla vacía, la transcripción vuelve a mandar, como red de seguridad.</span></div>
+    <div class="rule"><span class="no">✗</span><span>El generador <b>no inventa</b> años, fechas, eventos, precios ni promociones que no consten en el video, el hook, el brief, las restricciones del cliente (CTA, reglas, hashtags) o los captions de referencia.</span></div>
 
     <div class="row-label">Dónde se ve la marca</div>
     <div class="cols">
