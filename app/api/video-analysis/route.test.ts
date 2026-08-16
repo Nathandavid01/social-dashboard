@@ -29,6 +29,8 @@ let videoResult: { data: unknown } = { data: null }
  *  call index so a test can fail just the pending upsert (index 0) and leave
  *  the rest healthy, without weakening the existing all-calls-fail tests. */
 let upsertError: { message: string } | null | ((callIndex: number) => { message: string } | null) = null
+/** Findings ya persistidos en la fila, leídos por el merge de un chunk > 0. */
+let existingFindings: unknown = null
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -50,6 +52,14 @@ vi.mock('@/lib/supabase/server', () => ({
             const error = typeof upsertError === 'function' ? upsertError(callIndex) : upsertError
             return Promise.resolve({ error })
           },
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => {
+                calls.push({ op: 'select-findings' })
+                return { data: { findings: existingFindings }, error: null }
+              },
+            }),
+          }),
         }
       }
       throw new Error(`unexpected table ${table}`)
@@ -83,6 +93,7 @@ beforeEach(() => {
   calls = []
   videoResult = { data: VIDEO }
   upsertError = null
+  existingFindings = null
   requirePermission.mockReset().mockResolvedValue(undefined)
   analyzeVideoFrames.mockReset().mockResolvedValue(GOOD_FINDINGS)
   generateIdeaCaption.mockReset().mockImplementation(async (ideaId: string, opts?: unknown) => {
@@ -211,5 +222,73 @@ describe('POST /api/video-analysis', () => {
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toEqual({ ok: true })
     expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+})
+
+describe('POST /api/video-analysis — troceado (chunk)', () => {
+  const chunkFindings = (text: string, summary: string) => ({
+    burned_captions: { text, issues: [] },
+    relevance: { verdict: 'ok', explanation: 'coincide' },
+    visual_summary: summary,
+  })
+
+  it('chunk único (sin campo chunk): comportamiento actual intacto — pending, done, encadena caption', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(calls.map((c) => c.op)).toEqual(['upsert', 'upsert', 'generateIdeaCaption'])
+  })
+
+  it('chunk 0 de 3: pending → done con SOLO este chunk (sin merge, no hay fila previa) → NO encadena caption', async () => {
+    analyzeVideoFrames.mockResolvedValueOnce(chunkFindings('Ven hoy', 'persona cocina'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 0, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(calls.map((c) => c.op)).toEqual(['upsert', 'upsert'])
+
+    const pending = calls[0].payload as Record<string, unknown>
+    expect(pending).toMatchObject({ status: 'pending' })
+
+    const done = calls[1].payload as Record<string, unknown>
+    expect(done).toMatchObject({
+      status: 'done',
+      findings: chunkFindings('Ven hoy', 'persona cocina'),
+      visual_summary: 'persona cocina',
+    })
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+
+  it('chunk 2 de 3 (último): NO pending, lee findings previos, funde, escribe done, y SÍ encadena caption', async () => {
+    existingFindings = chunkFindings('Ven hoy al gym', 'persona cocina picanha')
+    analyzeVideoFrames.mockResolvedValueOnce(chunkFindings('cierra con el logo', 'cierra con el logo de Arasibo'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 2, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(calls.map((c) => c.op)).toEqual(['select-findings', 'upsert', 'generateIdeaCaption'])
+
+    const done = calls[1].payload as Record<string, unknown>
+    const findings = done.findings as { burned_captions: { text: string }; visual_summary: string }
+    expect(findings.burned_captions.text).toBe('Ven hoy al gym cierra con el logo')
+    expect(findings.visual_summary).toBe('persona cocina picanha cierra con el logo de Arasibo')
+    expect(done.visual_summary).toBe(findings.visual_summary)
+    expect(generateIdeaCaption).toHaveBeenCalledWith('idea-1', { auto: true })
+  })
+
+  it('chunk con forma inválida: se trata como chunk único (pending+done+encadena)', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 'x', total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(calls.map((c) => c.op)).toEqual(['upsert', 'upsert', 'generateIdeaCaption'])
+  })
+
+  it('chunk con index fuera de rango (index >= total): se trata como chunk único', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 5, total: 3 } }))
+    expect(res.status).toBe(200)
+    expect(calls.map((c) => c.op)).toEqual(['upsert', 'upsert', 'generateIdeaCaption'])
+  })
+
+  it('chunk > 0 falla en analyzeVideoFrames: 502, NO escribe status error (no clobber de la fila con findings válidos), NO encadena', async () => {
+    existingFindings = chunkFindings('Ven hoy', 'persona cocina')
+    analyzeVideoFrames.mockRejectedValueOnce(new Error('Grok API 429: rate'))
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], chunk: { index: 1, total: 3 } }))
+    expect(res.status).toBe(502)
+    expect(calls.map((c) => c.op)).toEqual(['select-findings'])
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
   })
 })

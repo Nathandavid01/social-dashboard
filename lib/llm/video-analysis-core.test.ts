@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   GROK_VISION_MODEL, videoAnalysisModelId, videoAnalysisConfigError,
   buildVideoAnalysisPrompt, buildVideoAnalysisRequest, parseVideoAnalysisResponse,
+  mergeVideoAnalysisFindings, type VideoAnalysisFindings,
 } from './video-analysis-core'
 
 describe('videoAnalysisModelId', () => {
@@ -131,5 +132,82 @@ describe('parseVideoAnalysisResponse', () => {
 
     const outWithoutT = parseVideoAnalysisResponse(wrap(JSON.stringify(good)))
     expect(outWithoutT?.burned_captions.issues[0].t).toBeUndefined()
+  })
+})
+
+describe('mergeVideoAnalysisFindings', () => {
+  const findings = (over: Partial<VideoAnalysisFindings> = {}): VideoAnalysisFindings => ({
+    burned_captions: { text: '', issues: [] },
+    relevance: { verdict: 'ok', explanation: '' },
+    visual_summary: '',
+    ...over,
+  })
+
+  it('concatena burned_captions.text sin repetir texto idéntico', () => {
+    const a = findings({ burned_captions: { text: 'Ven hoy', issues: [] } })
+    const b = findings({ burned_captions: { text: 'al gym', issues: [] } })
+    expect(mergeVideoAnalysisFindings(a, b).burned_captions.text).toBe('Ven hoy al gym')
+  })
+
+  it('no duplica el texto si el chunk repite exactamente lo mismo', () => {
+    const a = findings({ burned_captions: { text: 'Ven hoy', issues: [] } })
+    const b = findings({ burned_captions: { text: 'Ven hoy', issues: [] } })
+    expect(mergeVideoAnalysisFindings(a, b).burned_captions.text).toBe('Ven hoy')
+  })
+
+  it('une issues deduplicando por quote+t', () => {
+    const a = findings({
+      burned_captions: { text: '', issues: [{ quote: 'aserca', problem: 'p', suggestion: 's', t: '0.3s' }] },
+    })
+    const b = findings({
+      burned_captions: {
+        text: '',
+        issues: [
+          { quote: 'aserca', problem: 'p', suggestion: 's', t: '0.3s' }, // mismo quote+t → no se duplica
+          { quote: 'aserca', problem: 'p', suggestion: 's', t: '8.1s' }, // mismo quote, distinto t → se conserva
+          { quote: 'nuevo error', problem: 'p2', suggestion: 's2' },
+        ],
+      },
+    })
+    const merged = mergeVideoAnalysisFindings(a, b)
+    expect(merged.burned_captions.issues).toHaveLength(3)
+    expect(merged.burned_captions.issues.map((i) => `${i.quote}|${i.t ?? ''}`)).toEqual([
+      'aserca|0.3s', 'aserca|8.1s', 'nuevo error|',
+    ])
+  })
+
+  it('relevance: warning manda sobre ok, sin importar el orden', () => {
+    const ok = findings({ relevance: { verdict: 'ok', explanation: 'coincide' } })
+    const warn = findings({ relevance: { verdict: 'warning', explanation: 'no coincide' } })
+    expect(mergeVideoAnalysisFindings(ok, warn).relevance).toEqual({ verdict: 'warning', explanation: 'no coincide' })
+    expect(mergeVideoAnalysisFindings(warn, ok).relevance).toEqual({ verdict: 'warning', explanation: 'no coincide' })
+    expect(mergeVideoAnalysisFindings(ok, ok).relevance.verdict).toBe('ok')
+  })
+
+  it('visual_summary: conserva el primero no vacío y añade lo nuevo si aporta', () => {
+    const a = findings({ visual_summary: 'persona cocina picanha en parrilla' })
+    const b = findings({ visual_summary: 'cierra con el logo de Arasibo' })
+    expect(mergeVideoAnalysisFindings(a, b).visual_summary).toBe('persona cocina picanha en parrilla cierra con el logo de Arasibo')
+  })
+
+  it('visual_summary: si el segundo está vacío, se queda con el primero', () => {
+    const a = findings({ visual_summary: 'algo' })
+    const b = findings({ visual_summary: '' })
+    expect(mergeVideoAnalysisFindings(a, b).visual_summary).toBe('algo')
+  })
+
+  it('visual_summary: si el primero está vacío, usa el segundo', () => {
+    const a = findings({ visual_summary: '' })
+    const b = findings({ visual_summary: 'algo' })
+    expect(mergeVideoAnalysisFindings(a, b).visual_summary).toBe('algo')
+  })
+
+  it('tolera a nulo (chunk 0 falló, llega el chunk 1): el resultado es b', () => {
+    const b = findings({ visual_summary: 'solo esto' })
+    expect(mergeVideoAnalysisFindings(null, b)).toEqual(b)
+  })
+
+  it('campos vacíos en ambos lados no revientan', () => {
+    expect(mergeVideoAnalysisFindings(findings(), findings())).toEqual(findings())
   })
 })
