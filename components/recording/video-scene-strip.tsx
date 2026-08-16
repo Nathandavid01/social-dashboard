@@ -73,7 +73,12 @@ export function VideoSceneStrip({ videoId, onOpen }: { videoId: string; onOpen?:
     extractFramesFromVideoElement(video, {
       timestampsFor: (duration) => evenTimestamps(duration, THUMB_COUNT),
       maxSide: 320,
-      giveUpMs: 10_000,
+      // Tira de 5 escenas: rendirse rápido sigue siendo la prioridad (no son
+      // 240 fotogramas) — mismo presupuesto de 10s que tenía antes, pero
+      // ahora por operación (metadata Y cada uno de los 5 seeks) en vez de
+      // uno global para las 6 esperas juntas.
+      metadataTimeoutMs: 10_000,
+      seekTimeoutMs: 10_000,
       shouldContinue: () => alive,
       onFrame: ({ video, width, height, index }) => {
         const canvas = canvasRefs.current[index]
