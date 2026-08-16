@@ -96,15 +96,21 @@ export async function POST(request: Request) {
     // Chunk >0: lee lo que ya hay ANTES de gastar la llamada a Grok, para
     // fundir con lo nuevo. Si esta lectura falla, se trata como "sin previo"
     // (mergeVideoAnalysisFindings tolera null) — nunca bloquea el chunk.
+    // frame_count se lee de la MISMA fila (no un segundo round-trip): si esa
+    // columna no existiera aún, este select ya degradaría a "sin previo" para
+    // findings también — mismo riesgo que ya asume el resto de esta ruta.
     let previousFindings: VideoAnalysisFindings | null = null
+    let previousFrameCount = 0
     if (!isFirstChunk) {
       const { data: existing } = await supabase
         .from('content_idea_video_analysis')
-        .select('findings')
+        .select('findings, frame_count')
         .eq('video_id', video.id)
         .maybeSingle()
         .then((r) => r, () => ({ data: null }))
-      previousFindings = (existing as { findings?: VideoAnalysisFindings | null } | null)?.findings ?? null
+      const prevRow = existing as { findings?: VideoAnalysisFindings | null; frame_count?: number | null } | null
+      previousFindings = prevRow?.findings ?? null
+      previousFrameCount = typeof prevRow?.frame_count === 'number' ? prevRow.frame_count : 0
     }
 
     const analysisCtx = {
@@ -124,6 +130,20 @@ export async function POST(request: Request) {
       model: videoAnalysisModelId(process.env),
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Contador de fotogramas analizados, acumulado entre chunks — con un
+    // UPDATE separado (no en el upsert de arriba) para que si la columna
+    // `frame_count` no existe todavía (migración 0063 pendiente), el análisis
+    // en sí (status/findings, ya escrito arriba) nunca se vea afectado.
+    const frameCount = (isFirstChunk ? 0 : previousFrameCount) + frames.length
+    try {
+      await supabase
+        .from('content_idea_video_analysis')
+        .update({ frame_count: frameCount })
+        .eq('video_id', video.id)
+    } catch {
+      // Columna sin migrar todavía: degrada seguro, simplemente no se cuenta.
+    }
 
     // Encadena el auto-draft del caption SOLO tras el último chunk — antes de
     // eso el análisis está incompleto. generateIdeaCaption lo lee de la tabla

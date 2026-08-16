@@ -36,7 +36,15 @@ function ideaChain(result: { data: unknown; error: unknown }) {
   return self
 }
 
+/** getVideoAnalysis hace DOS consultas a `content_idea_video_analysis`: la
+ *  crítica (status/findings) y luego una separada, best-effort, solo para
+ *  frame_count — así una columna sin migrar apaga SOLO el contador, nunca el
+ *  resto del análisis. `analysisFromCallIndex` distingue cuál es cuál. */
+let analysisFromCallIndex = 0
+let analysisFrameCountResult: { data: unknown; error: unknown } = { data: null, error: null }
+
 function analysisChain() {
+  const callIndex = analysisFromCallIndex++
   let byVideoId = false
   const self: Record<string, unknown> = {
     select: () => self,
@@ -46,7 +54,10 @@ function analysisChain() {
     },
     order: () => self,
     limit: () => self,
-    maybeSingle: async () => (byVideoId ? analysisByVideoId : analysisNewestForIdea),
+    maybeSingle: async () => {
+      if (callIndex > 0) return analysisFrameCountResult
+      return byVideoId ? analysisByVideoId : analysisNewestForIdea
+    },
   }
   return self
 }
@@ -70,6 +81,8 @@ beforeEach(() => {
   analysisByVideoId = { data: null, error: null }
   analysisNewestForIdea = { data: null, error: null }
   ideaResult = { data: null, error: null }
+  analysisFromCallIndex = 0
+  analysisFrameCountResult = { data: null, error: null }
 })
 
 const DONE_FINDINGS = { burned_captions: { text: '', issues: [] }, relevance: { verdict: 'ok', explanation: '' }, visual_summary: null }
@@ -154,6 +167,34 @@ describe('getVideoAnalysis', () => {
       ideaResult = { data: null, error: null }
       const res = await getVideoAnalysis('idea-1')
       expect(res.analysis?.hasCaption).toBe(false)
+    })
+  })
+
+  describe('frameCount (contador de fotogramas, v3.39)', () => {
+    beforeEach(() => {
+      videoResult = { data: { id: 'video-2' }, error: null }
+      analysisByVideoId = { data: { status: 'done', findings: DONE_FINDINGS }, error: null }
+      ideaResult = { data: { caption_draft: null, generated_caption: null }, error: null }
+    })
+
+    it('con frame_count guardado → analysis.frameCount refleja el valor', async () => {
+      analysisFrameCountResult = { data: { frame_count: 48 }, error: null }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.status).toBe('done')
+      expect(res.analysis?.frameCount).toBe(48)
+    })
+
+    it('sin fila / frame_count null → frameCount: null', async () => {
+      analysisFrameCountResult = { data: { frame_count: null }, error: null }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.frameCount).toBeNull()
+    })
+
+    it('columna frame_count no existe todavía (error en esa query) → frameCount: null, sin tumbar el resto del análisis', async () => {
+      analysisFrameCountResult = { data: null, error: { message: 'column "frame_count" does not exist' } }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.status).toBe('done')
+      expect(res.analysis?.frameCount).toBeNull()
     })
   })
 })
