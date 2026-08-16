@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.54 — 2026-08-16
+
+**Las subidas de video ya no se caen con internet flojo — ahora se ven con el logo de Nate Media llenándose poco a poco, dicen qué están haciendo, y puedes irte a otra pantalla sin que se pierdan.**
+
+- **Antes**, un corte de internet a mitad de una subida grande perdía TODO el progreso y había que empezar de cero. **Ahora**, los videos de 8 MB o más se suben en pedazos: si uno falla por la conexión, solo se reintenta ESE pedazo (hasta 5 veces), no el archivo completo.
+- **El logo de Nate Media (la "N") se llena de abajo hacia arriba** según el porcentaje real de la subida, en la tarjeta del video de "Video editado".
+- **Un texto dice exactamente qué está pasando**, no solo una barra: "Subiendo… 45% · parte 12 de 26", "Se cayó la conexión — reintentando (2 de 5)…", "Ensamblando el archivo", "Registrando el video", "La IA está viendo el video…", "Listo".
+- **La subida sigue viva aunque cambies de pantalla**: un indicador pequeño con el mismo logo llenándose queda siempre visible en la esquina inferior izquierda (sin taparte el chat) mientras algo se sube — se expande con un clic para ver cada subida y cancelarla si hace falta.
+- Si cierras la pestaña del navegador con una subida activa, un aviso te avisa antes — cerrar la pestaña sí la mata (el archivo vive en la memoria del navegador), pero navegar dentro del dashboard no.
+- Los archivos pequeños (menos de 8 MB) siguen subiendo igual que siempre, sin este mecanismo extra — no hacía falta complicarlos.
+- Por ahora este cambio aplica al video editado que se sube desde la tarjeta de producción de cada idea; los otros dos lugares donde se sube video (la cola de edición y el formulario de Entregas) siguen funcionando exactamente igual que antes, sin tocar.
+
+Vista: [preview HTML](/previews/v3.54-subida-resistente.html)
+
 ## v3.52 — 2026-08-16
 
 **Los captions de un mismo lote ya no se parecen entre sí — y cuando el equipo corrige uno, el sistema aprende para ese cliente.**
