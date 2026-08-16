@@ -39,7 +39,7 @@ export function QcProgressDots({ ideaId }: { ideaId: string }) {
   const relevanceText =
     relevanceState === 'working' ? 'Analizando…'
     : relevanceState === 'ok' ? 'Es del cliente'
-    : relevanceState === 'warning' ? (findings?.relevance.explanation || 'No parece de este cliente')
+    : relevanceState === 'warning' ? 'No parece de este cliente'
     : 'Análisis no disponible'
 
   const captionsText =

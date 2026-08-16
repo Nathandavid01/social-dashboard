@@ -42,15 +42,20 @@ describe('QcProgressDots', () => {
     expect(screen.getByText('Caption generado')).toBeInTheDocument()
   })
 
-  it('done + relevancia warning + 2 issues → bolita 1 ámbar con la explicación, bolita 2 ámbar "2 errores a revisar", con detalle expandible', async () => {
+  it('done + relevancia warning + 2 issues → bolita 1 ámbar con problema corto, bolita 2 ámbar "2 errores a revisar", con detalle expandible al hacer click', async () => {
     mockGet.mockResolvedValue({ analysis: { status: 'done', findings: warningFindings, hasCaption: true } })
     render(<QcProgressDots ideaId="i1" />)
 
-    await waitFor(() => expect(screen.getByText(/no se menciona al cliente/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('No parece de este cliente')).toBeInTheDocument())
     expect(screen.getByText('2 errores a revisar')).toBeInTheDocument()
 
-    // El detalle de correcciones no se ve hasta hacer click en la bolita ámbar.
+    // El detalle no se ve hasta hacer click en cada bolita ámbar.
+    expect(screen.queryByText(/no se menciona al cliente/)).not.toBeInTheDocument()
     expect(screen.queryByText(/clínica/)).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('No parece de este cliente'))
+    expect(screen.getByText(/no se menciona al cliente/)).toBeInTheDocument()
+
     fireEvent.click(screen.getByText('2 errores a revisar'))
     expect(screen.getByText(/clínica/)).toBeInTheDocument()
     expect(screen.getByText(/Ven hoy,/)).toBeInTheDocument()
