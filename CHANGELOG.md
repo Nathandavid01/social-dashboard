@@ -15,6 +15,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Si cierras la pestaña del navegador con una subida activa, un aviso te avisa antes — cerrar la pestaña sí la mata (el archivo vive en la memoria del navegador), pero navegar dentro del dashboard no.
 - Los archivos pequeños (menos de 8 MB) siguen subiendo igual que siempre, sin este mecanismo extra — no hacía falta complicarlos.
 - Por ahora este cambio aplica al video editado que se sube desde la tarjeta de producción de cada idea; los otros dos lugares donde se sube video (la cola de edición y el formulario de Entregas) siguen funcionando exactamente igual que antes, sin tocar.
+- **Seguridad**: cancelar una subida por partes ahora limpia bien el lado del servidor incluso si cancelas justo al empezar (antes de internet lento) — ya no queda "basura" pagando almacenamiento en R2. Y solo la persona que empezó una subida puede completarla o cancelarla — antes, cualquiera con permiso de subir video que adivinara el identificador interno de OTRA subida podría haberla tocado.
+- **Pendiente operativo (documentado, no bloqueante)**: además de la limpieza automática de arriba, cada bucket de R2 (`nmedia-videos` y el de Entregas) necesita una regla de lifecycle `AbortIncompleteMultipartUpload` como red de seguridad adicional — se configura una vez, a mano, en el dashboard de Cloudflare R2 (Bucket → Settings → Object lifecycle rules → "Abort incomplete multipart uploads" → 1 día) o vía Wrangler/API de R2. Sin ninguna de las dos capas, cerrar la pestaña a mitad de una subida grande deja partes sueltas cobrando almacenamiento indefinidamente.
 
 Vista: [preview HTML](/previews/v3.54-subida-resistente.html)
 
