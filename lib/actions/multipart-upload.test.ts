@@ -41,8 +41,14 @@ vi.mock('@aws-sdk/s3-request-presigner', () => ({
 // --- Supabase mock: an in-memory ownership table, RLS emulated by hand ----
 let currentUserId: string | null = 'user-1'
 let ownershipRows: Array<{ upload_id: string; key: string; idea_id: string; provider: string; created_by: string }> = []
-let insertShouldError = false
+type DbError = { message: string; code?: string } | null
+let insertError: DbError = null
+let selectError: DbError = null
 const deleteSpy = vi.fn()
+
+// A real Postgres "table doesn't exist" error — the exact shape 0065's
+// migration NOT being applied yet produces.
+const MISSING_TABLE_ERROR: DbError = { message: 'relation "public.multipart_uploads" does not exist', code: '42P01' }
 
 function makeSupabaseMock() {
   return {
@@ -51,8 +57,8 @@ function makeSupabaseMock() {
       if (table !== 'multipart_uploads') throw new Error(`unexpected table ${table}`)
       return {
         insert: (payload: { upload_id: string; key: string; idea_id: string; provider: string; created_by: string }) => ({
-          then: (resolve: (v: { error: { message: string } | null }) => unknown) => {
-            if (insertShouldError) return resolve({ error: { message: 'insert falló' } })
+          then: (resolve: (v: { error: DbError }) => unknown) => {
+            if (insertError) return resolve({ error: insertError })
             ownershipRows.push(payload)
             return resolve({ error: null })
           },
@@ -61,6 +67,7 @@ function makeSupabaseMock() {
           eq: (col: string, val: string) => ({
             eq: (col2: string, val2: string) => ({
               maybeSingle: async () => {
+                if (selectError) return { data: null, error: selectError }
                 // RLS: only rows created_by the requester are ever visible.
                 const row = ownershipRows.find(
                   (r) => (r as never as Record<string, string>)[col] === val && (r as never as Record<string, string>)[col2] === val2 && r.created_by === currentUserId,
@@ -98,7 +105,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   currentUserId = 'user-1'
   ownershipRows = []
-  insertShouldError = false
+  insertError = null
+  selectError = null
   r2Send.mockResolvedValue({ UploadId: 'upload-123' })
   entregasSend.mockResolvedValue({ UploadId: 'upload-456' })
 })
@@ -137,13 +145,25 @@ describe('startMultipartUpload', () => {
   })
 
   it('aborts the just-created R2 multipart if recording ownership fails, and surfaces an error', async () => {
-    insertShouldError = true
+    insertError = { message: 'insert falló' }
     r2Send.mockResolvedValueOnce({ UploadId: 'upload-123' }) // create
     r2Send.mockResolvedValueOnce({}) // abort
     const res = await startMultipartUpload({ provider: 'r2', ideaId: 'idea-1', kind: 'edited', fileName: 'a.mp4', contentType: 'video/mp4' })
     expect(res.error).toBeTruthy()
     expect(res.uploadId).toBeUndefined()
     expect(r2Send).toHaveBeenCalledTimes(2) // create + abort, no orphan left trying to be used
+  })
+
+  it('when the 0065 migration is not applied yet (ownership table missing), surfaces a clear Spanish message — not raw Postgres text — and still aborts the R2 multipart', async () => {
+    insertError = MISSING_TABLE_ERROR
+    r2Send.mockResolvedValueOnce({ UploadId: 'upload-123' }) // create
+    r2Send.mockResolvedValueOnce({}) // abort
+    const res = await startMultipartUpload({ provider: 'r2', ideaId: 'idea-1', kind: 'edited', fileName: 'a.mp4', contentType: 'video/mp4' })
+    expect(res.error).toBeTruthy()
+    expect(res.error).not.toMatch(/relation|does not exist|multipart_uploads/i) // no raw Postgres text reaching the screen
+    expect(res.error).toMatch(/actualización pendiente/i)
+    expect(res.error).toMatch(/base de datos/i)
+    expect(r2Send).toHaveBeenCalledTimes(2) // create + abort — same clean-up as any other ownership failure
   })
 })
 
@@ -199,6 +219,33 @@ describe('ownership gate on presign/complete/abort', () => {
     const res = await abortMultipartUpload({ provider: 'r2', key, uploadId })
     expect(res.error).toBeTruthy()
     expect(r2Send).toHaveBeenCalledTimes(1) // only the original create
+  })
+
+  it('when ownership cannot be VERIFIED (table missing), the error says so — never "No autorizado", which would blame permissions for an infrastructure gap', async () => {
+    const { uploadId, key } = await startOwned()
+    selectError = MISSING_TABLE_ERROR
+    const res = await completeMultipartUpload({ provider: 'r2', key, uploadId, parts: [{ partNumber: 1, etag: '"e1"' }] })
+    expect(res.error).toBeTruthy()
+    expect(res.error).not.toBe('No autorizado para esta subida')
+    expect(res.error).not.toMatch(/relation|does not exist|multipart_uploads/i)
+    expect(res.error).toMatch(/actualización pendiente/i)
+    expect(r2Send).toHaveBeenCalledTimes(1) // only the original create — complete never touched R2
+  })
+
+  it('same infra-vs-permission distinction on abort', async () => {
+    const { uploadId, key } = await startOwned()
+    selectError = MISSING_TABLE_ERROR
+    const res = await abortMultipartUpload({ provider: 'r2', key, uploadId })
+    expect(res.error).not.toBe('No autorizado para esta subida')
+    expect(res.error).toMatch(/actualización pendiente/i)
+  })
+
+  it('same infra-vs-permission distinction on presign', async () => {
+    const { uploadId, key } = await startOwned()
+    selectError = MISSING_TABLE_ERROR
+    const res = await presignUploadParts({ provider: 'r2', key, uploadId, partNumbers: [1] })
+    expect(res.error).not.toBe('No autorizado para esta subida')
+    expect(res.error).toMatch(/actualización pendiente/i)
   })
 })
 

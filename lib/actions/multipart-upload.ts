@@ -58,6 +58,20 @@ function notConfiguredMessage(provider: MultipartProvider): string {
   return provider === 'entregas-r2' ? 'R2 de Entregas no está configurado (faltan ENTREGAS_R2_*)' : 'R2 no está configurado'
 }
 
+/**
+ * `multipart_uploads` (0065 migration) not existing yet is an infrastructure
+ * gap, not a permissions problem — a plain "No autorizado" would blame the
+ * wrong thing, and the raw Postgres error (`relation "..." does not exist`,
+ * code 42P01) must never reach the screen in English/technical form.
+ */
+function isMissingOwnershipTable(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false
+  if (error.code === '42P01') return true
+  return typeof error.message === 'string' && /relation .*multipart_uploads.* does not exist/i.test(error.message)
+}
+
+const MIGRATION_PENDING_SUFFIX = 'falta una actualización pendiente en la base de datos. Avisa al equipo.'
+
 /** Records who started this multipart upload — the ownership check for complete/abort/presign. */
 async function recordOwnership(input: { uploadId: string; key: string; ideaId: string; provider: MultipartProvider }): Promise<{ ok?: true; error?: string }> {
   const supabase = await createClient()
@@ -70,20 +84,34 @@ async function recordOwnership(input: { uploadId: string; key: string; ideaId: s
     provider: input.provider,
     created_by: user.id,
   })
-  if (error) return { error: error.message }
+  if (error) {
+    if (isMissingOwnershipTable(error)) return { error: `No se pudo iniciar la subida: ${MIGRATION_PENDING_SUFFIX}` }
+    return { error: error.message }
+  }
   return { ok: true }
 }
 
-/** True only if the CURRENT user is the one who started this uploadId (RLS-enforced, not a manual compare). */
-async function ownsUpload(uploadId: string, key: string): Promise<boolean> {
+type OwnershipCheck = { owns: boolean } | { error: string }
+
+/**
+ * Distinguishes "verified — you are NOT the owner" (owns: false) from
+ * "could not verify at all" (error) — the two used to collapse into the same
+ * `false`, which then always surfaced as "No autorizado para esta subida"
+ * even when the real cause was the ownership table not existing yet.
+ */
+async function checkOwnership(uploadId: string, key: string): Promise<OwnershipCheck> {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('multipart_uploads')
     .select('upload_id')
     .eq('upload_id', uploadId)
     .eq('key', key)
     .maybeSingle()
-  return !!data
+  if (error) {
+    if (isMissingOwnershipTable(error)) return { error: `No se pudo comprobar la subida: ${MIGRATION_PENDING_SUFFIX}` }
+    return { error: error.message }
+  }
+  return { owns: !!data }
 }
 
 /** Best-effort cleanup once a multipart is done (completed or aborted) — never blocks the outer result. */
@@ -156,7 +184,9 @@ export async function presignUploadParts(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
-  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
+  const ownership = await checkOwnership(input.uploadId, input.key)
+  if ('error' in ownership) return { error: ownership.error }
+  if (!ownership.owns) return { error: 'No autorizado para esta subida' }
 
   try {
     const entries = await Promise.all(
@@ -189,7 +219,9 @@ export async function completeMultipartUpload(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
-  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
+  const ownership = await checkOwnership(input.uploadId, input.key)
+  if ('error' in ownership) return { error: ownership.error }
+  if (!ownership.owns) return { error: 'No autorizado para esta subida' }
 
   try {
     await client.send(
@@ -225,7 +257,9 @@ export async function abortMultipartUpload(input: {
 
   const { client, bucket, ok } = clientFor(input.provider)
   if (!client || !ok) return { error: notConfiguredMessage(input.provider) }
-  if (!(await ownsUpload(input.uploadId, input.key))) return { error: 'No autorizado para esta subida' }
+  const ownership = await checkOwnership(input.uploadId, input.key)
+  if ('error' in ownership) return { error: ownership.error }
+  if (!ownership.owns) return { error: 'No autorizado para esta subida' }
 
   try {
     await client.send(new AbortMultipartUploadCommand({ Bucket: bucket, Key: input.key, UploadId: input.uploadId }))
