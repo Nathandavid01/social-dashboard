@@ -16,7 +16,7 @@ describe('VideoAnalysisReport', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('done con issues: muestra ⚠ en captions, ⚠ en relevancia y el detalle', async () => {
-    mockGet.mockResolvedValue({ analysis: { status: 'done', findings } })
+    mockGet.mockResolvedValue({ analysis: { status: 'done', findings, hasCaption: true } })
     render(<VideoAnalysisReport ideaId="i1" />)
     await waitFor(() => expect(screen.getByText(/Captions del video/)).toBeInTheDocument())
     expect(screen.getAllByText(/⚠|Revisar/).length).toBeGreaterThan(0)
@@ -29,6 +29,7 @@ describe('VideoAnalysisReport', () => {
       analysis: {
         status: 'done',
         findings: { ...findings, burned_captions: { text: 'Bien escrito', issues: [] }, relevance: { verdict: 'ok', explanation: 'coincide' } },
+        hasCaption: true,
       },
     })
     render(<VideoAnalysisReport ideaId="i1" />)
@@ -37,11 +38,11 @@ describe('VideoAnalysisReport', () => {
   })
 
   it('pending muestra "Analizando…"; error muestra "Análisis no disponible"', async () => {
-    mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null } })
+    mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null, hasCaption: false } })
     const { unmount } = render(<VideoAnalysisReport ideaId="i1" />)
     await waitFor(() => expect(screen.getByText(/Analizando/)).toBeInTheDocument())
     unmount()
-    mockGet.mockResolvedValue({ analysis: { status: 'error', findings: null } })
+    mockGet.mockResolvedValue({ analysis: { status: 'error', findings: null, hasCaption: false } })
     render(<VideoAnalysisReport ideaId="i1" />)
     await waitFor(() => expect(screen.getByText(/Análisis no disponible/)).toBeInTheDocument())
   })
@@ -59,9 +60,9 @@ describe('VideoAnalysisReport', () => {
 
     it('pending → poll cada 10s → done: deja de mostrar "Analizando…" y muestra el reporte, sin más llamadas tras el cambio', async () => {
       mockGet
-        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null } })
-        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null } })
-        .mockResolvedValue({ analysis: { status: 'done', findings } })
+        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null, hasCaption: false } })
+        .mockResolvedValueOnce({ analysis: { status: 'pending', findings: null, hasCaption: false } })
+        .mockResolvedValue({ analysis: { status: 'done', findings, hasCaption: true } })
 
       render(<VideoAnalysisReport ideaId="i1" />)
       await act(async () => {})
@@ -82,7 +83,7 @@ describe('VideoAnalysisReport', () => {
     })
 
     it('se desmonta con pending: no sigue sondeando (interval limpio)', async () => {
-      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null } })
+      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null, hasCaption: false } })
       const { unmount } = render(<VideoAnalysisReport ideaId="i1" />)
       await act(async () => {})
       expect(mockGet).toHaveBeenCalledTimes(1)
@@ -93,7 +94,7 @@ describe('VideoAnalysisReport', () => {
     })
 
     it('pending que nunca resuelve: se da por vencido a los ~5min y deja de sondear, sin inventar un error', async () => {
-      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null } })
+      mockGet.mockResolvedValue({ analysis: { status: 'pending', findings: null, hasCaption: false } })
       render(<VideoAnalysisReport ideaId="i1" />)
       await act(async () => {})
 

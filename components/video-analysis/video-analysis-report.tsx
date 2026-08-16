@@ -1,50 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CheckCircle2, AlertTriangle, Loader2, EyeOff, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getVideoAnalysis, type VideoAnalysisView } from '@/lib/actions/video-analysis'
-
-const POLL_MS = 10_000
-const POLL_GIVE_UP_MS = 5 * 60_000
+import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
 
 /**
  * Reporte ADVISORY del QC IA (Grok 4.6). Solo superficies internas — nunca
  * montarlo en /review/<token> ni /aprobacion (links públicos de cliente).
  *
- * Mientras el análisis está 'pending' (el editor puede tener el panel abierto
- * mientras Grok procesa) reconsulta cada 10s hasta que el estado cambie, se
- * desmonte, o pasen ~5min — ahí se da por vencido y deja la tarjeta "Analizando…"
- * (nunca inventa un error).
+ * El fetch + poll (10s mientras 'pending', tope ~5min) vive en
+ * `useVideoAnalysisPolling` — compartido con `QcProgressDots` para que ningún
+ * punto de montaje haga dos fetches distintos del mismo análisis.
  */
 export function VideoAnalysisReport({ ideaId }: { ideaId: string }) {
-  const [analysis, setAnalysis] = useState<VideoAnalysisView | null | undefined>(undefined)
+  const analysis = useVideoAnalysisPolling(ideaId)
   const [open, setOpen] = useState(true)
-
-  useEffect(() => {
-    let alive = true
-    let timer: ReturnType<typeof setTimeout> | null = null
-    const startedAt = Date.now()
-
-    const fetchOnce = () => {
-      getVideoAnalysis(ideaId)
-        .then((res) => {
-          if (!alive) return
-          const next = res.analysis ?? null
-          setAnalysis(next)
-          if (next?.status === 'pending' && Date.now() - startedAt < POLL_GIVE_UP_MS) {
-            timer = setTimeout(fetchOnce, POLL_MS)
-          }
-        })
-        .catch(() => { if (alive) setAnalysis(null) })
-    }
-    fetchOnce()
-
-    return () => {
-      alive = false
-      if (timer) clearTimeout(timer)
-    }
-  }, [ideaId])
 
   if (analysis === undefined || analysis === null) return null
 

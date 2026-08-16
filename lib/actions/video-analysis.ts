@@ -7,6 +7,10 @@ import type { VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 export interface VideoAnalysisView {
   status: 'pending' | 'done' | 'error'
   findings: VideoAnalysisFindings | null
+  /** true si la idea ya tiene un caption escrito por IA (`caption_draft`) o
+   *  guardado por un humano (`generated_caption`). Independiente del estado
+   *  del QC de video: alimenta la 3ra bolita ("Caption generado"). */
+  hasCaption: boolean
 }
 
 /**
@@ -49,10 +53,29 @@ export async function getVideoAnalysis(
 
   if (error) return { analysis: null } // tabla sin migrar u otro fallo: degrada
   if (!data) return { analysis: null }
+
+  // hasCaption es independiente del QC de video (no hay `if` que lo bloquee
+  // en pending/error): un fallo aquí SOLO apaga esta bandera, nunca tumba el
+  // análisis ya resuelto arriba.
+  let hasCaption = false
+  try {
+    const { data: idea, error: ideaError } = await supabase
+      .from('content_ideas')
+      .select('caption_draft, generated_caption')
+      .eq('id', ideaId)
+      .maybeSingle()
+    if (!ideaError && idea) {
+      hasCaption = !!(idea.caption_draft?.trim() || idea.generated_caption?.trim())
+    }
+  } catch {
+    hasCaption = false
+  }
+
   return {
     analysis: {
       status: data.status as VideoAnalysisView['status'],
       findings: (data.findings as VideoAnalysisFindings | null) ?? null,
+      hasCaption,
     },
   }
 }
