@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { staleAnalysisCandidates } from '@/lib/utils/video-analysis-sweep'
+import { cronAuthDenial } from '@/lib/auth/cron'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -13,7 +14,8 @@ export const maxDuration = 60
  * asserts the player-critical `206 + Accept-Ranges`. If the Worker regresses
  * (e.g. loses Range support again), this fails loudly via a non-200 response so
  * the Vercel cron run is flagged — instead of nobody noticing until a preview
- * spins. Protected by CRON_SECRET, same as the other crons (see vercel.json).
+ * spins. Protected by CRON_SECRET (lib/auth/cron.ts), same as the other crons
+ * (see vercel.json). Fails closed.
  */
 function admin() {
   return createClient(
@@ -23,13 +25,8 @@ function admin() {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET
-  const authed =
-    (secret && req.headers.get('authorization') === `Bearer ${secret}`) ||
-    req.headers.get('x-vercel-cron') !== null
-  if (!authed) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const denial = cronAuthDenial(req)
+  if (denial) return NextResponse.json(denial.body, { status: denial.status })
 
   const sb = admin()
   const { data: videos, error } = await sb
