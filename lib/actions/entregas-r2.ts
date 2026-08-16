@@ -10,6 +10,7 @@ import {
   isEntregasR2Configured,
   ENTREGAS_PROVIDER,
 } from '@/lib/integrations/entregas-r2'
+import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 
 /**
  * Upload/playback for Entregas, against its own bucket.
@@ -33,6 +34,9 @@ export async function getEntregasUploadUrl(input: {
     await requirePermission('video.upload')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!isAllowedVideoUploadType(input.contentType)) {
+    return { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' }
   }
 
   const client = entregasR2Client()

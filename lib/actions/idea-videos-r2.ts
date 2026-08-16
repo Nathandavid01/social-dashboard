@@ -8,6 +8,7 @@ import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
+import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 function slugify(name: string): string {
@@ -29,6 +30,9 @@ export async function getR2UploadUrl(input: {
     await requirePermission('video.upload')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!isAllowedVideoUploadType(input.contentType)) {
+    return { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' }
   }
   const client = r2Client()
   if (!client || !isR2Configured()) return { error: 'R2 no está configurado' }
@@ -63,6 +67,9 @@ export async function getQuickUploadUrl(input: {
     await requirePermission('posting.publish')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!isAllowedVideoUploadType(input.contentType)) {
+    return { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' }
   }
   const client = r2Client()
   if (!client || !isR2Configured()) return { error: 'R2 no está configurado (falta R2_ACCOUNT_ID).' }

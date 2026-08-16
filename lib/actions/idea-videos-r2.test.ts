@@ -33,6 +33,7 @@ vi.mock('@/lib/integrations/r2', () => ({
   r2Client: vi.fn(() => ({ send: vi.fn() })),
   r2Bucket: vi.fn(() => 'nmedia-videos'),
   isR2Configured: vi.fn(() => true),
+  isR2PublicConfigured: vi.fn(() => true),
   r2PublicUrl: vi.fn((key: string) => (publicBase ? `${publicBase}/${key}` : null)),
 }))
 
@@ -98,7 +99,14 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 // Import AFTER mocks are registered.
-import { registerR2Video, getR2PublicUrl, getR2DownloadUrl, getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
+import {
+  registerR2Video,
+  getR2PublicUrl,
+  getR2DownloadUrl,
+  getR2PreviewUrl,
+  getR2UploadUrl,
+  getQuickUploadUrl,
+} from '@/lib/actions/idea-videos-r2'
 
 beforeEach(() => {
   ops.length = 0
@@ -202,6 +210,40 @@ describe('registerR2Video — accumulate semantics', () => {
     expect(archiveUpdates()).toHaveLength(0)
   })
 
+})
+
+describe('getR2UploadUrl / getQuickUploadUrl — audit: solo se aceptan tipos de video al subir', () => {
+  it('getR2UploadUrl rechaza un Content-Type de HTML — el hueco de XSS almacenado', async () => {
+    const res = await getR2UploadUrl({
+      ideaId: 'idea-1', kind: 'edited', fileName: 'evil.html', contentType: 'text/html',
+    })
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no permitido/i)
+  })
+
+  it('getR2UploadUrl acepta un mp4 normal', async () => {
+    const res = await getR2UploadUrl({
+      ideaId: 'idea-1', kind: 'edited', fileName: 'final.mp4', contentType: 'video/mp4',
+    })
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBeDefined()
+  })
+
+  it('getQuickUploadUrl rechaza image/svg+xml', async () => {
+    const res = await getQuickUploadUrl({
+      clientId: 'client-1', fileName: 'evil.svg', contentType: 'image/svg+xml',
+    })
+    expect(res.url).toBeUndefined()
+    expect(res.error).toMatch(/no permitido/i)
+  })
+
+  it('getQuickUploadUrl acepta video/quicktime (.mov)', async () => {
+    const res = await getQuickUploadUrl({
+      clientId: 'client-1', fileName: 'clip.mov', contentType: 'video/quicktime',
+    })
+    expect(res.error).toBeUndefined()
+    expect(res.url).toBeDefined()
+  })
 })
 
 describe('getR2DownloadUrl / getR2PublicUrl / getR2PreviewUrl — audit: gate de lectura obligatorio', () => {

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
+import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 
 // Service role: anon clients upload via their magic link, no team auth. We still
 // validate the client id exists before minting an upload URL.
@@ -35,6 +36,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Faltan datos del archivo' }, { status: 400 })
   }
 
+  // Ruta anónima (magic link, sin sesión): el hueco más expuesto — validar
+  // el tipo aquí es lo único que evita que suban un .html servido luego en
+  // el dominio del dashboard (audit finding).
+  const effectiveType = contentType || 'video/mp4'
+  if (!isAllowedVideoUploadType(effectiveType)) {
+    return NextResponse.json(
+      { error: 'Tipo de archivo no permitido. Solo se aceptan videos (mp4, mov, webm, etc.).' },
+      { status: 400 },
+    )
+  }
+
   const sb = admin()
   const { data: client } = await sb.from('clients').select('id').eq('id', clientId).maybeSingle()
   if (!client) return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
@@ -48,7 +60,7 @@ export async function POST(req: NextRequest) {
   try {
     const url = await getSignedUrl(
       r2,
-      new PutObjectCommand({ Bucket: r2Bucket(), Key: key, ContentType: contentType || 'video/mp4' }),
+      new PutObjectCommand({ Bucket: r2Bucket(), Key: key, ContentType: effectiveType }),
       { expiresIn: 60 * 60 },
     )
     return NextResponse.json({ url, key })
