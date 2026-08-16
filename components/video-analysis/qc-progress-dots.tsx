@@ -25,8 +25,10 @@ type RunPhase = 'extracting' | 'analyzing'
  *
  * `videoId` habilita el botón "Analizar con IA" (sin análisis todavía) /
  * "Re-analizar" (ya hay uno): dispara `analyzeExistingVideo`, que hace en el
- * browser exactamente lo mismo que al subir pero sacando el video de R2 en
- * vez del disco (v3.39).
+ * browser exactamente lo mismo que al subir pero sacando el video del proxy
+ * de mismo origen (`/api/video-file/[videoId]`) en vez del disco — una URL
+ * firmada de R2 no serviría: sin CORS ahí, el canvas quedaría "tainted" y
+ * `toDataURL()` lanzaría (v3.39).
  */
 export function QcProgressDots({ ideaId, videoId }: { ideaId: string; videoId?: string }) {
   const { toast } = useToast()

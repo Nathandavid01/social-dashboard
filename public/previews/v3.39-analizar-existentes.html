@@ -106,9 +106,15 @@
     </div>
 
     <p class="note">
-      <b>Mismo mecanismo que al subir:</b> se pide la URL firmada de preview del video (R2), se carga en un
-      video oculto, se extraen fotogramas a 4 por segundo y se postean por tandas — igual que si el editor
-      acabara de subir el archivo. Al terminar, las bolitas se rellenan y el caption se genera solo.
+      <b>Mismo mecanismo que al subir:</b> el video se carga desde una ruta propia del dashboard (no directo
+      de R2) en un video oculto, se extraen fotogramas a 4 por segundo y se postean por tandas — igual que si
+      el editor acabara de subir el archivo. Al terminar, las bolitas se rellenan y el caption se genera solo.
+    </p>
+    <p class="note">
+      <b>Por qué una ruta propia:</b> los navegadores no dejan leer los píxeles de un video traído de otro
+      sitio (como el almacenamiento en la nube) a menos que ese sitio lo autorice explícitamente — y el
+      nuestro no lo hace. Sirviendo el video desde el propio dashboard, con el mismo permiso de siempre, se
+      evita esa restricción sin abrir el video a nadie más.
     </p>
     <p class="note">
       <b>Solo quien puede subir video</b> ve el botón — mismo permiso <code>video.upload</code> que ya

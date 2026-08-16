@@ -13,6 +13,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Si un video ya tiene análisis, aparece un enlace discreto **"Re-analizar"** junto a las bolitas, por si quieres refrescarlo.
 - Mientras corre, el botón se deshabilita y muestra el progreso ("Extrayendo fotogramas…" → "Analizando…"); si algo falla, sale un aviso claro sin romper el panel.
 - Debajo de las bolitas ahora también se ve **cuántos fotogramas revisó la IA** (p.ej. "48 fotogramas analizados"), para tener una idea de qué tan a fondo se vio el video.
+- Corrección: el video se sirve por una ruta propia del dashboard en vez de traerlo directo del almacenamiento — el botón ya funciona de verdad (antes fallaba en silencio por una restricción del navegador al leer un video de otro origen).
+- Corrección: quitado un límite de tiempo único para todo el análisis que hacía fallar videos largos aunque todo fuera bien — ahora cada fotograma tiene su propio tiempo de espera.
 
 Vista: [preview HTML](/previews/v3.39-analizar-existentes.html)
 

@@ -8,7 +8,18 @@
 import { extractVideoFrames, extractVideoFramesFromUrl } from './video-frames-dom'
 import { chunkFrames } from './video-frames'
 import { postVideoAnalysisChunks } from './video-analysis-chunks'
-import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+
+/**
+ * Mismo origen — NUNCA una URL firmada de R2: ni el bucket privado ni el
+ * dominio público r2.dev mandan `access-control-allow-origin`, así que
+ * `<video crossOrigin>` + `canvas.toDataURL()` no podrían funcionar contra
+ * R2 directo (canvas "tainted" → SecurityError). El proxy hace el mismo
+ * chequeo de permiso que `getVideoPreviewUrl` server-side — ver
+ * `app/api/video-file/[videoId]/route.ts`.
+ */
+function videoFileUrl(videoId: string): string {
+  return `/api/video-file/${encodeURIComponent(videoId)}`
+}
 
 export async function analyzeUploadedVideo(
   videoId: string,
@@ -31,8 +42,9 @@ export async function analyzeUploadedVideo(
 
 /**
  * Igual que `analyzeUploadedVideo` pero para un video YA subido (botón
- * "Analizar con IA" / "Re-analizar" en `QcProgressDots`): saca el File de R2
- * (URL firmada de preview) en vez del disco local, extrae fotogramas a 4fps y
+ * "Analizar con IA" / "Re-analizar" en `QcProgressDots`): saca el video del
+ * proxy de mismo origen (`videoFileUrl`, NO una URL firmada de R2 — ver
+ * comentario arriba) en vez del disco local, extrae fotogramas a 4fps y
  * postea por tandas — mismo troceado de 64 (`postVideoAnalysisChunks`).
  *
  * NO es fire-and-forget: aquí el usuario está esperando frente al botón, así
@@ -42,25 +54,20 @@ export async function analyzeUploadedVideo(
 export async function analyzeExistingVideo(
   videoId: string,
   deps?: {
-    getPreviewUrl?: (videoId: string) => Promise<{ url?: string; error?: string }>
+    videoUrl?: (videoId: string) => string
     extract?: (url: string) => Promise<{ frames: string[]; timestamps: number[] }>
     post?: typeof fetch
     /** Para que la UI muestre "Extrayendo fotogramas…" → "Analizando…". */
     onProgress?: (phase: 'extracting' | 'analyzing') => void
   },
 ): Promise<{ ok: true } | { error: string }> {
-  const getPreviewUrl = deps?.getPreviewUrl ?? getVideoPreviewUrl
+  const videoUrl = deps?.videoUrl ?? videoFileUrl
   const extract = deps?.extract ?? extractVideoFramesFromUrl
   const post = deps?.post ?? fetch
 
   try {
-    const preview = await getPreviewUrl(videoId)
-    if (preview.error || !preview.url) {
-      return { error: preview.error ?? 'No se pudo cargar el video para analizarlo' }
-    }
-
     deps?.onProgress?.('extracting')
-    const { frames, timestamps } = await extract(preview.url)
+    const { frames, timestamps } = await extract(videoUrl(videoId))
     if (frames.length === 0) {
       return { error: 'No se pudieron extraer fotogramas de este video' }
     }
