@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import { ReviewQueue, type QueueVideo } from '@/components/review/review-queue'
+import { VideoAnalysisReport } from '@/components/video-analysis/video-analysis-report'
 import { getEntregaReviewVideos } from '@/lib/actions/entregas-review'
 import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { decideReview } from '@/lib/actions/pipeline-submit'
@@ -96,6 +97,12 @@ export function ReviewOverlay({
           <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             Cargando videos…
+          </div>
+        )}
+
+        {videos && (
+          <div className="mb-4">
+            <VideoAnalysisReport ideaId={ideaId} />
           </div>
         )}
 

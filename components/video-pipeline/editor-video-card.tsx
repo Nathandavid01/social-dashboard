@@ -14,6 +14,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { getR2DownloadUrl, getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+import { analyzeUploadedVideo } from '@/lib/utils/video-analysis-client'
 import type { Client, ContentIdeaType, ContentIdeaVideo } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
 
@@ -150,6 +151,7 @@ function EditedUploader({ ideaId }: { ideaId: string }) {
     })
     const res = await registerR2Video({ ideaId, kind: 'edited', key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4' })
     if (res.error) throw new Error(res.error)
+    if (res.id) void analyzeUploadedVideo(res.id, file)
   }
 
   async function handleFiles(files: FileList | File[] | null) {

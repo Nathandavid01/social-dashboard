@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.35 — QC IA del video editado</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --amber:#f59e0b; --amber-bg:rgba(245,158,11,.1); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 48px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; line-height:1.5; margin:0 0 24px; }
+    h2.section { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:28px 0 10px; }
+
+    /* --- report card, same shape/copy as VideoAnalysisReport --- */
+    .report { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; box-shadow: inset 3px 0 0 0 var(--gold); }
+    .report .kicker { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-fg); margin:0 0 8px; }
+    .row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; padding:5px 0; }
+    .row .label { display:flex; align-items:center; gap:6px; min-width:0; font-size:12px; font-weight:500; }
+    .row .label svg { flex-shrink:0; }
+    .row .detail { flex-shrink:0; white-space:nowrap; font-size:10px; }
+    .ok { color:var(--good); }
+    .warn { color:var(--amber); }
+    .details-btn { display:flex; align-items:center; gap:4px; background:none; border:0; color:var(--muted-fg); font-size:11px; padding:6px 0 0; cursor:pointer; font-family:inherit; }
+    .details { margin-top:8px; display:flex; flex-direction:column; gap:8px; font-size:12px; }
+    .issue { background:var(--amber-bg); border-radius:6px; padding:6px 8px; line-height:1.5; }
+    .issue b { font-weight:600; }
+    .visual-summary { color:var(--muted-fg); line-height:1.5; }
+
+    .pending, .unavailable { display:flex; align-items:center; gap:8px; border:1px solid var(--border); background:rgba(255,255,255,.02); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--muted-fg); }
+
+    .caption-line { margin-top:12px; font-size:12px; color:var(--muted-fg); }
+    .caption-line b { color:var(--fg); }
+
+    /* --- tres bolitas QC, same shape as QcProgressDots --- */
+    .dots-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px; }
+    .dot-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .dot-row .left { display:flex; align-items:center; gap:8px; min-width:0; }
+    .dot { flex-shrink:0; width:12px; height:12px; border-radius:999px; }
+    .dot.working { border:2px dashed rgba(166,166,166,.5); background:transparent; animation:pulse 2s ease-in-out infinite; }
+    .dot.unavailable { background:rgba(166,166,166,.3); }
+    .dot-text { font-size:12px; }
+    .dot-text.working, .dot-text.unavailable { color:var(--muted-fg); }
+    .dot-text.ok { font-weight:500; color:var(--fg); }
+    .dot-text.warn { font-weight:500; color:var(--amber); }
+    .dot-chevron { color:var(--muted-fg); flex-shrink:0; }
+    .dot-detail { margin-left:20px; margin-top:2px; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    @media (prefers-reduced-motion: reduce) { .dot.working { animation:none; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.35 — La IA ahora revisa cada video editado antes de aprobarlo</h1>
+    <p class="sub">Al subir el editor la versión final, Grok 4.6 mira el video: lee los captions que van quemados dentro del video y avisa si tienen errores de ortografía o gramática, y verifica que el contenido corresponda al cliente. El reporte aparece junto al video en la pantalla de aprobación — es <b>advisory</b>, la IA nunca aprueba ni rechaza sola.</p>
+
+    <h2 class="section">Estado 1 — Analizando</h2>
+    <div class="pending">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      Analizando video con IA…
+    </div>
+
+    <h2 class="section">Estado 2 — Con errores a revisar</h2>
+    <div class="report">
+      <p class="kicker">QC con IA (advisory)</p>
+      <div class="row">
+        <span class="label warn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          Captions del video
+        </span>
+        <span class="detail warn">2 a revisar</span>
+      </div>
+      <div class="row">
+        <span class="label warn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          Relevancia
+        </span>
+        <span class="detail warn">Revisar</span>
+      </div>
+      <button class="details-btn" type="button">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        Detalles
+      </button>
+      <div class="details">
+        <p class="issue">«Vamos a disfrutrar de esta promocion» — falta la tilde en "promoción" y sobra una letra en "disfrutrar". Sugerencia: <b>"Vamos a disfrutar de esta promoción"</b></p>
+        <p class="issue">«El ultimo dia para aprovechar» — faltan tildes en "último" y "día". Sugerencia: <b>"El último día para aprovechar"</b></p>
+        <p class="issue">El video menciona una promoción de comida rápida pero el cliente de esta idea es una clínica dental — revisar si el clip corresponde a este cliente.</p>
+        <p class="visual-summary">Video de 22s, plano fijo sobre mostrador con texto quemado en dos escenas; no se ve logo ni producto del cliente.</p>
+      </div>
+    </div>
+
+    <h2 class="section">Estado 3 — Todo verde</h2>
+    <div class="report">
+      <p class="kicker">QC con IA (advisory)</p>
+      <div class="row">
+        <span class="label ok">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+          Captions del video
+        </span>
+        <span class="detail ok">Sin errores</span>
+      </div>
+      <div class="row">
+        <span class="label ok">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+          Relevancia
+        </span>
+        <span class="detail ok">Relevante para el cliente</span>
+      </div>
+    </div>
+
+    <h2 class="section">Estado 4 — No disponible</h2>
+    <div class="unavailable">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+      Análisis no disponible
+    </div>
+
+    <h2 class="section">Nuevo — Tres bolitas que se autorellenan (de un vistazo)</h2>
+    <p class="sub" style="margin-bottom:12px;">Reemplaza el reporte de arriba en el panel de subida de video: una bolita por línea que se rellena sola conforme la IA termina cada parte. Sin abrir nada se sabe si el video está bien.</p>
+
+    <p class="sub" style="margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">Trabajando (recién subido)</p>
+    <div class="dots-card">
+      <div class="dot-row"><div class="left"><span class="dot working"></span><span class="dot-text working">Analizando…</span></div></div>
+      <div class="dot-row"><div class="left"><span class="dot working"></span><span class="dot-text working">Analizando…</span></div></div>
+      <div class="dot-row"><div class="left"><span class="dot working"></span><span class="dot-text working">Generando caption…</span></div></div>
+    </div>
+
+    <p class="sub" style="margin:16px 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">Con avisos (click en la bolita ámbar para ver el detalle)</p>
+    <div class="dots-card">
+      <div class="dot-row">
+        <div class="left"><span class="dot" style="background:var(--amber); border:none;"></span><span class="dot-text warn">No parece de este cliente</span></div>
+        <svg class="dot-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="dot-row" style="border-top:1px solid var(--border); padding-top:6px;">
+        <div class="left"><span class="dot" style="background:var(--amber); border:none;"></span><span class="dot-text warn">2 errores a revisar</span></div>
+        <svg class="dot-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(180deg)"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="dot-detail" style="display:flex; flex-direction:column; gap:6px;">
+        <p class="issue">«clinica» — falta la tilde. Sugerencia: <b>clínica</b></p>
+        <p class="issue">«Ven hoy» — falta signo de puntuación. Sugerencia: <b>Ven hoy,</b></p>
+      </div>
+      <div class="dot-row" style="border-top:1px solid var(--border); padding-top:6px;">
+        <div class="left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg><span class="dot-text ok">Caption generado</span></div>
+      </div>
+    </div>
+
+    <p class="sub" style="margin:16px 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">Todo verde</p>
+    <div class="dots-card">
+      <div class="dot-row"><div class="left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg><span class="dot-text ok">Es del cliente</span></div></div>
+      <div class="dot-row"><div class="left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg><span class="dot-text ok">Libre de errores</span></div></div>
+      <div class="dot-row"><div class="left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg><span class="dot-text ok">Caption generado</span></div></div>
+    </div>
+
+    <p class="sub" style="margin:16px 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">Análisis no disponible (falló el análisis)</p>
+    <div class="dots-card">
+      <div class="dot-row"><div class="left"><span class="dot unavailable"></span><span class="dot-text unavailable">Análisis no disponible</span></div></div>
+      <div class="dot-row"><div class="left"><span class="dot unavailable"></span><span class="dot-text unavailable">Análisis no disponible</span></div></div>
+      <div class="dot-row"><div class="left"><span class="dot working"></span><span class="dot-text working">Generando caption…</span></div></div>
+    </div>
+
+    <p class="caption-line">El caption ahora se escribe sabiendo lo que se <b>VE</b> en el video, no solo lo que se oye.</p>
+  </div>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+</body>
+</html>

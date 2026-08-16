@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
+import { staleAnalysisCandidates } from '@/lib/utils/video-analysis-sweep'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -56,6 +57,45 @@ export async function GET(req: NextRequest) {
       return { id: v.id, url, ...(health.ok ? { ok: true } : { ok: false, reason: health.reason }) }
     }),
   )
+
+  // QC IA: cerrar análisis que nunca van a llegar (editor cerró el tab). Corre
+  // ANTES del early-return de fallas para que un Worker caído no deje huérfanos
+  // los análisis en "Analizando…" indefinidamente.
+  try {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const [{ data: edited }, { data: analyses }] = await Promise.all([
+      sb.from('content_idea_videos')
+        .select('id, idea_id, uploaded_at')
+        .eq('kind', 'edited').neq('status', 'archived').gte('uploaded_at', since),
+      sb.from('content_idea_video_analysis')
+        .select('video_id, status, updated_at').gte('updated_at', since),
+    ])
+    const stale = staleAnalysisCandidates(edited ?? [], analyses ?? [], new Date())
+    const ERROR_NOTE = 'No se recibieron frames (posible tab cerrado durante la subida).'
+    for (const s of stale) {
+      if (s.hasRow) {
+        // La fila ya existe como 'pending': el guard .eq('status','pending')
+        // cierra la carrera con una ruta concurrente que acaba de escribir
+        // 'done' — si eso pasó entre el SELECT y este UPDATE, no matchea y no
+        // pisa nada (TOCTOU-safe).
+        await sb.from('content_idea_video_analysis')
+          .update({ status: 'error', error_note: ERROR_NOTE, updated_at: new Date().toISOString() })
+          .eq('video_id', s.videoId)
+          .eq('status', 'pending')
+      } else {
+        // Sin fila todavía: insert-ignore — si una ruta concurrente ya insertó
+        // el 'done' entre el SELECT y aquí, ignoreDuplicates deja que gane esa
+        // fila en vez de pisarla con 'error'.
+        await sb.from('content_idea_video_analysis').upsert(
+          {
+            video_id: s.videoId, idea_id: s.ideaId, status: 'error',
+            error_note: ERROR_NOTE, updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'video_id', ignoreDuplicates: true },
+        )
+      }
+    }
+  } catch { /* best-effort: el health-check principal no depende de esto */ }
 
   const failures = results.filter((r) => !r.ok)
   if (failures.length > 0) {

@@ -7,6 +7,7 @@ Tracked work not yet done. Each is implemented **test-first (TDD)** when unblock
 Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelknmfudcvrzz` → SQL Editor.
 Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 - [ ] **`0060_assignment_changed_by.sql`** — columnas `clients.assignment_changed_by/at`. **URGENTE**: sin ellas, `/clients/asignaciones` (desplegada 2026-08-15) falla al leer Y al guardar.
+- [ ] **`0061_video_analysis.sql`** — tabla `content_idea_video_analysis` (QC IA del video editado). La feature degrada seguro: sin tabla, el reporte muestra "Análisis no disponible" y el caption se genera como hasta ahora.
 - [ ] **`0030_content_idea_captions.sql`** — tabla `content_idea_captions` (caption por red). La feature sigue bloqueada hasta aplicarla; degrada seguro.
 - [x] **`0032_idea_posting.sql`** — aplicada en prod (verificado 2026-08-15: columnas Metricool existen y hay posts reales).
 - [x] **`0034_content_idea_deadline.sql`** — aplicada en prod (verificado 2026-08-15).

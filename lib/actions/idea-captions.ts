@@ -70,6 +70,18 @@ export async function generateIdeaCaption(
   const videoUrl = await listenUrlForCaptionVideo(source)
   const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
 
+  // QC IA: el análisis visual más reciente de un video editado de esta idea.
+  // Best-effort — sin tabla (migración pendiente) o sin fila, el caption sale igual.
+  const { data: analysis } = await supabase
+    .from('content_idea_video_analysis')
+    .select('findings, visual_summary, status')
+    .eq('idea_id', ideaId)
+    .eq('status', 'done')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+    .then((r) => r, () => ({ data: null }))
+
   if (!isIdeaReadyForCaption({ hook: idea.hook, hasVideo })) {
     return { error: 'Di de qué es el video para generar el caption.' }
   }
@@ -113,6 +125,13 @@ export async function generateIdeaCaption(
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
     videoTranscript,
+    videoAnalysis: analysis
+      ? {
+          visualSummary: analysis.visual_summary,
+          burnedCaptionsText:
+            (analysis.findings as { burned_captions?: { text?: string } } | null)?.burned_captions?.text ?? null,
+        }
+      : null,
     client: {
       name: client.name,
       brandVoice: client.brand_voice,

@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.35 — 2026-08-15
+
+**La IA ahora revisa cada video editado antes de aprobarlo.**
+
+- Al subir el editor la versión final, la IA (Grok 4.6) mira el video: lee los captions que van dentro del video y avisa si tienen errores de ortografía o gramática.
+- También verifica que el contenido del video corresponda al cliente.
+- El resultado aparece como un reporte junto al video en la pantalla de aprobación — la IA nunca aprueba ni rechaza sola.
+- El caption ahora se escribe sabiendo lo que se VE en el video, no solo lo que se oye.
+- **Lee el video casi fotograma a fotograma:** se muestrea a 4 fotogramas por segundo (hasta 48 por video) en vez de 8 fijos, porque un caption que solo aparece medio segundo se saltaba entero. Prueba real: el mismo video pasó de 0 errores detectados a 3 errores reales encontrados.
+- Cada error que reporta la IA trae el segundo aproximado donde aparece.
+- **Tres bolitas que se autorellenan** en el video editado: es del cliente, libre de errores, caption generado — se van poniendo verdes solas mientras la IA trabaja, sin tener que abrir nada para saber que el video está bien. Si algo necesita revisión, la bolita se pone ámbar y se puede abrir para ver el detalle.
+
+Vista: [preview HTML](/previews/v3.35-qc-video-ia.html)
+
 ## v3.34 — 2026-08-15
 
 **Lo enviado a Metricool es clickable, los updates avisan, y sin sesión ya no se ve el dashboard.**
