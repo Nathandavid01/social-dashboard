@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { requirePermission } from '@/lib/auth/server'
-import type { ProductionContentType, ProductionPriority, ProductionTaskStatus } from '@/lib/supabase/types'
+import type { ProductionContentType, ProductionPriority, ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 
 // ── Schedules ────────────────────────────────────────────────────────────────
 
@@ -98,7 +98,7 @@ export async function getProductionTasks(filters?: {
   assignedToId?: string
   status?: ProductionTaskStatus | 'all'
   clientId?: string
-}) {
+}): Promise<ProductionTask[]> {
   const supabase = await createClient()
   let query = supabase
     .from('production_tasks')
@@ -129,7 +129,35 @@ export async function getProductionTasks(filters?: {
 
   const { data, error } = await query.limit(500)
   if (error) throw new Error(error.message)
-  return data ?? []
+  return await attachIdeaPublicationState(supabase, data ?? [])
+}
+
+/**
+ * Attaches each task's linked idea's { status, published_at } so the calendar
+ * chip can compute isReallyPublished. A plain second query keyed by idea_id —
+ * NOT a PostgREST embed, which is fragile here (repo has PGRST201 history,
+ * see CLAUDE.md's content_ideas/content_idea_videos rules). Does not add a
+ * new FK.
+ */
+async function attachIdeaPublicationState<T extends { idea_id: string | null }>(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tasks: T[]
+): Promise<(T & { idea: { status: string; published_at: string | null } | null })[]> {
+  const ideaIds = Array.from(new Set(tasks.map((t) => t.idea_id).filter((id): id is string => id != null)))
+  const ideaById = new Map<string, { status: string; published_at: string | null }>()
+  if (ideaIds.length > 0) {
+    const { data: ideas, error } = await supabase
+      .from('content_ideas')
+      .select('id, status, published_at')
+      .in('id', ideaIds)
+    if (error) {
+      console.error('attachIdeaPublicationState: failed to fetch linked ideas', error.message)
+    }
+    for (const i of ideas ?? []) {
+      ideaById.set(i.id, { status: i.status, published_at: i.published_at })
+    }
+  }
+  return tasks.map((t) => ({ ...t, idea: t.idea_id ? ideaById.get(t.idea_id) ?? null : null }))
 }
 
 export async function getReviewQueueTasks() {

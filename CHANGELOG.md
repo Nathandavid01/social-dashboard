@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.37 — 2026-08-15
+
+**El calendario ahora marca con ✓ verde lo que ya se publicó de verdad.**
+
+- En el calendario semanal de producción, cada Reel/Post que ya salió al aire de verdad (Metricool confirmó que se publicó) muestra un ✓ verde junto a la etiqueta.
+- Lo que sigue pendiente (en edición, en revisión, aprobado pero sin publicar) se ve exactamente igual que antes — sin ✓, sin cambios de tamaño en la celda.
+- Por debajo, cuando el sync con Metricool marca una idea como publicada, ahora también actualiza la tarea de producción ligada — antes se quedaba atascada en su estado viejo aunque el post ya estuviera en vivo.
+
+Vista: [preview HTML](/previews/v3.37-calendario-publicado.html)
+
 ## v3.36 — 2026-08-15
 
 **Ahora ves 5 escenas de cada video editado sin darle play.**

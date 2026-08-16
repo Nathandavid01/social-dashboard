@@ -389,7 +389,10 @@ export interface ProductionTask {
   // Joined
   client?: Pick<Client, 'id' | 'name' | 'industry'> | null
   assigned_to?: Pick<Profile, 'id' | 'full_name'> | null
-  idea?: Pick<ContentIdea, 'id' | 'title' | 'visual_brief' | 'caption_angle' | 'hook'> | null
+  /** Publication state of the linked idea (from a plain second query, not an
+   *  embed — see getProductionTasks). Used by isReallyPublished for the
+   *  calendar's ✓ chip. */
+  idea?: Pick<ContentIdea, 'status' | 'published_at'> | null
 }
 
 export type ContentIdeaType = 'R' | 'P' | 'C' | 'S'
