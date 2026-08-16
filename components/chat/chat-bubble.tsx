@@ -1,11 +1,20 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, X, Send, Loader2, Bot, Trash2, Copy, CheckCheck, Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// react-markdown + remark-gfm loaded lazily: they never need to be in the
+// initial JS of every dashboard route (see chat-markdown.tsx for why).
+const ChatMarkdown = dynamic(
+  () => import('./chat-markdown').then((m) => m.ChatMarkdown),
+  {
+    ssr: false,
+    loading: () => <span className="inline-block h-3.5 w-32 animate-pulse rounded bg-muted-foreground/20" />,
+  },
+)
 
 interface Message {
   role: 'user' | 'assistant'
@@ -267,9 +276,7 @@ export function ChatBubble() {
                     <div className="min-w-0">
                       <div className="rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-headings:my-1 prose-pre:my-1 prose-code:text-xs">
                         {msg.content ? (
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {msg.content}
-                          </ReactMarkdown>
+                          <ChatMarkdown content={msg.content} />
                         ) : loading && i === messages.length - 1 ? (
                           <span className="flex items-center gap-1.5 text-muted-foreground">
                             <Loader2 className="h-3 w-3 animate-spin" />
