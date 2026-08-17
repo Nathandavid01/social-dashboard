@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.57 — 2026-08-16
+
+**Jornada: ya se ve cuánto tiempo está cada persona en el dashboard — como un ranking de estudio, no un reloj de fichar.**
+
+- En **Actividad** aparece el tablero **Jornada**: total de la semana del estudio, tu tiempo de hoy en un reloj dorado, y el ranking del equipo.
+- Si alguien está con la pestaña abierta, sale **En estudio**. Si deja el dashboard (o se va 3 minutos), deja de contar — no se inflan horas con una pestaña olvidada.
+- Cada quien ve su racha de días seguidos. El primero de la semana lleva el 1 en dorado.
+- Todo el equipo puede entrar (editores, copy, videógrafos). El log de clicks de **Sesión** sigue siendo solo del owner.
+- Hay que pegar la migración **`0067_user_time_days.sql`** en el SQL Editor de Supabase. Sin ella, el tablero sale vacío y no se rompe nada.
+
+Vista: [preview HTML](/previews/v3.53-jornada.html)
+
 ## v3.56 — 2026-08-16
 
 **Analizar con IA saca los fotogramas más rápido, y ya no marca como error una letra que solo se ve a medias al cambiar de escena.**

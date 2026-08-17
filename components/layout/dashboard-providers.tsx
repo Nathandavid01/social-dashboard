@@ -3,6 +3,7 @@
 import { AuthProvider } from '@/lib/context/auth-context'
 import { SidebarProvider } from '@/lib/context/sidebar-context'
 import { UiEventTracker } from '@/components/activity/ui-event-tracker'
+import { PresenceHeartbeat } from '@/components/activity/presence-heartbeat'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
 interface Props {
@@ -17,6 +18,7 @@ export function DashboardProviders({ children, user, profile, role }: Props) {
     <AuthProvider value={{ user, profile, role }}>
       <SidebarProvider>
         {user ? <UiEventTracker /> : null}
+        {user ? <PresenceHeartbeat /> : null}
         {children}
       </SidebarProvider>
     </AuthProvider>

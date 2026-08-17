@@ -496,6 +496,14 @@ export interface ContentIdeaActivity {
 
 export type UiEventKind = 'click' | 'navigate'
 
+export interface UserTimeDay {
+  user_id: string
+  day: string
+  active_seconds: number
+  last_beat_at: string | null
+  updated_at: string
+}
+
 export interface UiEvent {
   id: string
   user_id: string
@@ -560,6 +568,7 @@ export interface Database {
       content_ideas: { Row: ContentIdea }
       saved_captions: { Row: SavedCaptionRow }
       ui_events: { Row: UiEvent }
+      user_time_days: { Row: UserTimeDay }
     }
   }
 }

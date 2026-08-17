@@ -95,7 +95,7 @@ export const AREAS: Area[] = [
 
   // ── Equipo y ajustes ──
   { href: '/team',               label: 'Equipo',          permission: 'team.read',          group: 'Equipo' },
-  { href: '/actividad',          label: 'Actividad',       permission: 'activity.read',      group: 'Equipo' },
+  { href: '/actividad',          label: 'Actividad',       permission: 'presence.read',      group: 'Equipo' },
   { href: '/settings/users',     label: 'Usuarios',        permission: 'team.assign_roles',  group: 'Equipo' },
   { href: '/settings/workflow',  label: 'Configuración',   permission: 'settings.edit',      group: 'Equipo' },
   // Was reachable by ANY authenticated user: it wasn't in AREAS at all, so
