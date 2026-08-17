@@ -5,7 +5,6 @@ import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { UserMenu } from '@/components/auth/user-menu'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { PresenceBar } from '@/components/presence/presence-bar'
-import { Search } from 'lucide-react'
 import type { Notification } from '@/lib/supabase/types'
 
 interface TopbarProps {
@@ -27,14 +26,6 @@ export function Topbar({
       {currentUser && <PresenceBar currentUser={currentUser} />}
       <div className="flex-1" />
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', metaKey: true, bubbles: true }))}
-          className="hidden sm:flex h-8 items-center gap-2 rounded-md border border-input bg-muted/50 px-3 text-xs text-muted-foreground hover:bg-muted transition-colors"
-          title="Buscar"
-        >
-          <Search className="h-3.5 w-3.5" />
-          <span>Buscar...</span>
-        </button>
         {currentUser && (
           <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} />
         )}
