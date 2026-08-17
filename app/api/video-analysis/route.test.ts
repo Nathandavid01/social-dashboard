@@ -7,8 +7,10 @@ vi.mock('@/lib/auth/server', () => ({
 
 const analyzeVideoFrames = vi.fn()
 vi.mock('@/lib/llm/video-analysis', () => ({
-  analyzeVideoFrames: (frames: string[], ctx: unknown, timestamps?: number[]) =>
-    analyzeVideoFrames(frames, ctx, timestamps),
+  analyzeVideoFrames: (frames: string[], ctx: unknown, timestamps?: number[], cuts?: number[]) =>
+    cuts && cuts.length > 0
+      ? analyzeVideoFrames(frames, ctx, timestamps, cuts)
+      : analyzeVideoFrames(frames, ctx, timestamps),
   videoAnalysisModelId: () => 'grok-4.6',
 }))
 
@@ -255,6 +257,12 @@ describe('POST /api/video-analysis', () => {
     const res = await POST(req({ videoId: 'video-1', frames: [FRAME], timestamps: [1.5] }))
     expect(res.status).toBe(200)
     expect(analyzeVideoFrames).toHaveBeenCalledWith([FRAME], expect.anything(), [1.5])
+  })
+
+  it('cuts en el body llegan como 4º argumento a analyzeVideoFrames', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], timestamps: [1.5], cuts: [1.5] }))
+    expect(res.status).toBe(200)
+    expect(analyzeVideoFrames).toHaveBeenCalledWith([FRAME], expect.anything(), [1.5], [1.5])
   })
 
   it('timestamps de longitud distinta a frames: se ignoran, sigue 200', async () => {

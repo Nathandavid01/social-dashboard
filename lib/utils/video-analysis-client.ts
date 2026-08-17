@@ -6,7 +6,7 @@
  * dirá "Análisis no disponible".
  */
 import { extractVideoFrames, extractVideoFramesFromUrl } from './video-frames-dom'
-import { chunkFrames } from './video-frames'
+import { chunkFrames, detectSceneCuts } from './video-frames'
 import { postVideoAnalysisChunks } from './video-analysis-chunks'
 
 /**
@@ -25,16 +25,17 @@ export async function analyzeUploadedVideo(
   videoId: string,
   file: File,
   deps?: {
-    extract?: (f: File) => Promise<{ frames: string[]; timestamps: number[] }>
+    extract?: (f: File) => Promise<{ frames: string[]; timestamps: number[]; fingerprints?: { t: number; fingerprint: number[] }[] }>
     post?: typeof fetch
   },
 ): Promise<void> {
   const extract = deps?.extract ?? extractVideoFrames
   const post = deps?.post ?? fetch
   try {
-    const { frames, timestamps } = await extract(file)
-    if (frames.length === 0) return
-    await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post)
+    const extracted = await extract(file)
+    if (extracted.frames.length === 0) return
+    const cuts = extracted.fingerprints ? detectSceneCuts(extracted.fingerprints) : []
+    await postVideoAnalysisChunks(videoId, chunkFrames(extracted.frames, extracted.timestamps), post, cuts)
   } catch {
     // Silencioso a propósito: el análisis es advisory, la subida ya terminó.
   }
@@ -55,7 +56,7 @@ export async function analyzeExistingVideo(
   videoId: string,
   deps?: {
     videoUrl?: (videoId: string) => string
-    extract?: (url: string) => Promise<{ frames: string[]; timestamps: number[] }>
+    extract?: (url: string) => Promise<{ frames: string[]; timestamps: number[]; fingerprints?: { t: number; fingerprint: number[] }[] }>
     post?: typeof fetch
     /** Para que la UI muestre "Extrayendo fotogramas…" → "Analizando…". */
     onProgress?: (phase: 'extracting' | 'analyzing') => void
@@ -67,13 +68,14 @@ export async function analyzeExistingVideo(
 
   try {
     deps?.onProgress?.('extracting')
-    const { frames, timestamps } = await extract(videoUrl(videoId))
-    if (frames.length === 0) {
+    const extracted = await extract(videoUrl(videoId))
+    if (extracted.frames.length === 0) {
       return { error: 'No se pudieron extraer fotogramas de este video' }
     }
 
     deps?.onProgress?.('analyzing')
-    await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post)
+    const cuts = extracted.fingerprints ? detectSceneCuts(extracted.fingerprints) : []
+    await postVideoAnalysisChunks(videoId, chunkFrames(extracted.frames, extracted.timestamps), post, cuts)
     return { ok: true }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'El análisis falló' }

@@ -42,6 +42,15 @@ export const FRAME_JPEG_QUALITY = 0.7
  * para el resto del JSON (prompt, timestamps, etc).
  */
 export const FRAME_BUDGET_BYTES = 3_500_000
+/** Workers de <video> en paralelo al extraer fotogramas. 4 es el tope
+ *  práctico: más decoders a la vez en un laptop no aceleran y Safari se
+ *  pone pesado. */
+export const FRAME_EXTRACT_WORKERS = 4
+/** Diferencia media de luminancia (0–255) para marcar un cambio de escena.
+ *  Un corte duro (negro→calle) está cerca de 80–150; un paneo suave, <10. */
+export const SCENE_CUT_DIFF_THRESHOLD = 28
+/** El último keyframe casi nunca llega exacto a `duration`. */
+export const BUFFER_END_SLOP_S = 0.25
 
 /**
  * `count` timestamps equiespaciados en (0, duration), sin duplicados. La
@@ -123,4 +132,71 @@ export function chunkFrames(
     out.push({ frames: frames.slice(i, i + size), timestamps: timestamps.slice(i, i + size) })
   }
   return out
+}
+
+export interface TimeRangeLike {
+  length: number
+  start: (index: number) => number
+  end: (index: number) => number
+}
+
+/** ¿El buffer de <video> ya cubre casi todo el video? Tras esto los seeks
+ *  son locales (no range-request por red), que es lo que hace lento
+ *  "Extrayendo fotogramas…" en el botón Analizar con IA. */
+export function bufferCoversDuration(
+  buffered: TimeRangeLike,
+  duration: number,
+  slop = BUFFER_END_SLOP_S,
+): boolean {
+  if (!(duration > 0) || buffered.length < 1) return false
+  const ranges = Array.from({ length: buffered.length }, (_, i) => [buffered.start(i), buffered.end(i)] as [number, number])
+    .sort((a, b) => a[0] - b[0])
+  let cover = 0
+  for (const [start, end] of ranges) {
+    if (start > cover + 0.05) return false
+    cover = Math.max(cover, end)
+  }
+  return cover >= duration - slop
+}
+
+/** Reparte timestamps en tiras contiguas: cada worker seekea hacia adelante. */
+export function splitTimestampsContiguous(timestamps: number[], workers: number): number[][] {
+  const n = Math.max(1, workers)
+  const out = Array.from({ length: n }, () => [] as number[])
+  if (timestamps.length === 0) return out
+  const size = Math.ceil(timestamps.length / n)
+  for (let i = 0; i < n; i++) out[i] = timestamps.slice(i * size, (i + 1) * size)
+  return out
+}
+
+export function meanAbsDiff(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length)
+  if (n === 0) return 0
+  let sum = 0
+  for (let i = 0; i < n; i++) sum += Math.abs(a[i] - b[i])
+  return sum / n
+}
+
+/** Luminancia por pixel (RGBA → un número). */
+export function luminanceFingerprint(pixels: ArrayLike<number>): number[] {
+  const out: number[] = []
+  for (let i = 0; i + 3 < pixels.length; i += 4) {
+    out.push(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2])
+  }
+  return out
+}
+
+/** Timestamps del PRIMER fotograma de cada escena nueva. */
+export function detectSceneCuts(
+  samples: { t: number; fingerprint: number[] }[],
+  threshold = SCENE_CUT_DIFF_THRESHOLD,
+): number[] {
+  const ordered = [...samples].sort((a, b) => a.t - b.t)
+  const cuts: number[] = []
+  for (let i = 1; i < ordered.length; i++) {
+    if (meanAbsDiff(ordered[i - 1].fingerprint, ordered[i].fingerprint) >= threshold) {
+      cuts.push(ordered[i].t)
+    }
+  }
+  return cuts
 }

@@ -32,6 +32,30 @@ describe('analyzeVideoFrames', () => {
     expect(content).toContainEqual({ type: 'text', text: '--- Fotograma 1 · t=1.2s ---' })
   })
 
+  it('con cuts: etiqueta CORTE en el body y tira issues que solo existen en el corte', async () => {
+    const withFalsePositive = {
+      ...good,
+      burned_captions: {
+        text: 'plaza',
+        issues: [{ quote: 'plza', problem: 'falta una letra', suggestion: 'plaza', t: '1.2s' }],
+      },
+    }
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: JSON.stringify(withFalsePositive) } }] }),
+    } as Response)
+    const out = await analyzeVideoFrames(
+      ['data:image/jpeg;base64,A'],
+      { ideaTitle: 'T' },
+      [1.2],
+      [1.2],
+    )
+    const [, init] = fetchMock.mock.calls[0]
+    const content = JSON.parse((init as RequestInit).body as string).messages[0].content
+    expect(content).toContainEqual({ type: 'text', text: '--- Fotograma 1 · t=1.2s · CORTE ---' })
+    expect(out.burned_captions.issues).toEqual([])
+  })
+
   it('sin XAI_API_KEY → lanza con mensaje claro', async () => {
     delete process.env.XAI_API_KEY
     await expect(analyzeVideoFrames(['d'], { ideaTitle: 'T' })).rejects.toThrow(/XAI_API_KEY/)

@@ -17,7 +17,9 @@
  * vez de fps — ver `video-scene-strip.tsx`.
  */
 import {
-  frameTimestamps, scaleDimensions, FRAME_FPS, FRAME_HARD_MAX, FRAME_JPEG_QUALITY, FRAME_MAX_SIDE,
+  frameTimestamps, scaleDimensions, bufferCoversDuration, splitTimestampsContiguous,
+  luminanceFingerprint,
+  FRAME_FPS, FRAME_HARD_MAX, FRAME_JPEG_QUALITY, FRAME_MAX_SIDE, FRAME_EXTRACT_WORKERS,
 } from './video-frames'
 
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
@@ -79,6 +81,9 @@ const DEFAULT_METADATA_TIMEOUT_MS = 15_000
  *  techo teórico (240 × 10s) solo se alcanzaría si CADA seek se demora al
  *  máximo, algo que ya de por sí sería un video/red irrecuperablemente lento. */
 const DEFAULT_SEEK_TIMEOUT_MS = 10_000
+/** Esperar a que el video esté en caché local. Si se agota, seguimos
+ *  seekeando (peor, pero no nos colgamos). */
+const DEFAULT_BUFFER_TIMEOUT_MS = 20_000
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined
@@ -134,38 +139,118 @@ export async function extractFramesFromVideoElement(
   return { frames, timestamps }
 }
 
-function captureDataUrlFrames(video: HTMLVideoElement): Promise<{ frames: string[]; timestamps: number[] }> {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('canvas no disponible')
+async function waitForEnoughBuffer(
+  video: HTMLVideoElement,
+  duration: number,
+  timeoutMs = DEFAULT_BUFFER_TIMEOUT_MS,
+): Promise<void> {
+  if (!(duration > 0)) return
+  if (video.readyState >= 4 || bufferCoversDuration(video.buffered, duration)) return
+  try {
+    await withTimeout(new Promise<void>((resolve) => {
+      const done = () => { cleanup(); resolve() }
+      const check = () => {
+        if (bufferCoversDuration(video.buffered, duration)) done()
+      }
+      const cleanup = () => {
+        video.removeEventListener('progress', check)
+        video.removeEventListener('canplaythrough', done)
+      }
+      video.addEventListener('progress', check)
+      video.addEventListener('canplaythrough', done)
+      check()
+    }), timeoutMs, 'buffer')
+  } catch {
+    // Sin buffer completo seguimos: peor (seeks por red) pero no nos colgamos.
+  }
+}
 
-  return extractFramesFromVideoElement(video, {
-    // Muestrea hasta FRAME_HARD_MAX (60s a 4fps): el presupuesto de bytes de
-    // cable se aplica por CHUNK, no aquí — ver chunkFrames() en
-    // video-frames.ts y el troceado en video-analysis-chunks.ts.
+/**
+ * Extrae fotogramas con N <video> en paralelo. Cada worker recibe una tira
+ * contigua de timestamps y seekea hacia adelante. La tira de 5 escenas sigue
+ * usando `extractFramesFromVideoElement` (secuencial, 5 seeks).
+ */
+export async function extractFramesInParallel(
+  createVideo: () => HTMLVideoElement,
+  opts: ExtractFramesOptions & { workers?: number; waitForBuffer?: boolean },
+): Promise<{ frames: string[]; timestamps: number[] }> {
+  const workers = Math.max(1, opts.workers ?? FRAME_EXTRACT_WORKERS)
+  const probe = createVideo()
+  await withTimeout(
+    waitForMetadata(probe),
+    opts.metadataTimeoutMs ?? DEFAULT_METADATA_TIMEOUT_MS,
+    'tiempo de espera agotado cargando metadata del video',
+  )
+  const duration = probe.duration
+  if (!Number.isFinite(duration) || duration <= 0) return { frames: [], timestamps: [] }
+  if (opts.waitForBuffer) await waitForEnoughBuffer(probe, duration)
+
+  const timestamps = opts.timestampsFor(duration)
+  const slices = splitTimestampsContiguous(timestamps, workers)
+  const results = await Promise.all(slices.map((slice, i) => {
+    if (slice.length === 0) return Promise.resolve({ frames: [] as string[], timestamps: [] as number[] })
+    const video = i === 0 ? probe : createVideo()
+    return extractFramesFromVideoElement(video, { ...opts, timestampsFor: () => slice })
+  }))
+
+  const byT = new Map<number, string>()
+  for (const r of results) {
+    r.timestamps.forEach((t, i) => {
+      if (typeof r.frames[i] === 'string') byT.set(t, r.frames[i])
+    })
+  }
+  return {
+    timestamps,
+    frames: timestamps.map((t) => byT.get(t)).filter((f): f is string => typeof f === 'string'),
+  }
+}
+
+export interface ExtractedFrames {
+  frames: string[]
+  timestamps: number[]
+  fingerprints?: { t: number; fingerprint: number[] }[]
+}
+
+async function captureFromSrc(src: string, opts: { waitForBuffer: boolean }): Promise<ExtractedFrames> {
+  const fingerprints: { t: number; fingerprint: number[] }[] = []
+  const createVideo = () => {
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    video.preload = 'auto'
+    video.src = src
+    return video
+  }
+  const result = await extractFramesInParallel(createVideo, {
     timestampsFor: (duration) => frameTimestamps(duration, FRAME_FPS, FRAME_HARD_MAX),
-    onFrame: ({ video, width, height }) => {
+    waitForBuffer: opts.waitForBuffer,
+    onFrame: ({ video, width, height, t }) => {
+      const canvas = document.createElement('canvas')
       canvas.width = width
       canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
       ctx.drawImage(video, 0, 0, width, height)
+      try {
+        const sw = Math.min(32, width)
+        const sh = Math.min(32, height)
+        fingerprints.push({ t, fingerprint: luminanceFingerprint(ctx.getImageData(0, 0, sw, sh).data) })
+      } catch {
+        // canvas tainted / jsdom sin getImageData — el filtro de cortes se salta.
+      }
       return canvas.toDataURL('image/jpeg', FRAME_JPEG_QUALITY)
     },
   })
+  return { ...result, fingerprints }
 }
 
 /** Extrae frames de un `File` local (el editor, en el momento de subir). */
-export async function extractVideoFrames(file: File): Promise<{ frames: string[]; timestamps: number[] }> {
+export async function extractVideoFrames(file: File): Promise<ExtractedFrames> {
   const url = URL.createObjectURL(file)
-  const video = document.createElement('video')
-  video.muted = true
-  video.playsInline = true
-  video.preload = 'auto'
-  video.src = url
   try {
-    return await captureDataUrlFrames(video)
+    return await captureFromSrc(url, { waitForBuffer: false })
   } finally {
     URL.revokeObjectURL(url)
-    video.src = ''
   }
 }
 
@@ -179,15 +264,6 @@ export async function extractVideoFrames(file: File): Promise<{ frames: string[]
  * petición SIN cookies de sesión, y el proxy depende de esa cookie para
  * autenticar.
  */
-export async function extractVideoFramesFromUrl(url: string): Promise<{ frames: string[]; timestamps: number[] }> {
-  const video = document.createElement('video')
-  video.muted = true
-  video.playsInline = true
-  video.preload = 'auto'
-  video.src = url
-  try {
-    return await captureDataUrlFrames(video)
-  } finally {
-    video.src = ''
-  }
+export async function extractVideoFramesFromUrl(url: string): Promise<ExtractedFrames> {
+  return captureFromSrc(url, { waitForBuffer: true })
 }

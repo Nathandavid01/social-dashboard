@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.56 — 2026-08-16
+
+**Analizar con IA saca los fotogramas más rápido, y ya no marca como error una letra que solo se ve a medias al cambiar de escena.**
+
+- Al pulsar **Analizar con IA** (o al subir el editado), el browser espera a tener el video en caché y luego extrae los fotogramas con **4 reproductores en paralelo** — el “Extrayendo fotogramas…” deja de ir seek por seek.
+- Sigue siendo **4 fotogramas por segundo** (el tope que atrapa typos reales). No bajamos calidad para ganar velocidad.
+- En un **corte de escena**, si la IA ve una letra a medias o una palabra cortada que no se repite en la toma, **ya no la reporta**. Un typo de verdad (el que se queda en pantalla) se sigue marcando.
+- Vista: [preview HTML](/previews/v3.52-qc-rapido-certero.html)
+
 ## v3.55 — 2026-08-16
 
 **"Atrás" ya no te saca del tablero, y borrar un video ahora pregunta y se puede deshacer.**

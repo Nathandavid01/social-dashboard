@@ -15,15 +15,21 @@ export async function postVideoAnalysisChunks(
   videoId: string,
   chunks: { frames: string[]; timestamps: number[] }[],
   post: typeof fetch,
+  cuts: number[] = [],
 ): Promise<void> {
   const total = chunks.length
   for (let index = 0; index < total; index++) {
     const { frames, timestamps } = capFramesAndTimestampsToBudget(chunks[index].frames, chunks[index].timestamps)
+    const chunkCuts = cuts.filter((c) => timestamps.some((t) => Math.abs(t - c) < 1e-6))
     try {
       await post('/api/video-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId, frames, timestamps, chunk: { index, total } }),
+        body: JSON.stringify({
+          videoId, frames, timestamps,
+          ...(chunkCuts.length > 0 ? { cuts: chunkCuts } : {}),
+          chunk: { index, total },
+        }),
       })
     } catch {
       // Silencioso a propósito: un chunk perdido no debe tumbar los demás.

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null) as
-    { videoId?: unknown; frames?: unknown; timestamps?: unknown; chunk?: unknown } | null
+    { videoId?: unknown; frames?: unknown; timestamps?: unknown; cuts?: unknown; chunk?: unknown } | null
   const videoId = typeof body?.videoId === 'string' ? body.videoId : null
   const frames = Array.isArray(body?.frames)
     ? (body!.frames as unknown[]).filter(
@@ -66,6 +66,10 @@ export async function POST(request: Request) {
     && rawTimestamps.every((t): t is number => typeof t === 'number' && Number.isFinite(t))
     ? (rawTimestamps as number[])
     : undefined
+
+  const cuts = Array.isArray(body?.cuts)
+    ? (body!.cuts as unknown[]).filter((t): t is number => typeof t === 'number' && Number.isFinite(t))
+    : []
 
   const supabase = await createClient()
   const { data: video } = await supabase
@@ -154,7 +158,9 @@ export async function POST(request: Request) {
       captionNotes: idea?.client?.caption_notes,
       transcript,
     }
-    const chunkFindings = await analyzeVideoFrames(frames, analysisCtx, timestamps)
+    const chunkFindings = cuts.length > 0
+      ? await analyzeVideoFrames(frames, analysisCtx, timestamps, cuts)
+      : await analyzeVideoFrames(frames, analysisCtx, timestamps)
     const findings = isFirstChunk ? chunkFindings : mergeVideoAnalysisFindings(previousFindings, chunkFindings)
     const { error } = await upsert({
       status: 'done',
