@@ -51,6 +51,8 @@ describe('effectiveAreaHrefs', () => {
     const editor = effectiveAreaHrefs('editor', null)
     expect(editor.has('/team')).toBe(false)
     expect(editor.has('/ideas-aprobadas')).toBe(true)
+    // Jornada: presence.read está en todos los roles, incluido editor
+    expect(editor.has('/actividad')).toBe(true)
   })
 
   it('explicit area_access overrides the role (independent of role)', () => {

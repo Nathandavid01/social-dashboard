@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { hasPermission } from './permissions'
 
+describe('presence.read (tablero Jornada — todo el equipo)', () => {
+  it('todos los roles del estudio pueden ver y ser medidos', () => {
+    for (const role of ['owner', 'supervisor', 'editor', 'video', 'disenador', 'copy', 'team_member'] as const) {
+      expect(hasPermission(role, 'presence.read')).toBe(true)
+    }
+  })
+  it('sin rol: no', () => {
+    expect(hasPermission(null, 'presence.read')).toBe(false)
+  })
+})
+
 describe('planning.assign permission (assigning videos to others)', () => {
   it('owner and supervisor may assign', () => {
     expect(hasPermission('owner', 'planning.assign')).toBe(true)

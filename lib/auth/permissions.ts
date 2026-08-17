@@ -50,6 +50,7 @@ export type Permission =
   | 'weekly_compliance.read'
   | 'runway.read'
   | 'activity.read'
+  | 'presence.read'
   | 'planning.read'
   | 'entregas.read'
   | 'revision.read'
@@ -92,7 +93,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
-    'weekly_compliance.read', 'runway.read', 'activity.read',
+    'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
     'planning.read', 'entregas.read', 'revision.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
@@ -112,6 +113,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video.upload',
     'captions.use', 'captions.edit',
     'revision.read', 'planning.act',
+    'presence.read',
     'alerts.read',
   ],
 
@@ -123,7 +125,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read', 'ideas.edit',
     'runway.read',
     'recording.read', 'recording.create', 'recording.complete',
-    'weekly_compliance.read', 'cadence.read', 'activity.read',
+    'weekly_compliance.read', 'cadence.read', 'activity.read', 'presence.read',
     'alerts.read',
   ],
 
@@ -134,6 +136,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'runway.read',
     'video.upload',
     'revision.read',
+    'presence.read',
     'alerts.read',
   ],
 
@@ -146,6 +149,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'captions.use', 'captions.edit',
     'metricool.read', 'posting.read',
     'cadence.read',
+    'presence.read',
     'alerts.read',
   ],
 
@@ -160,6 +164,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'posting.read', 'captions.use',
     'metricool.read',
     'planning.read',
+    'presence.read',
     'alerts.read',
   ],
 }
