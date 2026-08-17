@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { nombrarAngulo, sonDemasiadoParecidos } from './caption-angles'
+import { nombrarAngulo, sonDemasiadoParecidos, prepararHermanos, describirAngulo, MAX_HERMANOS, MAX_HERMANO_LEN } from './caption-angles'
 
 describe('nombrarAngulo', () => {
   it('toma la primera línea no vacía, normalizada', () => {
@@ -54,5 +54,53 @@ describe('sonDemasiadoParecidos', () => {
   it('con captions vacíos no revienta y no marca falso positivo', () => {
     expect(sonDemasiadoParecidos('', '')).toBe(false)
     expect(sonDemasiadoParecidos('algo', '')).toBe(false)
+  })
+})
+
+describe('prepararHermanos', () => {
+  it('trunca el texto de cada hermano a MAX_HERMANO_LEN caracteres', () => {
+    const largo = 'x'.repeat(2200) // un caption de Instagram puede rondar esto
+    const [h] = prepararHermanos([{ titulo: 'V1', caption: largo }])
+    expect(h.caption.length).toBe(MAX_HERMANO_LEN + 1) // + '…'
+    expect(h.caption.endsWith('…')).toBe(true)
+  })
+
+  it('no toca textos que ya caben dentro del límite', () => {
+    const [h] = prepararHermanos([{ titulo: 'V1', caption: 'Un caption corto' }])
+    expect(h.caption).toBe('Un caption corto')
+  })
+
+  it('respeta un maxLen custom', () => {
+    const [h] = prepararHermanos([{ titulo: 'V1', caption: 'x'.repeat(100) }], { maxLen: 20 })
+    expect(h.caption).toBe(`${'x'.repeat(20)}…`)
+  })
+
+  it('limita la cantidad de hermanos a MAX_HERMANOS por defecto', () => {
+    const muchos = Array.from({ length: MAX_HERMANOS + 5 }, (_, i) => ({ titulo: `V${i}`, caption: `Caption ${i}` }))
+    expect(prepararHermanos(muchos)).toHaveLength(MAX_HERMANOS)
+  })
+
+  it('respeta un límite custom', () => {
+    const cuatro = Array.from({ length: 10 }, (_, i) => ({ titulo: `V${i}`, caption: `Caption ${i}` }))
+    expect(prepararHermanos(cuatro, { limit: 3 })).toHaveLength(3)
+  })
+
+  it('descarta hermanos sin caption', () => {
+    expect(prepararHermanos([{ titulo: 'V1', caption: '' }, { titulo: 'V2', caption: '  ' }])).toEqual([])
+  })
+
+  it('incluye el ángulo calculado con describirAngulo', () => {
+    const [h] = prepararHermanos([{ titulo: 'V1', caption: 'Mira esto\nComenta qué opinas' }])
+    expect(h.angulo).toBe(describirAngulo('Mira esto\nComenta qué opinas'))
+  })
+})
+
+describe('describirAngulo', () => {
+  it('combina primera línea y CTA en un renglón corto', () => {
+    expect(describirAngulo('Mira esto\nComenta qué opinas')).toMatch(/mira esto.*CTA: comentar/)
+  })
+
+  it('sin CTA reconocible, omite el sufijo de CTA', () => {
+    expect(describirAngulo('Un texto cualquiera sin llamado a la acción')).not.toContain('CTA:')
   })
 })

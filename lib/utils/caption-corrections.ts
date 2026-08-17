@@ -11,6 +11,15 @@ const normalize = (s: string | null | undefined): string =>
   (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ')
 
 /**
+ * Corta un texto a `maxLen` caracteres con "…" al final — usado tanto para
+ * correcciones (abajo) como para los captions hermanos del prompt (ver
+ * lib/utils/caption-angles.ts), para no inflar el prompt con textos largos.
+ */
+export function truncarTexto(s: string, maxLen = 220): string {
+  return s.length > maxLen ? `${s.slice(0, maxLen)}…` : s
+}
+
+/**
  * Solo cuenta como "corrección" si el texto cambió de verdad, no cuando
  * el equipo únicamente reformateó espacios/mayúsculas — eso es ruido, no
  * aprendizaje, y guardarlo infla la tabla sin dar ninguna señal útil.
@@ -45,15 +54,13 @@ export function seleccionarCorrecciones(
   limit = 5,
   maxLen = 220,
 ): CaptionCorrection[] {
-  const truncate = (s: string): string => (s.length > maxLen ? `${s.slice(0, maxLen)}…` : s)
-
   return rows
     .filter((r) => (r.finalText ?? '').trim().length > 0)
     .slice()
     .sort((a, b) => ((a.recency ?? '') < (b.recency ?? '') ? 1 : (a.recency ?? '') > (b.recency ?? '') ? -1 : 0))
     .slice(0, limit)
     .map((r) => ({
-      draft: truncate((r.draftText ?? '').trim()),
-      final: truncate((r.finalText ?? '').trim()),
+      draft: truncarTexto((r.draftText ?? '').trim(), maxLen),
+      final: truncarTexto((r.finalText ?? '').trim(), maxLen),
     }))
 }

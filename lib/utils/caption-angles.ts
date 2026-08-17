@@ -7,6 +7,7 @@
  * ESTE MISMO LOTE") y lib/actions/idea-captions.ts (red de seguridad de
  * una sola regeneración cuando dos captions del lote chocan).
  */
+import { truncarTexto } from '@/lib/utils/caption-corrections'
 
 export interface AnguloCaption {
   /** Primera línea no vacía del caption, en minúsculas y sin espacios extra. */
@@ -71,6 +72,56 @@ function overlapRatio(a: Set<string>, b: Set<string>): number {
  * hashtags muy solapados. No detecta parecidos sutiles de fondo/tono a
  * propósito (eso lo cubre el prompt, no este chequeo).
  */
+export const MAX_HERMANO_LEN = 220
+export const MAX_HERMANOS = 8
+
+export interface HermanoCaption {
+  titulo: string
+  caption: string
+}
+
+export interface HermanoParaPrompt extends HermanoCaption {
+  angulo: string
+}
+
+/**
+ * Etiqueta corta del ángulo de un caption hermano (primera línea + tipo de
+ * CTA), para mostrarla en el bloque del prompt — heurística honesta, ver
+ * comentario de arriba, no una clasificación inteligente del contenido.
+ */
+export function describirAngulo(caption: string): string {
+  const { primeraLinea, tipoCta } = nombrarAngulo(caption)
+  const snippet = primeraLinea.length > 60 ? `${primeraLinea.slice(0, 60)}…` : primeraLinea
+  return tipoCta !== 'otro' ? `${snippet} — CTA: ${tipoCta}` : snippet
+}
+
+/**
+ * Prepara los captions hermanos para el bloque del prompt: descarta vacíos,
+ * limita cuántos hermanos entran (un lote grande no debe inflar el prompt sin
+ * tope) y trunca el texto de cada uno — mismo tratamiento que las
+ * correcciones del equipo (ver lib/utils/caption-corrections.ts), porque un
+ * caption de Instagram puede rondar los 2200 caracteres y el botón de lote
+ * acumula uno por cada video generado.
+ */
+export function prepararHermanos(
+  hermanos: HermanoCaption[],
+  opts?: { limit?: number; maxLen?: number },
+): HermanoParaPrompt[] {
+  const limit = opts?.limit ?? MAX_HERMANOS
+  const maxLen = opts?.maxLen ?? MAX_HERMANO_LEN
+  return hermanos
+    .filter((h) => (h.caption ?? '').trim().length > 0)
+    .slice(0, limit)
+    .map((h) => {
+      const caption = h.caption.trim()
+      return {
+        titulo: h.titulo,
+        caption: truncarTexto(caption, maxLen),
+        angulo: describirAngulo(caption),
+      }
+    })
+}
+
 export function sonDemasiadoParecidos(a: string, b: string): boolean {
   const angA = nombrarAngulo(a)
   const angB = nombrarAngulo(b)
