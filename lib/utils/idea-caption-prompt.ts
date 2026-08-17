@@ -54,6 +54,25 @@ export interface IdeaCaptionPromptInput {
   videoTranscript?: string | null
   /** QC IA (Grok 4.6 sobre frames): qué se VE en el video + texto quemado en pantalla. */
   videoAnalysis?: { visualSummary?: string | null; burnedCaptionsText?: string | null } | null
+  /**
+   * Captions de los OTROS videos de este mismo lote (ya generados o guardados —
+   * ver generateIdeaCaption / batch-captions-button.tsx). Evita que un lote de
+   * varios videos suene genérico: cada caption debe conocer a sus hermanos y
+   * buscar un ángulo distinto, derivado de lo que se ve/oye en SU propio video.
+   */
+  hermanos?: { titulo: string; caption: string; angulo?: string }[]
+  /**
+   * Últimas correcciones del equipo PARA ESTE CLIENTE (lo que escribió la IA vs
+   * lo que dejó el equipo tras editar y guardar) — aprendizaje por corrección,
+   * ver lib/utils/caption-corrections.ts y supabase/migrations/0066.
+   */
+  teamCorrections?: { draft: string; final: string }[]
+  /**
+   * Se activa tras UNA regeneración cuando el intento anterior chocó con un
+   * hermano (sonDemasiadoParecidos) — refuerza la instrucción de ángulo distinto
+   * en vez de repetir el prompt normal sin más presión.
+   */
+  forceDistinctAngle?: boolean
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -103,6 +122,21 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       ? '- Imita el tono, el largo, el uso de emojis y el formato de hashtags de los CAPTIONS DE REFERENCIA de arriba\n'
       : ''
 
+  // Pieza 3: correcciones del equipo PARA ESTE CLIENTE (aprendizaje por
+  // corrección). Prioridad 2 — justo debajo del hook, por encima de los
+  // aprobados: es la señal más fresca de "así se corrige a este cliente".
+  const corrections = (input.teamCorrections ?? []).filter((c) => filled(c.final))
+  const correctionsBlock =
+    corrections.length > 0
+      ? `CORRECCIONES DEL EQUIPO PARA ESTE CLIENTE (esto escribió la IA / esto dejó el equipo — aprende la diferencia y no repitas el error):\n\n${corrections
+          .map((c, i) => `--- Corrección ${i + 1} ---\nIA escribió: ${c.draft.trim() || '(sin borrador registrado)'}\nEquipo dejó: ${c.final.trim()}`)
+          .join('\n\n')}\n\n`
+      : ''
+  const correctionsBullet =
+    corrections.length > 0
+      ? '- Aprende de las CORRECCIONES DEL EQUIPO de arriba: no repitas lo que la IA escribió si el equipo ya lo cambió antes\n'
+      : ''
+
   // Learning loop: captions the team APPROVED for this client are the exact
   // standard to match — weighted above the Metricool reference examples.
   const approved = (input.approvedExamples ?? []).filter((s) => filled(s))
@@ -128,6 +162,29 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
   const avoidBullet =
     avoid.length > 0
       ? '- EVITA el estilo/los errores de los CAPTIONS QUE EL EQUIPO RECHAZÓ\n'
+      : ''
+
+  // Pieza 1+2: los captions de los OTROS videos de este lote — para que este
+  // no salga genérico ni repita gancho/estructura/CTA/hashtags, y para pedir
+  // un ángulo distinto derivado de lo que se ve/oye en ESTE video (no un
+  // reparto arbitrario de temas).
+  const hermanos = input.hermanos ?? []
+  const hermanosBlock =
+    hermanos.length > 0
+      ? `OTROS CAPTIONS DE ESTE MISMO LOTE (ya existen — NO repitas su gancho, su estructura, su CTA ni sus hashtags; este tiene que sonar distinto):\n\n${hermanos
+          .map(
+            (h, i) =>
+              `--- Hermano ${i + 1}${filled(h.titulo) ? ` (${h.titulo})` : ''}${filled(h.angulo) ? ` — ángulo: ${h.angulo}` : ''} ---\n${h.caption.trim()}`,
+          )
+          .join('\n\n')}\n\n`
+      : ''
+  const hermanosBullet =
+    hermanos.length > 0
+      ? `- Busca un ÁNGULO DISTINTO al de los captions hermanos de arriba (antojo, detrás de cámaras, invitación, testimonio, educar, mostrar producto…), pero que salga de lo que se ve/oye en ESTE video — no lo repartas al azar\n${
+          input.forceDistinctAngle
+            ? '- IMPORTANTE: tu intento anterior se pareció demasiado a un caption hermano (mismo gancho, CTA o hashtags) — cambia el ángulo de verdad esta vez\n'
+            : ''
+        }`
       : ''
 
   // When the user gives feedback on a prior attempt, show that attempt + the
@@ -195,7 +252,7 @@ ${redLine}
 LA IDEA DEL VIDEO:
 ${ideaLines}
 
-${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${seen}${approvedBlock}${avoidBlock}${feedbackBlock}${examplesBlock}
+${constraints ? `RESTRICCIONES:\n${constraints}\n\n` : ''}${heard}${seen}${correctionsBlock}${approvedBlock}${avoidBlock}${hermanosBlock}${feedbackBlock}${examplesBlock}
 
 ${taskLine}
 ${heard
@@ -203,7 +260,7 @@ ${heard
         ? 'El caption se basa en el HOOK de arriba (de qué es el video) — la transcripción es apoyo secundario, no el guion.'
         : 'El caption se basa en lo que ocurre en el video (transcripción). El hook es contexto, no el guion.')
     : 'El caption debe alinearse con el hook y el brief visual — el video se grabará siguiendo esa idea.'}
-${heardBullet}${seenBullet}${approvedBullet}${avoidBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
+${heardBullet}${seenBullet}${correctionsBullet}${approvedBullet}${avoidBullet}${hermanosBullet}${feedbackBullet}${imitationBullet}- Engancha en la primera línea
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - No inventes años, fechas, nombres de eventos, precios, promociones ni ningún otro dato que no conste en el video, el hook, el brief, las RESTRICCIONES del cliente de arriba (CTA, reglas, hashtags) o los captions de referencia — si algo no consta, se omite
