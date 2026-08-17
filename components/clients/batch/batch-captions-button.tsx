@@ -8,6 +8,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { hasCaptionableVideo } from '@/lib/utils/idea-ready'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
+import { MAX_HERMANOS } from '@/lib/utils/caption-angles'
 import type { BatchVideo } from '@/lib/utils/batch-view'
 
 const filled = (s?: string | null) => !!s && s.trim().length > 0
@@ -64,11 +65,20 @@ export function BatchCaptionsButton({
     // para que no salgan genéricos ni se repitan entre sí (Pieza 1). Arranca
     // sembrado con los captions que YA existían en el lote (guardados o en
     // borrador) — no solo los generados en esta corrida — porque `missing`
-    // excluye esos videos y de otro modo el generador nunca los vería.
-    const hermanos: { titulo: string; caption: string }[] = videos
-      .filter((v) => v.status !== 'descartada' && (filled(v.generated_caption) || filled(v.caption_draft)))
+    // excluye esos videos y de otro modo el generador nunca los vería. Un
+    // lote grande no debe hacer crecer este array sin tope: se limita a los
+    // MAX_HERMANOS más recientes (mismo tope que aplica el servidor).
+    let hermanos: { titulo: string; caption: string }[] = videos
+      .filter(
+        (v) =>
+          v.status !== 'descartada' &&
+          v.status !== 'publicada' &&
+          !v.published_at &&
+          (filled(v.generated_caption) || filled(v.caption_draft)),
+      )
       .map((v) => ({ titulo: v.title ?? '', caption: displayCaptionDraft(v.generated_caption || v.caption_draft) }))
       .filter((h) => filled(h.caption))
+      .slice(-MAX_HERMANOS)
     for (let i = 0; i < missing.length; i++) {
       try {
         const res = await generateIdeaCaption(missing[i].id, { hermanos: [...hermanos] })
@@ -76,7 +86,9 @@ export function BatchCaptionsButton({
           failed++
         } else {
           ok++
-          if (res?.caption) hermanos.push({ titulo: missing[i].title ?? '', caption: res.caption })
+          if (res?.caption) {
+            hermanos = [...hermanos, { titulo: missing[i].title ?? '', caption: res.caption }].slice(-MAX_HERMANOS)
+          }
         }
       } catch {
         failed++

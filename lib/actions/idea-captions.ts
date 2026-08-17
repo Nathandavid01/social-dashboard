@@ -9,7 +9,7 @@ import { fetchApprovedCaptionExamples, fetchCaptionFeedbackForPrompt } from '@/l
 import { fetchCaptionCorrectionsForPrompt } from '@/lib/integrations/caption-corrections'
 import { mergeApprovedAndLoved } from '@/lib/utils/caption-learning'
 import { huboCambioSignificativo } from '@/lib/utils/caption-corrections'
-import { nombrarAngulo, sonDemasiadoParecidos } from '@/lib/utils/caption-angles'
+import { MAX_HERMANOS, prepararHermanos, sonDemasiadoParecidos } from '@/lib/utils/caption-angles'
 import { buildIdeaCaptionPrompt, type IdeaCaptionPromptInput } from '@/lib/utils/idea-caption-prompt'
 import { hasCaptionableVideo, isIdeaReadyForCaption } from '@/lib/utils/idea-ready'
 import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
@@ -21,17 +21,6 @@ import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
-
-/**
- * Heurística honesta (ver lib/utils/caption-angles.ts) para mostrarle al
- * modelo, en un renglón corto, en qué se diferencia el caption de un hermano
- * — NO es una clasificación inteligente del contenido.
- */
-function describirAngulo(caption: string): string {
-  const { primeraLinea, tipoCta } = nombrarAngulo(caption)
-  const snippet = primeraLinea.length > 60 ? `${primeraLinea.slice(0, 60)}…` : primeraLinea
-  return tipoCta !== 'otro' ? `${snippet} — CTA: ${tipoCta}` : snippet
-}
 
 /**
  * Pieza 1: los demás videos de la MISMA idea/lote (mismo cliente, activos, no
@@ -63,13 +52,16 @@ async function fetchSiblingCaptions(
     }[]
 
     return rows
-      .filter((r) => r.status !== 'descartada' && !r.published_at)
+      // "publicado" se comprueba igual en todo el repo: published_at O status
+      // 'publicada' (ver batch-view.ts / content-batches.ts) — un hermano ya
+      // publicado no debe tratarse como parte del lote activo.
+      .filter((r) => r.status !== 'descartada' && !r.published_at && r.status !== 'publicada')
       .map((r) => ({
         titulo: r.title ?? '',
         caption: displayCaptionDraft(r.generated_caption || r.caption_draft),
       }))
       .filter((h) => filled(h.caption))
-      .slice(0, 8)
+      .slice(0, MAX_HERMANOS)
   } catch {
     return []
   }
@@ -192,10 +184,14 @@ export async function generateIdeaCaption(
   // 👍-rated captions are the strongest positive signal → lead the approved list.
   const approvedExamples = mergeApprovedAndLoved(ratings.loved, approved)
 
+  // Cap the COUNT here (shared by the collision check below and the prompt),
+  // but keep the FULL text for the collision check — sonDemasiadoParecidos
+  // compares hashtags, which usually sit at the end of a caption, so a
+  // truncated hermano would silently defeat that check. `prepararHermanos`
+  // truncates only the copy that goes INTO the prompt text.
   const hermanosRaw = opts?.hermanos !== undefined ? opts.hermanos : autoHermanos
-  const hermanos = hermanosRaw
-    .filter((h) => filled(h.caption))
-    .map((h) => ({ ...h, angulo: describirAngulo(h.caption) }))
+  const hermanosLlenos = hermanosRaw.filter((h) => filled(h.caption)).slice(0, MAX_HERMANOS)
+  const hermanos = prepararHermanos(hermanosLlenos)
 
   const sharedPrompt: IdeaCaptionPromptInput = {
     title: idea.title as string,
@@ -237,7 +233,7 @@ export async function generateIdeaCaption(
     // hermano del lote (mismo gancho, mismo CTA + hashtags solapados),
     // regenera UNA sola vez con la instrucción reforzada. Si vuelve a
     // chocar se acepta igual — nunca bucles, nunca gasto infinito de API.
-    let anguloChocado = hermanos.some((h) => sonDemasiadoParecidos(stored, h.caption))
+    let anguloChocado = hermanosLlenos.some((h) => sonDemasiadoParecidos(stored, h.caption))
     let regenerado = false
     if (anguloChocado) {
       regenerado = true
@@ -246,7 +242,7 @@ export async function generateIdeaCaption(
       )
       if (retry?.trim()) {
         stored = retry.trim()
-        anguloChocado = hermanos.some((h) => sonDemasiadoParecidos(stored, h.caption))
+        anguloChocado = hermanosLlenos.some((h) => sonDemasiadoParecidos(stored, h.caption))
       }
     }
 
