@@ -5,6 +5,7 @@ import { SidebarAwareContent } from '@/components/layout/sidebar-aware-content'
 import { Topbar } from '@/components/layout/topbar'
 import { DashboardProviders } from '@/components/layout/dashboard-providers'
 import { ChatBubble } from '@/components/chat/chat-bubble'
+import { UploadDock } from '@/components/uploads/upload-dock'
 import { Toaster } from '@/components/ui/toaster'
 import { CommandPalette } from '@/components/shared/command-palette'
 import { RequestNotifier } from '@/components/shared/request-notifier'
@@ -97,6 +98,7 @@ export default async function DashboardLayout({
         <Toaster />
         <UpdateNotice />
         <ChatBubble />
+        <UploadDock />
         <CommandPalette />
         <RequestNotifier />
         <VideoReviewNotifier />

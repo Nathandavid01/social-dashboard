@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
-import { getR2UploadUrl, registerR2Video, getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
-import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { useUploadStore, type UploadItem } from '@/lib/stores/upload-store'
+import { NateUploadLogo } from '@/components/uploads/nate-upload-logo'
+import { uploadPhaseText } from '@/lib/utils/upload-phase-text'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
@@ -175,39 +177,36 @@ function SlotGroup({
       : 'Completo'
 
   const fileRef = useRef<HTMLInputElement>(null)
-  const [progress, setProgress] = useState<number | null>(null)
-  const [batch, setBatch] = useState<{ done: number; total: number } | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [myUploadIds, setMyUploadIds] = useState<string[]>([])
   const { toast } = useToast()
+  const startUpload = useUploadStore((s) => s.startUpload)
+  const allUploads = useUploadStore((s) => s.uploads)
+  // Uploads THIS group started, still tracked in the store — the engine keeps
+  // running even if this component unmounts; we just stop listening to it.
+  const myUploads = myUploadIds.map((id) => allUploads[id]).filter((u): u is UploadItem => !!u)
 
   const canDrop = canUpload && !disabledReason
 
   const MAX_BYTES = 5 * 1024 * 1024 * 1024
 
-  // Upload a single file end-to-end (presign → PUT → register). Throws on failure.
-  async function uploadOne(file: File) {
-    const slot = await getR2UploadUrl({ ideaId, kind, fileName: file.name, contentType: file.type || 'video/mp4' })
-    if (slot.error || !slot.url || !slot.key) throw new Error(slot.error ?? 'No se pudo iniciar la subida')
-
-    await new Promise<void>((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      xhr.open('PUT', slot.url!, true)
-      xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
-      xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)) }
-      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 ${xhr.status}`)))
-      xhr.onerror = () => reject(new Error('Error de red durante la subida'))
-      xhr.send(file)
+  function waitForUploadDone(id: string): Promise<UploadItem> {
+    const isDone = (item: UploadItem) => item.phase === 'listo' || item.phase === 'error' || item.phase === 'cancelado'
+    const now = useUploadStore.getState().uploads[id]
+    if (now && isDone(now)) return Promise.resolve(now)
+    return new Promise((resolve) => {
+      const unsub = useUploadStore.subscribe((state) => {
+        const item = state.uploads[id]
+        if (item && isDone(item)) {
+          unsub()
+          resolve(item)
+        }
+      })
     })
-
-    const res = await registerR2Video({
-      ideaId, kind, key: slot.key!, name: file.name, sizeBytes: file.size, mimeType: file.type || 'video/mp4',
-    })
-    if (res.error) throw new Error(res.error)
-    // QC IA solo del corte final. void: si falla, la subida ya está completa.
-    if (kind === 'edited' && res.id) void processUploadedVideo(res.id, file)
   }
 
-  // Accepts one OR many files; uploads them sequentially into this kind.
+  // Accepts one OR many files; each starts its own resilient upload in the
+  // global store (survives navigating away). We just wait here to summarize.
   async function handleFiles(files: FileList | File[] | null) {
     const list = Array.from(files ?? [])
     if (list.length === 0) return
@@ -217,21 +216,16 @@ function SlotGroup({
     }
     if (ok.length === 0) return
 
-    let failed = 0
-    for (let i = 0; i < ok.length; i++) {
-      setBatch({ done: i, total: ok.length })
-      setProgress(0)
-      try {
-        await uploadOne(ok[i])
-      } catch (err) {
-        failed++
-        toast({ title: 'Falló una subida', description: err instanceof Error ? err.message : 'Error', variant: 'destructive' })
-      }
-    }
-    setBatch(null)
-    setProgress(null)
+    const ids = ok.map((file) => startUpload({ file, ideaId, kind, provider: 'r2' }))
+    setMyUploadIds((prev) => [...prev, ...ids])
 
-    const done = ok.length - failed
+    const results = await Promise.all(ids.map(waitForUploadDone))
+    results.forEach((r) => {
+      if (r.phase === 'error') {
+        toast({ title: 'Falló una subida', description: r.error ?? 'Error', variant: 'destructive' })
+      }
+    })
+    const done = results.filter((r) => r.phase === 'listo').length
     if (done > 0) {
       const label = meta.label.toLowerCase()
       toast({ title: done === 1 ? `${label} subido` : `${done} ${label}s subidos` })
@@ -306,22 +300,37 @@ function SlotGroup({
         </div>
       </div>
 
-      {progress !== null && (
-        <div className={cn('rounded-lg border p-3', meta.tone)}>
-          <div className="mb-2 flex items-center justify-between text-xs font-medium">
-            <span className="flex items-center gap-1.5">
-              <Icon className="h-3.5 w-3.5" /> Subiendo {meta.label.toLowerCase()}…
-              {batch && batch.total > 1 && (
-                <span className="text-muted-foreground">({batch.done + 1} de {batch.total})</span>
-              )}
-            </span>
-            <span className="tabular-nums">{progress}%</span>
+      {myUploads
+        .filter((u) => u.phase !== 'listo' && u.phase !== 'cancelado')
+        .map((u) => (
+          <div key={u.id} className={cn('flex items-center gap-3 rounded-lg border p-3', meta.tone)}>
+            <NateUploadLogo pct={u.pct} size={32} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium">{u.fileName}</p>
+              <p className={cn('text-xs', u.phase === 'error' ? 'text-red-500' : 'text-muted-foreground')}>
+                {uploadPhaseText(u)}
+              </p>
+            </div>
+            {u.phase === 'error' ? (
+              <button
+                type="button"
+                onClick={() => useUploadStore.getState().dismissUpload(u.id)}
+                aria-label="Cerrar"
+                className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => useUploadStore.getState().cancelUpload(u.id)}
+                className="shrink-0 rounded-md border border-current/30 px-2 py-1 text-[10px] font-medium hover:border-current/60"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-background/60">
-            <div className="h-full bg-current transition-all duration-200" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-      )}
+        ))}
 
       {videos.length > 0 && (
         <div className="space-y-2">

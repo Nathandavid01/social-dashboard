@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.47 — Subida resistente</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --amber:#f59e0b; --red:#f87171; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 80px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 22px; line-height:1.5; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:26px 0 10px; }
+
+    /* --- Logo N que se llena --- */
+    .logo-row { display:flex; flex-wrap:wrap; gap:22px; }
+    .logo-cell { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .logo-cell .pct { font-size:11px; color:var(--muted-fg); font-variant-numeric:tabular-nums; }
+
+    /* --- Tarjeta de fase --- */
+    .phase-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .phase-card .meta { min-width:0; flex:1; }
+    .phase-card .file { font-size:12px; font-weight:600; margin:0 0 2px; }
+    .phase-card .text { font-size:12px; color:var(--muted-fg); margin:0; }
+    .phase-card.error .text { color:var(--red); }
+    .phase-card .action { flex-shrink:0; font-size:10px; font-weight:600; padding:4px 9px; border-radius:7px; border:1px solid var(--border); color:var(--muted-fg); white-space:nowrap; }
+
+    /* --- Dock global --- */
+    .stage { position:relative; height:180px; background:radial-gradient(120% 120% at 15% 100%, #14140f 0%, #0a0a0a 60%); border:1px solid var(--border); border-radius:14px; margin-top:8px; overflow:hidden; }
+    .stage .hint { position:absolute; top:12px; left:14px; font-size:11px; color:var(--muted-fg); }
+    .dock { position:absolute; bottom:16px; left:16px; display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:6px 14px 6px 6px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+    .dock .label { display:flex; flex-direction:column; line-height:1.25; }
+    .dock .label .t1 { font-size:11px; font-weight:600; }
+    .dock .label .t2 { font-size:10px; color:var(--muted-fg); }
+    .chat-fab { position:absolute; bottom:16px; right:16px; width:44px; height:44px; border-radius:999px; background:var(--gold); display:flex; align-items:center; justify-content:center; color:#1a1200; font-size:18px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+
+    footer { margin-top:34px; font-size:11px; color:#6b6b6b; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.47 — La subida no se cae con internet flojo</h1>
+    <p class="sub">
+      Videos de 8 MB o más se suben en partes; si una parte falla por la conexión, solo se reintenta esa parte
+      (hasta 5 veces) — no el archivo completo. El logo de Nate Media se llena de abajo hacia arriba con el
+      progreso real, un texto siempre dice qué está pasando, y un indicador pequeño en la esquina inferior
+      izquierda mantiene la subida visible aunque cambies de pantalla.
+    </p>
+
+    <p class="row-label">El logo, en varios porcentajes</p>
+    <div class="logo-row" id="logo-row"></div>
+
+    <p class="row-label">Cada fase dice qué está pasando — nunca una barra muda</p>
+    <div id="phase-list"></div>
+
+    <p class="row-label">Indicador global — esquina inferior izquierda, sin tapar el chat</p>
+    <div class="stage">
+      <span class="hint">Cualquier pantalla del dashboard</span>
+      <div class="dock">
+        <svg viewBox="0 0 512 512" width="30" height="30" id="dock-logo"></svg>
+        <div class="label">
+          <span class="t1" id="dock-text">Subiendo… 62%</span>
+          <span class="t2">2 subidas</span>
+        </div>
+      </div>
+      <div class="chat-fab">💬</div>
+    </div>
+  </div>
+
+  <footer>Nate Media · Social Dashboard · v3.47</footer>
+
+  <script>
+    function nGeometry(pct) {
+      const h = (512 * pct) / 100;
+      const y = 512 - h;
+      return { h, y };
+    }
+
+    function nSvg(pct, size) {
+      const { h, y } = nGeometry(pct);
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="${size}" height="${size}">
+          <defs>
+            <linearGradient id="g${pct}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F0C040"/>
+              <stop offset="50%" stop-color="#D4A017"/>
+              <stop offset="100%" stop-color="#A87B0C"/>
+            </linearGradient>
+            <clipPath id="c${pct}">
+              <rect x="0" y="${y}" width="512" height="${h}" />
+            </clipPath>
+          </defs>
+          <rect width="512" height="512" fill="#0A0A0A" rx="100"/>
+          <path d="M163 382 V130 L349 382 V130" fill="none" stroke="#3A3A3A" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+          <g clip-path="url(#c${pct})">
+            <path d="M163 382 V130 L349 382 V130" fill="none" stroke="url(#g${pct})" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>`;
+    }
+
+    const pcts = [0, 15, 45, 72, 100];
+    const logoRow = document.getElementById('logo-row');
+    pcts.forEach((p) => {
+      const cell = document.createElement('div');
+      cell.className = 'logo-cell';
+      cell.innerHTML = nSvg(p, 64) + `<span class="pct">${p}%</span>`;
+      logoRow.appendChild(cell);
+    });
+
+    document.getElementById('dock-logo').outerHTML = nSvg(62, 30).replace('<svg ', '<svg id="dock-logo" ');
+
+    const phases = [
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'Subiendo… 45% · parte 12 de 26', action: 'Cancelar', pct: 45 },
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'Se cayó la conexión — reintentando (2 de 5)…', action: 'Cancelar', pct: 45, err: true },
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'Ensamblando el archivo', action: 'Cancelar', pct: 100 },
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'Registrando el video', action: 'Cancelar', pct: 100 },
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'La IA está viendo el video…', action: 'Cancelar', pct: 100 },
+      { file: 'reel-cafe-don-rogelio.mp4', text: 'Listo', action: 'Cerrar', pct: 100 },
+    ];
+    const list = document.getElementById('phase-list');
+    phases.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'phase-card' + (p.err ? ' error' : '');
+      row.innerHTML = `
+        ${nSvg(p.pct, 34)}
+        <div class="meta">
+          <p class="file">${p.file}</p>
+          <p class="text">${p.text}</p>
+        </div>
+        <span class="action">${p.action}</span>`;
+      list.appendChild(row);
+    });
+  </script>
+</body>
+</html>
