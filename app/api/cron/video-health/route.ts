@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { r2PublicUrl } from '@/lib/integrations/r2'
+import { DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { r2PublicUrl, r2Client, r2Bucket } from '@/lib/integrations/r2'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { staleAnalysisCandidates } from '@/lib/utils/video-analysis-sweep'
+import { archivedVideoCandidates } from '@/lib/utils/archived-video-sweep'
 import { cronAuthDenial } from '@/lib/auth/cron'
 
 export const dynamic = 'force-dynamic'
@@ -94,15 +96,48 @@ export async function GET(req: NextRequest) {
     }
   } catch { /* best-effort: el health-check principal no depende de esto */ }
 
+  // Barrido diferido del borrado de video (deleteR2Video solo archiva, nunca
+  // destruye en caliente — ver lib/utils/archived-video-sweep.ts). Pasados
+  // ARCHIVED_VIDEO_GRACE_DAYS días desde que se archivó, el objeto en R2 SÍ
+  // se destruye aquí. Best-effort: un fallo aquí no debe tumbar el chequeo de
+  // salud del gateway público, que es la razón principal de este cron.
+  let archivedSwept = 0
+  try {
+    const { data: archived } = await sb
+      .from('content_idea_videos')
+      .select('id, status, storage_provider, drive_file_id, updated_at')
+      .eq('status', 'archived')
+      .eq('storage_provider', 'r2')
+
+    const candidates = archivedVideoCandidates(archived ?? [], new Date())
+    const client = r2Client()
+    if (client) {
+      for (const c of candidates) {
+        try {
+          await client.send(new DeleteObjectCommand({ Bucket: r2Bucket(), Key: c.driveFileId }))
+          // Clear the key so a re-run doesn't keep retrying an object that's
+          // already gone (S3 deletes are idempotent either way — this is
+          // just to keep the daily log clean).
+          await sb.from('content_idea_videos').update({ drive_file_id: null }).eq('id', c.id)
+          archivedSwept++
+        } catch (err) {
+          console.error('[video-health] no se pudo borrar objeto archivado', c.id, err)
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[video-health] barrido de archivados falló', err)
+  }
+
   const failures = results.filter((r) => !r.ok)
   if (failures.length > 0) {
     // Non-200 → the Vercel cron run shows as failed and is visible in logs.
     console.error('[video-health] videos no reproducibles:', JSON.stringify(failures))
     return NextResponse.json(
-      { ok: false, checked: results.length, failures },
+      { ok: false, checked: results.length, failures, archivedSwept },
       { status: 503 },
     )
   }
 
-  return NextResponse.json({ ok: true, checked: results.length })
+  return NextResponse.json({ ok: true, checked: results.length, archivedSwept })
 }
