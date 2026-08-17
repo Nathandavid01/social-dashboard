@@ -9,7 +9,7 @@
  * analyzeUploadedVideo sigue existiendo intacto para quien no quiera thumbs.
  */
 import { extractVideoFrames } from './video-frames-dom'
-import { chunkFrames } from './video-frames'
+import { chunkFrames, detectSceneCuts } from './video-frames'
 import { postVideoAnalysisChunks } from './video-analysis-chunks'
 import { pickThumbFrames, THUMB_COUNT } from './video-thumbs'
 import { getThumbUploadUrls, registerVideoThumbs } from '@/lib/actions/video-thumbs'
@@ -20,7 +20,7 @@ async function dataUriToBlob(dataUri: string): Promise<Blob> {
 }
 
 export interface ProcessUploadedVideoDeps {
-  extract?: (f: File) => Promise<{ frames: string[]; timestamps: number[] }>
+  extract?: (f: File) => Promise<{ frames: string[]; timestamps: number[]; fingerprints?: { t: number; fingerprint: number[] }[] }>
   post?: typeof fetch
   getUploadUrls?: (videoId: string, count: number) => Promise<{ urls?: string[]; keys?: string[]; error?: string }>
   register?: (videoId: string, keys: string[]) => Promise<{ ok?: true; error?: string }>
@@ -32,11 +32,12 @@ async function analyze(
   frames: string[],
   timestamps: number[],
   post: typeof fetch,
+  cuts: number[] = [],
 ): Promise<void> {
   if (frames.length === 0) return
   // Un POST secuencial por chunk (videos largos → varios); los timestamps
   // dejan que la IA reporte el segundo exacto del error.
-  await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post)
+  await postVideoAnalysisChunks(videoId, chunkFrames(frames, timestamps), post, cuts)
 }
 
 async function uploadThumbs(
@@ -79,17 +80,20 @@ export async function processUploadedVideo(
 
   let frames: string[]
   let timestamps: number[]
+  let fingerprints: { t: number; fingerprint: number[] }[] | undefined
   try {
-    ;({ frames, timestamps } = await extract(file))
+    ;({ frames, timestamps, fingerprints } = await extract(file))
   } catch {
     // Silencioso: el navegador no pudo decodificar el video — ni análisis ni thumbs.
     return
   }
   if (frames.length === 0) return
 
+  const cuts = fingerprints ? detectSceneCuts(fingerprints) : []
+
   // Ambos son independientes: uno puede fallar sin tumbar al otro.
   await Promise.allSettled([
-    analyze(videoId, frames, timestamps, post),
+    analyze(videoId, frames, timestamps, post, cuts),
     uploadThumbs(videoId, frames, { getUploadUrls, register, putThumb }),
   ])
 }

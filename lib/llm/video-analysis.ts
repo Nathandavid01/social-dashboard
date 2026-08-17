@@ -1,6 +1,7 @@
 import 'server-only'
 import {
   buildVideoAnalysisPrompt, buildVideoAnalysisRequest, parseVideoAnalysisResponse,
+  filterSceneCutCaptionIssues,
   videoAnalysisModelId, videoAnalysisConfigError,
   type VideoAnalysisContext, type VideoAnalysisFindings, type VideoAnalysisEnv,
 } from './video-analysis-core'
@@ -13,6 +14,7 @@ export async function analyzeVideoFrames(
   frames: string[],
   ctx: VideoAnalysisContext,
   timestamps?: number[],
+  cuts?: number[],
 ): Promise<VideoAnalysisFindings> {
   const env = process.env as VideoAnalysisEnv
   const configError = videoAnalysisConfigError(env)
@@ -21,6 +23,7 @@ export async function analyzeVideoFrames(
   const req = buildVideoAnalysisRequest({
     frames,
     timestamps,
+    cuts,
     prompt: buildVideoAnalysisPrompt(ctx),
     apiKey: env.XAI_API_KEY!,
     model: videoAnalysisModelId(env),
@@ -33,5 +36,12 @@ export async function analyzeVideoFrames(
   const json = await res.json().catch(() => null)
   const findings = parseVideoAnalysisResponse(json)
   if (!findings) throw new Error('La IA no devolvió un análisis válido')
-  return findings
+  if (!cuts || cuts.length === 0) return findings
+  return {
+    ...findings,
+    burned_captions: {
+      ...findings.burned_captions,
+      issues: filterSceneCutCaptionIssues(findings.burned_captions.issues, cuts),
+    },
+  }
 }

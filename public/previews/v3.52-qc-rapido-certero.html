@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.52 — QC más rápido y más certero</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --warn:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px; }
+    .wrap { max-width:780px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 24px; line-height:1.45; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:24px 0 8px; }
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:640px) { .cols { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .card-title { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); margin:0 0 10px; }
+    .card-title.before { color:#f87171; }
+    .card-title.after { color:var(--good); }
+    .qc { background:#0e0e0e; border:1px solid var(--border); border-radius:10px; padding:12px; }
+    .qc-title { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-fg); margin:0 0 8px; }
+    .dot-row { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12px; }
+    .dot { width:14px; height:14px; flex-shrink:0; }
+    .dot.ok { color:var(--good); }
+    .dot.warn { color:var(--warn); }
+    .dot-text.ok { font-weight:500; }
+    .dot-text.warn { color:var(--warn); font-weight:500; }
+    .issue { margin:8px 0 0 22px; background:rgba(245,158,11,.1); border-radius:6px; padding:8px 10px; font-size:12px; color:#fbbf24; }
+    .issue b { color:var(--fg); }
+    .progress { display:flex; align-items:center; gap:10px; background:#0e0e0e; border:1px dashed var(--border); border-radius:10px; padding:12px; }
+    .spinner { width:14px; height:14px; border-radius:50%; border:2px solid #3f3f46; border-top-color:var(--gold); animation:spin .8s linear infinite; flex-shrink:0; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .progress p { margin:0; font-size:12px; color:var(--muted-fg); }
+    .progress small { display:block; margin-top:2px; font-size:11px; color:#52525b; }
+    .strips { display:flex; gap:4px; margin-top:10px; }
+    .strip { flex:1; height:44px; border-radius:4px; background:#1a1a1a; position:relative; overflow:hidden; }
+    .strip.cut::after { content:"CORTE"; position:absolute; inset:0; display:grid; place-items:center; font-size:9px; font-weight:700; letter-spacing:.06em; color:var(--gold); background:rgba(0,0,0,.45); }
+    .note { margin-top:24px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; line-height:1.45; }
+    .note b { color:var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.52 — Analizar con IA: más rápido, y sin letras fantasmas en el corte</h1>
+    <p class="sub">El botón sigue igual. Lo que cambia es el tiempo que tarda en sacar los fotogramas, y que un cambio de escena ya no se reporta como “falta una letra”.</p>
+
+    <div class="row-label">Extrayendo fotogramas</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title before">Antes</p>
+        <div class="progress">
+          <span class="spinner"></span>
+          <p>Extrayendo fotogramas…<small>un seek a la vez, a veces por red</small></p>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title after">Ahora</p>
+        <div class="progress">
+          <span class="spinner"></span>
+          <p>Extrayendo fotogramas…<small>video en caché + 4 reproductores a la vez</small></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-label">Cuando el video cambia de pantalla</div>
+    <div class="cols">
+      <div class="card">
+        <p class="card-title before">Antes — falso positivo</p>
+        <div class="strips">
+          <div class="strip"></div>
+          <div class="strip"></div>
+          <div class="strip cut"></div>
+          <div class="strip"></div>
+          <div class="strip"></div>
+        </div>
+        <div class="qc" style="margin-top:10px;">
+          <p class="qc-title">QC con IA (advisory)</p>
+          <div class="dot-row"><span class="dot ok">✓</span><span class="dot-text ok">Es del cliente</span></div>
+          <div class="dot-row"><span class="dot warn">!</span><span class="dot-text warn">1 error a revisar</span></div>
+          <p class="issue">«plza» — falta una letra. Sugerencia: <b>plaza</b></p>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title after">Ahora — el corte no cuenta</p>
+        <div class="strips">
+          <div class="strip"></div>
+          <div class="strip"></div>
+          <div class="strip cut"></div>
+          <div class="strip"></div>
+          <div class="strip"></div>
+        </div>
+        <div class="qc" style="margin-top:10px;">
+          <p class="qc-title">QC con IA (advisory)</p>
+          <div class="dot-row"><span class="dot ok">✓</span><span class="dot-text ok">Es del cliente</span></div>
+          <div class="dot-row"><span class="dot ok">✓</span><span class="dot-text ok">Libre de errores</span></div>
+          <div class="dot-row"><span class="dot ok">✓</span><span class="dot-text ok">Caption generado</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>Un typo de verdad se sigue marcando.</b> Si “Santamaria” aparece mal en varios fotogramas de la misma toma, el reporte lo enseña. Solo se tira lo que aparece una vez, justo en el corte — la letra que nunca estuvo en pantalla de verdad.
+    </p>
+  </div>
+</body>
+</html>

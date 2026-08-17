@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { extractFramesFromVideoElement } from './video-frames-dom'
+import { extractFramesFromVideoElement, extractFramesInParallel } from './video-frames-dom'
 
 /**
  * <video>+canvas real (decode/seek) no es simulable en jsdom, pero un
@@ -128,5 +128,41 @@ describe('extractFramesFromVideoElement', () => {
     })
     expect(onFrame).not.toHaveBeenCalled()
     expect(res.frames).toEqual([])
+  })
+})
+
+describe('extractFramesInParallel', () => {
+  it('dos workers seekean a la vez (más de un currentTime en vuelo)', async () => {
+    let inFlight = 0
+    let maxInFlight = 0
+    const wrap = (video: HTMLVideoElement) => {
+      const desc = Object.getOwnPropertyDescriptor(video, 'currentTime')
+      Object.defineProperty(video, 'currentTime', {
+        configurable: true,
+        get: () => desc!.get!.call(video),
+        set: (t: number) => {
+          inFlight += 1
+          maxInFlight = Math.max(maxInFlight, inFlight)
+          desc!.set!.call(video, t)
+        },
+      })
+      video.addEventListener('seeked', () => { inFlight -= 1 })
+      return video
+    }
+
+    const onFrame = vi.fn(() => 'data:image/jpeg;base64,X')
+    const res = await extractFramesInParallel(
+      () => wrap(makeAutoSeekingVideo({ delays: [30, 30] })),
+      {
+        timestampsFor: () => [1, 2, 3, 4],
+        workers: 2,
+        seekTimeoutMs: 200,
+        onFrame,
+      },
+    )
+    expect(res.timestamps).toEqual([1, 2, 3, 4])
+    expect(res.frames).toHaveLength(4)
+    expect(onFrame).toHaveBeenCalledTimes(4)
+    expect(maxInFlight).toBeGreaterThan(1)
   })
 })

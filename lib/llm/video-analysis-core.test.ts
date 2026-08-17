@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest'
 import {
   GROK_VISION_MODEL, videoAnalysisModelId, videoAnalysisConfigError,
   buildVideoAnalysisPrompt, buildVideoAnalysisRequest, parseVideoAnalysisResponse,
-  mergeVideoAnalysisFindings, type VideoAnalysisFindings,
+  mergeVideoAnalysisFindings, filterSceneCutCaptionIssues, parseIssueSeconds,
+  type VideoAnalysisFindings,
 } from './video-analysis-core'
 
 describe('videoAnalysisModelId', () => {
@@ -267,5 +268,74 @@ describe('mergeVideoAnalysisFindings', () => {
 
   it('video_topic: ninguno lo trajo → undefined', () => {
     expect(mergeVideoAnalysisFindings(findings(), findings()).video_topic).toBeUndefined()
+  })
+})
+
+describe('buildVideoAnalysisPrompt — no inventar letras en el corte de escena', () => {
+  it('prohíbe marcar como error una letra que solo se ve a medias al cambiar de pantalla', () => {
+    const p = buildVideoAnalysisPrompt({ ideaTitle: 'Promo agosto' }).toLowerCase()
+    expect(p).toMatch(/cambio de (escena|pantalla)|corte/)
+    expect(p).toMatch(/letra/)
+    expect(p).toMatch(/completa|formad|legible/)
+  })
+})
+
+describe('buildVideoAnalysisRequest — etiqueta CORTE', () => {
+  it('marca · CORTE en los fotogramas cuyo timestamp está en cuts', () => {
+    const req = buildVideoAnalysisRequest({
+      frames: ['data:image/jpeg;base64,AAA', 'data:image/jpeg;base64,BBB'],
+      timestamps: [0.3, 1.8],
+      cuts: [1.8],
+      prompt: 'analiza', apiKey: 'k', model: 'grok-4.6',
+    })
+    const content = JSON.parse(req.body).messages[0].content
+    expect(content).toContainEqual({ type: 'text', text: '--- Fotograma 1 · t=0.3s ---' })
+    expect(content).toContainEqual({ type: 'text', text: '--- Fotograma 2 · t=1.8s · CORTE ---' })
+  })
+})
+
+describe('parseIssueSeconds', () => {
+  it('lee "5.75s", "5.75" y rechaza basura', () => {
+    expect(parseIssueSeconds('5.75s')).toBe(5.75)
+    expect(parseIssueSeconds('0.3s')).toBe(0.3)
+    expect(parseIssueSeconds('8')).toBe(8)
+    expect(parseIssueSeconds(undefined)).toBeNull()
+    expect(parseIssueSeconds('foo')).toBeNull()
+  })
+})
+
+describe('filterSceneCutCaptionIssues', () => {
+  const issue = (quote: string, t: string | undefined, problem = 'ortografía') => ({
+    quote, problem, suggestion: quote, ...(t ? { t } : {}),
+  })
+
+  it('sin cortes: no toca nada', () => {
+    const issues = [issue('plza', '5.5s', 'falta una letra')]
+    expect(filterSceneCutCaptionIssues(issues, [])).toEqual(issues)
+  })
+
+  it('tira el falso positivo de una letra que solo aparece en el corte', () => {
+    const issues = [issue('plza', '5.5s', 'falta una letra')]
+    expect(filterSceneCutCaptionIssues(issues, [5.5])).toEqual([])
+  })
+
+  it('conserva un typo real que también se reportó lejos del corte', () => {
+    const issues = [
+      issue('Santamaria', '5.5s'),
+      issue('Santamaria', '8.0s'),
+    ]
+    const out = filterSceneCutCaptionIssues(issues, [5.5])
+    expect(out).toHaveLength(2)
+    expect(out.map((i) => i.t)).toEqual(['5.5s', '8.0s'])
+  })
+
+  it('conserva un typo que no está cerca de ningún corte', () => {
+    const issues = [issue('aserca', '2.0s')]
+    expect(filterSceneCutCaptionIssues(issues, [5.5])).toEqual(issues)
+  })
+
+  it('issue sin t: se conserva (no podemos ubicarla)', () => {
+    const issues = [issue('plza', undefined, 'falta una letra')]
+    expect(filterSceneCutCaptionIssues(issues, [5.5])).toEqual(issues)
   })
 })

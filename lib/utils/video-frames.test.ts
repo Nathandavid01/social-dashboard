@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   frameTimestamps, evenTimestamps, scaleDimensions, capFramesToBudget, capFramesAndTimestampsToBudget, chunkFrames,
-  FRAME_FPS, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX,
+  bufferCoversDuration, splitTimestampsContiguous, detectSceneCuts,
+  FRAME_FPS, FRAME_BUDGET_BYTES, FRAME_CHUNK_SIZE, FRAME_HARD_MAX, FRAME_EXTRACT_WORKERS,
 } from './video-frames'
 
 /**
@@ -200,5 +201,77 @@ describe('capFramesAndTimestampsToBudget', () => {
     const out = capFramesAndTimestampsToBudget(frames, timestamps, FRAME_BUDGET_BYTES)
     expect(out.frames).toHaveLength(FRAME_CHUNK_SIZE)
     expect(out.timestamps).toHaveLength(FRAME_CHUNK_SIZE)
+  })
+})
+
+describe('bufferCoversDuration', () => {
+  const ranges = (pairs: [number, number][]) => ({
+    length: pairs.length,
+    start: (i: number) => pairs[i][0],
+    end: (i: number) => pairs[i][1],
+  })
+
+  it('un solo rango que cubre [0, duration] → listo', () => {
+    expect(bufferCoversDuration(ranges([[0, 10]]), 10)).toBe(true)
+  })
+  it('rango corto → todavía no', () => {
+    expect(bufferCoversDuration(ranges([[0, 5]]), 10)).toBe(false)
+  })
+  it('varios rangos contiguos que juntos cubren el video → listo', () => {
+    expect(bufferCoversDuration(ranges([[0, 3], [3, 10]]), 10)).toBe(true)
+  })
+  it('agujero en el medio → no', () => {
+    expect(bufferCoversDuration(ranges([[0, 3], [6, 10]]), 10)).toBe(false)
+  })
+  it('deja un margen al final (el último keyframe no llega exacto a duration)', () => {
+    expect(bufferCoversDuration(ranges([[0, 9.8]]), 10)).toBe(true)
+  })
+  it('sin rangos o duración inválida → no', () => {
+    expect(bufferCoversDuration(ranges([]), 10)).toBe(false)
+    expect(bufferCoversDuration(ranges([[0, 10]]), 0)).toBe(false)
+  })
+})
+
+describe('splitTimestampsContiguous', () => {
+  it('reparte en N tiras contiguas (cada worker seekea hacia adelante)', () => {
+    expect(splitTimestampsContiguous([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]])
+  })
+  it('con resto: el último worker se queda con menos', () => {
+    expect(splitTimestampsContiguous([1, 2, 3, 4, 5], 2)).toEqual([[1, 2, 3], [4, 5]])
+  })
+  it('más workers que timestamps: workers de más salen vacíos', () => {
+    expect(splitTimestampsContiguous([1, 2], 4)).toEqual([[1], [2], [], []])
+  })
+  it('lista vacía → N listas vacías', () => {
+    expect(splitTimestampsContiguous([], 3)).toEqual([[], [], []])
+  })
+  it('FRAME_EXTRACT_WORKERS es 4', () => {
+    expect(FRAME_EXTRACT_WORKERS).toBe(4)
+  })
+})
+
+describe('detectSceneCuts', () => {
+  const dark = Array.from({ length: 16 }, () => 0)
+  const bright = Array.from({ length: 16 }, () => 255)
+
+  it('marca el primer fotograma de la escena nueva cuando el fingerprint salta', () => {
+    const cuts = detectSceneCuts([
+      { t: 0.2, fingerprint: dark },
+      { t: 0.4, fingerprint: dark },
+      { t: 0.6, fingerprint: bright },
+      { t: 0.8, fingerprint: bright },
+    ])
+    expect(cuts).toEqual([0.6])
+  })
+  it('escena estable: ningún corte', () => {
+    expect(detectSceneCuts([
+      { t: 0.2, fingerprint: dark },
+      { t: 0.4, fingerprint: dark },
+      { t: 0.6, fingerprint: dark },
+    ])).toEqual([])
+  })
+  it('un solo fotograma o vacío: ningún corte', () => {
+    expect(detectSceneCuts([])).toEqual([])
+    expect(detectSceneCuts([{ t: 0.2, fingerprint: dark }])).toEqual([])
   })
 })
