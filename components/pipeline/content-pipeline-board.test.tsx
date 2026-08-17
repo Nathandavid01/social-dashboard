@@ -1,12 +1,23 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, within, act } from '@testing-library/react'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const moveBatch = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
 vi.mock('@/lib/actions/content-ideas', () => ({ moveBatch: (...a: unknown[]) => moveBatch(...a) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
-const push = vi.fn()
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
+// Reactive fake so the overlay-in-URL flow (open pushes, back/Escape closes,
+// reload reopens) can actually be exercised, not a no-op push spy.
+vi.mock('next/navigation', async () => {
+  const { createFakeNavigation } = await import('@/tests/fake-next-navigation')
+  return createFakeNavigation('/pipeline')
+})
+import * as nav from 'next/navigation'
+type FakeNav = {
+  currentSearch: () => string
+  reset: (s?: string) => void
+  simulateBrowserBack: () => void
+}
+const { currentSearch, reset: resetNav, simulateBrowserBack } = nav as unknown as FakeNav
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
@@ -16,7 +27,14 @@ const getBatchVideoPreviewUrls = vi.fn(async (ids: string[]) => ({
 vi.mock('@/lib/actions/batch-video-previews', () => ({
   getBatchVideoPreviewUrls: (...a: unknown[]) => getBatchVideoPreviewUrls(...(a as [string[]])),
 }))
-vi.mock('@/components/clients/batch/client-batch-view', () => ({ ClientBatchView: () => <div data-testid="batch-overlay">overlay</div> }))
+vi.mock('@/components/clients/batch/client-batch-view', () => ({
+  ClientBatchView: ({ onClose }: { onClose?: () => void }) => (
+    <div data-testid="batch-overlay">
+      overlay
+      {onClose && <button onClick={onClose}>Cerrar</button>}
+    </div>
+  ),
+}))
 
 import { ContentPipelineBoard, type PlannedClient } from './content-pipeline-board'
 
@@ -61,7 +79,7 @@ beforeEach(() => {
   cleanup()
   moveBatch.mockClear()
   moveBatch.mockResolvedValue({ success: true })
-  push.mockClear()
+  resetNav('')
 })
 
 describe('ContentPipelineBoard — batch model', () => {
@@ -195,13 +213,84 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(container.querySelector('article')!.textContent).toContain('Atrasado')
   })
 
-  it('opens the client batch overlay in place on card click (no navigation)', async () => {
+  it('opens the client batch overlay in place on card click (same page — the URL gains ?lote=, no route change)', async () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
-    expect(push).not.toHaveBeenCalled()
+    expect(currentSearch()).toBe('lote=c9')
     expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+  })
+})
+
+describe('ContentPipelineBoard — flujo natural: el overlay vive en la URL', () => {
+  function openBoard() {
+    return render(
+      <ContentPipelineBoard
+        ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]}
+      />,
+    )
+  }
+
+  it('cerrar con el botón X quita los params y no deja el overlay', async () => {
+    getClientBatchData.mockClear()
+    const { container } = openBoard()
+    fireEvent.click(container.querySelector('article')!)
+    await screen.findByTestId('batch-overlay')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(currentSearch()).toBe('')
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
+  })
+
+  it('el back del navegador cierra el overlay y deja el tablero — no desmonta la pantalla', async () => {
+    getClientBatchData.mockClear()
+    const { container } = openBoard()
+    fireEvent.click(container.querySelector('article')!)
+    await screen.findByTestId('batch-overlay')
+
+    act(() => simulateBrowserBack())
+    // El tablero sigue ahí (los headers de columna siguen presentes) y el
+    // overlay se fue — nada de "saliste de la pantalla".
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
+    expect(screen.getByText('Video')).toBeInTheDocument()
+    expect(screen.getByText('Publicación')).toBeInTheDocument()
+  })
+
+  it('Escape cierra el overlay y retrocede el historial (no deja una entrada huérfana)', async () => {
+    getClientBatchData.mockClear()
+    const { container } = openBoard()
+    fireEvent.click(container.querySelector('article')!)
+    await screen.findByTestId('batch-overlay')
+    expect(currentSearch()).toBe('lote=c9')
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(currentSearch()).toBe('')
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
+
+    // A second Escape (or a stray keydown after close) must not pop past an
+    // already-closed overlay.
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(currentSearch()).toBe('')
+  })
+
+  it('recargar con ?lote= en la URL reabre el mismo cliente (deep link)', async () => {
+    getClientBatchData.mockClear()
+    resetNav('lote=c9')
+    render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+    expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
+  })
+
+  it('cerrar tras un deep link no navega hacia atrás fuera del tablero (replace, no back)', async () => {
+    getClientBatchData.mockClear()
+    resetNav('lote=c9')
+    render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    await screen.findByTestId('batch-overlay')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(currentSearch()).toBe('')
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
   })
 })
 
@@ -234,15 +323,17 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
   })
 
-  it('opens the client batch overlay when a planned card is clicked', () => {
+  it('opens the client batch overlay when a planned card is clicked', async () => {
     getClientBatchData.mockClear()
     const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
-    expect(getClientBatchData).toHaveBeenCalledWith('nd', {
-      fromPlanned: true,
-      publishDate: '2026-06-08',
-      publishLabel: 'Lun 8 jun',
-    })
+    await waitFor(() =>
+      expect(getClientBatchData).toHaveBeenCalledWith('nd', {
+        fromPlanned: true,
+        publishDate: '2026-06-08',
+        publishLabel: 'Lun 8 jun',
+      }),
+    )
   })
 })
 

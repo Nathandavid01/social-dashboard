@@ -3,10 +3,12 @@
 import { useRef, useState, useTransition } from 'react'
 import { Video, Plus, Download, Trash2, Loader2, Camera, Clapperboard, ExternalLink, Play, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { ToastAction } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
-import { getR2DownloadUrl, deleteR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2DownloadUrl, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { useUploadStore, type UploadItem } from '@/lib/stores/upload-store'
 import { NateUploadLogo } from '@/components/uploads/nate-upload-logo'
@@ -168,8 +170,22 @@ function SlotGroup({
   const meta = META[kind]
   const Icon = meta.icon
   const required = REQUIRED_FILES[kind]
-  const missing = required == null ? 0 : Math.max(0, required - videos.length)
-  const uploadedLabel = `${videos.length} ${videos.length === 1 ? 'subido' : 'subidos'}`
+
+  // Optimistic hide on delete: the row leaves the list instantly, before the
+  // server call resolves. "Deshacer" (in FileRow's toast) just removes the id
+  // again — the row was archived, never destroyed, so restoring is cheap.
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
+  const visibleVideos = videos.filter((v) => !hiddenIds.has(v.id))
+  const hideVideo = (id: string) => setHiddenIds((s) => new Set(s).add(id))
+  const showVideo = (id: string) => setHiddenIds((s) => {
+    if (!s.has(id)) return s
+    const next = new Set(s)
+    next.delete(id)
+    return next
+  })
+
+  const missing = required == null ? 0 : Math.max(0, required - visibleVideos.length)
+  const uploadedLabel = `${visibleVideos.length} ${visibleVideos.length === 1 ? 'subido' : 'subidos'}`
   const requirementLabel = required == null
     ? 'Opcional'
     : missing > 0
@@ -260,7 +276,7 @@ function SlotGroup({
           </span>
         </p>
         <div className="flex shrink-0 items-center gap-1.5">
-          {kind === 'raw' && videos.length > 0 && (
+          {kind === 'raw' && visibleVideos.length > 0 && (
             <span className="rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground" title="En el pipeline, borrar el crudo lo destruye — se conserva a propósito.">
               Se conserva
             </span>
@@ -332,9 +348,9 @@ function SlotGroup({
           </div>
         ))}
 
-      {videos.length > 0 && (
+      {visibleVideos.length > 0 && (
         <div className="space-y-2">
-          {videos.map((v) => (
+          {visibleVideos.map((v) => (
             <FileRow
               key={v.id}
               kind={kind}
@@ -344,6 +360,8 @@ function SlotGroup({
               canSee={canManageVideos || (!!ownUploadUserId && v.uploaded_by === ownUploadUserId)}
               publicEnabled={publicEnabled}
               allowDelete={kind !== 'raw'}
+              onHide={hideVideo}
+              onShow={showVideo}
             />
           ))}
         </div>
@@ -354,7 +372,7 @@ function SlotGroup({
 
 /** One uploaded file's row: preview / download / (maybe) delete + status. */
 function FileRow({
-  kind, ideaId, video, canUpload, canSee, publicEnabled, allowDelete,
+  kind, ideaId, video, canUpload, canSee, publicEnabled, allowDelete, onHide, onShow,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
@@ -366,13 +384,61 @@ function FileRow({
   canSee: boolean
   publicEnabled: boolean
   allowDelete: boolean
+  /** Optimistic hide/show — lifted to SlotGroup so the count in the header
+   * (Faltan N / Completo) updates in lockstep with the card disappearing. */
+  onHide: (id: string) => void
+  onShow: (id: string) => void
 }) {
   const meta = META[kind]
   const Icon = meta.icon
   const [isPending, startTransition] = useTransition()
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const { toast } = useToast()
+
+  function requestDelete() {
+    setConfirmOpen(true)
+  }
+
+  function confirmDelete() {
+    setConfirmOpen(false)
+    // Optimistic: the card disappears instantly, before the server call
+    // resolves — archiving is reversible, so there is nothing risky about it.
+    onHide(video.id)
+    startTransition(async () => {
+      const res = await deleteR2Video(video.id, ideaId)
+      if (res.error) {
+        onShow(video.id)
+        toast({ title: 'Error', description: res.error, variant: 'destructive' })
+        return
+      }
+      const t = toast({
+        title: `${meta.label} eliminado`,
+        description: 'Se puede deshacer por unos segundos. El archivo no se borra hasta pasados 7 días.',
+        action: (
+          <ToastAction
+            altText="Deshacer"
+            onClick={() => {
+              onShow(video.id)
+              startTransition(async () => {
+                const undo = await restoreR2Video(video.id, ideaId)
+                if (undo.error) {
+                  // The archive already happened server-side; keep the row
+                  // hidden rather than show a video that failed to restore.
+                  onHide(video.id)
+                  toast({ title: 'No se pudo deshacer', description: undo.error, variant: 'destructive' })
+                }
+              })
+            }}
+          >
+            Deshacer
+          </ToastAction>
+        ),
+      })
+      setTimeout(() => t.dismiss?.(), 8000)
+    })
+  }
 
   async function togglePreview() {
     if (previewUrl) {
@@ -448,14 +514,7 @@ function FileRow({
           ) : null}
           {canUpload && allowDelete && (
             <button
-              onClick={() => {
-                if (!confirm(`¿Quitar este ${meta.label.toLowerCase()}?`)) return
-                startTransition(async () => {
-                  const res = await deleteR2Video(video.id, ideaId)
-                  if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-                  else toast({ title: 'Video eliminado' })
-                })
-              }}
+              onClick={requestDelete}
               className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"
               disabled={isPending}
               aria-label="Eliminar"
@@ -471,6 +530,17 @@ function FileRow({
           controls
           playsInline
           className="aspect-video w-full rounded-lg border bg-black"
+        />
+      )}
+      {canUpload && allowDelete && (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title={`¿Eliminar este ${meta.label.toLowerCase()}?`}
+          description={`Se quita "${video.name}" de este video. Se puede deshacer por unos segundos después de confirmar; pasados 7 días sin deshacer, el archivo se borra.`}
+          confirmLabel="Eliminar"
+          destructive
+          onConfirm={confirmDelete}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2, ExternalLink } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
@@ -8,6 +8,7 @@ import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, entregaCardKey, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { useToast } from '@/lib/hooks/use-toast'
+import { useOverlayRoute } from '@/lib/hooks/use-overlay-route'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ReviewOverlay } from './review-overlay'
@@ -59,7 +60,29 @@ const STAGE_DOT: Record<EntregaStageKey, string> = {
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function EntregasBoard({
+export function EntregasBoard(props: {
+  ideas: Idea[]
+  plannedClients?: PlannedClient[]
+  allClients?: { id: string; name: string }[]
+  clientCadence?: Record<string, ClientCadence>
+  teamMembers?: { id: string; name: string }[]
+  submitClients?: { id: string; name: string }[]
+  stages: EntregaStageKey[]
+  postingTimes?: Record<string, string | null>
+  reviewNotes?: Record<string, ReviewNote>
+  clientApprovals?: Record<string, EstadoCliente>
+  postedLinks?: Record<string, string>
+  modoDia?: ModoDia
+}) {
+  // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <EntregasBoardInner {...props} />
+    </Suspense>
+  )
+}
+
+function EntregasBoardInner({
   ideas,
   plannedClients = [],
   allClients = [],
@@ -140,13 +163,34 @@ export function EntregasBoard({
   // Con ideaId: la tarjeta es UN video, así que abrirla tiene que enseñar ese
   // y no todos los del cliente. Ver los cinco de un cliente al abrir uno
   // obligaba a buscar cuál era, que es justo lo que la tarjeta ya resolvía.
-  const [open, setOpen] = useState<{ clientId: string; stage: EntregaStageKey; ideaId: string } | null>(null)
-  const openClientId = open?.clientId ?? null
+  // "What's open" lives in the URL (?lote=&etapa=&video=) so back/Escape close
+  // it and land back on the board's day/filters/scroll — instead of leaving
+  // the page entirely — and a reload with those params reopens the same
+  // video (deep link). Only 'approval'/'copy' actually render an overlay
+  // below; a click on an 'edited'-stage card (or its planned placeholder) is
+  // a no-op today, same as before — it must NOT push a URL entry for nothing,
+  // or back would look "broken" (nothing visibly closes).
+  const { searchParams, open: pushOverlay, close: closeOverlayRoute, markClosed } = useOverlayRoute()
+  const openClientId = searchParams.get('lote')
+  const openStage = searchParams.get('etapa') as EntregaStageKey | null
+  const openIdeaId = searchParams.get('video')
+  const open = openClientId && openStage && openIdeaId
+    ? { clientId: openClientId, stage: openStage, ideaId: openIdeaId }
+    : null
 
   const openEntregaBatch = useCallback((clientId: string, stage: EntregaStageKey, ideaId: string) => {
-    setOpen({ clientId, stage, ideaId })
-  }, [])
-  const closeBatch = useCallback(() => setOpen(null), [])
+    if (stage !== 'approval' && stage !== 'copy') return
+    pushOverlay({ lote: clientId, etapa: stage, video: ideaId })
+  }, [pushOverlay])
+  const closeBatch = useCallback(() => {
+    closeOverlayRoute(['lote', 'etapa', 'video'])
+  }, [closeOverlayRoute])
+
+  // A physical back-button press never goes through closeBatch() — reset the
+  // "we pushed this" bookkeeping whenever the URL says nothing is open.
+  useEffect(() => {
+    if (!openClientId) markClosed()
+  }, [openClientId, markClosed])
 
   // One card per (client, stage): a client with videos in two columns shows in
   // both, instead of parking in the least-advanced one.

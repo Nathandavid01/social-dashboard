@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.55 — Flujo natural: atrás y borrar</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted-fg:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --good:#22c55e; --bad:#f87171; --amber:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:24px 16px 64px; }
+    .wrap { max-width:680px; margin:0 auto; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    .sub { color:var(--muted-fg); font-size:13px; margin:0 0 26px; line-height:1.55; }
+    .section-title { font-size:14px; font-weight:700; margin:36px 0 4px; display:flex; align-items:center; gap:8px; }
+    .section-sub { font-size:12px; color:var(--muted-fg); margin:0 0 16px; line-height:1.5; }
+    .row-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted-fg); margin:18px 0 8px; }
+    .row-label.before { color:var(--bad); }
+    .row-label.after { color:var(--good); }
+
+    /* Browser chrome mock for the "back closes overlay" story */
+    .browser { border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--card); }
+    .browser-bar { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--border); background:#161616; }
+    .dots { display:flex; gap:5px; }
+    .dots span { width:9px; height:9px; border-radius:999px; background:#333; }
+    .url-bar { flex:1; display:flex; align-items:center; gap:6px; background:#0d0d0d; border:1px solid var(--border); border-radius:7px; padding:4px 10px; font-size:11px; color:var(--muted-fg); font-family:ui-monospace,monospace; }
+    .url-bar .param { color:var(--gold); }
+    .back-btn { width:22px; height:22px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted-fg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .board-mock { padding:16px; }
+    .cols { display:flex; gap:8px; }
+    .col { flex:1; background:#161616; border:1px solid var(--border); border-radius:8px; padding:8px; min-height:70px; }
+    .col-h { font-size:9.5px; font-weight:700; text-transform:uppercase; color:var(--muted-fg); margin-bottom:6px; }
+    .card-mini { background:var(--bg); border:1px solid var(--border); border-radius:6px; height:26px; margin-bottom:5px; }
+    .overlay-mock { position:relative; background:#0d0d0d; }
+    .overlay-close { position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:7px; border:1px solid var(--border); background:var(--card); color:var(--muted-fg); display:flex; align-items:center; justify-content:center; font-size:12px; }
+    .overlay-title { padding:24px 16px 8px; font-size:13px; font-weight:700; }
+    .overlay-body { padding:0 16px 24px; font-size:11.5px; color:var(--muted-fg); line-height:1.6; }
+    .arrow-flow { display:flex; align-items:center; justify-content:center; gap:10px; font-size:11px; color:var(--muted-fg); padding:10px 0; }
+    .chip { border:1px solid var(--border); border-radius:999px; padding:4px 10px; background:var(--card); }
+    .chip.hot { border-color:rgba(212,175,55,.4); color:var(--gold); }
+
+    /* Delete flow mocks */
+    .native-confirm { background:#e8e8e8; color:#1a1a1a; border-radius:8px; padding:16px; font-family:-apple-system,sans-serif; box-shadow:0 8px 30px rgba(0,0,0,.5); }
+    .native-confirm .msg { font-size:13px; margin-bottom:14px; }
+    .native-confirm .btns { display:flex; justify-content:flex-end; gap:8px; }
+    .native-confirm button { border:1px solid #bbb; background:#f2f2f2; border-radius:5px; padding:5px 14px; font-size:12px; }
+
+    .dialog-mock { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,.5); }
+    .dialog-mock h3 { font-size:14px; margin:0 0 8px; }
+    .dialog-mock p { font-size:12px; color:var(--muted-fg); line-height:1.55; margin:0 0 18px; }
+    .dialog-btns { display:flex; justify-content:flex-end; gap:8px; }
+    .btn-outline { border:1px solid var(--border); background:transparent; color:var(--fg); border-radius:7px; padding:7px 14px; font-size:12px; }
+    .btn-danger { border:1px solid transparent; background:var(--bad); color:#1a0000; font-weight:600; border-radius:7px; padding:7px 14px; font-size:12px; }
+
+    .toast-mock { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 10px 30px rgba(0,0,0,.45); }
+    .toast-mock .t1 { font-size:12.5px; font-weight:600; margin:0 0 2px; }
+    .toast-mock .t2 { font-size:11px; color:var(--muted-fg); margin:0; }
+    .undo-btn { flex-shrink:0; border:1px solid var(--gold); color:var(--gold); background:rgba(212,175,55,.08); border-radius:7px; padding:6px 12px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+
+    .note { margin-top:18px; font-size:12px; color:var(--muted-fg); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 12px; line-height:1.55; }
+    .note b { color:var(--fg); }
+    .note + .note { margin-top:10px; }
+    .timeline { display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--muted-fg); margin-top:14px; }
+    .timeline .step { background:var(--card); border:1px solid var(--border); border-radius:999px; padding:4px 10px; }
+    .timeline .step.now { border-color:var(--gold); color:var(--gold); }
+    .timeline .sep { color:#444; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v3.55 — Un flujo natural: atrás y borrar</h1>
+    <p class="sub">Dos cosas que se sentían "raras" del dashboard, arregladas: el botón atrás ahora te devuelve al tablero en vez de sacarte de la pantalla, y borrar un video pregunta primero y se puede deshacer.</p>
+
+    <div class="section-title">🔙 "Atrás" ya no te saca del tablero</div>
+    <p class="section-sub">Antes, el navegador no sabía que había una pantalla abierta encima del tablero — "atrás" (o el gesto del trackpad) te mandaba fuera de la app entera, perdiendo el día, los filtros y el scroll. Ahora, abrir un video empuja la URL; "atrás" solo cierra esa pantalla y te deja exactamente donde estabas.</p>
+
+    <div class="row-label before">Antes</div>
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <button class="back-btn">←</button>
+        <div class="url-bar">nate-media.app/pipeline</div>
+      </div>
+      <div class="overlay-mock">
+        <button class="overlay-close">✕</button>
+        <div class="overlay-title">Lote de videos — Café Don Rogelio</div>
+        <div class="overlay-body">La URL nunca cambió al abrir esto — para el navegador, "atrás" no tiene nada que deshacer aquí. Pulsarlo te manda a la pantalla ANTERIOR al tablero (a veces fuera de la app), perdiendo el día y los filtros que tenías.</div>
+      </div>
+    </div>
+
+    <div class="row-label after">Ahora</div>
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <button class="back-btn">←</button>
+        <div class="url-bar">nate-media.app/pipeline<span class="param">?lote=cafe-don-rogelio</span></div>
+      </div>
+      <div class="overlay-mock">
+        <button class="overlay-close">✕</button>
+        <div class="overlay-title">Lote de videos — Café Don Rogelio</div>
+        <div class="overlay-body">Abrir empujó <code>?lote=…</code> a la URL. Pulsar "atrás" (o Escape) la quita y cierra esta pantalla — el tablero reaparece con el mismo día, los mismos filtros y el mismo scroll. Recargar la página con esta URL vuelve a abrir directo aquí.</div>
+      </div>
+    </div>
+
+    <div class="arrow-flow">
+      <span class="chip">Tablero</span>
+      <span>→ clic en video →</span>
+      <span class="chip hot">?lote=… (empuja historial)</span>
+      <span>→ atrás/Escape →</span>
+      <span class="chip">Tablero (mismo lugar)</span>
+    </div>
+
+    <div class="section-title">🗑️ Borrar pregunta primero — y se puede deshacer</div>
+    <p class="section-sub">El diálogo del navegador (feo, sin marca, sin deshacer) se cambió por uno propio. Y lo más importante: borrar ya no destruye nada al instante — solo lo esconde, con unos segundos para arrepentirse.</p>
+
+    <div class="row-label before">Antes — confirm() del navegador</div>
+    <div style="background:#3a3a3a; border-radius:10px; padding:30px 20px; display:flex; justify-content:center;">
+      <div class="native-confirm" style="width:280px;">
+        <div class="msg">nate-media.app dice:<br/>¿Quitar este video editado?</div>
+        <div class="btns"><button>Cancelar</button><button>Aceptar</button></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px;"><b>Y al aceptar</b>, el archivo se destruía en R2 en el mismo instante — sin vuelta atrás, ni para un video crudo de un cliente ya publicado.</p>
+
+    <div class="row-label after">Ahora — diálogo propio, en español, con lo que de verdad va a pasar</div>
+    <div class="dialog-mock">
+      <h3>¿Eliminar este video editado?</h3>
+      <p>Se quita "final_rutina_5x5.mp4" de este video. Se puede deshacer por unos segundos después de confirmar; pasados 7 días sin deshacer, el archivo se borra.</p>
+      <div class="dialog-btns">
+        <button class="btn-outline">Cancelar</button>
+        <button class="btn-danger">Eliminar</button>
+      </div>
+    </div>
+
+    <div class="row-label after">Al confirmar — la tarjeta desaparece y aparece "Deshacer"</div>
+    <div class="toast-mock">
+      <div>
+        <p class="t1">Video editado eliminado</p>
+        <p class="t2">Se puede deshacer por unos segundos. El archivo no se borra hasta pasados 7 días.</p>
+      </div>
+      <button class="undo-btn">Deshacer</button>
+    </div>
+
+    <div class="timeline">
+      <span class="step now">Confirmas</span><span class="sep">→</span>
+      <span class="step">Tarjeta desaparece + toast 8s</span><span class="sep">→</span>
+      <span class="step">Fila archivada</span><span class="sep">→</span>
+      <span class="step">7 días sin deshacer</span><span class="sep">→</span>
+      <span class="step">Se limpia el archivo</span>
+    </div>
+
+    <p class="note">
+      <b>Deshacer es real, no cosmético:</b> al confirmar solo se archiva la fila — el archivo en el servidor de videos nunca se toca. Si pulsas "Deshacer", el video vuelve exactamente como estaba. Si no lo haces, el archivo sigue intacto y solo se limpia
+      <b>pasados 7 días</b>, en una limpieza automática nocturna — nunca al momento del clic.
+    </p>
+    <p class="note">
+      <b>Antes esto podía perder trabajo para siempre:</b> borrar el video crudo de una idea ya publicada destruía el archivo en el acto, sin aviso claro ni vuelta atrás. Ahora ese mismo error se deshace con un clic.
+    </p>
+  </div>
+</body>
+</html>

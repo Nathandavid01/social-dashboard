@@ -19,6 +19,7 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
   registerR2Video: vi.fn(async () => ({ ok: true, id: 'v1' })),
   getR2DownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
   deleteR2Video: vi.fn(async () => ({ ok: true })),
+  restoreR2Video: vi.fn(async () => ({ ok: true })),
 }))
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
@@ -27,8 +28,12 @@ vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn().mockResolvedValue(undefined),
 }))
 
+// Real-shaped toast() return ({id, dismiss, update}) so the component's
+// `t.dismiss()` after the undo window doesn't blow up on a bare vi.fn().
+// Tests that need to inspect what a toast said/offered read toastSpy.mock.calls.
+const toastSpy = vi.fn((..._args: unknown[]) => ({ id: 't1', dismiss: vi.fn(), update: vi.fn() }))
 vi.mock('@/lib/hooks/use-toast', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => ({ toast: toastSpy }),
 }))
 
 // Drives whether the user can see upload slots. Mutable across tests.
@@ -46,7 +51,7 @@ vi.mock('@/components/auth/role-gate', () => ({
 }))
 
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
-import { registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { registerR2Video, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 
 function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
@@ -189,6 +194,87 @@ describe('IdeaVideoPanel — borrado: el crudo no lo tiene, editado y b-roll sí
     render(<IdeaVideoPanel ideaId="idea-1" videos={[makeVideo('broll', 0)]} />)
     await flush()
     expect(screen.getByRole('button', { name: /eliminar/i })).toBeInTheDocument()
+  })
+})
+
+describe('IdeaVideoPanel — borrar con confirmación propia + deshacer (no window.confirm)', () => {
+  const originalConfirm = window.confirm
+
+  beforeEach(() => {
+    window.confirm = vi.fn(() => {
+      throw new Error('window.confirm no debería usarse — el diálogo propio lo reemplaza')
+    })
+  })
+  afterEach(() => {
+    window.confirm = originalConfirm
+  })
+
+  it('clicking "Eliminar" opens the confirm dialog instead of window.confirm, and does nothing yet', async () => {
+    const video = makeVideo('edited', 0)
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    expect(window.confirm).not.toHaveBeenCalled()
+    expect(screen.getByText(/¿Eliminar este video editado\?/i)).toBeInTheDocument()
+    expect(deleteR2Video).not.toHaveBeenCalled()
+  })
+
+  it('confirming archives (never destroys) and removes the card instantly, with an undo toast', async () => {
+    const video = makeVideo('edited', 0)
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' })) // trash icon → opens dialog
+    const confirmButtons = screen.getAllByRole('button', { name: 'Eliminar' })
+    fireEvent.click(confirmButtons[confirmButtons.length - 1]) // dialog's own confirm button
+    await flush()
+
+    expect(deleteR2Video).toHaveBeenCalledWith(video.id, 'idea-1')
+    // Optimistic removal: the file row is gone immediately.
+    expect(screen.queryByText('edited-0.mp4')).not.toBeInTheDocument()
+    // A toast with an undo action was shown.
+    expect(toastSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ title: expect.stringMatching(/eliminado/i), action: expect.anything() }),
+    )
+  })
+
+  it('cancelling the confirm dialog leaves the card and never calls deleteR2Video', async () => {
+    const video = makeVideo('edited', 0)
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await flush()
+
+    expect(deleteR2Video).not.toHaveBeenCalled()
+    expect(screen.getByText('edited-0.mp4')).toBeInTheDocument()
+  })
+
+  it('clicking "Deshacer" in the toast restores the row', async () => {
+    const video = makeVideo('edited', 0)
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[video]} />)
+    await flush()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' })) // trash icon → opens dialog
+    const confirmButtons = screen.getAllByRole('button', { name: 'Eliminar' })
+    fireEvent.click(confirmButtons[confirmButtons.length - 1]) // dialog's own confirm button
+    await flush()
+    expect(screen.queryByText('edited-0.mp4')).not.toBeInTheDocument()
+
+    // Pull the action element out of the toast call and click it — the same
+    // way Toaster would render it, without needing the full Toaster tree.
+    const call = toastSpy.mock.calls.find((c) => (c[0] as { action?: unknown }).action)
+    expect(call).toBeDefined()
+    const action = (call![0] as { action: React.ReactElement }).action
+    render(action)
+    await flush()
+    fireEvent.click(screen.getByRole('button', { name: /Deshacer/i }))
+    await flush()
+
+    expect(restoreR2Video).toHaveBeenCalledWith(video.id, 'idea-1')
+    expect(screen.getByText('edited-0.mp4')).toBeInTheDocument()
   })
 })
 

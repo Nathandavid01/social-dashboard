@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.55 — 2026-08-16
+
+**"Atrás" ya no te saca del tablero, y borrar un video ahora pregunta y se puede deshacer.**
+
+- **En Pipeline y en Entregas**: cuando abres el lote de un cliente (o la cola de revisión/copy de un video), el botón atrás del navegador — o el gesto del trackpad — ahora **cierra esa pantalla y te devuelve al tablero exactamente donde estabas**, con el día, los filtros y el scroll intactos. Antes te sacaba de la app entera. La tecla **Escape** sigue cerrando igual, sin dejar nada raro en el historial. Recargar la página mientras tienes algo abierto lo vuelve a abrir directo ahí.
+- **Borrar un video** ya no usa el aviso feo del navegador: ahora es un diálogo propio, en español, que dice claramente qué se va a quitar y de qué video.
+- Al confirmar, la tarjeta **desaparece al instante** y aparece un aviso con el botón **"Deshacer"** por unos segundos.
+- Si deshaces, el video vuelve exactamente como estaba. Si no, el archivo **no se toca en el momento** — se conserva y se limpia solo, automáticamente, **pasados 7 días**.
+- Esto también cierra una forma real de perder trabajo: antes, borrar el video crudo de una idea ya publicada destruía el archivo al instante, sin vuelta atrás.
+
+Vista: [preview HTML](/previews/v3.55-flujo-natural.html)
+
 ## v3.54 — 2026-08-16
 
 > ⚠️ **REQUISITO OBLIGATORIO ANTES (O A LA VEZ) DE HACER MERGE**: aplicar la migración
