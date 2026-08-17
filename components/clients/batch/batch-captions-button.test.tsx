@@ -124,6 +124,25 @@ describe('BatchCaptionsButton', () => {
     expect(calls[2][1]?.hermanos?.map((h) => h.caption)).toEqual(['Caption número 1', 'Caption número 2'])
   })
 
+  it('siembra hermanos con captions que YA existían en el lote (guardados o en borrador)', async () => {
+    generateIdeaCaption.mockResolvedValue({ caption: 'nuevo caption' })
+    const onDone = vi.fn()
+    render(
+      <BatchCaptionsButton
+        videos={[vid('a', 'caption ya guardado'), vid('b', null, 'borrador sin revisar'), vid('c', null)]}
+        onDone={onDone}
+      />,
+    )
+    // solo 'c' está en missing (a=tiene caption, b=tiene borrador pendiente)
+    fireEvent.click(screen.getByRole('button', { name: /generar 1 borrador/i }))
+    await waitFor(() => expect(onDone).toHaveBeenCalled())
+    expect(generateIdeaCaption).toHaveBeenCalledTimes(1)
+    const [, opts] = generateIdeaCaption.mock.calls[0]
+    const captions = opts?.hermanos?.map((h) => h.caption) ?? []
+    expect(captions).toContain('caption ya guardado')
+    expect(captions).toContain('borrador sin revisar')
+  })
+
   it('un video que falla no se cuenta como hermano de los siguientes', async () => {
     generateIdeaCaption
       .mockImplementationOnce(async () => ({ error: 'Falta la idea' }))
