@@ -57,12 +57,20 @@ export function BatchCaptionsButton({
     let ok = 0
     let failed = 0
     // Sequential on purpose: N parallel LLM calls would race the rate limit
-    // and make partial failures hard to attribute.
+    // and make partial failures hard to attribute. It also lets each caption
+    // "meet" the ones already written for this batch: hermanos acumula los
+    // captions ya generados (título + texto) y se los pasa al siguiente video,
+    // para que no salgan genéricos ni se repitan entre sí (Pieza 1).
+    const hermanos: { titulo: string; caption: string }[] = []
     for (let i = 0; i < missing.length; i++) {
       try {
-        const res = await generateIdeaCaption(missing[i].id)
-        if (res?.error) failed++
-        else ok++
+        const res = await generateIdeaCaption(missing[i].id, { hermanos: [...hermanos] })
+        if (res?.error) {
+          failed++
+        } else {
+          ok++
+          if (res?.caption) hermanos.push({ titulo: missing[i].title ?? '', caption: res.caption })
+        }
       } catch {
         failed++
       }

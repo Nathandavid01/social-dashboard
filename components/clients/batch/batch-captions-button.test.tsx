@@ -12,10 +12,14 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import type { UserRole } from '@/lib/supabase/types'
 
 const generateIdeaCaption = vi.fn(
-  async (_id: string): Promise<{ caption?: string; error?: string }> => ({ caption: 'generado ✨' }),
+  async (
+    _id: string,
+    _opts?: { hermanos?: { titulo: string; caption: string }[] },
+  ): Promise<{ caption?: string; error?: string }> => ({ caption: 'generado ✨' }),
 )
 vi.mock('@/lib/actions/idea-captions', () => ({
-  generateIdeaCaption: (id: string) => generateIdeaCaption(id),
+  generateIdeaCaption: (id: string, opts?: { hermanos?: { titulo: string; caption: string }[] }) =>
+    generateIdeaCaption(id, opts),
 }))
 
 let mockRole: UserRole | null = 'supervisor'
@@ -31,6 +35,7 @@ import type { BatchVideo } from '@/lib/utils/batch-view'
 function vid(id: string, caption: string | null, draft: string | null = null): BatchVideo {
   return {
     id,
+    title: `Video ${id}`,
     generated_caption: caption,
     caption_draft: draft,
     status: 'idea',
@@ -55,8 +60,8 @@ describe('BatchCaptionsButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /generar 2 borradores/i }))
     await waitFor(() => expect(onDone).toHaveBeenCalled())
     expect(generateIdeaCaption).toHaveBeenCalledTimes(2)
-    expect(generateIdeaCaption).toHaveBeenCalledWith('a')
-    expect(generateIdeaCaption).toHaveBeenCalledWith('c')
+    expect(generateIdeaCaption).toHaveBeenCalledWith('a', expect.objectContaining({ hermanos: expect.any(Array) }))
+    expect(generateIdeaCaption).toHaveBeenCalledWith('c', expect.objectContaining({ hermanos: expect.any(Array) }))
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringMatching(/2 borradores listos/i) }))
   })
 
@@ -66,7 +71,7 @@ describe('BatchCaptionsButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /generar 1 borrador/i }))
     await waitFor(() => expect(onDone).toHaveBeenCalled())
     expect(generateIdeaCaption).toHaveBeenCalledTimes(1)
-    expect(generateIdeaCaption).toHaveBeenCalledWith('a')
+    expect(generateIdeaCaption).toHaveBeenCalledWith('a', expect.objectContaining({ hermanos: expect.any(Array) }))
   })
 
   it('el texto del botón deja claro que nada se envía', () => {
@@ -97,6 +102,38 @@ describe('BatchCaptionsButton', () => {
   it('renders nothing when every video already has a caption', () => {
     const { container } = render(<BatchCaptionsButton videos={[vid('a', 'listo')]} onDone={vi.fn()} />)
     expect(container.firstChild).toBeNull()
+  })
+
+  it('genera en secuencia acumulando hermanos: 0, luego 1, luego 2 (Pieza 1)', async () => {
+    let n = 0
+    generateIdeaCaption.mockImplementation(async () => {
+      n++
+      return { caption: `Caption número ${n}` }
+    })
+    const onDone = vi.fn()
+    render(<BatchCaptionsButton videos={[vid('a', null), vid('b', null), vid('c', null)]} onDone={onDone} />)
+    fireEvent.click(screen.getByRole('button', { name: /generar 3 borradores/i }))
+    await waitFor(() => expect(onDone).toHaveBeenCalled())
+
+    expect(generateIdeaCaption).toHaveBeenCalledTimes(3)
+    const calls = generateIdeaCaption.mock.calls
+    expect(calls[0][1]?.hermanos).toEqual([])
+    expect(calls[1][1]?.hermanos).toHaveLength(1)
+    expect(calls[1][1]?.hermanos?.[0].caption).toBe('Caption número 1')
+    expect(calls[2][1]?.hermanos).toHaveLength(2)
+    expect(calls[2][1]?.hermanos?.map((h) => h.caption)).toEqual(['Caption número 1', 'Caption número 2'])
+  })
+
+  it('un video que falla no se cuenta como hermano de los siguientes', async () => {
+    generateIdeaCaption
+      .mockImplementationOnce(async () => ({ error: 'Falta la idea' }))
+      .mockImplementationOnce(async () => ({ caption: 'segundo caption' }))
+    const onDone = vi.fn()
+    render(<BatchCaptionsButton videos={[vid('a', null), vid('b', null)]} onDone={onDone} />)
+    fireEvent.click(screen.getByRole('button', { name: /generar 2 borradores/i }))
+    await waitFor(() => expect(onDone).toHaveBeenCalled())
+    const calls = generateIdeaCaption.mock.calls
+    expect(calls[1][1]?.hermanos).toEqual([])
   })
 
   it('renders nothing without captions.use permission', () => {
