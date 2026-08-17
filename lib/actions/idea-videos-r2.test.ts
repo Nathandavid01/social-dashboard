@@ -108,7 +108,10 @@ import {
   getR2PreviewUrl,
   getR2UploadUrl,
   getQuickUploadUrl,
+  deleteR2Video,
+  restoreR2Video,
 } from '@/lib/actions/idea-videos-r2'
+import { r2Client } from '@/lib/integrations/r2'
 
 beforeEach(() => {
   ops.length = 0
@@ -340,6 +343,36 @@ describe('excepción "lo propio" — quien subió el archivo siempre puede verlo
     const res = await getR2DownloadUrl('vid-1')
     expect(res.error).toBeUndefined()
     expect(res.url).toBe('https://signed.example/presigned')
+  })
+})
+
+describe('deleteR2Video / restoreR2Video — archive-only, never destroys the R2 object', () => {
+  it('deleteR2Video only updates the row to archived — never touches R2 at all', async () => {
+    const res = await deleteR2Video('vid-1', 'idea-1')
+    expect(res.ok).toBe(true)
+    expect(res.error).toBeUndefined()
+
+    const updates = ops.filter((o) => o.method === 'update' && o.table === 'content_idea_videos')
+    expect(updates).toHaveLength(1)
+    expect(updates[0].payload).toMatchObject({ status: 'archived' })
+
+    // The regression this whole feature exists to prevent: the object must
+    // never be destroyed synchronously on delete — it must not even mint an
+    // R2 client.
+    expect(r2Client).not.toHaveBeenCalled()
+  })
+
+  it('restoreR2Video flips an archived row back to uploaded, guarded by the current status, without touching R2', async () => {
+    const res = await restoreR2Video('vid-1', 'idea-1')
+    expect(res.ok).toBe(true)
+
+    const updates = ops.filter((o) => o.method === 'update' && o.table === 'content_idea_videos')
+    expect(updates).toHaveLength(1)
+    expect(updates[0].payload).toMatchObject({ status: 'uploaded' })
+    // restoreR2Video's own .eq('status','archived') filter is applied to the
+    // chain (asserted structurally is out of scope here); what matters is R2
+    // stays untouched, since the object was never deleted in the first place.
+    expect(r2Client).not.toHaveBeenCalled()
   })
 })
 

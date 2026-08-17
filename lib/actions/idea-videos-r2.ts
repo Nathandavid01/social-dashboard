@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas } from '@/lib/auth/server'
@@ -306,6 +306,20 @@ export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; 
   }
 }
 
+/**
+ * Archives a video — REVERSIBLE, never touches the R2 object.
+ *
+ * Used to destroy the R2 object right here, synchronously, on click. That
+ * made "delete" unforgiving: a misclick on a raw video of an already-published
+ * idea meant the source material was gone for good, with no confirm dialog
+ * and no undo (window.confirm() + immediate destroy).
+ *
+ * Now: this only flips the row to 'archived' (see restoreR2Video for the
+ * inverse). The R2 object is left alone — the UI hides the card optimistically
+ * and offers "Deshacer" for a few seconds; if nobody undoes it, the object is
+ * swept up later by the cron sweep in /api/cron/video-health (7-day grace
+ * period, see lib/utils/archived-video-sweep.ts), never by this action.
+ */
 export async function deleteR2Video(videoId: string, ideaId: string): Promise<{ ok?: true; error?: string }> {
   try {
     await requirePermission('video.upload')
@@ -314,23 +328,32 @@ export async function deleteR2Video(videoId: string, ideaId: string): Promise<{ 
   }
 
   const supabase = await createClient()
-  const { data: video } = await supabase
-    .from('content_idea_videos')
-    .select('drive_file_id, storage_provider')
-    .eq('id', videoId)
-    .single()
+  const { error } = await supabase.from('content_idea_videos').update({ status: 'archived' }).eq('id', videoId)
+  if (error) return { error: error.message }
+  revalidatePath(`/produccion/idea/${ideaId}`)
+  return { ok: true }
+}
 
-  // Best-effort delete from R2; keep going even if it fails.
-  if (video?.storage_provider === 'r2' && video.drive_file_id) {
-    const client = r2Client()
-    if (client) {
-      try {
-        await client.send(new DeleteObjectCommand({ Bucket: r2Bucket(), Key: video.drive_file_id }))
-      } catch { /* ignore */ }
-    }
+/**
+ * Undo for deleteR2Video — flips an 'archived' row back to 'uploaded'.
+ * Guarded with `.eq('status', 'archived')` so a double-click (or an undo that
+ * races the 7-day cron sweep) is a no-op the second time, not an error.
+ * The R2 object was never touched by the delete, so there is nothing to
+ * restore there.
+ */
+export async function restoreR2Video(videoId: string, ideaId: string): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('video.upload')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
 
-  const { error } = await supabase.from('content_idea_videos').update({ status: 'archived' }).eq('id', videoId)
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('content_idea_videos')
+    .update({ status: 'uploaded' })
+    .eq('id', videoId)
+    .eq('status', 'archived')
   if (error) return { error: error.message }
   revalidatePath(`/produccion/idea/${ideaId}`)
   return { ok: true }
