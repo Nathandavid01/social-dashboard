@@ -59,7 +59,9 @@ function overlapRatio(a: Set<string>, b: Set<string>): number {
   if (a.size === 0 || b.size === 0) return 0
   const [small, big] = a.size <= b.size ? [a, b] : [b, a]
   let shared = 0
-  for (const h of small) if (big.has(h)) shared++
+  Array.from(small).forEach((h) => {
+    if (big.has(h)) shared++
+  })
   return shared / small.size
 }
 
