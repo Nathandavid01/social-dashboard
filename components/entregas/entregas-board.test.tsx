@@ -1,16 +1,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, within, act } from '@testing-library/react'
 import type { IdeaWithPipeline, UserRole } from '@/lib/supabase/types'
 
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
-const push = vi.fn()
-const refresh = vi.fn()
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push, refresh }) }))
+// Reactive fake so the overlay-in-URL flow (open pushes, back/Escape close,
+// reload reopens) can actually be exercised, not a no-op push spy.
+vi.mock('next/navigation', async () => {
+  const { createFakeNavigation } = await import('@/tests/fake-next-navigation')
+  return createFakeNavigation('/revision')
+})
 const discardEntregaVideos = vi.fn(async () => ({ ok: true as const, count: 1 }))
 vi.mock('@/lib/actions/pipeline-submit', () => ({
   discardEntregaVideos: (...a: unknown[]) => discardEntregaVideos(...(a as [])),
 }))
-vi.mock('./review-overlay', () => ({ ReviewOverlay: () => <div data-testid="review-overlay">cola</div> }))
+vi.mock('./review-overlay', () => ({
+  ReviewOverlay: ({ onClose }: { onClose?: () => void }) => (
+    <div data-testid="review-overlay">
+      cola
+      {onClose && <button onClick={onClose}>Cerrar cola</button>}
+    </div>
+  ),
+}))
 // EnlaceClienteBoton hits both actions on mount inside every card; unmocked
 // they call currentUserHas → cookies() outside a request scope (jsdom, no
 // Next request context) and blow up as an unhandled rejection after the test
@@ -30,6 +40,9 @@ vi.mock('@/lib/context/auth-context', () => ({
 
 import { EntregasBoard, type PlannedClient } from './entregas-board'
 import { fechaDeEntrega, fechaEntregaDelDia } from '@/lib/entregas/dias'
+import * as nav from 'next/navigation'
+type FakeNav = { currentSearch: () => string; reset: (s?: string) => void; simulateBrowserBack: () => void }
+const { currentSearch, reset: resetNav, simulateBrowserBack } = nav as unknown as FakeNav
 
 function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
   return {
@@ -48,7 +61,7 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 
 beforeEach(() => {
   cleanup()
-  push.mockClear()
+  resetNav('')
 })
 
 describe('EntregasBoard — las columnas las define la ruta', () => {
@@ -245,7 +258,61 @@ describe('EntregasBoard — batch model', () => {
     ]} />)
     fireEvent.click(container.querySelector('article')!)
     expect(await screen.findByTestId('review-overlay')).toBeInTheDocument()
-    expect(push).not.toHaveBeenCalled()
+    // Same page — the URL gained ?lote=&etapa=approval&video=, no route change.
+    expect(currentSearch()).toContain('etapa=approval')
+  })
+})
+
+describe('EntregasBoard — flujo natural: el overlay vive en la URL', () => {
+  function ideaEnRevision(over: Partial<IdeaWithPipeline> = {}) {
+    return idea({
+      client_id: 'c9', status: 'producida', approval_status: 'submitted',
+      client: { id: 'c9', name: 'Acme', industry: null },
+      ...over,
+    })
+  }
+
+  it('un click en una tarjeta de Editado (sin overlay aún) no ensucia la URL', () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[idea({ id: '1' })]} />)
+    fireEvent.click(container.querySelector('article')!)
+    expect(currentSearch()).toBe('')
+  })
+
+  it('cerrar la cola con su botón quita los params de la URL', async () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[ideaEnRevision()]} />)
+    fireEvent.click(container.querySelector('article')!)
+    await screen.findByTestId('review-overlay')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar cola' }))
+    expect(currentSearch()).toBe('')
+    expect(screen.queryByTestId('review-overlay')).not.toBeInTheDocument()
+  })
+
+  it('el back del navegador cierra la cola y deja el tablero (sigue en su día)', async () => {
+    const { container } = render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[ideaEnRevision()]} />)
+    fireEvent.click(container.querySelector('article')!)
+    await screen.findByTestId('review-overlay')
+
+    act(() => simulateBrowserBack())
+    expect(screen.queryByTestId('review-overlay')).not.toBeInTheDocument()
+    expect(screen.getByText('Editado')).toBeInTheDocument()
+    expect(screen.getByText('Revisión')).toBeInTheDocument()
+  })
+
+  it('recargar con ?lote=&etapa=approval&video= reabre la cola de ese video (deep link)', async () => {
+    resetNav('lote=c9&etapa=approval&video=i')
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[ideaEnRevision({ id: 'i' })]} />)
+    expect(await screen.findByTestId('review-overlay')).toBeInTheDocument()
+  })
+
+  it('cerrar tras un deep link no navega hacia atrás fuera del tablero (replace, no back)', async () => {
+    resetNav('lote=c9&etapa=approval&video=i')
+    render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={[ideaEnRevision({ id: 'i' })]} />)
+    await screen.findByTestId('review-overlay')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar cola' }))
+    expect(currentSearch()).toBe('')
+    expect(screen.queryByTestId('review-overlay')).not.toBeInTheDocument()
   })
 })
 

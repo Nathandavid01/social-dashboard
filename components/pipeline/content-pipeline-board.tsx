@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
@@ -12,6 +12,7 @@ import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions }
 import { getBatchVideoPreviewUrls } from '@/lib/actions/batch-video-previews'
 import { pickBatchEditedVideos } from '@/lib/utils/batch-video-thumbs'
 import { useToast } from '@/lib/hooks/use-toast'
+import { useOverlayRoute } from '@/lib/hooks/use-overlay-route'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
@@ -43,14 +44,7 @@ const STAGE_DOT: Record<BatchStageKey, string> = {
 }
 
 /** Global content pipeline — one card per CLIENT BATCH, colored by its assignee. */
-export function ContentPipelineBoard({
-  ideas,
-  plannedClients = [],
-  allClients = [],
-  clientCadence = {},
-  teamMembers = [],
-  clientLogos = {},
-}: {
+export function ContentPipelineBoard(props: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
   /** Every active client — used by "Nuevo video" so you can pick any account. */
@@ -64,6 +58,29 @@ export function ContentPipelineBoard({
    */
   clientLogos?: Record<string, string | null>
 }) {
+  // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <ContentPipelineBoardInner {...props} />
+    </Suspense>
+  )
+}
+
+function ContentPipelineBoardInner({
+  ideas,
+  plannedClients = [],
+  allClients = [],
+  clientCadence = {},
+  teamMembers = [],
+  clientLogos = {},
+}: {
+  ideas: Idea[]
+  plannedClients?: PlannedClient[]
+  allClients?: { id: string; name: string }[]
+  clientCadence?: Record<string, ClientCadence>
+  teamMembers?: { id: string; name: string }[]
+  clientLogos?: Record<string, string | null>
+}) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -71,31 +88,82 @@ export function ContentPipelineBoard({
   const [, startMove] = useTransition()
   const { toast } = useToast()
 
-  // In-place full-screen overlay of a client's batch view (no navigation).
-  const [openClientId, setOpenClientId] = useState<string | null>(null)
-  const [openOptions, setOpenOptions] = useState<ClientBatchOpenOptions | null>(null)
+  // In-place full-screen overlay of a client's batch view (no navigation) —
+  // "what's open" lives in the URL (?lote=&planificado=&fecha=&etiqueta=) so
+  // the browser/trackpad back gesture and Escape close it and land back on
+  // the board, instead of leaving the page. Reloading with those params
+  // reopens the same client at the same spot (deep link).
+  const { searchParams, open: pushOverlay, close: closeOverlayRoute, markClosed } = useOverlayRoute()
+  const openClientId = searchParams.get('lote')
+  const fromPlanned = searchParams.get('planificado') === '1'
+  const publishDateParam = searchParams.get('fecha')
+  const publishLabelParam = searchParams.get('etiqueta')
+  const openOptions: ClientBatchOpenOptions | undefined = fromPlanned
+    ? { fromPlanned: true, publishDate: publishDateParam, publishLabel: publishLabelParam }
+    : undefined
+
   const [batchData, setBatchData] = useState<ClientBatchData | null>(null)
   const [batchLoading, setBatchLoading] = useState(false)
 
-  const openClientBatch = useCallback(async (clientId: string, opts?: ClientBatchOpenOptions) => {
-    setOpenClientId(clientId)
-    setOpenOptions(opts ?? null)
+  const openClientBatch = useCallback((clientId: string, opts?: ClientBatchOpenOptions) => {
+    pushOverlay({
+      lote: clientId,
+      planificado: opts?.fromPlanned ? '1' : null,
+      fecha: opts?.fromPlanned ? (opts.publishDate ?? null) : null,
+      etiqueta: opts?.fromPlanned ? (opts.publishLabel ?? null) : null,
+    })
+  }, [pushOverlay])
+  const closeBatch = useCallback(() => {
+    closeOverlayRoute(['lote', 'planificado', 'fecha', 'etiqueta'])
+  }, [closeOverlayRoute])
+
+  // The URL is the source of truth for "which client is open" — fetch
+  // whenever it changes (open, deep-link reload, or a back/forward that
+  // lands on a different client). Keyed on primitive strings, not the
+  // derived `openOptions` object, so an unrelated re-render doesn't refetch.
+  useEffect(() => {
+    if (!openClientId) {
+      setBatchData(null)
+      setBatchLoading(false)
+      return
+    }
+    let cancelled = false
     setBatchData(null)
     setBatchLoading(true)
-    const data = await getClientBatchData(clientId, opts)
-    setBatchData(data)
-    setBatchLoading(false)
-  }, [])
-  const closeBatch = useCallback(() => {
-    setOpenClientId(null)
-    setOpenOptions(null)
-    setBatchData(null)
-  }, [])
+    getClientBatchData(openClientId, openOptions).then((data) => {
+      if (cancelled) return
+      setBatchData(data)
+      setBatchLoading(false)
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openClientId, fromPlanned, publishDateParam, publishLabelParam])
+
+  // A physical back-button press never goes through closeBatch() — reset the
+  // "we pushed this" bookkeeping whenever the URL says nothing is open, so a
+  // later close() (e.g. Escape right after) replaces instead of mis-popping.
+  useEffect(() => {
+    if (!openClientId) markClosed()
+  }, [openClientId, markClosed])
+
+  // Escape closes the overlay — ClientBatchView has no Escape handling of its
+  // own (unlike ReviewOverlay/CopyOverlay in Entregas), so the board owns it.
+  useEffect(() => {
+    if (!openClientId) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      closeBatch()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [openClientId, closeBatch])
+
   const refetchBatch = useCallback(async () => {
     if (!openClientId) return
-    const data = await getClientBatchData(openClientId, openOptions ?? undefined)
+    const data = await getClientBatchData(openClientId, openOptions)
     setBatchData(data)
-  }, [openClientId, openOptions])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openClientId, fromPlanned, publishDateParam, publishLabelParam])
 
   const batches = useMemo(() => {
     const raw = groupIntoBatches(ideas)
