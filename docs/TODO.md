@@ -53,6 +53,9 @@ Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 ## Responsive
 - [ ] Make the **client profile tabs** (Captions, Contenido, etc.) responsive on small screens.
 
+## Captions distintos por lote (v3.50)
+- [ ] Aplicar migración **`0066_caption_corrections.sql`** en Supabase (aprendizaje por corrección, por cliente). Hasta entonces, `generateIdeaCaption`/`saveIdeaCaption` siguen funcionando igual — el bloque de correcciones del prompt y el insert de corrección son best-effort.
+
 ## Cadencia (home widget — impulsado por Metricool)
 - [x] Widget mide cadencia configurada (posting_days = meta) vs realidad de Metricool (publicado/atrasado/pendiente). Calendario de producción ya NO alimenta el widget.
 - [ ] **Optimización:** cron `app/api/cron/metricool-sync` que escriba un snapshot semanal por cliente a una tabla nueva (req. migración nueva que aplica Nathan en Supabase), para que el widget lea de la DB en vez de barrer Metricool en vivo (~60 llamadas/cargas, hoy mitigado con unstable_cache 10 min).

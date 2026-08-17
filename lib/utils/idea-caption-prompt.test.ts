@@ -248,3 +248,79 @@ describe('regla anti-invención', () => {
     expect(p.toLowerCase()).toMatch(/restricciones del cliente/)
   })
 })
+
+// Pieza 1: los captions del mismo lote deben conocerse entre sí para no salir genéricos.
+describe('bloque de hermanos (captions del mismo lote)', () => {
+  const base = { title: 'Promo', examples: [] as { text: string; provider: string }[] }
+
+  it('sin hermanos, no aparece el bloque', () => {
+    const p = buildIdeaCaptionPrompt(base)
+    expect(p).not.toContain('OTROS CAPTIONS DE ESTE MISMO LOTE')
+  })
+
+  it('con hermanos, el bloque lista cada uno y pide un ángulo distinto', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hermanos: [
+        { titulo: 'Video 1', caption: 'Mira este antojo\nComenta si te gusta\n#comida' },
+        { titulo: 'Video 2', caption: 'Detrás de cámaras\nGuarda este post\n#bts', angulo: 'detrás de cámaras / guardar' },
+      ],
+    })
+    expect(p).toContain('OTROS CAPTIONS DE ESTE MISMO LOTE')
+    expect(p).toContain('Mira este antojo')
+    expect(p).toContain('Detrás de cámaras')
+    expect(p).toContain('detrás de cámaras / guardar')
+    expect(p).toMatch(/NO repitas su gancho/i)
+    expect(p).toMatch(/ángulo distinto/i)
+  })
+
+  it('con lista de hermanos vacía, no aparece el bloque (ej. primer video del lote)', () => {
+    const p = buildIdeaCaptionPrompt({ ...base, hermanos: [] })
+    expect(p).not.toContain('OTROS CAPTIONS DE ESTE MISMO LOTE')
+  })
+
+  it('forceDistinctAngle refuerza la instrucción tras un choque detectado', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hermanos: [{ titulo: 'Video 1', caption: 'Un caption cualquiera' }],
+      forceDistinctAngle: true,
+    })
+    expect(p).toMatch(/se pareció demasiado/i)
+  })
+})
+
+// Pieza 3: correcciones del equipo, por cliente — la señal de aprendizaje más valiosa.
+describe('bloque de correcciones del equipo (aprendizaje por cliente)', () => {
+  const base = { title: 'Promo', examples: [] as { text: string; provider: string }[] }
+
+  it('sin correcciones, no aparece el bloque', () => {
+    expect(buildIdeaCaptionPrompt(base)).not.toContain('CORRECCIONES DEL EQUIPO')
+  })
+
+  it('con correcciones, muestra lo que escribió la IA vs lo que dejó el equipo', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      teamCorrections: [{ draft: 'Compra ya con descuento especial', final: 'Reserva tu cita esta semana' }],
+    })
+    expect(p).toContain('CORRECCIONES DEL EQUIPO PARA ESTE CLIENTE')
+    expect(p).toContain('Compra ya con descuento especial')
+    expect(p).toContain('Reserva tu cita esta semana')
+    expect(p).toMatch(/aprende la diferencia/i)
+  })
+
+  it('el orden de prioridad deja el hook primero, luego correcciones, luego aprobados', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      hook: 'un socio en el gym',
+      videoTranscript: 'transcripción cualquiera',
+      teamCorrections: [{ draft: 'd', final: 'f' }],
+      approvedExamples: ['Caption aprobado con largo suficiente para pasar el piso'],
+    })
+    const iHook = p.indexOf('LO QUE SE OYE EN EL VIDEO')
+    const iCorr = p.indexOf('CORRECCIONES DEL EQUIPO')
+    const iAprob = p.indexOf('CAPTIONS QUE EL EQUIPO YA APROBÓ')
+    expect(iHook).toBeGreaterThan(-1)
+    expect(iCorr).toBeGreaterThan(iHook)
+    expect(iAprob).toBeGreaterThan(iCorr)
+  })
+})

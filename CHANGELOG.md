@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.52 — 2026-08-16
+
+**Los captions de un mismo lote ya no se parecen entre sí — y cuando el equipo corrige uno, el sistema aprende para ese cliente.**
+
+- Antes, generar captions para varios videos de un lote los escribía uno por uno, sin que ninguno supiera de los demás — con la misma voz de marca y los mismos ejemplos aprobados, salían casi calcados. Ahora, cada caption nuevo **conoce a sus hermanos del lote** y busca un ángulo distinto de verdad (antojo, detrás de cámaras, invitación, testimonio…), derivado de lo que se ve y se oye en **su propio video** — no repartido al azar.
+- Si un caption sale demasiado parecido a uno de sus hermanos (mismo gancho, mismo llamado a la acción, mismos hashtags), el sistema lo detecta y **regenera una sola vez** con esa instrucción reforzada — sin bucles ni gasto de más.
+- **Cuando el equipo corrige un caption** antes de guardarlo, esa corrección queda registrada **por cliente** — la próxima vez que se genere un caption para ese mismo cliente, el sistema ve "esto escribió la IA / esto dejó el equipo" y aprende a no repetir el error. Una corrección de tono para un cliente nunca afecta a otro.
+
+Vista: [preview HTML](/previews/v3.52-captions-distintos.html)
+
 ## v3.51 — 2026-08-16
 
 **El botón de buscar desapareció de la barra superior — la paleta de comandos sigue trabajando igual.**
