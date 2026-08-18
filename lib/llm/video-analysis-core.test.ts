@@ -33,6 +33,7 @@ describe('buildVideoAnalysisPrompt', () => {
     expect(p).toContain('jerga boricua')
     expect(p.toLowerCase()).toContain('puertorriqueño')
     expect(p).toContain('JSON')
+    expect(p).toContain('confidence')
     expect(p.toLowerCase()).toContain('cronológico')
     expect(p.toLowerCase()).toMatch(/cada fotograma/)
   })
@@ -162,6 +163,22 @@ describe('parseVideoAnalysisResponse', () => {
     expect(parseVideoAnalysisResponse(weirdType)?.video_topic).toBeUndefined()
   })
 
+  it('relevance.confidence: 0–100; si falta, undefined (el UI usa fallback)', () => {
+    const withConf = wrap(JSON.stringify({
+      ...good,
+      relevance: { verdict: 'ok', confidence: 87, explanation: 'coincide' },
+    }))
+    expect(parseVideoAnalysisResponse(withConf)?.relevance.confidence).toBe(87)
+
+    const clamped = wrap(JSON.stringify({
+      ...good,
+      relevance: { verdict: 'ok', confidence: 140, explanation: 'x' },
+    }))
+    expect(parseVideoAnalysisResponse(clamped)?.relevance.confidence).toBe(100)
+
+    expect(parseVideoAnalysisResponse(wrap(JSON.stringify(good)))?.relevance.confidence).toBeUndefined()
+  })
+
   it('issues[].t: se conserva cuando viene, se omite cuando no', () => {
     const withT = {
       ...good,
@@ -222,8 +239,8 @@ describe('mergeVideoAnalysisFindings', () => {
   it('relevance: warning manda sobre ok, sin importar el orden', () => {
     const ok = findings({ relevance: { verdict: 'ok', explanation: 'coincide' } })
     const warn = findings({ relevance: { verdict: 'warning', explanation: 'no coincide' } })
-    expect(mergeVideoAnalysisFindings(ok, warn).relevance).toEqual({ verdict: 'warning', explanation: 'no coincide' })
-    expect(mergeVideoAnalysisFindings(warn, ok).relevance).toEqual({ verdict: 'warning', explanation: 'no coincide' })
+    expect(mergeVideoAnalysisFindings(ok, warn).relevance).toMatchObject({ verdict: 'warning', explanation: 'no coincide' })
+    expect(mergeVideoAnalysisFindings(warn, ok).relevance).toMatchObject({ verdict: 'warning', explanation: 'no coincide' })
     expect(mergeVideoAnalysisFindings(ok, ok).relevance.verdict).toBe('ok')
   })
 
@@ -251,7 +268,11 @@ describe('mergeVideoAnalysisFindings', () => {
   })
 
   it('campos vacíos en ambos lados no revientan', () => {
-    expect(mergeVideoAnalysisFindings(findings(), findings())).toEqual(findings())
+    expect(mergeVideoAnalysisFindings(findings(), findings())).toMatchObject({
+      burned_captions: { text: '', issues: [] },
+      relevance: { verdict: 'ok', explanation: '' },
+      visual_summary: '',
+    })
   })
 
   it('video_topic: conserva el primero no vacío', () => {

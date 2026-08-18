@@ -19,6 +19,8 @@ export interface RowProgress {
   stage: SubmitStage
   pct: number
   error?: string
+  ideaId?: string
+  videoId?: string
 }
 
 /** XHR rather than fetch: fetch has no upload progress events. */
@@ -104,6 +106,12 @@ export function useSubmitVideos(onDone?: () => void) {
         if (!res.ok) {
           setRows((r) =>
             r.map((row, j) => (j === i ? { ...row, stage: 'error' as SubmitStage, error: res.error } : row)),
+          )
+        } else {
+          setRows((r) =>
+            r.map((row, j) =>
+              j === i ? { ...row, ideaId: res.ideaId, videoId: res.videoId, stage: 'listo' as SubmitStage, pct: 100 } : row,
+            ),
           )
         }
       }

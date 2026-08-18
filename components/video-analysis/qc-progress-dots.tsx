@@ -8,20 +8,15 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
 import { analyzeExistingVideo } from '@/lib/utils/video-analysis-client'
+import { qcChecklist } from '@/lib/utils/qc-checklist'
 
 type DotState = 'working' | 'ok' | 'warning' | 'unavailable'
 type RunPhase = 'extracting' | 'analyzing'
 
 /**
- * Tira de 3 bolitas QC ("de un vistazo"): es la nueva cara del reporte QC IA
- * — reemplaza `VideoAnalysisReport` en `IdeaVideoPanel` (mismo fetch/poll,
- * compartido vía `useVideoAnalysisPolling`, así que no hay doble fetch).
- * `VideoAnalysisReport` sigue viva para `review-overlay.tsx`.
- *
- * 1. Relevancia ("Es del cliente")
- * 2. Captions quemados sin faltas ("Libre de errores")
- * 3. Caption ya escrito ("Caption generado") — independiente del QC de
- *    video: se alimenta de `hasCaption`, no de `status`.
+ * Checklist fijo de 5 checks al subir un editado: cliente + %, captions,
+ * quién lo subió, errores, fotogramas. Reemplaza `VideoAnalysisReport` en
+ * `IdeaVideoPanel` (mismo fetch/poll vía `useVideoAnalysisPolling`).
  *
  * `videoId` habilita el botón "Analizar con IA" (sin análisis todavía) /
  * "Re-analizar" (ya hay uno): dispara `analyzeExistingVideo`, que hace en el
@@ -82,30 +77,14 @@ export function QcProgressDots({ ideaId, videoId }: { ideaId: string; videoId?: 
     )
   }
 
-  const { status, findings, hasCaption, frameCount } = analysis
-  const dataAvailable = status === 'done' && !!findings
+  const { status, findings, frameCount, uploadedBy } = analysis
+  const rows = qcChecklist({
+    status,
+    findings,
+    frameCount,
+    uploadedBy: uploadedBy ?? null,
+  })
   const captionIssues = findings?.burned_captions.issues ?? []
-  const relevanceOk = findings?.relevance.verdict === 'ok'
-
-  const relevanceState: DotState =
-    status === 'pending' ? 'working' : dataAvailable ? (relevanceOk ? 'ok' : 'warning') : 'unavailable'
-  const captionsState: DotState =
-    status === 'pending' ? 'working' : dataAvailable ? (captionIssues.length === 0 ? 'ok' : 'warning') : 'unavailable'
-  const captionDraftState: DotState = hasCaption ? 'ok' : 'working'
-
-  const relevanceText =
-    relevanceState === 'working' ? 'Analizando…'
-    : relevanceState === 'ok' ? 'Es del cliente'
-    : relevanceState === 'warning' ? 'No parece de este cliente'
-    : 'Análisis no disponible'
-
-  const captionsText =
-    captionsState === 'working' ? 'Analizando…'
-    : captionsState === 'ok' ? 'Libre de errores'
-    : captionsState === 'warning' ? `${captionIssues.length} error${captionIssues.length === 1 ? '' : 'es'} a revisar`
-    : 'Análisis no disponible'
-
-  const captionDraftText = captionDraftState === 'ok' ? 'Caption generado' : 'Generando caption…'
 
   return (
     <div className="space-y-1.5 rounded-lg border bg-card p-3 animate-in fade-in slide-in-from-bottom-1 duration-300">
@@ -130,29 +109,38 @@ export function QcProgressDots({ ideaId, videoId }: { ideaId: string; videoId?: 
         )}
       </div>
 
-      <QcDot state={relevanceState} text={relevanceText} expanded={openRelevance} onToggle={relevanceState === 'warning' ? () => setOpenRelevance((o) => !o) : undefined} />
-      {openRelevance && relevanceState === 'warning' && (
-        <p className="ml-[22px] rounded-md bg-amber-500/10 px-2 py-1.5 text-xs">{findings?.relevance.explanation}</p>
-      )}
-
-      <QcDot state={captionsState} text={captionsText} expanded={openCaptions} onToggle={captionsState === 'warning' ? () => setOpenCaptions((o) => !o) : undefined} />
-      {openCaptions && captionsState === 'warning' && (
-        <div className="ml-[22px] space-y-1.5">
-          {captionIssues.map((issue, n) => (
-            <p key={n} className="rounded-md bg-amber-500/10 px-2 py-1.5 text-xs">
-              «{issue.quote}» — {issue.problem}. Sugerencia: <span className="font-medium">{issue.suggestion}</span>
-            </p>
-          ))}
-        </div>
-      )}
-
-      <QcDot state={captionDraftState} text={captionDraftText} />
-
-      {typeof frameCount === 'number' && frameCount > 0 && (
-        <p className="ml-[22px] text-[10px] text-muted-foreground">
-          {frameCount} {frameCount === 1 ? 'fotograma analizado' : 'fotogramas analizados'}
-        </p>
-      )}
+      {rows.map((row) => {
+        const state = row.state === 'ok' ? 'ok' : row.state === 'warn' ? 'warning' : 'working'
+        const canOpenClient = row.key === 'client' && row.state === 'warn'
+        const canOpenCaptions = row.key === 'captions' && row.state === 'warn' && captionIssues.length > 0
+        const expanded = row.key === 'client' ? openRelevance : row.key === 'captions' ? openCaptions : false
+        return (
+          <div key={row.key} className="space-y-1">
+            <QcDot
+              state={state}
+              text={row.text}
+              expanded={expanded}
+              onToggle={
+                canOpenClient ? () => setOpenRelevance((o) => !o)
+                : canOpenCaptions ? () => setOpenCaptions((o) => !o)
+                : undefined
+              }
+            />
+            {openRelevance && canOpenClient && (
+              <p className="ml-[22px] rounded-md bg-amber-500/10 px-2 py-1.5 text-xs">{findings?.relevance.explanation}</p>
+            )}
+            {openCaptions && canOpenCaptions && (
+              <div className="ml-[22px] space-y-1.5">
+                {captionIssues.map((issue, n) => (
+                  <p key={n} className="rounded-md bg-amber-500/10 px-2 py-1.5 text-xs">
+                    «{issue.quote}» — {issue.problem}. Sugerencia: <span className="font-medium">{issue.suggestion}</span>
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

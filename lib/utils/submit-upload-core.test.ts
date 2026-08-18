@@ -21,7 +21,7 @@ function deps(over: Partial<SubmitDeps> = {}): SubmitDeps {
     createIdea: vi.fn(async () => ({ idea: { id: 'idea-1' } })),
     getUploadUrl: vi.fn(async () => ({ url: 'https://r2/put', key: 'ideas/idea-1/edited/reel.mp4' })),
     putFile: vi.fn(async () => {}),
-    registerVideo: vi.fn(async () => ({ ok: true as const })),
+    registerVideo: vi.fn(async () => ({ ok: true as const, id: 'video-1' })),
     ...over,
   }
 }
@@ -35,10 +35,10 @@ describe('submitOneVideo — cadena completa', () => {
       createIdea: vi.fn(async () => { order.push('crear'); return { idea: { id: 'idea-1' } } }),
       getUploadUrl: vi.fn(async () => { order.push('presign'); return { url: 'u', key: 'k' } }),
       putFile: vi.fn(async () => { order.push('subir') }),
-      registerVideo: vi.fn(async () => { order.push('registrar'); return { ok: true as const } }),
+      registerVideo: vi.fn(async () => { order.push('registrar'); return { ok: true as const, id: 'video-1' } }),
     })
     const r = await submitOneVideo(d, input)
-    expect(r).toEqual({ ok: true, ideaId: 'idea-1', stage: 'listo' })
+    expect(r).toEqual({ ok: true, ideaId: 'idea-1', videoId: 'video-1', stage: 'listo' })
     expect(order).toEqual(['crear', 'presign', 'subir', 'registrar'])
   })
 

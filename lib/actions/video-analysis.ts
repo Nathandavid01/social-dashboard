@@ -16,6 +16,9 @@ export interface VideoAnalysisView {
    *  o fila vieja de antes de esa migración: la UI simplemente no muestra
    *  el número. */
   frameCount?: number | null
+  /** Nombre de quien subió el video editado (`profiles.full_name`). Null si
+   *  no hay uploaded_by o no se pudo resolver el perfil. */
+  uploadedBy?: string | null
 }
 
 /**
@@ -40,7 +43,7 @@ export async function getVideoAnalysis(
 
   const { data: video, error: videoError } = await supabase
     .from('content_idea_videos')
-    .select('id')
+    .select('id, uploaded_by')
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
     .not('status', 'in', '(archived,failed)')
@@ -95,12 +98,31 @@ export async function getVideoAnalysis(
     hasCaption = false
   }
 
+  let uploadedBy: string | null = null
+  const uploaderId = (video as { uploaded_by?: string | null }).uploaded_by
+  if (uploaderId) {
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', uploaderId)
+        .maybeSingle()
+      if (!profileError) {
+        const name = (profile as { full_name?: string | null } | null)?.full_name?.trim()
+        uploadedBy = name || null
+      }
+    } catch {
+      uploadedBy = null
+    }
+  }
+
   return {
     analysis: {
       status: data.status as VideoAnalysisView['status'],
       findings: (data.findings as VideoAnalysisFindings | null) ?? null,
       hasCaption,
       frameCount,
+      uploadedBy,
     },
   }
 }
