@@ -1,0 +1,31 @@
+---
+description: Always show a live Next.js preview of current work in the Cursor browser
+alwaysApply: true
+---
+
+# Always live-preview the product
+
+This is a Next.js app (`social-dashboard`). The user wants to **see the running product**, not only static mocks.
+
+## Dev server
+
+- Start with `npm run dev` from `social-dashboard` (port **3020**, not 3000).
+- Check existing terminals first. If something healthy is already on 3020, reuse it. Do not kill unrelated processes.
+- If the server dies, restart it. Keep the preview in view while working.
+
+## After user-visible UI work
+
+1. Open the **live** app in the Cursor browser (`cursor-ide-browser`), with `position: "active"` so it is visible.
+2. Navigate to the **actual route** being worked on (e.g. `/actividad` for Jornada), not only a static HTML file.
+3. Refresh that route after UI changes so the user sees the result.
+
+Landing URL: `http://localhost:3020/` (often redirects to login or home). If login blocks you, still show that page — never invent credentials.
+
+## Static HTML previews are secondary
+
+`public/previews/*.html` may still exist (project docs can require them). They are **not** a substitute for the live app. Do not treat `/previews/...` or a static file server as the primary preview.
+
+```
+❌ BAD: only open public/previews/v3.xx-foo.html
+✅ GOOD: npm run dev on 3020, then open http://localhost:3020/<route>
+```

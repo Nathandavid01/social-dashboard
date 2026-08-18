@@ -89,4 +89,33 @@ describe('NotificationBell', () => {
     expect(body.tagName).toBe('P')
     expect(body.className).toContain('line-clamp-2')
   })
+
+  it('does not ping for stale unread — only shows a quiet badge', () => {
+    render(
+      <NotificationBell
+        initialNotifications={[makeNotification({ created_at: '2026-08-01T12:00:00.000Z' })]}
+        initialUnreadCount={1}
+        userId="u1"
+      />,
+    )
+    const trigger = screen.getByRole('button', { name: /1 notificaciones sin leer/i })
+    expect(trigger).toHaveAttribute('data-pulse', 'false')
+    expect(trigger.querySelector('.animate-ping')).toBeNull()
+    expect(trigger.textContent).toContain('1')
+  })
+
+  it('pulses for unread activity from the last few minutes, then stops after opening', async () => {
+    const user = userEvent.setup()
+    render(
+      <NotificationBell
+        initialNotifications={[makeNotification({ created_at: new Date().toISOString() })]}
+        initialUnreadCount={1}
+        userId="u1"
+      />,
+    )
+    const trigger = screen.getByRole('button', { name: /1 notificaciones sin leer/i })
+    expect(trigger).toHaveAttribute('data-pulse', 'true')
+    await user.click(trigger)
+    expect(trigger).toHaveAttribute('data-pulse', 'false')
+  })
 })

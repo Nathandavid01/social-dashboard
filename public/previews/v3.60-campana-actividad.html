@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.60 — Campana según actividad</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 28px; line-height: 1.45; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .card h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+    .bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; height: 48px; background: #0c0c0c; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; }
+    .bell { position: relative; width: 32px; height: 32px; display: grid; place-items: center; }
+    .badge { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; border-radius: 99px; background: #ef4444; color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
+    .halo { position: absolute; top: -6px; right: -6px; width: 28px; height: 28px; border-radius: 50%; background: rgba(239,68,68,.45); }
+    .av { width: 28px; height: 28px; border-radius: 50%; background: #222; }
+    .note { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .note b { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Cabecera</p>
+    <h1>La campana late por lo que acaba de pasar</h1>
+    <p class="sub">El 6 puede seguir ahí si hay avisos sin leer. Lo que desaparece es el halo rojo infinito — eso solo es para actividad nueva.</p>
+    <div class="row">
+      <div class="card">
+        <h2>Antes — backlog viejo, alarma igual</h2>
+        <div class="bar">
+          <div class="bell">🔔<span class="halo"></span><span class="badge">6</span></div>
+          <span class="av"></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Ahora — número quieto hasta que haya algo fresco</h2>
+        <div class="bar">
+          <div class="bell">🔔<span class="badge">6</span></div>
+          <span class="av"></span>
+        </div>
+      </div>
+    </div>
+    <p class="note">Si llega una subida o una aprobación <b>ahora</b>, el número late un momento. Abrir la lista lo apaga. Marcar como leído baja el número.</p>
+  </div>
+</body>
+</html>

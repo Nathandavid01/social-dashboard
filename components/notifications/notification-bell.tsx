@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import {
   Bell,
   BellRing,
-  Check,
   CheckCheck,
   Info,
   AlertTriangle,
@@ -30,6 +29,7 @@ import {
   deleteNotification,
 } from '@/lib/actions/notifications'
 import { useToast } from '@/lib/hooks/use-toast'
+import { shouldPulseBell, unreadCount } from '@/lib/utils/notification-bell'
 import type { Notification, NotificationSeverity } from '@/lib/supabase/types'
 
 interface Props {
@@ -67,13 +67,17 @@ function relativeTime(iso: string): string {
 
 export function NotificationBell({ initialNotifications, initialUnreadCount, userId }: Props) {
   const [items, setItems] = useState<Notification[]>(initialNotifications)
-  const [unread, setUnread] = useState(initialUnreadCount)
   const [open, setOpen] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
+  const [acknowledgedAt, setAcknowledgedAt] = useState<number | null>(null)
   const router = useRouter()
   const { toast } = useToast()
+  const [extraUnread, setExtraUnread] = useState(() =>
+    Math.max(0, initialUnreadCount - unreadCount(initialNotifications)),
+  )
+  const unread = unreadCount(items) + extraUnread
+  const pulse = shouldPulseBell({ items, acknowledgedAt })
 
-  // Realtime subscription
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
@@ -84,10 +88,8 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
         (payload) => {
           const n = payload.new as Notification
           setItems((prev) => [n, ...prev].slice(0, 50))
-          setUnread((c) => c + 1)
           setHighlightId(n.id)
           window.setTimeout(() => setHighlightId(null), 1500)
-          // Surface as toast too — but only if dropdown is closed
           if (!open) {
             toast({
               title: n.title,
@@ -102,12 +104,6 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
         (payload) => {
           const n = payload.new as Notification
           setItems((prev) => prev.map((p) => (p.id === n.id ? n : p)))
-          // recount unread from local state next tick
-          setUnread((c) => {
-            const before = items.find((i) => i.id === n.id)
-            if (before && !before.read_at && n.read_at) return Math.max(c - 1, 0)
-            return c
-          })
         },
       )
       .on(
@@ -126,18 +122,20 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
-  // Periodic tick to refresh relative timestamps
   const [, setTick] = useState(0)
   useEffect(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), 60_000)
     return () => clearInterval(id)
   }, [])
 
+  function onOpenChange(next: boolean) {
+    setOpen(next)
+    if (next) setAcknowledgedAt(Date.now())
+  }
+
   function onItemClick(n: Notification) {
     if (!n.read_at) {
-      // Optimistic mark
       setItems((prev) => prev.map((p) => (p.id === n.id ? { ...p, read_at: new Date().toISOString() } : p)))
-      setUnread((c) => Math.max(c - 1, 0))
       void markNotificationRead(n.id)
     }
     if (n.link) {
@@ -147,15 +145,13 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <button
-          className={cn(
-            'relative flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted',
-            unread > 0 && 'animate-[wiggle_3.5s_ease-in-out_infinite]',
-          )}
+          className="relative flex h-8 w-8 items-center justify-center overflow-visible rounded-md transition-colors hover:bg-muted"
           title="Notificaciones"
           aria-label={unread > 0 ? `${unread} notificaciones sin leer` : 'Notificaciones'}
+          data-pulse={pulse ? 'true' : 'false'}
         >
           {unread > 0 ? (
             <BellRing className="h-4 w-4 text-foreground" />
@@ -163,21 +159,15 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
             <Bell className="h-4 w-4" />
           )}
           {unread > 0 && (
-            <>
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
-                {unread > 99 ? '99+' : unread}
-              </span>
-              <span className="absolute -right-1 -top-1 h-4 w-4 animate-ping rounded-full bg-red-500 opacity-60" />
-            </>
+            <span
+              className={cn(
+                'absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white',
+                pulse && 'ring-2 ring-red-500/40 motion-safe:animate-pulse',
+              )}
+            >
+              {unread > 99 ? '99+' : unread}
+            </span>
           )}
-          <style>{`
-            @keyframes wiggle {
-              0%, 92%, 100% { transform: rotate(0); }
-              94% { transform: rotate(-10deg); }
-              96% { transform: rotate(10deg); }
-              98% { transform: rotate(-6deg); }
-            }
-          `}</style>
         </button>
       </DropdownMenuTrigger>
 
@@ -186,14 +176,13 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
         sideOffset={8}
         className="w-[360px] p-0 overflow-hidden"
       >
-        {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-2.5">
           <div className="flex items-center gap-2">
             <BellRing className="h-4 w-4 text-primary" />
             <p className="text-sm font-semibold">Notificaciones</p>
             {unread > 0 && (
               <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-500">
-                {unread} nueva{unread === 1 ? '' : 's'}
+                {unread} sin leer
               </span>
             )}
           </div>
@@ -201,13 +190,12 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
             <MarkAllReadButton
               onDone={() => {
                 setItems((prev) => prev.map((p) => ({ ...p, read_at: p.read_at ?? new Date().toISOString() })))
-                setUnread(0)
+                setExtraUnread(0)
               }}
             />
           )}
         </div>
 
-        {/* Body */}
         {items.length === 0 ? (
           <div className="grid place-items-center px-3 py-10 text-center">
             <Bell className="mb-2 h-8 w-8 text-muted-foreground/40" />
@@ -225,7 +213,6 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
                   onClick={() => onItemClick(n)}
                   onDelete={() => {
                     setItems((prev) => prev.filter((p) => p.id !== n.id))
-                    if (!n.read_at) setUnread((c) => Math.max(c - 1, 0))
                     void deleteNotification(n.id)
                   }}
                 />
@@ -234,7 +221,6 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
           </ScrollArea>
         )}
 
-        {/* Footer */}
         <div className="flex items-center justify-between border-t bg-muted/20 px-3 py-2">
           <Link
             href="/alerts"
@@ -278,7 +264,7 @@ function NotificationItem({
       onClick={onClick}
     >
       {isUnread && (
-        <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500 animate-pulse" />
+        <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500" />
       )}
       <div className="flex items-start gap-3 pl-3">
         <div className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-lg', tone)}>
@@ -317,7 +303,6 @@ function MarkAllReadButton({ onDone }: { onDone: () => void }) {
       className="h-7 gap-1 text-xs"
       disabled={isPending}
       onClick={() => {
-        // Optimistic
         onDone()
         startTransition(async () => {
           await markAllNotificationsRead()
