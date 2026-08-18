@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
+import { ThemeToggleMenuItem } from '@/components/shared/theme-toggle'
 
 export function UserMenu() {
   const { profile, role } = useAuth()
@@ -155,6 +156,7 @@ export function UserMenu() {
             Novedades
           </Link>
         </DropdownMenuItem>
+        <ThemeToggleMenuItem />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive cursor-pointer"

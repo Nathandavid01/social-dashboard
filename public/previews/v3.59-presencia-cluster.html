@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.59 — Cluster de presencia</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --header:#0c0c0c; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; letter-spacing: -.02em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 28px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .card h2 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; padding: 12px 14px 0; }
+    .bar { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 14px; margin: 14px; background: var(--header); border: 1px solid var(--border); border-radius: 12px; }
+    .title { font-size: 14px; font-weight: 600; }
+    .spacer { flex: 1; }
+    .right { display: flex; align-items: center; gap: 8px; }
+    .icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
+    .bell { position: relative; }
+    .badge { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; border-radius: 99px; background: #dc2626; color: #fff; font-size: 8px; font-weight: 700; display: grid; place-items: center; }
+    .me { width: 32px; height: 32px; border-radius: 50%; background: #1c1c1c; }
+
+    .stack { display: flex; align-items: center; }
+    .stack .face { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #d4d4d4; background: #27272a; box-shadow: 0 0 0 2px #0c0c0c; position: relative; margin-left: -8px; }
+    .stack .face:first-child { margin-left: 0; }
+    .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; right: 0; bottom: 0; box-shadow: 0 0 0 2px #0c0c0c; }
+
+    .cluster { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px 0 4px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 0 24px -12px rgba(212,175,55,.45); }
+    .cluster .faces { display: flex; align-items: center; }
+    .cluster .face { width: 32px; height: 32px; border-radius: 50%; margin-left: -10px; box-shadow: 0 0 0 1.5px #0a0a0a; background: #161616; color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .08em; display: grid; place-items: center; overflow: hidden; position: relative; }
+    .cluster .face:first-child { margin-left: 0; }
+    .cluster .face.photo { background: #2a2a2a; }
+    .cluster .face.photo::after { content: ""; position: absolute; inset: -12%; background: radial-gradient(circle at 40% 30%, #5a5a5a, #1a1a1a); }
+    .tally { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+    .roster { margin: 0 14px 16px; background: #161616; border: 1px solid var(--border); border-radius: 10px; padding: 8px; width: 240px; }
+    .roster-h { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; }
+    .roster-h span { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .live { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 6px; }
+    .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: block; }
+    .row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; }
+    .row .av { width: 32px; height: 32px; border-radius: 50%; background: #161616; color: var(--gold); font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+    .row b { font-size: 13px; font-weight: 600; flex: 1; }
+    .tu { font-size: 11px; font-weight: 600; color: var(--gold); }
+    .note { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .note b { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Cabecera</p>
+    <h1>Cluster de estudio, con luz de tally</h1>
+    <p class="sub">Las caras se juntan en una pastilla. Una sola luz dorada dice que hay gente en vivo — ya no un puntito verde en cada avatar.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Antes</h2>
+        <div class="bar">
+          <span class="title">Inicio</span>
+          <div class="stack">
+            <span class="face" style="z-index:2"><span class="dot"></span></span>
+            <span class="face" style="z-index:1">VM<span class="dot"></span></span>
+          </div>
+          <div class="spacer"></div>
+          <div class="right">
+            <span class="icon bell">🔔<span class="badge">6</span></span>
+            <span class="me"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ahora</h2>
+        <div class="bar">
+          <span class="title">Inicio</span>
+          <div class="cluster">
+            <div class="faces">
+              <span class="face photo" style="z-index:2"></span>
+              <span class="face" style="z-index:1">VM</span>
+            </div>
+            <span class="tally"></span>
+          </div>
+          <div class="spacer"></div>
+          <div class="right">
+            <span class="icon bell">🔔<span class="badge">6</span></span>
+            <span class="me"></span>
+          </div>
+        </div>
+        <div class="roster">
+          <div class="roster-h">
+            <span>En el estudio</span>
+            <span class="live"><i></i> En vivo</span>
+          </div>
+          <div class="row">
+            <span class="av">AD</span>
+            <b>Ana Díaz</b>
+            <span class="tu">Tú</span>
+          </div>
+          <div class="row">
+            <span class="av">VM</span>
+            <b>Valeria Mendez</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">Pulsa el cluster en el dashboard para ver la lista. La luz dorada es la misma idea que el tally de una cámara: hay sesión abierta.</p>
+  </div>
+</body>
+</html>

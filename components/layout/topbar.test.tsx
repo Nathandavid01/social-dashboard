@@ -6,10 +6,6 @@ vi.mock('@/components/layout/mobile-nav', () => ({
   MobileNav: () => <div data-testid="mobile-nav">Mobile Nav</div>,
 }))
 
-vi.mock('@/components/shared/theme-toggle', () => ({
-  ThemeToggle: () => <div data-testid="theme-toggle">Theme Toggle</div>,
-}))
-
 vi.mock('@/components/auth/user-menu', () => ({
   UserMenu: () => <div data-testid="user-menu">User Menu</div>,
 }))
@@ -31,9 +27,10 @@ describe('Topbar', () => {
     avatar_url: null,
   }
 
-  it('renders theme toggle, notification bell, and user menu', () => {
+  it('renders notification bell and user menu without a header theme toggle', () => {
     render(<Topbar currentUser={mockUser} />)
-    expect(screen.getByTestId('theme-toggle')).toBeInTheDocument()
+    expect(screen.queryByTestId('theme-toggle')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /toggle theme/i })).not.toBeInTheDocument()
     expect(screen.getByTestId('notification-bell')).toBeInTheDocument()
     expect(screen.getByTestId('user-menu')).toBeInTheDocument()
   })

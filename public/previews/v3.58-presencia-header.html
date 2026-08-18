@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.58 — Presencia en la barra</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --header:#0c0c0c; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; letter-spacing: -.02em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 28px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .card h2 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; padding: 12px 14px 0; }
+    .bar { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 14px; margin: 14px; background: var(--header); border: 1px solid var(--border); border-radius: 12px; }
+    .title { font-size: 14px; font-weight: 600; }
+    .spacer { flex: 1; }
+    .right { display: flex; align-items: center; gap: 8px; }
+    .icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--fg); }
+    .bell { position: relative; }
+    .badge { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; border-radius: 99px; background: #dc2626; color: #fff; font-size: 8px; font-weight: 700; display: grid; place-items: center; }
+    .me { width: 32px; height: 32px; border-radius: 50%; background: #1c1c1c; overflow: hidden; }
+    .me img { width: 100%; height: 100%; object-fit: cover; }
+
+    .chips { display: flex; align-items: center; gap: 8px; }
+    .pill { display: flex; align-items: center; gap: 6px; border-radius: 999px; background: rgba(255,255,255,.06); padding: 2px 10px 2px 3px; font-size: 12px; font-weight: 500; }
+    .pill.you { box-shadow: inset 0 0 0 1px rgba(212,175,55,.55); }
+    .av { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 700; position: relative; }
+    .av.photo { background: #2a2a2a; box-shadow: 0 0 0 3px #fff; }
+    .av.initials { background: var(--gold); color: #111; }
+    .dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; right: -1px; bottom: -1px; box-shadow: 0 0 0 2px #0c0c0c; }
+
+    .stack { display: flex; align-items: center; }
+    .stack .face { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #d4d4d4; background: #27272a; box-shadow: 0 0 0 2px #0c0c0c; position: relative; margin-left: -8px; }
+    .stack .face:first-child { margin-left: 0; }
+    .stack .face.photo { background: #3f3f46; }
+    .stack .dot { width: 6px; height: 6px; right: 0; bottom: 0; }
+
+    .roster { margin: 0 14px 16px; background: #161616; border: 1px solid var(--border); border-radius: 10px; padding: 8px; width: 224px; }
+    .roster p { margin: 0; padding: 6px 8px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; }
+    .row .face { width: 28px; height: 28px; margin: 0; box-shadow: none; }
+    .row b { font-size: 13px; font-weight: 600; flex: 1; }
+    .tu { font-size: 11px; font-weight: 600; color: var(--gold); }
+
+    .menu { margin: 0 14px 16px auto; background: #161616; border: 1px solid var(--border); border-radius: 10px; padding: 6px; width: 220px; }
+    .menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; border-radius: 6px; }
+    .menu-item.hi { background: rgba(255,255,255,.06); }
+
+    .note { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .note b { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Cabecera</p>
+    <h1>Presencia compacta, más aire a la derecha</h1>
+    <p class="sub">El stack de avatares sustituye las pastillas con nombre. El tema se cambia desde el menú de tu foto, no con la luna de la barra.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Antes</h2>
+        <div class="bar">
+          <span class="title">Inicio</span>
+          <div class="chips">
+            <div class="pill you">
+              <span class="av photo"><span class="dot"></span></span>
+              Tú
+            </div>
+            <div class="pill">
+              <span class="av initials">VM<span class="dot"></span></span>
+              Valeria
+            </div>
+          </div>
+          <div class="spacer"></div>
+          <div class="right">
+            <span class="icon bell">🔔<span class="badge">6</span></span>
+            <span class="icon">☾</span>
+            <span class="me"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ahora</h2>
+        <div class="bar">
+          <span class="title">Inicio</span>
+          <div class="stack">
+            <span class="face photo" style="z-index:2"><span class="dot"></span></span>
+            <span class="face" style="z-index:1">VM<span class="dot"></span></span>
+          </div>
+          <div class="spacer"></div>
+          <div class="right">
+            <span class="icon bell">🔔<span class="badge">6</span></span>
+            <span class="me"></span>
+          </div>
+        </div>
+        <div class="roster">
+          <p>En el estudio</p>
+          <div class="row">
+            <span class="face photo"></span>
+            <b>Ana Díaz</b>
+            <span class="tu">Tú</span>
+          </div>
+          <div class="row">
+            <span class="face">VM</span>
+            <b>Valeria Mendez</b>
+          </div>
+        </div>
+        <div class="menu">
+          <div class="menu-item">Novedades</div>
+          <div class="menu-item hi">☀ Tema claro</div>
+          <div class="menu-item">Cerrar sesión</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">En el dashboard real pulsa el stack para ver quién está conectado. El tema sigue disponible en el menú de tu avatar: <b>Tema claro</b> si estás en oscuro.</p>
+  </div>
+</body>
+</html>

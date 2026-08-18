@@ -4,6 +4,36 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.60 — 2026-08-18
+
+**La campana ya no parpadea por avisos viejos: el rojo late solo si acaba de pasar algo.**
+
+- El número sigue siendo lo que tienes **sin leer**.
+- El ping rojo y el temblor de la campana **solo salen si el aviso es de los últimos minutos** y aún no abriste la lista. Abrirla apaga la alarma (los sin leer siguen ahí hasta que los marques).
+- Si llega un aviso nuevo de verdad (subida, aprobación, etc.), vuelve a latir.
+
+Vista: [preview HTML](/previews/v3.60-campana-actividad.html)
+
+## v3.59 — 2026-08-18
+
+**Quién está en el estudio se ve como un cluster de estudio: caras juntas y una luz dorada de “en vivo”.**
+
+- El montón de avatares va dentro de una pastilla oscura, con más overlap. Las fotos se recortan para que no se vea el aro blanco de la imagen.
+- Las iniciales salen en dorado sobre negro, no en gris ni en amarillo plano.
+- En vez de un puntito verde en cada cara, hay **una sola luz de tally** (como en cámara) que late suave. En la lista aparece **En vivo**.
+
+Vista: [preview HTML](/previews/v3.59-presencia-cluster.html)
+
+## v3.58 — 2026-08-18
+
+**Quién está en el estudio se ve como un stack de avatares — y la luna del tema ya no ocupa sitio en la barra.**
+
+- Arriba, junto al título, las personas conectadas salen en un **montón compacto de fotos**, todas del mismo tamaño, con el puntito verde igual para todos. Ya no hay una pastilla dorada solo para “Tú” ni nombres al lado que estiran la barra.
+- Al pulsar el stack se abre la lista: nombre completo, y **Tú** solo como etiqueta suave junto a tu fila.
+- El botón de **luna / sol** salió de la cabecera. El tema se cambia desde el menú de tu foto: **Tema claro** / **Tema oscuro**. El estudio sigue en oscuro por defecto.
+
+Vista: [preview HTML](/previews/v3.58-presencia-header.html)
+
 ## v3.57 — 2026-08-16
 
 **Jornada: ya se ve cuánto tiempo está cada persona en el dashboard — como un ranking de estudio, no un reloj de fichar.**

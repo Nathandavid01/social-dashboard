@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
 interface PresenceUser {
@@ -20,7 +25,7 @@ interface Props {
 const PRESENCE_CHANNEL = 'nm-presence-global'
 const MAX_VISIBLE = 5
 
-function initials(name: string | null | undefined): string {
+export function initials(name: string | null | undefined): string {
   if (!name) return '?'
   return name
     .split(' ')
@@ -28,6 +33,10 @@ function initials(name: string | null | undefined): string {
     .slice(0, 2)
     .join('')
     .toUpperCase()
+}
+
+export function estudioLabel(count: number): string {
+  return count === 1 ? '1 persona en el estudio' : `${count} personas en el estudio`
 }
 
 export function PresenceBar({ currentUser }: Props) {
@@ -107,55 +116,103 @@ export function PresenceBar({ currentUser }: Props) {
   const extra = users.length - MAX_VISIBLE
 
   return (
-    <TooltipProvider delayDuration={150}>
-      <div className="flex items-center gap-2">
-        {visible.map((u, i) => (
-          <Tooltip key={u.id}>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  'group flex items-center gap-1.5 rounded-full bg-muted/40 py-0.5 pl-0.5 pr-2.5 transition-colors hover:bg-muted',
-                  'animate-in fade-in slide-in-from-left-1 duration-300',
-                  u.id === currentUser.id && 'ring-1 ring-primary/40',
-                )}
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'backwards' }}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={estudioLabel(users.length)}
+          className={cn(
+            'group flex h-9 shrink-0 items-center gap-2 rounded-full',
+            'border border-white/[0.07] bg-white/[0.035] pl-1 pr-2.5',
+            'outline-none transition-[border-color,background-color,box-shadow] duration-200',
+            'hover:border-primary/30 hover:bg-white/[0.055] hover:shadow-[0_0_20px_-8px_hsl(var(--primary)/0.55)]',
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          )}
+        >
+          <span className="flex items-center -space-x-2.5 motion-safe:transition-[margin] group-hover:-space-x-1.5">
+            {visible.map((u, i) => (
+              <PresenceFace
+                key={u.id}
+                user={u}
+                zIndex={visible.length - i}
+                ringClass="ring-[1.5px] ring-background"
+              />
+            ))}
+            {extra > 0 ? (
+              <span
+                className="relative z-0 grid h-8 w-8 place-items-center rounded-full bg-[#141414] text-[10px] font-semibold tracking-tight text-primary ring-[1.5px] ring-background"
+                aria-hidden
               >
-                <div className="relative">
-                  <Avatar className="h-6 w-6 transition-transform group-hover:scale-110">
-                    {u.avatar_url ? <AvatarImage src={u.avatar_url} alt={u.full_name ?? 'Usuario'} /> : null}
-                    <AvatarFallback className="text-[10px] font-semibold">{initials(u.full_name)}</AvatarFallback>
-                  </Avatar>
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" />
-                  </span>
-                </div>
-                <span className="hidden text-xs font-medium sm:inline">
-                  {u.id === currentUser.id ? 'Tú' : (u.full_name?.split(' ')[0] ?? 'Usuario')}
-                </span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p className="font-medium">{u.full_name ?? 'Usuario'}</p>
-              <p className="text-[10px] text-muted-foreground">
-                {u.id === currentUser.id ? 'Tú · conectado' : 'Conectado ahora'}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-        {extra > 0 && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="grid h-7 min-w-[28px] place-items-center rounded-full bg-muted px-2 text-[10px] font-semibold text-muted-foreground">
                 +{extra}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p>{extra} más conectado{extra === 1 ? '' : 's'}</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-    </TooltipProvider>
+              </span>
+            ) : null}
+          </span>
+          <span
+            data-presence="tally"
+            className="relative grid h-2 w-2 place-items-center"
+            aria-hidden
+          >
+            <span className="absolute inset-0 rounded-full bg-primary/35 motion-safe:animate-ping" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.9)]" />
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-60 p-1.5">
+        <DropdownMenuLabel className="flex items-center justify-between px-2 py-1.5">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            En el estudio
+          </span>
+          <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+            En vivo
+          </span>
+        </DropdownMenuLabel>
+        <ul className="flex flex-col gap-0.5">
+          {users.map((u) => {
+            const isYou = u.id === currentUser.id
+            return (
+              <li key={u.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
+                <PresenceFace user={u} />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium tracking-tight">
+                  {u.full_name ?? 'Usuario'}
+                </span>
+                {isYou ? (
+                  <span className="shrink-0 text-[11px] font-medium text-primary">Tú</span>
+                ) : (
+                  <span className="sr-only">Conectado ahora</span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function PresenceFace({
+  user,
+  zIndex,
+  ringClass,
+}: {
+  user: PresenceUser
+  zIndex?: number
+  ringClass?: string
+}) {
+  return (
+    <span className="relative inline-flex" style={zIndex == null ? undefined : { zIndex }}>
+      <Avatar className={cn('h-8 w-8', ringClass)}>
+        {user.avatar_url ? (
+          <AvatarImage
+            src={user.avatar_url}
+            alt=""
+            className="object-cover object-center scale-[1.18]"
+          />
+        ) : null}
+        <AvatarFallback className="bg-[#161616] text-[10px] font-semibold tracking-[0.08em] text-primary">
+          {initials(user.full_name)}
+        </AvatarFallback>
+      </Avatar>
+    </span>
   )
 }

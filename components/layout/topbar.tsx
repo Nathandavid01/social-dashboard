@@ -1,7 +1,6 @@
 'use client'
 
 import { MobileNav } from './mobile-nav'
-import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { UserMenu } from '@/components/auth/user-menu'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { PresenceBar } from '@/components/presence/presence-bar'
@@ -29,7 +28,6 @@ export function Topbar({
         {currentUser && (
           <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} />
         )}
-        <ThemeToggle />
         <UserMenu />
       </div>
     </header>
