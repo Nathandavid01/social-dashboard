@@ -41,7 +41,7 @@ export interface VideoAnalysisIssue { quote: string; problem: string; suggestion
 
 export interface VideoAnalysisFindings {
   burned_captions: { text: string; issues: VideoAnalysisIssue[] }
-  relevance: { verdict: 'ok' | 'warning'; explanation: string }
+  relevance: { verdict: 'ok' | 'warning'; explanation: string; confidence?: number }
   visual_summary: string
   /** Una o dos frases factuales, en español, de qué ES el video —
    *  combinando lo que se VE en los fotogramas y lo que se DICE en la
@@ -90,14 +90,14 @@ IMPORTANTE — CAMBIO DE PANTALLA / CORTE: cuando el video corta de una escena a
 
 TAREAS (en este orden):
 1. CAPTIONS QUEMADOS: transcribe el texto que aparece EN PANTALLA dentro del video (subtítulos/captions integrados), fotograma por fotograma. Señala SOLO faltas objetivas en captions completos y legibles: ortografía, tildes, concordancia, typos. NO marques como error una letra incompleta, una palabra cortada o un texto a medias en un cambio de pantalla. IMPORTANTE: el español puertorriqueño, los anglicismos y el slang deliberado de la voz de marca NO son errores — no los "corrijas". Cuando puedas, incluye en cada issue el segundo aproximado ("t") donde aparece el error, tomándolo de la etiqueta "--- Fotograma N · t=Xs ---" que precede a cada imagen.
-2. RELEVANCIA: ¿el contenido del video corresponde a este cliente y a esta idea? "ok" si claramente sí; "warning" si no se ve relación o parece de otro cliente, explicando por qué.
+2. RELEVANCIA: ¿el contenido del video corresponde a este cliente y a esta idea? "ok" si claramente sí; "warning" si no se ve relación o parece de otro cliente, explicando por qué. Incluye "confidence" 0-100: qué tan seguro estás de ese veredicto.
 3. RESUMEN VISUAL: describe en 2-4 frases qué se ve (escenas, personas, acciones, tono, texto destacado) para que un copywriter escriba el caption sin ver el video.
 4. DE QUÉ ES EL VIDEO: escribe una o dos frases, en español, factuales, tal como las escribiría alguien del equipo en la casilla "¿De qué es este video?" para explicarle a un copywriter de qué va el video — combinando lo que se VE en los fotogramas y lo que se DICE en la transcripción del audio (cuando la hay). Si choca lo que se dice con lo que se intuye de las imágenes, lo que se dice manda sobre lo que se ve. Ej.: "Cómo sellar una picanha en parrilla Santa María con roble rojo". NO es el resumen visual técnico de la tarea anterior (que describe la escena para el reporte), no es marketing ni es el caption: es el DATO factual del contenido, tal cual lo escribiría una persona del equipo que vio y escuchó el video.
 
 Devuelve SOLO este JSON, sin explicaciones fuera de él:
 {
   "burned_captions": { "text": "...", "issues": [{ "quote": "...", "problem": "...", "suggestion": "...", "t": "0.3s" }] },
-  "relevance": { "verdict": "ok" | "warning", "explanation": "..." },
+  "relevance": { "verdict": "ok" | "warning", "confidence": 0-100, "explanation": "..." },
   "visual_summary": "...",
   "video_topic": "..."
 }`
@@ -173,17 +173,33 @@ export function parseVideoAnalysisResponse(json: unknown): VideoAnalysisFindings
           ...(typeof i.t === 'string' ? { t: i.t } : {}),
         }))
     : []
-  const rel = (r.relevance ?? {}) as { verdict?: unknown; explanation?: unknown }
+  const rel = (r.relevance ?? {}) as { verdict?: unknown; explanation?: unknown; confidence?: unknown }
+  const confidence = parseConfidence(rel.confidence)
 
   return {
     burned_captions: { text: typeof bc.text === 'string' ? bc.text : '', issues },
     relevance: {
       verdict: rel.verdict === 'ok' ? 'ok' : 'warning',
       explanation: typeof rel.explanation === 'string' ? rel.explanation : '',
+      ...(confidence !== undefined ? { confidence } : {}),
     },
     visual_summary: typeof r.visual_summary === 'string' ? r.visual_summary : '',
     ...(typeof r.video_topic === 'string' && r.video_topic.trim() ? { video_topic: r.video_topic } : {}),
   }
+}
+
+function parseConfidence(raw: unknown): number | undefined {
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN
+  if (!Number.isFinite(n)) return undefined
+  return Math.round(Math.min(100, Math.max(0, n)))
+}
+
+/** % de confiabilidad del veredicto de cliente. Si el modelo no mandó cifra, ok→90 / warning→45. */
+export function relevanceConfidence(rel: { verdict: 'ok' | 'warning'; confidence?: number }): number {
+  if (typeof rel.confidence === 'number' && Number.isFinite(rel.confidence)) {
+    return Math.round(Math.min(100, Math.max(0, rel.confidence)))
+  }
+  return rel.verdict === 'ok' ? 90 : 45
 }
 
 /** Concatena dos fragmentos de texto sin repetir si b ya es sufijo/igual de a. */
@@ -269,7 +285,10 @@ export function mergeVideoAnalysisFindings(
       text: mergeText(a.burned_captions.text, b.burned_captions.text),
       issues: mergedIssues,
     },
-    relevance: a.relevance.verdict === 'warning' ? a.relevance : b.relevance,
+    relevance: {
+      ...(a.relevance.verdict === 'warning' ? a.relevance : b.relevance),
+      confidence: Math.min(relevanceConfidence(a.relevance), relevanceConfidence(b.relevance)),
+    },
     visual_summary: mergeText(a.visual_summary, b.visual_summary),
     ...(mergedTopic ? { video_topic: mergedTopic } : {}),
   }

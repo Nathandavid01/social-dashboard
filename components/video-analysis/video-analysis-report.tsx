@@ -5,6 +5,19 @@ import { CheckCircle2, AlertTriangle, Loader2, EyeOff, ChevronDown } from 'lucid
 import { cn } from '@/lib/utils'
 import { useVideoAnalysisPolling } from '@/lib/hooks/use-video-analysis-polling'
 
+export function burnedCaptionsRow(input: { text: string; issues: unknown[] }): {
+  ok: boolean
+  detail: string
+  missing: boolean
+} {
+  const hasText = input.text.trim().length > 0
+  if (!hasText && input.issues.length === 0) {
+    return { ok: false, detail: 'No tiene captions', missing: true }
+  }
+  if (input.issues.length === 0) return { ok: true, detail: 'Sin errores', missing: false }
+  return { ok: false, detail: `${input.issues.length} a revisar`, missing: false }
+}
+
 /**
  * Reporte ADVISORY del QC IA (Grok 4.6). Solo superficies internas — nunca
  * montarlo en /review/<token> ni /aprobacion (links públicos de cliente).
@@ -35,7 +48,7 @@ export function VideoAnalysisReport({ ideaId }: { ideaId: string }) {
   }
 
   const f = analysis.findings
-  const captionsOk = f.burned_captions.issues.length === 0
+  const captions = burnedCaptionsRow(f.burned_captions)
   const relevanceOk = f.relevance.verdict === 'ok'
 
   const Row = ({ ok, label, detail }: { ok: boolean; label: string; detail: string }) => (
@@ -55,15 +68,18 @@ export function VideoAnalysisReport({ ideaId }: { ideaId: string }) {
   return (
     <div className="space-y-2 rounded-lg border bg-card p-3 animate-in fade-in slide-in-from-bottom-1 duration-300">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">QC con IA (advisory)</p>
-      <Row ok={captionsOk} label="Captions del video" detail={captionsOk ? 'Sin errores' : `${f.burned_captions.issues.length} a revisar`} />
+      <Row ok={captions.ok} label="Captions del video" detail={captions.detail} />
       <Row ok={relevanceOk} label="Relevancia" detail={relevanceOk ? 'Relevante para el cliente' : 'Revisar'} />
-      {(!captionsOk || !relevanceOk || f.visual_summary) && (
+      {(!captions.ok || !relevanceOk || f.visual_summary) && (
         <button type="button" onClick={() => setOpen((o) => !o)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
           <ChevronDown className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} /> Detalles
         </button>
       )}
       {open && (
         <div className="space-y-2 text-xs">
+          {captions.missing && (
+            <p className="rounded-md bg-amber-500/10 px-2 py-1.5">Este video no tiene captions quemados.</p>
+          )}
           {f.burned_captions.issues.map((i, n) => (
             <p key={n} className="rounded-md bg-amber-500/10 px-2 py-1.5">
               «{i.quote}» — {i.problem}. Sugerencia: <span className="font-medium">{i.suggestion}</span>

@@ -5,13 +5,8 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SubmitVideoCard } from './submit-video-card'
 import { useSubmitVideos } from './use-submit-videos'
-import { etiquetaDia, diaDePublicacion, fechaDeEntrega, type DiaKey } from '@/lib/entregas/dias'
-
-/** '11 ago' — con el día solo no se distingue una semana de la siguiente. */
-function fechaCorta(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d, 12).toLocaleDateString('es', { day: 'numeric', month: 'short' })
-}
+import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
+import type { DiaKey } from '@/lib/entregas/dias'
 
 /**
  * The real Editado column slot: the submit form plus per-video progress while
@@ -76,6 +71,10 @@ export function EditorSubmitSlot({
               )}
 
               {r.error && <p className="text-[10px] text-destructive">{r.error}</p>}
+
+              {r.stage === 'listo' && r.ideaId && (
+                <QcProgressDots ideaId={r.ideaId} videoId={r.videoId} />
+              )}
             </li>
           ))}
 

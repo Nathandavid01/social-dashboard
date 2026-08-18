@@ -24,6 +24,24 @@ describe('VideoAnalysisReport', () => {
     expect(screen.getByText(/no se menciona al cliente/)).toBeInTheDocument()
   })
 
+  it('done sin captions quemados: dice que no tiene captions, no "Sin errores"', async () => {
+    mockGet.mockResolvedValue({
+      analysis: {
+        status: 'done',
+        findings: {
+          ...findings,
+          burned_captions: { text: '   ', issues: [] },
+          relevance: { verdict: 'ok', explanation: 'coincide' },
+        },
+        hasCaption: true,
+      },
+    })
+    render(<VideoAnalysisReport ideaId="i1" />)
+    await waitFor(() => expect(screen.getByText('No tiene captions')).toBeInTheDocument())
+    expect(screen.queryByText(/Sin errores/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Este video no tiene captions quemados/i)).toBeInTheDocument()
+  })
+
   it('done sin issues y relevancia ok: muestra ambos checks en verde', async () => {
     mockGet.mockResolvedValue({
       analysis: {

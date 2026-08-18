@@ -15,6 +15,8 @@ let analysisByVideoId: { data: unknown; error: unknown } = { data: null, error: 
 let analysisNewestForIdea: { data: unknown; error: unknown } = { data: null, error: null }
 let ideaResult: { data: unknown; error: unknown } = { data: null, error: null }
 
+let profileResult: { data: unknown; error: unknown } = { data: null, error: null }
+
 function videoChain(result: { data: unknown; error: unknown }) {
   const self: Record<string, unknown> = {
     select: () => self,
@@ -68,6 +70,7 @@ vi.mock('@/lib/supabase/server', () => ({
       if (table === 'content_idea_videos') return videoChain(videoResult)
       if (table === 'content_idea_video_analysis') return analysisChain()
       if (table === 'content_ideas') return ideaChain(ideaResult)
+      if (table === 'profiles') return ideaChain(profileResult)
       throw new Error(`unexpected table ${table}`)
     },
   }),
@@ -83,6 +86,7 @@ beforeEach(() => {
   ideaResult = { data: null, error: null }
   analysisFromCallIndex = 0
   analysisFrameCountResult = { data: null, error: null }
+  profileResult = { data: null, error: null }
 })
 
 const DONE_FINDINGS = { burned_captions: { text: '', issues: [] }, relevance: { verdict: 'ok', explanation: '' }, visual_summary: null }
@@ -195,6 +199,33 @@ describe('getVideoAnalysis', () => {
       const res = await getVideoAnalysis('idea-1')
       expect(res.analysis?.status).toBe('done')
       expect(res.analysis?.frameCount).toBeNull()
+    })
+  })
+
+  describe('uploadedBy (quién lo subió)', () => {
+    beforeEach(() => {
+      videoResult = { data: { id: 'video-2', uploaded_by: 'user-9' }, error: null }
+      analysisByVideoId = { data: { status: 'done', findings: DONE_FINDINGS }, error: null }
+      ideaResult = { data: { caption_draft: null, generated_caption: null }, error: null }
+    })
+
+    it('perfil con full_name → analysis.uploadedBy es el nombre', async () => {
+      profileResult = { data: { full_name: 'María Editor' }, error: null }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.uploadedBy).toBe('María Editor')
+    })
+
+    it('sin uploaded_by → uploadedBy: null, no consulta profiles', async () => {
+      videoResult = { data: { id: 'video-2', uploaded_by: null }, error: null }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.uploadedBy).toBeNull()
+    })
+
+    it('error leyendo profiles → uploadedBy: null, sin tumbar el análisis', async () => {
+      profileResult = { data: null, error: { message: 'db down' } }
+      const res = await getVideoAnalysis('idea-1')
+      expect(res.analysis?.status).toBe('done')
+      expect(res.analysis?.uploadedBy).toBeNull()
     })
   })
 })

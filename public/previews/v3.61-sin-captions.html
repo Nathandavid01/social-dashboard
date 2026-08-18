@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.61 — QC sin captions</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --amber:#d97706; --ok:#059669; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+    .card h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .box { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #0c0c0c; }
+    .lab { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; margin: 6px 0; }
+    .ok { color: var(--ok); font-size: 10px; }
+    .warn { color: var(--amber); font-size: 10px; }
+    .note { margin-top: 8px; font-size: 12px; background: rgba(217,119,6,.12); border-radius: 8px; padding: 8px 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Entregas · QC con IA</p>
+    <h1>Si no hay captions, lo dice</h1>
+    <p class="sub">Antes, un video sin texto quemado salía “Sin errores”. Ahora avisa en ámbar.</p>
+    <div class="grid">
+      <div class="card">
+        <h2>Antes</h2>
+        <div class="box">
+          <p class="lab">QC con IA (advisory)</p>
+          <div class="row"><span>Captions del video</span><span class="ok">Sin errores</span></div>
+          <div class="row"><span>Relevancia</span><span class="ok">Relevante para el cliente</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Ahora</h2>
+        <div class="box">
+          <p class="lab">QC con IA (advisory)</p>
+          <div class="row"><span>Captions del video</span><span class="warn">No tiene captions</span></div>
+          <div class="row"><span>Relevancia</span><span class="ok">Relevante para el cliente</span></div>
+          <p class="note">Este video no tiene captions quemados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

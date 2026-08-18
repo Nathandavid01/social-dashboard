@@ -49,6 +49,7 @@ export type SubmitStage = 'creando' | 'subiendo' | 'registrando' | 'listo' | 'er
 export interface SubmitResult {
   ok: boolean
   ideaId?: string
+  videoId?: string
   stage: SubmitStage
   error?: string
 }
@@ -113,12 +114,11 @@ export async function submitOneVideo(
       file: input.file,
     })
     if (reg.error) return { ok: false, ideaId, stage: 'registrando', error: reg.error }
+    onProgress('listo', 100)
+    return { ok: true, ideaId, videoId: reg.id, stage: 'listo' }
   } catch (err) {
     return { ok: false, ideaId, stage: 'registrando', error: msg(err) }
   }
-
-  onProgress('listo', 100)
-  return { ok: true, ideaId, stage: 'listo' }
 }
 
 function msg(err: unknown): string {

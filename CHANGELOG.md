@@ -4,6 +4,28 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.62 — 2026-08-18
+
+**Cada video que sube por Editado muestra 5 checks: cliente, captions, quién lo subió, errores y fotogramas.**
+
+- En cuanto queda **Listo**, aparece el checklist (no solo “Listo”).
+- **Del cliente** incluye el % de confiabilidad de la IA.
+- **Captions** dice si hay texto quemado, si está limpio o si hay errores.
+- **Lo subió** sale con el nombre de quien lo mandó.
+- **Errores** y **fotogramas** siempre se ven, aunque todavía se estén extrayendo.
+
+Vista: [preview HTML](/previews/v3.62-qc-checklist.html)
+
+## v3.61 — 2026-08-18
+
+**Si el video no tiene captions, el QC lo dice — ya no sale “Sin errores” en verde.**
+
+- En Entregas, la fila **Captions del video** ahora muestra **No tiene captions** (ámbar) cuando la IA no leyó texto quemado.
+- En Detalles: “Este video no tiene captions quemados.”
+- Si sí hay captions y están bien, sigue saliendo **Sin errores**.
+
+Vista: [preview HTML](/previews/v3.61-sin-captions.html)
+
 ## v3.60 — 2026-08-18
 
 **La campana ya no parpadea por avisos viejos: el rojo late solo si acaba de pasar algo.**
