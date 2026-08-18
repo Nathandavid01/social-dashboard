@@ -55,6 +55,8 @@ let supa = makeSupabase()
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => supa }))
 
 import { recordHeartbeat, getTeamTimeBoard } from './presence'
+import { PRESENCE_TZ } from '@/lib/utils/presence-core'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 
 beforeEach(() => {
   user = { id: 'u1' }
@@ -109,13 +111,14 @@ describe('getTeamTimeBoard', () => {
   })
 
   it('arma el ranking de la semana', async () => {
+    const today = todayISOInTimeZone(PRESENCE_TZ)
     people = [
       { id: 'u1', full_name: 'Ana', avatar_url: null },
       { id: 'u2', full_name: 'Beto', avatar_url: null },
     ]
     rows = [
-      { user_id: 'u2', day: '2026-08-16', active_seconds: 4000, last_beat_at: null },
-      { user_id: 'u1', day: '2026-08-16', active_seconds: 1200, last_beat_at: null },
+      { user_id: 'u2', day: today, active_seconds: 4000, last_beat_at: null },
+      { user_id: 'u1', day: today, active_seconds: 1200, last_beat_at: null },
     ]
     const out = await getTeamTimeBoard()
     expect(out.members.map((m) => m.user_id)).toEqual(['u2', 'u1'])
