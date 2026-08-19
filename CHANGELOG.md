@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.63 — 2026-08-19
+
+**Los días de publicación son los del perfil: al aprobar, cada video toma el siguiente hueco (lunes, miércoles, viernes…).**
+
+- En el perfil del cliente, los chips de **días de posting** mandan en toda la app: tarjetas de la semana, próxima publicación, y la parrilla de Producción (se sincroniza sola).
+- Si subes varios videos y los vas aprobando, el primero llena el próximo día de cadencia, el siguiente el que sigue, y así. No se pisan.
+- Si eliges una fecha que no es día de posting de ese cliente, te avisa: “Ese día el cliente no publica”.
+
+Vista: [preview HTML](/previews/v3.63-posting-days.html)
+
 ## v3.62 — 2026-08-18
 
 **Cada video que sube por Editado muestra 5 checks: cliente, captions, quién lo subió, errores y fotogramas.**

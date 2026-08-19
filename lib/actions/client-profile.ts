@@ -11,6 +11,7 @@ import {
   type PaymentInput,
 } from '@/lib/validations/client-profile.schema'
 import type { ClientAsset, ClientAssetKind, ClientPayment } from '@/lib/supabase/types'
+import { syncSchedulesToPostingDays } from '@/lib/actions/sync-posting-cadence'
 
 /**
  * The fields in `clients` are gated by different permissions:
@@ -70,6 +71,10 @@ export async function updateClientProfile(clientId: string, input: ClientProfile
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq('id', clientId)
   if (error) return { error: error.message }
+
+  if (Array.isArray(patch.posting_days)) {
+    await syncSchedulesToPostingDays(supabase, clientId, patch.posting_days)
+  }
 
   revalidatePath(`/clients/${clientId}`)
   revalidatePath('/clients')

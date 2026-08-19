@@ -15,6 +15,7 @@ import {
   type CadenceType,
   type NextAutopostFacts,
 } from '@/lib/utils/next-autopost-core'
+import { cadenceRowsFromPostingDays } from '@/lib/utils/posting-days-sot'
 
 /** What the UI needs to show "when/where this video will publish" + default the date. */
 export interface NextAutopostNotice {
@@ -45,7 +46,8 @@ const cachedNotice = unstable_cache(
 
 /**
  * For each given client, compute "when/where their next post is scheduled" from
- * their weekly cadence (production_schedules) + platforms, and phrase it with AI.
+ * their weekly cadence (`clients.posting_days`, plus Reel/Post from
+ * production_schedules) + platforms, and phrase it with AI.
  * Clients with no cadence are omitted. Batched DB reads; AI is cached per post.
  * Degrades to {} on any error so the calling page never breaks.
  */
@@ -61,7 +63,7 @@ export async function getNextAutopostNotices(
     const today = todayISOInTimeZone(POST_TZ)
 
     const [clientsRes, schedulesRes] = await Promise.all([
-      supabase.from('clients').select('id, name, platforms, default_platforms').in('id', ids),
+      supabase.from('clients').select('id, name, platforms, default_platforms, posting_days').in('id', ids),
       supabase.from('production_schedules').select('client_id, day_of_week, content_type').in('client_id', ids),
     ])
     const clients = clientsRes.data
@@ -76,7 +78,10 @@ export async function getNextAutopostNotices(
 
     await Promise.all(
       clients.map(async (c) => {
-        const next = nextCadencePost(rowsByClient.get(c.id) ?? [], today)
+        const next = nextCadencePost(
+          cadenceRowsFromPostingDays((c.posting_days as number[] | null) ?? [], rowsByClient.get(c.id) ?? []),
+          today,
+        )
         if (!next) return
         const platforms = resolvePlatforms(
           c.platforms as string[] | null,

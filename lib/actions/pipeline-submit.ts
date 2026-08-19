@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { applyReviewDecision } from '@/lib/utils/internal-review'
+import { assignCadencePublishDate } from '@/lib/actions/claim-posting-slot'
 import type { ContentIdea, IdeaApprovalStatus } from '@/lib/supabase/types'
 
 /**
@@ -118,6 +119,10 @@ export async function decideReview(input: {
     })
     .eq('id', input.ideaId)
   if (error) return { error: error.message }
+
+  if (next === 'approved') {
+    await assignCadencePublishDate(supabase, input.ideaId)
+  }
 
   // El texto es lo unico que le dice al editor que corregir. Antes se exigia y
   // se tiraba: la tarjeta volvia con la etiqueta "Cambios pedidos" y nada mas.
