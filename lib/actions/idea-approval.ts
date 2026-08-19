@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { maybeAutoPostIdea, type AutoPostOutcome } from '@/lib/actions/idea-posting'
+import { assignCadencePublishDate } from '@/lib/actions/claim-posting-slot'
 import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string; autopost?: AutoPostOutcome }
@@ -98,7 +99,10 @@ export async function approveIdea(ideaId: string): Promise<Result> {
   // A fully-ready idea (caption + edited video) auto-posts to Metricool on its
   // planned date. Best-effort — never blocks or fails the approval. The outcome
   // rides back so the UI can say WHETHER it was scheduled (or why not).
-  if (res.ok) return { ...res, autopost: await maybeAutoPostIdea(ideaId) }
+  if (res.ok) {
+    await assignCadencePublishDate(supabase, ideaId)
+    return { ...res, autopost: await maybeAutoPostIdea(ideaId) }
+  }
   return res
 }
 

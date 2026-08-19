@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { requirePermission } from '@/lib/auth/server'
 import type { ProductionContentType, ProductionPriority, ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
+import { postingDaysFromIsoWeekdays } from '@/lib/utils/posting-days-sot'
 
 // ── Schedules ────────────────────────────────────────────────────────────────
 
@@ -44,7 +45,9 @@ export async function upsertProductionSchedules(
   }
 
   if (schedules.length === 0) {
+    await supabase.from('clients').update({ posting_days: [], updated_at: new Date().toISOString() }).eq('id', clientId)
     revalidatePath('/produccion')
+    revalidatePath(`/clients/${clientId}`)
     return { error: null }
   }
 
@@ -61,7 +64,13 @@ export async function upsertProductionSchedules(
       { onConflict: 'client_id,day_of_week,content_type' }
     )
 
+  if (!error) {
+    const postingDays = postingDaysFromIsoWeekdays(schedules.map((s) => s.day_of_week))
+    await supabase.from('clients').update({ posting_days: postingDays, updated_at: new Date().toISOString() }).eq('id', clientId)
+  }
+
   revalidatePath('/produccion')
+  revalidatePath(`/clients/${clientId}`)
   return { error: error?.message ?? null }
 }
 

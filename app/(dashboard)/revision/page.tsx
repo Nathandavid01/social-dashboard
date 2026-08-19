@@ -23,7 +23,7 @@ export default async function RevisionPage() {
 
   const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
-    supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time').eq('status', 'active').order('name'),
+    supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time, posting_days').eq('status', 'active').order('name'),
     getCurrentRole(),
     supabase.auth.getUser(),
   ])
@@ -49,7 +49,11 @@ export default async function RevisionPage() {
     role,
     user?.id ?? null,
     asignables,
-  ).map((c) => ({ id: c.id, name: c.name }))
+  ).map((c) => ({
+    id: c.id,
+    name: c.name,
+    postingDays: activeClients.find((a) => a.id === c.id)?.posting_days ?? [],
+  }))
 
   // Las correcciones de la última ronda, para enseñarlas en la tarjeta que
   // volvió al editor. Solo de lo visible: no hace falta traerlas todas.

@@ -28,6 +28,17 @@ describe('checkFechaVideo', () => {
     expect(r.aviso).toMatch(/pasad/i)
   })
 
+  it('avisa si el día no está en los posting_days del cliente', () => {
+    // 2026-08-04 es martes; el cliente publica lun/mié/vie
+    const r = checkFechaVideo('2026-08-04', HOY, [1, 3, 5])
+    expect(r.ok).toBe(true)
+    expect(r.aviso).toMatch(/no publica/i)
+  })
+
+  it('no avisa cuando la fecha cae en un día de posting', () => {
+    expect(checkFechaVideo('2026-08-05', HOY, [1, 3, 5]).aviso).toBeNull()
+  })
+
   it('una fecha de hoy o futura no avisa', () => {
     expect(checkFechaVideo('2026-08-03', HOY).aviso).toBeNull()
     expect(checkFechaVideo('2026-08-20', HOY).aviso).toBeNull()

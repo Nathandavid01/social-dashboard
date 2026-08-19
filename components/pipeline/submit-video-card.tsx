@@ -81,7 +81,7 @@ export function SubmitVideoCard({
   onSubmit,
   pending = false,
 }: {
-  clients: { id: string; name: string }[]
+  clients: { id: string; name: string; postingDays?: number[] }[]
   onSubmit: (payload: SubmitVideoPayload) => void
   pending?: boolean
 }) {
@@ -105,11 +105,12 @@ export function SubmitVideoCard({
       if (!archivo.ok) return archivo
       // Sin fecha no se puede entregar: es el dato que decide en qué día cae
       // la tarjeta y qué recibe Metricool.
-      const fecha = checkFechaVideo(r.fecha)
+      const days = clients.find((c) => c.id === clientId)?.postingDays
+      const fecha = checkFechaVideo(r.fecha, new Date(), days)
       if (!fecha.ok) return { ok: false, message: r.fecha ? 'Fecha no válida' : null }
       return { ok: true, message: fecha.aviso }
     })
-  }, [rows])
+  }, [rows, clientId, clients])
 
   const readyCount = checks.filter((c) => c.ok).length
   const canSubmit = !!clientId && readyCount === rows.length && !pending

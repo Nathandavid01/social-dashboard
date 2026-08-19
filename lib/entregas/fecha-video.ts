@@ -18,7 +18,11 @@ export interface CheckFecha {
   aviso: string | null
 }
 
-export function checkFechaVideo(iso: string, hoy: Date = new Date()): CheckFecha {
+export function checkFechaVideo(
+  iso: string,
+  hoy: Date = new Date(),
+  postingDays?: number[] | null,
+): CheckFecha {
   if (!iso) return { ok: false, aviso: null }
   const [y, m, d] = iso.split('-').map(Number)
   if (!y || !m || !d) return { ok: false, aviso: null }
@@ -30,6 +34,9 @@ export function checkFechaVideo(iso: string, hoy: Date = new Date()): CheckFecha
   // tarde a propósito, y prohibirlo obligaría a inventarse una fecha falsa.
   if (f.getTime() < hoyMed.getTime()) {
     return { ok: true, aviso: 'Es una fecha pasada' }
+  }
+  if (postingDays && postingDays.length > 0 && !postingDays.includes(f.getDay())) {
+    return { ok: true, aviso: 'Ese día el cliente no publica' }
   }
   return { ok: true, aviso: null }
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runIdeaPost } from '@/lib/actions/idea-posting-run'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { assignCadencePublishDate } from '@/lib/actions/claim-posting-slot'
 import {
   decideClientVote,
   type ApprovalStatus,
@@ -129,6 +130,8 @@ export async function autopostOnClientVote(ideaId: string): Promise<ClientVoteAu
       .select('id')
     if (updErr) return { acted: false, reason: updErr.message }
     if (!won || won.length === 0) return { acted: false, reason: 'Otro voto ya lo procesó' }
+
+    await assignCadencePublishDate(supabase, ideaId)
 
     await logIdeaActivity(supabase, {
       ideaId,
