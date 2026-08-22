@@ -1,4 +1,4 @@
-import { requirePermission, getCurrentRole } from '@/lib/auth/server'
+import { requirePermission, getEffectiveRole, getEffectiveUserId, currentUserHas } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
@@ -6,6 +6,7 @@ import { filterEntregasDeliveredIdeas } from '@/lib/utils/entregas-delivery'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
 import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
 import { VistaEditor } from '@/components/entregas/vista-editor'
+import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -21,11 +22,12 @@ export default async function RevisionPage() {
   await requirePermission('revision.read')
   const supabase = await createClient()
 
-  const [ideas, { data: activeClientsRaw }, role, { data: { user } }] = await Promise.all([
+  const [ideas, { data: activeClientsRaw }, role, userId, showProcess] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase.from('clients').select('id, name, assigned_to, assigned_designer, posting_time, posting_days').eq('status', 'active').order('name'),
-    getCurrentRole(),
-    supabase.auth.getUser(),
+    getEffectiveRole(),
+    getEffectiveUserId(),
+    currentUserHas('recording.brief'),
   ])
 
   const activeClients = activeClientsRaw ?? []
@@ -38,7 +40,7 @@ export default async function RevisionPage() {
   // viendo el trabajo de los demás, que no puede tocar y le estorba para ver
   // el suyo.
   const asignables = activeClients.map((c) => ({ id: c.id, name: c.name, assigned_to: c.assigned_to ?? null, assigned_designer: c.assigned_designer ?? null }))
-  const permitidos = visibleClientIds(role, user?.id ?? null, asignables)
+  const permitidos = visibleClientIds(role, userId, asignables)
   const mios = permitidos === null
     ? entregados
     : entregados.filter((i) => permitidos.has(i.client_id ?? ''))
@@ -47,7 +49,7 @@ export default async function RevisionPage() {
   // conveniencia — ver la nota en client-visibility.ts; no es control de acceso.
   const submitClients = clientsForUser(
     role,
-    user?.id ?? null,
+    userId,
     asignables,
   ).map((c) => ({
     id: c.id,
@@ -90,13 +92,16 @@ export default async function RevisionPage() {
   }
 
   return (
-    <EntregasBoard
-      ideas={mios}
-      reviewNotes={reviewNotes}
-      allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
-      submitClients={submitClients}
-      stages={['edited', 'approval']}
-      postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
-    />
+    <div className="space-y-4">
+      {showProcess && <SupervisorProcessSteps pathname="/revision" />}
+      <EntregasBoard
+        ideas={mios}
+        reviewNotes={reviewNotes}
+        allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
+        submitClients={submitClients}
+        stages={['edited', 'approval']}
+        postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
+      />
+    </div>
   )
 }

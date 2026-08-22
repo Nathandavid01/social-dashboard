@@ -168,11 +168,12 @@ const JSON_SCHEMA = `Output STRICT JSON — an array, no markdown, no commentary
     "objective": "Awareness" | "Engagement" | "Conversion",
     "funnel_stage": "TOFU" | "MOFU" | "BOFU",
     "title": "Short 6-8 word title in Spanish",
-    "hook": "Scroll-stopping first 1-2 sentences in Puerto Rican Spanish",
-    "visual_brief": "Concrete visual direction for the designer/editor: shots, composition, colors, lighting, mood, on-screen text. 2-4 sentences in Spanish.",
+    "hook": "Exact first line the talent says on camera in Puerto Rican Spanish (1-2 sentences).",
+    "visual_brief": "QUÉ GRABAR — complete call sheet in Spanish, numbered steps. Must include: where (location), who is on camera, which camera (DJI / Sony / POV / producto), every shot in order, what they say or do in each shot, B-roll, lighting, on-screen text, and total duration. A videographer who never saw the client should be able to shoot from this alone. 6-12 sentences or numbered lines. Not a mood. Not 2 vague sentences.",
     "caption_angle": "Tone, copy framework (AIDA/PAS), and CTA direction for the copywriter. 1-2 sentences in Spanish.",
     "hashtags_suggestion": "5-8 hashtags relevant to this idea + audience",
-    "rationale": "Why this idea works and why now — tie to the objective. 1 sentence in Spanish."
+    "rationale": "Por qué puede viralizar: hook, shareability, timing local. 1-2 sentences in Spanish.",
+    "virality_score": "Integer 1-10. Be honest: 9-10 only if the hook + format would actually stop a PR feed; 5-6 is a solid client video; 1-4 is weak. Do not rate everything an 8."
   }
 ]`
 
@@ -211,7 +212,8 @@ ${JSON_SCHEMA}
 Rules:
 - Each idea UNIQUE in concept (don't suggest 3 reels on the same topic).
 - The hook must stop the scroll — no generic openers.
-- visual_brief must give the designer something concrete: colors, shots, composition, props, on-screen text.
+- visual_brief is the shoot list (QUÉ GRABAR): numbered steps a videographer follows on site. Incomplete briefs fail.
+- virality_score must vary across the batch. Justify it in rationale. Never default every idea to 8.
 - Output ONLY the JSON array. No prose, no \`\`\`json fence, nothing else.`
 }
 
@@ -234,7 +236,8 @@ For EACH idea, silently judge:
 - Objective fit: is the objective + funnel_stage right and is the CTA aligned to it?
 - Distinctiveness: would a competitor post the same thing? Make it sharper and more specific.
 - Local resonance: does it feel authentically Puerto Rican where relevant (without forcing it)?
-- Executability: is the visual_brief concrete enough to shoot/design today?${input.referenceIdeas?.length ? '\n- Originality vs the reference ideas: is this just one of them reworded? If so, REPLACE it with something new that clears the same bar.' : ''}
+- Executability: is the visual_brief a complete QUÉ GRABAR shoot list (location, camera, lines, B-roll, duration)? If not, rewrite it longer.
+- Virality: is virality_score honest (not everything an 8)? Rewrite weak hooks or drop the score.${input.referenceIdeas?.length ? '\n- Originality vs the reference ideas: is this just one of them reworded? If so, REPLACE it with something new that clears the same bar.' : ''}
 
 Then RETURN the improved set — same JSON schema, same number of ideas — rewriting hooks, briefs, and CTAs wherever they fall short. Keep the strong ones, sharpen the rest.
 

@@ -31,16 +31,16 @@ export interface Area {
  * Las secciones del menú, en orden. Nombradas por lo que la persona intenta
  * HACER, no por cómo está construida la app.
  *
- * Trabajo    — el flujo del editor: entregar y revisar, luego copy y publicar.
- * Marketing  — de dónde salen las ideas.
- * Recordings — el día de rodaje.
+ * Marketing  — primer paso: generar y dejar las ideas.
+ * Recordings — segundo: grabar en On Site.
+ * Trabajo    — editar, revisar, copy y publicar.
  * Desarrollo — lo anterior a este flujo (Pipeline, Producción, Video QC) más
  *              Runway. Sigue vivo, pero no es por donde entra el trabajo nuevo.
  */
 export const NAV_GROUPS = [
-  'Trabajo',
   'Marketing',
   'Recordings',
+  'Trabajo',
   'Clientes',
   'Publicación',
   'Métricas',
@@ -53,24 +53,22 @@ export type NavGroup = (typeof NAV_GROUPS)[number]
 /** Restricted areas. `/mi-dia` and `/home` are intentionally excluded — everyone
  * lands there and `/mi-dia` only ever shows a person their OWN work. */
 export const AREAS: Area[] = [
-  // ── Trabajo: el flujo de un video, de la cámara a la aprobación ──
-  // El flujo del editor va en dos pantallas: entrega y revisión en /revision,
-  // copy y publicación en /entregas. Cruzan al aprobar el video.
-  { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
-  { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
-  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
-  { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
-  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
-  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Recordings' },
-  // Lista de grabación para marcar en el sitio. Va junto a Grabación porque
-  // trabaja sobre las sesiones de ese calendario.
-  { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Recordings' },
-
-  // ── Ideas: qué vamos a grabar ──
-  // Escribir el lote a mano — reemplaza el documento PDF.
+  // ── 1. Ideas: primer paso del proceso ──
   { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Marketing' },
+
+  // ── 2. Grabar ──
+  { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Recordings' },
+  { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Recordings' },
+
+  // ── 3. Editar y entregar ──
+  { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
+  { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
+
+  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
+  { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
+  { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
   { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Desarrollo' },
 
   // ── Publicación: sacarlo a la calle y comprobar que salió ──

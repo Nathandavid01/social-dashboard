@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entregar videos — editor</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #fafafa;
+      --card: #121212;
+      --muted: #1a1a1a;
+      --muted-fg: #a6a6a6;
+      --border: #262626;
+      --gold: #d4af37;
+      --gold-2: #d97706;
+      --good: #34d399;
+      --input: #0f0f0f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .page { max-width: 42rem; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+    header { display: flex; align-items: center; gap: 10px; }
+    .icon {
+      width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px;
+      display: grid; place-items: center;
+      background: linear-gradient(to bottom right, var(--gold), var(--gold-2));
+      color: #000;
+    }
+    h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+    .sub { margin: 0; font-size: 12px; color: var(--muted-fg); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .card-head h3 { margin: 0; font-size: 12px; font-weight: 600; }
+    .badge { font-size: 11px; color: var(--muted-fg); white-space: nowrap; }
+    label { display: block; font-size: 11px; margin-bottom: 6px; }
+    .field {
+      width: 100%; height: 36px;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      padding: 0 12px;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .placeholder { color: var(--muted-fg); }
+    .inner {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .date-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .date { width: auto; min-width: 9.5rem; font-size: 11px; }
+    .file {
+      height: 36px; font-size: 11px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .file-btn {
+      background: #262626; border-radius: 4px; padding: 4px 8px; font-size: 11px;
+    }
+    .file-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted-fg); }
+    .check { color: var(--good); }
+    .input-icon { position: relative; }
+    .input-icon svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted-fg); }
+    .input-icon .field { padding-left: 36px; }
+    .btn {
+      width: 100%; height: 36px; border: 0; border-radius: 8px;
+      background: var(--gold); color: #000; font-weight: 600; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .progress {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .prog-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .prog-title { font-size: 11px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prog-stat { font-size: 10px; color: var(--muted-fg); display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .bar { margin-top: 4px; height: 4px; background: #262626; border-radius: 999px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 62%; background: var(--gold); }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <span class="icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16h2a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/><rect x="8" y="14" width="8" height="6" rx="1"/><path d="M12 14v-4"/><path d="m9 11 3-3 3 3"/></svg>
+      </span>
+      <div>
+        <h1>Entregar videos</h1>
+        <p class="sub">Sube el video y dinos para cuándo es.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-head">
+        <h3>Enviar videos editados</h3>
+        <span class="badge">Editor</span>
+      </div>
+
+      <div>
+        <label>Cliente *</label>
+        <div class="field">Gym X <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+      </div>
+
+      <div class="inner">
+        <div>
+          <label>¿Para cuándo es este video? *</label>
+          <div class="date-row">
+            <div class="field date">18 ago 2026</div>
+            <span class="badge">lunes</span>
+          </div>
+        </div>
+
+        <div class="field file">
+          <span class="file-btn">Elegir archivo</span>
+          <span>reel-lunes.mp4</span>
+        </div>
+        <p class="file-meta">
+          <svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          <span>reel-lunes.mp4</span>
+          <span>· 48 MB</span>
+        </p>
+
+        <div class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div class="field placeholder">Enlace de Drive (opcional)</div>
+        </div>
+        <div class="field placeholder">Título (opcional)</div>
+      </div>
+
+      <button class="btn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Enviar a revisión
+      </button>
+    </section>
+
+    <div class="progress">
+      <div class="prog-row">
+        <span class="prog-title">Gym X — video 1</span>
+        <span class="prog-stat">
+          <svg class="spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          Subiendo 62%
+        </span>
+      </div>
+      <div class="bar"><i></i></div>
+    </div>
+  </div>
+</body>
+</html>

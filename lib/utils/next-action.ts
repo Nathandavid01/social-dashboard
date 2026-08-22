@@ -12,12 +12,12 @@ export interface NextAction {
 }
 
 const ACTION_BY_STAGE: Record<PipelineStageKey, string> = {
-  idea: 'Decir de qué es el video',
-  caption: 'Generar el caption',
-  scheduled: 'Agendar la grabación',
+  idea: 'Generar la idea',
+  scheduled: 'Agendar y grabar en On Site',
   recorded: 'Grabar y subir el material',
   edited: 'Editar y subir el video',
   approval: 'Enviar a aprobación',
+  caption: 'Escribir el caption',
   published: 'Publicar',
 }
 

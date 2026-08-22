@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.63 — Ver como editor</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --amber:#d97706; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 420px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid rgba(217,119,6,.35); background: rgba(217,119,6,.12); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; }
+    .btn { border: 0; background: transparent; color: #fcd34d; font-weight: 600; font-size: 13px; min-height: 44px; }
+    .menu { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 10px 0; }
+    .item { padding: 10px 14px; font-size: 14px; }
+    .item.muted { color: var(--muted); font-size: 12px; }
+    .item.active { background: rgba(212,175,55,.12); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Perfil · Admin</p>
+    <h1>Ver la app como un editor</h1>
+    <p class="sub">Eliges a quién. El menú y los clientes son los de esa persona. Sales cuando quieras.</p>
+
+    <div class="banner">
+      <span>Viendo como <strong>Lisneidy</strong> · solo sus clientes</span>
+      <button class="btn" type="button">Salir de esta vista</button>
+    </div>
+
+    <div class="menu">
+      <div class="item muted">Ver como editor</div>
+      <div class="item">Jeander</div>
+      <div class="item active">Lisneidy</div>
+      <div class="item">Joxandra</div>
+    </div>
+  </div>
+</body>
+</html>

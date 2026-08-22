@@ -63,9 +63,7 @@ export function computeIdeaProgress(input: {
   const editedN = active('edited')
 
   const stages: StageProgress[] = [
-    // Hook-only = idea defined (the topic is all the caption needs since v2.88).
     { key: 'idea', label: 'Idea', done: filled(idea.hook) },
-    { key: 'caption', label: 'Caption', done: filled(idea.generated_caption) },
     { key: 'material', label: 'Material', done: rawN >= 1, count: { current: rawN, total: MIN.raw } },
     { key: 'edited', label: 'Editado', done: editedN >= 1, count: { current: editedN, total: MIN.edited } },
     { key: 'assets', label: 'Assets', done: assetCount >= 1, count: { current: assetCount, total: 1 } },
@@ -75,6 +73,7 @@ export function computeIdeaProgress(input: {
       done: idea.approval_status === 'approved',
       detail: APPROVAL_DETAIL[idea.approval_status],
     },
+    { key: 'caption', label: 'Caption', done: filled(idea.generated_caption) },
     { key: 'published', label: 'Publicado', done: idea.published_at != null },
   ]
 

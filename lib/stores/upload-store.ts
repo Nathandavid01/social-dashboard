@@ -14,6 +14,7 @@ import {
   abortMultipartUpload,
 } from '@/lib/actions/multipart-upload'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { videoNameFromIdea } from '@/lib/uploads/video-name-from-idea'
 
 /**
  * The subida-resistente engine — the file survives navigation, tab switches
@@ -90,6 +91,8 @@ interface UploadStoreState {
     ideaId: string
     kind: ContentIdeaVideoKind
     provider: UploadProvider
+    /** Título de la idea del call sheet — el dock y el registro usan este nombre. */
+    title?: string | null
   }): string
   /** Aborts in-flight requests and tells the server to abort the multipart upload (no orphaned parts). */
   cancelUpload(id: string): void
@@ -111,7 +114,7 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
     const id = nextId()
     const item: UploadItem = {
       id,
-      fileName: input.file.name,
+      fileName: videoNameFromIdea(input.title, input.file.name),
       sizeBytes: input.file.size,
       ideaId: input.ideaId,
       kind: input.kind,
@@ -318,8 +321,8 @@ async function runSinglePut(id: string): Promise<void> {
 
   const slot =
     item.provider === 'entregas-r2'
-      ? await getEntregasUploadUrl({ ideaId: item.ideaId, fileName: eng.file.name, contentType })
-      : await getR2UploadUrl({ ideaId: item.ideaId, kind: item.kind, fileName: eng.file.name, contentType })
+      ? await getEntregasUploadUrl({ ideaId: item.ideaId, fileName: item.fileName, contentType })
+      : await getR2UploadUrl({ ideaId: item.ideaId, kind: item.kind, fileName: item.fileName, contentType })
   if (slot.error || !slot.url || !slot.key) throw new Error(slot.error ?? 'No se pudo iniciar la subida')
   eng.key = slot.key
 
@@ -328,8 +331,8 @@ async function runSinglePut(id: string): Promise<void> {
   patchUpload(id, { phase: 'registrando' })
   const res =
     item.provider === 'entregas-r2'
-      ? await registerEntregasVideo({ ideaId: item.ideaId, key: slot.key, name: eng.file.name, sizeBytes: eng.file.size, mimeType: contentType })
-      : await registerR2Video({ ideaId: item.ideaId, kind: item.kind, key: slot.key, name: eng.file.name, sizeBytes: eng.file.size, mimeType: contentType })
+      ? await registerEntregasVideo({ ideaId: item.ideaId, key: slot.key, name: item.fileName, sizeBytes: eng.file.size, mimeType: contentType })
+      : await registerR2Video({ ideaId: item.ideaId, kind: item.kind, key: slot.key, name: item.fileName, sizeBytes: eng.file.size, mimeType: contentType })
   if (res.error) throw new Error(res.error)
 
   await finishAfterRegister(id, res.id)
@@ -340,7 +343,7 @@ async function runMultipart(id: string): Promise<void> {
   const item = useUploadStore.getState().uploads[id]
   const contentType = eng.file.type || 'video/mp4'
 
-  const started = await startMultipartUpload({ provider: item.provider, ideaId: item.ideaId, kind: item.kind, fileName: eng.file.name, contentType })
+  const started = await startMultipartUpload({ provider: item.provider, ideaId: item.ideaId, kind: item.kind, fileName: item.fileName, contentType })
   if (started.error || !started.uploadId || !started.key) throw new Error(started.error ?? 'No se pudo iniciar la subida por partes')
   eng.uploadId = started.uploadId
   eng.key = started.key
@@ -398,8 +401,8 @@ async function runMultipart(id: string): Promise<void> {
   patchUpload(id, { phase: 'registrando' })
   const res =
     item.provider === 'entregas-r2'
-      ? await registerEntregasVideo({ ideaId: item.ideaId, key: started.key, name: eng.file.name, sizeBytes: eng.file.size, mimeType: contentType })
-      : await registerR2Video({ ideaId: item.ideaId, kind: item.kind, key: started.key, name: eng.file.name, sizeBytes: eng.file.size, mimeType: contentType })
+      ? await registerEntregasVideo({ ideaId: item.ideaId, key: started.key, name: item.fileName, sizeBytes: eng.file.size, mimeType: contentType })
+      : await registerR2Video({ ideaId: item.ideaId, kind: item.kind, key: started.key, name: item.fileName, sizeBytes: eng.file.size, mimeType: contentType })
   if (res.error) throw new Error(res.error)
 
   await finishAfterRegister(id, res.id)

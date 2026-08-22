@@ -12,21 +12,28 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
-import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound, Eye } from 'lucide-react'
+import { startViewAsEditor, stopViewAs } from '@/lib/actions/view-as'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ThemeToggleMenuItem } from '@/components/shared/theme-toggle'
 
 export function UserMenu() {
-  const { profile, role } = useAuth()
+  const { profile, role, realRole, viewAsEditor, editors } = useAuth()
   const canReadMetricool = useHasPermission('metricool.read')
   const fileRef = useRef<HTMLInputElement>(null)
   const [optimisticUrl, setOptimisticUrl] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
+  const router = useRouter()
+  const canViewAs = (realRole === 'owner' || realRole === 'supervisor') && editors.length > 0
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map((n) => n[0]).join('').toUpperCase()
@@ -99,7 +106,9 @@ export function UserMenu() {
               <span className="truncate font-medium">{profile?.full_name || 'Usuario'}</span>
               <span className="truncate text-xs font-normal text-muted-foreground">{profile?.email}</span>
               <Badge variant="secondary" className="mt-0.5 w-fit text-xs capitalize">
-                {role?.replace('_', ' ')}
+                {viewAsEditor
+                  ? `Vista: ${viewAsEditor.full_name?.trim() || 'editor'}`
+                  : role?.replace('_', ' ')}
               </Badge>
             </div>
           </div>
@@ -132,6 +141,55 @@ export function UserMenu() {
             <Trash2 className="mr-2 h-4 w-4" />
             Quitar foto
           </DropdownMenuItem>
+        )}
+        {canViewAs && (
+          <>
+            <DropdownMenuSeparator />
+            {viewAsEditor ? (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => {
+                  e.preventDefault()
+                  startTransition(async () => {
+                    await stopViewAs()
+                    router.push('/home')
+                    router.refresh()
+                  })
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Salir de vista de editor
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="cursor-pointer">
+                <Eye className="mr-2 h-4 w-4" />
+                Ver como editor
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="max-h-72 overflow-y-auto">
+                {editors.map((ed) => (
+                  <DropdownMenuItem
+                    key={ed.id}
+                    className="cursor-pointer"
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      startTransition(async () => {
+                        const res = await startViewAsEditor(ed.id)
+                        if (res.error) {
+                          toast({ title: 'No se pudo cambiar la vista', description: res.error, variant: 'destructive' })
+                          return
+                        }
+                        router.push('/revision')
+                        router.refresh()
+                      })
+                    }}
+                  >
+                    {ed.full_name?.trim() || 'Sin nombre'}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer">

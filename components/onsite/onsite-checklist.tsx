@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Check, ExternalLink, Plus, X, Loader2, Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
-import { SHOT_TYPES, groupShots, progressOf, type OnsiteShot } from '@/lib/onsite/shot-types'
+import { SHOT_TYPES, groupShots, type OnsiteShot } from '@/lib/onsite/shot-types'
+import { emptyOnsiteSlots, progressAgainstTarget } from '@/lib/onsite/slot-count'
 import {
   toggleShotRecorded,
   removeShotFromSession,
@@ -27,10 +28,13 @@ export function OnsiteChecklist({
   sessionId,
   initialShots,
   addable,
+  slotTarget = 0,
 }: {
   sessionId: string
   initialShots: OnsiteShot[]
   addable: AddableIdea[]
+  /** Cuota del mes × 1.5. 0 = no inventar huecos. */
+  slotTarget?: number
 }) {
   const { toast } = useToast()
   const [shots, setShots] = useState(initialShots)
@@ -44,7 +48,8 @@ export function OnsiteChecklist({
   const [tipoNuevo, setTipoNuevo] = useState<string>(SHOT_TYPES[0].key)
 
   const grupos = useMemo(() => groupShots(shots), [shots])
-  const prog = useMemo(() => progressOf(shots), [shots])
+  const huecos = emptyOnsiteSlots(shots.length, slotTarget)
+  const prog = useMemo(() => progressAgainstTarget(shots, slotTarget), [shots, slotTarget])
 
   function marcarOcupado(id: string, on: boolean) {
     setOcupado((s) => {
@@ -163,11 +168,15 @@ export function OnsiteChecklist({
         </section>
       )}
 
-      {grupos.length === 0 && (
+      {grupos.length === 0 && huecos === 0 && (
         <div className="flex flex-col items-center gap-2 rounded-xl border bg-card px-4 py-10 text-center">
           <Camera className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
           <p className="text-sm font-medium">Esta sesión no tiene tomas todavía</p>
-          <p className="text-xs text-muted-foreground">Añade ideas del cliente o del Idea Lab.</p>
+          <p className="text-xs text-muted-foreground">
+            {slotTarget === 0
+              ? 'Este cliente no tiene frecuencia en el perfil. Pon los días de posteo para ver cuántos videos grabar.'
+              : 'Añade ideas del cliente o del Idea Lab.'}
+          </p>
         </div>
       )}
 
@@ -259,6 +268,29 @@ export function OnsiteChecklist({
           </section>
         )
       })}
+
+      {huecos > 0 && (
+        <section className="overflow-hidden rounded-xl border border-dashed bg-card">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-3">
+            <span className="truncate text-sm font-semibold">Por idear</span>
+            <span className="shrink-0 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground">
+              {huecos} por idear
+            </span>
+          </div>
+          <div className="grid grid-cols-5 gap-1.5 border-t px-3 py-3 sm:grid-cols-6">
+            {Array.from({ length: huecos }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                data-testid="onsite-empty-slot"
+                aria-label={`Espacio ${i + 1} por idear`}
+                onClick={() => setAñadiendo(true)}
+                className="h-11 rounded-md border border-dashed border-border bg-muted/40 transition hover:border-primary/50 hover:bg-primary/5"
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* El total, al final: es lo que se mira para saber cuánto queda. */}
       <div className="sticky bottom-0 space-y-2 rounded-xl border bg-card/95 p-3 backdrop-blur">

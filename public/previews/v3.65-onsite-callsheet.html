@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.65 — On Site call sheet</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 200px 1fr; gap: 12px; }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .col { border: 1px solid var(--border); background: var(--card); border-radius: 16px; overflow: hidden; }
+    .lane { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); padding: 10px 12px 4px; }
+    .item { padding: 10px 12px; border-left: 3px solid transparent; }
+    .item.on { background: rgba(212,175,55,.12); border-left-color: var(--gold); }
+    .item strong { display: block; font-size: 13px; }
+    .item span { font-size: 11px; color: var(--muted); }
+    .head { padding: 14px 16px 10px; }
+    .head p { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+    .head h2 { margin: 4px 0 0; font-size: 20px; }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .bar { padding: 0 16px 14px; font-size: 11px; }
+    .track { height: 6px; background: #1f1f1f; border-radius: 99px; margin-top: 6px; overflow: hidden; }
+    .fill { width: 14%; height: 100%; background: var(--gold); }
+    .idea { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-top: 1px solid var(--border); }
+    .n { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); width: 22px; padding-top: 4px; }
+    .dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #333; flex-shrink: 0; }
+    .dot.on { background: #10b981; border-color: #10b981; }
+    .idea b { display: block; font-size: 14px; }
+    .idea em { font-style: normal; font-size: 12px; color: var(--muted); }
+    .chip { display: inline-block; margin-top: 6px; font-size: 10px; border: 1px solid var(--border); border-radius: 99px; padding: 2px 8px; }
+    .ref { color: var(--gold); font-size: 11px; margin-left: 8px; }
+    .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .roles div { border: 1px solid var(--border); background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 12px; }
+    .roles strong { display: block; margin-bottom: 4px; }
+    .roles span { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">On Site</p>
+    <h1>Call sheet: el cliente, las ideas, el material</h1>
+    <p class="sub">A la izquierda eliges a quién grabas. A la derecha, cada toma con número, de qué es, referencia, check y subida.</p>
+
+    <div class="grid">
+      <div class="col">
+        <div class="lane">Hoy</div>
+        <div class="item on"><strong>Blue Chiropractic</strong><span>20 ago · 14 vid.</span></div>
+        <div class="lane">Próximas</div>
+        <div class="item"><strong>Danny Mudanzas</strong><span>1 ago · 9 vid.</span></div>
+        <div class="lane">Sin cliente</div>
+        <div class="item"><strong>Sin cliente</strong><span>26 may</span></div>
+      </div>
+      <div class="col">
+        <div class="head">
+          <p>Call sheet</p>
+          <h2>Blue Chiropractic</h2>
+          <div class="meta">20 ago · Oficina · 9/mes · 14 videos</div>
+        </div>
+        <div class="bar">
+          2 de 14 grabadas
+          <div class="track"><div class="fill"></div></div>
+        </div>
+        <div class="idea">
+          <span class="n">01</span>
+          <span class="dot on"></span>
+          <div>
+            <b>Intro Patricia</b>
+            <em>Quién es y qué hace la clínica</em>
+            <div><span class="chip">DJI</span><span class="ref">Referencia</span></div>
+          </div>
+        </div>
+        <div class="idea">
+          <span class="n">02</span>
+          <span class="dot"></span>
+          <div>
+            <b>Ajuste en camilla</b>
+            <em>Toma de manos, 15 segundos, luz de ventana</em>
+            <div><span class="chip">Sony</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roles">
+      <div>
+        <strong>Admin</strong>
+        <span>Genera las ideas que faltan (el /mes × 1.5) y edita título, de qué es y el link de referencia.</span>
+      </div>
+      <div>
+        <strong>Grabación</strong>
+        <span>Ve el brief, marca cada toma y sube el crudo de esa idea.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

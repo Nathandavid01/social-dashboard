@@ -14,7 +14,10 @@ import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { UpdateNotice } from '@/components/shared/update-notice'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
-import { getCurrentRole } from '@/lib/auth/server'
+import { getCurrentRole, getViewAsEditor } from '@/lib/auth/server'
+import { listEditorsForViewAs } from '@/lib/actions/view-as'
+import { canStartViewAs } from '@/lib/auth/view-as-core'
+import { ViewAsBanner } from '@/components/auth/view-as-banner'
 import { resolveDashboardRedirect } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
 
@@ -31,7 +34,10 @@ export default async function DashboardLayout({
   if (!user) redirect(resolveDashboardRedirect(false, null)!)
 
   // Backfills profile if the signup trigger never ran.
-  const ensuredRole = await getCurrentRole()
+  const [ensuredRole, viewAsEditor] = await Promise.all([
+    getCurrentRole(),
+    getViewAsEditor(),
+  ])
 
   const { data } = await supabase
     .from('profiles')
@@ -39,7 +45,9 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .maybeSingle()
   const profile = data as Profile | null
-  const role: UserRole | null = profile?.role ?? ensuredRole
+  const realRole: UserRole | null = profile?.role ?? ensuredRole
+  const effectiveRole: UserRole | null = viewAsEditor ? 'editor' : realRole
+  const editors = canStartViewAs(realRole) ? await listEditorsForViewAs() : []
 
   // Deactivated accounts are locked out of the entire dashboard.
   if (profile && profile.status === 'inactive') {
@@ -76,13 +84,20 @@ export default async function DashboardLayout({
     : null
 
   return (
-    <DashboardProviders user={authUser} profile={profile} role={role}>
+    <DashboardProviders
+      user={authUser}
+      profile={profile}
+      role={effectiveRole}
+      realRole={realRole}
+      viewAsEditor={viewAsEditor}
+      editors={editors}
+    >
       <NateTopProgress />
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar
           videoReviewCount={videoReviewCount ?? 0}
           navPreferences={profile?.nav_preferences}
-          areaAccess={profile?.area_access ?? null}
+          areaAccess={viewAsEditor ? null : profile?.area_access ?? null}
         />
         <SidebarAwareContent>
           <Topbar
@@ -92,6 +107,7 @@ export default async function DashboardLayout({
             currentUser={currentUserForTopbar}
           />
           <main className="flex-1 overflow-y-auto">
+            <ViewAsBanner />
             <div className="p-4 lg:p-6">{children}</div>
           </main>
         </SidebarAwareContent>

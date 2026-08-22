@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.64 — On Site, 50% más espacios</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 420px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; border: 1px solid var(--border); background: var(--card); border-radius: 14px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; }
+    .meta span { color: var(--muted); }
+    .card { border: 1px solid var(--border); background: var(--card); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+    .card.dash { border-style: dashed; }
+    .head { display: flex; justify-content: space-between; padding: 12px 14px; font-size: 14px; font-weight: 600; }
+    .head small { font-weight: 400; color: var(--muted); font-size: 11px; }
+    .row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--border); min-height: 44px; font-size: 13px; }
+    .dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #333; }
+    .dot.on { background: #10b981; border-color: #10b981; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 12px; border-top: 1px solid var(--border); }
+    .slot { height: 44px; border: 1px dashed #333; border-radius: 8px; background: #161616; }
+    .bar { border: 1px solid var(--border); background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 12px; }
+    .track { height: 6px; background: #1f1f1f; border-radius: 99px; margin-top: 8px; overflow: hidden; }
+    .fill { width: 17%; height: 100%; background: #10b981; }
+    .amber { color: #fbbf24; float: right; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">On Site</p>
+    <h1>9 al mes → 14 videos al grabar</h1>
+    <p class="sub">El mismo /mes de Días de posting, multiplicado por 1.5. Eso es lo recomendado en esa sesión.</p>
+
+    <div class="meta">
+      <strong>Nathandavid</strong>
+      <span>20 ago</span>
+      <span>9/mes · 14 videos</span>
+    </div>
+
+    <div class="card">
+      <div class="head">Sony <small>1 de 2 grabadas</small></div>
+      <div class="row"><span class="dot"></span> Hook A</div>
+      <div class="row"><span class="dot on"></span> Hook B</div>
+    </div>
+
+    <div class="card dash">
+      <div class="head">Por idear <small>43 por idear</small></div>
+      <div class="grid">
+        <div class="slot"></div><div class="slot"></div><div class="slot"></div>
+        <div class="slot"></div><div class="slot"></div><div class="slot"></div>
+      </div>
+    </div>
+
+    <div class="bar">
+      <strong>1</strong> de <strong>14</strong> ideas grabadas
+      <span class="amber">Faltan 13</span>
+      <div class="track"><div class="fill"></div></div>
+    </div>
+  </div>
+</body>
+</html>

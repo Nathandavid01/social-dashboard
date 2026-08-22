@@ -1,0 +1,31 @@
+---
+description: Consultar el equipo interno de cambios (producción + graph/data + ingeniería) antes de implementar o mergear
+alwaysApply: true
+---
+
+# Equipo interno de cambios
+
+Antes de **implementar** un cambio de producto y otra vez **antes de commit/push/merge**, consulta al equipo interno. No saltes esto por “es chiquito”.
+
+## Quién es el equipo (en esta sesión)
+
+Lanza revisores en paralelo (`Task`) y espera su veredicto. Nombres fijos:
+
+1. **Producción** — ¿el flujo real (On Site → grabar → Revisión → Entregas) sigue siendo el de Nate? ¿el rol correcto ve/edita?
+2. **Graph / data** — ¿tipos, `select`, migraciones, etapas del pipeline y permisos coinciden con la DB y entre sí?
+3. **Ingeniería** — TDD, gates de servidor (no solo UI), nada de secretos, sin romper lo que ya está en `main`.
+
+Si el cambio es solo copy/UI de un archivo, Producción + Ingeniería bastan. Si toca tablas, stages o API, los tres.
+
+## Cómo consultar
+
+- Pasa: qué pide Eric, archivos tocados, rol afectado (video / supervisor / editor / owner).
+- Cada revisor responde: **OK / BLOQUEA** + 1–3 puntos. Sin reescribir el feature.
+- En el chat, **resumen corto al usuario** antes de mergear. Si hay BLOQUEA, no pushees hasta resolverlo o que Eric lo pise.
+
+## Ejemplos
+
+```
+❌ BAD: editar On Site y hacer push en el mismo turno sin revisión.
+✅ GOOD: implementar → Task Producción + Ingeniería → “Producción OK; Ingeniería: el save sigue gated en recording.brief” → entonces commit/push.
+```

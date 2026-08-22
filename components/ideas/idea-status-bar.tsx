@@ -11,12 +11,12 @@ import type { IdeaPipeline, PipelineStageKey } from '@/lib/utils/idea-pipeline-s
 
 /** What each pipeline stage means — shown in the per-stage info dialog. */
 const STAGE_INFO: Record<PipelineStageKey, string> = {
-  idea: 'La idea está definida con su hook y brief visual.',
-  caption: 'El caption del video ya fue generado o escrito.',
-  scheduled: 'La grabación está agendada en una sesión.',
-  recorded: 'El material fue grabado y está en el buffer.',
+  idea: 'Primer paso: la idea está definida (título / de qué es) para grabar.',
+  scheduled: 'La grabación está agendada. Se ve en On Site.',
+  recorded: 'El material fue grabado y está en el banco de crudo.',
   edited: 'El video fue editado / está en producción.',
-  approval: 'El video fue aprobado para publicar.',
+  approval: 'El video fue aprobado (IA + admin) para publicar.',
+  caption: 'El caption del video ya fue generado o escrito.',
   published: 'El video fue publicado en redes.',
 }
 

@@ -73,7 +73,7 @@ function firstName(fullName: string | null | undefined): string {
 
 const REQUIRED_FILES: Partial<Record<ContentIdeaVideoKind, number>> = { raw: 4, edited: 1 }
 
-export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props) {
+export function IdeaVideoPanel({ ideaId, ideaTitle, videos, publicEnabled = false }: Props) {
   const canUpload = useHasPermission('video.upload')
   // Same read gate as the server actions (getR2DownloadUrl/PreviewUrl/PublicUrl):
   // revision/entregas/planning read lets you manage ANY client's material.
@@ -96,6 +96,7 @@ export function IdeaVideoPanel({ ideaId, videos, publicEnabled = false }: Props)
           key={kind}
           kind={kind}
           ideaId={ideaId}
+          ideaTitle={ideaTitle}
           videos={byKind[kind]}
           canUpload={canUpload}
           canManageVideos={canManageVideos}
@@ -156,10 +157,11 @@ function VideoStatusBadges({
  * box; the whole group is still a drop target so drag-and-drop keeps working.
  */
 function SlotGroup({
-  kind, ideaId, videos, canUpload, canManageVideos, ownUploadUserId, publicEnabled, disabledReason,
+  kind, ideaId, ideaTitle, videos, canUpload, canManageVideos, ownUploadUserId, publicEnabled, disabledReason,
 }: {
   kind: ContentIdeaVideoKind
   ideaId: string
+  ideaTitle?: string
   videos: ContentIdeaVideo[]
   canUpload: boolean
   canManageVideos: boolean
@@ -232,7 +234,7 @@ function SlotGroup({
     }
     if (ok.length === 0) return
 
-    const ids = ok.map((file) => startUpload({ file, ideaId, kind, provider: 'r2' }))
+    const ids = ok.map((file) => startUpload({ file, ideaId, kind, provider: 'r2', title: ideaTitle }))
     setMyUploadIds((prev) => [...prev, ...ids])
 
     const results = await Promise.all(ids.map(waitForUploadDone))

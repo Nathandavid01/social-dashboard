@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { groupShots, progressOf, shotTypeLabel, SHOT_TYPES, type OnsiteShot } from './shot-types'
 
 const shot = (over: Partial<OnsiteShot> = {}): OnsiteShot => ({
-  id: 'x', title: 'Toma', hook: null, referenceUrl: null, shotType: 'sony', recorded: false, ...over,
+  id: 'x', title: 'Toma', hook: null, visualBrief: null, viralityScore: null, viralityWhy: null, referenceUrl: null, shotType: 'sony', recorded: false, ...over,
 })
 
 describe('SHOT_TYPES', () => {

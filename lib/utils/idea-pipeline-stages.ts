@@ -36,7 +36,7 @@ type PipelineIdea = Pick<
 
 /**
  * Production pipeline stages for an idea/video, in order:
- *   Idea → Caption → Agendada → Grabación → Edición → Aprobación → Publicado.
+ *   Idea → Agendada → Grabación → Edición → Aprobación → Caption → Publicado.
  * Each stage is evaluated independently (no linear assumption) from existing data
  * plus a `recordingScheduled` flag (a linked recording session). `currentIndex`
  * points at the first not-done stage — i.e. "where it is" in the process.
@@ -52,13 +52,12 @@ export function computeIdeaPipeline(input: {
     videos.some((v) => v.kind === kind && ACTIVE.has(v.status))
 
   const stages: PipelineStage[] = [
-    // Hook-only = idea defined (the topic is all the caption needs since v2.88).
     { key: 'idea', label: 'Idea', done: filled(idea.hook) },
-    { key: 'caption', label: 'Caption', done: filled(idea.generated_caption) },
     { key: 'scheduled', label: 'Agendada', done: recordingScheduled || idea.recording_session_id != null },
     { key: 'recorded', label: 'Grabación', done: idea.status === 'grabada' || idea.recording_date != null || activeOf('raw') },
     { key: 'edited', label: 'Edición', done: activeOf('edited') || idea.status === 'producida' },
     { key: 'approval', label: 'Aprobación', done: idea.approval_status === 'approved' },
+    { key: 'caption', label: 'Caption', done: filled(idea.generated_caption) },
     { key: 'published', label: 'Publicado', done: idea.published_at != null || idea.status === 'publicada' },
   ]
 

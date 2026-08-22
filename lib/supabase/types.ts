@@ -200,6 +200,9 @@ export interface RecordingSession {
   start_time: string | null
   end_time: string | null
   status: RecordingSessionStatus
+  /** Quién selló “Llegué” en On Site. Migración 0069. */
+  arrived_at?: string | null
+  arrived_by?: string | null
   created_by: string
   created_at: string
   updated_at: string
@@ -411,6 +414,8 @@ export interface ContentIdea {
    *  0064_hook_source.sql. */
   hook_source?: 'ai' | null
   visual_brief: string | null
+  /** 1–10 de la IA. Null = todavía no se puntuó. Migración 0068. */
+  virality_score?: number | null
   caption_angle: string | null
   hashtags_suggestion: string | null
   rationale: string | null

@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import { hasPermission } from './permissions'
 
+describe('view_as.editor', () => {
+  it('owner (wildcard) y supervisor pueden; el editor no', () => {
+    expect(hasPermission('owner', 'view_as.editor')).toBe(true)
+    expect(hasPermission('supervisor', 'view_as.editor')).toBe(true)
+    expect(hasPermission('editor', 'view_as.editor')).toBe(false)
+    expect(hasPermission('copy', 'view_as.editor')).toBe(false)
+  })
+})
+
 describe('presence.read (tablero Jornada — todo el equipo)', () => {
   it('todos los roles del estudio pueden ver y ser medidos', () => {
     for (const role of ['owner', 'supervisor', 'editor', 'video', 'disenador', 'copy', 'team_member'] as const) {
@@ -12,7 +21,25 @@ describe('presence.read (tablero Jornada — todo el equipo)', () => {
   })
 })
 
-describe('planning.assign permission (assigning videos to others)', () => {
+describe('recording.brief (brief de On Site)', () => {
+  it('owner y supervisor pueden generar y editar el brief', () => {
+    expect(hasPermission('owner', 'recording.brief')).toBe(true)
+    expect(hasPermission('supervisor', 'recording.brief')).toBe(true)
+  })
+
+  it('quien graba no edita el brief', () => {
+    expect(hasPermission('video', 'recording.brief')).toBe(false)
+    expect(hasPermission('editor', 'recording.brief')).toBe(false)
+  })
+})
+
+describe('video.upload en el rol video (subir material en On Site)', () => {
+  it('el videógrafo puede subir el crudo de cada idea', () => {
+    expect(hasPermission('video', 'video.upload')).toBe(true)
+  })
+})
+
+describe('planning.assign', () => {
   it('owner and supervisor may assign', () => {
     expect(hasPermission('owner', 'planning.assign')).toBe(true)
     expect(hasPermission('supervisor', 'planning.assign')).toBe(true)

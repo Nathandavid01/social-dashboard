@@ -23,7 +23,7 @@ describe('computeIdeaPipeline', () => {
   it('returns the 7 stages in order', () => {
     const p = computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false })
     expect(p.stages.map((s) => s.key)).toEqual([
-      'idea', 'caption', 'scheduled', 'recorded', 'edited', 'approval', 'published',
+      'idea', 'scheduled', 'recorded', 'edited', 'approval', 'caption', 'published',
     ])
   })
 
@@ -38,36 +38,37 @@ describe('computeIdeaPipeline', () => {
   })
 
   it('scheduled reflects recordingScheduled or a linked session', () => {
-    expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: true }).stages[2].done).toBe(true)
-    expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false }).stages[2].done).toBe(false)
+    expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: true }).stages[1].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false }).stages[1].done).toBe(false)
     expect(
-      computeIdeaPipeline({ idea: { ...base, recording_session_id: 's1' }, videos: [], recordingScheduled: false }).stages[2].done,
+      computeIdeaPipeline({ idea: { ...base, recording_session_id: 's1' }, videos: [], recordingScheduled: false }).stages[1].done,
     ).toBe(true)
   })
 
   it('recorded done via status, recording_date, or active raw (not archived)', () => {
-    expect(computeIdeaPipeline({ idea: { ...base, status: 'grabada' }, videos: [], recordingScheduled: false }).stages[3].done).toBe(true)
-    expect(computeIdeaPipeline({ idea: { ...base, recording_date: '2026-05-01' }, videos: [], recordingScheduled: false }).stages[3].done).toBe(true)
-    expect(computeIdeaPipeline({ idea: base, videos: [raw], recordingScheduled: false }).stages[3].done).toBe(true)
-    expect(computeIdeaPipeline({ idea: base, videos: [{ ...raw, status: 'archived' }], recordingScheduled: false }).stages[3].done).toBe(false)
+    expect(computeIdeaPipeline({ idea: { ...base, status: 'grabada' }, videos: [], recordingScheduled: false }).stages[2].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: { ...base, recording_date: '2026-05-01' }, videos: [], recordingScheduled: false }).stages[2].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: base, videos: [raw], recordingScheduled: false }).stages[2].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: base, videos: [{ ...raw, status: 'archived' }], recordingScheduled: false }).stages[2].done).toBe(false)
   })
 
   it('edited done via active edited or producida', () => {
-    expect(computeIdeaPipeline({ idea: base, videos: [edited], recordingScheduled: false }).stages[4].done).toBe(true)
-    expect(computeIdeaPipeline({ idea: { ...base, status: 'producida' }, videos: [], recordingScheduled: false }).stages[4].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: base, videos: [edited], recordingScheduled: false }).stages[3].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: { ...base, status: 'producida' }, videos: [], recordingScheduled: false }).stages[3].done).toBe(true)
   })
 
-  it('approval + published', () => {
-    expect(computeIdeaPipeline({ idea: { ...base, approval_status: 'approved' }, videos: [], recordingScheduled: false }).stages[5].done).toBe(true)
+  it('approval then caption then published', () => {
+    expect(computeIdeaPipeline({ idea: { ...base, approval_status: 'approved' }, videos: [], recordingScheduled: false }).stages[4].done).toBe(true)
+    expect(computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false }).stages[5].done).toBe(true)
     expect(computeIdeaPipeline({ idea: { ...base, published_at: '2026-05-01' }, videos: [], recordingScheduled: false }).stages[6].done).toBe(true)
     expect(computeIdeaPipeline({ idea: { ...base, status: 'publicada' }, videos: [], recordingScheduled: false }).stages[6].done).toBe(true)
   })
 
   it('currentIndex is the first not-done; percent reflects completed', () => {
-    const p = computeIdeaPipeline({ idea: base, videos: [], recordingScheduled: false }) // idea + caption done
-    expect(p.currentIndex).toBe(2)
-    expect(p.completed).toBe(2)
-    expect(p.percent).toBe(Math.round((2 / 7) * 100))
+    const p = computeIdeaPipeline({ idea: { ...base, generated_caption: null }, videos: [], recordingScheduled: false })
+    expect(p.currentIndex).toBe(1)
+    expect(p.completed).toBe(1)
+    expect(p.percent).toBe(Math.round((1 / 7) * 100))
   })
 
   it('currentIndex points past the end when all stages are done', () => {

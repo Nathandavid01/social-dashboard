@@ -22,6 +22,17 @@ describe('navItems source', () => {
     expect(hrefs).toContain('/clients')
     expect(hrefs).toContain('/settings/users')
   })
+
+  it('el menú de proceso empieza por generar ideas, luego grabar', () => {
+    const process = navItems.filter((n) => n.group).map((n) => n.href)
+    expect(process.slice(0, 5)).toEqual([
+      '/escribir-ideas',
+      '/idea-lab',
+      '/ideas-aprobadas',
+      '/recording-calendar',
+      '/onsite',
+    ])
+  })
 })
 
 describe('visibleNavItems', () => {

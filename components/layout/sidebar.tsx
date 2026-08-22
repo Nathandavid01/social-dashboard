@@ -11,7 +11,7 @@ import { APP_VERSION } from '@/lib/version'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useAuth } from '@/lib/context/auth-context'
 import { useSidebar } from '@/lib/context/sidebar-context'
-import { hasPermission } from '@/lib/auth/permissions'
+import { supervisorNavLabel } from '@/lib/onsite/supervisor-process'
 import type { NavPreferences } from '@/lib/supabase/types'
 
 interface SidebarProps {
@@ -26,13 +26,9 @@ const DEFAULT_HREFS = navItems.map((n) => n.href)
 /**
  * Bump this whenever the DEFAULT sidebar layout changes.
  *
- * v2 = the six-section menu. A saved `order` from v1 was a full snapshot of the
- * OLD flat list — and `toggleHidden` used to save that snapshot even for people
- * who never reordered anything, just hid one item. Honoring it would pin those
- * users to the old flat menu forever and they'd never see the sections. So an
- * order from an older version is dropped; `hidden` (still meaningful) is kept.
+ * v3 = ideas first (Marketing → Recordings → Trabajo). v2 orders are dropped.
  */
-const NAV_PREFS_VERSION = 2
+const NAV_PREFS_VERSION = 3
 
 function applyPreferences(prefs: NavPreferences | undefined) {
   const fromThisLayout = prefs?.v === NAV_PREFS_VERSION
@@ -232,7 +228,9 @@ export function Sidebar({
             >
               {editing && !collapsed && <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
               <item.icon className="h-4 w-4 shrink-0" />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && (
+                <span className="truncate">{supervisorNavLabel(item.href, role, item.label)}</span>
+              )}
               {/* Collapsed: a small dot signals a pending badge without the number */}
               {collapsed && !editing && badge > 0 && (
                 <span className={cn('absolute right-1 top-1 h-2 w-2 rounded-full', badgeColor)} />

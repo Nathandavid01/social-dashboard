@@ -22,7 +22,7 @@ describe('computeIdeaProgress', () => {
     expect(p.percent).toBe(100)
     expect(p.missing).toEqual([])
     expect(p.stages.map((s) => s.key)).toEqual([
-      'idea', 'caption', 'material', 'edited', 'assets', 'approval', 'published',
+      'idea', 'material', 'edited', 'assets', 'approval', 'caption', 'published',
     ])
   })
 

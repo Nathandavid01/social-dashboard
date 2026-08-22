@@ -4,6 +4,62 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.69 — 2026-08-22
+
+**On Site es una jornada: llegada, call sheet y subida con el nombre de la idea.**
+
+- El botón **Llegué** deja quién y a qué hora.
+- Quien graba ve el brief y no lo edita. La subida del crudo no espera a marcar grabada.
+- Al subir, el archivo se nombra como la idea, no como IMG_8841.
+- Un admin puede **ver como editor** (clientes de esa persona) y salir desde la barra.
+
+## v3.68 — 2026-08-20
+
+**On Site siempre muestra las tomas en blanco hasta el /mes × 1.5.**
+
+- Cada espacio es una tarjeta vacía numerada. Las llenas tienen la idea; las demás dicen **Por llenar**.
+- El cliente abierto en la lista se pinta en oro, igual que el call sheet.
+
+## v3.67 — 2026-08-20
+
+**Para el supervisor, On Site es el paso 1.**
+
+- En el menú: **1 · On Site**, luego Revisión y Entregas.
+- Arriba de On Site hay un step-by-step: **1 On Site → 2 Revisión → 3 Entregas**.
+- Quien graba sigue viendo On Site sin número (su trabajo es grabar, no el mapa).
+
+## v3.66 — 2026-08-20
+
+**Generar ideas es el primer paso del proceso, y On Site usa la misma IA del Lab.**
+
+- En el menú: Marketing (ideas) → Recordings (On Site) → Trabajo (editar).
+- En cada video: Idea → grabar → editar → aprobar → caption → publicar.
+- “Generar N ideas con IA” en On Site usa el generador del Lab (marca, voz, lo aprobado).
+
+Vista: [preview HTML](/previews/v3.65-onsite-callsheet.html)
+
+## v3.65 — 2026-08-20
+
+**On Site es el call sheet del equipo de grabación: eliges el cliente, ves las ideas, marcas y subes.**
+
+- A la izquierda, los clientes **Hoy / Próximas / Anteriores** — ya no hay que buscar entre “Sin cliente”.
+- Cada idea muestra **número, título, de qué es y referencia**.
+- **Admin** genera las ideas que faltan (el /mes × 1.5) y las edita.
+- Quien graba **marca la toma y sube el material** de esa idea.
+
+Vista: [preview HTML](/previews/v3.65-onsite-callsheet.html)
+
+## v3.64 — 2026-08-19
+
+**On Site recomienda videos = el /mes de Días de posting × 1.5.**
+
+- Coge los **días de posting del perfil** (Lun, Jue, etc.).
+- Usa el mismo **N /mes** que sale en esa tarjeta, y lo multiplica por **1.5** (9/mes → 14 videos).
+- Ese número es lo recomendado **cada vez que se graba**.
+- Las ideas ya escritas llenan espacios; el resto sale **por idear**. Tocar un hueco abre **Añadir ideas**.
+
+Vista: [preview HTML](/previews/v3.64-onsite-espacios.html)
+
 ## v3.63 — 2026-08-19
 
 **Los días de publicación son los del perfil: al aprobar, cada video toma el siguiente hueco (lunes, miércoles, viernes…).**

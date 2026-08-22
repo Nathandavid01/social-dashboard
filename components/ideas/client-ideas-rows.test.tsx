@@ -137,8 +137,8 @@ describe('IdeaRow bulk selection', () => {
 describe('IdeaRow next action', () => {
   it('shows the next action badge when showNextAction is set', () => {
     render(<ClientIdeasRows ideas={[idea({ status: 'idea' })]} showNextAction />)
-    // hook+brief filled, no caption → next action is "Generar el caption"
-    expect(screen.getByText(/Generar el caption/)).toBeInTheDocument()
+    // hook+brief filled, sin sesión → siguiente es On Site
+    expect(screen.getByText(/Agendar y grabar en On Site/)).toBeInTheDocument()
   })
 
   it('hides the next action badge by default', () => {

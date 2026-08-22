@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   AREAS,
   ALWAYS_ALLOWED_PREFIXES,
+  NAV_GROUPS,
   areaForPath,
   effectiveAreaHrefs,
   canAccessPath,
@@ -9,6 +10,14 @@ import {
   normalizeAreaAccess,
 } from './areas'
 import type { UserRole } from '@/lib/supabase/types'
+
+describe('NAV_GROUPS — orden del proceso', () => {
+  it('empieza por generar ideas (Marketing), luego grabar (Recordings)', () => {
+    expect(NAV_GROUPS[0]).toBe('Marketing')
+    expect(NAV_GROUPS[1]).toBe('Recordings')
+    expect(NAV_GROUPS[2]).toBe('Trabajo')
+  })
+})
 
 describe('AREAS catalogue', () => {
   it('is non-empty and never includes the mandatory landing (/home)', () => {

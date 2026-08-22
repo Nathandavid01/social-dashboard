@@ -72,6 +72,8 @@ describe('buildGenerationPrompt', () => {
     expect(p).toContain('PUERTO RICAN CULTURAL LENS')
     expect(p).toContain('"objective"')
     expect(p).toContain('"funnel_stage"')
+    expect(p).toContain('"virality_score"')
+    expect(p).toContain('QUÉ GRABAR')
   })
 
   it('embeds top-performing winners when provided', () => {

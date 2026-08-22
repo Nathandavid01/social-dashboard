@@ -86,6 +86,18 @@ describe('upload-store — small file (single PUT)', () => {
     expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('video-1', file)
   })
 
+  it('el dock y el registro usan el título de la idea, no IMG_8841', async () => {
+    const file = smallFile('IMG_8841.MOV')
+    const id = useUploadStore.getState().startUpload({
+      file, ideaId: 'idea-1', kind: 'raw', provider: 'r2', title: 'El primer sandwich del día',
+    })
+    expect(useUploadStore.getState().uploads[id].fileName).toBe('El primer sandwich del día.MOV')
+    await waitForPhase(id, ['listo', 'error'])
+    expect(vi.mocked(registerR2Video)).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'El primer sandwich del día.MOV' }),
+    )
+  })
+
   it('routes entregas-r2 uploads through the entregas actions, not the pipeline ones', async () => {
     const file = smallFile('final.mp4')
     const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-9', kind: 'edited', provider: 'entregas-r2' })

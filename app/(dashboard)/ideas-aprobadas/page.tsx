@@ -1,4 +1,5 @@
-import { requirePermission } from '@/lib/auth/server'
+import { getEffectiveRole, getEffectiveUserId, requirePermission } from '@/lib/auth/server'
+import { visibleClientIds } from '@/lib/utils/client-visibility'
 import { getApprovedIdeas } from '@/lib/actions/idea-feedback'
 import { getNextAutopostNotices, type NextAutopostNotice } from '@/lib/actions/next-autopost'
 import { getClients } from '@/lib/actions/clients'
@@ -13,6 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function IdeasAprobadasPage() {
   await requirePermission('ideas.read')
+  const [role, userId] = await Promise.all([getEffectiveRole(), getEffectiveUserId()])
 
   let ideas: ApprovedIdea[] = []
   try {
@@ -35,7 +37,19 @@ export default async function IdeasAprobadasPage() {
   let clients: QuickCaptionClient[] = []
   try {
     const rows = await getClients({ status: 'active' })
-    clients = rows.map((c) => ({ id: c.id, name: c.name, metricool_blog_id: c.metricool_blog_id ?? null }))
+    const permitidos = visibleClientIds(
+      role,
+      userId,
+      rows.map((c) => ({
+        id: c.id,
+        name: c.name,
+        assigned_to: c.assigned_to ?? null,
+        assigned_designer: c.assigned_designer ?? null,
+      })),
+    )
+    const visible = permitidos ? rows.filter((c) => permitidos.has(c.id)) : rows
+    if (permitidos) ideas = ideas.filter((i) => permitidos.has(i.client_id ?? ''))
+    clients = visible.map((c) => ({ id: c.id, name: c.name, metricool_blog_id: c.metricool_blog_id ?? null }))
   } catch {
     clients = []
   }

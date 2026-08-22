@@ -511,6 +511,23 @@ describe('IdeaVideoPanel — arrastrar y soltar (sin la caja grande)', () => {
 
     expect(vi.mocked(registerR2Video)).toHaveBeenCalled()
   })
+
+  it('el crudo se registra con el título de la idea, no IMG_8841', async () => {
+    vi.mocked(registerR2Video).mockResolvedValueOnce({ ok: true, id: 'vid-raw' })
+    render(<IdeaVideoPanel ideaId="idea-1" ideaTitle="El primer sandwich del día" videos={[]} />)
+    await flush()
+
+    const group = screen.getByRole('button', { name: 'Añadir material crudo' }).closest('[data-slot-group="raw"]')
+    const file = new File(['x'], 'IMG_8841.MOV', { type: 'video/quicktime' })
+    await act(async () => {
+      fireEvent.drop(group as Element, { dataTransfer: { files: [file] } })
+    })
+    await flush()
+
+    expect(vi.mocked(registerR2Video)).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'raw', name: 'El primer sandwich del día.MOV' }),
+    )
+  })
 })
 
 describe('IdeaVideoPanel — multi-file upload', () => {

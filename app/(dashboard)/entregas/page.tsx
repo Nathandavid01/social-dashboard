@@ -1,7 +1,8 @@
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
 import { buildPostedLinks } from '@/lib/entregas/posted-links'
 import type { EstadoCliente } from '@/lib/entregas/marca-cliente'
 
@@ -20,13 +21,14 @@ export default async function EntregasPage() {
   await requirePermission('entregas.read')
   const supabase = await createClient()
 
-  const [ideas, { data: activeClientsRaw }] = await Promise.all([
+  const [ideas, { data: activeClientsRaw }, showProcess] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
       .select('id, name, assigned_to, posting_time')
       .eq('status', 'active')
       .order('name'),
+    currentUserHas('recording.brief'),
   ])
 
   const activeClients = activeClientsRaw ?? []
@@ -70,17 +72,20 @@ export default async function EntregasPage() {
   const postedLinks = buildPostedLinks(envios ?? [])
 
   return (
-    <EntregasBoard
-      ideas={entregas}
-      clientApprovals={clientApprovals}
-      postedLinks={postedLinks}
-      allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
-      postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
-      stages={['copy', 'publication']}
-      // La cadencia del cliente y lo que recibe Metricool es el día de
-      // PUBLICACIÓN. La Guira publica lunes, miércoles y viernes; verla en
-      // domingo, martes y jueves no se entendía.
-      modoDia="publicacion"
-    />
+    <div className="space-y-4">
+      {showProcess && <SupervisorProcessSteps pathname="/entregas" />}
+      <EntregasBoard
+        ideas={entregas}
+        clientApprovals={clientApprovals}
+        postedLinks={postedLinks}
+        allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
+        postingTimes={Object.fromEntries(activeClients.map((c) => [c.id, c.posting_time ?? null]))}
+        stages={['copy', 'publication']}
+        // La cadencia del cliente y lo que recibe Metricool es el día de
+        // PUBLICACIÓN. La Guira publica lunes, miércoles y viernes; verla en
+        // domingo, martes y jueves no se entendía.
+        modoDia="publicacion"
+      />
+    </div>
   )
 }

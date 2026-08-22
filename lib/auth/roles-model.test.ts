@@ -63,8 +63,9 @@ describe('modelo de roles', () => {
     // El diseñador entrega piezas pero el copy lo escribe otro.
     expect(hasPermission('disenador', 'video.upload')).toBe(true)
     expect(hasPermission('disenador', 'captions.edit')).toBe(false)
-    // El videógrafo ni sube entregas ni escribe copy.
-    expect(hasPermission('video', 'video.upload')).toBe(false)
+    // El videógrafo sube el crudo en On Site; el copy lo escribe otro.
+    expect(hasPermission('video', 'video.upload')).toBe(true)
+    expect(hasPermission('video', 'captions.edit')).toBe(false)
   })
 
   it('el supervisor conserva Equipo y Métricas', () => {

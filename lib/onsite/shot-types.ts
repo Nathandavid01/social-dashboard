@@ -22,6 +22,12 @@ export interface OnsiteShot {
   id: string
   title: string
   hook: string | null
+  /** Qué grabar, paso a paso. */
+  visualBrief: string | null
+  /** 1–10 de la IA; null si aún no se puntuó. */
+  viralityScore: number | null
+  /** Por qué esa nota. */
+  viralityWhy: string | null
   referenceUrl: string | null
   shotType: string | null
   /** status === 'grabada' — la misma verdad que el resto de la app. */

@@ -14,7 +14,9 @@ import type { UserRole } from '@/lib/supabase/types'
 vi.mock('@/components/produccion/idea-brief-card', () => ({ IdeaBriefCard: () => null }))
 vi.mock('@/components/produccion/idea-caption-editor', () => ({ IdeaCaptionEditor: () => null }))
 vi.mock('@/components/recording/idea-video-panel', () => ({
-  IdeaVideoPanel: () => <div data-testid="idea-video-panel" />,
+  IdeaVideoPanel: ({ ideaTitle }: { ideaTitle?: string }) => (
+    <div data-testid="idea-video-panel">{ideaTitle}</div>
+  ),
 }))
 vi.mock('@/components/recording/video-scene-strip', () => ({
   VideoSceneStrip: ({ videoId }: { videoId: string }) => <div data-testid="scene-strip" data-video-id={videoId} />,
@@ -65,6 +67,13 @@ function video(over: Partial<BatchVideo> = {}): BatchVideo {
 }
 
 afterEach(() => cleanup())
+
+describe('VideoWorkCard — subida con el título de la idea', () => {
+  it('pasa el título de la idea al panel de videos para renombrar el crudo', () => {
+    render(<VideoWorkCard video={video({ title: 'Rutina de fuerza 5x5' })} index={0} />)
+    expect(screen.getByTestId('idea-video-panel')).toHaveTextContent('Rutina de fuerza 5x5')
+  })
+})
 
 describe('VideoWorkCard — aprobación en el lote', () => {
   it('lets an authorised user approve / request changes when submitted', () => {

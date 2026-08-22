@@ -37,6 +37,8 @@ export type Permission =
   | 'recording.read'
   | 'recording.create'
   | 'recording.complete'
+  /** Generar y editar el brief de On Site (admin / supervisor). */
+  | 'recording.brief'
   // Posting
   | 'posting.read'
   | 'posting.publish'
@@ -67,6 +69,8 @@ export type Permission =
   | 'settings.edit'
   | 'alerts.read'
   | 'alerts.dismiss'
+  /** Ver la plataforma como un editor (solo owner/supervisor). */
+  | 'view_as.editor'
 
 /**
  * Wildcard sentinel — present in a role's permission set means "everything".
@@ -89,7 +93,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read', 'ideas.edit',
     'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve',
     'production.read', 'production.edit',
-    'recording.read', 'recording.create', 'recording.complete',
+    'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
@@ -102,6 +106,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
+    'view_as.editor',
   ],
 
   // Editor — SOLO Entregas: sube el video editado y escribe su copy.
@@ -124,6 +129,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'tasks.read.own', 'tasks.edit',
     'ideas.read', 'ideas.edit',
     'runway.read',
+    'video.upload',
     'recording.read', 'recording.create', 'recording.complete',
     'weekly_compliance.read', 'cadence.read', 'activity.read', 'presence.read',
     'alerts.read',

@@ -16,17 +16,20 @@ function pipe(over: Record<string, unknown> = {}) {
 }
 
 describe('nextAction', () => {
-  it('points to generating the caption when the idea is defined but has no caption', () => {
+  it('points to scheduling / On Site when the idea is defined', () => {
     const a = nextAction(pipe())
-    expect(a.stage).toBe('caption')
-    expect(a.label).toMatch(/caption/i)
+    expect(a.stage).toBe('scheduled')
+    expect(a.label).toMatch(/grabar|agendar|on site/i)
     expect(a.done).toBe(false)
   })
 
-  it('points to scheduling once the caption exists', () => {
-    const a = nextAction(pipe({ generated_caption: 'listo' }))
-    expect(a.stage).toBe('scheduled')
-    expect(a.label).toMatch(/agendar/i)
+  it('points to writing the caption after the video is approved', () => {
+    const a = nextAction(pipe({
+      recording_session_id: 's', recording_date: '2026-01-01',
+      status: 'producida', approval_status: 'approved', generated_caption: null,
+    }))
+    expect(a.stage).toBe('caption')
+    expect(a.label).toMatch(/caption/i)
   })
 
   it('is done (no actions) when the video is fully published', () => {

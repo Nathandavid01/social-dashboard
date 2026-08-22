@@ -1,9 +1,22 @@
 import 'server-only'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { hasPermission, type Permission } from './permissions'
 import { areaGrantsPermission } from './areas'
+import {
+  VIEW_AS_COOKIE,
+  canStartViewAs,
+  isViewAsEditorId,
+  resolveEffectiveRole,
+  resolveEffectiveUserId,
+} from './view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
+
+export interface ViewAsEditor {
+  id: string
+  full_name: string | null
+}
 
 interface RoleAndAreas {
   role: UserRole | null
@@ -83,8 +96,57 @@ export async function getCurrentRole(): Promise<UserRole | null> {
   return role
 }
 
+async function readViewAsCookie(): Promise<string | null> {
+  try {
+    const store = await cookies()
+    const value = store.get(VIEW_AS_COOKIE)?.value ?? null
+    return isViewAsEditorId(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+/** Cookie de vista, solo si el usuario real puede usarla. */
+export async function getViewAsEditorId(): Promise<string | null> {
+  const role = await getCurrentRole()
+  if (!canStartViewAs(role)) return null
+  return readViewAsCookie()
+}
+
+export async function getEffectiveRole(): Promise<UserRole | null> {
+  const real = await getCurrentRole()
+  return resolveEffectiveRole(real, await getViewAsEditorId())
+}
+
+export async function getEffectiveUserId(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const realRole = await getCurrentRole()
+  return resolveEffectiveUserId(user?.id ?? null, realRole, await getViewAsEditorId())
+}
+
+export async function getViewAsEditor(): Promise<ViewAsEditor | null> {
+  const id = await getViewAsEditorId()
+  if (!id) return null
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .eq('id', id)
+    .maybeSingle()
+  return { id, full_name: data?.full_name ?? null }
+}
+
+async function getEffectiveRoleAndAreas(): Promise<RoleAndAreas> {
+  const real = await getRoleAndAreas()
+  const viewAs = await getViewAsEditorId()
+  const role = resolveEffectiveRole(real.role, viewAs)
+  if (viewAs && role === 'editor') return { role: 'editor', areaAccess: null }
+  return real
+}
+
 export async function currentUserHas(perm: Permission): Promise<boolean> {
-  const { role, areaAccess } = await getRoleAndAreas()
+  const { role, areaAccess } = await getEffectiveRoleAndAreas()
   return hasPermission(role, perm) || areaGrantsPermission(perm, role, areaAccess)
 }
 
@@ -96,7 +158,7 @@ export async function currentUserHas(perm: Permission): Promise<boolean> {
  * friendly toast through the existing { error } shape — keep it Spanish.
  */
 export async function requirePermission(perm: Permission): Promise<void> {
-  const { role, areaAccess } = await getRoleAndAreas()
+  const { role, areaAccess } = await getEffectiveRoleAndAreas()
   if (!role) {
     throw new Error('Acceso denegado (perfil no configurado — contacta a un Owner)')
   }

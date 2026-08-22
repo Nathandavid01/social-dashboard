@@ -236,7 +236,7 @@ function IdeaRow({
       </button>
     </div>
 
-    {isRecorded && (
+    {isLinked && (
       <div className="ml-7">
         <IdeaVideoLoader ideaId={idea.id} ideaTitle={idea.title} compact />
       </div>

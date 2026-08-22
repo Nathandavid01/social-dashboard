@@ -28,7 +28,7 @@ interface Step {
 export function PipelineCard({ data, title, linkable, clientId }: Props) {
   const q = clientId ? `?client=${clientId}` : ''
   const steps: Step[] = [
-    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-600 bg-purple-500/10 border-purple-500/25', iconBg: 'bg-purple-500/15 text-purple-600', href: `/planning${q}` },
+    { key: 'ideas',       label: 'Ideas',        value: data.ideas,        icon: Lightbulb,     tone: 'text-purple-600 bg-purple-500/10 border-purple-500/25', iconBg: 'bg-purple-500/15 text-purple-600', href: `/onsite${q}` },
     { key: 'porGrabar',   label: 'Por grabar',   value: data.porGrabar,    icon: Video,         tone: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/25',   iconBg: 'bg-cyan-500/15 text-cyan-600',   href: `/recording-calendar${q}` },
     { key: 'porEditar',   label: 'Por editar',   value: data.porEditar,    icon: Scissors,      tone: 'text-orange-600 bg-orange-500/10 border-orange-500/25', iconBg: 'bg-orange-500/15 text-orange-600', href: `/produccion${q}` },
     { key: 'porPublicar', label: 'Por publicar', value: data.porPublicar,  icon: CalendarCheck, tone: 'text-blue-600 bg-blue-500/10 border-blue-500/25',   iconBg: 'bg-blue-500/15 text-blue-600',   href: `/posting${q}` },

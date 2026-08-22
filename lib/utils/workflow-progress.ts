@@ -16,11 +16,19 @@ const DEFAULT_SETTINGS: WorkflowSettings = {
   ideas_multiplier: 2,
   require_rescheduling: true,
   steps: [
-    { slug: 'scheduled',   name: 'Agendar próxima sesión',     required: true },
-    { slug: 'ideas',       name: 'Tener ideas listas',         required: true },
+    { slug: 'ideas',       name: 'Generar ideas',               required: true },
+    { slug: 'scheduled',   name: 'Agendar y grabar (On Site)',  required: true },
     { slug: 'rescheduled', name: 'Reagendar después de grabar', required: true },
   ],
   pipeline_step_assignees: {},
+}
+
+function withIdeasFirst(
+  steps: { slug: string; name: string; required: boolean }[],
+): { slug: string; name: string; required: boolean }[] {
+  const ideas = steps.find((s) => s.slug === 'ideas')
+  if (!ideas) return steps
+  return [ideas, ...steps.filter((s) => s.slug !== 'ideas')]
 }
 
 export async function getWorkflowSettings(): Promise<WorkflowSettings> {
@@ -37,7 +45,7 @@ export async function getWorkflowSettings(): Promise<WorkflowSettings> {
     min_ideas_per_session: data.min_ideas_per_session ?? 4,
     ideas_multiplier: Number(data.ideas_multiplier ?? 2),
     require_rescheduling: data.require_rescheduling ?? true,
-    steps: Array.isArray(data.steps) ? data.steps : DEFAULT_SETTINGS.steps,
+    steps: withIdeasFirst(Array.isArray(data.steps) ? data.steps : DEFAULT_SETTINGS.steps),
     pipeline_step_assignees: parsePipelineStepAssignees(data.pipeline_step_assignees),
   }
 }

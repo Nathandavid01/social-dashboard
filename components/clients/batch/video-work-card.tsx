@@ -177,7 +177,7 @@ export function VideoWorkCard({
             Sube el video
           </span>
         </div>
-        <IdeaVideoPanel ideaId={video.id} videos={ideaVideos} />
+        <IdeaVideoPanel ideaId={video.id} ideaTitle={video.title} videos={ideaVideos} />
       </div>
 
       {/* 2) de qué es → la AI escribe el caption (igual que el generador de ideas) */}
