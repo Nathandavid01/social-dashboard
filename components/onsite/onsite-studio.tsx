@@ -512,13 +512,18 @@ function IdeaCard({
               </a>
             )}
           </div>
+          {canUpload && (
+            <div className="pt-2">
+              <IdeaVideoLoader ideaId={shot.id} ideaTitle={titulo} kinds={['raw']} compact />
+            </div>
+          )}
         </div>
         <button
           type="button"
           onClick={onOpen}
           aria-expanded={abierta}
           className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border"
-          aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle y subida'}
+          aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle'}
         >
           {abierta ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -558,9 +563,8 @@ function IdeaCard({
               </label>
             </div>
           )}
-          {canUpload && <IdeaVideoLoader ideaId={shot.id} ideaTitle={titulo} compact />}
           {!canUpload && (
-            <p className="text-[12px] text-muted-foreground">Marca la toma cuando esté grabada. El material se sube aquí si tienes permiso.</p>
+            <p className="text-[12px] text-muted-foreground">El material crudo se sube en la tarjeta si tienes permiso.</p>
           )}
         </div>
       )}

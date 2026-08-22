@@ -208,8 +208,7 @@ describe('OnsiteStudio', () => {
     await user.click(screen.getByRole('button', { name: /Generar 19 ideas con IA/ }))
   })
 
-  it('quien graba abre la idea y ve la subida, no el botón de generar', async () => {
-    const user = userEvent.setup()
+  it('quien graba ve la subida del crudo en la tarjeta, sin abrir el chevron', async () => {
     render(
       <OnsiteStudio
         sessions={[session()]}
@@ -224,8 +223,8 @@ describe('OnsiteStudio', () => {
       />,
     )
     expect(screen.queryByRole('button', { name: /Generar/ })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /Abrir detalle y subida/ }))
     expect(screen.getByText('Subida Intro Patricia')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Abrir detalle' })).toBeInTheDocument()
   })
 
   it('la subida usa el título que está escrito, aunque no se haya guardado aún', async () => {
@@ -245,7 +244,6 @@ describe('OnsiteStudio', () => {
     )
     await user.clear(screen.getByLabelText('Título de la idea 1'))
     await user.type(screen.getByLabelText('Título de la idea 1'), 'El primer sandwich del día')
-    await user.click(screen.getByRole('button', { name: /Abrir detalle y subida/ }))
     expect(screen.getByText('Subida El primer sandwich del día')).toBeInTheDocument()
   })
 })

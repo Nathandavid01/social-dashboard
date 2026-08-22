@@ -108,6 +108,14 @@ describe('IdeaVideoPanel — compact upload view', () => {
     expect(screen.getByText('Opcional')).toBeInTheDocument()
   })
 
+  it('On Site puede mostrar solo el slot de crudo', async () => {
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[]} kinds={['raw']} />)
+    await flush()
+    expect(screen.getByRole('button', { name: 'Añadir material crudo' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Añadir video editado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Añadir b-roll' })).not.toBeInTheDocument()
+  })
+
   it('shows existing files under each group', async () => {
     const videos = [
       makeVideo('raw', 0),

@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { IdeaVideoPanel } from './idea-video-panel'
 import { getIdeaVideos } from '@/lib/actions/idea-videos'
-import type { ContentIdeaVideo } from '@/lib/supabase/types'
+import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 interface Props {
   ideaId: string
   ideaTitle?: string
   compact?: boolean
+  kinds?: ContentIdeaVideoKind[]
 }
 
 /**
@@ -18,7 +19,7 @@ interface Props {
  * mount and re-renders. For lists with N ideas, prefer to fetch in bulk in
  * the parent and pass `videos` straight to IdeaVideoPanel.
  */
-export function IdeaVideoLoader({ ideaId, ideaTitle, compact }: Props) {
+export function IdeaVideoLoader({ ideaId, ideaTitle, compact, kinds }: Props) {
   const [videos, setVideos] = useState<ContentIdeaVideo[] | null>(null)
 
   useEffect(() => {
@@ -37,5 +38,5 @@ export function IdeaVideoLoader({ ideaId, ideaTitle, compact }: Props) {
     )
   }
 
-  return <IdeaVideoPanel ideaId={ideaId} ideaTitle={ideaTitle} videos={videos} compact={compact} />
+  return <IdeaVideoPanel ideaId={ideaId} ideaTitle={ideaTitle} videos={videos} compact={compact} kinds={kinds} />
 }

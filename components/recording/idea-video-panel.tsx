@@ -22,6 +22,8 @@ interface Props {
   compact?: boolean
   /** True when R2 public access is configured (edited videos served publicly). */
   publicEnabled?: boolean
+  /** On Site only needs raw. Default: editado → crudo → b-roll. */
+  kinds?: ContentIdeaVideoKind[]
 }
 
 const META: Record<ContentIdeaVideoKind, { label: string; sub: string; icon: typeof Camera; tone: string }> = {
@@ -73,7 +75,7 @@ function firstName(fullName: string | null | undefined): string {
 
 const REQUIRED_FILES: Partial<Record<ContentIdeaVideoKind, number>> = { raw: 4, edited: 1 }
 
-export function IdeaVideoPanel({ ideaId, ideaTitle, videos, publicEnabled = false }: Props) {
+export function IdeaVideoPanel({ ideaId, ideaTitle, videos, publicEnabled = false, kinds = KIND_ORDER }: Props) {
   const canUpload = useHasPermission('video.upload')
   // Same read gate as the server actions (getR2DownloadUrl/PreviewUrl/PublicUrl):
   // revision/entregas/planning read lets you manage ANY client's material.
@@ -91,7 +93,7 @@ export function IdeaVideoPanel({ ideaId, ideaTitle, videos, publicEnabled = fals
 
   return (
     <div className="space-y-5">
-      {KIND_ORDER.map((kind) => (
+      {KIND_ORDER.filter((kind) => kinds.includes(kind)).map((kind) => (
         <SlotGroup
           key={kind}
           kind={kind}

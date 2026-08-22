@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.70 — 2026-08-22
+
+**El crudo se sube en la tarjeta de la idea, sin abrir la flecha.**
+
+- En On Site, cada toma llena tiene **Video crudo** y el **+** a la vista.
+- Editado y B-roll no salen ahí (eso es de Revisión).
+
 ## v3.69 — 2026-08-22
 
 **On Site es una jornada: llegada, call sheet y subida con el nombre de la idea.**
