@@ -3,6 +3,9 @@ import {
   NATE_SLACK_CHANNEL_ID,
   NATE_SLACK_CHANNEL_NAME,
   formatCommitAnnouncement,
+  formatSlackSetupSteps,
+  livePreviewUrl,
+  resolveAnnouncementImage,
   resolveSlackTarget,
   postCommitAnnouncement,
 } from './announce-commit.mjs'
@@ -78,6 +81,7 @@ describe('postCommitAnnouncement', () => {
       ok: true,
       skipped: true,
       reason: 'missing_slack',
+      uploaded: false,
       channelId: 'C0BRP1X3BHQ',
       channelName: '#updates-dashboard',
     })
@@ -98,5 +102,111 @@ describe('postCommitAnnouncement', () => {
     expect(result.ok).toBe(false)
     expect(result.skipped).toBe(false)
     expect(result.reason).toBe('slack_error')
+  })
+
+  it('con bot token e imagen, sube por files.getUploadURLExternal al canal fijo', async () => {
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47])
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).includes('files.getUploadURLExternal')) {
+        return {
+          ok: true,
+          json: async () => ({
+            ok: true,
+            upload_url: 'https://files.slack.com/upload/v1/TEST',
+            file_id: 'F123ABC456',
+          }),
+        }
+      }
+      if (String(url).includes('files.slack.com/upload')) {
+        return { ok: true, json: async () => ({}) }
+      }
+      if (String(url).includes('files.completeUploadExternal')) {
+        return {
+          ok: true,
+          json: async () => ({ ok: true, files: [{ id: 'F123ABC456' }] }),
+        }
+      }
+      return { ok: true, json: async () => ({ ok: true }) }
+    })
+
+    const result = await postCommitAnnouncement({
+      env: { SLACK_BOT_TOKEN: 'xoxb-test' },
+      message: 'Nate · v3.71 calendario',
+      imagePath: '/tmp/recording-calendar.png',
+      fetchFn,
+      readFileFn: () => png,
+    })
+
+    expect(result.ok).toBe(true)
+    expect(result.uploaded).toBe(true)
+    expect(result.fileId).toBe('F123ABC456')
+    const urls = fetchFn.mock.calls.map((call) => String(call[0]))
+    expect(urls.some((u) => u.includes('files.getUploadURLExternal'))).toBe(true)
+    expect(urls.some((u) => u.includes('files.completeUploadExternal'))).toBe(true)
+    const completeCall = fetchFn.mock.calls.find((call) =>
+      String(call[0]).includes('files.completeUploadExternal'),
+    )
+    const completeBody = JSON.parse(String(completeCall?.[1]?.body))
+    expect(completeBody.channel_id).toBe('C0BRP1X3BHQ')
+    expect(completeBody.initial_comment).toContain('v3.71')
+    expect(completeCall?.[1]).toMatchObject({
+      headers: expect.objectContaining({
+        Authorization: 'Bearer xoxb-test',
+      }),
+    })
+  })
+
+  it('con bot token y sin imagen, postea chat.postMessage al canal fijo', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, ts: '1.2' }),
+    })
+    const result = await postCommitAnnouncement({
+      env: { SLACK_BOT_TOKEN: 'xoxb-test' },
+      message: 'sin foto',
+      fetchFn,
+    })
+    expect(result.ok).toBe(true)
+    expect(result.uploaded).toBe(false)
+    expect(String(fetchFn.mock.calls[0][0])).toContain('chat.postMessage')
+  })
+})
+
+describe('announce-commit screenshot + setup', () => {
+  it('la captura viva es localhost:3020, no un HTML estático', () => {
+    expect(livePreviewUrl('/recording-calendar')).toBe('http://localhost:3020/recording-calendar')
+  })
+
+  it('usa --image si el archivo existe; si no, captura la ruta viva', async () => {
+    const captureFn = vi.fn(async () => '/tmp/captured.png')
+    const existing = await resolveAnnouncementImage({
+      imagePath: '/tmp/given.png',
+      route: '/recording-calendar',
+      existsFn: (p) => p === '/tmp/given.png',
+      captureFn,
+    })
+    expect(existing).toBe('/tmp/given.png')
+    expect(captureFn).not.toHaveBeenCalled()
+
+    const captured = await resolveAnnouncementImage({
+      imagePath: undefined,
+      route: '/recording-calendar',
+      existsFn: () => false,
+      captureFn,
+    })
+    expect(captured).toBe('/tmp/captured.png')
+    expect(captureFn).toHaveBeenCalledWith({
+      url: 'http://localhost:3020/recording-calendar',
+    })
+  })
+
+  it('si falta el token, los 4 pasos no inventan un xoxb real', () => {
+    const steps = formatSlackSetupSteps()
+    expect(steps).toHaveLength(4)
+    expect(steps.join('\n')).toContain('chat:write')
+    expect(steps.join('\n')).toContain('files:write')
+    expect(steps.join('\n')).toContain('#updates-dashboard')
+    expect(steps.join('\n')).toContain('SLACK_BOT_TOKEN=xoxb-...')
+    expect(steps.join('\n')).not.toMatch(/xoxb-[0-9]/)
   })
 })
