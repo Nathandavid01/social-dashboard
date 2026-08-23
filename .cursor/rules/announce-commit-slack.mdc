@@ -1,0 +1,30 @@
+---
+description: Cada commit captura la UI en 3020 y anuncia en Slack #updates-dashboard
+alwaysApply: true
+---
+
+# Anunciar cada commit en Slack
+
+Al **commitear** (agente o humano):
+
+1. Reusa `npm run dev` en puerto **3020**. No mates otros procesos.
+2. Screenshot de la **ruta viva** que cambió (`http://localhost:3020/...`), no un HTML estático. Si pide login, captura eso — no inventes credenciales.
+3. Postea en Slack **siempre** a `#updates-dashboard` (`C0BRP1X3BHQ`, workspace natemediapr). Usa Slack MCP `slack_send_message`. No inventes webhook.
+4. Copy en **español**, corto, qué hace para el equipo (On Site / grabar / Revisión / Entregas). Incluye `vX.Y` si se subió `APP_VERSION`. Adjunta o menciona el screenshot. Cero secretos / `.env`.
+
+Formato:
+
+```
+*Nate · v3.71* — <qué puede hacer el equipo ahora>
+
+<1–2 frases: quién (owner / supervisor / video / editor) y en qué paso>
+
+• Ruta: `/recording-calendar`
+```
+
+Corre `node scripts/announce-commit.mjs --headline "..." --explanation "..." --route "/..." --image <png>` para armar el texto. Si faltan `SLACK_BOT_TOKEN` / webhook, el script **no bloquea** el commit: el agente postea igual por MCP.
+
+```
+❌ BAD: commit sin Slack, o postear a otro canal, o inventar un webhook.
+✅ GOOD: screenshot en 3020 → mensaje en #updates-dashboard (C0BRP1X3BHQ).
+```

@@ -50,3 +50,7 @@ GDRIVE_ROOT_FOLDER_ID=op://Development/social-dashboard/GDRIVE_ROOT_FOLDER_ID
 # ── ClickUp (optional — Video Queue integration) ──────────────────────────────
 CLICKUP_API_TOKEN=op://Development/social-dashboard/CLICKUP_API_TOKEN
 CLICKUP_WEBHOOK_SECRET=op://Development/social-dashboard/CLICKUP_WEBHOOK_SECRET
+
+# ── Slack (optional — #updates-dashboard C0BRP1X3BHQ; el agente usa Slack MCP) ─
+# SLACK_BOT_TOKEN=op://Development/social-dashboard/SLACK_BOT_TOKEN
+# SLACK_COMMIT_WEBHOOK_URL=op://Development/social-dashboard/SLACK_COMMIT_WEBHOOK_URL
