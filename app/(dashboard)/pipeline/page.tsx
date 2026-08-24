@@ -25,7 +25,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
@@ -71,6 +71,12 @@ export default async function PipelinePage() {
       return [c.id, resolveClientLogo(c.logo_url, metricoolPic)]
     }),
   )
+  const clientColors: Record<string, string | null> = Object.fromEntries(
+    activeClients.map((c) => {
+      const primary = (c as { brand_colors?: { primary?: string | null } | null }).brand_colors?.primary ?? null
+      return [c.id, primary]
+    }),
+  )
 
   return (
     <ContentPipelineBoard
@@ -80,6 +86,7 @@ export default async function PipelinePage() {
       clientCadence={clientCadence}
       teamMembers={teamMembers}
       clientLogos={clientLogos}
+      clientColors={clientColors}
     />
   )
 }

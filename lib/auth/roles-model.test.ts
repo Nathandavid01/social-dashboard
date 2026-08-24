@@ -69,6 +69,13 @@ describe('modelo de roles', () => {
     expect(hasPermission('video', 'captions.edit')).toBe(false)
   })
 
+  it('cualquier rol puede actualizar su propia foto (profile.avatar)', () => {
+    for (const r of ['owner', 'supervisor', 'editor', 'video', 'disenador', 'copy', 'team_member'] as const) {
+      expect(hasPermission(r, 'profile.avatar')).toBe(true)
+    }
+    expect(hasPermission(null, 'profile.avatar')).toBe(false)
+  })
+
   it('el supervisor conserva Equipo y Métricas', () => {
     const h = effectiveAreaHrefs('supervisor', null)
     expect(h.has('/team')).toBe(true)

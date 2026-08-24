@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.84 — Logo y color del cliente</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#f7f4ef; --muted:#9a948a; --gold:#c9a227; --paper:#16140f; --line:#2c2820; --speedy:#e11d48; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .card { border: 1px solid var(--line); background: var(--paper); border-radius: 12px; overflow: hidden; }
+    .head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .av { width: 32px; height: 32px; border-radius: 8px; background: rgba(167,139,250,.18); }
+    h2 { font-size: 14px; margin: 0; }
+    .meta { font-size: 11px; color: var(--muted); }
+    .cli {
+      margin: 12px; padding: 12px; border-radius: 10px; border: 1px solid var(--speedy);
+      box-shadow: inset 3px 0 0 0 var(--speedy);
+      background: linear-gradient(90deg, rgba(225,29,72,.08), transparent 42%);
+    }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .who { display: flex; align-items: center; gap: 8px; }
+    .logo { width: 24px; height: 24px; border-radius: 6px; background: #fff; color: #111; font-size: 8px; font-weight: 800; display: grid; place-items: center; }
+    h3 { font-size: 13px; margin: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    th { text-align: left; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; background: #1c1913; }
+    td { padding: 8px 10px; border-top: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Pipeline · v3.84</p>
+    <h1>Logo real y color fijo por cliente</h1>
+    <p class="sub">Speedy Net se ve con su marca, no con SP. La tarjeta es siempre del mismo color. Si falta el logo, owner o supervisor lo suben en la ficha del cliente.</p>
+    <div class="card">
+      <div class="head">
+        <div class="av"></div>
+        <div>
+          <h2>María R.</h2>
+          <p class="meta">1 cliente</p>
+        </div>
+      </div>
+      <div class="cli">
+        <div class="row">
+          <div class="who">
+            <div class="logo">SN</div>
+            <h3>Speedy Net</h3>
+          </div>
+          <p class="meta"><strong>4</strong> aprobados</p>
+        </div>
+        <table>
+          <thead><tr><th>Idea</th><th>Archivo</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Promo fibra</td><td>crudo.mp4</td><td>Ver · Bajar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

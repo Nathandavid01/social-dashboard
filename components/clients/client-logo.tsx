@@ -15,11 +15,12 @@ export function ClientLogo({
   className?: string
 }) {
   const initials = name?.slice(0, 2).toUpperCase() || '??'
-  if (logoUrl) {
+  const src = logoUrl?.trim() || ''
+  if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={logoUrl}
+        src={src}
         alt={name ?? 'Cliente'}
         referrerPolicy="no-referrer"
         width={44}

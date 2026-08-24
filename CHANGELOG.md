@@ -4,7 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v3.81 — 2026-08-23
+## v3.84 — 2026-08-23
+
+**Cada cliente se ve con su logo y su color, siempre el mismo.**
+
+- En el banco de Pipeline, Speedy Net (y el resto) muestran el **logo real** si está en la ficha o en Metricool — no solo las iniciales.
+- La tarjeta de cada cliente lleva **el mismo color** cada vez (color de marca, o uno fijo según el cliente).
+- Si falta el logo, owner y supervisor ven **Subir logo** y van a la ficha del cliente.
+
+Vista: [preview HTML](/previews/v3.84-logo-color-cliente.html)
+
+## v3.83 — 2026-08-23
 
 **Al entrar, te pedimos una foto hasta que dejes de usar el ícono genérico.**
 
@@ -12,7 +22,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Puedes tocar **Ahora no** una vez en esa sesión. Al volver a entrar, el aviso sale otra vez.
 - Cuando subes o eliges una imagen real, deja de pedirla. La foto queda en tu perfil y se ve en el menú y en el resto del equipo.
 
-Vista: [preview HTML](/previews/v3.81-foto-perfil.html)
+Vista: [preview HTML](/previews/v3.83-foto-perfil.html)
 
 ## v3.80 — 2026-08-23
 

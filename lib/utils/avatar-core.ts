@@ -16,7 +16,6 @@ export const AVATAR_STYLES: AvatarStyle[] = [
   { id: 'thumbs', label: 'Abstracto' },
   { id: 'glass', label: 'Glass' },
   { id: 'shapes', label: 'Geométrico' },
-  { id: 'initials', label: 'Iniciales' },
 ]
 
 const ALLOWED_HOST = 'api.dicebear.com'
@@ -49,4 +48,48 @@ export function initialsFrom(name?: string | null, email?: string | null): strin
     return (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)).toUpperCase()
   }
   return (email?.[0] ?? 'U').toUpperCase()
+}
+
+const FALLBACK_HOSTS = new Set([
+  'ui-avatars.com',
+  'www.ui-avatars.com',
+  'gravatar.com',
+  'www.gravatar.com',
+  'secure.gravatar.com',
+])
+
+/**
+ * A persisted URL counts as a real avatar only if it is a chosen/uploaded
+ * image — not empty, not initials generators, not a generic placeholder.
+ */
+export function hasRealAvatar(url: string | null | undefined): boolean {
+  if (!url || !url.trim()) return false
+  try {
+    const u = new URL(url.trim())
+    if (u.protocol !== 'https:') return false
+    const host = u.hostname.toLowerCase()
+    const path = u.pathname.toLowerCase()
+    if (FALLBACK_HOSTS.has(host) || host.endsWith('.ui-avatars.com')) return false
+    if (host === 'api.dicebear.com' && path.includes('/initials/')) return false
+    if (/placeholder|default-avatar|generic-avatar/.test(path)) return false
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Server gate: only the signed-in user may write their own profile photo. */
+export function canUpdateOwnAvatar(
+  actorId: string | null | undefined,
+  targetUserId: string,
+): boolean {
+  return Boolean(actorId && targetUserId && actorId === targetUserId)
+}
+
+/** Show the setup prompt unless they already have a real photo or postponed this visit. */
+export function shouldPromptForAvatar(
+  avatarUrl: string | null | undefined,
+  sessionPostponed: boolean,
+): boolean {
+  return !hasRealAvatar(avatarUrl) && !sessionPostponed
 }

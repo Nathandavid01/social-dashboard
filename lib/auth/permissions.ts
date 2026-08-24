@@ -71,6 +71,8 @@ export type Permission =
   | 'settings.edit'
   | 'alerts.read'
   | 'alerts.dismiss'
+  /** Subir o elegir la foto propia (todos los roles autenticados). */
+  | 'profile.avatar'
   /** Ver la plataforma como un editor (solo owner/supervisor). */
   | 'view_as.editor'
 
@@ -108,6 +110,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
+    'profile.avatar',
     'view_as.editor',
   ],
 
@@ -120,6 +123,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'revision.read', 'pipeline.read', 'planning.act',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Videógrafo — grabación e ideas. No entra a Entregas: su trabajo termina
@@ -133,6 +137,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'recording.read', 'recording.create', 'recording.complete',
     'weekly_compliance.read', 'cadence.read', 'activity.read', 'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Diseñador — Ideas y Entregas. Sube piezas pero NO escribe el copy (sin
@@ -144,6 +149,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'revision.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Copy — escribe el copy de lo aprobado. Ve el tablero entero para saber
@@ -157,6 +163,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'cadence.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Legacy default — treated as editor for backwards compatibility.
@@ -173,6 +180,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'planning.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 }
 
