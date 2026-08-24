@@ -32,6 +32,8 @@ export interface OnsiteShot {
   shotType: string | null
   /** status === 'grabada' — la misma verdad que el resto de la app. */
   recorded: boolean
+  /** Notas de quien grabó. No es el brief ni las correcciones de Revisión. */
+  shootingNotes: string | null
 }
 
 export interface ShotGroup {

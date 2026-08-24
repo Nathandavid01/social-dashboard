@@ -33,6 +33,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { SessionIdeasPanel } from '@/components/recording/session-ideas-panel'
+import { useHasPermission } from '@/components/auth/role-gate'
 import {
   Camera,
   Plus,
@@ -50,6 +51,7 @@ import {
   CalendarDays,
   List,
   BookOpen,
+  ExternalLink,
 } from 'lucide-react'
 import {
   format,
@@ -65,6 +67,8 @@ import {
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { friendlyError } from '@/lib/utils/error-message'
+import { videographerConflictsInRange } from '@/lib/utils/videographer-conflicts'
+import { GOOGLE_CALENDAR_HOME_URL, sessionsToIcs } from '@/lib/utils/google-calendar'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,6 +91,52 @@ function initials(name: string | null | undefined) {
   return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
+function normalizePersonName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/\b(?:dra?|sra?|lic(?:da|do)?|ing)\.?\b/g, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const GENERIC_RECORDING_TITLE = /^(?:recording|grabaci[oó]n)$/i
+const RECORDING_TITLE_PREFIX = /^(?:recording|grabaci[oó]n)\s*[-–:]\s*/i
+const RECORDING_TITLE_SUFFIX = /\s*[-–:]\s*(?:recording|grabaci[oó]n)$/i
+
+function clientLabelFromTitle(title?: string | null): string | null {
+  const raw = title?.trim() ?? ''
+  if (!raw) return null
+  const stripped = raw.replace(RECORDING_TITLE_PREFIX, '').replace(RECORDING_TITLE_SUFFIX, '').trim()
+  if (!stripped || GENERIC_RECORDING_TITLE.test(stripped)) return null
+  return stripped
+}
+
+/** Nombre visible del chip: cliente, lista, título-si-es-cliente, o “Sin cliente”. */
+export function sessionChipClientLabel(
+  session: { client?: { name?: string | null } | null; client_id?: string | null; title?: string | null },
+  clients: Pick<Client, 'id' | 'name'>[] = [],
+): string {
+  const fromJoin = session.client?.name?.trim()
+  if (fromJoin) return fromJoin
+  const fromList = session.client_id
+    ? clients.find((c) => c.id === session.client_id)?.name?.trim()
+    : undefined
+  if (fromList) return fromList
+  return clientLabelFromTitle(session.title) ?? 'Sin cliente'
+}
+
+/** Videógrafo y cliente se leen como la misma persona (p. ej. Delian / Dra. Delian). */
+export function namesLookLikeSamePerson(left?: string | null, right?: string | null): boolean {
+  if (!left?.trim() || !right?.trim()) return false
+  const a = normalizePersonName(left)
+  const b = normalizePersonName(right)
+  if (!a || !b) return false
+  return a === b || a.includes(b) || b.includes(a)
+}
+
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   scheduled: { label: 'Programada', color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' },
   completed: { label: 'Completada', color: 'text-green-500', bg: 'bg-green-500/10 border-green-500/20' },
@@ -106,6 +156,7 @@ interface SessionDialogProps {
 }
 
 function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDate, editing }: SessionDialogProps) {
+  const canAssign = useHasPermission('recording.brief')
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
 
@@ -128,15 +179,17 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
       const values = {
         session_date: date,
         client_id: clientId === 'none' ? null : clientId,
-        videographer_id: videographerId === 'none' ? null : videographerId,
         title: title.trim(),
         start_time: startTime || null,
         end_time: endTime || null,
-        location: location || null,
-        location_address: locationAddress || null,
-        location_lat: locationLat,
-        location_lng: locationLng,
         notes: notes || null,
+        ...(canAssign ? {
+          videographer_id: videographerId === 'none' ? null : videographerId,
+          location: location || null,
+          location_address: locationAddress || null,
+          location_lat: locationLat,
+          location_lng: locationLng,
+        } : {}),
       }
       if (editing) {
         const result = await updateRecordingSession(editing.id, values)
@@ -181,28 +234,32 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
             <Input autoFocus placeholder="p.ej. Sesión de Marca — Casita Vieja" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn('grid gap-3', canAssign ? 'grid-cols-2' : 'grid-cols-1')}>
             <div className="space-y-1.5">
               <Label htmlFor="rc-fecha" className="text-xs flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Fecha *</Label>
               <Input id="rc-fecha" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 text-sm" />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><MapPin className="h-3 w-3" /> Tipo de ubicación</Label>
-              <Input placeholder="Estudio, en sitio..." value={location} onChange={(e) => setLocation(e.target.value)} className="h-9 text-sm" />
-            </div>
+            {canAssign && (
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1"><MapPin className="h-3 w-3" /> Tipo de ubicación</Label>
+                <Input placeholder="Estudio, en sitio..." value={location} onChange={(e) => setLocation(e.target.value)} className="h-9 text-sm" />
+              </div>
+            )}
           </div>
 
-          <GpsPicker
-            address={locationAddress}
-            lat={locationLat}
-            lng={locationLng}
-            onChange={({ address, lat, lng }) => {
-              setLocationAddress(address)
-              setLocationLat(lat)
-              setLocationLng(lng)
-            }}
-            compact
-          />
+          {canAssign && (
+            <GpsPicker
+              address={locationAddress}
+              lat={locationLat}
+              lng={locationLng}
+              onChange={({ address, lat, lng }) => {
+                setLocationAddress(address)
+                setLocationLat(lat)
+                setLocationLng(lng)
+              }}
+              compact
+            />
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -226,16 +283,18 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs flex items-center gap-1"><User className="h-3 w-3" /> Videógrafo</Label>
-            <Select value={videographerId} onValueChange={setVideographerId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Sin asignar" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin asignar</SelectItem>
-                {teamMembers.map((m) => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {canAssign && (
+            <div className="space-y-1.5">
+              <Label className="text-xs flex items-center gap-1"><User className="h-3 w-3" /> Videógrafo</Label>
+              <Select value={videographerId} onValueChange={setVideographerId}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Sin asignar" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin asignar</SelectItem>
+                  {teamMembers.map((m) => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label className="text-xs">Notas</Label>
@@ -370,6 +429,7 @@ function SessionCard({
 // ── Main Component ───────────────────────────────────────────────────────────
 
 export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap }: RecordingCalendarClientProps) {
+  const canAssign = useHasPermission('recording.brief')
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
   const [view, setView] = useState<'calendar' | 'list'>('calendar')
   const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -383,6 +443,10 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const [ideasSession, setIdeasSession] = useState<ExtendedSession | undefined>()
   const [ideasMap, setIdeasMap] = useState<Record<string, ContentIdea[]>>(clientIdeasMap)
   const { toast } = useToast()
+  const conflicts = useMemo(
+    () => videographerConflictsInRange(sessions, currentMonth),
+    [sessions, currentMonth],
+  )
 
   // Calendar grid
   const monthStart = startOfMonth(currentMonth)
@@ -457,6 +521,30 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     })
   }
 
+  function handleAvailabilityPick(sessionId: string, videographerId: string) {
+    const nextId = videographerId === 'none' ? null : videographerId
+    const videographer = nextId ? teamMembers.find((m) => m.id === nextId) ?? null : null
+    setSessions((prev) => prev.map((s) => s.id === sessionId ? { ...s, videographer_id: nextId, videographer } : s))
+    startTransition(async () => {
+      const result = await updateRecordingSession(sessionId, { videographer_id: nextId })
+      if (result.error) {
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+      }
+    })
+  }
+
+  function downloadMonthIcs() {
+    const monthStr = format(currentMonth, 'yyyy-MM')
+    const ics = sessionsToIcs(sessions.filter((s) => s.session_date.startsWith(monthStr)))
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `grabaciones-${monthStr}.ics`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all'
 
   return (
@@ -487,6 +575,21 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
               <List className="h-3.5 w-3.5" /> Lista
             </button>
           </div>
+          <a
+            href={GOOGLE_CALENDAR_HOME_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
+          >
+            <ExternalLink className="h-3.5 w-3.5" /> Google Calendar
+          </a>
+          <button
+            type="button"
+            onClick={downloadMonthIcs}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
+          >
+            Descargar .ics
+          </button>
           <button onClick={() => { setAddDate(undefined); setShowAdd(true) }} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
             <Plus className="h-3.5 w-3.5" /> Agregar sesión
           </button>
@@ -534,19 +637,30 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
         )}
       </div>
 
-      {/* Videographer color legend */}
-      {teamMembers.length > 0 && (
+      {conflicts.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-border bg-muted/30 px-3 py-2">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Videógrafos</span>
-          {teamMembers.map((m) => {
-            const a = userAccent(m.id)
-            return (
-              <span key={m.id} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: a.dot }} />
-                {m.full_name}
+          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Conflicto de disponibilidad</span>
+          {conflicts.map((conflict) => (
+            <span key={`${conflict.videographerId}-${conflict.date}`} className="inline-flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+              <span>
+                {conflict.videographerName} · {conflict.sessionIds.length} sesiones el{' '}
+                {format(parseISO(conflict.date), 'd MMM', { locale: es })}
               </span>
-            )
-          })}
+              {canAssign && (
+                <Select onValueChange={(id) => handleAvailabilityPick(conflict.sessionIds[conflict.sessionIds.length - 1], id)}>
+                  <SelectTrigger aria-label="Quién está disponible" className="h-7 w-[160px] text-[11px]">
+                    <SelectValue placeholder="Quién está disponible" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin asignar</SelectItem>
+                    {teamMembers.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </span>
+          ))}
         </div>
       )}
 
@@ -600,18 +714,28 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                   <div className="space-y-1">
                     {daySessions.slice(0, 3).map((session) => {
                       const a = userAccent(session.videographer_id)
+                      const clientLabel = sessionChipClientLabel(session, clients)
                       const clientIdeas = session.client_id ? (ideasMap[session.client_id] ?? []) : []
                       const sessionIdeaCount = clientIdeas.filter((i) => i.recording_session_id === session.id).length
                       return (
                         <div
                           key={session.id}
-                          className="cursor-pointer rounded-md px-1.5 py-1 text-[9px] leading-tight transition hover:opacity-80"
+                          className="min-h-[22px] cursor-pointer rounded-md px-1.5 py-1 text-[9px] leading-tight transition hover:opacity-80"
                           style={{ backgroundColor: a.soft, boxShadow: `inset 2px 0 0 0 ${a.dot}` }}
                           onClick={(e) => { e.stopPropagation(); setIdeasSession(session) }}
                         >
-                          <p className="truncate font-semibold" style={{ color: a.text }}>{session.title}</p>
-                          {session.client && (
-                            <p className="truncate text-muted-foreground">{session.client.name}</p>
+                          <p
+                            data-slot="session-chip-client"
+                            className="min-h-[14px] truncate text-[11px] font-semibold tracking-tight leading-snug text-foreground"
+                          >
+                            {clientLabel}
+                          </p>
+                          {session.videographer?.full_name &&
+                            !namesLookLikeSamePerson(session.videographer.full_name, clientLabel) && (
+                            <p className="truncate text-muted-foreground">{session.videographer.full_name}</p>
+                          )}
+                          {session.location && (
+                            <p className="truncate text-muted-foreground">{session.location}</p>
                           )}
                           {sessionIdeaCount > 0 && (
                             <p className="text-muted-foreground">{sessionIdeaCount} ideas</p>
@@ -701,11 +825,14 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
 
       {ideasSession && (
         <SessionIdeasPanel
+          key={ideasSession.id}
           open={!!ideasSession}
           onClose={() => setIdeasSession(undefined)}
           session={ideasSession}
           onDelete={() => { const id = ideasSession.id; setIdeasSession(undefined); handleDelete(id) }}
           clientIdeas={ideasSession.client_id ? (ideasMap[ideasSession.client_id] ?? []) : []}
+          teamMembers={teamMembers}
+          onSessionChange={handleSaved}
           onEdit={() => {
             setIdeasSession(undefined)
             setEditing(ideasSession)

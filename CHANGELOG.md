@@ -4,6 +4,75 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.77 — 2026-08-23
+
+**El documento de toma se lee como una hoja de producción, no como un formulario.**
+
+- En On Site, cada idea es un panel de papel: título como titular, guión y qué grabar en cuerpo, sin cajas grises apiladas.
+- **Anotaciones** queda como bloque de notas rayado, listo para quien graba.
+- **Video crudo** y el **+** siguen en la misma tarjeta, ahora en el pie: material de esta toma.
+
+Vista: [preview HTML](/previews/v3.77-documento-formal.html)
+
+## v3.76 — 2026-08-23
+
+**En On Site, cada idea es un documento de toma: lees el guión, anotas y subes el crudo ahí.**
+
+- Quien graba ve título, guión y qué grabar como un documento, no como tres cajas iguales.
+- Puede dejar **Anotaciones** en esa idea (tomas, luz, lo que el editor debe saber).
+- El **video crudo** se sigue subiendo en la misma tarjeta, con el nombre de la idea.
+- En Revisión, las anotaciones salen junto al material crudo de esa idea.
+
+Vista: [preview HTML](/previews/v3.76-documento-toma.html)
+
+## v3.75 — 2026-08-23
+
+**En el calendario, cada sesión del mes siempre muestra el cliente.**
+
+- El chip del día ya no puede quedar como una barra de color vacía.
+- Si falta el nombre en la sesión, se usa el de la lista de clientes o el título (sin “Recording”). Si no hay ninguno: **Sin cliente**.
+
+Vista: [preview HTML](/previews/v3.75-chip-sin-cliente.html)
+
+## v3.74 — 2026-08-23
+
+**En el calendario, el chip del día muestra solo el cliente, más claro.**
+
+- El título del chip es el nombre del cliente. Ya no sale “Recording - …” ni un segundo renglón con el mismo nombre.
+- Si el videógrafo se lee como la misma persona que el cliente, no se duplica. Lugar e ideas se quedan.
+- El nombre va un poco más grande, semibold y con más contraste.
+
+Vista: [preview HTML](/previews/v3.74-chip-cliente.html)
+
+## v3.73 — 2026-08-23
+
+**En el calendario, el nombre del cliente se lee primero en cada sesión.**
+
+- En **Calendario de Grabación**, el cliente del chip del día va un poco más grande, en negrita y con más contraste.
+- El título, el videógrafo, el lugar y las ideas se quedan como estaban.
+
+Vista: [preview HTML](/previews/v3.73-chip-cliente.html)
+
+## v3.72 — 2026-08-23
+
+**El calendario de grabación se abre en Google Calendar, y la lista de videógrafos solo aparece si hay un conflicto.**
+
+- En **Calendario de Grabación** ya no se muestra el roster con todos los nombres y puntitos.
+- Si alguien tiene dos sesiones el mismo día del mes que estás viendo, sale **Conflicto de disponibilidad** para elegir quién puede ir (owner / supervisor).
+- **Google Calendar** abre la agenda de Google. **Descargar .ics** exporta el mes para importar o suscribir.
+
+Vista: [preview HTML](/previews/v3.72-calendario-google.html)
+
+## v3.71 — 2026-08-23
+
+**Desde el día del calendario, el admin asigna quién va a grabar y en qué lugar.**
+
+- En **Calendario de Grabación**, cada sesión del día muestra el videógrafo y el lugar.
+- Pulsa la sesión: owner y supervisor eligen quién va y el sitio, y guardan ahí mismo.
+- Quien graba ve la asignación y no la cambia.
+
+Vista: [preview HTML](/previews/v3.71-asignar-grabacion.html)
+
 ## v3.70 — 2026-08-22
 
 **El crudo se sube en la tarjeta de la idea, sin abrir la flecha.**

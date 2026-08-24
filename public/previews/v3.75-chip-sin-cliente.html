@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.75 — Cliente siempre visible en el chip</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --muted:#a6a6a6; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .cell { border: 1px solid rgba(212,175,55,.4); background: rgba(212,175,55,.06); border-radius: 12px; padding: 10px; width: 160px; }
+    .day { width: 24px; height: 24px; border-radius: 99px; background: var(--gold); color: #111; font-size: 12px; font-weight: 700; display: grid; place-items: center; margin-bottom: 8px; }
+    .chip { background: rgba(100,116,139,.14); box-shadow: inset 2px 0 0 #64748b; border-radius: 6px; padding: 4px 6px; font-size: 9px; line-height: 1.25; min-height: 22px; margin-bottom: 4px; }
+    .chip .client { font-size: 11px; font-weight: 600; letter-spacing: -0.02em; color: #fafafa; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 14px; }
+    .chip .meta { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .label { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Calendario de Grabación</p>
+    <h1>El cliente siempre se ve</h1>
+    <p class="sub">Cada chip del mes muestra el nombre del cliente. Si falta el dato, sale un fallback — nunca una barra vacía.</p>
+    <div class="row">
+      <div class="cell">
+        <p class="label">Con cliente</p>
+        <div class="day">1</div>
+        <div class="chip">
+          <div class="client">Danny Mudano</div>
+          <div class="meta">Casa de cliente</div>
+        </div>
+      </div>
+      <div class="cell">
+        <p class="label">Sin nombre en la sesión</p>
+        <div class="day">1</div>
+        <div class="chip">
+          <div class="client">Sin cliente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

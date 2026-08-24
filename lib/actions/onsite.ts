@@ -116,20 +116,31 @@ export async function getOnsiteShots(
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const withNotes = 'id, title, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status'
+  const withoutNotes = 'id, title, hook, visual_brief, rationale, shot_type, reference_url, status'
+  const first = await supabase
     .from('content_ideas')
-    .select('id, title, hook, visual_brief, rationale, shot_type, reference_url, status')
+    .select(withNotes)
     .eq('recording_session_id', sessionId)
     .neq('status', 'descartada')
     .order('created_at', { ascending: true })
-  if (error) return { error: error.message }
+  const loaded = first.error
+    ? await supabase
+      .from('content_ideas')
+      .select(withoutNotes)
+      .eq('recording_session_id', sessionId)
+      .neq('status', 'descartada')
+      .order('created_at', { ascending: true })
+    : first
+  if (loaded.error) return { error: loaded.error.message }
 
   return {
-    shots: (data ?? []).map((i) => ({
+    shots: (loaded.data ?? []).map((i) => ({
       id: i.id,
       title: i.title?.trim() || i.hook?.trim() || 'Sin título',
       hook: i.hook,
       visualBrief: (i.visual_brief as string | null) ?? null,
+      shootingNotes: (i as { shooting_notes?: string | null }).shooting_notes ?? null,
       viralityScore: clampVirality((i as { virality_score?: unknown }).virality_score),
       viralityWhy: (i.rationale as string | null) ?? null,
       referenceUrl: (i.reference_url as string | null) ?? null,
@@ -496,6 +507,29 @@ export async function updateOnsiteIdea(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+  return { ok: true }
+}
+
+/** Notas de quien grabó. No toca el brief (eso es recording.brief). */
+export async function updateOnsiteAnnotations(input: {
+  ideaId: string
+  shootingNotes: string | null
+}): Promise<{ ok?: true; error?: string }> {
+  try {
+    await requirePermission('recording.complete')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('content_ideas')
+    .update({ shooting_notes: input.shootingNotes?.trim() || null })
+    .eq('id', input.ideaId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/onsite')
+  revalidatePath('/revision')
   return { ok: true }
 }
 

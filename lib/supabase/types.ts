@@ -414,6 +414,8 @@ export interface ContentIdea {
    *  0064_hook_source.sql. */
   hook_source?: 'ai' | null
   visual_brief: string | null
+  /** Notas de quien grabó (On Site). Migración 0070. */
+  shooting_notes?: string | null
   /** 1–10 de la IA. Null = todavía no se puntuó. Migración 0068. */
   virality_score?: number | null
   caption_angle: string | null

@@ -34,10 +34,40 @@ export async function getRecordingSessions(filters?: {
   return { sessions: (data ?? []) as unknown as RecordingSession[] }
 }
 
+const ASSIGNMENT_KEYS = [
+  'videographer_id',
+  'location',
+  'location_address',
+  'location_lat',
+  'location_lng',
+] as const
+
+function isFilledAssignment(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value === 'string') return value.trim().length > 0
+  return true
+}
+
+function hasAssignmentValues(values: Record<string, unknown>): boolean {
+  return ASSIGNMENT_KEYS.some((key) => isFilledAssignment(values[key]))
+}
+
+function hasAssignmentKeys(values: object): boolean {
+  return ASSIGNMENT_KEYS.some((key) => key in values)
+}
+
+async function requireSessionWrite(values: object, mode: 'create' | 'update') {
+  await requirePermission('recording.create')
+  const needsBrief = mode === 'create'
+    ? hasAssignmentValues(values as Record<string, unknown>)
+    : hasAssignmentKeys(values)
+  if (needsBrief) await requirePermission('recording.brief')
+}
+
 export async function createRecordingSession(values: {
   session_date: string
   client_id: string | null
-  videographer_id: string | null
+  videographer_id?: string | null
   title: string
   notes?: string | null
   location?: string | null
@@ -47,6 +77,12 @@ export async function createRecordingSession(values: {
   start_time?: string | null
   end_time?: string | null
 }) {
+  try {
+    await requireSessionWrite(values, 'create')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -74,6 +110,12 @@ export async function updateRecordingSession(id: string, values: Partial<{
   end_time: string | null
   status: string
 }>) {
+  try {
+    await requireSessionWrite(values, 'update')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
   const supabase = await createClient()
   const { error } = await supabase.from('recording_sessions').update(values).eq('id', id)
   if (error) return { error: error.message }

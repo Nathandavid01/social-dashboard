@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.73 — Nombre del cliente en el chip</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .cell { border: 1px solid rgba(212,175,55,.4); background: rgba(212,175,55,.06); border-radius: 12px; padding: 10px; max-width: 160px; }
+    .day { width: 24px; height: 24px; border-radius: 99px; background: var(--gold); color: #111; font-size: 12px; font-weight: 700; display: grid; place-items: center; margin-bottom: 8px; }
+    .chip { background: rgba(100,116,139,.14); box-shadow: inset 2px 0 0 #64748b; border-radius: 6px; padding: 4px 6px; font-size: 9px; line-height: 1.25; }
+    .chip .title { font-weight: 700; color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chip .client { font-size: 10px; font-weight: 700; color: #fafafa; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chip .meta { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Calendario de Grabación</p>
+    <h1>El cliente se lee primero</h1>
+    <p class="sub">En el chip del día, solo el nombre del cliente va más claro. El resto del chip no cambia.</p>
+    <div class="cell">
+      <div class="day">23</div>
+      <div class="chip">
+        <div class="title">Recording - Miti Miti Miti Miti</div>
+        <div class="client">Miti Miti</div>
+        <div class="meta">Rest</div>
+        <div class="meta">1 ideas</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

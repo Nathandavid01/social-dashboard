@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import type { ContentIdea, ContentIdeaType, RecordingSession, Client } from '@/lib/supabase/types'
+import type { ContentIdea, ContentIdeaType, RecordingSession, Client, Profile } from '@/lib/supabase/types'
 import { assignIdeaToSession, markIdeaRecorded, createContentIdeaManual } from '@/lib/actions/content-ideas'
+import { updateRecordingSession } from '@/lib/actions/recording-sessions'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -14,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IdeaVideoLoader } from './idea-video-loader'
 import {
   Camera, CheckCircle2, Circle, Plus, Video, BookOpen,
-  Building2, Clock, MapPin, Link2, Unlink, Loader2, Trash2, Pencil,
+  Building2, Clock, MapPin, User, Link2, Unlink, Loader2, Trash2, Pencil,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -24,6 +26,7 @@ import { friendlyError } from '@/lib/utils/error-message'
 
 interface ExtendedSession extends RecordingSession {
   client?: Pick<Client, 'id' | 'name'> | null
+  videographer?: Pick<Profile, 'id' | 'full_name'> | null
 }
 
 interface SessionIdeasPanelProps {
@@ -35,6 +38,8 @@ interface SessionIdeasPanelProps {
   clientIdeas: ContentIdea[]          // All ideas for this client
   onIdeasChange: (ideas: ContentIdea[]) => void
   onEdit: () => void
+  teamMembers?: Pick<Profile, 'id' | 'full_name'>[]
+  onSessionChange?: (session: ExtendedSession) => void
 }
 
 // ── Content type label helpers ────────────────────────────────────────────────
@@ -245,9 +250,111 @@ function IdeaRow({
   )
 }
 
+function SessionAssignment({
+  session,
+  teamMembers,
+  onSaved,
+}: {
+  session: ExtendedSession
+  teamMembers: Pick<Profile, 'id' | 'full_name'>[]
+  onSaved?: (session: ExtendedSession) => void
+}) {
+  const canAssign = useHasPermission('recording.brief')
+  const [isPending, startTransition] = useTransition()
+  const [videographerId, setVideographerId] = useState(session.videographer_id ?? 'none')
+  const [location, setLocation] = useState(session.location ?? '')
+  const { toast } = useToast()
+
+  const videographerName = session.videographer?.full_name
+    ?? teamMembers.find((m) => m.id === session.videographer_id)?.full_name
+    ?? null
+
+  if (!canAssign) {
+    return (
+      <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs space-y-1">
+        <p>
+          <span className="font-medium text-foreground">Videógrafo: </span>
+          <span className="text-muted-foreground">{videographerName ?? 'Sin asignar'}</span>
+        </p>
+        <p>
+          <span className="font-medium text-foreground">Lugar: </span>
+          <span className="text-muted-foreground">{session.location || session.location_address || 'Sin lugar'}</span>
+        </p>
+      </div>
+    )
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    startTransition(async () => {
+      const values = {
+        videographer_id: videographerId === 'none' ? null : videographerId,
+        location: location.trim() || null,
+      }
+      const result = await updateRecordingSession(session.id, values)
+      if (result.error) {
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+        return
+      }
+      const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
+      onSaved?.({ ...session, ...values, videographer })
+      toast({ title: 'Asignación guardada' })
+    })
+  }
+
+  return (
+    <form onSubmit={handleSave} className="rounded-lg border border-border bg-muted/20 p-3 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Quién va y dónde</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="session-videographer" className="text-xs flex items-center gap-1">
+            <User className="h-3 w-3" /> Videógrafo
+          </Label>
+          <Select value={videographerId} onValueChange={setVideographerId}>
+            <SelectTrigger id="session-videographer" aria-label="Videógrafo" className="h-9">
+              <SelectValue placeholder="Sin asignar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sin asignar</SelectItem>
+              {teamMembers.map((m) => (
+                <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="session-lugar" className="text-xs flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Lugar
+          </Label>
+          <Input
+            id="session-lugar"
+            placeholder="Estudio, clínica, en sitio…"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="h-9 text-sm"
+          />
+        </div>
+      </div>
+      <Button type="submit" size="sm" className="w-full h-8 text-xs" disabled={isPending}>
+        {isPending ? 'Guardando...' : 'Guardar asignación'}
+      </Button>
+    </form>
+  )
+}
+
 // ── Main panel ────────────────────────────────────────────────────────────────
 
-export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeasChange, onDelete, onEdit }: SessionIdeasPanelProps) {
+export function SessionIdeasPanel({
+  open,
+  onClose,
+  session,
+  clientIdeas,
+  onIdeasChange,
+  onDelete,
+  onEdit,
+  teamMembers = [],
+  onSessionChange,
+}: SessionIdeasPanelProps) {
   const [ideas, setIdeas] = useState<ContentIdea[]>(clientIdeas)
   const [showAddForm, setShowAddForm] = useState(false)
 
@@ -307,6 +414,12 @@ export function SessionIdeasPanel({ open, onClose, session, clientIdeas, onIdeas
             </span>
           )}
         </div>
+
+        <SessionAssignment
+          session={session}
+          teamMembers={teamMembers}
+          onSaved={onSessionChange}
+        />
 
         {/* Buffer summary */}
         <div className="flex items-center justify-between">

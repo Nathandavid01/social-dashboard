@@ -33,7 +33,7 @@ function makeSupabase() {
 let supabase = makeSupabase()
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => supabase }))
 
-import { checkInOnsite } from './onsite'
+import { checkInOnsite, updateOnsiteAnnotations, updateOnsiteIdea } from './onsite'
 
 beforeEach(() => {
   requirePermission.mockReset().mockResolvedValue(undefined)
@@ -67,5 +67,38 @@ describe('checkInOnsite', () => {
     const res = await checkInOnsite('s1')
     expect(res).toEqual({ ok: true })
     expect(updatePayload).toBeNull()
+  })
+})
+
+describe('updateOnsiteAnnotations', () => {
+  it('pide recording.complete — sin ese permiso no escribe notas', async () => {
+    requirePermission.mockRejectedValueOnce(new Error('No autorizado'))
+    const res = await updateOnsiteAnnotations({ ideaId: 'i1', shootingNotes: 'Toma 2 en 35mm' })
+    expect(res.error).toMatch(/autorizado/i)
+    expect(updatePayload).toBeNull()
+  })
+
+  it('guarda shooting_notes con recording.complete, no recording.brief', async () => {
+    const res = await updateOnsiteAnnotations({ ideaId: 'i1', shootingNotes: '  Toma 2, mejor luz  ' })
+    expect(res).toEqual({ ok: true })
+    expect(requirePermission).toHaveBeenCalledWith('recording.complete')
+    expect(requirePermission).not.toHaveBeenCalledWith('recording.brief')
+    expect(updatePayload).toEqual({ shooting_notes: 'Toma 2, mejor luz' })
+  })
+
+  it('vacío se guarda como null', async () => {
+    const res = await updateOnsiteAnnotations({ ideaId: 'i1', shootingNotes: '   ' })
+    expect(res).toEqual({ ok: true })
+    expect(updatePayload).toEqual({ shooting_notes: null })
+  })
+})
+
+describe('updateOnsiteIdea', () => {
+  it('sigue pidiendo recording.brief y no escribe shooting_notes', async () => {
+    const res = await updateOnsiteIdea({ ideaId: 'i1', hook: 'Nuevo hook' })
+    expect(res).toEqual({ ok: true })
+    expect(requirePermission).toHaveBeenCalledWith('recording.brief')
+    expect(updatePayload).toEqual({ hook: 'Nuevo hook' })
+    expect(updatePayload).not.toHaveProperty('shooting_notes')
   })
 })

@@ -26,6 +26,7 @@ const shot = (over: Partial<OnsiteShot> = {}): OnsiteShot => ({
   referenceUrl: null,
   shotType: 'sony',
   recorded: false,
+  shootingNotes: null,
   ...over,
 })
 

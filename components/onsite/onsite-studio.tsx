@@ -18,6 +18,7 @@ import {
   generateOnsiteIdeas,
   toggleShotRecorded,
   updateOnsiteIdea,
+  updateOnsiteAnnotations,
   updateShotDetails,
   type AddableIdea,
   type OnsiteSession,
@@ -358,6 +359,10 @@ export function OnsiteStudio({
   )
 }
 
+const docField =
+  'w-full min-w-0 resize-y border-0 bg-transparent px-0 py-0 text-[13.5px] leading-[1.65] text-foreground/90 outline-none placeholder:text-muted-foreground/45 focus-visible:ring-0'
+const docLabel = 'text-[10px] font-semibold uppercase tracking-[0.16em] text-primary/80'
+
 function EmptyIdeaSlot({
   n, canBrief, onFill,
 }: {
@@ -373,17 +378,16 @@ function EmptyIdeaSlot({
         onClick={canBrief ? onFill : undefined}
         disabled={!canBrief}
         className={cn(
-          'flex w-full items-start gap-3 rounded-2xl border border-dashed bg-transparent p-3 text-left',
-          canBrief && 'hover:border-primary/50 hover:bg-muted/30',
+          'flex w-full items-start gap-3 rounded-xl border border-dashed border-[hsl(36_12%_22%)] bg-[hsl(32_8%_7%/0.4)] p-3 text-left',
+          canBrief && 'hover:border-primary/40 hover:bg-[hsl(32_10%_9%)]',
         )}
       >
         <span className="mt-1 w-7 shrink-0 text-center font-mono text-[11px] text-muted-foreground/50">
           {String(n).padStart(2, '0')}
         </span>
-        <span className="min-w-0 flex-1 space-y-2 py-0.5">
-          <span className="block h-10 rounded-md border border-dashed bg-transparent" />
-          <span className="block h-10 rounded-md border border-dashed bg-transparent" />
-          <span className="block min-h-[4.5rem] rounded-md border border-dashed bg-transparent" />
+        <span className="min-w-0 flex-1 space-y-2 py-1">
+          <span className="block h-5 w-2/3 rounded-sm bg-foreground/5" />
+          <span className="block h-16 rounded-sm bg-foreground/[0.03]" />
           <span className="text-[11px] text-muted-foreground">Por llenar</span>
         </span>
       </button>
@@ -409,6 +413,7 @@ function IdeaCard({
   const [titulo, setTitulo] = useState(shot.title)
   const [hook, setHook] = useState(shot.hook ?? '')
   const [brief, setBrief] = useState(shot.visualBrief ?? '')
+  const [notas, setNotas] = useState(shot.shootingNotes ?? '')
   const [refUrl, setRefUrl] = useState(shot.referenceUrl ?? '')
 
   async function guardar(patch: { title?: string; hook?: string | null; visualBrief?: string | null; referenceUrl?: string | null; shotType?: string | null }) {
@@ -416,120 +421,172 @@ function IdeaCard({
     if (res.error) toast({ title: 'No se guardó', description: res.error, variant: 'destructive' })
   }
 
+  async function guardarNotas() {
+    onPatch({ shootingNotes: notas.trim() || null })
+    const res = await updateOnsiteAnnotations({ ideaId: shot.id, shootingNotes: notas })
+    if (res.error) toast({ title: 'No se guardaron las anotaciones', description: res.error, variant: 'destructive' })
+  }
+
   return (
-    <li className={cn('rounded-2xl border bg-card', shot.recorded && 'opacity-80')}>
-      <div className="flex items-start gap-3 p-3">
-        <span className="mt-1 w-7 shrink-0 text-center font-mono text-[11px] text-muted-foreground">
-          {String(n).padStart(2, '0')}
-        </span>
-        {canRecord && (
-          <button
-            type="button"
-            onClick={onToggle}
-            disabled={ocupado}
-            aria-pressed={shot.recorded}
-            aria-label={`${shot.recorded ? 'Desmarcar' : 'Marcar'} ${shot.title} como grabada`}
-            className={cn(
-              'mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 transition',
-              shot.recorded ? 'border-emerald-500 bg-emerald-500 text-black' : 'border-border hover:border-primary',
+    <li
+      className={cn(
+        'overflow-hidden rounded-xl border border-[hsl(36_14%_16%)] bg-[hsl(32_10%_8%)] shadow-[inset_0_1px_0_hsl(40_20%_100%/0.04)]',
+        shot.recorded && 'opacity-80',
+      )}
+    >
+      <div className="flex items-start gap-2.5 p-3 sm:gap-3 sm:p-4">
+        <div className="flex w-10 shrink-0 flex-col items-center gap-2 pt-0.5">
+          <span className="w-full text-center font-mono text-[11px] tabular-nums text-muted-foreground">
+            {String(n).padStart(2, '0')}
+          </span>
+          {canRecord && (
+            <button
+              type="button"
+              onClick={onToggle}
+              disabled={ocupado}
+              aria-pressed={shot.recorded}
+              aria-label={`${shot.recorded ? 'Desmarcar' : 'Marcar'} ${shot.title} como grabada`}
+              className={cn(
+                'grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 transition',
+                shot.recorded ? 'border-emerald-500 bg-emerald-500 text-black' : 'border-border/80 hover:border-primary',
+              )}
+            >
+              {ocupado ? <Loader2 className="h-4 w-4 animate-spin" /> : shot.recorded && <Check className="h-4 w-4" />}
+            </button>
+          )}
+        </div>
+        <article className="min-w-0 flex-1">
+          <header className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className={docLabel}>Documento de toma</p>
+              {canBrief ? (
+                <input
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  onBlur={() => {
+                    onPatch({ title: titulo })
+                    void guardar({ title: titulo, hook })
+                  }}
+                  aria-label={`Título de la idea ${n}`}
+                  className="mt-1.5 w-full min-w-0 border-0 bg-transparent px-0 py-0 text-[18px] font-semibold leading-snug tracking-tight outline-none placeholder:text-muted-foreground/40 focus-visible:ring-0"
+                />
+              ) : (
+                <h3 className="mt-1.5 text-[18px] font-semibold leading-snug tracking-tight">{titulo || 'Sin título'}</h3>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={onOpen}
+              aria-expanded={abierta}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+              aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle'}
+            >
+              {abierta ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </button>
+          </header>
+
+          <div className="mt-4 space-y-4 border-t border-[hsl(36_12%_16%)] pt-4">
+            <section className="space-y-1.5">
+              <h4 className={docLabel}>Guión</h4>
+              {canBrief ? (
+                <textarea
+                  value={hook}
+                  onChange={(e) => setHook(e.target.value)}
+                  onBlur={() => {
+                    onPatch({ hook: hook || null })
+                    void guardar({ hook })
+                  }}
+                  placeholder="Qué dice en los primeros 2 segundos"
+                  aria-label={`Hook de la idea ${n}`}
+                  rows={3}
+                  className={cn(docField, 'min-h-[4.25rem] whitespace-pre-wrap break-words')}
+                />
+              ) : (
+                <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.65] text-foreground/90">
+                  {hook.trim() || 'Sin guión'}
+                </p>
+              )}
+            </section>
+            <section className="space-y-1.5">
+              <h4 className={docLabel}>Qué grabar</h4>
+              {canBrief ? (
+                <textarea
+                  value={brief}
+                  onChange={(e) => setBrief(e.target.value)}
+                  onBlur={() => {
+                    onPatch({ visualBrief: brief || null })
+                    void guardar({ visualBrief: brief })
+                  }}
+                  placeholder="Cámara, sitio, quién habla, cada toma, B-roll, duración"
+                  aria-label={`Qué grabar en la idea ${n}`}
+                  rows={5}
+                  className={cn(docField, 'min-h-[6.5rem] whitespace-pre-wrap break-words')}
+                />
+              ) : (
+                <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.65] text-foreground/90">
+                  {brief.trim() || 'Sin notas visuales'}
+                </p>
+              )}
+            </section>
+            {canRecord && (
+              <section className="space-y-1.5 rounded-md border border-[hsl(36_12%_18%)] bg-[hsl(36_14%_11%)] px-3 py-2.5">
+                <h4 className={docLabel}>Anotaciones</h4>
+                <textarea
+                  value={notas}
+                  onChange={(e) => setNotas(e.target.value)}
+                  onBlur={() => void guardarNotas()}
+                  placeholder="Qué capturaste, tomas, lo que el editor debe saber"
+                  aria-label={`Anotaciones de la idea ${n}`}
+                  rows={3}
+                  className={cn(
+                    docField,
+                    'min-h-[5rem] whitespace-pre-wrap break-words [background-image:repeating-linear-gradient(transparent,transparent_1.6em,hsl(36_12%_22%/0.7)_1.6em,hsl(36_12%_22%/0.7)_calc(1.6em+1px))]',
+                  )}
+                />
+              </section>
             )}
-          >
-            {ocupado ? <Loader2 className="h-4 w-4 animate-spin" /> : shot.recorded && <Check className="h-4 w-4" />}
-          </button>
-        )}
-        <div className="min-w-0 flex-1 space-y-1">
-          <input
-            value={titulo}
-            readOnly={!canBrief}
-            onChange={canBrief ? (e) => setTitulo(e.target.value) : undefined}
-            onBlur={canBrief ? () => {
-              onPatch({ title: titulo })
-              void guardar({ title: titulo, hook })
-            } : undefined}
-            aria-label={`Título de la idea ${n}`}
-            className={cn(
-              'h-10 w-full rounded-md border px-2 text-[14px] font-medium outline-none',
-              canBrief ? 'bg-background focus-visible:ring-2 focus-visible:ring-primary/40' : 'cursor-default bg-muted/30 text-foreground',
-            )}
-          />
-          <textarea
-            value={hook}
-            readOnly={!canBrief}
-            onChange={canBrief ? (e) => setHook(e.target.value) : undefined}
-            onBlur={canBrief ? () => {
-              onPatch({ hook: hook || null })
-              void guardar({ hook })
-            } : undefined}
-            placeholder="Qué dice en los primeros 2 segundos"
-            aria-label={`Hook de la idea ${n}`}
-            rows={3}
-            className={cn(
-              'min-h-[4.5rem] w-full resize-y whitespace-pre-wrap break-words rounded-md border px-2 py-2 text-[12px] leading-relaxed outline-none',
-              canBrief ? 'bg-background focus-visible:ring-2 focus-visible:ring-primary/40' : 'cursor-default bg-muted/30 text-foreground',
-            )}
-          />
-          <textarea
-            value={brief}
-            readOnly={!canBrief}
-            onChange={canBrief ? (e) => setBrief(e.target.value) : undefined}
-            onBlur={canBrief ? () => {
-              onPatch({ visualBrief: brief || null })
-              void guardar({ visualBrief: brief })
-            } : undefined}
-            placeholder="Qué grabar: cámara, sitio, quién habla, cada toma, B-roll, duración"
-            aria-label={`Qué grabar en la idea ${n}`}
-            rows={5}
-            className={cn(
-              'min-h-[7.5rem] w-full resize-y rounded-md border px-2 py-2 text-[12px] leading-relaxed outline-none',
-              canBrief ? 'bg-background focus-visible:ring-2 focus-visible:ring-primary/40' : 'cursor-default bg-muted/30 text-foreground',
-            )}
-          />
-          <div className="flex flex-wrap items-center gap-2 pt-1">
+          </div>
+
+          <p className="mt-4 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+            <span className="shrink-0 font-medium uppercase tracking-[0.12em]">{shotTypeLabel(shot.shotType)}</span>
             {shot.viralityScore != null && (
               <span
                 className={cn(
-                  'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums',
-                  viralityBand(shot.viralityScore) === 'alto' && 'bg-primary text-primary-foreground',
-                  viralityBand(shot.viralityScore) === 'medio' && 'bg-amber-500/20 text-amber-400',
-                  viralityBand(shot.viralityScore) === 'bajo' && 'bg-muted text-muted-foreground',
+                  'shrink-0 tabular-nums',
+                  viralityBand(shot.viralityScore) === 'alto' && 'text-primary',
+                  viralityBand(shot.viralityScore) === 'medio' && 'text-amber-400',
                 )}
               >
                 Viral {shot.viralityScore}/10
               </span>
             )}
             {shot.viralityWhy && (
-              <span className="text-[11px] text-muted-foreground">{shot.viralityWhy}</span>
+              <span className="min-w-0 break-words">{shot.viralityWhy}</span>
             )}
-            <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium">{shotTypeLabel(shot.shotType)}</span>
             {shot.referenceUrl && (
               <a
                 href={shot.referenceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-primary"
+                className="inline-flex shrink-0 items-center gap-1 text-primary"
               >
                 <ExternalLink className="h-3 w-3" /> Referencia
               </a>
             )}
-          </div>
+          </p>
+
           {canUpload && (
-            <div className="pt-2">
+            <footer className="mt-4 border-t border-[hsl(36_12%_16%)] pt-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Material de esta toma
+              </p>
               <IdeaVideoLoader ideaId={shot.id} ideaTitle={titulo} kinds={['raw']} compact />
-            </div>
+            </footer>
           )}
-        </div>
-        <button
-          type="button"
-          onClick={onOpen}
-          aria-expanded={abierta}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border"
-          aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle'}
-        >
-          {abierta ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </button>
+        </article>
       </div>
       {abierta && (
-        <div className="space-y-3 border-t px-3 py-3">
+        <div className="space-y-3 border-t border-[hsl(36_12%_16%)] px-3 py-3 sm:px-4">
           {canBrief && (
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="text-[11px] text-muted-foreground">

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.77 — Documento de toma formal</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#f7f4ef; --muted:#9a948a; --gold:#c9a227; --paper:#16140f; --line:#2c2820; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 390px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .card { border: 1px solid var(--line); background: var(--paper); border-radius: 12px; padding: 14px 12px 12px; display: flex; gap: 10px; box-shadow: inset 0 1px 0 rgba(255,248,230,.04); }
+    .rail { width: 36px; flex-shrink: 0; text-align: center; }
+    .num { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); }
+    .dot { width: 36px; height: 36px; border-radius: 99px; border: 2px solid #3a362e; margin: 8px auto 0; }
+    .body { min-width: 0; flex: 1; }
+    .top { display: flex; align-items: flex-start; gap: 8px; }
+    .doc { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(201,162,39,.85); margin: 0; }
+    h2 { font-size: 18px; margin: 6px 0 0; letter-spacing: -0.02em; font-weight: 650; }
+    .chev { width: 28px; height: 28px; color: var(--muted); display: grid; place-items: center; flex-shrink: 0; }
+    .secs { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 16px; }
+    h3 { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(201,162,39,.8); margin: 0 0 6px; }
+    p { margin: 0; font-size: 13.5px; line-height: 1.65; }
+    .notes { border: 1px solid var(--line); background: #1c1913; border-radius: 6px; padding: 10px 12px; }
+    .ruled { min-height: 72px; background-image: repeating-linear-gradient(transparent, transparent 1.6em, rgba(80,72,56,.55) 1.6em, rgba(80,72,56,.55) calc(1.6em + 1px)); color: var(--muted); font-size: 13.5px; }
+    .meta { margin: 16px 0 0; font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 10px; }
+    .meta strong { font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+    .raw { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .raw-kicker { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+    .raw-row { display: flex; justify-content: space-between; align-items: center; }
+    .raw-row strong { color: #67e8f9; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .plus { width: 24px; height: 24px; border-radius: 6px; border: 1px solid #3a362e; display: grid; place-items: center; color: var(--fg); font-size: 16px; line-height: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">On Site · v3.77</p>
+    <h1>Documento de producción</h1>
+    <p class="sub">Misma toma, mismo crudo. Se lee como call sheet: titular, cuerpo y notas. El + del material se queda en el pie.</p>
+    <div class="card">
+      <div class="rail">
+        <div class="num">01</div>
+        <div class="dot" aria-hidden="true"></div>
+      </div>
+      <div class="body">
+        <div class="top">
+          <div>
+            <p class="doc">Documento de toma</p>
+            <h2>El primer sandwich del día</h2>
+          </div>
+          <div class="chev">›</div>
+        </div>
+        <div class="secs">
+          <div>
+            <h3>Guión</h3>
+            <p>Abre con el primer corte. “Este es el sandwich que abre el local.”</p>
+          </div>
+          <div>
+            <h3>Qué grabar</h3>
+            <p>Plano de la tabla. Manos cortando. Cara al pedir. 8s de B-roll del local.</p>
+          </div>
+          <div class="notes">
+            <h3>Anotaciones</h3>
+            <div class="ruled">Toma 2, mejor luz. El crudo de esta idea va con este título.</div>
+          </div>
+        </div>
+        <p class="meta"><strong>Sin tipo</strong><span>Viral 8/10</span></p>
+        <div class="raw">
+          <p class="raw-kicker">Material de esta toma</p>
+          <div class="raw-row">
+            <div>
+              <strong>Video crudo</strong>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">0 subidos · Faltan 4</div>
+            </div>
+            <div class="plus">+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

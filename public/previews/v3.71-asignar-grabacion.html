@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.71 — Asignar grabación</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .col { border: 1px solid var(--border); background: var(--card); border-radius: 16px; padding: 14px; }
+    .lane { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .cell { border: 1px solid rgba(212,175,55,.4); background: rgba(212,175,55,.06); border-radius: 12px; padding: 10px; min-height: 96px; }
+    .day { width: 24px; height: 24px; border-radius: 99px; background: var(--gold); color: #111; font-size: 12px; font-weight: 700; display: grid; place-items: center; margin-bottom: 8px; }
+    .chip { background: rgba(245,158,11,.18); box-shadow: inset 2px 0 0 #f59e0b; border-radius: 6px; padding: 6px 8px; font-size: 11px; }
+    .chip b { display: block; }
+    .chip span { color: var(--muted); }
+    .form label { display: block; font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+    .form input, .form select { width: 100%; background: #0a0a0a; color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-size: 13px; }
+    .btn { margin-top: 12px; width: 100%; background: var(--gold); color: #111; border: 0; border-radius: 8px; padding: 8px; font-weight: 700; font-size: 12px; }
+    .ro { font-size: 13px; line-height: 1.5; }
+    .ro strong { color: var(--fg); }
+    .ro span { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Calendario de Grabación</p>
+    <h1>Asignar quién va y a qué lugar</h1>
+    <p class="sub">Pulsa la sesión del día. Owner y supervisor eligen videógrafo y sitio. Quien graba lo ve y no lo cambia.</p>
+    <div class="grid">
+      <div class="col">
+        <div class="lane">Día 3</div>
+        <div class="cell">
+          <div class="day">3</div>
+          <div class="chip">
+            <b>Blue Chiro - Recording</b>
+            <span>Blue Chiropractic</span><br />
+            <span>María R.</span><br />
+            <span>Clínica · 1 ideas</span>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="lane">Admin — asignar</div>
+        <form class="form" onsubmit="return false">
+          <label>Videógrafo</label>
+          <select><option>María R.</option><option>Diego V.</option></select>
+          <label>Lugar</label>
+          <input value="Blue Chiropractic" />
+          <button class="btn" type="button">Guardar asignación</button>
+        </form>
+        <div class="lane" style="margin-top:18px">Videógrafo — solo ve</div>
+        <p class="ro"><strong>Videógrafo:</strong> <span>María R.</span><br /><strong>Lugar:</strong> <span>Blue Chiropractic</span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -46,6 +46,17 @@ describe('EditorVideoCard', () => {
     expect(screen.getAllByRole('button', { name: /Bajar/i })).toHaveLength(3)
   })
 
+  it('muestra las anotaciones de grabación junto al material crudo', () => {
+    const withNotes = {
+      ...item,
+      video: { ...video(), shooting_notes: 'Toma 2, mejor luz. El crudo va con este título.' },
+    }
+    render(<EditorVideoCard item={withNotes} />)
+    expect(screen.getByText('Anotaciones de grabación')).toBeInTheDocument()
+    expect(screen.getByText(/Toma 2, mejor luz/)).toBeInTheDocument()
+    expect(screen.getByText('raw-0.mp4')).toBeInTheDocument()
+  })
+
   it('renders the edited uploader (video, multiple)', () => {
     const { container } = render(<EditorVideoCard item={item} />)
     const input = container.querySelector('input[type="file"]')

@@ -61,6 +61,15 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
         {caption ?? 'Sin caption'}
       </p>
 
+      {video.shooting_notes?.trim() && (
+        <section className="space-y-1 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-2.5">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wide text-cyan-600 dark:text-cyan-400">
+            Anotaciones de grabación
+          </h3>
+          <p className="whitespace-pre-wrap break-words text-[12px] leading-snug">{video.shooting_notes}</p>
+        </section>
+      )}
+
       {/* Source material to download */}
       <div className="space-y-1.5">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Material a editar</p>

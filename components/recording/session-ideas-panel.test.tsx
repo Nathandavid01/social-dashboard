@@ -6,6 +6,12 @@ import { SessionIdeasPanel } from './session-ideas-panel'
 vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }))
+vi.mock('@/lib/actions/recording-sessions', () => ({
+  updateRecordingSession: vi.fn(),
+}))
+vi.mock('@/components/auth/role-gate', () => ({
+  useHasPermission: () => false,
+}))
 
 vi.mock('@/lib/actions/content-ideas', () => ({
   assignIdeaToSession: vi.fn(),

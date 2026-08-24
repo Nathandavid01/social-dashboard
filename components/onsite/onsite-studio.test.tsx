@@ -29,6 +29,7 @@ vi.mock('@/lib/actions/onsite', () => ({
   generateOnsiteIdeas: vi.fn(async () => ({ created: 2 })),
   checkInOnsite: vi.fn(async () => ({ ok: true })),
   updateOnsiteIdea: vi.fn(async () => ({ ok: true })),
+  updateOnsiteAnnotations: vi.fn(async () => ({ ok: true })),
 }))
 
 vi.mock('@/components/recording/idea-video-loader', () => ({
@@ -64,6 +65,7 @@ const shot = (over: Partial<OnsiteShot> = {}): OnsiteShot => ({
   referenceUrl: 'https://ref.example',
   shotType: 'dji',
   recorded: false,
+  shootingNotes: null,
   ...over,
 })
 
@@ -172,8 +174,8 @@ describe('OnsiteStudio', () => {
         currentUserId="u1"
       />,
     )
-    expect(screen.getByDisplayValue('Intro Patricia')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Servicios de la clínica')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Intro Patricia' })).toBeInTheDocument()
+    expect(screen.getByText('Servicios de la clínica')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Referencia/ })).toHaveAttribute('href', 'https://ref.example')
     expect(screen.getByText(/13\/mes · 20 videos/)).toBeInTheDocument()
     expect(screen.getByText(/DJI al entrar/)).toBeInTheDocument()
@@ -181,9 +183,41 @@ describe('OnsiteStudio', () => {
     expect(screen.getByText(/saludo en el umbral/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Generar/ })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Llegué' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Título de la idea 1')).toHaveAttribute('readOnly')
-    expect(screen.getByLabelText('Hook de la idea 1')).toHaveAttribute('readOnly')
-    expect(screen.getByLabelText('Qué grabar en la idea 1')).toHaveAttribute('readOnly')
+    expect(screen.queryByLabelText('Título de la idea 1')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Anotaciones de la idea 1')).toBeInTheDocument()
+    expect(screen.getByLabelText('Anotaciones de la idea 1')).not.toHaveAttribute('readOnly')
+  })
+
+  it('quien graba lee el documento y deja anotaciones, sin editar el brief', async () => {
+    const user = userEvent.setup()
+    const { updateOnsiteAnnotations } = await import('@/lib/actions/onsite')
+    render(
+      <OnsiteStudio
+        sessions={[session()]}
+        active={session()}
+        shots={[shot({ shootingNotes: 'Toma 1 corta' })]}
+        addable={[]}
+        canBrief={false}
+        canRecord
+        canUpload
+        today="2026-08-20"
+        currentUserId="u1"
+      />,
+    )
+    expect(screen.getByText('Guión')).toBeInTheDocument()
+    expect(screen.getByText('Qué grabar')).toBeInTheDocument()
+    expect(screen.getByText('Anotaciones')).toBeInTheDocument()
+    const notes = screen.getByLabelText('Anotaciones de la idea 1')
+    expect(notes).toHaveValue('Toma 1 corta')
+    await user.clear(notes)
+    await user.type(notes, 'Mejor luz en toma 2')
+    await user.tab()
+    expect(updateOnsiteAnnotations).toHaveBeenCalledWith({
+      ideaId: 'i1',
+      shootingNotes: 'Mejor luz en toma 2',
+    })
+    expect(screen.queryByLabelText('Hook de la idea 1')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Qué grabar en la idea 1')).not.toBeInTheDocument()
   })
 
   it('el admin puede generar las ideas que faltan', async () => {
