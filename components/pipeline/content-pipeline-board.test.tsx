@@ -19,6 +19,9 @@ type FakeNav = {
 }
 const { currentSearch, reset: resetNav, simulateBrowserBack } = nav as unknown as FakeNav
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
+vi.mock('@/components/auth/role-gate', () => ({
+  useHasPermission: () => true,
+}))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
 const getBatchVideoPreviewUrls = vi.fn(async (ids: string[]) => ({
@@ -82,15 +85,42 @@ beforeEach(() => {
   resetNav('')
 })
 
+function openLotes() {
+  fireEvent.click(screen.getByRole('button', { name: /lotes/i }))
+}
+
+function renderLotes(ui: Parameters<typeof render>[0]) {
+  const result = render(ui)
+  openLotes()
+  return result
+}
+
+describe('ContentPipelineBoard — editor bank (paso 2)', () => {
+  it('abre en el banco y agrupa por editor', () => {
+    render(<ContentPipelineBoard ideas={[
+      idea({
+        id: '1',
+        status: 'grabada',
+        title: 'Intro clínica',
+        assignee: { id: 'u1', full_name: 'María R.' },
+        videos: [{ ...editedVideo('raw-1'), kind: 'raw', storage_provider: 'r2', drive_file_id: 'ideas/i/raw/x' }],
+      }),
+    ]} />)
+    expect(screen.getByText(/paso 2 · banco para edición/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'María R.' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Video' })).not.toBeInTheDocument()
+  })
+})
+
 describe('ContentPipelineBoard — batch model', () => {
   it('renders the 4 columns in Spanish with Video first', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea()]} />)
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
     expect(headings).toEqual(['Video', 'Edición', 'Aprobación', 'Publicación'])
   })
 
   it('shows one batch card per client (not per video)', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' }), idea({ id: '3' })]} />)
     const cards = container.querySelectorAll('article')
     expect(cards).toHaveLength(1)
     expect(cards[0].textContent).toContain('Nora Fitness')
@@ -98,14 +128,14 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('places the batch in the column of its least-advanced video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[idea({ id: '1', status: 'producida' }), idea({ id: '2', status: 'grabada' })]} />)
     // least advanced is grabada → Video column (1st section)
     const videoCol = container.querySelectorAll('section')[0]
     expect(videoCol.textContent).toContain('Nora Fitness')
   })
 
   it('shows the assignee filter and filters by person', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[
       idea({ id: '1', client_id: 'c1', assignee: { id: 'u1', full_name: 'María R.' } }),
       idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null }, assignee: { id: 'u2', full_name: 'Diego V.' } }),
     ] as IdeaWithPipeline[]} teamMembers={[
@@ -123,18 +153,18 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('moves the whole batch forward, persisting all its videos', async () => {
-    render(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
     await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
   })
 
   it('shows "Sin asignar" for an unassigned batch', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea()]} />)
     expect(screen.getByText(/sin asignar/i)).toBeInTheDocument()
   })
 
   it('shows the client logo on the batch card (header + strip)', () => {
-    const { container } = render(
+    const { container } = renderLotes(
       <ContentPipelineBoard
         ideas={[
           idea({
@@ -157,7 +187,7 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('falls back to clientLogos map when idea.client.logo_url is empty (Metricool)', () => {
-    const { container } = render(
+    const { container } = renderLotes(
       <ContentPipelineBoard
         ideas={[
           idea({
@@ -174,7 +204,7 @@ describe('ContentPipelineBoard — batch model', () => {
 
   it('shows editor-uploaded videos in the gray strip (not only logos)', async () => {
     getBatchVideoPreviewUrls.mockClear()
-    const { container } = render(
+    const { container } = renderLotes(
       <ContentPipelineBoard
         ideas={[
           idea({
@@ -207,7 +237,7 @@ describe('ContentPipelineBoard — batch model', () => {
   })
 
   it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[
       idea({ id: '1', client_id: 'c1', status: 'grabada', deadline: '2020-01-01' }),
     ] as IdeaWithPipeline[]} />)
     expect(container.querySelector('article')!.textContent).toContain('Atrasado')
@@ -215,7 +245,7 @@ describe('ContentPipelineBoard — batch model', () => {
 
   it('opens the client batch overlay in place on card click (same page — the URL gains ?lote=, no route change)', async () => {
     getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     fireEvent.click(container.querySelector('article')!)
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
     expect(currentSearch()).toBe('lote=c9')
@@ -225,7 +255,7 @@ describe('ContentPipelineBoard — batch model', () => {
 
 describe('ContentPipelineBoard — flujo natural: el overlay vive en la URL', () => {
   function openBoard() {
-    return render(
+    return renderLotes(
       <ContentPipelineBoard
         ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]}
       />,
@@ -277,7 +307,7 @@ describe('ContentPipelineBoard — flujo natural: el overlay vive en la URL', ()
   it('recargar con ?lote= en la URL reabre el mismo cliente (deep link)', async () => {
     getClientBatchData.mockClear()
     resetNav('lote=c9')
-    render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
   })
@@ -285,7 +315,7 @@ describe('ContentPipelineBoard — flujo natural: el overlay vive en la URL', ()
   it('cerrar tras un deep link no navega hacia atrás fuera del tablero (replace, no back)', async () => {
     getClientBatchData.mockClear()
     resetNav('lote=c9')
-    render(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     await screen.findByTestId('batch-overlay')
 
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }))
@@ -312,7 +342,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
   ]
 
   it('renders one planned card per client for the next single video', () => {
-    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     expect(screen.getAllByText('Nathandavidts._')).toHaveLength(1)
     expect(screen.getByText('Lun 8 jun')).toBeInTheDocument()
     expect(screen.getByText('Próxima publicación')).toBeInTheDocument()
@@ -325,7 +355,7 @@ describe('ContentPipelineBoard — planned sessions (empty slots)', () => {
 
   it('opens the client batch overlay when a planned card is clicked', async () => {
     getClientBatchData.mockClear()
-    const { container } = render(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[]} plannedClients={planned} />)
     fireEvent.click(container.querySelector('article')!)
     await waitFor(() =>
       expect(getClientBatchData).toHaveBeenCalledWith('nd', {
@@ -344,13 +374,13 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
   ] as IdeaWithPipeline[]
 
   it('renders a compact "Todos los clientes" dropdown trigger, closed by default', () => {
-    render(<ContentPipelineBoard ideas={twoClients} />)
+    renderLotes(<ContentPipelineBoard ideas={twoClients} />)
     expect(screen.getByRole('button', { name: /todos los clientes/i })).toBeInTheDocument()
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
   it('opens the list with every client + count and filters the board on select', () => {
-    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     expect(screen.getByRole('listbox')).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /lumen/i })).toBeInTheDocument()
@@ -365,7 +395,7 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
   })
 
   it('clears the filter back to all clients via the clear button', () => {
-    const { container } = render(<ContentPipelineBoard ideas={twoClients} />)
+    const { container } = renderLotes(<ContentPipelineBoard ideas={twoClients} />)
     fireEvent.click(screen.getByRole('button', { name: /todos los clientes/i }))
     fireEvent.click(screen.getByRole('option', { name: /lumen/i }))
     fireEvent.click(screen.getByRole('button', { name: /quitar filtro de cliente/i }))
@@ -375,7 +405,7 @@ describe('ContentPipelineBoard — client dropdown filter (replaces chip row)', 
   })
 
   it('still shows the batches/publicados stats line', () => {
-    render(<ContentPipelineBoard ideas={twoClients} />)
+    renderLotes(<ContentPipelineBoard ideas={twoClients} />)
     expect(screen.getByText(/publicados/i)).toBeInTheDocument()
   })
 })
@@ -386,7 +416,7 @@ describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => 
   }
 
   it('shows a grab cursor at rest and grabbing while dragging horizontally', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea()]} />)
     const el = scrollEl()
     expect(el.className).toContain('cursor-grab')
     expect(el.className).not.toContain('cursor-grabbing')
@@ -400,7 +430,7 @@ describe('ContentPipelineBoard — drag-to-scroll columns (grab cursor)', () => 
   })
 
   it('does not enter grabbing state for a click without movement (cards stay clickable)', () => {
-    render(<ContentPipelineBoard ideas={[idea()]} />)
+    renderLotes(<ContentPipelineBoard ideas={[idea()]} />)
     const el = scrollEl()
     fireEvent.mouseDown(el, { button: 0, clientX: 300 })
     fireEvent.mouseUp(el, { clientX: 300 })

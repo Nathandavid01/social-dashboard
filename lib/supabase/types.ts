@@ -467,6 +467,8 @@ export interface IdeaWithPipeline extends ContentIdea {
    * avatar_url is optional so optimistic updates (from a name-only profile list)
    * still type-check; the fetched data includes it. */
   assignee?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
+  /** Pipeline banco: el servidor marca lo que está fuera del WIP de 2. */
+  bankQueue?: 'active' | 'waiting'
 }
 
 export type ContentIdeaActivityAction =

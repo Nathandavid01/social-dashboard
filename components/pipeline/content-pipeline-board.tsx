@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
+import { Search, Filter, LayoutGrid, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, Clapperboard, Columns3 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
@@ -16,7 +16,10 @@ import { useOverlayRoute } from '@/lib/hooks/use-overlay-route'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
+import { EditorVideoBank } from './editor-video-bank'
+import { groupEditorVideoBank } from '@/lib/pipeline/editor-video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -84,6 +87,8 @@ function ContentPipelineBoardInner({
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [view, setView] = useState<'bank' | 'lotes'>('bank')
+  const canManageLotes = useHasPermission('planning.read')
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
@@ -250,6 +255,27 @@ function ContentPipelineBoardInner({
 
   const published = visible.filter((b) => stageOf(b) === 'publication').length
 
+  const bankRows = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
+    return groupEditorVideoBank(ideas, names)
+      .filter((row) => {
+        if (assigneeFilter === 'unassigned') return row.editorId == null
+        if (assigneeFilter) return row.editorId === assigneeFilter
+        return true
+      })
+      .map((row) => ({
+        ...row,
+        clients: row.clients.filter((c) => {
+          if (clientFilter && c.clientId !== clientFilter) return false
+          if (!q) return true
+          const hay = `${c.clientName} ${row.editorName} ${c.clips.map((clip) => clip.title).join(' ')}`
+          return hay.toLowerCase().includes(q)
+        }),
+      }))
+      .filter((row) => row.clients.length > 0)
+  }, [ideas, teamMembers, assigneeFilter, clientFilter, search])
+
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
   const pan = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 })
@@ -297,10 +323,34 @@ function ContentPipelineBoardInner({
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-[13px] font-bold text-black shadow-lg shadow-primary/20">N</div>
           <div className="min-w-0">
             <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Pipeline de contenido</h1>
-            <p className="text-[11px] text-muted-foreground">Nate Media · lotes por cliente</p>
+            <p className="text-[11px] text-muted-foreground">Paso 2 · Banco para edición</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-md border border-border p-0.5">
+            <button
+              type="button"
+              onClick={() => setView('bank')}
+              className={cn(
+                'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
+                view === 'bank' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <Clapperboard className="h-3.5 w-3.5" />
+              Banco
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('lotes')}
+              className={cn(
+                'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
+                view === 'lotes' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <Columns3 className="h-3.5 w-3.5" />
+              Lotes
+            </button>
+          </div>
           <div className="relative hidden sm:block">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar clientes, personas…" className="h-8 w-52 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
@@ -308,11 +358,13 @@ function ContentPipelineBoardInner({
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
           <HeaderButton icon={Filter} label="Filtros" />
           <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <NewVideoDialog
-            clients={allClients.length > 0 ? allClients : clients}
-            pipelineByClient={pipelineByClient}
-            clientCadence={clientCadence}
-          />
+          {canManageLotes && (
+            <NewVideoDialog
+              clients={allClients.length > 0 ? allClients : clients}
+              pipelineByClient={pipelineByClient}
+              clientCadence={clientCadence}
+            />
+          )}
         </div>
       </header>
 
@@ -327,11 +379,21 @@ function ContentPipelineBoardInner({
           onChange={setAssigneeFilter}
         />
         <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
-          <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+          {view === 'bank' ? (
+            <>
+              <span className="text-foreground">{bankRows.length}</span> editores
+            </>
+          ) : (
+            <>
+              <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+            </>
+          )}
         </p>
       </div>
 
-      {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}
+      {view === 'bank' ? (
+        <EditorVideoBank rows={bankRows} />
+      ) : (
       <div
         ref={scrollRef}
         data-testid="pipeline-scroll"
@@ -348,6 +410,7 @@ function ContentPipelineBoardInner({
           ))}
         </div>
       </div>
+      )}
 
       {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
       {openClientId && (

@@ -1,6 +1,6 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { createClient } from '@/lib/supabase/server'
-import { currentUserHas } from '@/lib/auth/server'
+import { authorizeIdeaVideoAccess } from '@/lib/actions/idea-videos-r2'
 import { r2Client, r2Bucket } from '@/lib/integrations/r2'
 import { entregasR2Client, entregasR2Bucket } from '@/lib/integrations/entregas-r2'
 import { safeServeContentType } from '@/lib/utils/video-upload-guard'
@@ -28,11 +28,11 @@ export async function GET(
 ): Promise<Response> {
   const { videoId } = await params
 
-  const allowed =
-    (await currentUserHas('revision.read')) ||
-    (await currentUserHas('entregas.read')) ||
-    (await currentUserHas('planning.read'))
-  if (!allowed) return new Response('No autorizado', { status: 403 })
+  const access = await authorizeIdeaVideoAccess(videoId)
+  if ('error' in access) {
+    const status = access.error === 'No autorizado' ? 403 : 404
+    return new Response(access.error, { status })
+  }
 
   const supabase = await createClient()
   const { data: video, error } = await supabase

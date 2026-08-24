@@ -1,4 +1,5 @@
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
+import { prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
@@ -14,14 +15,13 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * Global Content Pipeline board — every client's videos on one Trello-style
- * board, filterable by client. Reference design: "Content Pipeline Board".
+ * Paso 2: banco de crudos por editor (y lotes para owner/supervisor).
  */
 export default async function PipelinePage() {
-  await requirePermission('planning.read')
+  await requirePermission('pipeline.read')
   const supabase = await createClient()
 
-  const [ideas, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }] = await Promise.all([
+  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
@@ -31,8 +31,11 @@ export default async function PipelinePage() {
     getMetricoolPicturesByBlogId(),
     getWorkflowSettings(),
     supabase.from('profiles').select('id, full_name').eq('status', 'active'),
+    getEffectiveRole(),
+    getEffectiveUserId(),
   ])
 
+  const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId })
   const activeClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
   const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
   const clientCadence: Record<string, ClientCadence> = Object.fromEntries(

@@ -8,22 +8,23 @@ import { effectiveAreaHrefs } from '@/lib/auth/areas'
  * esto lo caza antes de que un editor pueda aprobar su propio video.
  */
 describe('modelo de roles', () => {
-  it('el editor solo llega a Revisión dentro de Trabajo', () => {
+  it('el editor llega a Pipeline (banco) y Revisión; no a Entregas', () => {
     const h = effectiveAreaHrefs('editor', null)
+    expect(h.has('/pipeline')).toBe(true)
     expect(h.has('/revision')).toBe(true)
     // Copy y publicación viven en /entregas: no es su trabajo.
     expect(h.has('/entregas')).toBe(false)
-    expect(h.has('/pipeline')).toBe(false)
     expect(h.has('/produccion')).toBe(false)
     expect(h.has('/video-reviews')).toBe(false)
     expect(h.has('/clients')).toBe(false)
   })
 
-  it('el videógrafo hace grabación e ideas, y NO entra a Entregas', () => {
+  it('el videógrafo hace grabación e ideas, y NO entra a Entregas ni al banco', () => {
     const h = effectiveAreaHrefs('video', null)
     expect(h.has('/recording-calendar')).toBe(true)
     expect(h.has('/idea-lab')).toBe(true)
     expect(h.has('/entregas')).toBe(false)
+    expect(h.has('/pipeline')).toBe(false)
   })
 
   it('el diseñador hace ideas y entrega en Revisión', () => {

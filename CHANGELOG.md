@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.78 — 2026-08-23
+
+**El Pipeline es el paso 2: cada editor ve su banco de crudos por cliente y los puede bajar.**
+
+- Después de On Site, el editor entra a Pipeline y ve **una fila por editor** (o Sin asignar) con el **banco de video de cada cliente**.
+- En cada clip puede **ver** y **bajar** el crudo o el B-roll. Revisión sigue siendo el corte; Entregas no se mezcló aquí.
+- El videógrafo no entra a este banco. El editor solo ve lo asignado; owner y supervisor ven todos.
+- En cada cliente se ve siempre cuántos videos ya están **aprobados** (no se esconde en un filtro).
+- El editor trabaja **2 videos a la vez**; el resto queda en espera y no se puede bajar hasta que uno se apruebe.
+- Los lotes y “Nuevo video” siguen en la pestaña **Lotes**, para quien arma el tablero.
+
+Vista: [preview HTML](/previews/v3.78-banco-editor.html)
+
 ## v3.77 — 2026-08-23
 
 **El documento de toma se lee como una hoja de producción, no como un formulario.**
