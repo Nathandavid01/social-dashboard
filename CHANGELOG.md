@@ -4,6 +4,26 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.81 — 2026-08-23
+
+**Al entrar, te pedimos una foto hasta que dejes de usar el ícono genérico.**
+
+- La primera vez — y cada visita siguiente — el dashboard pide **una foto o un avatar** si solo tienes iniciales o el ícono de persona.
+- Puedes tocar **Ahora no** una vez en esa sesión. Al volver a entrar, el aviso sale otra vez.
+- Cuando subes o eliges una imagen real, deja de pedirla. La foto queda en tu perfil y se ve en el menú y en el resto del equipo.
+
+Vista: [preview HTML](/previews/v3.81-foto-perfil.html)
+
+## v3.80 — 2026-08-23
+
+**Lotes es el tablero Trello del trabajo: ves en qué etapa va cada cliente.**
+
+- En Pipeline, **Banco** sigue siendo el paso 2 (bajar crudos). **Lotes** es el tablero del flujo.
+- Cuatro columnas reales: **Video → Edición → Aprobación → Publicación**. Una tarjeta por lote (cliente, editor, cuántos videos, aprobados).
+- Quien puede mover el flujo arrastra la tarjeta a otra columna; el servidor guarda el cambio. El editor no mueve lotes.
+
+Vista: [preview HTML](/previews/v3.80-lotes-tablero.html)
+
 ## v3.78 — 2026-08-23
 
 **El Pipeline es el paso 2: cada editor ve su banco de crudos por cliente y los puede bajar.**

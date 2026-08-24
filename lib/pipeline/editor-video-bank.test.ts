@@ -240,6 +240,22 @@ describe('groupEditorVideoBank', () => {
     expect(rows[0].clients.map((c) => c.clientName)).toEqual(['Alpha', 'Beta'])
   })
 
+  it('usa el logo resuelto (Metricool) si el join no trae logo_url', () => {
+    const rows = groupEditorVideoBank(
+      [idea({ client: { id: 'c1', name: 'Speedy Net', industry: null, logo_url: null } })],
+      {},
+      { logos: { c1: 'https://cdn.example/speedy.png' } },
+    )
+    expect(rows[0].clients[0].logoUrl).toBe('https://cdn.example/speedy.png')
+  })
+
+  it('el color de tarjeta es estable por client_id', () => {
+    const a = groupEditorVideoBank([idea()])
+    const b = groupEditorVideoBank([idea()])
+    expect(a[0].clients[0].cardColor).toBe(b[0].clients[0].cardColor)
+    expect(a[0].clients[0].cardColor).toMatch(/^#/)
+  })
+
   it('cada cliente muestra cuántos videos tiene aprobados', () => {
     const rows = groupEditorVideoBank([
       idea({ id: 'raw', status: 'grabada' }),

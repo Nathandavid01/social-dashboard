@@ -110,6 +110,29 @@ describe('ContentPipelineBoard — editor bank (paso 2)', () => {
     expect(screen.getByRole('heading', { name: 'María R.' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Video' })).not.toBeInTheDocument()
   })
+
+  it('en el banco, usa clientLogos cuando idea.client.logo_url está vacío', () => {
+    render(
+      <ContentPipelineBoard
+        ideas={[
+          idea({
+            id: '1',
+            status: 'grabada',
+            title: 'Promo',
+            client_id: 'c1',
+            client: { id: 'c1', name: 'Speedy Net', industry: null, logo_url: null, platforms: [] },
+            assignee: { id: 'u1', full_name: 'María R.' },
+            videos: [{ ...editedVideo('raw-1'), kind: 'raw', storage_provider: 'r2', drive_file_id: 'ideas/i/raw/x' }],
+          }),
+        ]}
+        clientLogos={{ c1: 'https://cdn.example/metricool-speedy.png' }}
+      />,
+    )
+    expect(screen.getByRole('img', { name: 'Speedy Net' })).toHaveAttribute(
+      'src',
+      'https://cdn.example/metricool-speedy.png',
+    )
+  })
 })
 
 describe('ContentPipelineBoard — batch model', () => {
@@ -155,6 +178,22 @@ describe('ContentPipelineBoard — batch model', () => {
   it('moves the whole batch forward, persisting all its videos', async () => {
     renderLotes(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
     fireEvent.click(screen.getByRole('button', { name: /mover batch adelante/i }))
+    await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
+  })
+
+  it('Lotes se lee como tablero y soltar en otra columna persiste el lote', async () => {
+    const { container } = renderLotes(<ContentPipelineBoard ideas={[idea({ id: '1' }), idea({ id: '2' })]} />)
+    expect(screen.getByText(/tablero de lotes/i)).toBeInTheDocument()
+    const card = container.querySelector('article')!
+    const payload = JSON.stringify({ clientId: 'c1', ideaIds: ['1', '2'] })
+    const dt = {
+      setData: vi.fn(),
+      getData: () => payload,
+      effectAllowed: 'move',
+      dropEffect: 'move',
+    }
+    fireEvent.dragStart(card, { dataTransfer: dt })
+    fireEvent.drop(screen.getByTestId('lotes-column-edited'), { dataTransfer: dt })
     await waitFor(() => expect(moveBatch).toHaveBeenCalledWith(['1', '2'], 'edited'))
   })
 

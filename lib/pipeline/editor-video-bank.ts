@@ -1,4 +1,5 @@
 import type { ContentIdeaVideo, IdeaWithPipeline, UserRole } from '@/lib/supabase/types'
+import { clientCardColor } from '@/lib/utils/client-accent'
 
 const LIVE = new Set<ContentIdeaVideo['status']>(['uploading', 'uploaded', 'processing'])
 const SOURCE = new Set<ContentIdeaVideo['kind']>(['raw', 'broll'])
@@ -36,9 +37,16 @@ export interface EditorBankClient {
   clientId: string
   clientName: string
   logoUrl: string | null
+  /** Hex estable (brand_colors.primary o hash del id). */
+  cardColor: string
   /** Ideas de este cliente ya aprobadas o publicadas (campo real, no métrica nueva). */
   approvedCount: number
   clips: EditorBankClip[]
+}
+
+export interface EditorBankResolvedMarks {
+  logos?: Record<string, string | null>
+  brandColors?: Record<string, string | null>
 }
 
 export interface EditorBankRow {
@@ -183,9 +191,15 @@ function countApprovedByClient(ideas: IdeaWithPipeline[]): Record<string, number
 }
 
 /** Una fila por editor de video; dentro, banco por cliente con clips que tienen crudo. */
+function clientBrandPrimary(client: IdeaWithPipeline['client']): string | null {
+  const colors = (client as { brand_colors?: { primary?: string | null } } | null | undefined)?.brand_colors
+  return colors?.primary ?? null
+}
+
 export function groupEditorVideoBank(
   ideas: IdeaWithPipeline[],
   profileNames: Record<string, string> = {},
+  resolved: EditorBankResolvedMarks = {},
 ): EditorBankRow[] {
   const approvedByClient = countApprovedByClient(ideas)
   const byEditor = new Map<string, EditorBankRow>()
@@ -208,10 +222,12 @@ export function groupEditorVideoBank(
     if (!clientId) continue
     let client = row.clients.find((c) => c.clientId === clientId)
     if (!client) {
+      const brandColor = resolved.brandColors?.[clientId] ?? clientBrandPrimary(idea.client)
       client = {
         clientId,
         clientName: idea.client?.name ?? 'Cliente',
-        logoUrl: idea.client?.logo_url ?? null,
+        logoUrl: resolved.logos?.[clientId] ?? idea.client?.logo_url ?? null,
+        cardColor: clientCardColor({ id: clientId, brandColor }).dot,
         approvedCount: approvedByClient[clientId] ?? 0,
         clips: [],
       }

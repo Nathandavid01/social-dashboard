@@ -1,15 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Camera, Download, ExternalLink, Loader2, Play, UserRound, Video, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ClientLogo } from '@/components/clients/client-logo'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import type { EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 
 export function EditorVideoBank({ rows }: { rows: EditorBankRow[] }) {
+  const canSetLogo = useHasPermission('clients.brand.edit')
+
   if (rows.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center px-5 py-16 text-center">
@@ -43,18 +47,35 @@ export function EditorVideoBank({ rows }: { rows: EditorBankRow[] }) {
           </header>
           <div className="space-y-4 p-3 sm:p-4">
             {row.clients.map((client) => (
-              <div key={client.clientId} className="min-w-0">
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <div
+                key={client.clientId}
+                data-testid="client-bank-card"
+                className="min-w-0 overflow-hidden rounded-lg border bg-card/40"
+                style={{
+                  borderColor: client.cardColor,
+                  boxShadow: `inset 3px 0 0 0 ${client.cardColor}`,
+                  background: `linear-gradient(90deg, ${client.cardColor}14, transparent 42%)`,
+                }}
+              >
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pt-3">
                   <div className="flex min-w-0 items-center gap-2">
                     <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-6 w-6 text-[9px]" />
                     <h3 className="truncate text-[13px] font-semibold">{client.clientName}</h3>
+                    {!client.logoUrl && canSetLogo && (
+                      <Link
+                        href={`/clients/${client.clientId}`}
+                        className="shrink-0 text-[11px] font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      >
+                        Subir logo
+                      </Link>
+                    )}
                   </div>
                   <p className="shrink-0 text-[11px] tabular-nums text-muted-foreground" data-testid="approved-count">
                     <span className="font-semibold text-foreground">{client.approvedCount}</span>{' '}
                     {client.approvedCount === 1 ? 'aprobado' : 'aprobados'}
                   </p>
                 </div>
-                <div className="overflow-x-auto rounded-lg border border-border">
+                <div className="overflow-x-auto rounded-lg border border-border mx-3 mb-3">
                   <table className="w-full min-w-[520px] text-left text-xs">
                     <thead className="bg-muted/40 text-[10px] uppercase tracking-wide text-muted-foreground">
                       <tr>
