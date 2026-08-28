@@ -57,7 +57,7 @@ function makeChain() {
   const chain: Record<string, unknown> = {}
   const passthrough = () => chain
   for (const m of ['eq', 'in', 'select']) chain[m] = vi.fn(passthrough)
-  chain.single = vi.fn(async () => ({
+  const row = vi.fn(async () => ({
     data: {
       id: 'new-video-id',
       drive_file_id: `ideas/idea-1/${videoKind}/1-final.mp4`,
@@ -73,6 +73,10 @@ function makeChain() {
     },
     error: null,
   }))
+  // El código usa `.maybeSingle()` (una fila que puede no existir); `.single()`
+  // sigue expuesto porque otras llamadas del módulo lo usan.
+  chain.maybeSingle = row
+  chain.single = row
   // Make the chain awaitable (for update() calls that aren't .single()'d).
   ;(chain as { then: unknown }).then = (resolve: (v: unknown) => unknown) =>
     resolve({ data: null, error: null })

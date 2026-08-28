@@ -1,8 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const currentUserHas = vi.fn(async (_perm: string) => true)
+/**
+ * El gate real de esta ruta es `authorizeIdeaVideoAccess`, que resuelve rol y
+ * usuario efectivos (no `currentUserHas`). El mock expone los tres para que un
+ * cambio de firma salga aquí y no en producción.
+ */
+let effectiveRole: string | null = 'owner'
+let effectiveUserId: string | null = 'u-owner'
 vi.mock('@/lib/auth/server', () => ({
   currentUserHas: (perm: string) => currentUserHas(perm),
+  getEffectiveRole: async () => effectiveRole,
+  getEffectiveUserId: async () => effectiveUserId,
 }))
 
 let videoResult: { data: unknown; error: unknown } = { data: null, error: null }
@@ -73,6 +82,8 @@ function ctx(videoId = 'vid-1') {
 
 beforeEach(() => {
   currentUserHas.mockReset().mockResolvedValue(true)
+  effectiveRole = 'owner'
+  effectiveUserId = 'u-owner'
   videoResult = { data: { drive_file_id: 'key/video.mp4', storage_provider: 'entregas-r2', status: 'uploaded' }, error: null }
   sendCalls = []
   sendThrows = null
@@ -84,8 +95,9 @@ beforeEach(() => {
 })
 
 describe('GET /api/video-file/[videoId]', () => {
-  it('403 sin ningún permiso de lectura (revision/entregas/planning)', async () => {
-    currentUserHas.mockResolvedValue(false)
+  it('403 sin un rol que alcance el banco del editor', async () => {
+    effectiveRole = null
+    effectiveUserId = null
     const res = await GET(req(), ctx())
     expect(res.status).toBe(403)
     expect(sendCalls).toEqual([])

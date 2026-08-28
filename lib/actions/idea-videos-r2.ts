@@ -190,7 +190,7 @@ export async function authorizeIdeaVideoAccess(videoId: string): Promise<
     .from('content_idea_videos')
     .select(VIDEO_ACCESS_SELECT)
     .eq('id', videoId)
-    .single()
+    .maybeSingle()
   if (error || !video) return { error: 'Video no encontrado' }
 
   const idea = video.idea as {
