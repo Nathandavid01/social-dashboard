@@ -84,8 +84,15 @@ export async function submitIdeaForApproval(ideaId: string): Promise<Result> {
   )
 }
 
-/** Approve an idea: submitted -> approved (stamps approver + timestamp). */
-export async function approveIdea(ideaId: string): Promise<Result> {
+/**
+ * Approve an idea: submitted -> approved (stamps approver + timestamp).
+ *
+ * `videoFileId` sella QUÉ archivo se aprobó (`approved_video_id`). Publicar
+ * exige ese archivo exacto: sin el sello, se re-resolvía "el edited vivo más
+ * nuevo" y un corte subido después de aprobar salía publicado sin que nadie lo
+ * viera. Si el archivo se re-sube, el trigger de la 0071 invalida la aprobación.
+ */
+export async function approveIdea(ideaId: string, videoFileId?: string | null): Promise<Result> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -93,7 +100,11 @@ export async function approveIdea(ideaId: string): Promise<Result> {
   const res = await transition(
     ideaId,
     'approved',
-    { approved_by: user?.id ?? null, approved_at: new Date().toISOString() },
+    {
+      approved_by: user?.id ?? null,
+      approved_at: new Date().toISOString(),
+      ...(videoFileId ? { approved_video_id: videoFileId } : {}),
+    },
     (current) => `Solo se puede aprobar una idea en revisión (estado actual: "${current}").`,
   )
   // A fully-ready idea (caption + edited video) auto-posts to Metricool on its
@@ -111,7 +122,8 @@ export async function requestRevision(ideaId: string, _notes?: string): Promise<
   return transition(
     ideaId,
     'revision_needed',
-    {},
+    // Pedir cambios deja la idea sin nada aprobado: el sello se limpia.
+    { approved_video_id: null },
     (current) => `Solo se pueden pedir cambios sobre una idea en revisión (estado actual: "${current}").`,
   )
 }

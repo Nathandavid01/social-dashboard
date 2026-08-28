@@ -123,21 +123,50 @@ export function inferWatchBoard(
  * The file Metricool must receive: the one being approved, never another
  * idea of the same client and never the other board's leftover cut.
  */
-export function pickEditedVideoForPublish(
+export interface PublishVideoChoice {
+  video: PublishableEditedVideo | null
+  /** Por qué no hay archivo publicable. Solo cuando la cadena de custodia se rompió. */
+  skipped?: string
+}
+
+export interface PublishVideoOptions {
+  preferredId?: string | null
+  ideaId?: string | null
+  watchedOn?: VideoWatchBoard | null
+  /**
+   * `content_ideas.approved_video_id`: el archivo que de verdad se aprobó.
+   * Cuando existe es un CONTRATO, no una preferencia — si ese archivo no está
+   * vivo, no se publica ningún otro. Las ideas viejas (sin sello) siguen con
+   * el comportamiento de siempre.
+   */
+  approvedVideoId?: string | null
+}
+
+/**
+ * Resuelve qué archivo recibe Metricool. Única fuente de la decisión: lo que
+ * se aprobó es lo que se publica.
+ */
+export function resolveVideoForPublish(
   videos: PublishableEditedVideo[],
-  opts?: {
-    preferredId?: string | null
-    ideaId?: string | null
-    watchedOn?: VideoWatchBoard | null
-  },
-): PublishableEditedVideo | null {
+  opts?: PublishVideoOptions,
+): PublishVideoChoice {
   const ideaId = opts?.ideaId?.trim() || null
   const live = videos.filter((v) => isLiveEdited(v, ideaId))
-  if (live.length === 0) return null
+
+  // Con sello, el archivo aprobado es el único aceptable. Antes esto era un
+  // `find` blando que caía al edited más nuevo — y publicaba un corte que
+  // nadie había aprobado.
+  const sealed = opts?.approvedVideoId?.trim() || null
+  if (sealed) {
+    const approved = live.find((v) => v.id === sealed)
+    return approved ? { video: approved } : { video: null, skipped: SKIP_APPROVED_GONE }
+  }
+
+  if (live.length === 0) return { video: null }
 
   if (opts?.preferredId) {
     const preferred = live.find((v) => v.id === opts.preferredId)
-    if (preferred) return preferred
+    if (preferred) return { video: preferred }
   }
 
   const newest = (list: PublishableEditedVideo[]) =>
@@ -145,13 +174,24 @@ export function pickEditedVideoForPublish(
 
   if (opts?.watchedOn) {
     const wanted = opts.watchedOn === 'entregas' ? 'entregas-r2' : 'r2'
-    return newest(live.filter((v) => v.storage_provider === wanted))
+    return { video: newest(live.filter((v) => v.storage_provider === wanted)) }
   }
 
   const board = inferWatchBoard(live, ideaId)
-  if (board === 'entregas') return newest(live.filter((v) => v.storage_provider === 'entregas-r2'))
-  if (board === 'pipeline') return newest(live.filter((v) => v.storage_provider === 'r2'))
-  return null
+  if (board === 'entregas') return { video: newest(live.filter((v) => v.storage_provider === 'entregas-r2')) }
+  if (board === 'pipeline') return { video: newest(live.filter((v) => v.storage_provider === 'r2')) }
+  return { video: null }
+}
+
+/** Mensaje único del skip por cadena rota, para que la UI y la actividad digan lo mismo. */
+export const SKIP_APPROVED_GONE = 'El archivo aprobado ya no está disponible'
+
+/** Compatibilidad: el video sin el motivo. Misma lógica, no una segunda. */
+export function pickEditedVideoForPublish(
+  videos: PublishableEditedVideo[],
+  opts?: PublishVideoOptions,
+): PublishableEditedVideo | null {
+  return resolveVideoForPublish(videos, opts).video
 }
 
 /** Networks to post to: the client's own platforms, else its defaults, else IG/FB/TikTok. */
