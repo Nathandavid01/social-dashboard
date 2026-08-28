@@ -5,7 +5,7 @@ import { Search, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X,
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
@@ -21,6 +21,8 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
 import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
+import { buildEditorPace } from '@/lib/pipeline/editor-pace'
+import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -307,6 +309,39 @@ function ContentPipelineBoardInner({
       .filter((row) => row.clients.length > 0)
   }, [ideas, teamMembers, clientLogos, clientColors, assigneeFilter, clientFilter, search])
 
+  const visualVideoBank = useMemo(() => {
+    const names = Object.fromEntries(teamMembers.map((member) => [member.id, member.name]))
+    const q = search.trim().toLowerCase()
+    const bank = buildVideoBank(ideas, { editorNames: names, recorderNames: names })
+    const rails = bank.rails
+      .filter((rail) => !clientFilter || rail.clientId === clientFilter)
+      .map((rail) => ({
+        ...rail,
+        logoUrl: clientLogos[rail.clientId] ?? rail.logoUrl,
+        cardColor: clientCardColor({ id: rail.clientId, brandColor: clientColors[rail.clientId] }).dot,
+        videos: rail.videos.filter((video) => {
+          if (assigneeFilter === 'unassigned' && video.editorId) return false
+          if (assigneeFilter && assigneeFilter !== 'unassigned' && video.editorId !== assigneeFilter) return false
+          return !q || `${rail.clientName} ${video.title} ${video.editorName ?? ''}`.toLowerCase().includes(q)
+        }),
+      }))
+      .filter((rail) => rail.videos.length > 0)
+      .map((rail) => ({ ...rail, videoCount: rail.videos.length }))
+    return {
+      rails,
+      totals: {
+        videos: rails.reduce((total, rail) => total + rail.videoCount, 0),
+        clients: rails.length,
+        unassigned: rails.filter((rail) => !rail.editorId).length,
+      },
+    }
+  }, [ideas, teamMembers, clientFilter, assigneeFilter, search, clientLogos, clientColors])
+
+  const editorPaces = useMemo(() => {
+    const visibleEditorIds = new Set(bankRows.map((row) => row.editorId).filter(Boolean))
+    return buildEditorPace(ideas).filter((pace) => visibleEditorIds.has(pace.editorId))
+  }, [ideas, bankRows])
+
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
   const pan = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 })
@@ -423,7 +458,13 @@ function ContentPipelineBoardInner({
       </div>
 
       {view === 'bank' ? (
-        <EditorVideoBank rows={bankRows} admins={bankAdmins} />
+        <EditorVideoBank
+          rows={bankRows}
+          admins={bankAdmins}
+          videoBank={visualVideoBank}
+          paces={editorPaces}
+          teamMembers={teamMembers}
+        />
       ) : (
       <div
         ref={scrollRef}

@@ -4,6 +4,23 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.91 — 2026-08-28
+
+**El pipeline diseñado en el preview ya es la pantalla de trabajo.**
+
+- Cada editor ve sus **dos espacios activos**, el próximo video en espera y si
+  todavía tiene capacidad para tomar trabajo.
+- El banco se ve como una biblioteca de carátulas por cliente, con duración,
+  quién grabó y un selector para reasignar el video sin salir de Pipeline.
+- Abajo aparece el **ritmo real de edición**: mediana de días, entregas de los
+  últimos 30 días y tendencia contra el periodo anterior.
+- La vista se adapta a móvil, tableta y escritorio sin desplazar toda la página
+  horizontalmente; solo la tabla de métricas conserva su desplazamiento propio.
+
+![Pipeline real con espacios, banco y ritmo](/changelog/v3.91-pipeline-real.png)
+
+Vista: [preview HTML](/previews/v3.91-pipeline-real.html)
+
 ## v3.90 — 2026-08-28
 
 **Los videos crudos ya se ven, y se cerró un agujero de permisos.**
