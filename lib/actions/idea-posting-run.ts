@@ -10,7 +10,7 @@ import {
   ideaPostReadiness,
   buildPublishDateTime,
   resolvePlatforms,
-  pickEditedVideoForPublish,
+  resolveVideoForPublish,
   type VideoWatchBoard,
 } from '@/lib/utils/idea-posting-core'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
@@ -46,7 +46,7 @@ export async function runIdeaPost(
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, content_type, generated_caption, status, approval_status, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
+      'id, title, content_type, generated_caption, status, approval_status, approved_video_id, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
     )
     .eq('id', ideaId)
     .single()
@@ -63,15 +63,20 @@ export async function runIdeaPost(
     .in('storage_provider', ['r2', 'entregas-r2'])
     .neq('status', 'archived')
 
-  const edited = pickEditedVideoForPublish(editedRows ?? [], {
-    preferredId: opts?.videoFileId,
-    ideaId,
-    watchedOn: opts?.watchedOn,
-  })
-
   // Un fallo al buscar el video NO puede leerse como "no hay video": eso fue
   // exactamente lo que ocultó el bug de created_at durante todo este tiempo.
   if (editedErr) return { error: `No se pudo leer el video editado: ${editedErr.message}` }
+
+  // El archivo aprobado es contrato: si la idea trae sello y ese archivo ya no
+  // está vivo, no se publica NINGÚN otro (antes se caía al edited más nuevo).
+  const choice = resolveVideoForPublish(editedRows ?? [], {
+    preferredId: opts?.videoFileId,
+    ideaId,
+    watchedOn: opts?.watchedOn,
+    approvedVideoId: (idea as { approved_video_id?: string | null }).approved_video_id ?? null,
+  })
+  if (choice.skipped) return { skipped: choice.skipped }
+  const edited = choice.video
 
   const client = (idea.client ?? {}) as {
     metricool_blog_id?: string | null

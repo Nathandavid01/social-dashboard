@@ -4,7 +4,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v3.95 — 2026-08-28
+## v3.96 — 2026-08-28
 
 **Pipeline dice si cada cliente va adelantado o atrasado.**
 
@@ -15,11 +15,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - El cálculo reutiliza el Runway y la cadencia real del cliente. Cada editor
   recibe únicamente el resumen de sus propios clientes.
 
-![Estado adelantado o atrasado por cliente en Pipeline](/changelog/v3.95-pipeline-runway-cliente.png)
+![Estado adelantado o atrasado por cliente en Pipeline](/changelog/v3.96-pipeline-runway-cliente.png)
 
-Vista: [preview HTML](/previews/v3.95-pipeline-runway-cliente.html)
+Vista: [preview HTML](/previews/v3.96-pipeline-runway-cliente.html)
 
-## v3.94 — 2026-08-28
+## v3.95 — 2026-08-28
 
 **Cada editor ve solamente su pipeline; los administradores conservan la vista completa.**
 
@@ -28,11 +28,11 @@ Vista: [preview HTML](/previews/v3.95-pipeline-runway-cliente.html)
 - El acceso directo a una carátula también valida la asignación antes de entregar
   una URL, no solo oculta la tarjeta en pantalla.
 
-![Pipeline privado para editores y completo para administradores](/changelog/v3.94-pipeline-privado.png)
+![Pipeline privado para editores y completo para administradores](/changelog/v3.95-pipeline-privado.png)
 
-Vista: [preview HTML](/previews/v3.94-pipeline-privado.html)
+Vista: [preview HTML](/previews/v3.95-pipeline-privado.html)
 
-## v3.93 — 2026-08-28
+## v3.94 — 2026-08-28
 
 **Pipeline muestra la carátula, pero no reproduce el video.**
 
@@ -41,11 +41,11 @@ Vista: [preview HTML](/previews/v3.94-pipeline-privado.html)
 - **Bajar** sigue disponible para que el editor descargue el archivo cuando vaya
   a trabajarlo.
 
-![Pipeline con carátula estática y sin reproductor](/changelog/v3.93-pipeline-solo-caratula.png)
+![Pipeline con carátula estática y sin reproductor](/changelog/v3.94-pipeline-solo-caratula.png)
 
-Vista: [preview HTML](/previews/v3.93-pipeline-solo-caratula.html)
+Vista: [preview HTML](/previews/v3.94-pipeline-solo-caratula.html)
 
-## v3.92 — 2026-08-28
+## v3.93 — 2026-08-28
 
 **Cada video del banco muestra su carátula en vez de un cuadro oscuro.**
 
@@ -54,11 +54,11 @@ Vista: [preview HTML](/previews/v3.93-pipeline-solo-caratula.html)
   propio archivo, sin obligar al editor a darle play.
 - Si el video todavía está cargando, se ve un estado claro y no un bloque vacío.
 
-![Carátula visible en el banco de videos](/changelog/v3.92-pipeline-caratulas.png)
+![Carátula visible en el banco de videos](/changelog/v3.93-pipeline-caratulas.png)
 
-Vista: [preview HTML](/previews/v3.92-pipeline-caratulas.html)
+Vista: [preview HTML](/previews/v3.93-pipeline-caratulas.html)
 
-## v3.91 — 2026-08-28
+## v3.92 — 2026-08-28
 
 **El pipeline diseñado en el preview ya es la pantalla de trabajo.**
 
@@ -71,9 +71,23 @@ Vista: [preview HTML](/previews/v3.92-pipeline-caratulas.html)
 - La vista se adapta a móvil, tableta y escritorio sin desplazar toda la página
   horizontalmente; solo la tabla de métricas conserva su desplazamiento propio.
 
-![Pipeline real con espacios, banco y ritmo](/changelog/v3.91-pipeline-real.png)
+![Pipeline real con espacios, banco y ritmo](/changelog/v3.92-pipeline-real.png)
 
-Vista: [preview HTML](/previews/v3.91-pipeline-real.html)
+Vista: [preview HTML](/previews/v3.92-pipeline-real.html)
+
+## v3.91 — 2026-08-28
+
+**El video que se aprueba es el que se publica.**
+
+- Al aprobar, queda guardado **cuál** archivo se aprobó. Antes la aprobación
+  apuntaba a la idea y, al publicar, el sistema volvía a buscar "el corte más
+  nuevo": si el editor subía otro después de aprobar, se publicaba ese sin que
+  nadie lo hubiera visto.
+- Si el archivo aprobado se archiva o desaparece, ya no se publica otro en su
+  lugar: la publicación se detiene y avisa.
+- Subir un corte nuevo sobre un video ya aprobado (y aún sin publicar) lo
+  devuelve a **por aprobar**. Lo ya publicado no se toca.
+- Pedir cambios borra la aprobación anterior.
 
 ## v3.90 — 2026-08-28
 
