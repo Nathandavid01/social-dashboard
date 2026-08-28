@@ -15,6 +15,7 @@ import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
 import { QcProgressDots } from '@/components/video-analysis/qc-progress-dots'
 import { ApprovalButton } from '@/components/produccion/approval-button'
+import { currentEditedVideoId } from '@/lib/utils/current-edited-video'
 import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import { ReviewLinkPanel } from '@/components/review/review-link-panel'
 import type { SocialPlatform } from '@/lib/supabase/types'
@@ -75,9 +76,7 @@ export function VideoWorkCard({
   // The "vigente" edited cut — same criterion as getVideoAnalysis: the most
   // recent uploaded edited file, not the first in the array. Feeds the scene
   // strip + QC dots at the top of the card (once per video, above the files).
-  const currentEditedId = [...video.videos.edited]
-    .filter((v) => v.status === 'uploaded')
-    .sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))[0]?.id
+  const currentEditedId = currentEditedVideoId(video.videos.edited)
 
   // published_at also suppresses the badge (the auto-post path may set it without
   // flipping status to 'publicada').
@@ -166,7 +165,7 @@ export function VideoWorkCard({
           vigente — antes de la lista de archivos, y solo una vez por video. */}
       <div className="flex flex-col gap-2">
         {currentEditedId && <VideoSceneStrip videoId={currentEditedId} />}
-        <QcProgressDots ideaId={video.id} videoId={currentEditedId} />
+        <QcProgressDots ideaId={video.id} videoId={currentEditedId ?? undefined} />
       </div>
 
       {/* 1) el video — lo primero: súbelo */}
@@ -235,6 +234,7 @@ export function VideoWorkCard({
             clientName={clientName}
             clientLogoUrl={clientLogoUrl}
             ideaTitle={video.title}
+            videoFileId={currentEditedId}
           />
           {video.approval_status === 'approved' && !(video.published_at || video.status === 'publicada') && (
             <PublishToMetricoolButton key={video.id} ideaId={video.id} metricoolPostId={video.metricool_post_id} />

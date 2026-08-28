@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ApprovalButton } from '@/components/produccion/approval-button'
+import { currentEditedVideoId } from '@/lib/utils/current-edited-video'
 import { PublishToMetricoolButton } from '@/components/produccion/publish-metricool-button'
 import { computeIdeaProgress } from '@/lib/utils/idea-progress'
 import type {
@@ -169,6 +170,7 @@ export function VideoPipelineRow({
             clientName={clientName}
             clientLogoUrl={clientLogoUrl}
             ideaTitle={video.title}
+            videoFileId={currentEditedVideoId(video.videos.edited)}
           />
           {video.approval_status === 'approved' && (
             <PublishToMetricoolButton
