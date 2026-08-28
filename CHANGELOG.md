@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.90 — 2026-08-28
+
+**Los videos crudos ya se ven, y se cerró un agujero de permisos.**
+
+- Cada crudo que se sube genera su carátula, así el banco de video se ve por
+  imagen y no por nombre de archivo. Antes solo la generaban los editados.
+- Sacar esa carátula cuesta 5 fotogramas en vez de 240: no dispara el análisis
+  de IA, que es del corte final y se cobra por fotograma.
+- **Seguridad:** en Producción, cualquiera con sesión podía reasignarle el
+  trabajo a otro editor. Ahora hace falta el mismo permiso que ya pedía la otra
+  pantalla de asignación.
+- Por dentro: el chequeo de tipos del proyecto estaba roto y con él 16 pruebas
+  del flujo de video. Quedó verde otra vez (2618 pruebas).
+
 ## v3.89 — 2026-08-25
 
 **Historial de pipeline: carátula y fecha con hora.**
