@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.92 — 2026-08-28
+
+**El tablero deja de dar por publicado lo que nunca salió.**
+
+- Al revisar contra Metricool, cada envío cae ahora en un resultado claro:
+  **publicado**, **esperando su fecha**, **falló una red** o **el post ya no
+  existe**. Antes solo se reconocía "publicado" y todo lo demás se quedaba en
+  Producción para siempre.
+- La revisión ya no se limita a los últimos 45 días: lo que quedó atrás deja
+  de ser invisible, y los posts programados a futuro también se ven.
+- Si Metricool no responde para alguna marca, esos envíos quedan como
+  *sin comprobar* — nunca se dan por perdidos por un fallo de conexión.
+- **Hallazgo al aplicarlo (28-ago):** de 67 envíos que el tablero daba por
+  mandados, **58 ya no existen en Metricool y 9 fallaron al publicar**.
+  Ninguno estaba esperando: ninguno salió.
+
 ## v3.91 — 2026-08-28
 
 **El video que se aprueba es el que se publica.**
