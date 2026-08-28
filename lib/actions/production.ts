@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { requirePermission } from '@/lib/auth/server'
+import { currentUserHas, requirePermission } from '@/lib/auth/server'
 import type { ProductionContentType, ProductionPriority, ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 import { postingDaysFromIsoWeekdays } from '@/lib/utils/posting-days-sot'
 
@@ -301,6 +301,12 @@ export async function updateTaskNotes(taskId: string, notes: string, reviewNotes
 }
 
 export async function reassignTask(taskId: string, assignedToId: string | null) {
+  // Escribe la MISMA columna que `reassignVideo` (production_tasks.assigned_to_id),
+  // así que pasa por el mismo permiso: sin esto, cualquiera con sesión podía
+  // moverle el trabajo a otro editor desde /produccion.
+  if (!(await currentUserHas('planning.assign'))) {
+    return { error: 'No tienes permiso para reasignar tareas.' }
+  }
   const supabase = await createClient()
   const { error } = await supabase
     .from('production_tasks')

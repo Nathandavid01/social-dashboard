@@ -92,6 +92,8 @@ export interface ContentIdeaVideo {
   uploaded_by: string | null
   status: ContentIdeaVideoStatus
   error_message: string | null
+  /** Claves en R2 de la tira de 5 escenas (migración 0062). Ausente en los selects parciales. */
+  thumb_keys?: string[] | null
   uploaded_at: string
   updated_at: string
   /** Joined uploader profile when the query requests it. */
