@@ -17,7 +17,7 @@
  * vez de fps — ver `video-scene-strip.tsx`.
  */
 import {
-  frameTimestamps, scaleDimensions, bufferCoversDuration, splitTimestampsContiguous,
+  frameTimestamps, evenTimestamps, scaleDimensions, bufferCoversDuration, splitTimestampsContiguous,
   luminanceFingerprint,
   FRAME_FPS, FRAME_HARD_MAX, FRAME_JPEG_QUALITY, FRAME_MAX_SIDE, FRAME_EXTRACT_WORKERS,
 } from './video-frames'
@@ -211,7 +211,10 @@ export interface ExtractedFrames {
   fingerprints?: { t: number; fingerprint: number[] }[]
 }
 
-async function captureFromSrc(src: string, opts: { waitForBuffer: boolean }): Promise<ExtractedFrames> {
+async function captureFromSrc(
+  src: string,
+  opts: { waitForBuffer: boolean; frameCount?: number },
+): Promise<ExtractedFrames> {
   const fingerprints: { t: number; fingerprint: number[] }[] = []
   const createVideo = () => {
     const video = document.createElement('video')
@@ -222,7 +225,9 @@ async function captureFromSrc(src: string, opts: { waitForBuffer: boolean }): Pr
     return video
   }
   const result = await extractFramesInParallel(createVideo, {
-    timestampsFor: (duration) => frameTimestamps(duration, FRAME_FPS, FRAME_HARD_MAX),
+    timestampsFor: (duration) =>
+      // `frameCount` es el camino barato de la carátula: 5 seeks en vez de 240.
+      opts.frameCount ? evenTimestamps(duration, opts.frameCount) : frameTimestamps(duration, FRAME_FPS, FRAME_HARD_MAX),
     waitForBuffer: opts.waitForBuffer,
     onFrame: ({ video, width, height, t }) => {
       const canvas = document.createElement('canvas')
@@ -245,10 +250,10 @@ async function captureFromSrc(src: string, opts: { waitForBuffer: boolean }): Pr
 }
 
 /** Extrae frames de un `File` local (el editor, en el momento de subir). */
-export async function extractVideoFrames(file: File): Promise<ExtractedFrames> {
+export async function extractVideoFrames(file: File, frameCount?: number): Promise<ExtractedFrames> {
   const url = URL.createObjectURL(file)
   try {
-    return await captureFromSrc(url, { waitForBuffer: false })
+    return await captureFromSrc(url, { waitForBuffer: false, frameCount })
   } finally {
     URL.revokeObjectURL(url)
   }

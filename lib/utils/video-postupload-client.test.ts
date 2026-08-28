@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { processUploadedVideo, type ProcessUploadedVideoDeps } from './video-postupload-client'
+import { generateVideoThumbs, processUploadedVideo, type ProcessUploadedVideoDeps } from './video-postupload-client'
 import { FRAME_CHUNK_SIZE } from './video-frames'
+import { THUMB_COUNT } from './video-thumbs'
 
 const file = new File(['x'], 'v.mp4', { type: 'video/mp4' })
 const frames8 = Array.from({ length: 8 }, (_, i) => `data:image/jpeg;base64,F${i}`)
@@ -133,5 +134,48 @@ describe('processUploadedVideo', () => {
     } finally {
       global.fetch = originalFetch
     }
+  })
+})
+
+/**
+ * El banco de crudos se ve por su carátula. Antes de esto la tira solo se
+ * generaba para `edited`, así que los crudos salían en gris.
+ */
+describe('generateVideoThumbs — carátula del crudo', () => {
+  it('sube y registra la tira sin disparar el QC IA', async () => {
+    const deps = makeDeps()
+    await generateVideoThumbs('vid-raw', file, deps)
+
+    expect(deps.putThumb).toHaveBeenCalledTimes(5)
+    expect(deps.register).toHaveBeenCalledWith('vid-raw', ['k0', 'k1', 'k2', 'k3', 'k4'])
+    // El QC IA es del corte final y cuesta dinero: en un crudo no se dispara.
+    expect(deps.post).not.toHaveBeenCalled()
+  })
+
+  it('pide solo los fotogramas de la tira, no los 240 del análisis', async () => {
+    const deps = makeDeps()
+    await generateVideoThumbs('vid-raw', file, deps)
+    expect(deps.extract).toHaveBeenCalledTimes(1)
+    expect(deps.extract).toHaveBeenCalledWith(file, THUMB_COUNT)
+  })
+
+  it('un video que el navegador no puede decodificar no rompe la subida', async () => {
+    const deps = makeDeps({ extract: vi.fn().mockRejectedValue(new Error('decode')) })
+    await expect(generateVideoThumbs('vid-raw', file, deps)).resolves.toBeUndefined()
+    expect(deps.putThumb).not.toHaveBeenCalled()
+    expect(deps.register).not.toHaveBeenCalled()
+  })
+
+  it('si R2 rechaza un PUT no registra ninguna key (todo o nada)', async () => {
+    const deps = makeDeps({ putThumb: vi.fn().mockRejectedValue(new Error('R2 403')) })
+    await expect(generateVideoThumbs('vid-raw', file, deps)).resolves.toBeUndefined()
+    expect(deps.register).not.toHaveBeenCalled()
+  })
+
+  it('sin fotogramas no llama a R2', async () => {
+    const deps = makeDeps({ extract: vi.fn().mockResolvedValue({ frames: [], timestamps: [] }) })
+    await generateVideoThumbs('vid-raw', file, deps)
+    expect(deps.getUploadUrls).not.toHaveBeenCalled()
+    expect(deps.register).not.toHaveBeenCalled()
   })
 })

@@ -28,6 +28,7 @@ vi.mock('@/lib/actions/multipart-upload', () => ({
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn(async () => {}),
+  generateVideoThumbs: vi.fn(async () => {}),
 }))
 
 const putBlobMock = vi.fn(async (_url: string, _blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void; signal?: AbortSignal }) => {
@@ -40,7 +41,7 @@ import { useUploadStore } from './upload-store'
 import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { startMultipartUpload, completeMultipartUpload, abortMultipartUpload } from '@/lib/actions/multipart-upload'
-import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { generateVideoThumbs, processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { PART_SIZE_BYTES } from '@/lib/utils/upload-parts'
 
 function smallFile(name = 'clip.mp4', bytes = 1024): File {
@@ -84,6 +85,42 @@ describe('upload-store — small file (single PUT)', () => {
     )
     expect(vi.mocked(registerR2Video)).toHaveBeenCalledTimes(1)
     expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('video-1', file)
+  })
+
+  it('un crudo genera su carátula, y no el QC IA', async () => {
+    // El banco de video se ve por la carátula del crudo; el QC IA es del corte
+    // final y se cobra por fotograma.
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(vi.mocked(generateVideoThumbs)).toHaveBeenCalledWith('video-1', file)
+    expect(vi.mocked(processUploadedVideo)).not.toHaveBeenCalled()
+  })
+
+  it('el b-roll también trae carátula', async () => {
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'broll', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+    expect(vi.mocked(generateVideoThumbs)).toHaveBeenCalledWith('video-1', file)
+  })
+
+  it('un editado sigue yendo al QC IA, no a la carátula sola', async () => {
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+    expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('video-1', file)
+    expect(vi.mocked(generateVideoThumbs)).not.toHaveBeenCalled()
+  })
+
+  it('si la carátula del crudo falla, la subida igual queda lista', async () => {
+    vi.mocked(generateVideoThumbs).mockRejectedValueOnce(new Error('sin decodificador'))
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(item.pct).toBe(100)
   })
 
   it('el dock y el registro usan el título de la idea, no IMG_8841', async () => {
