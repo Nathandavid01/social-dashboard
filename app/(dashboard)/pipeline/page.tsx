@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { shouldPlanForClient, planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
+import { getPipelineTotals } from '@/lib/utils/content-pipeline'
+import { computeRunway } from '@/lib/utils/content-runway'
 import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
@@ -21,7 +23,7 @@ export default async function PipelinePage() {
   await requirePermission('pipeline.read')
   const supabase = await createClient()
 
-  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId] = await Promise.all([
+  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId, pipelineTotals] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
@@ -33,6 +35,7 @@ export default async function PipelinePage() {
     supabase.from('profiles').select('id, full_name, email, role, status').eq('status', 'active'),
     getEffectiveRole(),
     getEffectiveUserId(),
+    getPipelineTotals(),
   ])
 
   const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId })
@@ -45,6 +48,19 @@ export default async function PipelinePage() {
   const visibleProfiles = canSeeAll
     ? (teamProfiles ?? [])
     : (teamProfiles ?? []).filter((profile) => profile.id === userId)
+  const clientRunway = Object.fromEntries(
+    pipelineTotals.perClient
+      .filter((client) => canSeeAll || visibleClientIds.has(client.clientId))
+      .map((client) => [
+        client.clientId,
+        computeRunway({
+          ideas: client.ideas,
+          porEditar: client.porEditar,
+          porPublicar: client.porPublicar,
+          weeklyCadence: client.targetSemana,
+        }),
+      ]),
+  )
   const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
   const clientCadence: Record<string, ClientCadence> = Object.fromEntries(
     activeClients.map((c) => [
@@ -97,6 +113,7 @@ export default async function PipelinePage() {
       teamMembers={teamMembers}
       clientLogos={clientLogos}
       clientColors={clientColors}
+      clientRunway={clientRunway}
       bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
       canSeeAll={canSeeAll}
     />

@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   role: vi.fn(),
   userId: vi.fn(),
   ideas: vi.fn(),
+  pipelineTotals: vi.fn(),
   contentBoard: vi.fn(() => null),
 }))
 
@@ -38,6 +39,7 @@ vi.mock('@/lib/auth/server', () => ({
   getEffectiveUserId: () => mocks.userId(),
 }))
 vi.mock('@/lib/actions/content-ideas', () => ({ getIdeacionPipeline: () => mocks.ideas() }))
+vi.mock('@/lib/utils/content-pipeline', () => ({ getPipelineTotals: () => mocks.pipelineTotals() }))
 vi.mock('@/lib/actions/client-pictures', () => ({ getMetricoolPicturesByBlogId: vi.fn(async () => ({})) }))
 vi.mock('@/lib/utils/workflow-progress', () => ({ getWorkflowSettings: vi.fn(async () => ({ pipeline_step_assignees: {} })) }))
 vi.mock('@/lib/supabase/server', () => ({
@@ -65,6 +67,13 @@ beforeEach(() => {
     idea('mia', 'c1', 'ed-1'),
     idea('ajena', 'c2', 'ed-2'),
   ])
+  mocks.pipelineTotals.mockResolvedValue({
+    totals: {},
+    perClient: [
+      { clientId: 'c1', ideas: 12, porEditar: 12, porPublicar: 12, targetSemana: 3 },
+      { clientId: 'c2', ideas: 3, porEditar: 1, porPublicar: 2, targetSemana: 3 },
+    ],
+  })
 })
 
 describe('PipelinePage access scope', () => {
@@ -76,6 +85,8 @@ describe('PipelinePage access scope', () => {
     expect(result.props.teamMembers).toEqual([{ id: 'ed-1', name: 'Editora Uno' }])
     expect(result.props.bankAdmins).toEqual([])
     expect(result.props.plannedClients).toEqual([])
+    expect(Object.keys(result.props.clientRunway)).toEqual(['c1'])
+    expect(result.props.clientRunway.c1).toMatchObject({ status: 'ok', minWeeks: 4 })
     expect(result.props.canSeeAll).toBe(false)
   })
 
@@ -89,6 +100,7 @@ describe('PipelinePage access scope', () => {
     expect(result.props.allClients).toHaveLength(2)
     expect(result.props.teamMembers).toHaveLength(3)
     expect(result.props.bankAdmins.map((admin: { id: string }) => admin.id)).toEqual(['own-1'])
+    expect(Object.keys(result.props.clientRunway).sort()).toEqual(['c1', 'c2'])
     expect(result.props.canSeeAll).toBe(true)
   })
 })

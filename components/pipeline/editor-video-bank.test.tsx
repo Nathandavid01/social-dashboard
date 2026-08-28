@@ -43,13 +43,45 @@ vi.mock('@/lib/actions/content-ideas', () => ({ reassignVideo: actionMocks.reass
 vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2DownloadUrl: vi.fn() }))
 vi.mock('@/lib/actions/video-preview', () => ({ getVideoPreviewUrl: vi.fn() }))
 vi.mock('@/lib/actions/video-thumbs', () => ({
-  getVideoThumbViewUrls: vi.fn(() => new Promise(() => {})),
+  getPipelineVideoThumbViewUrls: vi.fn(() => new Promise(() => {})),
 }))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
 }))
 
 describe('EditorVideoBank', () => {
+  it('dice si cada cliente va adelantado o atrasado según su runway', () => {
+    const bank: VideoBank = {
+      totals: { videos: 2, clients: 2, unassigned: 0 },
+      rails: [
+        {
+          clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
+          postingDays: [1, 3, 5], videoCount: 1, editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea',
+          videos: [{ videoId: 'v1', ideaId: 'i1', productionTaskId: null, title: 'Video uno', kind: 'raw', durationSec: null, thumbKeys: [], hasCover: false, recordedBy: null, uploadedAt: null, clientId: 'c1', clientName: 'Lucky Pet', editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea' }],
+        },
+        {
+          clientId: 'c2', clientName: 'Speedy Net', logoUrl: null, cardColor: '#835CF0',
+          postingDays: [1, 3, 5], videoCount: 1, editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea',
+          videos: [{ videoId: 'v2', ideaId: 'i2', productionTaskId: null, title: 'Video dos', kind: 'raw', durationSec: null, thumbKeys: [], hasCover: false, recordedBy: null, uploadedAt: null, clientId: 'c2', clientName: 'Speedy Net', editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea' }],
+        },
+      ],
+    }
+
+    render(
+      <EditorVideoBank
+        rows={[]}
+        videoBank={bank}
+        clientRunway={{
+          c1: { ideasWeeks: 5, recordedWeeks: 4, editedWeeks: 4, minWeeks: 4, status: 'ok' },
+          c2: { ideasWeeks: 3, recordedWeeks: 1, editedWeeks: 2, minWeeks: 1, status: 'risk' },
+        }}
+      />,
+    )
+
+    expect(screen.getByTestId('client-runway-c1')).toHaveTextContent('Adelantado · 4 sem')
+    expect(screen.getByTestId('client-runway-c2')).toHaveTextContent('Atrasado · 1 sem')
+  })
+
   it('presenta los dos espacios, el banco visual por cliente y el ritmo como en el preview v3.90', () => {
     const bank: VideoBank = {
       totals: { videos: 1, clients: 1, unassigned: 0 },

@@ -13,6 +13,7 @@ import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { EDITOR_WIP_LIMIT, type BankAdmin, type EditorBankClip, type EditorBankFile, type EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pipeline/editor-pace'
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
+import type { Runway, RunwayStatus } from '@/lib/utils/content-runway'
 import { formatDateShortES } from '@/lib/utils/deadlines'
 
 type TeamMember = { id: string; name: string }
@@ -23,12 +24,14 @@ export function EditorVideoBank({
   videoBank,
   paces = [],
   teamMembers = [],
+  clientRunway = {},
 }: {
   rows: EditorBankRow[]
   admins?: BankAdmin[]
   videoBank?: VideoBank
   paces?: EditorPace[]
   teamMembers?: TeamMember[]
+  clientRunway?: Record<string, Runway>
 }) {
   const canOpenProfile = useHasPermission('team.read')
   const teamPace = teamMedianDays(paces)
@@ -44,7 +47,7 @@ export function EditorVideoBank({
           </div>
         )}
       </section>
-      {videoBank && <VideoBankLibrary bank={videoBank} teamMembers={teamMembers} />}
+      {videoBank && <VideoBankLibrary bank={videoBank} teamMembers={teamMembers} clientRunway={clientRunway} />}
       {paces.length > 0 && <EditorPaceTable rows={rows} paces={paces} teamMembers={teamMembers} />}
       {admins.length > 0 && <AdminStrip admins={admins} />}
     </div>
@@ -111,16 +114,30 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark }: { 
   )
 }
 
-function VideoBankLibrary({ bank, teamMembers }: { bank: VideoBank; teamMembers: TeamMember[] }) {
+function VideoBankLibrary({ bank, teamMembers, clientRunway }: { bank: VideoBank; teamMembers: TeamMember[]; clientRunway: Record<string, Runway> }) {
   const [onlyUnassigned, setOnlyUnassigned] = useState(false)
   const rails = onlyUnassigned ? bank.rails.filter((rail) => !rail.editorId) : bank.rails
   return (
     <section aria-labelledby="raw-bank-title">
       <SectionHeader id="raw-bank-title" title="Banco de videos crudos" description="Cada crudo se ve como una carátula, agrupado por cliente y con el editor que lo tiene asignado." />
       <div className="mb-3 flex flex-wrap items-center gap-2"><button type="button" className="rounded-md border border-[#c8a34a]/40 bg-[#c8a34a]/10 px-2.5 py-1 text-[10px] font-medium text-[#d6b55f]">Por cliente</button><button type="button" aria-pressed={onlyUnassigned} onClick={() => setOnlyUnassigned((value) => !value)} className="rounded-md border border-white/10 px-2.5 py-1 text-[10px] text-slate-400 hover:text-white">Solo sin asignar {bank.totals.unassigned}</button><p className="ml-auto text-[10px] tabular-nums text-slate-500">{bank.totals.videos} crudos · {bank.totals.clients} clientes · {bank.totals.unassigned} sin editor</p></div>
-      <div className="space-y-6">{rails.map((rail) => <section key={rail.clientId} className="min-w-0"><header className="mb-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2"><span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: rail.cardColor }} /><ClientLogo name={rail.clientName} logoUrl={rail.logoUrl} className="h-6 w-6 text-[8px]" /><h3 className="truncate text-xs font-semibold text-white">{rail.clientName}</h3><span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-400">{rail.videoCount} videos</span>{rail.postingDays.length > 0 && <span className="hidden text-[9px] text-[#c8a34a] sm:inline">Publica {formatPostingDays(rail.postingDays)}</span>}</div><p className="text-[9px] text-slate-500">{rail.editorName ? <>Le tocan a <span className="font-medium text-slate-300">{rail.editorName}</span></> : 'Sin editor asignado'}</p></header><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rail.videos.map((video) => <RawVideoCard key={video.videoId} video={video} teamMembers={teamMembers} color={rail.cardColor} />)}</div></section>)}</div>
+      <div className="space-y-6">{rails.map((rail) => <section key={rail.clientId} className="min-w-0"><header className="mb-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-2"><span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: rail.cardColor }} /><ClientLogo name={rail.clientName} logoUrl={rail.logoUrl} className="h-6 w-6 text-[8px]" /><h3 className="truncate text-xs font-semibold text-white">{rail.clientName}</h3><ClientRunwayBadge clientId={rail.clientId} runway={clientRunway[rail.clientId]} /><span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-400">{rail.videoCount} videos</span>{rail.postingDays.length > 0 && <span className="hidden text-[9px] text-[#c8a34a] sm:inline">Publica {formatPostingDays(rail.postingDays)}</span>}</div><p className="text-[9px] text-slate-500">{rail.editorName ? <>Le tocan a <span className="font-medium text-slate-300">{rail.editorName}</span></> : 'Sin editor asignado'}</p></header><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rail.videos.map((video) => <RawVideoCard key={video.videoId} video={video} teamMembers={teamMembers} color={rail.cardColor} />)}</div></section>)}</div>
     </section>
   )
+}
+
+const RUNWAY_TONE: Record<RunwayStatus, { label: string; className: string }> = {
+  ok: { label: 'Adelantado', className: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300' },
+  warn: { label: 'Atrasado', className: 'border-amber-400/25 bg-amber-400/10 text-amber-300' },
+  risk: { label: 'Atrasado', className: 'border-rose-400/25 bg-rose-400/10 text-rose-300' },
+  no_cadence: { label: 'Sin cadencia', className: 'border-white/10 bg-white/5 text-slate-400' },
+}
+
+function ClientRunwayBadge({ clientId, runway }: { clientId: string; runway?: Runway }) {
+  if (!runway) return null
+  const tone = RUNWAY_TONE[runway.status]
+  const weeks = runway.minWeeks == null ? '' : ` · ${runway.minWeeks} sem`
+  return <span data-testid={`client-runway-${clientId}`} title="Colchón de la etapa más débil contra la meta de 4 semanas" className={`rounded-md border px-1.5 py-0.5 text-[9px] font-semibold ${tone.className}`}>{tone.label}{weeks}</span>
 }
 
 function RawVideoCard({ video, teamMembers, color }: { video: BankVideoTile; teamMembers: TeamMember[]; color: string }) {

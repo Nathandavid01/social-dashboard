@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.95 — 2026-08-28
+
+**Pipeline dice si cada cliente va adelantado o atrasado.**
+
+- Junto al nombre del cliente aparece su estado y las semanas de contenido que
+  tiene en la etapa más débil del flujo.
+- **Adelantado** significa que Ideas, Grabado y Editado cubren la meta de cuatro
+  semanas; **Atrasado** señala que alguna etapa quedó por debajo.
+- El cálculo reutiliza el Runway y la cadencia real del cliente. Cada editor
+  recibe únicamente el resumen de sus propios clientes.
+
+![Estado adelantado o atrasado por cliente en Pipeline](/changelog/v3.95-pipeline-runway-cliente.png)
+
+Vista: [preview HTML](/previews/v3.95-pipeline-runway-cliente.html)
+
 ## v3.94 — 2026-08-28
 
 **Cada editor ve solamente su pipeline; los administradores conservan la vista completa.**

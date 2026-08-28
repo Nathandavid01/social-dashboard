@@ -25,6 +25,7 @@ import { buildEditorPace } from '@/lib/pipeline/editor-pace'
 import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
+import type { Runway } from '@/lib/utils/content-runway'
 
 type Idea = IdeaWithPipeline
 
@@ -65,6 +66,8 @@ export function ContentPipelineBoard(props: {
   clientLogos?: Record<string, string | null>
   /** brand_colors.primary por cliente (opcional; si falta, hash del id). */
   clientColors?: Record<string, string | null>
+  /** Estado de colchón por cliente, calculado en servidor contra su cadencia. */
+  clientRunway?: Record<string, Runway>
   /** Owner y supervisor — sección fija en el Banco. */
   bankAdmins?: BankAdmin[]
   /** Solo owner/supervisor reciben navegación, filtros y datos del pipeline global. */
@@ -86,6 +89,7 @@ function ContentPipelineBoardInner({
   teamMembers = [],
   clientLogos = {},
   clientColors = {},
+  clientRunway = {},
   bankAdmins = [],
   canSeeAll = true,
 }: {
@@ -96,6 +100,7 @@ function ContentPipelineBoardInner({
   teamMembers?: { id: string; name: string }[]
   clientLogos?: Record<string, string | null>
   clientColors?: Record<string, string | null>
+  clientRunway?: Record<string, Runway>
   bankAdmins?: BankAdmin[]
   canSeeAll?: boolean
 }) {
@@ -475,6 +480,7 @@ function ContentPipelineBoardInner({
           videoBank={visualVideoBank}
           paces={editorPaces}
           teamMembers={teamMembers}
+          clientRunway={clientRunway}
         />
       ) : (
       <div
