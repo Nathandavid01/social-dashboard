@@ -9,6 +9,7 @@ import {
   groupEditorVideoBank,
   isIdeaApproved,
   prepareIdeasForEditorBank,
+  listBankAdmins,
 } from './editor-video-bank'
 
 function raw(over: Partial<ContentIdeaVideo> = {}): ContentIdeaVideo {
@@ -290,6 +291,139 @@ describe('editor WIP (máximo 2)', () => {
     expect(Array.from(ids)).toEqual(['a', 'b'])
   })
 
+  it('con 5 clientes, los 2 espacios van a los más urgentes (no al más viejo)', () => {
+    const five = [
+      idea({
+        id: 'old-calm',
+        client_id: 'c-calm',
+        created_at: '2026-01-01',
+        deadline: null,
+        client: { id: 'c-calm', name: 'Calm Co', industry: null, logo_url: null },
+        videos: [raw({ id: 'v-calm', idea_id: 'old-calm' })],
+      }),
+      idea({
+        id: 'mid',
+        client_id: 'c-mid',
+        created_at: '2026-02-01',
+        deadline: '2026-09-15',
+        client: { id: 'c-mid', name: 'Mid Co', industry: null, logo_url: null },
+        videos: [raw({ id: 'v-mid', idea_id: 'mid' })],
+      }),
+      idea({
+        id: 'soon',
+        client_id: 'c-soon',
+        created_at: '2026-03-01',
+        deadline: '2026-08-26',
+        client: { id: 'c-soon', name: 'Soon Co', industry: null, logo_url: null },
+        videos: [raw({ id: 'v-soon', idea_id: 'soon' })],
+      }),
+      idea({
+        id: 'late',
+        client_id: 'c-late',
+        created_at: '2026-04-01',
+        deadline: '2026-08-20',
+        client: { id: 'c-late', name: 'Late Co', industry: null, logo_url: null },
+        videos: [raw({ id: 'v-late', idea_id: 'late' })],
+      }),
+      idea({
+        id: 'other',
+        client_id: 'c-other',
+        created_at: '2026-05-01',
+        deadline: null,
+        client: { id: 'c-other', name: 'Other Co', industry: null, logo_url: null },
+        videos: [raw({ id: 'v-other', idea_id: 'other' })],
+      }),
+    ]
+    const ids = editorWipIdeaIds(five, 'ed-maria', '2026-08-25')
+    expect(Array.from(ids)).toEqual(['late', 'soon'])
+  })
+
+  it('cuenta cuántos quedan en el banco y quién grabó', () => {
+    const rows = groupEditorVideoBank(
+      [
+        idea({
+          id: 'a',
+          hook: 'A las 5:45 huele a pan',
+          visual_brief: 'Luz de amanecer',
+          shooting_notes: 'Toma 2',
+          videos: [raw({ id: 'va', uploaded_by: 'vid-1' })],
+          bankQueue: 'active',
+        }),
+        idea({
+          id: 'b',
+          title: 'Segunda',
+          videos: [raw({ id: 'vb', idea_id: 'b' })],
+          bankQueue: 'waiting',
+        }),
+      ],
+      {},
+      {},
+      { 'vid-1': 'Diego Video' },
+    )
+    const client = rows[0].clients[0]
+    expect(client.remainingInBank).toBe(2)
+    expect(client.clips[0].hook).toBe('A las 5:45 huele a pan')
+    expect(client.clips[0].visualBrief).toBe('Luz de amanecer')
+    expect(client.clips[0].recordedBy).toBe('Diego Video')
+    expect(client.clips[0].yours).toBe(true)
+    expect(client.clips[1].yours).toBe(false)
+    expect(rows[0].nextSlots.map((s) => s.ideaId)).toEqual(['a'])
+    expect(rows[0].remainingInBank).toBe(2)
+    expect(rows[0].nowCount).toBe(1)
+    expect(rows[0].inRevision).toBe(0)
+  })
+
+  it('separa banco pendiente, ahora (WIP) y en revisión', () => {
+    const rows = groupEditorVideoBank([
+      idea({ id: 'bank', status: 'grabada', approval_status: 'pending', bankQueue: 'waiting' }),
+      idea({
+        id: 'now',
+        title: 'Ahora',
+        status: 'grabada',
+        approval_status: 'pending',
+        bankQueue: 'active',
+        videos: [raw({ id: 'vn', idea_id: 'now' })],
+      }),
+      idea({
+        id: 'rev',
+        title: 'En corte',
+        status: 'producida',
+        approval_status: 'submitted',
+        videos: [raw({ id: 'vr', idea_id: 'rev' })],
+      }),
+    ])
+    expect(rows[0].remainingInBank).toBe(2)
+    expect(rows[0].nowCount).toBe(1)
+    expect(rows[0].inRevision).toBe(1)
+    expect(rows[0].clients[0].inRevision).toBe(1)
+    expect(rows[0].clients[0].remainingInBank).toBe(2)
+  })
+
+  it('lleva deadline, lugar y días de posting de la idea On Site', () => {
+    const rows = groupEditorVideoBank([
+      idea({
+        deadline: '2026-08-20',
+        recording_date: '2026-08-19',
+        content_type: 'R',
+        client: {
+          id: 'c1',
+          name: 'Blue Chiropractic',
+          industry: null,
+          logo_url: null,
+          posting_days: [1, 3, 5],
+        } as IdeaWithPipeline['client'],
+        recording_session: { status: 'completed', location: 'Oficina', location_address: 'Hato Rey' },
+        bankQueue: 'active',
+      } as Partial<IdeaWithPipeline>),
+    ])
+    const clip = rows[0].clients[0].clips[0]
+    expect(clip.deadline).toBe('2026-08-20')
+    expect(clip.location).toBe('Oficina')
+    expect(clip.contentType).toBe('R')
+    expect(clip.yours).toBe(true)
+    expect(rows[0].clients[0].postingDays).toEqual([1, 3, 5])
+  })
+
   it('si una se aprueba, entra la siguiente', () => {
     const after = [
       idea({ id: 'a', created_at: '2026-08-01', approval_status: 'approved', videos: [raw({ id: 'va', idea_id: 'a' })] }),
@@ -322,5 +456,19 @@ describe('editor WIP (máximo 2)', () => {
     const clips = rows[0].clients[0].clips
     expect(clips.filter((c) => c.queue === 'active')).toHaveLength(2)
     expect(clips.find((c) => c.ideaId === 'c')).toMatchObject({ queue: 'waiting', files: [] })
+  })
+})
+
+describe('listBankAdmins', () => {
+  it('solo owner y supervisor activos, owner primero', () => {
+    const admins = listBankAdmins([
+      { id: 'e1', full_name: 'María', email: 'maria@nate.media', role: 'editor', status: 'active' },
+      { id: 's1', full_name: 'Ana', email: 'ana@nate.media', role: 'supervisor', status: 'active' },
+      { id: 'o1', full_name: 'Eric', email: 'eric@nate.media', role: 'owner', status: 'active' },
+      { id: 'o2', full_name: 'Viejo', email: 'old@nate.media', role: 'owner', status: 'inactive' },
+    ])
+    expect(admins.map((a) => a.id)).toEqual(['o1', 's1'])
+    expect(admins[0]).toMatchObject({ name: 'Eric', email: 'eric@nate.media', role: 'owner', roleLabel: 'Owner' })
+    expect(admins[1]).toMatchObject({ name: 'Ana', role: 'supervisor', roleLabel: 'Supervisor' })
   })
 })

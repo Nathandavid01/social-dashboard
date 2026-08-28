@@ -1,5 +1,5 @@
 import { requirePermission, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
-import { prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
+import { listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
@@ -30,7 +30,7 @@ export default async function PipelinePage() {
       .order('name'),
     getMetricoolPicturesByBlogId(),
     getWorkflowSettings(),
-    supabase.from('profiles').select('id, full_name').eq('status', 'active'),
+    supabase.from('profiles').select('id, full_name, email, role, status').eq('status', 'active'),
     getEffectiveRole(),
     getEffectiveUserId(),
   ])
@@ -87,6 +87,7 @@ export default async function PipelinePage() {
       teamMembers={teamMembers}
       clientLogos={clientLogos}
       clientColors={clientColors}
+      bankAdmins={listBankAdmins(teamProfiles ?? [])}
     />
   )
 }

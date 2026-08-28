@@ -15,7 +15,7 @@ vi.mock('@/lib/actions/content-ideas', () => ({
   getIdeacionPipeline: () => getIdeacionPipeline(),
 }))
 
-import { getEditorVideoBank } from './pipeline-bank'
+import { getEditorPipelineHistory, getEditorVideoBank } from './pipeline-bank'
 
 function idea(id: string, editorId: string): IdeaWithPipeline {
   return {
@@ -91,5 +91,20 @@ describe('getEditorVideoBank', () => {
     const clips = res.rows?.[0].clients[0].clips ?? []
     expect(clips.filter((c) => c.queue === 'active')).toHaveLength(2)
     expect(clips.find((c) => c.ideaId === 'tres')).toMatchObject({ queue: 'waiting', files: [] })
+  })
+})
+
+describe('getEditorPipelineHistory', () => {
+  it('exige team.read y solo devuelve videos de ese editor', async () => {
+    requirePermission.mockRejectedValueOnce(new Error('No autorizado'))
+    const denied = await getEditorPipelineHistory('ed-maria')
+    expect(denied.error).toMatch(/autorizado/i)
+    expect(getIdeacionPipeline).not.toHaveBeenCalled()
+
+    requirePermission.mockResolvedValue(undefined)
+    const res = await getEditorPipelineHistory('ed-maria')
+    expect(requirePermission).toHaveBeenCalledWith('team.read')
+    expect(res.items?.map((i) => i.ideaId)).toEqual(['mia'])
+    expect(res.items?.some((i) => i.ideaId === 'otra')).toBe(false)
   })
 })

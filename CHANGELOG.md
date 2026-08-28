@@ -4,6 +4,42 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.89 — 2026-08-25
+
+**Historial de pipeline: carátula y fecha con hora.**
+
+- Cada video muestra la miniatura (corte, si no crudo o Drive).
+- La fecha es día + hora de Puerto Rico, no solo “18d”.
+
+## v3.88 — 2026-08-25
+
+**Tocar el perfil del editor abre su historial.**
+
+- En el Banco, el nombre de Alexa, Jeander, Johan… lleva a `/team/<id>`.
+- Ahí se ve el historial de pipeline: en corte, banco y aprobados, con días.
+- Sin asignar no tiene perfil.
+
+## v3.87 — 2026-08-25
+
+**Más detalle en el banco por cliente: el documento de toma.**
+
+- Cada video muestra guión, qué grabar, anotaciones, quién grabó, lugar, límite y **Te toca** si es uno de los 2 espacios.
+- La tarjeta del cliente indica los días de posting.
+
+## v3.86 — 2026-08-25
+
+**Banco por editor: ahora, pendientes y revisión, de un vistazo.**
+
+- Cada editor tiene una tarjeta con **Ahora** (2 espacios), **Banco** (pendientes por cliente) y **Revisión**.
+- Los 2 espacios van al cliente más urgente (fecha límite), no al video más viejo.
+
+## v3.85 — 2026-08-24
+
+**En el Banco de video hay una sección Admins.**
+
+- Arriba del banco se ve quién es **owner** y **supervisor** (nombre, correo, rol).
+- No cambia el tope de 2 videos del editor ni quién baja crudo.
+
 ## v3.84 — 2026-08-23
 
 **Cada cliente se ve con su logo y su color, siempre el mismo.**

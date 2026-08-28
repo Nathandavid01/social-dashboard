@@ -7,6 +7,7 @@ import {
   prepareIdeasForEditorBank,
   type EditorBankRow,
 } from '@/lib/pipeline/editor-video-bank'
+import { buildEditorHistory, type EditorHistoryItem } from '@/lib/pipeline/editor-history'
 
 export async function getEditorVideoBank(): Promise<{ rows?: EditorBankRow[]; error?: string }> {
   try {
@@ -29,4 +30,16 @@ export async function getEditorVideoBank(): Promise<{ rows?: EditorBankRow[]; er
       .map((a) => [a.id, a.full_name ?? 'Editor']),
   )
   return { rows: groupEditorVideoBank(visible, names) }
+}
+
+export async function getEditorPipelineHistory(
+  editorId: string,
+): Promise<{ items?: EditorHistoryItem[]; error?: string }> {
+  try {
+    await requirePermission('team.read')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const ideas = await getIdeacionPipeline({ limit: 500 })
+  return { items: buildEditorHistory(ideas, editorId) }
 }

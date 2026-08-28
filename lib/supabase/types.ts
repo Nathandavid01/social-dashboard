@@ -469,6 +469,11 @@ export interface IdeaWithPipeline extends ContentIdea {
   assignee?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
   /** Pipeline banco: el servidor marca lo que está fuera del WIP de 2. */
   bankQueue?: 'active' | 'waiting'
+  recording_session?: {
+    status?: string
+    location?: string | null
+    location_address?: string | null
+  } | null
 }
 
 export type ContentIdeaActivityAction =

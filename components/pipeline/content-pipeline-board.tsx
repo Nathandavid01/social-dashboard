@@ -20,7 +20,7 @@ import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
-import { groupEditorVideoBank, isIdeaApproved } from '@/lib/pipeline/editor-video-bank'
+import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -63,6 +63,8 @@ export function ContentPipelineBoard(props: {
   clientLogos?: Record<string, string | null>
   /** brand_colors.primary por cliente (opcional; si falta, hash del id). */
   clientColors?: Record<string, string | null>
+  /** Owner y supervisor — sección fija en el Banco. */
+  bankAdmins?: BankAdmin[]
 }) {
   // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
   return (
@@ -80,6 +82,7 @@ function ContentPipelineBoardInner({
   teamMembers = [],
   clientLogos = {},
   clientColors = {},
+  bankAdmins = [],
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -88,6 +91,7 @@ function ContentPipelineBoardInner({
   teamMembers?: { id: string; name: string }[]
   clientLogos?: Record<string, string | null>
   clientColors?: Record<string, string | null>
+  bankAdmins?: BankAdmin[]
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -285,7 +289,7 @@ function ContentPipelineBoardInner({
   const bankRows = useMemo(() => {
     const q = search.trim().toLowerCase()
     const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
-    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors })
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors }, names)
       .filter((row) => {
         if (assigneeFilter === 'unassigned') return row.editorId == null
         if (assigneeFilter) return row.editorId === assigneeFilter
@@ -419,7 +423,7 @@ function ContentPipelineBoardInner({
       </div>
 
       {view === 'bank' ? (
-        <EditorVideoBank rows={bankRows} />
+        <EditorVideoBank rows={bankRows} admins={bankAdmins} />
       ) : (
       <div
         ref={scrollRef}
