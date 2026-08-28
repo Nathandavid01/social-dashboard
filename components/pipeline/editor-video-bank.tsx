@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Download, ExternalLink, Loader2, Play, UserRound, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ClientLogo } from '@/components/clients/client-logo'
+import { VideoCover } from '@/components/recording/video-cover'
 import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -137,7 +138,7 @@ function RawVideoCard({ video, teamMembers, color }: { video: BankVideoTile; tea
   }
   return (
     <article data-testid={`raw-video-${video.videoId}`} className="min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#12161a]">
-      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-black" style={{ boxShadow: `inset 0 2px 0 ${color}` }}><VideoSceneStrip videoId={video.videoId} /><span className="absolute right-1.5 top-1.5 rounded bg-black/75 px-1 py-0.5 text-[8px] font-semibold uppercase text-slate-200">{video.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>{video.durationSec != null && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1 py-0.5 text-[9px] tabular-nums text-white">{formatDuration(video.durationSec)}</span>}</div>
+      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-black" style={{ boxShadow: `inset 0 2px 0 ${color}` }}><VideoCover videoId={video.videoId} title={video.title} /><span className="absolute right-1.5 top-1.5 rounded bg-black/75 px-1 py-0.5 text-[8px] font-semibold uppercase text-slate-200">{video.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>{video.durationSec != null && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1 py-0.5 text-[9px] tabular-nums text-white">{formatDuration(video.durationSec)}</span>}</div>
       <div className="p-2.5"><h4 className="truncate text-[11px] font-semibold text-white" title={video.title}>{video.title}</h4><p className="mt-0.5 truncate text-[9px] text-slate-500">{video.recordedBy ? `Grabó ${video.recordedBy}` : 'Sin camarógrafo'}{video.uploadedAt ? ` · ${formatDateShortES(video.uploadedAt)}` : ''}</p><div className="mt-2 flex items-center gap-1.5"><VideoTileActions videoId={video.videoId} />{canAssign && video.productionTaskId ? <select aria-label={`Asignar ${video.title}`} value={assigned} disabled={pending} onChange={(event) => changeEditor(event.target.value)} className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-[9px] text-slate-300 outline-none focus:border-[#c8a34a]/60"><option value="">Sin editor</option>{teamMembers.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select> : <span className="min-w-0 flex-1 truncate text-[9px] text-slate-500">{video.editorName ?? 'Sin editor'}</span>}</div></div>
     </article>
   )

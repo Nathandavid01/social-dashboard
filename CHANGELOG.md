@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.92 — 2026-08-28
+
+**Cada video del banco muestra su carátula en vez de un cuadro oscuro.**
+
+- La tarjeta usa primero la miniatura que se generó al subir el crudo.
+- Los videos anteriores que no tienen miniatura muestran un fotograma del
+  propio archivo, sin obligar al editor a darle play.
+- Si el video todavía está cargando, se ve un estado claro y no un bloque vacío.
+
+![Carátula visible en el banco de videos](/changelog/v3.92-pipeline-caratulas.png)
+
+Vista: [preview HTML](/previews/v3.92-pipeline-caratulas.html)
+
 ## v3.91 — 2026-08-28
 
 **El pipeline diseñado en el preview ya es la pantalla de trabajo.**
