@@ -4,6 +4,7 @@ import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getEffectiveRole, getEffectiveUserId, requirePermission } from '@/lib/auth/server'
 import {
   groupEditorVideoBank,
+  canSeeAllEditorBanks,
   prepareIdeasForEditorBank,
   type EditorBankRow,
 } from '@/lib/pipeline/editor-video-bank'
@@ -39,6 +40,10 @@ export async function getEditorPipelineHistory(
     await requirePermission('team.read')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const [role, userId] = await Promise.all([getEffectiveRole(), getEffectiveUserId()])
+  if (!canSeeAllEditorBanks(role) && editorId !== userId) {
+    return { error: 'Solo administradores pueden ver el historial de otros editores' }
   }
   const ideas = await getIdeacionPipeline({ limit: 500 })
   return { items: buildEditorHistory(ideas, editorId) }

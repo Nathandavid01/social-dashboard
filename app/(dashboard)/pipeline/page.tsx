@@ -1,11 +1,13 @@
 import { requirePermission, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
-import { listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
+import { canSeeAllEditorBanks, listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
 import { shouldPlanForClient, planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
+import { getPipelineTotals } from '@/lib/utils/content-pipeline'
+import { computeRunway } from '@/lib/utils/content-runway'
 import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
@@ -21,7 +23,7 @@ export default async function PipelinePage() {
   await requirePermission('pipeline.read')
   const supabase = await createClient()
 
-  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId] = await Promise.all([
+  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId, pipelineTotals] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
@@ -33,10 +35,32 @@ export default async function PipelinePage() {
     supabase.from('profiles').select('id, full_name, email, role, status').eq('status', 'active'),
     getEffectiveRole(),
     getEffectiveUserId(),
+    getPipelineTotals(),
   ])
 
   const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId })
-  const activeClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
+  const canSeeAll = canSeeAllEditorBanks(role)
+  const visibleClientIds = new Set(ideas.map((idea) => idea.client?.id ?? idea.client_id).filter(Boolean))
+  const allActiveClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
+  const activeClients = canSeeAll
+    ? allActiveClients
+    : allActiveClients.filter((client) => visibleClientIds.has(client.id))
+  const visibleProfiles = canSeeAll
+    ? (teamProfiles ?? [])
+    : (teamProfiles ?? []).filter((profile) => profile.id === userId)
+  const clientRunway = Object.fromEntries(
+    pipelineTotals.perClient
+      .filter((client) => canSeeAll || visibleClientIds.has(client.clientId))
+      .map((client) => [
+        client.clientId,
+        computeRunway({
+          ideas: client.ideas,
+          porEditar: client.porEditar,
+          porPublicar: client.porPublicar,
+          weeklyCadence: client.targetSemana,
+        }),
+      ]),
+  )
   const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
   const clientCadence: Record<string, ClientCadence> = Object.fromEntries(
     activeClients.map((c) => [
@@ -49,17 +73,19 @@ export default async function PipelinePage() {
     ]),
   )
   const profilesById = Object.fromEntries(
-    (teamProfiles ?? []).map((p) => [p.id, p.full_name ?? 'Sin nombre']),
+    visibleProfiles.map((p) => [p.id, p.full_name ?? 'Sin nombre']),
   )
-  const plannedClients = buildPlannedClients(
-    ideas,
-    activeClients,
-    metricoolPics,
-    workflowSettings.pipeline_step_assignees,
-    profilesById,
-  )
+  const plannedClients = canSeeAll
+    ? buildPlannedClients(
+        ideas,
+        activeClients,
+        metricoolPics,
+        workflowSettings.pipeline_step_assignees,
+        profilesById,
+      )
+    : []
 
-  const teamMembers = (teamProfiles ?? []).map((p) => ({
+  const teamMembers = visibleProfiles.map((p) => ({
     id: p.id,
     name: p.full_name ?? 'Sin nombre',
   }))
@@ -87,7 +113,9 @@ export default async function PipelinePage() {
       teamMembers={teamMembers}
       clientLogos={clientLogos}
       clientColors={clientColors}
-      bankAdmins={listBankAdmins(teamProfiles ?? [])}
+      clientRunway={clientRunway}
+      bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
+      canSeeAll={canSeeAll}
     />
   )
 }

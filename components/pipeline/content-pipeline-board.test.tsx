@@ -24,11 +24,10 @@ vi.mock('@/components/auth/role-gate', () => ({
 }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))
-const getBatchVideoPreviewUrls = vi.fn(async (ids: string[]) => ({
-  urls: Object.fromEntries(ids.map((id) => [id, `https://cdn.example/preview/${id}.mp4`])),
-}))
-vi.mock('@/lib/actions/batch-video-previews', () => ({
-  getBatchVideoPreviewUrls: (...a: unknown[]) => getBatchVideoPreviewUrls(...(a as [string[]])),
+vi.mock('@/components/recording/video-cover', () => ({
+  VideoCover: ({ videoId, title }: { videoId: string; title: string }) => (
+    <div data-testid="static-video-cover" data-video-id={videoId}>{title}</div>
+  ),
 }))
 vi.mock('@/components/clients/batch/client-batch-view', () => ({
   ClientBatchView: ({ onClose }: { onClose?: () => void }) => (
@@ -96,6 +95,12 @@ function renderLotes(ui: Parameters<typeof render>[0]) {
 }
 
 describe('ContentPipelineBoard — editor bank (paso 2)', () => {
+  it('el editor no recibe navegación ni filtros del pipeline global', () => {
+    render(<ContentPipelineBoard ideas={[]} canSeeAll={false} />)
+    expect(screen.queryByRole('button', { name: /lotes/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Asignado a')).not.toBeInTheDocument()
+  })
+
   it('abre en el banco y agrupa por editor', () => {
     render(<ContentPipelineBoard ideas={[
       idea({
@@ -241,8 +246,7 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(container.querySelectorAll('article img[src*="metricool-speedy"]').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('shows editor-uploaded videos in the gray strip (not only logos)', async () => {
-    getBatchVideoPreviewUrls.mockClear()
+  it('muestra carátulas estáticas de editados y nunca reproductores', () => {
     const { container } = renderLotes(
       <ContentPipelineBoard
         ideas={[
@@ -265,14 +269,8 @@ describe('ContentPipelineBoard — batch model', () => {
       />,
     )
     expect(container.querySelector('[data-testid="batch-video-strip"]')).toBeInTheDocument()
-    await waitFor(() => {
-      expect(getBatchVideoPreviewUrls).toHaveBeenCalled()
-    })
-    await waitFor(() => {
-      const videos = container.querySelectorAll('article video')
-      expect(videos.length).toBe(2)
-      expect(videos[0]).toHaveAttribute('src', 'https://cdn.example/preview/ev1.mp4')
-    })
+    expect(screen.getAllByTestId('static-video-cover')).toHaveLength(2)
+    expect(container.querySelectorAll('article video')).toHaveLength(0)
   })
 
   it('shows an "Atrasado" badge on a batch card with an overdue video', () => {
@@ -289,6 +287,20 @@ describe('ContentPipelineBoard — batch model', () => {
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
     expect(currentSearch()).toBe('lote=c9')
     expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+  })
+
+  it('un editor no abre Lotes aunque escriba ?lote= con un cliente ajeno', async () => {
+    getClientBatchData.mockClear()
+    resetNav('lote=cliente-ajeno')
+    render(
+      <ContentPipelineBoard
+        ideas={[idea({ client_id: 'c1' })]}
+        canSeeAll={false}
+      />,
+    )
+    await act(async () => undefined)
+    expect(getClientBatchData).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
   })
 })
 

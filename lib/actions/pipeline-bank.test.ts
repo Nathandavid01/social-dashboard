@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const requirePermission = vi.fn(async (_perm: string) => undefined)
-const getEffectiveRole = vi.fn(async (): Promise<'editor' | 'owner'> => 'editor')
+const getEffectiveRole = vi.fn(async (): Promise<'editor' | 'owner' | 'supervisor'> => 'editor')
 const getEffectiveUserId = vi.fn(async () => 'ed-maria')
 const getIdeacionPipeline = vi.fn(async () => [] as IdeaWithPipeline[])
 
@@ -81,6 +81,12 @@ describe('getEditorVideoBank', () => {
     expect(res.rows?.map((r) => r.editorId).sort()).toEqual(['ed-diego', 'ed-maria'])
   })
 
+  it('supervisor ve todas las filas de editor', async () => {
+    getEffectiveRole.mockResolvedValue('supervisor')
+    const res = await getEditorVideoBank()
+    expect(res.rows?.map((r) => r.editorId).sort()).toEqual(['ed-diego', 'ed-maria'])
+  })
+
   it('el editor solo recibe 2 clips activos; el tercero espera sin archivo', async () => {
     getIdeacionPipeline.mockResolvedValue([
       idea('uno', 'ed-maria'),
@@ -95,13 +101,26 @@ describe('getEditorVideoBank', () => {
 })
 
 describe('getEditorPipelineHistory', () => {
-  it('exige team.read y solo devuelve videos de ese editor', async () => {
+  it('rechaza a un editor aunque tenga team.read por área', async () => {
+    const res = await getEditorPipelineHistory('ed-diego')
+    expect(res.error).toMatch(/administrador|autorizado/i)
+    expect(getIdeacionPipeline).not.toHaveBeenCalled()
+  })
+
+  it('permite que un editor vea su propio historial', async () => {
+    const res = await getEditorPipelineHistory('ed-maria')
+    expect(res.error).toBeUndefined()
+    expect(res.items?.map((item) => item.ideaId)).toEqual(['mia'])
+  })
+
+  it('exige team.read y un admin puede consultar el historial solicitado', async () => {
     requirePermission.mockRejectedValueOnce(new Error('No autorizado'))
     const denied = await getEditorPipelineHistory('ed-maria')
     expect(denied.error).toMatch(/autorizado/i)
     expect(getIdeacionPipeline).not.toHaveBeenCalled()
 
     requirePermission.mockResolvedValue(undefined)
+    getEffectiveRole.mockResolvedValue('owner')
     const res = await getEditorPipelineHistory('ed-maria')
     expect(requirePermission).toHaveBeenCalledWith('team.read')
     expect(res.items?.map((i) => i.ideaId)).toEqual(['mia'])
