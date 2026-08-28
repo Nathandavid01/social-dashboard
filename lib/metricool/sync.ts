@@ -2,16 +2,21 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getServerConfig } from '@/lib/metricool/post'
 import { getScheduledPosts } from '@/lib/metricool/scheduler'
+import { type SyncIdeaRef } from '@/lib/utils/metricool-sync-core'
 import {
-  isScheduledPostPublished,
-  ideasToMarkPublished,
-  type SyncIdeaRef,
-} from '@/lib/utils/metricool-sync-core'
+  reconcilePostedIdeas,
+  type ReconcileOutcome,
+  type ReconcileRow,
+} from '@/lib/utils/metricool-reconcile-core'
 
 export interface MetricoolSyncResult {
   updated: number
   checked: number
   error?: string
+  /** Cuántos envíos cayeron en cada desenlace. */
+  counts?: Record<ReconcileOutcome, number>
+  /** Envíos cuyo post ya no existe en Metricool: hay que republicarlos o cerrarlos a mano. */
+  missing?: ReconcileRow[]
 }
 
 /**
@@ -53,28 +58,45 @@ export async function runMetricoolPublishedSync(): Promise<MetricoolSyncResult> 
     if (b) blogIds.add(b)
   }
 
-  // Window: anything that could have just gone live — last 45 days through now.
-  const end = new Date()
-  const start = new Date(end.getTime() - 45 * 24 * 60 * 60 * 1000)
+  // Ventana: una de 45 días dejaba huérfano para siempre lo que no casara a
+  // tiempo. Se abre hacia atrás un año y hacia adelante 90 días — el scheduler
+  // lista por fecha DE PUBLICACIÓN, así que un post programado a futuro no
+  // aparece en una ventana que termina "ahora".
+  const now = new Date()
+  const start = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+  const end = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000)
   const startStr = start.toISOString().slice(0, 19)
   const endStr = end.toISOString().slice(0, 19)
 
-  const publishedIds = new Set<number>()
-  await Promise.allSettled(
+  const found: Array<{ id: number; draft?: boolean | null; providers?: Array<{ status?: string | null }> | null }> = []
+  let lookupComplete = true
+  const lookups = await Promise.allSettled(
     Array.from(blogIds).map(async (blogId) => {
       const posts = await getScheduledPosts({ ...base, blogId }, startStr, endStr)
-      for (const p of posts) if (isScheduledPostPublished(p)) publishedIds.add(p.id)
+      for (const p of posts) found.push(p)
     }),
   )
+  // Si un blog no respondió, la foto está incompleta: lo no encontrado NO puede
+  // declararse "desaparecido".
+  if (lookups.some((r) => r.status === 'rejected')) lookupComplete = false
 
-  const toMark = ideasToMarkPublished(ideas as SyncIdeaRef[], publishedIds)
-  if (toMark.length === 0) return { updated: 0, checked: ideas.length }
+  const recon = reconcilePostedIdeas(ideas as SyncIdeaRef[], found, lookupComplete)
+  const toMark = recon.toMarkPublished
+  if (recon.missing.length > 0) {
+    console.warn(
+      `runMetricoolPublishedSync: ${recon.missing.length} envíos ya no existen en Metricool`,
+      recon.missing.map((m) => m.postId),
+    )
+  }
+  if (toMark.length === 0) {
+    return { updated: 0, checked: ideas.length, counts: recon.counts, missing: recon.missing }
+  }
 
   const { error: updErr } = await supabase
     .from('content_ideas')
     .update({ status: 'publicada' })
     .in('id', toMark)
-  if (updErr) return { updated: 0, checked: ideas.length, error: updErr.message }
+  if (updErr) return { updated: 0, checked: ideas.length, error: updErr.message, counts: recon.counts }
 
   // Close the loop: the DB trigger `sync_idea_status_from_task` propagates
   // task → idea, not the reverse. We just marked these ideas 'publicada'
@@ -90,5 +112,5 @@ export async function runMetricoolPublishedSync(): Promise<MetricoolSyncResult> 
     console.error('runMetricoolPublishedSync: failed to sync production_tasks status', taskUpdErr.message)
   }
 
-  return { updated: toMark.length, checked: ideas.length }
+  return { updated: toMark.length, checked: ideas.length, counts: recon.counts, missing: recon.missing }
 }
