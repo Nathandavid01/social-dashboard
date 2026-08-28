@@ -8,9 +8,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  */
 
 let canView = true
+type VideoAccessResult =
+  | { error: string }
+  | { drive_file_id: string; storage_provider: string; name: string; kind: string }
+
+const authorizeIdeaVideoAccess = vi.fn<(videoId: string) => Promise<VideoAccessResult>>(async () => ({
+  drive_file_id: 'ideas/i1/raw/video.mp4',
+  storage_provider: 'r2',
+  name: 'video.mp4',
+  kind: 'raw',
+}))
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
   currentUserHas: vi.fn(async () => canView),
+}))
+vi.mock('@/lib/actions/idea-videos-r2', () => ({
+  authorizeIdeaVideoAccess: (videoId: string) => authorizeIdeaVideoAccess(videoId),
 }))
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -52,7 +65,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { getThumbUploadUrls, registerVideoThumbs, getVideoThumbViewUrls } from './video-thumbs'
+import { getPipelineVideoThumbViewUrls, getThumbUploadUrls, registerVideoThumbs, getVideoThumbViewUrls } from './video-thumbs'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -60,6 +73,12 @@ beforeEach(() => {
   selectError = null
   updateError = null
   canView = true
+  authorizeIdeaVideoAccess.mockResolvedValue({
+    drive_file_id: 'ideas/i1/raw/video.mp4',
+    storage_provider: 'r2',
+    name: 'video.mp4',
+    kind: 'raw',
+  })
 })
 
 describe('getThumbUploadUrls', () => {
@@ -182,5 +201,25 @@ describe('getVideoThumbViewUrls', () => {
     videoRow = { thumb_keys: ['ideas/i1/edited/thumbs/1-0.jpg'], storage_provider: 'r2', status: 'archived' }
     const res = await getVideoThumbViewUrls('vid-1')
     expect(res.urls).toEqual([])
+  })
+})
+
+describe('getPipelineVideoThumbViewUrls', () => {
+  it('no entrega la carátula si el video no pertenece al editor', async () => {
+    authorizeIdeaVideoAccess.mockResolvedValueOnce({ error: 'No autorizado' })
+    videoRow = { thumb_keys: ['ideas/i1/raw/thumbs/1-0.jpg'], storage_provider: 'r2', status: 'uploaded' }
+
+    const res = await getPipelineVideoThumbViewUrls('video-ajeno')
+
+    expect(res.urls).toEqual([])
+  })
+
+  it('entrega la carátula después de validar acceso al video', async () => {
+    videoRow = { thumb_keys: ['ideas/i1/raw/thumbs/1-0.jpg'], storage_provider: 'r2', status: 'uploaded' }
+
+    const res = await getPipelineVideoThumbViewUrls('video-propio')
+
+    expect(authorizeIdeaVideoAccess).toHaveBeenCalledWith('video-propio')
+    expect(res.urls).toHaveLength(1)
   })
 })

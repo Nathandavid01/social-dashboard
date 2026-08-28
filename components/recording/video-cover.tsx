@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Film } from 'lucide-react'
-import { getVideoThumbViewUrls } from '@/lib/actions/video-thumbs'
+import { getPipelineVideoThumbViewUrls } from '@/lib/actions/video-thumbs'
 
 type CoverState =
   | { kind: 'loading' }
@@ -23,7 +23,7 @@ export function VideoCover({ videoId, title }: { videoId: string; title: string 
 
     ;(async () => {
       try {
-        const stored = await getVideoThumbViewUrls(videoId)
+        const stored = await getPipelineVideoThumbViewUrls(videoId)
         if (!alive) return
         if (stored.urls[0]) {
           setState({ kind: 'image', url: stored.urls[0] })

@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { VideoCover } from './video-cover'
 
 const actionMocks = vi.hoisted(() => ({
-  getVideoThumbViewUrls: vi.fn(),
+  getPipelineVideoThumbViewUrls: vi.fn(),
   getVideoPreviewUrl: vi.fn(),
 }))
 
 vi.mock('@/lib/actions/video-thumbs', () => ({
-  getVideoThumbViewUrls: actionMocks.getVideoThumbViewUrls,
+  getPipelineVideoThumbViewUrls: actionMocks.getPipelineVideoThumbViewUrls,
 }))
 
 vi.mock('@/lib/actions/video-preview', () => ({
@@ -19,7 +19,7 @@ describe('VideoCover', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('usa la primera miniatura guardada como carátula', async () => {
-    actionMocks.getVideoThumbViewUrls.mockResolvedValue({
+    actionMocks.getPipelineVideoThumbViewUrls.mockResolvedValue({
       urls: ['https://cdn.example/frame-1.jpg', 'https://cdn.example/frame-2.jpg'],
     })
 
@@ -30,7 +30,7 @@ describe('VideoCover', () => {
   })
 
   it('no carga el video cuando todavía no hay una carátula guardada', async () => {
-    actionMocks.getVideoThumbViewUrls.mockResolvedValue({ urls: [] })
+    actionMocks.getPipelineVideoThumbViewUrls.mockResolvedValue({ urls: [] })
     actionMocks.getVideoPreviewUrl.mockResolvedValue({ url: 'https://cdn.example/video.mp4' })
 
     render(<VideoCover videoId="video-2" title="Video Prueba 9pm" />)

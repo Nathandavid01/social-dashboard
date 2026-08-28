@@ -3,7 +3,8 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { currentUserHas } from '@/lib/auth/server'
+import { getEffectiveRole } from '@/lib/auth/server'
+import { canSeeAllEditorBanks } from '@/lib/pipeline/editor-video-bank'
 import { r2Client, r2Bucket, r2PublicUrl } from '@/lib/integrations/r2'
 import {
   entregasR2Client,
@@ -20,12 +21,7 @@ const MAX_IDS = 6
 export async function getBatchVideoPreviewUrls(
   videoIds: string[],
 ): Promise<{ urls?: Record<string, string>; error?: string }> {
-  const canSee =
-    (await currentUserHas('planning.read')) ||
-    (await currentUserHas('pipeline.read')) ||
-    (await currentUserHas('revision.read')) ||
-    (await currentUserHas('entregas.read'))
-  if (!canSee) return { error: 'No autorizado' }
+  if (!canSeeAllEditorBanks(await getEffectiveRole())) return { error: 'No autorizado' }
 
   const ids = Array.from(new Set(videoIds.filter(Boolean))).slice(0, MAX_IDS)
   if (ids.length === 0) return { urls: {} }

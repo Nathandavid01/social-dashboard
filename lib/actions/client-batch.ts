@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getEffectiveRole } from '@/lib/auth/server'
+import { canSeeAllEditorBanks } from '@/lib/pipeline/editor-video-bank'
 import { computePostingTargets } from '@/lib/utils/posting-cadence'
 import { planSessions, planSlots, type PlannedSlot } from '@/lib/utils/planned-sessions'
 import { resolveInterval } from '@/lib/utils/recording-window'
@@ -93,6 +95,10 @@ export async function getClientBatchData(
   clientId: string,
   opts?: ClientBatchOpenOptions,
 ): Promise<ClientBatchData | null> {
+  // Lotes is a global administrative view. Guard before ensureBatchVideos,
+  // because that helper can create rows as a side effect.
+  if (!canSeeAllEditorBanks(await getEffectiveRole())) return null
+
   if (opts?.fromPlanned) {
     await ensureBatchVideos(clientId, { count: 1, publishDate: opts.publishDate ?? null })
   } else {

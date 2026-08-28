@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.94 — 2026-08-28
+
+**Cada editor ve solamente su pipeline; los administradores conservan la vista completa.**
+
+- Editor y miembro de equipo reciben únicamente sus videos y clientes asignados.
+- Owner y supervisor siguen viendo todos los editores, clientes, lotes e historial.
+- El acceso directo a una carátula también valida la asignación antes de entregar
+  una URL, no solo oculta la tarjeta en pantalla.
+
+![Pipeline privado para editores y completo para administradores](/changelog/v3.94-pipeline-privado.png)
+
+Vista: [preview HTML](/previews/v3.94-pipeline-privado.html)
+
 ## v3.93 — 2026-08-28
 
 **Pipeline muestra la carátula, pero no reproduce el video.**
