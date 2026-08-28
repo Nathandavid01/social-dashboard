@@ -42,6 +42,9 @@ const actionMocks = vi.hoisted(() => ({ reassignVideo: vi.fn() }))
 vi.mock('@/lib/actions/content-ideas', () => ({ reassignVideo: actionMocks.reassignVideo }))
 vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2DownloadUrl: vi.fn() }))
 vi.mock('@/lib/actions/video-preview', () => ({ getVideoPreviewUrl: vi.fn() }))
+vi.mock('@/lib/actions/video-thumbs', () => ({
+  getVideoThumbViewUrls: vi.fn(() => new Promise(() => {})),
+}))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
 }))
@@ -137,7 +140,7 @@ describe('EditorVideoBank', () => {
     await waitFor(() => expect(actionMocks.reassignVideo).toHaveBeenCalledWith('pt-77', 'ed-2'))
   })
 
-  it('muestra una fila por editor y una tabla por cliente con Ver y Bajar', () => {
+  it('muestra una fila por editor y permite bajar sin reproducir el video', () => {
     render(
       <EditorVideoBank
         rows={[
@@ -186,7 +189,7 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('Te toca')).toBeInTheDocument()
     expect(screen.getByText(/anotaciones/i)).toBeInTheDocument()
     expect(screen.getByText('crudo.mp4')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /ver/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /ver/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /bajar/i })).toBeInTheDocument()
     expect(screen.getByTestId('approved-count')).toHaveTextContent('4 aprobados')
     const load = screen.getByTestId('editor-load-ed-maria')

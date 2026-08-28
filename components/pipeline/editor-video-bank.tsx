@@ -2,16 +2,14 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { Download, ExternalLink, Loader2, Play, UserRound, X } from 'lucide-react'
+import { Download, ExternalLink, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { VideoCover } from '@/components/recording/video-cover'
-import { VideoSceneStrip } from '@/components/recording/video-scene-strip'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
-import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { EDITOR_WIP_LIMIT, type BankAdmin, type EditorBankClip, type EditorBankFile, type EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pipeline/editor-pace'
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
@@ -99,7 +97,7 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark }: { 
   return (
     <article data-testid={testId} className="group min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#0d1013]" style={{ borderColor: `${client.cardColor}66` }}>
       <div data-testid="client-bank-card" className="relative min-h-24 overflow-hidden border-b border-white/10 bg-gradient-to-br from-slate-800 to-slate-950" style={{ borderColor: client.cardColor }}>
-        {file ? <VideoSceneStrip videoId={file.id} /> : null}
+        {file ? <VideoCover videoId={file.id} title={clip.title} /> : null}
         <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1 py-0.5 text-[8px] uppercase text-slate-200">{file?.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>
       </div>
       <div className="min-w-0 p-2">
@@ -172,11 +170,8 @@ function VideoTileActions({ videoId }: { videoId: string }) {
 function BankFileActions({ file, compact = false }: { file: EditorBankFile; compact?: boolean }) {
   const { toast } = useToast()
   const isR2 = file.storageProvider === 'r2'
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
   async function download() { if (!isR2) { if (file.driveViewLink) window.open(file.driveViewLink, '_blank'); return } const result = await getR2DownloadUrl(file.id); if (result.error || !result.url) toast({ title: 'Error', description: result.error ?? 'No se pudo descargar', variant: 'destructive' }); else window.open(result.url, '_blank') }
-  async function togglePreview() { if (previewUrl) { setPreviewUrl(null); return } setLoading(true); const result = await getVideoPreviewUrl(file.id); setLoading(false); if (result.error || !result.url) toast({ title: 'Error', description: result.error ?? 'No se pudo cargar', variant: 'destructive' }); else setPreviewUrl(result.url) }
-  return <div className="flex flex-col items-end gap-1.5"><div className="flex items-center gap-0.5">{isR2 && <Button size="sm" variant="ghost" className={compact ? 'h-7 w-7 p-0' : 'h-8 px-2 text-xs'} onClick={togglePreview} disabled={loading} aria-label={previewUrl ? 'Cerrar' : 'Ver'}>{loading ? <Loader2 className="h-3 w-3 animate-spin" /> : previewUrl ? <X className="h-3 w-3" /> : <Play className="h-3 w-3" />}</Button>}<Button size="sm" variant="ghost" className={compact ? 'h-7 w-7 p-0' : 'h-8 px-2 text-xs'} onClick={download} aria-label="Bajar">{isR2 ? <Download className="h-3 w-3" /> : <ExternalLink className="h-3 w-3" />}</Button></div>{previewUrl && <video src={previewUrl} controls playsInline className="aspect-video w-full max-w-sm rounded-md border bg-black" />}</div>
+  return <Button size="sm" variant="ghost" className={compact ? 'h-7 w-7 p-0' : 'h-8 px-2 text-xs'} onClick={download} aria-label="Bajar">{isR2 ? <Download className="h-3 w-3" /> : <ExternalLink className="h-3 w-3" />}</Button>
 }
 
 const POSTING_DAY = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']

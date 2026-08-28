@@ -27,20 +27,16 @@ describe('VideoCover', () => {
 
     const cover = await screen.findByRole('img', { name: 'Carátula de Video Prueba 9pm' })
     expect(cover).toHaveAttribute('src', 'https://cdn.example/frame-1.jpg')
-    expect(actionMocks.getVideoPreviewUrl).not.toHaveBeenCalled()
   })
 
-  it('muestra un fotograma del video cuando no hay miniatura guardada', async () => {
+  it('no carga el video cuando todavía no hay una carátula guardada', async () => {
     actionMocks.getVideoThumbViewUrls.mockResolvedValue({ urls: [] })
     actionMocks.getVideoPreviewUrl.mockResolvedValue({ url: 'https://cdn.example/video.mp4' })
 
     render(<VideoCover videoId="video-2" title="Video Prueba 9pm" />)
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('Carátula de Video Prueba 9pm')).toHaveAttribute(
-        'src',
-        'https://cdn.example/video.mp4',
-      )
-    })
+    await waitFor(() => expect(screen.getByLabelText('Carátula no disponible')).toBeInTheDocument())
+    expect(actionMocks.getVideoPreviewUrl).not.toHaveBeenCalled()
+    expect(document.querySelector('video')).not.toBeInTheDocument()
   })
 })
