@@ -97,15 +97,26 @@ export function AvatarSetupDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) return
+        onOpenChange(next)
+      }}
+    >
+      <DialogContent
+        className="sm:max-w-lg [&>button.absolute]:hidden"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Crea tu avatar
+            Pon tu foto
           </DialogTitle>
           <DialogDescription>
-            Ponle cara a tu cuenta — elige un avatar generado o sube tu foto. Puedes hacerlo después.
+            El equipo te reconoce mejor con una foto o un avatar — no con iniciales ni el ícono genérico.
+            Si eliges Ahora no, te lo pedimos de nuevo la próxima vez que entres.
           </DialogDescription>
         </DialogHeader>
 
@@ -211,7 +222,7 @@ export function AvatarSetupDialog({
             }}
             disabled={isPending}
           >
-            Más tarde
+            Ahora no
           </Button>
           {mode === 'generate' && (
             <Button type="button" onClick={saveGenerated} disabled={isPending || !selectedSeed}>

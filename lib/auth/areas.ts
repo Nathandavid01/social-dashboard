@@ -32,10 +32,9 @@ export interface Area {
  * HACER, no por cómo está construida la app.
  *
  * Marketing  — primer paso: generar y dejar las ideas.
- * Recordings — segundo: grabar en On Site.
- * Trabajo    — editar, revisar, copy y publicar.
- * Desarrollo — lo anterior a este flujo (Pipeline, Producción, Video QC) más
- *              Runway. Sigue vivo, pero no es por donde entra el trabajo nuevo.
+ * Recordings — grabar en On Site.
+ * Trabajo    — paso 2 Pipeline (banco), Revisión (corte), Entregas (copy).
+ * Desarrollo — Producción, Video QC, Runway. Sigue vivo, no es la entrada.
  */
 export const NAV_GROUPS = [
   'Marketing',
@@ -62,11 +61,11 @@ export const AREAS: Area[] = [
   { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Recordings' },
   { href: '/onsite',             label: 'On Site',         permission: 'recording.read',     group: 'Recordings' },
 
-  // ── 3. Editar y entregar ──
+  // ── 3. Banco (paso 2), corte, copy ──
+  { href: '/pipeline',           label: 'Pipeline',        permission: 'pipeline.read',      group: 'Trabajo' },
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
 
-  { href: '/pipeline',           label: 'Pipeline',        permission: 'planning.read',      group: 'Desarrollo' },
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
   { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Desarrollo' },

@@ -4,6 +4,99 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.90 — 2026-08-28
+
+**Los videos crudos ya se ven, y se cerró un agujero de permisos.**
+
+- Cada crudo que se sube genera su carátula, así el banco de video se ve por
+  imagen y no por nombre de archivo. Antes solo la generaban los editados.
+- Sacar esa carátula cuesta 5 fotogramas en vez de 240: no dispara el análisis
+  de IA, que es del corte final y se cobra por fotograma.
+- **Seguridad:** en Producción, cualquiera con sesión podía reasignarle el
+  trabajo a otro editor. Ahora hace falta el mismo permiso que ya pedía la otra
+  pantalla de asignación.
+- Por dentro: el chequeo de tipos del proyecto estaba roto y con él 16 pruebas
+  del flujo de video. Quedó verde otra vez (2618 pruebas).
+
+## v3.89 — 2026-08-25
+
+**Historial de pipeline: carátula y fecha con hora.**
+
+- Cada video muestra la miniatura (corte, si no crudo o Drive).
+- La fecha es día + hora de Puerto Rico, no solo “18d”.
+
+## v3.88 — 2026-08-25
+
+**Tocar el perfil del editor abre su historial.**
+
+- En el Banco, el nombre de Alexa, Jeander, Johan… lleva a `/team/<id>`.
+- Ahí se ve el historial de pipeline: en corte, banco y aprobados, con días.
+- Sin asignar no tiene perfil.
+
+## v3.87 — 2026-08-25
+
+**Más detalle en el banco por cliente: el documento de toma.**
+
+- Cada video muestra guión, qué grabar, anotaciones, quién grabó, lugar, límite y **Te toca** si es uno de los 2 espacios.
+- La tarjeta del cliente indica los días de posting.
+
+## v3.86 — 2026-08-25
+
+**Banco por editor: ahora, pendientes y revisión, de un vistazo.**
+
+- Cada editor tiene una tarjeta con **Ahora** (2 espacios), **Banco** (pendientes por cliente) y **Revisión**.
+- Los 2 espacios van al cliente más urgente (fecha límite), no al video más viejo.
+
+## v3.85 — 2026-08-24
+
+**En el Banco de video hay una sección Admins.**
+
+- Arriba del banco se ve quién es **owner** y **supervisor** (nombre, correo, rol).
+- No cambia el tope de 2 videos del editor ni quién baja crudo.
+
+## v3.84 — 2026-08-23
+
+**Cada cliente se ve con su logo y su color, siempre el mismo.**
+
+- En el banco de Pipeline, Speedy Net (y el resto) muestran el **logo real** si está en la ficha o en Metricool — no solo las iniciales.
+- La tarjeta de cada cliente lleva **el mismo color** cada vez (color de marca, o uno fijo según el cliente).
+- Si falta el logo, owner y supervisor ven **Subir logo** y van a la ficha del cliente.
+
+Vista: [preview HTML](/previews/v3.84-logo-color-cliente.html)
+
+## v3.83 — 2026-08-23
+
+**Al entrar, te pedimos una foto hasta que dejes de usar el ícono genérico.**
+
+- La primera vez — y cada visita siguiente — el dashboard pide **una foto o un avatar** si solo tienes iniciales o el ícono de persona.
+- Puedes tocar **Ahora no** una vez en esa sesión. Al volver a entrar, el aviso sale otra vez.
+- Cuando subes o eliges una imagen real, deja de pedirla. La foto queda en tu perfil y se ve en el menú y en el resto del equipo.
+
+Vista: [preview HTML](/previews/v3.83-foto-perfil.html)
+
+## v3.80 — 2026-08-23
+
+**Lotes es el tablero Trello del trabajo: ves en qué etapa va cada cliente.**
+
+- En Pipeline, **Banco** sigue siendo el paso 2 (bajar crudos). **Lotes** es el tablero del flujo.
+- Cuatro columnas reales: **Video → Edición → Aprobación → Publicación**. Una tarjeta por lote (cliente, editor, cuántos videos, aprobados).
+- Quien puede mover el flujo arrastra la tarjeta a otra columna; el servidor guarda el cambio. El editor no mueve lotes.
+
+Vista: [preview HTML](/previews/v3.80-lotes-tablero.html)
+
+## v3.78 — 2026-08-23
+
+**El Pipeline es el paso 2: cada editor ve su banco de crudos por cliente y los puede bajar.**
+
+- Después de On Site, el editor entra a Pipeline y ve **una fila por editor** (o Sin asignar) con el **banco de video de cada cliente**.
+- En cada clip puede **ver** y **bajar** el crudo o el B-roll. Revisión sigue siendo el corte; Entregas no se mezcló aquí.
+- El videógrafo no entra a este banco. El editor solo ve lo asignado; owner y supervisor ven todos.
+- En cada cliente se ve siempre cuántos videos ya están **aprobados** (no se esconde en un filtro).
+- El editor trabaja **2 videos a la vez**; el resto queda en espera y no se puede bajar hasta que uno se apruebe.
+- Los lotes y “Nuevo video” siguen en la pestaña **Lotes**, para quien arma el tablero.
+
+Vista: [preview HTML](/previews/v3.78-banco-editor.html)
+
 ## v3.77 — 2026-08-23
 
 **El documento de toma se lee como una hoja de producción, no como un formulario.**

@@ -3,8 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { MemberTaskBoard } from '@/components/team/member-task-board'
 import { MemberUploadHistory } from '@/components/team/member-upload-history'
+import { MemberPipelineHistory } from '@/components/team/member-pipeline-history'
 import { ClientIdeasRows } from '@/components/ideas/client-ideas-rows'
 import { getAssignedVideosForMember } from '@/lib/actions/content-ideas'
+import { getEditorPipelineHistory } from '@/lib/actions/pipeline-bank'
 import { getVideoUploadMetricsByUser } from '@/lib/actions/video-uploads'
 import { Film, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -23,7 +25,7 @@ export default async function MemberPage({ params }: Props) {
   const { memberId } = await params
   const supabase = await createClient()
 
-  const [{ data: profile }, { data: tasks }, { data: clients }, { data: teamMembers }, assignedVideos, uploadMetrics] = await Promise.all([
+  const [{ data: profile }, { data: tasks }, { data: clients }, { data: teamMembers }, assignedVideos, uploadMetrics, pipelineHistory] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', memberId).single(),
     supabase
       .from('tasks')
@@ -39,6 +41,7 @@ export default async function MemberPage({ params }: Props) {
     supabase.from('profiles').select('id, full_name').order('full_name'),
     getAssignedVideosForMember(memberId),
     getVideoUploadMetricsByUser({ userId: memberId }),
+    getEditorPipelineHistory(memberId),
   ])
 
   if (!profile) notFound()
@@ -61,6 +64,11 @@ export default async function MemberPage({ params }: Props) {
         clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
         teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
         assignedVideoCount={assignedVideos.length}
+      />
+
+      <MemberPipelineHistory
+        editorName={(profile as Profile).full_name?.trim() || 'Editor'}
+        items={pipelineHistory.items ?? []}
       />
 
       <MemberUploadHistory userId={memberId} initial={uploadMetrics[0] ?? null} />

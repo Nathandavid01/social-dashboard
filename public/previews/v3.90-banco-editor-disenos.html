@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="es" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco del editor — propuestas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#0a0a0a; --card:#121212; --card-2:#161616; --border:#1f1f1f; --border-2:#2a2a2a;
+  --fg:#fafafa; --muted:#a6a6a6; --faint:#6f6f6f;
+  --gold:#e9b323; --gold-dim:#3a2e0d; --gold-fg:#0a0a0a;
+  --ok:#38c172; --warn:#e0a020; --bad:#e05252; --info:#4a90e2;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-feature-settings:"rlig" 1,"calt" 1;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1400px;margin:0 auto;padding:40px 24px 96px}
+
+/* ---------- página ---------- */
+.page-head{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:40px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:0 0 10px}
+.page-head h1{font-size:30px;line-height:1.15;margin:0 0 10px;font-weight:700;text-wrap:balance}
+.page-head p{margin:0;color:var(--muted);font-size:14px;max-width:70ch;line-height:1.6}
+.page-head .note{margin-top:14px;font-size:12px;color:var(--faint)}
+
+.option{margin-bottom:64px;scroll-margin-top:20px}
+.option-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:6px}
+.option-tag{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:7px;background:var(--gold);color:var(--gold-fg);
+  font-size:13px;font-weight:700;flex:0 0 auto
+}
+.option-head h2{font-size:20px;margin:0;font-weight:650}
+.option-sub{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 20px;max-width:78ch}
+.tradeoff{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.pill{font-size:11.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--border-2);color:var(--muted)}
+.pill.pro{border-color:#1e4630;background:#0f2318;color:#7fd6a2}
+.pill.con{border-color:#4a2323;background:#231010;color:#e79a9a}
+
+/* ---------- primitivas del dashboard ---------- */
+.grid3{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.who{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{
+  width:34px;height:34px;border-radius:9px;background:#1b1730;border:1px solid #2c2547;
+  display:grid;place-items:center;color:#a78bfa;flex:0 0 auto
+}
+.avatar svg{width:17px;height:17px}
+.who h3{margin:0;font-size:15px;font-weight:650;line-height:1.2}
+.who span{font-size:11.5px;color:var(--muted)}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border:1px solid var(--border);border-radius:9px;padding:9px 10px;text-align:center;background:#0f0f0f}
+.stat b{display:block;font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat .k{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.stat .h{font-size:10px;color:var(--faint)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  border:1px solid;border-radius:7px;padding:4px 8px;font-size:11px;font-weight:500
+}
+.chip .n{color:var(--faint);font-variant-numeric:tabular-nums}
+
+/* ---------- miniatura de video ---------- */
+.frame{position:relative;border-radius:9px;overflow:hidden;background:#000;border:1px solid var(--border-2)}
+.frame::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.82))}
+.frame .img{position:absolute;inset:0}
+.frame .meta{position:absolute;left:0;right:0;bottom:0;padding:8px 9px;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.frame .title{font-size:12px;font-weight:600;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+.frame .sub{font-size:10.5px;color:#cfcfcf;margin-top:2px}
+.dur{
+  position:absolute;right:7px;top:7px;z-index:2;background:rgba(0,0,0,.72);
+  border-radius:5px;padding:2px 5px;font-size:10px;font-variant-numeric:tabular-nums;color:#eaeaea
+}
+.play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;
+  width:38px;height:38px;border-radius:50%;background:rgba(10,10,10,.62);
+  border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;backdrop-filter:blur(2px)
+}
+.play svg{width:14px;height:14px;margin-left:2px;fill:#fff}
+.ratio-16{aspect-ratio:16/9}
+.ratio-9{aspect-ratio:9/16}
+
+.empty-slot{
+  border:1px dashed var(--border-2);border-radius:9px;display:grid;place-items:center;
+  text-align:center;padding:12px;color:var(--faint);background:
+    repeating-linear-gradient(45deg,#0e0e0e,#0e0e0e 6px,#111 6px,#111 12px)
+}
+.empty-slot .lbl{font-size:11px;font-weight:600;color:var(--muted)}
+.empty-slot .nxt{font-size:10.5px;margin-top:3px;line-height:1.35}
+
+.line{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.line .dot{width:3px;height:3px;border-radius:50%;background:var(--border-2);flex:0 0 auto}
+.line b{color:var(--fg);font-weight:600}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 8px;
+  font-size:10.5px;font-weight:600;border:1px solid
+}
+.badge.warn{color:var(--warn);border-color:#4a3a12;background:#1e1706}
+.badge.bad{color:var(--bad);border-color:#4a2020;background:#1e0d0d}
+.badge.ok{color:var(--ok);border-color:#1c4330;background:#0c1e15}
+.badge.gold{color:var(--gold);border-color:var(--gold-dim);background:#1a1406}
+
+/* meter de capacidad */
+.meter{display:flex;gap:4px;height:6px}
+.meter i{flex:1;border-radius:3px;background:#242424;display:block}
+.meter i.on{background:var(--gold)}
+.meter i.hot{background:var(--bad)}
+
+/* ---------- A: en la mesa ---------- */
+.a-hero{margin:12px 0 10px}
+.a-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+
+/* ---------- B: dos espacios ---------- */
+.b-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 10px}
+
+/* ---------- C: línea de producción ---------- */
+.c-row{
+  display:grid;grid-template-columns:190px 1fr 220px;gap:16px;align-items:center;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px
+}
+.c-slots{display:flex;gap:8px}
+.c-slot{display:flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:9px;padding:6px;background:#0f0f0f;min-width:0;flex:1}
+.c-slot .frame{width:74px;flex:0 0 auto}
+.c-slot .txt{min-width:0}
+.c-slot .txt .t{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-slot .txt .s{font-size:10.5px;color:var(--faint);margin-top:2px}
+.c-slot.free{border-style:dashed;justify-content:center;color:var(--faint);font-size:11px}
+.c-num{display:flex;gap:14px;justify-content:flex-end;font-variant-numeric:tabular-nums}
+.c-num div{text-align:right}
+.c-num b{display:block;font-size:17px;font-weight:650}
+.c-num span{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+
+/* ---------- D: tira de escenas ---------- */
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin:12px 0 10px}
+.strip .frame{border-radius:5px}
+.strip .frame:first-child{border-top-left-radius:9px;border-bottom-left-radius:9px}
+.strip .frame:last-child{border-top-right-radius:9px;border-bottom-right-radius:9px}
+.strip .frame::after{display:none}
+.d-cap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+
+.footer{border-top:1px solid var(--border);margin-top:24px;padding-top:24px;color:var(--muted);font-size:13px;line-height:1.7}
+.footer h2{font-size:16px;color:var(--fg);margin:0 0 10px}
+.footer ul{margin:0;padding-left:18px}
+.footer li{margin-bottom:6px}
+.footer code{background:#161616;border:1px solid var(--border);border-radius:5px;padding:1px 5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <p class="eyebrow">Nate Media · Banco del editor</p>
+    <h1>Cuatro maneras de ver qué está editando cada quien</h1>
+    <p>Hoy la tarjeta gasta todo su espacio en tres números (Ahora, Banco, Revisión) y una lista de chips con ceros. No se ve <strong>el video</strong>. Estas cuatro propuestas ponen el clip en corte al frente, cada una con un compromiso distinto entre imagen y densidad.</p>
+    <p class="note">Datos de ejemplo tomados del tablero real. Las miniaturas salen de <code>thumb_keys</code> (la tira de 5 escenas que ya existe) y del preview firmado de R2 — no hace falta nada nuevo en la base de datos.</p>
+  </header>
+
+  <!-- ============ OPCIÓN A ============ -->
+  <section class="option">
+    <div class="option-head"><span class="option-tag">A</span><h2>En la mesa</h2></div>
+    <p class="option-sub">El clip que está en corte ahora ocupa la tarjeta. Cliente, fecha límite y tiempo en corte van encima de la imagen; los números se retiran a una sola línea al pie. Se entiende de un vistazo <em>qué</em> está saliendo, no solo cuánto.</p>
+    <div class="tradeoff"><span class="pill pro">El video manda</span><span class="pill pro">Se lee a 2 metros</span><span class="pill con">Caben menos editores por pantalla</span></div>
+
+    <div class="grid3">
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Jeander Loop</h3><span>5 clientes · 2 de 2 espacios</span></div>
+        </div>
+        <div class="a-hero">
+          <div class="frame ratio-16">
+            <div class="img" style="background:radial-gradient(120% 90% at 25% 25%,#7c5c2a,#2a1d0c 60%,#0b0a08)"></div>
+            <span class="dur">0:38</span>
+            <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <div class="meta">
+              <div>
+                <div class="title">Lucky Pet — Baño y corte, antes/después</div>
+                <div class="sub">En corte hace 2 h 10 min</div>
+              </div>
+              <span class="badge bad">Entrega hoy</span>
+            </div>
+          </div>
+        </div>
+        <div class="line" style="margin-bottom:10px">
+          <span>También en corte:</span><b>Speedy Net — Fibra en 24 h</b><span class="dot"></span><span>4 h</span>
+        </div>
+        <ul class="chips">
+          <li class="chip" style="border-color:#5a4d7a;background:#171327">AA Real Estate <span class="n">3</span></li>
+          <li class="chip" style="border-color:#2f6152;background:#0e1c19">Beyond PVC <span class="n">2</span></li>
+          <li class="chip" style="border-color:#7a3a3a;background:#1d1010">Lucky Pet <span class="n">1</span></li>
+          <li class="chip" style="border-color:#3d6a2f;background:#111b0d">Predator Gaming <span class="n">0</span></li>
+          <li class="chip" style="border-color:#2d5470;background:#0d1620">Speedy Net <span class="n">0</span></li>
+        </ul>
+        <div class="a-foot">
+          <div class="line"><b>6</b><span>en banco</span><span class="dot"></span><b>15</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i class="hot"></i><i class="hot"></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Alexa Kerocen</h3><span>3 clientes · 1 de 2 espacios</span></div>
+        </div>
+        <div class="a-hero">
+          <div class="frame ratio-16">
+            <div class="img" style="background:radial-gradient(120% 90% at 70% 30%,#2f5f6e,#122a30 60%,#080d0e)"></div>
+            <span class="dur">1:04</span>
+            <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <div class="meta">
+              <div>
+                <div class="title">Farmacia Buena Vida — Vacuna de gripe</div>
+                <div class="sub">En corte hace 40 min</div>
+              </div>
+              <span class="badge warn">Vence mañana</span>
+            </div>
+          </div>
+        </div>
+        <div class="line" style="margin-bottom:10px">
+          <span>Espacio libre</span><span class="dot"></span><span>siguiente: <b>Casita Vieja — Mofongo relleno</b></span>
+        </div>
+        <ul class="chips">
+          <li class="chip" style="border-color:#7a5a2f;background:#1d160c">Casita Vieja <span class="n">2</span></li>
+          <li class="chip" style="border-color:#2f6152;background:#0e1c19">Farmacia Buena Vida <span class="n">1</span></li>
+          <li class="chip" style="border-color:#4a4a6a;background:#131320">Farmacia Tierras Nuevas <span class="n">0</span></li>
+        </ul>
+        <div class="a-foot">
+          <div class="line"><b>3</b><span>en banco</span><span class="dot"></span><b>4</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i class="on"></i><i></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>David Grafico</h3><span>1 cliente · sin trabajo activo</span></div>
+        </div>
+        <div class="a-hero">
+          <div class="empty-slot ratio-16" style="display:grid;align-content:center">
+            <div class="lbl">Los 2 espacios libres</div>
+            <div class="nxt">Nada en corte. Siguiente en su banco:<br><strong style="color:#d8d8d8">Lumavi Properties — Recorrido casa modelo</strong></div>
+          </div>
+        </div>
+        <ul class="chips">
+          <li class="chip" style="border-color:#3d6a2f;background:#111b0d">Lumavi Properties <span class="n">1</span></li>
+        </ul>
+        <div class="a-foot">
+          <div class="line"><b>1</b><span>en banco</span><span class="dot"></span><b>1</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i></i><i></i></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ OPCIÓN B ============ -->
+  <section class="option">
+    <div class="option-head"><span class="option-tag">B</span><h2>Los dos espacios, lado a lado</h2></div>
+    <p class="option-sub">El límite de 2 videos a la vez deja de ser el texto «0/2» y se vuelve la forma de la tarjeta: dos casillas. Llena = miniatura del corte con su cliente y su reloj. Vacía = quién entra después. La regla de trabajo se ve sin explicarla.</p>
+    <div class="tradeoff"><span class="pill pro">El WIP de 2 es literal</span><span class="pill pro">Vertical 9:16, como se publica</span><span class="pill con">Miniatura más pequeña que en A</span></div>
+
+    <div class="grid3">
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Johan Rafael</h3><span>5 clientes</span></div>
+          <span class="badge bad" style="margin-left:auto">Lleno</span>
+        </div>
+        <div class="b-slots">
+          <div class="frame ratio-9">
+            <div class="img" style="background:radial-gradient(120% 80% at 40% 20%,#6e4a2c,#2a1a10 62%,#0a0807)"></div>
+            <span class="dur">0:22</span>
+            <div class="meta"><div><div class="title">Mojito Mojito</div><div class="sub">Coctel de la casa · 5 h</div></div></div>
+          </div>
+          <div class="frame ratio-9">
+            <div class="img" style="background:radial-gradient(120% 80% at 60% 30%,#3a5f3a,#152214 62%,#080b08)"></div>
+            <span class="dur">0:47</span>
+            <div class="meta"><div><div class="title">NutriMed</div><div class="sub">Consulta inicial · 1 d</div></div></div>
+          </div>
+        </div>
+        <div class="line" style="margin-bottom:10px"><span>Siguiente cuando libere:</span><b>Panadería La Nueva Modelo</b></div>
+        <div class="stat-row">
+          <div class="stat"><span class="k">Banco</span><b>7</b><span class="h">pendientes</span></div>
+          <div class="stat"><span class="k">Revisión</span><b>15</b><span class="h">en corte</span></div>
+          <div class="stat"><span class="k">Aprobados</span><b>32</b><span class="h">este mes</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Lisneidy Lopez</h3><span>2 clientes</span></div>
+          <span class="badge gold" style="margin-left:auto">1 espacio libre</span>
+        </div>
+        <div class="b-slots">
+          <div class="frame ratio-9">
+            <div class="img" style="background:radial-gradient(120% 80% at 30% 25%,#2f4f78,#111c2b 62%,#07090d)"></div>
+            <span class="dur">0:31</span>
+            <div class="meta"><div><div class="title">Blue Chiropractic</div><div class="sub">Ajuste cervical · 3 h</div></div></div>
+          </div>
+          <div class="empty-slot">
+            <div class="lbl">Libre</div>
+            <div class="nxt">Entra<br><strong style="color:#d8d8d8">Geovanny Alamo</strong></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><span class="k">Banco</span><b>2</b><span class="h">pendientes</span></div>
+          <div class="stat"><span class="k">Revisión</span><b>3</b><span class="h">en corte</span></div>
+          <div class="stat"><span class="k">Aprobados</span><b>11</b><span class="h">este mes</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Sin asignar</h3><span>2 clientes</span></div>
+          <span class="badge warn" style="margin-left:auto">Sin editor</span>
+        </div>
+        <div class="b-slots">
+          <div class="frame ratio-9">
+            <div class="img" style="background:radial-gradient(120% 80% at 50% 20%,#6b3a3a,#25100f 62%,#0a0606)"></div>
+            <span class="dur">0:53</span>
+            <div class="meta"><div><div class="title">Anibal Fuentes PNP</div><div class="sub">Mensaje de campaña · 6 d</div></div></div>
+          </div>
+          <div class="empty-slot">
+            <div class="lbl">Libre</div>
+            <div class="nxt">Entra<br><strong style="color:#d8d8d8">Tu Cerrajero PR</strong></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><span class="k">Banco</span><b>1</b><span class="h">pendientes</span></div>
+          <div class="stat"><span class="k">Revisión</span><b>2</b><span class="h">en corte</span></div>
+          <div class="stat"><span class="k">Aprobados</span><b>0</b><span class="h">este mes</span></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ OPCIÓN C ============ -->
+  <section class="option">
+    <div class="option-head"><span class="option-tag">C</span><h2>Línea de producción</h2></div>
+    <p class="option-sub">Una fila por editor, de ancho completo. Los nueve caben sin bajar la página y se comparan de arriba abajo: quién está lleno, quién está vacío, quién acumula revisión. La miniatura es chica pero está.</p>
+    <div class="tradeoff"><span class="pill pro">Todo el equipo en una pantalla</span><span class="pill pro">Fácil comparar carga</span><span class="pill con">La imagen pierde protagonismo</span></div>
+
+    <div>
+      <div class="c-row">
+        <div class="who" style="margin:0">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Jeander Loop</h3><span>5 clientes</span></div>
+        </div>
+        <div class="c-slots">
+          <div class="c-slot">
+            <div class="frame ratio-16"><div class="img" style="background:radial-gradient(120% 90% at 25% 25%,#7c5c2a,#2a1d0c 60%,#0b0a08)"></div></div>
+            <div class="txt"><div class="t">Lucky Pet — Baño y corte</div><div class="s">2 h · <span style="color:var(--bad)">hoy</span></div></div>
+          </div>
+          <div class="c-slot">
+            <div class="frame ratio-16"><div class="img" style="background:radial-gradient(120% 90% at 60% 35%,#2d5470,#101d27 60%,#070a0c)"></div></div>
+            <div class="txt"><div class="t">Speedy Net — Fibra en 24 h</div><div class="s">4 h · viernes</div></div>
+          </div>
+        </div>
+        <div class="c-num">
+          <div><b>6</b><span>Banco</span></div>
+          <div><b style="color:var(--warn)">15</b><span>Revisión</span></div>
+          <div><b>2/2</b><span>Ahora</span></div>
+        </div>
+      </div>
+
+      <div class="c-row">
+        <div class="who" style="margin:0">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Alexa Kerocen</h3><span>3 clientes</span></div>
+        </div>
+        <div class="c-slots">
+          <div class="c-slot">
+            <div class="frame ratio-16"><div class="img" style="background:radial-gradient(120% 90% at 70% 30%,#2f5f6e,#122a30 60%,#080d0e)"></div></div>
+            <div class="txt"><div class="t">Farmacia Buena Vida — Vacuna</div><div class="s">40 min · mañana</div></div>
+          </div>
+          <div class="c-slot free">Libre → Casita Vieja</div>
+        </div>
+        <div class="c-num">
+          <div><b>3</b><span>Banco</span></div>
+          <div><b>4</b><span>Revisión</span></div>
+          <div><b>1/2</b><span>Ahora</span></div>
+        </div>
+      </div>
+
+      <div class="c-row">
+        <div class="who" style="margin:0">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Carlos Villalta</h3><span>4 clientes</span></div>
+        </div>
+        <div class="c-slots">
+          <div class="c-slot">
+            <div class="frame ratio-16"><div class="img" style="background:radial-gradient(120% 90% at 35% 20%,#6b4a5f,#241722 60%,#0a070a)"></div></div>
+            <div class="txt"><div class="t">Arasibo Steakhouse — Churrasco</div><div class="s">1 h · lunes</div></div>
+          </div>
+          <div class="c-slot free">Libre → La Guira</div>
+        </div>
+        <div class="c-num">
+          <div><b>4</b><span>Banco</span></div>
+          <div><b>6</b><span>Revisión</span></div>
+          <div><b>1/2</b><span>Ahora</span></div>
+        </div>
+      </div>
+
+      <div class="c-row">
+        <div class="who" style="margin:0">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>David Grafico</h3><span>1 cliente</span></div>
+        </div>
+        <div class="c-slots">
+          <div class="c-slot free">Libre → Lumavi Properties</div>
+          <div class="c-slot free">Libre</div>
+        </div>
+        <div class="c-num">
+          <div><b>1</b><span>Banco</span></div>
+          <div><b>1</b><span>Revisión</span></div>
+          <div><b style="color:var(--faint)">0/2</b><span>Ahora</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OPCIÓN D ============ -->
+  <section class="option">
+    <div class="option-head"><span class="option-tag">D</span><h2>Tira de escenas</h2></div>
+    <p class="option-sub">En vez de un fotograma, los cinco de la tira que ya se genera al subir el corte. Se ve el arco del video —cómo abre y cómo cierra— sin abrirlo. Es la misma tira de <code>thumb_keys</code> que hoy vive dentro de la idea, subida al tablero.</p>
+    <div class="tradeoff"><span class="pill pro">Se juzga el video sin abrirlo</span><span class="pill pro">Reusa lo ya generado</span><span class="pill con">Fotogramas pequeños; hay que ampliar al pasar</span></div>
+
+    <div class="grid3">
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Jeander Loop</h3><span>5 clientes · 2 de 2</span></div>
+        </div>
+        <div class="d-cap" style="margin-top:12px">
+          <div class="line"><b>Lucky Pet</b><span class="dot"></span><span>Baño y corte, antes/después</span></div>
+          <span class="badge bad">Hoy</span>
+        </div>
+        <div class="strip">
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#8a6a34,#241a0b)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#6f5a3c,#1e1810)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#a07f3d,#2b210e)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#5c4a2c,#191308)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#c39a45,#332810)"></div></div>
+        </div>
+        <div class="d-cap">
+          <div class="line"><b>Speedy Net</b><span class="dot"></span><span>Fibra en 24 h</span></div>
+          <span class="badge">viernes</span>
+        </div>
+        <div class="strip">
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#2d5470,#0d1620)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#39627f,#101c26)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#26485f,#0b1219)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#457697,#132330)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#1e3a4d,#080e13)"></div></div>
+        </div>
+        <div class="a-foot">
+          <div class="line"><b>6</b><span>en banco</span><span class="dot"></span><b>15</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i class="hot"></i><i class="hot"></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Alexa Kerocen</h3><span>3 clientes · 1 de 2</span></div>
+        </div>
+        <div class="d-cap" style="margin-top:12px">
+          <div class="line"><b>Farmacia Buena Vida</b><span class="dot"></span><span>Vacuna de gripe</span></div>
+          <span class="badge warn">Mañana</span>
+        </div>
+        <div class="strip">
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#2f5f6e,#0e1d22)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#3d7484,#12262c)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#27505c,#0b171b)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#4d8896,#173036)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#1f4149,#070f12)"></div></div>
+        </div>
+        <div class="d-cap">
+          <div class="line"><span style="color:var(--faint)">Espacio libre</span><span class="dot"></span><span>siguiente: <b>Casita Vieja</b></span></div>
+        </div>
+        <div class="empty-slot" style="height:58px;align-content:center">
+          <div class="nxt">Cuando empiece el corte, aquí sale su tira</div>
+        </div>
+        <div class="a-foot">
+          <div class="line"><b>3</b><span>en banco</span><span class="dot"></span><b>4</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i class="on"></i><i></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="who">
+          <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div><h3>Richard Jimenez</h3><span>1 cliente · 1 de 2</span></div>
+        </div>
+        <div class="d-cap" style="margin-top:12px">
+          <div class="line"><b>Café El Bosque</b><span class="dot"></span><span>Latte art en cámara lenta</span></div>
+          <span class="badge ok">Al día</span>
+        </div>
+        <div class="strip">
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#6b4a2c,#1e1409)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#8a6238,#261a0d)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#5a3f26,#180f07)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#a97c46,#2e2010)"></div></div>
+          <div class="frame ratio-9"><div class="img" style="background:linear-gradient(160deg,#4a3320,#130c05)"></div></div>
+        </div>
+        <div class="a-foot">
+          <div class="line"><b>0</b><span>en banco</span><span class="dot"></span><b>2</b><span>en revisión</span></div>
+          <div class="meter" style="width:56px"><i class="on"></i><i></i></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <h2>Para escoger</h2>
+    <ul>
+      <li><strong>A — En la mesa:</strong> si lo que quieres al abrir el tablero es <em>ver el trabajo</em>. La más vistosa; caben 3 por fila igual que hoy, pero cada tarjeta es más alta.</li>
+      <li><strong>B — Dos espacios:</strong> si lo que quieres es que nadie pase de 2 videos a la vez. La regla queda dibujada, y el formato vertical es el que se publica.</li>
+      <li><strong>C — Línea de producción:</strong> si revisas al equipo completo varias veces al día y necesitas compararlos sin bajar la página.</li>
+      <li><strong>D — Tira de escenas:</strong> si quieres juzgar el corte sin abrirlo. Reusa la tira que ya se genera; cero trabajo nuevo de miniaturas.</li>
+    </ul>
+    <p>Se pueden combinar: <strong>A o D</strong> para el detalle y <strong>C</strong> como vista comprimida con un botón de cambio arriba. Dime cuál y lo implemento con sus tests.</p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -13,7 +13,7 @@ import {
   completeMultipartUpload,
   abortMultipartUpload,
 } from '@/lib/actions/multipart-upload'
-import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { generateVideoThumbs, processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { videoNameFromIdea } from '@/lib/uploads/video-name-from-idea'
 
 /**
@@ -408,17 +408,30 @@ async function runMultipart(id: string): Promise<void> {
   await finishAfterRegister(id, res.id)
 }
 
-/** After a successful register: fire the AI QC for edited videos (best-effort), then mark done. */
+/**
+ * Después de registrar: el corte final va al QC IA; el crudo y el b-roll solo
+ * generan su carátula, que es lo que hace visible el banco de video (el QC IA
+ * se cobra por fotograma y es del corte, no del material bruto).
+ * Best-effort las dos: la subida ya está hecha y no se revierte.
+ */
 async function finishAfterRegister(id: string, videoId?: string): Promise<void> {
   const eng = engines.get(id)!
   const item = useUploadStore.getState().uploads[id]
   patchUpload(id, { videoId })
-  if (item.kind === 'edited' && videoId) {
-    patchUpload(id, { phase: 'analizando' })
-    try {
-      await processUploadedVideo(videoId, eng.file)
-    } catch {
-      // El video ya está subido y registrado; que falle el análisis no revierte la subida.
+  if (videoId) {
+    if (item.kind === 'edited') {
+      patchUpload(id, { phase: 'analizando' })
+      try {
+        await processUploadedVideo(videoId, eng.file)
+      } catch {
+        // El video ya está subido y registrado; que falle el análisis no revierte la subida.
+      }
+    } else {
+      try {
+        await generateVideoThumbs(videoId, eng.file)
+      } catch {
+        // Sin carátula el banco muestra un marcador; no es motivo para fallar la subida.
+      }
     }
   }
   patchUpload(id, { phase: 'listo', pct: 100 })

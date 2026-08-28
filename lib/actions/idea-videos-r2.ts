@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission, currentUserHas } from '@/lib/auth/server'
+import { requirePermission, currentUserHas, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
+import { canDownloadOrPreviewRaw, editorWipIdeaIds } from '@/lib/pipeline/editor-video-bank'
+import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
@@ -165,31 +167,75 @@ export async function registerR2Video(input: {
   return { ok: true, id: data.id }
 }
 
-/**
- * Presigned GET URL so an editor downloads straight from R2 (fast, CDN).
- * Same read gate as getEntregasPreviewUrl — video/copy/team_member could
- * pull raw material of ANY client without this (audit finding). Exception:
- * whoever UPLOADED the file can always see/download their own upload — a
- * videógrafo confirming their own recording landed OK is not the abuse the
- * gate targets.
- */
-export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+const VIDEO_ACCESS_SELECT = `
+  drive_file_id, storage_provider, name, uploaded_by, kind,
+  idea:content_ideas!content_idea_videos_idea_id_fkey(
+    id,
+    production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id),
+    client:clients!content_ideas_client_id_fkey(assigned_to)
+  )
+`
+
+export async function authorizeIdeaVideoAccess(videoId: string): Promise<
+  | { error: string }
+  | {
+      drive_file_id: string | null
+      storage_provider: string | null
+      name: string
+      kind?: string
+    }
+> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   const { data: video, error } = await supabase
     .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, name, uploaded_by')
+    .select(VIDEO_ACCESS_SELECT)
     .eq('id', videoId)
-    .single()
+    .maybeSingle()
   if (error || !video) return { error: 'Video no encontrado' }
 
-  const isOwnUpload = !!user && video.uploaded_by === user.id
-  const canDownload =
-    isOwnUpload ||
-    (await currentUserHas('revision.read')) ||
-    (await currentUserHas('entregas.read')) ||
-    (await currentUserHas('planning.read'))
-  if (!canDownload) return { error: 'No autorizado' }
+  const idea = video.idea as {
+    id?: string
+    production_task?: { assigned_to_id?: string | null } | null
+    client?: { assigned_to?: string | null } | null
+  } | null
+
+  const role = await getEffectiveRole()
+  const userId = await getEffectiveUserId()
+  let inEditorWip: boolean | undefined
+  if ((role === 'editor' || role === 'team_member') && userId) {
+    if (!idea?.id) {
+      inEditorWip = false
+    } else {
+      const pipeline = await getIdeacionPipeline({ limit: 400 })
+      inEditorWip = editorWipIdeaIds(pipeline, userId).has(idea.id)
+    }
+  }
+
+  const allowed = canDownloadOrPreviewRaw({
+    role,
+    userId,
+    ideaAssigneeId: idea?.production_task?.assigned_to_id ?? null,
+    clientAssigneeId: idea?.client?.assigned_to ?? null,
+    uploadedBy: video.uploaded_by,
+    inEditorWip,
+  })
+  if (!allowed) return { error: 'No autorizado' }
+  return {
+    drive_file_id: video.drive_file_id,
+    storage_provider: video.storage_provider,
+    name: video.name,
+    kind: video.kind,
+  }
+}
+
+/**
+ * Presigned GET URL so an editor downloads straight from R2 (fast, CDN).
+ * Owner/supervisor: todo el banco. Editor: solo asignado (tarea o cliente).
+ * Videógrafo: solo el crudo que él subió.
+ */
+export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string; error?: string }> {
+  const video = await authorizeIdeaVideoAccess(videoId)
+  if ('error' in video) return { error: video.error }
 
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }
@@ -266,22 +312,8 @@ export async function getR2PublicUrl(videoId: string): Promise<{ url?: string; e
  * with the same own-upload exception.
  */
 export async function getR2PreviewUrl(videoId: string): Promise<{ url?: string; error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const { data: video, error } = await supabase
-    .from('content_idea_videos')
-    .select('drive_file_id, storage_provider, uploaded_by')
-    .eq('id', videoId)
-    .single()
-  if (error || !video) return { error: 'Video no encontrado' }
-
-  const isOwnUpload = !!user && video.uploaded_by === user.id
-  const canPreview =
-    isOwnUpload ||
-    (await currentUserHas('revision.read')) ||
-    (await currentUserHas('entregas.read')) ||
-    (await currentUserHas('planning.read'))
-  if (!canPreview) return { error: 'No autorizado' }
+  const video = await authorizeIdeaVideoAccess(videoId)
+  if ('error' in video) return { error: video.error }
 
   if (video.storage_provider !== 'r2' || !video.drive_file_id) {
     return { error: 'Este video no está en R2' }

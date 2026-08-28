@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/context/auth-context'
+import { hasRealAvatar, shouldPromptForAvatar } from '@/lib/utils/avatar-core'
 import { AvatarSetupDialog } from './avatar-setup-dialog'
 
-// Per-session dismissal: "Más tarde" hides it for this session, but a fresh
-// login (new session) asks again — so it keeps asking until an avatar is set.
+// Per-session only: "Ahora no" hides it until the next visit / new login.
 const DISMISS_KEY = 'nm_avatar_prompt_dismissed'
 
 function isDismissed(): boolean {
@@ -24,18 +24,25 @@ function markDismissed() {
 }
 
 /**
- * On login, nudges users without an avatar to create one. Optional ("Más
- * tarde") and reappears each session until they set one.
+ * After login, blocks users without a real photo/avatar. They can postpone
+ * this visit once; the next time they enter, we ask again.
  */
 export function AvatarSetupGate() {
   const { profile } = useAuth()
   const [open, setOpen] = useState(false)
+  const [postponed, setPostponed] = useState(false)
 
   useEffect(() => {
-    if (profile && !profile.avatar_url && !isDismissed()) setOpen(true)
-  }, [profile])
+    setPostponed(isDismissed())
+  }, [])
 
-  if (!profile || profile.avatar_url) return null
+  useEffect(() => {
+    if (profile && shouldPromptForAvatar(profile.avatar_url, postponed || isDismissed())) {
+      setOpen(true)
+    }
+  }, [profile, postponed])
+
+  if (!profile || hasRealAvatar(profile.avatar_url) || postponed) return null
 
   return (
     <AvatarSetupDialog
@@ -43,9 +50,11 @@ export function AvatarSetupGate() {
       onOpenChange={setOpen}
       name={profile.full_name ?? ''}
       email={profile.email ?? ''}
-      onLater={markDismissed}
-      onSaved={() => {
+      onLater={() => {
         markDismissed()
+        setPostponed(true)
+      }}
+      onSaved={() => {
         setOpen(false)
       }}
     />

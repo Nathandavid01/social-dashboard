@@ -140,6 +140,11 @@ export function ClientLogoUpload({ clientId, currentLogoUrl, currentLogoDarkUrl,
           <Moon className="h-3.5 w-3.5" />
         </Button>
       </div>
+      {!url && (
+        <p className="max-w-[11rem] text-center text-[11px] text-muted-foreground">
+          Sube el logo para que se vea en Pipeline y en todas las tarjetas del cliente.
+        </p>
+      )}
     </div>
   )
 }

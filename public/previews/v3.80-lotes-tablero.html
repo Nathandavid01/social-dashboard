@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.80 — Tablero de lotes</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#f7f4ef; --muted:#9a948a; --gold:#c9a227; --col:#121212; --line:#2c2820; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 24px 16px 48px; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 20px; line-height: 1.45; }
+    .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 16px; }
+    .tab { font-size: 12px; padding: 6px 10px; border-radius: 6px; color: var(--muted); }
+    .tab.on { background: var(--gold); color: #111; font-weight: 600; }
+    .board { display: flex; gap: 12px; overflow-x: auto; }
+    .col { width: 220px; flex-shrink: 0; }
+    .col h2 { font-size: 12px; margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 99px; }
+    .well { background: var(--col); border: 1px solid var(--line); border-radius: 12px; min-height: 220px; padding: 8px; }
+    .card { background: #1a1814; border: 1px solid var(--line); border-radius: 10px; padding: 10px; border-left: 3px solid #8b5cf6; }
+    .card strong { display: block; font-size: 13px; }
+    .meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .empty { color: var(--muted); font-size: 11px; text-align: center; padding: 28px 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Pipeline · v3.80</p>
+    <h1>Tablero de lotes · el flujo del equipo</h1>
+    <p class="sub">Banco es bajar el crudo. Lotes es ver en qué etapa va cada cliente. Arrastra la tarjeta; el servidor guarda.</p>
+    <div class="tabs"><span class="tab">Banco</span><span class="tab on">Lotes</span></div>
+    <div class="board">
+      <div class="col">
+        <h2><span class="dot" style="background:#06b6d4"></span> Video</h2>
+        <div class="well">
+          <div class="card">
+            <strong>Blue Chiropractic</strong>
+            <p class="meta">3 videos · 0 aprobados</p>
+            <p class="meta">María R.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <h2><span class="dot" style="background:#8b5cf6"></span> Edición</h2>
+        <div class="well">
+          <div class="card" style="border-left-color:#c9a227">
+            <strong>Lumen</strong>
+            <p class="meta">2 videos · 0 aprobados</p>
+            <p class="meta">Diego V.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <h2><span class="dot" style="background:#f59e0b"></span> Aprobación</h2>
+        <div class="well"><p class="empty">Suelta un lote aquí</p></div>
+      </div>
+      <div class="col">
+        <h2><span class="dot" style="background:#10b981"></span> Publicación</h2>
+        <div class="well"><p class="empty">Suelta un lote aquí</p></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

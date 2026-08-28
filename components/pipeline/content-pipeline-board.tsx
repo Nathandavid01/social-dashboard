@@ -1,12 +1,13 @@
 'use client'
 
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag } from 'lucide-react'
+import { Search, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, Clapperboard, Columns3 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
 import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
+import { clientCardColor } from '@/lib/utils/client-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
 import { getBatchVideoPreviewUrls } from '@/lib/actions/batch-video-previews'
@@ -16,7 +17,10 @@ import { useOverlayRoute } from '@/lib/hooks/use-overlay-route'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
+import { EditorVideoBank } from './editor-video-bank'
+import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -57,6 +61,10 @@ export function ContentPipelineBoard(props: {
    * Fills batch cards when ideas.client.logo_url is empty.
    */
   clientLogos?: Record<string, string | null>
+  /** brand_colors.primary por cliente (opcional; si falta, hash del id). */
+  clientColors?: Record<string, string | null>
+  /** Owner y supervisor — sección fija en el Banco. */
+  bankAdmins?: BankAdmin[]
 }) {
   // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
   return (
@@ -73,6 +81,8 @@ function ContentPipelineBoardInner({
   clientCadence = {},
   teamMembers = [],
   clientLogos = {},
+  clientColors = {},
+  bankAdmins = [],
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -80,10 +90,15 @@ function ContentPipelineBoardInner({
   clientCadence?: Record<string, ClientCadence>
   teamMembers?: { id: string; name: string }[]
   clientLogos?: Record<string, string | null>
+  clientColors?: Record<string, string | null>
+  bankAdmins?: BankAdmin[]
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [view, setView] = useState<'bank' | 'lotes'>('bank')
+  const canManageLotes = useHasPermission('planning.read')
+  const canMoveLotes = useHasPermission('planning.move')
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
@@ -173,8 +188,9 @@ function ContentPipelineBoardInner({
     return raw.map((b) => ({
       ...b,
       logoUrl: b.logoUrl ?? clientLogos[b.clientId] ?? null,
+      cardColor: clientCardColor({ id: b.clientId, brandColor: clientColors[b.clientId] }).dot,
     }))
-  }, [ideas, clientLogos])
+  }, [ideas, clientLogos, clientColors])
 
   const pipelineByClient = useMemo(
     () => buildClientPipelineIndex(ideas, clientCadence),
@@ -231,24 +247,65 @@ function ContentPipelineBoardInner({
     return out
   }, [visible, stageOf])
 
-  const moveCard = useCallback(
-    (batch: ClientBatch, dir: 1 | -1) => {
+  const moveCardTo = useCallback(
+    (batch: ClientBatch, target: BatchStageKey) => {
       const cur = stageOf(batch)
-      const target = adjacentBatchStage(cur, dir)
-      if (!target) return
+      if (cur === target) return
       setOverrides((o) => ({ ...o, [batch.clientId]: target }))
       startMove(async () => {
         const res = await moveBatch(batch.ideas.map((i) => i.id), target)
         if (res?.error) {
           setOverrides((o) => ({ ...o, [batch.clientId]: cur }))
-          toast({ title: 'No se pudo mover el batch', description: res.error, variant: 'destructive' })
+          toast({ title: 'No se pudo mover el lote', description: res.error, variant: 'destructive' })
         }
       })
     },
     [stageOf, toast],
   )
 
+  const moveCard = useCallback(
+    (batch: ClientBatch, dir: 1 | -1) => {
+      const target = adjacentBatchStage(stageOf(batch), dir)
+      if (target) moveCardTo(batch, target)
+    },
+    [stageOf, moveCardTo],
+  )
+
+  const dropOnStage = useCallback(
+    (stage: BatchStageKey, raw: string) => {
+      try {
+        const parsed = JSON.parse(raw) as { clientId?: string }
+        const batch = visible.find((b) => b.clientId === parsed.clientId)
+        if (batch) moveCardTo(batch, stage)
+      } catch {
+        /* ignore malformed drops */
+      }
+    },
+    [visible, moveCardTo],
+  )
+
   const published = visible.filter((b) => stageOf(b) === 'publication').length
+
+  const bankRows = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors }, names)
+      .filter((row) => {
+        if (assigneeFilter === 'unassigned') return row.editorId == null
+        if (assigneeFilter) return row.editorId === assigneeFilter
+        return true
+      })
+      .map((row) => ({
+        ...row,
+        clients: row.clients.filter((c) => {
+          if (clientFilter && c.clientId !== clientFilter) return false
+          if (!q) return true
+          const hay = `${c.clientName} ${row.editorName} ${c.clips.map((clip) => clip.title).join(' ')}`
+          return hay.toLowerCase().includes(q)
+        }),
+      }))
+      .filter((row) => row.clients.length > 0)
+  }, [ideas, teamMembers, clientLogos, clientColors, assigneeFilter, clientFilter, search])
 
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -297,22 +354,48 @@ function ContentPipelineBoardInner({
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-[13px] font-bold text-black shadow-lg shadow-primary/20">N</div>
           <div className="min-w-0">
             <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Pipeline de contenido</h1>
-            <p className="text-[11px] text-muted-foreground">Nate Media · lotes por cliente</p>
+            <p className="text-[11px] text-muted-foreground">
+              {view === 'bank' ? 'Paso 2 · Banco para edición' : 'Tablero de lotes · el flujo del equipo'}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-md border border-border p-0.5">
+            <button
+              type="button"
+              onClick={() => setView('bank')}
+              className={cn(
+                'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
+                view === 'bank' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <Clapperboard className="h-3.5 w-3.5" />
+              Banco
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('lotes')}
+              className={cn(
+                'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
+                view === 'lotes' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <Columns3 className="h-3.5 w-3.5" />
+              Lotes
+            </button>
+          </div>
           <div className="relative hidden sm:block">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar clientes, personas…" className="h-8 w-52 rounded-md border border-border bg-muted/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:outline-none" />
           </div>
           <ClientFilterDropdown clients={clients} counts={clientCounts} total={batches.length} value={clientFilter} onChange={setClientFilter} />
-          <HeaderButton icon={Filter} label="Filtros" />
-          <HeaderButton icon={LayoutGrid} label="Agrupar" trailing={ChevronDown} />
-          <NewVideoDialog
-            clients={allClients.length > 0 ? allClients : clients}
-            pipelineByClient={pipelineByClient}
-            clientCadence={clientCadence}
-          />
+          {canManageLotes && (
+            <NewVideoDialog
+              clients={allClients.length > 0 ? allClients : clients}
+              pipelineByClient={pipelineByClient}
+              clientCadence={clientCadence}
+            />
+          )}
         </div>
       </header>
 
@@ -327,11 +410,21 @@ function ContentPipelineBoardInner({
           onChange={setAssigneeFilter}
         />
         <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
-          <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+          {view === 'bank' ? (
+            <>
+              <span className="text-foreground">{bankRows.length}</span> editores
+            </>
+          ) : (
+            <>
+              <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+            </>
+          )}
         </p>
       </div>
 
-      {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}
+      {view === 'bank' ? (
+        <EditorVideoBank rows={bankRows} admins={bankAdmins} />
+      ) : (
       <div
         ref={scrollRef}
         data-testid="pipeline-scroll"
@@ -344,10 +437,21 @@ function ContentPipelineBoardInner({
       >
         <div className="flex h-full min-w-max gap-3 p-4">
           {BATCH_STAGES.map((stage) => (
-            <BatchColumn key={stage.key} stageKey={stage.key} label={STAGE_LABEL_ES[stage.key]} batches={byStage[stage.key]} planned={stage.key === 'video' ? visiblePlanned : undefined} onMove={moveCard} onOpen={openClientBatch} />
+            <BatchColumn
+              key={stage.key}
+              stageKey={stage.key}
+              label={STAGE_LABEL_ES[stage.key]}
+              batches={byStage[stage.key]}
+              planned={stage.key === 'video' ? visiblePlanned : undefined}
+              canMove={canMoveLotes}
+              onMove={moveCard}
+              onDropStage={dropOnStage}
+              onOpen={openClientBatch}
+            />
           ))}
         </div>
       </div>
+      )}
 
       {/* In-place full-screen overlay: the client's "Lote de videos" (Pencil) */}
       {openClientId && (
@@ -381,11 +485,38 @@ function ContentPipelineBoardInner({
   )
 }
 
-function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { stageKey: BatchStageKey; label: string; batches: ClientBatch[]; planned?: PlannedClient[]; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void }) {
+function BatchColumn({
+  stageKey, label, batches, planned, canMove, onMove, onDropStage, onOpen,
+}: {
+  stageKey: BatchStageKey
+  label: string
+  batches: ClientBatch[]
+  planned?: PlannedClient[]
+  canMove: boolean
+  onMove: (b: ClientBatch, dir: 1 | -1) => void
+  onDropStage: (stage: BatchStageKey, raw: string) => void
+  onOpen: (clientId: string, opts?: ClientBatchOpenOptions) => void
+}) {
   const plannedCards = (planned ?? []).flatMap((p) => p.sessions.map((s) => ({ client: p, session: s })))
   const count = batches.length + plannedCards.length
+  const [over, setOver] = useState(false)
   return (
-    <section className="flex h-full w-[284px] flex-col">
+    <section
+      data-testid={`lotes-column-${stageKey}`}
+      onDragOver={(e) => {
+        if (!canMove) return
+        e.preventDefault()
+        setOver(true)
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        if (!canMove) return
+        e.preventDefault()
+        setOver(false)
+        onDropStage(stageKey, e.dataTransfer.getData('application/x-nate-lote') || e.dataTransfer.getData('text/plain'))
+      }}
+      className="flex h-full w-[300px] flex-col"
+    >
       <div className="mb-2 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STAGE_DOT[stageKey] }} />
@@ -393,15 +524,20 @@ function BatchColumn({ stageKey, label, batches, planned, onMove, onOpen }: { st
           <span className="rounded-full bg-muted px-1.5 text-[10px] font-medium tabular-nums text-muted-foreground">{count}</span>
         </div>
       </div>
-      <div className="flex-1 space-y-2.5 overflow-y-auto rounded-lg bg-muted/30 p-2">
+      <div className={cn(
+        'flex-1 space-y-2.5 overflow-y-auto rounded-xl border p-2 transition-colors',
+        over ? 'border-primary/50 bg-primary/5' : 'border-border/60 bg-[#121212]',
+      )}>
         {count === 0 ? (
-          <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">—</p>
+          <p className="select-none py-6 text-center text-[11px] text-muted-foreground/40">Suelta un lote aquí</p>
         ) : (
           <>
             {plannedCards.map(({ client, session }) => (
               <PlannedSessionCard key={`${client.clientId}-${session.index}`} client={client} session={session} onOpen={onOpen} />
             ))}
-            {batches.map((b) => <BatchCard key={b.clientId} batch={b} stage={stageKey} onMove={onMove} onOpen={onOpen} />)}
+            {batches.map((b) => (
+              <BatchCard key={b.clientId} batch={b} stage={stageKey} canMove={canMove} onMove={onMove} onOpen={onOpen} />
+            ))}
           </>
         )}
       </div>
@@ -428,6 +564,7 @@ function PlannedSessionCard({
       : session.empty > 0
         ? (isSingle ? 'Por idear' : `${session.empty} por idear`)
         : 'Lleno'
+  const brandDot = clientCardColor({ id: client.clientId }).dot
   return (
     <article
       onClick={() =>
@@ -438,6 +575,7 @@ function PlannedSessionCard({
         })
       }
       className="group relative cursor-pointer overflow-hidden rounded-xl border border-dashed border-sky-500/25 bg-gradient-to-b from-sky-500/[0.07] via-card to-card shadow-sm transition-all hover:border-sky-500/40 hover:from-sky-500/[0.11] hover:shadow-md [content-visibility:auto] [contain-intrinsic-size:0_220px]"
+      style={{ boxShadow: 'inset 3px 0 0 0 ' + brandDot }}
     >
       <div className="space-y-2.5 p-3">
         <div className="flex items-start justify-between gap-2">
@@ -659,18 +797,31 @@ function BatchVideoStrip({
   )
 }
 
-const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { batch: ClientBatch; stage: BatchStageKey; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
+const BatchCard = memo(function BatchCard({ batch, stage, canMove, onMove, onOpen }: { batch: ClientBatch; stage: BatchStageKey; canMove: boolean; onMove: (b: ClientBatch, dir: 1 | -1) => void; onOpen: (clientId: string) => void }) {
   const a = userAccent(batch.assignee?.id)
+  const brandDot = (batch as ClientBatch & { cardColor?: string }).cardColor
+    ?? clientCardColor({ id: batch.clientId }).dot
   const canBack = adjacentBatchStage(stage, -1) !== null
   const canFwd = adjacentBatchStage(stage, 1) !== null
   const pct = Math.round(batchProgress(stage) * 100)
+  const approved = batch.ideas.filter((i) => isIdeaApproved(i)).length
 
   // Worst deadline across the batch's videos → one Atrasado/Pronto badge so leads
   // can triage urgency from the board without opening each client.
   const dlt = deadlineTone(worstDeadlineStatus(batch.ideas))
 
   return (
-    <article onClick={() => onOpen(batch.clientId)} className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted [content-visibility:auto] [contain-intrinsic-size:0_260px]" style={{ boxShadow: 'inset 3px 0 0 0 ' + a.dot }}>
+    <article
+      draggable={canMove}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData('application/x-nate-lote', JSON.stringify({ clientId: batch.clientId, ideaIds: batch.ideas.map((i) => i.id) }))
+        e.dataTransfer.setData('text/plain', JSON.stringify({ clientId: batch.clientId, ideaIds: batch.ideas.map((i) => i.id) }))
+      }}
+      onClick={() => onOpen(batch.clientId)}
+      className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/20 hover:bg-muted [content-visibility:auto] [contain-intrinsic-size:0_260px]"
+      style={{ boxShadow: 'inset 3px 0 0 0 ' + brandDot }}
+    >
       <div className="absolute right-1.5 top-1.5 z-10 flex gap-1 opacity-0 transition group-hover:opacity-100">
         <MoveBtn dir={-1} disabled={!canBack} onClick={(e) => { e.stopPropagation(); onMove(batch, -1) }} />
         <MoveBtn dir={1} disabled={!canFwd} onClick={(e) => { e.stopPropagation(); onMove(batch, 1) }} />
@@ -694,7 +845,9 @@ const BatchCard = memo(function BatchCard({ batch, stage, onMove, onOpen }: { ba
                 </span>
               )}
             </div>
-            <p className="truncate text-[10px] text-muted-foreground">{batch.total} video{batch.total === 1 ? '' : 's'} en el batch</p>
+            <p className="truncate text-[10px] text-muted-foreground">
+              {batch.total} video{batch.total === 1 ? '' : 's'} en el batch · {approved} {approved === 1 ? 'aprobado' : 'aprobados'}
+            </p>
           </div>
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
@@ -1065,15 +1218,5 @@ function ClientFilterDropdown({
         </div>
       )}
     </div>
-  )
-}
-
-function HeaderButton({ icon: Icon, label, trailing: Trailing }: { icon: typeof Filter; label: string; trailing?: typeof ChevronDown }) {
-  return (
-    <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground">
-      <Icon className="h-3.5 w-3.5" />
-      <span className="hidden md:inline">{label}</span>
-      {Trailing && <Trailing className="h-3 w-3 opacity-60" />}
-    </button>
   )
 }

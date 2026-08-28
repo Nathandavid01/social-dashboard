@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.78 — Banco para edición</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#f7f4ef; --muted:#9a948a; --gold:#c9a227; --paper:#16140f; --line:#2c2820; --violet:#a78bfa; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 16px; }
+    .tab { font-size: 12px; padding: 6px 10px; border-radius: 6px; color: var(--muted); }
+    .tab.on { background: var(--gold); color: #111; font-weight: 600; }
+    .card { border: 1px solid var(--line); background: var(--paper); border-radius: 12px; overflow: hidden; }
+    .head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .av { width: 32px; height: 32px; border-radius: 8px; background: rgba(167,139,250,.18); }
+    h2 { font-size: 14px; margin: 0; }
+    .meta { font-size: 11px; color: var(--muted); }
+    .cli { padding: 12px 14px 14px; }
+    h3 { font-size: 13px; margin: 0 0 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    th { text-align: left; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; background: #1c1913; }
+    td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+    .btn { display: inline-block; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: 11px; margin-left: 4px; }
+    .gold { border-color: #5a4a1c; color: var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Pipeline · v3.78</p>
+    <h1>Paso 2 · Banco para edición</h1>
+    <p class="sub">Una fila por editor. Dentro, el banco de video por cliente: ver y bajar el crudo. El corte sigue en Revisión.</p>
+    <div class="tabs"><span class="tab on">Banco</span><span class="tab">Lotes</span></div>
+    <div class="card">
+      <div class="head">
+        <div class="av"></div>
+        <div>
+          <h2>María R.</h2>
+          <p class="meta">1 cliente</p>
+        </div>
+      </div>
+      <div class="cli">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px">
+          <h3>Blue Chiropractic</h3>
+          <p class="meta"><strong>4</strong> aprobados</p>
+        </div>
+        <table>
+          <thead><tr><th>Idea</th><th>Archivo</th><th>Notas</th><th></th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Intro clínica</td>
+              <td>crudo.mp4<br><span class="meta">Crudo</span></td>
+              <td>Toma 2, 35mm</td>
+              <td style="text-align:right"><span class="btn">Ver</span><span class="btn gold">Bajar</span></td>
+            </tr>
+            <tr>
+              <td>Tercera toma</td>
+              <td>En espera</td>
+              <td>—</td>
+              <td style="text-align:right;color:var(--muted)">Cola</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -16,9 +16,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 let canRead = true
+let effectiveRole: 'owner' | 'supervisor' | 'editor' | 'video' | null = 'editor'
+let effectiveUserId: string | null = 'user-1'
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => {}),
   currentUserHas: vi.fn(async () => canRead),
+  getEffectiveRole: vi.fn(async () => effectiveRole),
+  getEffectiveUserId: vi.fn(async () => effectiveUserId),
 }))
 
 // Activity logging is an orthogonal side effect; stub it so the op recorder
@@ -30,6 +34,7 @@ vi.mock('@/lib/utils/idea-activity', () => ({
 let publicBase: string | null = 'https://videos.natemedia.com'
 let videoKind = 'edited'
 let videoUploadedBy: string | null = 'user-1'
+let assignedEditorId: string | null = 'user-1'
 vi.mock('@/lib/integrations/r2', () => ({
   r2Client: vi.fn(() => ({ send: vi.fn() })),
   r2Bucket: vi.fn(() => 'nmedia-videos'),
@@ -52,7 +57,7 @@ function makeChain() {
   const chain: Record<string, unknown> = {}
   const passthrough = () => chain
   for (const m of ['eq', 'in', 'select']) chain[m] = vi.fn(passthrough)
-  chain.single = vi.fn(async () => ({
+  const row = vi.fn(async () => ({
     data: {
       id: 'new-video-id',
       drive_file_id: `ideas/idea-1/${videoKind}/1-final.mp4`,
@@ -60,9 +65,18 @@ function makeChain() {
       kind: videoKind,
       name: 'final.mp4',
       uploaded_by: videoUploadedBy,
+      idea: {
+        id: 'idea-1',
+        production_task: assignedEditorId ? { assigned_to_id: assignedEditorId } : null,
+        client: { assigned_to: null },
+      },
     },
     error: null,
   }))
+  // El código usa `.maybeSingle()` (una fila que puede no existir); `.single()`
+  // sigue expuesto porque otras llamadas del módulo lo usan.
+  chain.maybeSingle = row
+  chain.single = row
   // Make the chain awaitable (for update() calls that aren't .single()'d).
   ;(chain as { then: unknown }).then = (resolve: (v: unknown) => unknown) =>
     resolve({ data: null, error: null })
@@ -100,6 +114,11 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => supabaseMock),
 }))
 
+const pipelineIdeas: Array<Record<string, unknown>> = []
+vi.mock('@/lib/actions/content-ideas', () => ({
+  getIdeacionPipeline: async () => pipelineIdeas,
+}))
+
 // Import AFTER mocks are registered.
 import {
   registerR2Video,
@@ -123,6 +142,20 @@ beforeEach(() => {
   // 'user-1' explicitly.
   videoUploadedBy = 'someone-else-id'
   canRead = true
+  effectiveRole = 'editor'
+  effectiveUserId = 'user-1'
+  assignedEditorId = 'ed-maria'
+  pipelineIdeas.length = 0
+  pipelineIdeas.push({
+    id: 'idea-1',
+    created_at: '2026-08-01',
+    status: 'grabada',
+    approval_status: 'pending',
+    published_at: null,
+    assignee: { id: 'user-1', full_name: 'Editor' },
+    client: { id: 'c1', name: 'Blue', assigned_to: null },
+    videos: [{ id: 'vid-1', kind: 'raw', status: 'uploaded', name: 'x.mp4', storage_provider: 'r2', drive_view_link: null }],
+  })
   supabaseMock.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 })
 
@@ -256,15 +289,15 @@ describe('getR2UploadUrl / getQuickUploadUrl — audit: solo se aceptan tipos de
 })
 
 describe('getR2DownloadUrl / getR2PublicUrl / getR2PreviewUrl — audit: gate de lectura obligatorio', () => {
-  it('getR2DownloadUrl sin ningún permiso de lectura (revision/entregas/planning) → error, no presigna', async () => {
+  it('getR2DownloadUrl de un editor no asignado → error, no presigna', async () => {
     canRead = false
     const res = await getR2DownloadUrl('vid-1')
     expect(res.url).toBeUndefined()
     expect(res.error).toMatch(/no autorizado/i)
   })
 
-  it('getR2DownloadUrl con permiso → funciona como hoy', async () => {
-    canRead = true
+  it('getR2DownloadUrl del editor asignado → funciona', async () => {
+    assignedEditorId = 'user-1'
     const res = await getR2DownloadUrl('vid-1')
     expect(res.url).toBe('https://signed.example/presigned')
     expect(res.error).toBeUndefined()
@@ -277,8 +310,8 @@ describe('getR2DownloadUrl / getR2PublicUrl / getR2PreviewUrl — audit: gate de
     expect(res.error).toMatch(/no autorizado/i)
   })
 
-  it('getR2PreviewUrl con permiso → funciona como hoy', async () => {
-    canRead = true
+  it('getR2PreviewUrl del editor asignado → funciona', async () => {
+    assignedEditorId = 'user-1'
     const res = await getR2PreviewUrl('vid-1')
     expect(res.url).toBe('https://signed.example/presigned')
     expect(res.error).toBeUndefined()
@@ -337,9 +370,10 @@ describe('excepción "lo propio" — quien subió el archivo siempre puede verlo
     expect(res.error).toMatch(/no autorizado/i)
   })
 
-  it('con permiso normal (revision/entregas/planning), sigue funcionando igual aunque no sea el dueño', async () => {
-    canRead = true
+  it('owner baja el crudo de otro aunque no lo haya subido', async () => {
+    effectiveRole = 'owner'
     videoUploadedBy = 'un-tercero-cualquiera'
+    assignedEditorId = 'ed-maria'
     const res = await getR2DownloadUrl('vid-1')
     expect(res.error).toBeUndefined()
     expect(res.url).toBe('https://signed.example/presigned')

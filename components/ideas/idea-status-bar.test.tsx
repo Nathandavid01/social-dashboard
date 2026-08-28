@@ -39,18 +39,18 @@ describe('IdeaStatusBar', () => {
 
   it('opens an info dialog with the stage description + video title when a segment is clicked', () => {
     render(<IdeaStatusBar pipeline={pipeline} title="Mi video" />)
-    expect(screen.queryByText('La idea está definida con su hook y brief visual.')).toBeNull()
+    expect(screen.queryByText('Primer paso: la idea está definida (título / de qué es) para grabar.')).toBeNull()
 
     fireEvent.click(screen.getAllByTestId('stage-segment')[0])
 
-    expect(screen.getByText('La idea está definida con su hook y brief visual.')).toBeInTheDocument()
+    expect(screen.getByText('Primer paso: la idea está definida (título / de qué es) para grabar.')).toBeInTheDocument()
     expect(screen.getByText('Mi video')).toBeInTheDocument()
   })
 
   it('shows the description of the specific stage clicked', () => {
     render(<IdeaStatusBar pipeline={pipeline} />)
     fireEvent.click(screen.getAllByTestId('stage-segment')[3]) // Grabación
-    expect(screen.getByText('El material fue grabado y está en el buffer.')).toBeInTheDocument()
+    expect(screen.getByText('El material fue grabado y está en el banco de crudo.')).toBeInTheDocument()
   })
 
   it('offers a "work on this step" link to the idea workspace when ideaId is given', () => {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v3.83 — Foto de perfil</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#f7f4ef; --muted:#9a948a; --gold:#c9a227; --paper:#16140f; --line:#2c2820; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 28px 16px 48px; }
+    .wrap { max-width: 440px; margin: 0 auto; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 8px 0 24px; line-height: 1.45; }
+    .card { border: 1px solid var(--line); background: var(--paper); border-radius: 12px; padding: 20px 18px 16px; }
+    h2 { font-size: 16px; margin: 0 0 8px; }
+    p { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0 0 16px; }
+    .modes { display: inline-flex; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+    .mode { font-size: 12px; padding: 6px 10px; border-radius: 6px; color: var(--muted); }
+    .mode.on { background: var(--gold); color: #111; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+    .cell { aspect-ratio: 1; border-radius: 10px; background: #2a2438; }
+    .cell.on { outline: 2px solid var(--gold); }
+    .row { display: flex; justify-content: space-between; align-items: center; }
+    .ghost { background: none; border: 0; color: var(--muted); font-size: 13px; }
+    .gold { background: var(--gold); color: #111; border: 0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Perfil · v3.83</p>
+    <h1>Pon tu foto</h1>
+    <p class="sub">Al entrar al dashboard, si solo tienes el ícono genérico o iniciales, te pedimos una foto o un avatar. Ahora no pospone esta visita; la próxima vez vuelve a salir.</p>
+    <div class="card">
+      <h2>Pon tu foto</h2>
+      <p>El equipo te reconoce mejor con una foto o un avatar — no con iniciales ni el ícono genérico.</p>
+      <div class="modes"><span class="mode on">Generar</span><span class="mode">Subir foto</span></div>
+      <div class="grid">
+        <div class="cell on"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
+      <div class="row">
+        <button class="ghost" type="button">Ahora no</button>
+        <button class="gold" type="button">Guardar avatar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

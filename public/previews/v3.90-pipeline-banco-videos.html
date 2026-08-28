@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline y banco de videos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;650&display=swap">
+<style>
+:root{
+  /* Neutrales fríos, no negro puro — leve sesgo azul-grafito */
+  --bg:#0B0D10; --surface:#14171B; --surface-2:#191D22; --sunken:#0F1216;
+  --border:#232830; --border-2:#2E343D;
+  --fg:#E8EBEF; --muted:#98A1AC; --faint:#6A737F;
+  /* Acento único: latón apagado, no dorado neón */
+  --accent:#C8A34A; --accent-soft:#8C7130; --accent-bg:#1C1810;
+  /* Semánticos desaturados */
+  --ok:#5D9B79; --ok-bg:#111B16; --ok-bd:#22392E;
+  --warn:#BE8B41; --warn-bg:#1C1710; --warn-bd:#3C2F17;
+  --bad:#B45F58; --bad-bg:#1B1211; --bad-bd:#3A2321;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"cv05" 1,"calt" 1;
+}
+.wrap{max-width:1360px;margin:0 auto;padding:40px 24px 96px}
+.tnum{font-variant-numeric:tabular-nums}
+
+.page-head{border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:36px}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+.page-head h1{font-size:28px;line-height:1.15;margin:0 0 10px;font-weight:650;letter-spacing:-.01em;text-wrap:balance}
+.page-head p{margin:0;color:var(--muted);font-size:14px;max-width:72ch;line-height:1.65}
+
+.block{margin-bottom:60px}
+.block-head{margin-bottom:18px}
+.block-head h2{font-size:18px;margin:0 0 6px;font-weight:600;letter-spacing:-.005em}
+.block-head p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6;max-width:78ch}
+.rule{height:1px;background:var(--border);margin:0 0 18px}
+
+/* ---------- primitivas ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.grid3{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+
+.who{display:flex;align-items:center;gap:10px}
+.avatar{
+  width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border-2);
+  display:grid;place-items:center;color:var(--muted);flex:0 0 auto;font-size:11.5px;font-weight:600;letter-spacing:.02em
+}
+.who h3{margin:0;font-size:14.5px;font-weight:600;line-height:1.25;letter-spacing:-.005em}
+.who span{font-size:11.5px;color:var(--faint)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2.5px 7px;font-size:10.5px;font-weight:550;border:1px solid var(--border-2);color:var(--muted);white-space:nowrap}
+.badge.ok{color:var(--ok);border-color:var(--ok-bd);background:var(--ok-bg)}
+.badge.warn{color:var(--warn);border-color:var(--warn-bd);background:var(--warn-bg)}
+.badge.bad{color:var(--bad);border-color:var(--bad-bd);background:var(--bad-bg)}
+.badge.accent{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-bg)}
+
+.meter{display:flex;gap:3px;height:4px;width:52px}
+.meter i{flex:1;border-radius:2px;background:var(--border-2)}
+.meter i.on{background:var(--accent)}
+.meter i.full{background:var(--bad)}
+
+/* punto de color del cliente: el color de marca se reduce a 6px */
+.cdot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
+
+/* ---------- carátula ---------- */
+.frame{position:relative;border-radius:8px;overflow:hidden;background:#07090B;border:1px solid var(--border-2)}
+.frame .img{position:absolute;inset:0}
+.frame .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,9,11,0) 42%,rgba(7,9,11,.9))}
+.frame .meta{position:absolute;left:0;right:0;bottom:0;padding:8px 9px;z-index:2}
+.frame .title{font-size:11.5px;font-weight:550;line-height:1.3}
+.frame .sub{font-size:10.5px;color:#AEB5BE;margin-top:2px}
+.dur{position:absolute;right:6px;top:6px;z-index:2;background:rgba(7,9,11,.78);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:1.5px 5px;font-size:10px;color:#D6DAE0}
+.kindtag{position:absolute;left:6px;top:6px;z-index:2;background:rgba(7,9,11,.78);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:1.5px 6px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#AEB5BE}
+.ratio-16{aspect-ratio:16/9}
+.ratio-9{aspect-ratio:9/16}
+
+.slot-free{
+  border:1px dashed var(--border-2);border-radius:8px;display:grid;place-items:center;align-content:center;
+  text-align:center;padding:10px;background:var(--sunken)
+}
+.slot-free .lbl{font-size:11px;font-weight:600;color:var(--muted)}
+.slot-free .nxt{font-size:10.5px;margin-top:4px;color:var(--faint);line-height:1.4}
+.slot-free .nxt strong{color:var(--fg);font-weight:550}
+
+.line{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.line b{color:var(--fg);font-weight:600}
+.line .sep{width:3px;height:3px;border-radius:50%;background:var(--border-2);flex:0 0 auto}
+
+/* ---------- tarjeta del pipeline (opción B) ---------- */
+.b-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.b-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.b-slots > *{aspect-ratio:4/5;min-height:0}
+.b-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)}
+.b-next{margin-top:10px;font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:6px}
+.b-next strong{color:var(--muted);font-weight:550}
+
+/* ---------- banco de videos ---------- */
+.bank-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.filter{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);
+  border-radius:7px;padding:5px 9px;font-size:11.5px;color:var(--muted);cursor:default
+}
+.filter.active{border-color:var(--accent-soft);background:var(--accent-bg);color:var(--fg)}
+.filter .n{color:var(--faint);font-weight:600}
+.filter.active .n{color:var(--accent)}
+.spacer{flex:1}
+.total{font-size:12px;color:var(--faint)}
+.total b{color:var(--fg);font-weight:600}
+
+.bank-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.vcard .body{padding:9px 10px 10px;display:flex;flex-direction:column;gap:7px;flex:1}
+.vcard .idea{font-size:12.5px;font-weight:550;line-height:1.35;letter-spacing:-.003em}
+.vcard .client{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.vcard .assign{
+  display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:8px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted)
+}
+.vcard .assign .avatar{width:20px;height:20px;border-radius:6px;font-size:9px}
+.vcard .assign .to{color:var(--fg);font-weight:550}
+.vcard .assign .sug{color:var(--accent)}
+.vcard .assign .why{color:var(--faint);font-size:10px}
+
+/* agrupado por cliente */
+.cgroup{margin-bottom:20px}
+.cgroup-head{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:9px}
+.cgroup-head h3{margin:0;font-size:13.5px;font-weight:600}
+.count{
+  font-size:11px;color:var(--muted);border:1px solid var(--border);background:var(--surface);
+  border-radius:999px;padding:1.5px 8px;font-weight:600
+}
+.cgroup-head .to{margin-left:auto;font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:6px}
+.cgroup-head .to strong{color:var(--muted);font-weight:550}
+
+.footer{border-top:1px solid var(--border);margin-top:16px;padding-top:22px;color:var(--muted);font-size:13px;line-height:1.7}
+.footer h2{font-size:15px;color:var(--fg);margin:0 0 10px;font-weight:600}
+.footer ul{margin:0 0 14px;padding-left:18px}
+.footer li{margin-bottom:7px}
+.footer code{background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px}
+.warnbox{border:1px solid var(--warn-bd);background:var(--warn-bg);border-radius:var(--r);padding:12px 14px;color:#D8C39A;font-size:12.5px;line-height:1.6;margin-bottom:18px}
+.warnbox b{color:var(--warn)}
+
+/* ---------- banco de videos: biblioteca de medios ---------- */
+.bin-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg span{padding:5px 11px;font-size:11.5px;color:var(--muted);border-right:1px solid var(--border)}
+.seg span:last-child{border-right:0}
+.seg span.on{background:var(--accent-bg);color:var(--accent);font-weight:550}
+
+.rail{margin-bottom:26px}
+.rail-head{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:10px}
+.rail-head h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-.005em}
+.rail-head .owner{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint)}
+.rail-head .owner strong{color:var(--muted);font-weight:550}
+.rail-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.rail-strip::-webkit-scrollbar{height:6px}
+.rail-strip::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+
+.tile{width:236px;flex:0 0 auto;position:relative}
+.tile .shot{
+  position:relative;aspect-ratio:16/9;border-radius:9px;overflow:hidden;background:#07090B;
+  border:1px solid var(--border-2);cursor:pointer
+}
+.tile .shot .f{position:absolute;inset:0;opacity:0;transition:opacity .12s linear}
+.tile .shot .f.on{opacity:1}
+.tile .shot .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,9,11,0) 55%,rgba(7,9,11,.88));pointer-events:none}
+.tile .shot:hover{border-color:var(--accent-soft)}
+.tile .scrub{position:absolute;left:7px;right:64px;bottom:12px;height:2px;background:rgba(255,255,255,.16);border-radius:2px;z-index:3;opacity:0;transition:opacity .15s}
+.tile .shot:hover .scrub{opacity:1}
+.tile .scrub i{display:block;height:100%;width:20%;background:var(--accent);border-radius:2px;transition:width .1s linear}
+.tile .pick{
+  position:absolute;left:7px;top:7px;z-index:4;width:18px;height:18px;border-radius:5px;
+  border:1px solid rgba(255,255,255,.35);background:rgba(7,9,11,.6);opacity:0;transition:opacity .15s
+}
+.tile:hover .pick{opacity:1}
+.tile .pick.on{opacity:1;background:var(--accent);border-color:var(--accent)}
+.tile .pick.on::after{content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;border:2px solid #0B0D10;border-top:0;border-left:0;transform:rotate(42deg)}
+.tile .shot .kindtag{left:auto;right:7px;top:7px}
+.tile .shot .dur{right:7px;top:auto;bottom:7px}
+.tile .cap{padding:8px 2px 0}
+.tile .cap .idea{font-size:12.5px;font-weight:550;line-height:1.35;letter-spacing:-.003em}
+.tile .cap .sub{margin-top:3px;font-size:10.5px;color:var(--faint);display:flex;align-items:center;gap:5px}
+
+.assign-btn{
+  margin-top:7px;width:100%;display:flex;align-items:center;gap:7px;
+  border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:5px 7px;
+  font-size:11px;color:var(--muted);cursor:pointer;text-align:left
+}
+.assign-btn:hover{border-color:var(--border-2);background:var(--surface-2)}
+.assign-btn .avatar{width:19px;height:19px;border-radius:5px;font-size:8.5px}
+.assign-btn .to{color:var(--fg);font-weight:550}
+.assign-btn .chev{margin-left:auto;color:var(--faint);font-size:9px}
+.assign-btn.none{border-style:dashed;color:var(--accent)}
+.assign-btn.none .avatar{border-style:dashed}
+
+.menu{
+  position:absolute;z-index:20;left:0;right:0;top:calc(100% + 5px);
+  background:var(--surface-2);border:1px solid var(--border-2);border-radius:9px;padding:5px;
+  box-shadow:0 14px 34px rgba(0,0,0,.6)
+}
+.menu .mh{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);padding:5px 7px 6px}
+.menu button{
+  width:100%;display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:6px;
+  padding:6px 7px;color:var(--fg);font-size:11.5px;cursor:pointer;font-family:inherit;text-align:left
+}
+.menu button:hover{background:var(--surface)}
+.menu button.cur{background:var(--accent-bg)}
+.menu button .avatar{width:20px;height:20px;border-radius:6px;font-size:9px}
+.menu button .load{margin-left:auto;font-size:10px;color:var(--faint)}
+.menu button .load.full{color:var(--bad)}
+.menu button .load.free{color:var(--ok)}
+.menu .sep{height:1px;background:var(--border);margin:4px 2px}
+
+.selbar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  border:1px solid var(--accent-soft);background:var(--accent-bg);border-radius:9px;padding:9px 12px;margin-bottom:16px
+}
+.selbar .cnt{font-size:12.5px;font-weight:600;color:var(--fg)}
+.selbar .hint{font-size:11.5px;color:var(--muted)}
+.selbar .act{margin-left:auto;display:flex;gap:7px}
+.btn{border:1px solid var(--border-2);background:var(--surface);border-radius:7px;padding:5px 11px;font-size:11.5px;color:var(--fg);cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0B0D10;font-weight:600}
+
+
+/* ---------- ritmo del editor ---------- */
+.pace{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-top:2px}
+.pace b{color:var(--muted);font-weight:600}
+.pace .fast{color:var(--ok)}
+.pace .slow{color:var(--warn)}
+
+/* casilla libre accionable */
+.slot-free{cursor:pointer;transition:border-color .15s,background .15s}
+.slot-free:hover{border-color:var(--accent-soft);background:var(--accent-bg)}
+.slot-free .cta{margin-top:6px;font-size:10px;color:var(--accent);font-weight:550}
+
+/* panel para acomodar en el espacio libre */
+.place{border:1px solid var(--accent-soft);background:var(--sunken);border-radius:9px;margin-top:10px;overflow:hidden}
+.place-head{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:9px 11px;border-bottom:1px solid var(--border);background:var(--accent-bg)}
+.place-head h4{margin:0;font-size:12px;font-weight:600}
+.place-head span{font-size:10.5px;color:var(--muted)}
+.place-list{display:flex;flex-direction:column}
+.cand{display:flex;align-items:center;gap:9px;padding:8px 10px;border-bottom:1px solid var(--border)}
+.cand:last-child{border-bottom:0}
+.cand:hover{background:var(--surface)}
+.cand .frame{width:58px;flex:0 0 auto}
+.cand .txt{min-width:0;flex:1}
+.cand .t{font-size:11.5px;font-weight:550;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cand .s{font-size:10.5px;color:var(--faint);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.cand .eta{font-size:10.5px;color:var(--muted);text-align:right;flex:0 0 auto;line-height:1.35}
+.cand .eta b{display:block;color:var(--fg);font-size:12px;font-weight:600}
+.cand .go{flex:0 0 auto;border:1px solid var(--border-2);background:var(--surface);border-radius:6px;padding:4px 9px;font-size:10.5px;color:var(--fg);cursor:pointer;font-family:inherit}
+.cand .go:hover{border-color:var(--accent-soft);background:var(--accent-bg);color:var(--accent)}
+
+/* tabla de ritmo */
+.pace-table{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.pace-row{display:grid;grid-template-columns:210px 1fr 92px 92px 96px;gap:14px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border)}
+.pace-row:last-child{border-bottom:0}
+.pace-row.head{background:var(--sunken);padding-top:8px;padding-bottom:8px}
+.pace-row.head span{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.pace-row .num{text-align:right;font-size:13.5px;font-weight:600}
+.pace-row .num small{display:block;font-size:10px;color:var(--faint);font-weight:400;margin-top:1px}
+.bar{position:relative;height:20px;border-radius:5px;background:var(--sunken);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,#5A4B26,var(--accent-soft))}
+.bar i.slow{background:linear-gradient(90deg,#4A2E2B,#8A4A44)}
+.bar i.fast{background:linear-gradient(90deg,#254034,#4C8168)}
+.bar em{position:absolute;top:0;bottom:0;width:2px;background:rgba(232,235,239,.5)}
+.bar .lab{position:absolute;left:8px;top:0;bottom:0;display:flex;align-items:center;font-size:10.5px;color:#E8EBEF;font-style:normal;z-index:2}
+.legend{font-size:11px;color:var(--faint);margin-top:9px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.legend .k i{width:9px;height:9px;border-radius:2px;display:block}
+
+.eta-box{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:14px}
+.eta-card{border:1px solid var(--border);background:var(--surface);border-radius:var(--r);padding:12px 13px}
+.eta-card h4{margin:0 0 3px;font-size:12.5px;font-weight:600}
+.eta-card .who-s{font-size:11px;color:var(--faint);margin-bottom:9px}
+.eta-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.eta-card li{display:flex;align-items:center;gap:8px;font-size:11.5px}
+.eta-card li .avatar{width:20px;height:20px;border-radius:6px;font-size:9px}
+.eta-card li .d{margin-left:auto;font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
+.eta-card li .d.best{color:var(--ok)}
+.eta-card li .d.busy{color:var(--faint)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <p class="eyebrow">Nate Media · v3.90</p>
+    <h1>Pipeline con los dos espacios, y un banco donde cada video se ve</h1>
+    <p>Paleta revisada: un solo acento (latón apagado) sobre grafito frío, semáforos desaturados y el color de marca del cliente reducido a un punto de 6&nbsp;px. Nada de bordes de colores compitiendo entre sí.</p>
+  </header>
+
+  <!-- ============ 1. PIPELINE ============ -->
+  <section class="block">
+    <div class="block-head">
+      <h2>1 · Pipeline — los dos espacios del editor</h2>
+      <p>El límite de 2 videos a la vez es la forma de la tarjeta. Casilla llena: carátula del corte, cuánto lleva y cuánto suele tardar ese editor. Casilla vacía: se pulsa y se acomoda un video del banco ahí mismo.</p>
+    </div>
+    <div class="rule"></div>
+
+    <div class="grid3">
+
+      <article class="card">
+        <div class="b-head">
+          <div class="who">
+            <div class="avatar">JL</div>
+            <div>
+              <h3>Jeander Loop</h3>
+              <span>5 clientes</span>
+              <div class="pace">Ritmo <b>3.1 d</b> por video <span class="sep"></span> <span class="slow">+0.7 d vs. el equipo</span></div>
+            </div>
+          </div>
+          <span class="badge bad">2 de 2</span>
+        </div>
+        <div class="b-slots">
+          <div class="frame">
+            <div class="img" style="background:linear-gradient(168deg,#5C4A33,#241C13 62%,#0C0A08)"></div>
+            <div class="veil"></div>
+            <span class="dur">0:38</span>
+            <div class="meta"><div class="title">Lucky Pet</div><div class="sub">Día 2 de ~3 · entrega hoy</div></div>
+          </div>
+          <div class="frame">
+            <div class="img" style="background:linear-gradient(168deg,#33475C,#131C24 62%,#080B0E)"></div>
+            <div class="veil"></div>
+            <span class="dur">1:02</span>
+            <div class="meta"><div class="title">Speedy Net</div><div class="sub">Día 4 de ~3 · va tarde</div></div>
+          </div>
+        </div>
+        <div class="b-next"><span>Siguiente cuando libere:</span><strong>Beyond PVC — Closet a medida</strong></div>
+        <div class="b-foot">
+          <div class="line"><b class="tnum">6</b><span>en banco</span><span class="sep"></span><b class="tnum">15</b><span>en revisión</span></div>
+          <div class="meter"><i class="full"></i><i class="full"></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="b-head">
+          <div class="who">
+            <div class="avatar">AK</div>
+            <div>
+              <h3>Alexa Kerocen</h3>
+              <span>3 clientes</span>
+              <div class="pace">Ritmo <b>1.9 d</b> por video <span class="sep"></span> <span class="fast">&#8722;0.5 d vs. el equipo</span></div>
+            </div>
+          </div>
+          <span class="badge accent">1 espacio libre</span>
+        </div>
+        <div class="b-slots">
+          <div class="frame">
+            <div class="img" style="background:linear-gradient(168deg,#2F5058,#132126 62%,#080C0E)"></div>
+            <div class="veil"></div>
+            <span class="dur">1:04</span>
+            <div class="meta"><div class="title">Farmacia Buena Vida</div><div class="sub">Día 1 de ~2 · a tiempo</div></div>
+          </div>
+          <div class="slot-free">
+            <div class="lbl">Espacio libre</div>
+            <div class="nxt">Acomoda un video<br>del banco</div>
+            <div class="cta">Escoger &#9662;</div>
+          </div>
+        </div>
+
+        <div class="place">
+          <div class="place-head">
+            <h4>Acomodar en el espacio de Alexa</h4>
+            <span>ordenado por urgencia · estimado con su ritmo de 1.9 d</span>
+          </div>
+          <div class="place-list">
+            <div class="cand">
+              <div class="frame ratio-16"><div class="img" style="background:linear-gradient(150deg,#6B5638,#241C12)"></div></div>
+              <div class="txt">
+                <div class="t">Casita Vieja — Mofongo relleno</div>
+                <div class="s"><span class="cdot" style="background:#8A6A3E"></span> Casita Vieja <span class="sep"></span> <span style="color:var(--bad)">entrega mañana</span></div>
+              </div>
+              <div class="eta"><b>~2 d</b>llega a tiempo</div>
+              <button class="go">Acomodar</button>
+            </div>
+            <div class="cand">
+              <div class="frame ratio-16"><div class="img" style="background:linear-gradient(150deg,#6B4A3E,#241813)"></div></div>
+              <div class="txt">
+                <div class="t">Tu Cerrajero PR — Apertura en 3 minutos</div>
+                <div class="s"><span class="cdot" style="background:#8A5E4E"></span> Sin editor <span class="sep"></span> 6 días esperando</div>
+              </div>
+              <div class="eta"><b>~2 d</b>libera el atraso</div>
+              <button class="go">Acomodar</button>
+            </div>
+            <div class="cand">
+              <div class="frame ratio-16"><div class="img" style="background:linear-gradient(150deg,#4E7A5E,#182619)"></div></div>
+              <div class="txt">
+                <div class="t">Farmacia Tierras Nuevas — Horario extendido</div>
+                <div class="s"><span class="cdot" style="background:#4E7A5E"></span> Farmacia Tierras Nuevas <span class="sep"></span> viernes</div>
+              </div>
+              <div class="eta"><b>~2 d</b>holgado</div>
+              <button class="go">Acomodar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="b-foot">
+          <div class="line"><b class="tnum">3</b><span>en banco</span><span class="sep"></span><b class="tnum">4</b><span>en revisión</span></div>
+          <div class="meter"><i class="on"></i><i></i></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="b-head">
+          <div class="who">
+            <div class="avatar">DG</div>
+            <div>
+              <h3>David Grafico</h3>
+              <span>1 cliente</span>
+              <div class="pace">Ritmo <b>1.4 d</b> por video <span class="sep"></span> <span class="fast">el más rápido</span></div>
+            </div>
+          </div>
+          <span class="badge">Sin trabajo activo</span>
+        </div>
+        <div class="b-slots">
+          <div class="slot-free">
+            <div class="lbl">Espacio libre</div>
+            <div class="nxt">Acomoda un video<br>del banco</div>
+            <div class="cta">Escoger &#9662;</div>
+          </div>
+          <div class="slot-free">
+            <div class="lbl">Espacio libre</div>
+            <div class="nxt">Acomoda un video<br>del banco</div>
+            <div class="cta">Escoger &#9662;</div>
+          </div>
+        </div>
+        <div class="b-next"><span>Con su ritmo saca los 2 esta semana</span></div>
+        <div class="b-foot">
+          <div class="line"><b class="tnum">1</b><span>en banco</span><span class="sep"></span><b class="tnum">1</b><span>en revisión</span></div>
+          <div class="meter"><i></i><i></i></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 2. BANCO DE VIDEOS ============ -->
+  <section class="block">
+    <div class="block-head">
+      <h2>2 · Banco de videos crudos</h2>
+      <p>Una biblioteca, no una lista: cada crudo es su carátula. Pasa el mouse por encima y recorre las 5 escenas sin abrirlo. Un carril por cliente, con cuántos videos tiene y a qué editor le tocan; desde cualquier video lo mandas a otro editor.</p>
+    </div>
+    <div class="rule"></div>
+
+    <div class="bin-bar">
+      <div class="seg"><span class="on">Por cliente</span><span>Por editor</span><span>Todos</span></div>
+      <span class="filter">Recientes primero</span>
+      <span class="filter">Solo sin asignar <span class="n tnum">2</span></span>
+      <span class="spacer"></span>
+      <span class="total"><b class="tnum">9</b> crudos · <b class="tnum">4</b> clientes · <b class="tnum">2</b> sin editor</span>
+    </div>
+
+    <div class="selbar">
+      <span class="cnt">2 videos seleccionados</span>
+      <span class="hint">Tu Cerrajero PR · ninguno tiene editor</span>
+      <span class="act">
+        <button class="btn">Quitar selección</button>
+        <button class="btn primary">Asignar a un editor</button>
+      </span>
+    </div>
+
+    <div class="rail">
+      <div class="rail-head">
+        <span class="cdot" style="background:#8A6A3E;width:8px;height:8px"></span>
+        <h3>Lucky Pet</h3>
+        <span class="count tnum">3 videos</span>
+        <span class="badge warn">Publica lun · mié · vie</span>
+        <span class="owner">Le tocan a <span class="avatar" style="width:20px;height:20px;border-radius:6px;font-size:9px">JL</span><strong>Jeander Loop</strong> · lleno</span>
+      </div>
+      <div class="rail-strip">
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#6B5638,#241C12)"></div><div class="f" style="background:linear-gradient(150deg,#7E6740,#2A2115)"></div><div class="f" style="background:linear-gradient(150deg,#54432C,#1B160E)"></div><div class="f" style="background:linear-gradient(150deg,#8A6F45,#2E2517)"></div><div class="f" style="background:linear-gradient(150deg,#4A3B27,#17120C)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">Crudo</span><span class="dur">2:14</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Baño y corte, antes y después</div>
+            <div class="sub">Grabó Neitan · 24 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">JL</span><span>Iría a <span class="to">Jeander Loop</span></span><span class="chev">&#9662;</span></button>
+        </div>
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#7A6340,#2A2116)"></div><div class="f" style="background:linear-gradient(150deg,#6B5638,#241C12)"></div><div class="f" style="background:linear-gradient(150deg,#8A6F45,#2E2517)"></div><div class="f" style="background:linear-gradient(150deg,#5C4A31,#1E1810)"></div><div class="f" style="background:linear-gradient(150deg,#94794C,#31281A)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">Crudo</span><span class="dur">1:47</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Testimonio de la dueña de Max</div>
+            <div class="sub">Grabó Neitan · 24 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">JL</span><span>Iría a <span class="to">Jeander Loop</span></span><span class="chev">&#9662;</span></button>
+        </div>
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#584631,#1D1710)"></div><div class="f" style="background:linear-gradient(150deg,#66523A,#221B13)"></div><div class="f" style="background:linear-gradient(150deg,#4C3C2A,#19140D)"></div><div class="f" style="background:linear-gradient(150deg,#735D42,#261F16)"></div><div class="f" style="background:linear-gradient(150deg,#3F3223,#151109)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">B-roll</span><span class="dur">0:52</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Planos del local y la vitrina</div>
+            <div class="sub">Grabó Richard · 22 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">JL</span><span>Iría a <span class="to">Jeander Loop</span></span><span class="chev">&#9662;</span></button>
+        </div></div>
+    </div>
+
+    <div class="rail">
+      <div class="rail-head">
+        <span class="cdot" style="background:#7A4E6A;width:8px;height:8px"></span>
+        <h3>Arasibo Steakhouse</h3>
+        <span class="count tnum">2 videos</span>
+        <span class="badge">Publica mar · jue</span>
+        <span class="owner">Le tocan a <span class="avatar" style="width:20px;height:20px;border-radius:6px;font-size:9px">CV</span><strong>Carlos Villalta</strong> · 1 espacio libre</span>
+      </div>
+      <div class="rail-strip" style="overflow:visible">
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#6B4457,#241722)"></div><div class="f" style="background:linear-gradient(150deg,#7A4E63,#291A27)"></div><div class="f" style="background:linear-gradient(150deg,#573A48,#1C1219)"></div><div class="f" style="background:linear-gradient(150deg,#85566D,#2D1D2A)"></div><div class="f" style="background:linear-gradient(150deg,#4A3140,#180F16)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">Crudo</span><span class="dur">3:05</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Churrasco al carbón, corte en mesa</div>
+            <div class="sub">Grabó Neitan · 25 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">CV</span><span>Iría a <span class="to">Carlos Villalta</span></span><span class="chev">&#9662;</span></button><div class="menu">
+            <div class="mh">Asignar a</div>
+            <button class="cur"><span class="avatar">CV</span> Carlos Villalta <span class="load">1 de 2</span></button>
+            <button><span class="avatar">DG</span> David Grafico <span class="load free">2 libres</span></button>
+            <button><span class="avatar">AK</span> Alexa Kerocen <span class="load">1 de 2</span></button>
+            <button><span class="avatar">JL</span> Jeander Loop <span class="load full">lleno</span></button>
+            <button><span class="avatar">JR</span> Johan Rafael <span class="load full">lleno</span></button>
+            <div class="sep"></div>
+            <button><span class="avatar" style="border-style:dashed">&#8722;</span> Quitar asignación</button>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#573A48,#1C1219)"></div><div class="f" style="background:linear-gradient(150deg,#6B4457,#241722)"></div><div class="f" style="background:linear-gradient(150deg,#4A3140,#180F16)"></div><div class="f" style="background:linear-gradient(150deg,#7A4E63,#291A27)"></div><div class="f" style="background:linear-gradient(150deg,#3D2835,#140D12)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">Crudo</span><span class="dur">1:29</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Menú de la semana con el chef</div>
+            <div class="sub">Grabó Richard · 25 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">CV</span><span>Iría a <span class="to">Carlos Villalta</span></span><span class="chev">&#9662;</span></button>
+        </div></div>
+    </div>
+
+    <div class="rail">
+      <div class="rail-head">
+        <span class="cdot" style="background:#8A5E4E;width:8px;height:8px"></span>
+        <h3>Tu Cerrajero PR</h3>
+        <span class="count tnum">2 videos</span>
+        <span class="badge bad">Sin editor asignado</span>
+        <span class="owner">Sugerido <span class="avatar" style="width:20px;height:20px;border-radius:6px;font-size:9px">DG</span><strong>David Grafico</strong> · 2 espacios libres</span>
+      </div>
+      <div class="rail-strip">
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#6B4A3E,#241813)"></div><div class="f" style="background:linear-gradient(150deg,#7A5648,#2A1D16)"></div><div class="f" style="background:linear-gradient(150deg,#553B31,#1C130F)"></div><div class="f" style="background:linear-gradient(150deg,#87614F,#2E211A)"></div><div class="f" style="background:linear-gradient(150deg,#48332A,#17100C)"></div><div class="veil"></div><span class="pick on"></span>
+            <span class="kindtag">Crudo</span><span class="dur">1:12</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Apertura de puerta en 3 minutos</div>
+            <div class="sub">Grabó Neitan · 21 ago</div>
+          </div>
+          <button class="assign-btn none"><span class="avatar" style="border-style:dashed">?</span><span>Sin editor — asignar</span><span class="chev">&#9662;</span></button>
+        </div>
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#553B31,#1C130F)"></div><div class="f" style="background:linear-gradient(150deg,#6B4A3E,#241813)"></div><div class="f" style="background:linear-gradient(150deg,#48332A,#17100C)"></div><div class="f" style="background:linear-gradient(150deg,#7A5648,#2A1D16)"></div><div class="f" style="background:linear-gradient(150deg,#3D2B23,#140E0B)"></div><div class="veil"></div><span class="pick on"></span>
+            <span class="kindtag">Crudo</span><span class="dur">0:44</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Llaves con chip: cuánto cuesta</div>
+            <div class="sub">Grabó Richard · 21 ago</div>
+          </div>
+          <button class="assign-btn none"><span class="avatar" style="border-style:dashed">?</span><span>Sin editor — asignar</span><span class="chev">&#9662;</span></button>
+        </div></div>
+    </div>
+
+    <div class="rail">
+      <div class="rail-head">
+        <span class="cdot" style="background:#3E6A8A;width:8px;height:8px"></span>
+        <h3>Speedy Net</h3>
+        <span class="count tnum">2 videos</span>
+        <span class="badge">Publica mié · vie</span>
+        <span class="owner">Le tocan a <span class="avatar" style="width:20px;height:20px;border-radius:6px;font-size:9px">JL</span><strong>Jeander Loop</strong> · lleno</span>
+      </div>
+      <div class="rail-strip">
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#33475C,#131C24)"></div><div class="f" style="background:linear-gradient(150deg,#3D5570,#16212C)"></div><div class="f" style="background:linear-gradient(150deg,#2A3B4D,#10171E)"></div><div class="f" style="background:linear-gradient(150deg,#476280,#1A2530)"></div><div class="f" style="background:linear-gradient(150deg,#243342,#0D131A)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">Crudo</span><span class="dur">2:40</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Instalación de fibra en 24 horas</div>
+            <div class="sub">Grabó Neitan · 23 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">JL</span><span>Iría a <span class="to">Jeander Loop</span></span><span class="chev">&#9662;</span></button>
+        </div>
+        <div class="tile">
+          <div class="shot" data-frames="5"><div class="f on" style="background:linear-gradient(150deg,#2A3B4D,#10171E)"></div><div class="f" style="background:linear-gradient(150deg,#33475C,#131C24)"></div><div class="f" style="background:linear-gradient(150deg,#476280,#1A2530)"></div><div class="f" style="background:linear-gradient(150deg,#243342,#0D131A)"></div><div class="f" style="background:linear-gradient(150deg,#3D5570,#16212C)"></div><div class="veil"></div><span class="pick"></span>
+            <span class="kindtag">B-roll</span><span class="dur">1:05</span>
+            <span class="scrub"><i></i></span>
+          </div>
+          <div class="cap">
+            <div class="idea">Antes y después de la señal</div>
+            <div class="sub">Grabó Richard · 23 ago</div>
+          </div>
+          <button class="assign-btn"><span class="avatar">JL</span><span>Iría a <span class="to">Jeander Loop</span></span><span class="chev">&#9662;</span></button>
+        </div></div>
+    </div>
+
+  </section>
+
+  <!-- ============ 3. RITMO ============ -->
+  <section class="block">
+    <div class="block-head">
+      <h2>3 · Ritmo de los editores</h2>
+      <p>Cuánto tarda de verdad cada quien desde que toma el crudo hasta que entrega el corte. Se calcula con lo que ya está guardado: la fecha del crudo y la del editado de cada idea entregada. La mediana, no el promedio — un video atascado no debe mover la cifra.</p>
+    </div>
+    <div class="rule"></div>
+
+    <div class="pace-table">
+      <div class="pace-row head">
+        <span>Editor</span><span>Días por video · últimos 30 días</span><span>Mediana</span><span>Entregados</span><span>Tendencia</span>
+      </div>
+      <div class="pace-row">
+        <div class="who"><div class="avatar">DG</div><div><h3>David Grafico</h3><span>1 cliente</span></div></div>
+        <div class="bar"><i class="fast" style="width:28%"></i><em style="left:48%"></em><span class="lab">1.4 d</span></div>
+        <div class="num">1.4 d<small>mediana</small></div>
+        <div class="num">9<small>en 30 d</small></div>
+        <div class="num" style="color:var(--ok)">&#8722;0.3<small>vs. mes previo</small></div>
+      </div>
+      <div class="pace-row">
+        <div class="who"><div class="avatar">AK</div><div><h3>Alexa Kerocen</h3><span>3 clientes</span></div></div>
+        <div class="bar"><i class="fast" style="width:38%"></i><em style="left:48%"></em><span class="lab">1.9 d</span></div>
+        <div class="num">1.9 d<small>mediana</small></div>
+        <div class="num">14<small>en 30 d</small></div>
+        <div class="num" style="color:var(--ok)">&#8722;0.2<small>vs. mes previo</small></div>
+      </div>
+      <div class="pace-row">
+        <div class="who"><div class="avatar">CV</div><div><h3>Carlos Villalta</h3><span>4 clientes</span></div></div>
+        <div class="bar"><i style="width:48%"></i><em style="left:48%"></em><span class="lab">2.4 d</span></div>
+        <div class="num">2.4 d<small>mediana</small></div>
+        <div class="num">11<small>en 30 d</small></div>
+        <div class="num" style="color:var(--faint)">igual<small>vs. mes previo</small></div>
+      </div>
+      <div class="pace-row">
+        <div class="who"><div class="avatar">JL</div><div><h3>Jeander Loop</h3><span>5 clientes</span></div></div>
+        <div class="bar"><i class="slow" style="width:62%"></i><em style="left:48%"></em><span class="lab">3.1 d</span></div>
+        <div class="num">3.1 d<small>mediana</small></div>
+        <div class="num">18<small>en 30 d</small></div>
+        <div class="num" style="color:var(--warn)">+0.7<small>vs. mes previo</small></div>
+      </div>
+      <div class="pace-row">
+        <div class="who"><div class="avatar">JR</div><div><h3>Johan Rafael</h3><span>5 clientes</span></div></div>
+        <div class="bar"><i class="slow" style="width:78%"></i><em style="left:48%"></em><span class="lab">3.9 d</span></div>
+        <div class="num">3.9 d<small>mediana</small></div>
+        <div class="num">15<small>en 30 d</small></div>
+        <div class="num" style="color:var(--warn)">+1.1<small>vs. mes previo</small></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="k"><i style="background:#4C8168"></i> Bajo la mediana del equipo</span>
+      <span class="k"><i style="background:#8A4A44"></i> Sobre la mediana</span>
+      <span class="k"><i style="background:rgba(232,235,239,.5);width:2px;height:12px"></i> Mediana del equipo: 2.4 d</span>
+    </div>
+
+    <div class="eta-box">
+      <div class="eta-card">
+        <h4>Casita Vieja — Mofongo relleno</h4>
+        <div class="who-s">Crudo de 2:14 · entrega mañana</div>
+        <ul>
+          <li><span class="avatar">DG</span> David Grafico <span class="d best">~1 d</span></li>
+          <li><span class="avatar">AK</span> Alexa Kerocen <span class="d best">~2 d</span></li>
+          <li><span class="avatar">CV</span> Carlos Villalta <span class="d">~2 d</span></li>
+          <li><span class="avatar">JL</span> Jeander Loop <span class="d busy">~3 d · lleno</span></li>
+        </ul>
+      </div>
+      <div class="eta-card">
+        <h4>Arasibo Steakhouse — Churrasco al carbón</h4>
+        <div class="who-s">Crudo de 3:05 · el más largo del banco</div>
+        <ul>
+          <li><span class="avatar">CV</span> Carlos Villalta <span class="d best">~2 d</span></li>
+          <li><span class="avatar">DG</span> David Grafico <span class="d">~2 d</span></li>
+          <li><span class="avatar">AK</span> Alexa Kerocen <span class="d">~2 d</span></li>
+          <li><span class="avatar">JR</span> Johan Rafael <span class="d busy">~4 d · lleno</span></li>
+        </ul>
+      </div>
+      <div class="eta-card">
+        <h4>Tu Cerrajero PR — Apertura en 3 minutos</h4>
+        <div class="who-s">Crudo de 1:12 · 6 días esperando, sin editor</div>
+        <ul>
+          <li><span class="avatar">DG</span> David Grafico <span class="d best">~1 d</span></li>
+          <li><span class="avatar">AK</span> Alexa Kerocen <span class="d best">~2 d</span></li>
+          <li><span class="avatar">CV</span> Carlos Villalta <span class="d">~2 d</span></li>
+          <li><span class="avatar">JR</span> Johan Rafael <span class="d busy">~4 d · lleno</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="warnbox">
+      <b>Hallazgo antes de implementar:</b> hoy la carátula solo se genera para los videos <code>edited</code> (<code>lib/stores/upload-store.ts:416</code>). Los <strong>crudos del banco no tienen miniatura guardada</strong>. Para que el banco se vea así hay que generar la tira también al subir crudo — es el mismo código, sin el filtro de tipo — y sacar el fotograma al vuelo del <code>&lt;video&gt;</code> para los que ya están subidos.
+    </div>
+    <h2>Qué se implementa</h2>
+    <ul>
+      <li><strong>Pipeline:</strong> los dos espacios con carátula del corte y el reloj «día 2 de ~3», medido contra el ritmo real del editor.</li>
+      <li><strong>Espacio libre accionable:</strong> se pulsa la casilla vacía y se escoge un video del banco ahí mismo, ordenado por urgencia y con el estimado de entrega según el ritmo de esa persona.</li>
+      <li><strong>Banco:</strong> biblioteca de carátulas por cliente; el mouse recorre las 5 escenas sin abrir el video.</li>
+      <li><strong>Asignar desde el video:</strong> cada carátula lleva su selector de editor (con la carga de cada uno) y se pueden marcar varios para asignarlos de una vez.</li>
+      <li><strong>Conteo por cliente:</strong> cada carril dice cuántos videos tiene y a quién le tocan; el total separa cuántos van sin editor.</li>
+      <li><strong>Ritmo:</strong> mediana de días entre el crudo y el editado por persona, tendencia contra el mes anterior, y cuánto tardaría <em>este</em> video con cada editor.</li>
+    </ul>
+    <h2>Colores</h2>
+    <ul>
+      <li>Un solo acento: latón <code>#C8A34A</code>. Los semáforos van desaturados y solo aparecen cuando hay algo que atender.</li>
+      <li>El color de marca del cliente baja a un punto de 6&nbsp;px — identifica sin pintar bordes de colores por toda la pantalla.</li>
+      <li>Grises con sesgo azul-grafito en lugar de negro puro, para que las carátulas resalten.</li>
+    </ul>
+  </footer>
+
+</div>
+
+<script>
+// Scrub: la posición del mouse sobre la carátula elige la escena (las 5 de thumb_keys).
+document.querySelectorAll('.tile .shot').forEach(function (shot) {
+  var fs = shot.querySelectorAll('.f');
+  var bar = shot.querySelector('.scrub i');
+  shot.addEventListener('mousemove', function (e) {
+    var r = shot.getBoundingClientRect();
+    var t = Math.min(0.999, Math.max(0, (e.clientX - r.left) / r.width));
+    var k = Math.floor(t * fs.length);
+    fs.forEach(function (f, n) { f.classList.toggle('on', n === k); });
+    if (bar) bar.style.width = ((k + 1) / fs.length * 100) + '%';
+  });
+  shot.addEventListener('mouseleave', function () {
+    fs.forEach(function (f, n) { f.classList.toggle('on', n === 0); });
+    if (bar) bar.style.width = (100 / fs.length) + '%';
+  });
+});
+</script>
+</body>
+</html>

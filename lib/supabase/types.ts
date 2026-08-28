@@ -92,6 +92,8 @@ export interface ContentIdeaVideo {
   uploaded_by: string | null
   status: ContentIdeaVideoStatus
   error_message: string | null
+  /** Claves en R2 de la tira de 5 escenas (migración 0062). Ausente en los selects parciales. */
+  thumb_keys?: string[] | null
   uploaded_at: string
   updated_at: string
   /** Joined uploader profile when the query requests it. */
@@ -467,6 +469,13 @@ export interface IdeaWithPipeline extends ContentIdea {
    * avatar_url is optional so optimistic updates (from a name-only profile list)
    * still type-check; the fetched data includes it. */
   assignee?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
+  /** Pipeline banco: el servidor marca lo que está fuera del WIP de 2. */
+  bankQueue?: 'active' | 'waiting'
+  recording_session?: {
+    status?: string
+    location?: string | null
+    location_address?: string | null
+  } | null
 }
 
 export type ContentIdeaActivityAction =

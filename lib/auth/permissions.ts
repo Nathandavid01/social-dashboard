@@ -56,6 +56,8 @@ export type Permission =
   | 'planning.read'
   | 'entregas.read'
   | 'revision.read'
+  /** Paso 2: banco de crudos para que el editor baje y vea. */
+  | 'pipeline.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -69,6 +71,8 @@ export type Permission =
   | 'settings.edit'
   | 'alerts.read'
   | 'alerts.dismiss'
+  /** Subir o elegir la foto propia (todos los roles autenticados). */
+  | 'profile.avatar'
   /** Ver la plataforma como un editor (solo owner/supervisor). */
   | 'view_as.editor'
 
@@ -98,7 +102,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
-    'planning.read', 'entregas.read', 'revision.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -106,20 +110,20 @@ const RBAC: Record<UserRole, RolePerms> = {
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
+    'profile.avatar',
     'view_as.editor',
   ],
 
-  // Editor — SOLO Entregas: sube el video editado y escribe su copy.
-  // Mantiene captions.* porque la etapa Copy vive dentro de Entregas; lo que
-  // pierde es el acceso a las otras pantallas (pipeline, producción, QC).
-  // No aprueba ni publica: revisar el propio trabajo vaciaría esa etapa.
+  // Editor — paso 2 (Pipeline: baja crudos asignados) y Revisión (corta).
+  // No aprueba ni publica. Entregas (copy/publicar) no es su pantalla.
   editor: [
     'ideas.read',
     'video.upload',
     'captions.use', 'captions.edit',
-    'revision.read', 'planning.act',
+    'revision.read', 'pipeline.read', 'planning.act',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Videógrafo — grabación e ideas. No entra a Entregas: su trabajo termina
@@ -133,6 +137,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'recording.read', 'recording.create', 'recording.complete',
     'weekly_compliance.read', 'cadence.read', 'activity.read', 'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Diseñador — Ideas y Entregas. Sube piezas pero NO escribe el copy (sin
@@ -144,6 +149,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'revision.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Copy — escribe el copy de lo aprobado. Ve el tablero entero para saber
@@ -157,6 +163,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'cadence.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 
   // Legacy default — treated as editor for backwards compatibility.
@@ -165,6 +172,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'tasks.read.all', 'tasks.create', 'tasks.edit',
     'ideas.read', 'ideas.edit',
     'video_reviews.read',
+    'pipeline.read',
     'production.read', 'production.edit',
     'recording.read',
     'posting.read', 'captions.use',
@@ -172,6 +180,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'planning.read',
     'presence.read',
     'alerts.read',
+    'profile.avatar',
   ],
 }
 
@@ -199,7 +208,7 @@ export const ROLE_LABEL: Record<UserRole, string> = {
 export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   owner:       'Acceso completo, incluyendo facturación, contratos y asignación de roles.',
   supervisor:  'Gestión de equipo y contenido. Ve facturación/contratos pero no los edita.',
-  editor:      'Entregas: sube el video editado y escribe su copy. No aprueba ni publica.',
+  editor:      'Pipeline y Revisión: baja el crudo asignado y entrega el corte. No aprueba ni publica.',
   video:       'Grabación e ideas. No entra a Entregas.',
   disenador:   'Ideas y Entregas: sube piezas, sin escribir el copy.',
   copy:        'Escribe el copy de los videos aprobados. No aprueba ni publica.',

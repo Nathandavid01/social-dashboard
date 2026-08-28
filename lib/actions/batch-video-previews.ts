@@ -22,6 +22,7 @@ export async function getBatchVideoPreviewUrls(
 ): Promise<{ urls?: Record<string, string>; error?: string }> {
   const canSee =
     (await currentUserHas('planning.read')) ||
+    (await currentUserHas('pipeline.read')) ||
     (await currentUserHas('revision.read')) ||
     (await currentUserHas('entregas.read'))
   if (!canSee) return { error: 'No autorizado' }
