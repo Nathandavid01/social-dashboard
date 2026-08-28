@@ -163,7 +163,29 @@ describe('action wiring', () => {
     await user.click(screen.getByRole('button', { name: /^aprobar$/i }))
     const confirm = await screen.findByRole('button', { name: /sí, aprobar/i })
     await user.click(confirm)
-    expect(approveIdea).toHaveBeenCalledWith('idea-1')
+    expect(approveIdea).toHaveBeenCalledWith('idea-1', null)
+  })
+
+  /**
+   * Cadena de custodia: aprobar tiene que decir QUÉ archivo se aprobó. Si el
+   * id no viaja, el sello nunca se escribe y publicar vuelve a re-resolver "el
+   * edited más nuevo" — el agujero que este cambio cierra.
+   */
+  it('aprobar sella el archivo que el aprobador tiene delante', async () => {
+    const { default: userEventDefault } = await import('@testing-library/user-event')
+    const user = userEventDefault.setup()
+    mockRole = 'owner'
+    render(
+      <ApprovalButton
+        ideaId="idea-1"
+        approvalStatus="submitted"
+        clientName="612 C. Lounge"
+        videoFileId="cut-visto"
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: /^aprobar$/i }))
+    await user.click(await screen.findByRole('button', { name: /sí, aprobar/i }))
+    expect(approveIdea).toHaveBeenCalledWith('idea-1', 'cut-visto')
   })
 
   it('submit button invokes submitIdeaForApproval with the idea id', async () => {

@@ -19,6 +19,12 @@ import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 
 interface Props {
   ideaId: string
+  /**
+   * El archivo edited que se está aprobando. Se sella en la idea
+   * (`approved_video_id`) para que publicar mande EXACTAMENTE ese, y no el
+   * corte que alguien suba después.
+   */
+  videoFileId?: string | null
   approvalStatus: IdeaApprovalStatus
   /** Client identity shown in the approve-confirmation dialog (anti-wrong-client). */
   clientName?: string | null
@@ -38,7 +44,7 @@ interface Props {
  * Only owner / video.approve roles can act; everyone else gets a disabled
  * explanatory state.
  */
-export function ApprovalButton({ ideaId, approvalStatus, clientName, clientLogoUrl, ideaTitle }: Props) {
+export function ApprovalButton({ ideaId, approvalStatus, clientName, clientLogoUrl, ideaTitle, videoFileId }: Props) {
   const canApprove = useHasPermission('video.approve')
   const { toast } = useToast()
   const [pending, startTransition] = useTransition()
@@ -114,7 +120,7 @@ export function ApprovalButton({ ideaId, approvalStatus, clientName, clientLogoU
               <Button
                 type="button"
                 disabled={pending}
-                onClick={() => { setConfirmOpen(false); run(() => approveIdea(ideaId)) }}
+                onClick={() => { setConfirmOpen(false); run(() => approveIdea(ideaId, videoFileId ?? null)) }}
               >
                 <CheckCircle2 className="h-4 w-4" /> Sí, aprobar
               </Button>

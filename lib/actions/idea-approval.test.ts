@@ -242,3 +242,43 @@ describe('database errors surface as { error }', () => {
     expect(res.error).toBeTruthy()
   })
 })
+
+/**
+ * Cadena de custodia: aprobar tiene que sellar QUÉ archivo se aprobó. Sin el
+ * sello, publicar re-resolvía "el edited más nuevo" y podía mandar un corte
+ * que nadie aprobó.
+ */
+describe('approveIdea sella el archivo aprobado', () => {
+  it('guarda el video que el aprobador tenía delante', async () => {
+    currentStatus = 'submitted'
+    await approveIdea('idea-1', 'video-visto')
+    expect(updatePayload).toMatchObject({
+      approval_status: 'approved',
+      approved_video_id: 'video-visto',
+    })
+  })
+
+  it('sin video explícito no inventa un sello', async () => {
+    currentStatus = 'submitted'
+    await approveIdea('idea-1')
+    expect(updatePayload).toMatchObject({ approval_status: 'approved' })
+    expect(updatePayload).not.toHaveProperty('approved_video_id')
+  })
+
+  it('pedir cambios limpia el sello: ya no hay nada aprobado', async () => {
+    currentStatus = 'submitted'
+    await requestRevision('idea-1')
+    expect(updatePayload).toMatchObject({
+      approval_status: 'revision_needed',
+      approved_video_id: null,
+    })
+  })
+
+  it('sigue exigiendo el permiso de aprobar', async () => {
+    currentStatus = 'submitted'
+    requirePermission.mockRejectedValue(new Error('No autorizado'))
+    const res = await approveIdea('idea-1', 'video-visto')
+    expect(res.error).toBeTruthy()
+    expect(updatePayload).toBeNull()
+  })
+})

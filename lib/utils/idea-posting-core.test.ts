@@ -4,6 +4,7 @@ import {
   buildPublishDateTime,
   resolvePlatforms,
   pickEditedVideoForPublish,
+  resolveVideoForPublish,
   inferWatchBoard,
   type PostableIdea,
 } from './idea-posting-core'
@@ -204,5 +205,97 @@ describe('pickEditedVideoForPublish', () => {
   it('returns null when there is no usable edited file', () => {
     expect(pickEditedVideoForPublish([])).toBeNull()
     expect(pickEditedVideoForPublish([{ ...thisWeekEntregas, drive_file_id: null }])).toBeNull()
+  })
+})
+
+/**
+ * Cadena de custodia: el archivo que se publica tiene que ser EXACTAMENTE el
+ * que se aprobó. Antes de esto, `preferredId` era una preferencia blanda — si
+ * el archivo aprobado estaba archivado, se caía en silencio al edited más
+ * nuevo y se publicaba un corte que nadie aprobó.
+ */
+describe('resolveVideoForPublish — el aprobado es contrato, no preferencia', () => {
+  const aprobado = {
+    id: 'v-aprobado',
+    idea_id: 'idea-1',
+    drive_file_id: 'ideas/1/edited/aprobado.mp4',
+    storage_provider: 'r2',
+    kind: 'edited',
+    status: 'uploaded',
+    uploaded_at: '2026-08-20T10:00:00Z',
+  }
+  const masNuevoSinAprobar = {
+    id: 'v-nuevo',
+    idea_id: 'idea-1',
+    drive_file_id: 'ideas/1/edited/nuevo.mp4',
+    storage_provider: 'r2',
+    kind: 'edited',
+    status: 'uploaded',
+    uploaded_at: '2026-08-27T10:00:00Z',
+  }
+
+  it('con sello publica el aprobado, aunque haya un corte más nuevo', () => {
+    const res = resolveVideoForPublish([aprobado, masNuevoSinAprobar], {
+      ideaId: 'idea-1',
+      approvedVideoId: 'v-aprobado',
+    })
+    expect(res.video?.id).toBe('v-aprobado')
+    expect(res.skipped).toBeUndefined()
+  })
+
+  it('si el archivo aprobado se archivó, NO publica otro: falla explícito', () => {
+    const res = resolveVideoForPublish(
+      [{ ...aprobado, status: 'archived' }, masNuevoSinAprobar],
+      { ideaId: 'idea-1', approvedVideoId: 'v-aprobado' },
+    )
+    expect(res.video).toBeNull()
+    expect(res.skipped).toBe('El archivo aprobado ya no está disponible')
+  })
+
+  it('si el archivo aprobado ya no existe, tampoco publica otro', () => {
+    const res = resolveVideoForPublish([masNuevoSinAprobar], {
+      ideaId: 'idea-1',
+      approvedVideoId: 'v-aprobado',
+    })
+    expect(res.video).toBeNull()
+    expect(res.skipped).toBe('El archivo aprobado ya no está disponible')
+  })
+
+  it('el sello manda por encima del tablero: no se cambia de bandeja', () => {
+    const enEntregas = { ...masNuevoSinAprobar, id: 'v-ent', storage_provider: 'entregas-r2' }
+    const res = resolveVideoForPublish([aprobado, enEntregas], {
+      ideaId: 'idea-1',
+      approvedVideoId: 'v-aprobado',
+      watchedOn: 'entregas',
+    })
+    expect(res.video?.id).toBe('v-aprobado')
+  })
+
+  it('sin sello (ideas viejas) se comporta igual que siempre', () => {
+    const res = resolveVideoForPublish([aprobado, masNuevoSinAprobar], { ideaId: 'idea-1' })
+    expect(res.video?.id).toBe('v-nuevo')
+    expect(res.skipped).toBeUndefined()
+  })
+
+  it('sin ningún edited vivo no inventa nada', () => {
+    const res = resolveVideoForPublish([], { ideaId: 'idea-1', approvedVideoId: 'v-aprobado' })
+    expect(res.video).toBeNull()
+    expect(res.skipped).toBe('El archivo aprobado ya no está disponible')
+  })
+
+  it('un sello que apunta a un video de OTRA idea no vale', () => {
+    const deOtraIdea = { ...aprobado, idea_id: 'idea-2' }
+    const res = resolveVideoForPublish([deOtraIdea], {
+      ideaId: 'idea-1',
+      approvedVideoId: 'v-aprobado',
+    })
+    expect(res.video).toBeNull()
+    expect(res.skipped).toBe('El archivo aprobado ya no está disponible')
+  })
+
+  it('pickEditedVideoForPublish sigue siendo la misma lógica, sin duplicarla', () => {
+    expect(
+      pickEditedVideoForPublish([aprobado, masNuevoSinAprobar], { ideaId: 'idea-1' })?.id,
+    ).toBe(resolveVideoForPublish([aprobado, masNuevoSinAprobar], { ideaId: 'idea-1' }).video?.id)
   })
 })

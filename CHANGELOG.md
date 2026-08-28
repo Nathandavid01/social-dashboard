@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.91 — 2026-08-28
+
+**El video que se aprueba es el que se publica.**
+
+- Al aprobar, queda guardado **cuál** archivo se aprobó. Antes la aprobación
+  apuntaba a la idea y, al publicar, el sistema volvía a buscar "el corte más
+  nuevo": si el editor subía otro después de aprobar, se publicaba ese sin que
+  nadie lo hubiera visto.
+- Si el archivo aprobado se archiva o desaparece, ya no se publica otro en su
+  lugar: la publicación se detiene y avisa.
+- Subir un corte nuevo sobre un video ya aprobado (y aún sin publicar) lo
+  devuelve a **por aprobar**. Lo ya publicado no se toca.
+- Pedir cambios borra la aprobación anterior.
+
 ## v3.90 — 2026-08-28
 
 **Los videos crudos ya se ven, y se cerró un agujero de permisos.**
