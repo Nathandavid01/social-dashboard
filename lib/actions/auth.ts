@@ -2,10 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { SESSION_ONLY_COOKIE } from '@/lib/supabase/cookie-persistence'
 
 export async function signIn(formData: FormData) {
-  const supabase = await createClient()
+  // "Mantener sesión iniciada": unchecked → auth cookies become browser-session
+  // cookies, plus a marker so the middleware keeps them that way on refresh.
+  const remember = Boolean(formData.get('remember'))
+  const supabase = await createClient({ sessionOnly: !remember })
 
   const data = {
     email: formData.get('email') as string,
@@ -16,6 +21,14 @@ export async function signIn(formData: FormData) {
 
   if (error) {
     return { error: error.message }
+  }
+
+  const cookieStore = await cookies()
+  if (remember) {
+    cookieStore.delete(SESSION_ONLY_COOKIE)
+  } else {
+    // No maxAge on purpose — the marker itself dies with the browser session.
+    cookieStore.set(SESSION_ONLY_COOKIE, '1', { httpOnly: true, sameSite: 'lax', path: '/' })
   }
 
   revalidatePath('/', 'layout')

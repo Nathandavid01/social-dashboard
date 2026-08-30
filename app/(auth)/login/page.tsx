@@ -3,7 +3,7 @@ import { LoginForm } from '@/components/auth/login-form'
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams?: { deactivated?: string; rejected?: string; reset?: string }
+  searchParams?: { deactivated?: string; rejected?: string; reset?: string; oauth_error?: string }
 }) {
   if (searchParams?.reset) {
     return (
@@ -26,6 +26,11 @@ export default function LoginPage({
       {searchParams?.rejected && (
         <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
           Tu solicitud de acceso no fue aprobada. Contacta a un administrador.
+        </div>
+      )}
+      {searchParams?.oauth_error && (
+        <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+          No se pudo entrar con Google: {searchParams.oauth_error}
         </div>
       )}
       <LoginForm />

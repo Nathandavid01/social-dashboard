@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>v3.93 — Login simple con Google</title>
+<style>
+  :root { --gold-1: #FCE9A6; --gold-2: #E3B22B; --gold-3: #D4A017; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #0a0a0b; color: #fafafa; padding: 48px 24px; position: relative; overflow: hidden;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body::before {
+    content: ""; position: absolute; left: 50%; top: -160px; width: 384px; height: 384px;
+    transform: translateX(-50%); border-radius: 9999px; background: rgba(227,178,43,.15); filter: blur(64px);
+  }
+  .card { width: 100%; max-width: 384px; position: relative; }
+  .brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 32px; }
+  .logo {
+    width: 64px; height: 64px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1);
+    background: radial-gradient(circle at 50% 46%, #1c1810 0%, #0c0c0e 65%);
+    display: grid; place-items: center; box-shadow: 0 10px 30px rgba(227,178,43,.3);
+    font-size: 30px; font-weight: 800;
+    color: transparent; background-clip: border-box;
+  }
+  .logo span { background: linear-gradient(180deg, var(--gold-1), var(--gold-2) 55%, #9C7209); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  h1 { margin-top: 16px; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+  h1 .gold { background: linear-gradient(90deg, var(--gold-1), var(--gold-2), var(--gold-3)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .sub { margin-top: 4px; font-size: 14px; color: #a1a1aa; }
+  h2 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .lead { margin: 6px 0 24px; font-size: 14px; color: #a1a1aa; }
+  .btn-google {
+    width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 10px;
+    border: 1px solid #2a2a2e; border-radius: 10px; background: #131316; color: #fafafa;
+    font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px;
+  }
+  .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: #71717a; font-size: 12px; }
+  .divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: #27272a; }
+  label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .field { margin-bottom: 16px; }
+  input[type=email], input[type=password] {
+    width: 100%; height: 44px; border-radius: 10px; border: 1px solid #2a2a2e; background: #131316;
+    color: #fafafa; padding: 0 14px; font-size: 14px;
+  }
+  .remember { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #a1a1aa; margin-bottom: 16px; }
+  .remember input { width: 16px; height: 16px; accent-color: var(--gold-2); }
+  .btn-primary {
+    width: 100%; height: 44px; border: 0; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(180deg, #eec654, var(--gold-2)); color: #1c1500;
+    font-size: 14px; font-weight: 700; box-shadow: 0 4px 14px rgba(227,178,43,.2);
+  }
+  .help { margin-top: 24px; text-align: center; font-size: 12px; color: #71717a; }
+  .legal { margin-top: 40px; text-align: center; font-size: 12px; color: #52525b; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="logo"><span>N</span></div>
+      <h1>Nate<span class="gold"> Media</span></h1>
+      <p class="sub">Operaciones de contenido</p>
+    </div>
+
+    <h2>Bienvenido de nuevo</h2>
+    <p class="lead">Entra a tu panel de Nate Media para seguir trabajando.</p>
+
+    <button class="btn-google" type="button">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.46a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.81Z"/>
+        <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3.01c-1.07.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.72-4.95H1.27v3.11A12 12 0 0 0 12 24Z"/>
+        <path fill="#FBBC05" d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28V6.61H1.27a12 12 0 0 0 0 10.78l4.01-3.11Z"/>
+        <path fill="#EA4335" d="M12 4.77c1.76 0 3.34.61 4.59 1.8l3.44-3.44A11.98 11.98 0 0 0 12 0 12 12 0 0 0 1.27 6.61l4.01 3.11C6.22 6.88 8.87 4.77 12 4.77Z"/>
+      </svg>
+      Continuar con Google
+    </button>
+
+    <div class="divider">o con tu correo</div>
+
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="tu@natemedia.com" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" placeholder="••••••••" />
+    </div>
+
+    <label class="remember"><input type="checkbox" checked /> Mantener sesión iniciada</label>
+
+    <button class="btn-primary" type="button">Iniciar sesión</button>
+
+    <p class="help">¿Problemas para entrar? Escríbele a un administrador de Nate Media.</p>
+    <p class="legal">© 2026 Nate Media</p>
+  </div>
+</body>
+</html>
