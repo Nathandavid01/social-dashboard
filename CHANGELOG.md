@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v3.93 — 2026-08-30
+
+**Login más simple, con Google y sesión que de verdad se mantiene.**
+
+- La pantalla de entrada ahora es una sola tarjeta centrada con el logo de
+  Nate Media — se fue el panel largo de mercadeo.
+- Nuevo botón **"Continuar con Google"**: entra con tu cuenta de Google sin
+  escribir contraseña (un administrador debe aprobar correos nuevos, igual
+  que siempre).
+- El checkbox ahora dice **"Mantener sesión iniciada"** y hace lo que promete:
+  marcado, no te vuelve a pedir login; desmarcado, la sesión termina al cerrar
+  el navegador. Además sigue recordando tu correo.
+
+![Login simple con Google](/changelog/v3.93-login-simple-google.png)
+
 ## v3.92 — 2026-08-28
 
 **El tablero deja de dar por publicado lo que nunca salió.**

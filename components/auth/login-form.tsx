@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
 import { signIn } from '@/lib/actions/auth'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -33,6 +34,29 @@ export function LoginForm() {
   const [pending, setPending] = useState(false)
   const [email, setEmail] = useState('')
   const [remember, setRemember] = useState(true)
+  const [googlePending, setGooglePending] = useState(false)
+
+  async function onGoogle() {
+    setError(null)
+    setGooglePending(true)
+    try {
+      const supabase = createClient()
+      // PKCE: must run in the browser client so the code verifier cookie is
+      // set here and readable by /auth/callback on the server.
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+      if (oauthError) {
+        setError(oauthError.message)
+        setGooglePending(false)
+      }
+      // On success the browser navigates away to Google — leave pending on.
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo iniciar con Google.')
+      setGooglePending(false)
+    }
+  }
 
   // Prefill the remembered email on the client only (avoids SSR mismatch).
   useEffect(() => {
@@ -71,6 +95,44 @@ export function LoginForm() {
       <div className="mb-6 space-y-1.5">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Bienvenido de nuevo</h2>
         <p className="text-sm text-muted-foreground">Entra a tu panel de Nate Media para seguir trabajando.</p>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onGoogle}
+        disabled={googlePending}
+        className="mb-4 h-11 w-full gap-2.5 text-sm font-semibold"
+      >
+        {googlePending ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden>
+            <path
+              fill="#4285F4"
+              d="M23.52 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.46a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.81Z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3.01c-1.07.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.72-4.95H1.27v3.11A12 12 0 0 0 12 24Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28V6.61H1.27a12 12 0 0 0 0 10.78l4.01-3.11Z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.77c1.76 0 3.34.61 4.59 1.8l3.44-3.44A11.98 11.98 0 0 0 12 0 12 12 0 0 0 1.27 6.61l4.01 3.11C6.22 6.88 8.87 4.77 12 4.77Z"
+            />
+          </svg>
+        )}
+        Continuar con Google
+      </Button>
+
+      <div className="mb-4 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" aria-hidden />
+        <span className="text-xs text-muted-foreground">o con tu correo</span>
+        <span className="h-px flex-1 bg-border" aria-hidden />
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
@@ -129,11 +191,13 @@ export function LoginForm() {
         <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-muted-foreground">
           <input
             type="checkbox"
+            name="remember"
+            value="1"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
             className="h-4 w-4 rounded border-input accent-primary"
           />
-          Recordar mi correo
+          Mantener sesión iniciada
         </label>
 
         <Button type="submit" className="h-11 w-full text-sm font-semibold shadow-sm shadow-primary/20" disabled={pending}>
