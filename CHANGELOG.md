@@ -74,7 +74,7 @@ Vista: [preview HTML](/previews/v3.95-pipeline-solo-caratula.html)
 
 Vista: [preview HTML](/previews/v3.94-pipeline-caratulas.html)
 
-## v3.93 — 2026-08-30
+## v3.93.1 — 2026-08-30
 
 **Login más simple, con Google y sesión que de verdad se mantiene.**
 

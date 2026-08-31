@@ -44,7 +44,7 @@ export function EditorVideoBank({
   return (
     <div className="flex-1 space-y-8 overflow-y-auto bg-[#0b0d0f] p-3 text-foreground sm:p-5">
       <section aria-labelledby="editor-spaces-title">
-        <SectionHeader id="editor-spaces-title" title="Espacios de edición" description="Dos videos activos por editor. Los espacios libres dejan claro quién puede tomar el próximo crudo." />
+        <SectionHeader id="editor-spaces-title" title="Espacios de edición" description="El tope de videos activos sube con el % de aprobación de cada editor (2 → 3 → 4). Los espacios libres dejan claro quién puede tomar el próximo crudo." />
         {rows.length === 0 ? <EmptyState text="No hay crudos listos. Cuando On Site suba material, aparecerá aquí." /> : (
           <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} />)}
