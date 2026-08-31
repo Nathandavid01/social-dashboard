@@ -61,3 +61,9 @@ Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 - [x] Widget mide cadencia configurada (posting_days = meta) vs realidad de Metricool (publicado/atrasado/pendiente). Calendario de producción ya NO alimenta el widget.
 - [ ] **Optimización:** cron `app/api/cron/metricool-sync` que escriba un snapshot semanal por cliente a una tabla nueva (req. migración nueva que aplica Nathan en Supabase), para que el widget lea de la DB en vez de barrer Metricool en vivo (~60 llamadas/cargas, hoy mitigado con unstable_cache 10 min).
 - [ ] Considerar mostrar "sin meta" (clientes sin posting_days) con un CTA para configurar su cadencia, ya que publican pero no cuentan para el anillo.
+
+## Banco de Video — pendientes (2026-08-31, PR #130)
+- [ ] Colores "más profesionales" en las pantallas EXISTENTES de clientes (Eric: nada de fondos blancos/lavados). El /banco nuevo ya va oscuro; falta revisar /clients y tarjetas viejas.
+- [ ] Carátula del crudo siempre visible en /revision (contexto video+idea+comments). PR #128 la puso en pipeline; verificar/extender a revisión.
+- [ ] Listado ORDENADO de la cola por editor en /banco (hoy se enseña el conteo, no el orden 1..n).
+- [ ] Screenshot real en public/changelog/ para v4.0 (regla de changelog visual).
