@@ -5,7 +5,8 @@ import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
-import { canDownloadOrPreviewRaw, editorWipIdeaIds } from '@/lib/pipeline/editor-video-bank'
+import { canDownloadIdeaVideo, editorWipIdeaIds } from '@/lib/pipeline/editor-video-bank'
+import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
@@ -207,18 +208,20 @@ export async function authorizeIdeaVideoAccess(videoId: string): Promise<
       inEditorWip = false
     } else {
       const pipeline = await getIdeacionPipeline({ limit: 400 })
-      inEditorWip = editorWipIdeaIds(pipeline, userId).has(idea.id)
+      // WIP dinámico: el tope real de este editor (sube con su % de aprobación).
+      const limit = editorWipLimitFor(editorApprovalStats(pipeline, userId))
+      inEditorWip = editorWipIdeaIds(pipeline, userId, undefined, limit).has(idea.id)
     }
   }
 
-  const allowed = canDownloadOrPreviewRaw({
+  const allowed = canDownloadIdeaVideo({
     role,
     userId,
     ideaAssigneeId: idea?.production_task?.assigned_to_id ?? null,
     clientAssigneeId: idea?.client?.assigned_to ?? null,
     uploadedBy: video.uploaded_by,
     inEditorWip,
-  })
+  }, video.kind as string | undefined)
   if (!allowed) return { error: 'No autorizado' }
   return {
     drive_file_id: video.drive_file_id,

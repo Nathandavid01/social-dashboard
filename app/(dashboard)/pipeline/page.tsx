@@ -1,5 +1,7 @@
 import { requirePermission, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
 import { listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
+import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
+import { buildGlobalBroll } from '@/lib/pipeline/global-broll'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
@@ -35,7 +37,17 @@ export default async function PipelinePage() {
     getEffectiveUserId(),
   ])
 
-  const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId })
+  // WIP dinámico: cada editor gana espacios con volumen + % de aprobación.
+  const wipLimits: Record<string, number> = Object.fromEntries(
+    (teamProfiles ?? [])
+      .filter((p) => p.role === 'editor' || p.role === 'team_member')
+      .map((p) => [p.id, editorWipLimitFor(editorApprovalStats(ideasRaw, p.id))]),
+  )
+  const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId }, {
+    wipLimit: userId ? wipLimits[userId] : undefined,
+  })
+  // B-roll global: lo ve todo editor, de todos los clientes (raw sigue scoped).
+  const globalBroll = buildGlobalBroll(ideasRaw)
   const activeClients = clientsError || !activeClientsRaw ? [] : activeClientsRaw
   const allClients = activeClients.map((c) => ({ id: c.id, name: c.name }))
   const clientCadence: Record<string, ClientCadence> = Object.fromEntries(
@@ -88,6 +100,8 @@ export default async function PipelinePage() {
       clientLogos={clientLogos}
       clientColors={clientColors}
       bankAdmins={listBankAdmins(teamProfiles ?? [])}
+      wipLimits={wipLimits}
+      globalBroll={globalBroll}
     />
   )
 }

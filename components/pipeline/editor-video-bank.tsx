@@ -9,10 +9,12 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
-import { EDITOR_WIP_LIMIT, type BankAdmin, type EditorBankClip, type EditorBankFile, type EditorBankRow } from '@/lib/pipeline/editor-video-bank'
+import type { BankAdmin, EditorBankClip, EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
+import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import { GlobalBrollSection } from './global-broll-section'
 import { deadlineStatus, deadlineTone, formatDateShortES } from '@/lib/utils/deadlines'
 
-export function EditorVideoBank({ rows, admins = [] }: { rows: EditorBankRow[]; admins?: BankAdmin[] }) {
+export function EditorVideoBank({ rows, admins = [], globalBroll = [] }: { rows: EditorBankRow[]; admins?: BankAdmin[]; globalBroll?: GlobalBrollGroup[] }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const canOpenProfile = useHasPermission('team.read')
 
@@ -35,7 +37,7 @@ export function EditorVideoBank({ rows, admins = [] }: { rows: EditorBankRow[]; 
                 profileTestId
               />
               <div className="grid grid-cols-3 gap-2">
-                <LoadStat label="Ahora" value={`${row.nowCount}/${EDITOR_WIP_LIMIT}`} hint="espacios" hot={row.nowCount >= EDITOR_WIP_LIMIT} />
+                <LoadStat label="Ahora" value={`${row.nowCount}/${row.wipLimit}`} hint="espacios" hot={row.nowCount >= row.wipLimit} />
                 <LoadStat label="Banco" value={row.remainingInBank} hint="pendientes" />
                 <LoadStat label="Revisión" value={row.inRevision} hint="en corte" />
               </div>
@@ -150,6 +152,7 @@ export function EditorVideoBank({ rows, admins = [] }: { rows: EditorBankRow[]; 
           </div>
         </section>
       ))}
+      <GlobalBrollSection groups={globalBroll} />
     </div>
   )
 }

@@ -21,6 +21,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
 import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
+import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 
@@ -65,6 +66,10 @@ export function ContentPipelineBoard(props: {
   clientColors?: Record<string, string | null>
   /** Owner y supervisor — sección fija en el Banco. */
   bankAdmins?: BankAdmin[]
+  /** WIP dinámico por editor (editorWipLimitFor); sin entrada → 2. */
+  wipLimits?: Record<string, number>
+  /** Pool global de b-roll (todos los clientes) — visible para todo editor. */
+  globalBroll?: GlobalBrollGroup[]
 }) {
   // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
   return (
@@ -83,6 +88,8 @@ function ContentPipelineBoardInner({
   clientLogos = {},
   clientColors = {},
   bankAdmins = [],
+  wipLimits = {},
+  globalBroll = [],
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -92,6 +99,8 @@ function ContentPipelineBoardInner({
   clientLogos?: Record<string, string | null>
   clientColors?: Record<string, string | null>
   bankAdmins?: BankAdmin[]
+  wipLimits?: Record<string, number>
+  globalBroll?: GlobalBrollGroup[]
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
@@ -289,7 +298,7 @@ function ContentPipelineBoardInner({
   const bankRows = useMemo(() => {
     const q = search.trim().toLowerCase()
     const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
-    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors }, names)
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits }, names)
       .filter((row) => {
         if (assigneeFilter === 'unassigned') return row.editorId == null
         if (assigneeFilter) return row.editorId === assigneeFilter
@@ -305,7 +314,7 @@ function ContentPipelineBoardInner({
         }),
       }))
       .filter((row) => row.clients.length > 0)
-  }, [ideas, teamMembers, clientLogos, clientColors, assigneeFilter, clientFilter, search])
+  }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, assigneeFilter, clientFilter, search])
 
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -423,7 +432,7 @@ function ContentPipelineBoardInner({
       </div>
 
       {view === 'bank' ? (
-        <EditorVideoBank rows={bankRows} admins={bankAdmins} />
+        <EditorVideoBank rows={bankRows} admins={bankAdmins} globalBroll={globalBroll} />
       ) : (
       <div
         ref={scrollRef}

@@ -58,6 +58,8 @@ export type Permission =
   | 'revision.read'
   /** Paso 2: banco de crudos para que el editor baje y vea. */
   | 'pipeline.read'
+  /** Banco de Video global (/banco): biblioteca de crudos + calendario proyectado. Solo admins. */
+  | 'video_bank.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -102,7 +104,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
-    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'video_bank.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',

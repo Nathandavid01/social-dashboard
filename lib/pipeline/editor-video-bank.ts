@@ -71,6 +71,8 @@ export interface EditorBankClient {
 export interface EditorBankResolvedMarks {
   logos?: Record<string, string | null>
   brandColors?: Record<string, string | null>
+  /** WIP dinámico por editor (editorWipLimitFor); sin entrada → EDITOR_WIP_LIMIT. */
+  wipLimits?: Record<string, number>
 }
 
 export interface EditorBankRow {
@@ -82,6 +84,8 @@ export interface EditorBankRow {
   nowCount: number
   /** Cortes en Revisión (submitted / revision_needed / producida). */
   inRevision: number
+  /** Tope de espacios activos de ESTE editor (WIP dinámico; base EDITOR_WIP_LIMIT). */
+  wipLimit: number
   nextSlots: EditorBankNextSlot[]
 }
 
@@ -139,6 +143,16 @@ export function canDownloadOrPreviewRaw(access: EditorBankAccess): boolean {
     return false
   }
   return true
+}
+
+/**
+ * Descarga/preview por tipo de archivo: el b-roll es un pool GLOBAL — cualquier
+ * rol autenticado del equipo lo puede bajar para reusar en cualquier edición.
+ * El raw sigue scoped a la asignación + WIP (canDownloadOrPreviewRaw).
+ */
+export function canDownloadIdeaVideo(access: EditorBankAccess, kind: string | undefined): boolean {
+  if (kind === 'broll') return !!access.role
+  return canDownloadOrPreviewRaw(access)
 }
 
 export function ideaAssigneeId(idea: IdeaWithPipeline): string | null {
@@ -205,6 +219,7 @@ export function editorWipIdeaIds(
   ideas: IdeaWithPipeline[],
   userId: string | null,
   today: string = todayISOInTimeZone(NATE_TZ),
+  limit: number = EDITOR_WIP_LIMIT,
 ): Set<string> {
   if (!userId) return new Set()
   const ready = ideas.filter((idea) => belongsToEditor(idea, userId) && isRawReadyWork(idea))
@@ -230,12 +245,12 @@ export function editorWipIdeaIds(
   })
   const picked: IdeaWithPipeline[] = []
   for (const list of clients) {
-    if (picked.length >= EDITOR_WIP_LIMIT) break
+    if (picked.length >= limit) break
     picked.push(list[0])
   }
-  if (picked.length < EDITOR_WIP_LIMIT) {
+  if (picked.length < limit) {
     const have = new Set(picked.map((i) => i.id))
-    picked.push(...ready.filter((i) => !have.has(i.id)).sort(sortIdeas).slice(0, EDITOR_WIP_LIMIT - picked.length))
+    picked.push(...ready.filter((i) => !have.has(i.id)).sort(sortIdeas).slice(0, limit - picked.length))
   }
   return new Set(picked.map((i) => i.id))
 }
@@ -244,12 +259,13 @@ export function editorWipIdeaIds(
 export function prepareIdeasForEditorBank(
   ideas: IdeaWithPipeline[],
   viewer: { role: UserRole | null; userId: string | null },
+  opts: { wipLimit?: number } = {},
 ): IdeaWithPipeline[] {
   const assigned = filterIdeasForEditorBank(ideas, viewer)
   if (canSeeAllEditorBanks(viewer.role)) return assigned
   if (viewer.role !== 'editor' && viewer.role !== 'team_member') return assigned
 
-  const active = editorWipIdeaIds(assigned, viewer.userId)
+  const active = editorWipIdeaIds(assigned, viewer.userId, undefined, opts.wipLimit ?? EDITOR_WIP_LIMIT)
   return assigned.map((idea) => {
     if (active.has(idea.id)) return { ...idea, bankQueue: 'active' as const }
     if (isRawReadyWork(idea)) {
@@ -298,7 +314,7 @@ function clientBrandPrimary(client: IdeaWithPipeline['client']): string | null {
   return colors?.primary ?? null
 }
 
-function emptyRow(editor: { id: string | null; name: string }): EditorBankRow {
+function emptyRow(editor: { id: string | null; name: string }, wipLimit: number): EditorBankRow {
   return {
     editorId: editor.id,
     editorName: editor.name,
@@ -306,6 +322,7 @@ function emptyRow(editor: { id: string | null; name: string }): EditorBankRow {
     remainingInBank: 0,
     nowCount: 0,
     inRevision: 0,
+    wipLimit,
     nextSlots: [],
   }
 }
@@ -346,7 +363,7 @@ export function groupEditorVideoBank(
     const key = editor.id ?? '__unassigned__'
     let row = byEditor.get(key)
     if (!row) {
-      row = emptyRow(editor)
+      row = emptyRow(editor, (editor.id && resolved.wipLimits?.[editor.id]) || EDITOR_WIP_LIMIT)
       byEditor.set(key, row)
     }
     const clientId = clientKey(idea)

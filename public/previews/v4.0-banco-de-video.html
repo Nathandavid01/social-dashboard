@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.0 — Banco de Video</title>
+<style>
+  :root { --bg:#0a0a0a; --card:#141414; --border:#262626; --fg:#fafafa; --muted:#a3a3a3; --gold:#eab308; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--fg); font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif; padding:24px; }
+  .wrap { max-width:1000px; margin:0 auto; display:grid; gap:16px; }
+  h1 { font-size:18px; } h2 { font-size:14px; }
+  .sub { color:var(--muted); font-size:12px; }
+  .tabs { display:flex; gap:6px; }
+  .tab { border:1px solid var(--border); border-radius:8px; padding:6px 14px; font-size:12px; color:var(--muted); }
+  .tab.active { background:var(--card); color:var(--fg); border-color:var(--gold); }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; }
+  .rail { border-left:3px solid var(--gold); background:linear-gradient(90deg,rgba(234,179,8,.06),transparent 38%); }
+  .rail header, .sec header { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+  .logo { width:28px; height:28px; border-radius:50%; background:var(--gold); color:#000; display:grid; place-items:center; font-weight:700; font-size:10px; }
+  .count { border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:11px; color:var(--muted); }
+  .pill { border:1px solid var(--border); border-radius:6px; padding:3px 8px; font-size:11px; color:var(--muted); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; padding:12px; }
+  .tile { border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#0f0f0f; }
+  .cover { aspect-ratio:9/16; background:linear-gradient(160deg,#1f1f1f,#101010); display:grid; place-items:center; color:#525252; font-size:22px; position:relative; }
+  .dur { position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,.7); color:#fff; font-size:10px; border-radius:4px; padding:1px 4px; }
+  .tile p { font-size:12px; font-weight:500; padding:6px 8px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .ed { margin:4px 8px 8px; font-size:10px; color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:2px 6px; }
+  .strip { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+  .stat { padding:14px 16px; }
+  .stat .wip { float:right; color:var(--gold); border:1px solid rgba(234,179,8,.4); background:rgba(234,179,8,.1); border-radius:6px; font-size:11px; padding:2px 8px; }
+  .dev { border-color:rgba(245,158,11,.35); }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:10px 16px; border-top:1px solid var(--border); }
+  .row:first-of-type { border-top:0; }
+  .muted { color:var(--muted); font-size:11px; white-space:nowrap; }
+  .day { padding:8px 16px; border-bottom:1px solid var(--border); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Banco de Video <span class="sub">· v4.0 · solo admins (owner + supervisor)</span></h1>
+    <p class="sub">Crudos pendientes de todos los clientes — solo carátulas, para ir rápido. Lo aprobado vive en la pestaña Calendario.</p>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <span class="sub"><strong style="color:var(--fg)">14</strong> crudos · <strong style="color:var(--fg)">3</strong> clientes · <strong style="color:var(--fg)">2</strong> sin editor</span>
+    <div class="tabs"><span class="tab active">🎬 Banco</span><span class="tab">📅 Calendario</span></div>
+  </div>
+
+  <div class="strip">
+    <div class="card stat"><span class="wip">3 a la vez</span><strong>María</strong><br><span class="muted">Aprobación <strong style="color:var(--fg)">86%</strong> · 12 aprobados · 2 devueltos · cola: 4</span></div>
+    <div class="card stat"><span class="wip">2 a la vez</span><strong>Pablo</strong><br><span class="muted">Sin historial todavía · cola: 2</span></div>
+  </div>
+
+  <div class="card dev">
+    <header style="display:flex;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)">
+      <span style="color:#f59e0b">↩</span><h2>Devueltos</h2><span class="sub">virados por el QC IA o por un admin</span>
+    </header>
+    <div class="row"><span>Reel testimonios — corte 2</span><span class="muted">ARASIBO · María</span></div>
+  </div>
+
+  <div class="card rail">
+    <header>
+      <span style="display:flex;gap:8px;align-items:center"><span class="logo">AR</span><h2>ARASIBO</h2><span class="count">6</span></span>
+      <span class="pill">Editor: María ▾</span>
+    </header>
+    <div class="grid">
+      <div class="tile"><div class="cover">🎬<span class="dur">1:02</span></div><p>Intro clínica</p><div class="ed">María ▾</div></div>
+      <div class="tile"><div class="cover">🎬<span class="dur">0:47</span></div><p>Testimonio</p><div class="ed">María ▾</div></div>
+      <div class="tile"><div class="cover">🎬<span class="dur">2:10</span></div><p>Tour local</p><div class="ed">Sin editor ▾</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="opacity:.92">
+    <div class="day">Pestaña Calendario — proyección Metricool</div>
+    <div class="day" style="text-transform:none;letter-spacing:0">lunes, 31 ago</div>
+    <div class="row"><span>Intro clínica</span><span class="muted">ARASIBO · 18:00</span></div>
+    <div class="day" style="text-transform:none;letter-spacing:0">miércoles, 2 sep</div>
+    <div class="row"><span>Testimonio</span><span class="muted">ARASIBO · 18:00</span></div>
+  </div>
+</div>
+</body>
+</html>

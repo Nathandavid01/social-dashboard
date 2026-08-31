@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.0 — 2026-08-31
+
+**Nuevo Banco de Video para admins: todos los crudos, de todos los clientes, en una sola pantalla.**
+
+- Nueva sección **Banco de Video** en el menú (solo owners y supervisores):
+  cada cliente con su conteo de videos y sus crudos como carátulas — rápido,
+  sin cargar video.
+- Pestaña **Calendario**: la fecha teórica en que cada video aprobado se
+  auto-postearía a Metricool según el schedule del cliente, en orden.
+- Sección **Devueltos**: lo que el QC IA o un admin viró, en su propia cola.
+- Desde el banco puedes **reasignar un video a otro editor** o asignarle un
+  cliente completo a un editor.
+- Los editores ahora ven **B-roll y files globales** de todos los clientes en
+  su banco (sus crudos siguen siendo solo suyos), y su tope de videos a la vez
+  **sube con su % de aprobación** (2 → 3 → 4).
+
 ## v3.93 — 2026-08-30
 
 **Login más simple, con Google y sesión que de verdad se mantiene.**
