@@ -5,25 +5,28 @@ import { Search, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X,
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
 import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
-import { BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
+import { BATCH_STAGES, groupIntoBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, STAGE_LABEL_ES, type BatchStageKey, type ClientBatch, type ClientCadence } from '@/lib/utils/content-batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { moveBatch } from '@/lib/actions/content-ideas'
 import { getClientBatchData, type ClientBatchData, type ClientBatchOpenOptions } from '@/lib/actions/client-batch'
-import { getBatchVideoPreviewUrls } from '@/lib/actions/batch-video-previews'
 import { pickBatchEditedVideos } from '@/lib/utils/batch-video-thumbs'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useOverlayRoute } from '@/lib/hooks/use-overlay-route'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientBatchView } from '@/components/clients/batch/client-batch-view'
+import { VideoCover } from '@/components/recording/video-cover'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
 import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
 import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import { buildEditorPace } from '@/lib/pipeline/editor-pace'
+import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
+import type { Runway } from '@/lib/utils/content-runway'
 
 type Idea = IdeaWithPipeline
 
@@ -64,12 +67,16 @@ export function ContentPipelineBoard(props: {
   clientLogos?: Record<string, string | null>
   /** brand_colors.primary por cliente (opcional; si falta, hash del id). */
   clientColors?: Record<string, string | null>
+  /** Estado de colchón por cliente, calculado en servidor contra su cadencia. */
+  clientRunway?: Record<string, Runway>
   /** Owner y supervisor — sección fija en el Banco. */
   bankAdmins?: BankAdmin[]
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → 2. */
   wipLimits?: Record<string, number>
   /** Pool global de b-roll (todos los clientes) — visible para todo editor. */
   globalBroll?: GlobalBrollGroup[]
+  /** Solo owner/supervisor reciben navegación, filtros y datos del pipeline global. */
+  canSeeAll?: boolean
 }) {
   // useSearchParams (inside useOverlayRoute) needs a Suspense boundary.
   return (
@@ -87,9 +94,11 @@ function ContentPipelineBoardInner({
   teamMembers = [],
   clientLogos = {},
   clientColors = {},
+  clientRunway = {},
   bankAdmins = [],
   wipLimits = {},
   globalBroll = [],
+  canSeeAll = true,
 }: {
   ideas: Idea[]
   plannedClients?: PlannedClient[]
@@ -98,16 +107,20 @@ function ContentPipelineBoardInner({
   teamMembers?: { id: string; name: string }[]
   clientLogos?: Record<string, string | null>
   clientColors?: Record<string, string | null>
+  clientRunway?: Record<string, Runway>
   bankAdmins?: BankAdmin[]
   wipLimits?: Record<string, number>
   globalBroll?: GlobalBrollGroup[]
+  canSeeAll?: boolean
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [view, setView] = useState<'bank' | 'lotes'>('bank')
-  const canManageLotes = useHasPermission('planning.read')
-  const canMoveLotes = useHasPermission('planning.move')
+  const hasPlanningRead = useHasPermission('planning.read')
+  const hasPlanningMove = useHasPermission('planning.move')
+  const canManageLotes = canSeeAll && hasPlanningRead
+  const canMoveLotes = canSeeAll && hasPlanningMove
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
@@ -118,7 +131,8 @@ function ContentPipelineBoardInner({
   // the board, instead of leaving the page. Reloading with those params
   // reopens the same client at the same spot (deep link).
   const { searchParams, open: pushOverlay, close: closeOverlayRoute, markClosed } = useOverlayRoute()
-  const openClientId = searchParams.get('lote')
+  // Editors cannot reopen the admin-only Lotes overlay via a crafted query.
+  const openClientId = canSeeAll ? searchParams.get('lote') : null
   const fromPlanned = searchParams.get('planificado') === '1'
   const publishDateParam = searchParams.get('fecha')
   const publishLabelParam = searchParams.get('etiqueta')
@@ -316,6 +330,39 @@ function ContentPipelineBoardInner({
       .filter((row) => row.clients.length > 0)
   }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, assigneeFilter, clientFilter, search])
 
+  const visualVideoBank = useMemo(() => {
+    const names = Object.fromEntries(teamMembers.map((member) => [member.id, member.name]))
+    const q = search.trim().toLowerCase()
+    const bank = buildVideoBank(ideas, { editorNames: names, recorderNames: names })
+    const rails = bank.rails
+      .filter((rail) => !clientFilter || rail.clientId === clientFilter)
+      .map((rail) => ({
+        ...rail,
+        logoUrl: clientLogos[rail.clientId] ?? rail.logoUrl,
+        cardColor: clientCardColor({ id: rail.clientId, brandColor: clientColors[rail.clientId] }).dot,
+        videos: rail.videos.filter((video) => {
+          if (assigneeFilter === 'unassigned' && video.editorId) return false
+          if (assigneeFilter && assigneeFilter !== 'unassigned' && video.editorId !== assigneeFilter) return false
+          return !q || `${rail.clientName} ${video.title} ${video.editorName ?? ''}`.toLowerCase().includes(q)
+        }),
+      }))
+      .filter((rail) => rail.videos.length > 0)
+      .map((rail) => ({ ...rail, videoCount: rail.videos.length }))
+    return {
+      rails,
+      totals: {
+        videos: rails.reduce((total, rail) => total + rail.videoCount, 0),
+        clients: rails.length,
+        unassigned: rails.filter((rail) => !rail.editorId).length,
+      },
+    }
+  }, [ideas, teamMembers, clientFilter, assigneeFilter, search, clientLogos, clientColors])
+
+  const editorPaces = useMemo(() => {
+    const visibleEditorIds = new Set(bankRows.map((row) => row.editorId).filter(Boolean))
+    return buildEditorPace(ideas).filter((pace) => visibleEditorIds.has(pace.editorId))
+  }, [ideas, bankRows])
+
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
   const pan = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 })
@@ -381,17 +428,19 @@ function ContentPipelineBoardInner({
               <Clapperboard className="h-3.5 w-3.5" />
               Banco
             </button>
-            <button
-              type="button"
-              onClick={() => setView('lotes')}
-              className={cn(
-                'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
-                view === 'lotes' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <Columns3 className="h-3.5 w-3.5" />
-              Lotes
-            </button>
+            {canSeeAll && (
+              <button
+                type="button"
+                onClick={() => setView('lotes')}
+                className={cn(
+                  'inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-xs font-medium',
+                  view === 'lotes' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Columns3 className="h-3.5 w-3.5" />
+                Lotes
+              </button>
+            )}
           </div>
           <div className="relative hidden sm:block">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -409,30 +458,40 @@ function ContentPipelineBoardInner({
       </header>
 
       {/* Assignee filter — any active team member · batch stats on the right */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
-        <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
-        <AssigneeFilterDropdown
-          members={team}
-          counts={assigneeCounts}
-          total={batches.length}
-          value={assigneeFilter}
-          onChange={setAssigneeFilter}
-        />
-        <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
-          {view === 'bank' ? (
-            <>
-              <span className="text-foreground">{bankRows.length}</span> editores
-            </>
-          ) : (
-            <>
-              <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
-            </>
-          )}
-        </p>
-      </div>
+      {canSeeAll && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-2">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"><Users className="h-3.5 w-3.5" /> Asignado a</span>
+          <AssigneeFilterDropdown
+            members={team}
+            counts={assigneeCounts}
+            total={batches.length}
+            value={assigneeFilter}
+            onChange={setAssigneeFilter}
+          />
+          <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
+            {view === 'bank' ? (
+              <>
+                <span className="text-foreground">{bankRows.length}</span> editores
+              </>
+            ) : (
+              <>
+                <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+              </>
+            )}
+          </p>
+        </div>
+      )}
 
       {view === 'bank' ? (
-        <EditorVideoBank rows={bankRows} admins={bankAdmins} globalBroll={globalBroll} />
+        <EditorVideoBank
+          rows={bankRows}
+          admins={bankAdmins}
+          videoBank={visualVideoBank}
+          paces={editorPaces}
+          teamMembers={teamMembers}
+          clientRunway={clientRunway}
+          globalBroll={globalBroll}
+        />
       ) : (
       <div
         ref={scrollRef}
@@ -718,7 +777,7 @@ function PipelineVideoThumb({
   )
 }
 
-/** Strip of editor-uploaded videos (up to 3). Loads signed/public preview URLs. */
+/** Static covers for editor uploads (up to 3). Never loads the video file. */
 function BatchVideoStrip({
   ideas,
   clientName,
@@ -731,22 +790,6 @@ function BatchVideoStrip({
   total: number
 }) {
   const edited = useMemo(() => pickBatchEditedVideos(ideas, 3), [ideas])
-  const [urls, setUrls] = useState<Record<string, string>>({})
-  const idsKey = edited.map((v) => v.id).join(',')
-
-  useEffect(() => {
-    if (edited.length === 0) return
-    let cancelled = false
-    getBatchVideoPreviewUrls(edited.map((v) => v.id)).then((res) => {
-      if (cancelled || !res.urls) return
-      setUrls(res.urls)
-    })
-    return () => {
-      cancelled = true
-    }
-    // idsKey captures the set of video ids without depending on array identity
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsKey])
 
   const more = Math.max(0, total - Math.max(edited.length, Math.min(3, total)))
 
@@ -775,25 +818,13 @@ function BatchVideoStrip({
   return (
     <div className="flex gap-1" data-testid="batch-video-strip">
       {edited.map((v) => {
-        const src = urls[v.id]
         return (
           <div
             key={v.id}
             className="relative h-[42px] min-w-0 flex-1 overflow-hidden rounded-lg border border-border/60 bg-muted/40 ring-1 ring-inset ring-white/5"
             title={v.name}
           >
-            {src ? (
-              <video
-                src={src}
-                muted
-                playsInline
-                preload="metadata"
-                className="h-full w-full object-cover"
-                aria-label={v.name}
-              />
-            ) : (
-              <div className="h-full w-full animate-pulse bg-muted" aria-hidden />
-            )}
+            <VideoCover videoId={v.id} title={v.name} />
           </div>
         )
       })}
@@ -861,7 +892,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, canMove, onMove, onOpe
           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
         </div>
 
-        {/* editor-uploaded videos (gray strip → real previews) */}
+        {/* Editor uploads as static covers; Pipeline never embeds a player. */}
         <BatchVideoStrip
           ideas={batch.ideas}
           clientName={batch.clientName}

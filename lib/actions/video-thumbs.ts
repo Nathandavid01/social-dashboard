@@ -16,6 +16,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { r2Client, r2Bucket, isR2Configured } from '@/lib/integrations/r2'
 import { entregasR2Client, entregasR2Bucket, isEntregasR2Configured } from '@/lib/integrations/entregas-r2'
+import { authorizeIdeaVideoAccess } from '@/lib/actions/idea-videos-r2'
 
 type BucketHandle = { client: ReturnType<typeof r2Client>; bucket: string }
 
@@ -163,4 +164,14 @@ export async function getVideoThumbViewUrls(videoId: string): Promise<{ urls: st
   } catch {
     return { urls: [] }
   }
+}
+
+/**
+ * Pipeline necesita un límite más estricto que Revisión/Entregas: antes de
+ * presignar la carátula valida que el crudo sea del editor (o que sea admin).
+ */
+export async function getPipelineVideoThumbViewUrls(videoId: string): Promise<{ urls: string[] }> {
+  const access = await authorizeIdeaVideoAccess(videoId)
+  if ('error' in access) return { urls: [] }
+  return getVideoThumbViewUrls(videoId)
 }

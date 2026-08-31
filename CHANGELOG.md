@@ -20,6 +20,60 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
   su banco (sus crudos siguen siendo solo suyos), y su tope de videos a la vez
   **sube con su % de aprobación** (2 → 3 → 4).
 
+## v3.97 — 2026-08-28
+
+**Pipeline dice si cada cliente va adelantado o atrasado.**
+
+- Junto al nombre del cliente aparece su estado y las semanas de contenido que
+  tiene en la etapa más débil del flujo.
+- **Adelantado** significa que Ideas, Grabado y Editado cubren la meta de cuatro
+  semanas; **Atrasado** señala que alguna etapa quedó por debajo.
+- El cálculo reutiliza el Runway y la cadencia real del cliente. Cada editor
+  recibe únicamente el resumen de sus propios clientes.
+
+![Estado adelantado o atrasado por cliente en Pipeline](/changelog/v3.97-pipeline-runway-cliente.png)
+
+Vista: [preview HTML](/previews/v3.97-pipeline-runway-cliente.html)
+
+## v3.96 — 2026-08-28
+
+**Cada editor ve solamente su pipeline; los administradores conservan la vista completa.**
+
+- Editor y miembro de equipo reciben únicamente sus videos y clientes asignados.
+- Owner y supervisor siguen viendo todos los editores, clientes, lotes e historial.
+- El acceso directo a una carátula también valida la asignación antes de entregar
+  una URL, no solo oculta la tarjeta en pantalla.
+
+![Pipeline privado para editores y completo para administradores](/changelog/v3.96-pipeline-privado.png)
+
+Vista: [preview HTML](/previews/v3.96-pipeline-privado.html)
+
+## v3.95 — 2026-08-28
+
+**Pipeline muestra la carátula, pero no reproduce el video.**
+
+- Cada tarjeta carga únicamente la miniatura estática del crudo.
+- Quitamos el botón **Ver** y cualquier reproductor dentro de Pipeline.
+- **Bajar** sigue disponible para que el editor descargue el archivo cuando vaya
+  a trabajarlo.
+
+![Pipeline con carátula estática y sin reproductor](/changelog/v3.95-pipeline-solo-caratula.png)
+
+Vista: [preview HTML](/previews/v3.95-pipeline-solo-caratula.html)
+
+## v3.94 — 2026-08-28
+
+**Cada video del banco muestra su carátula en vez de un cuadro oscuro.**
+
+- La tarjeta usa primero la miniatura que se generó al subir el crudo.
+- Los videos anteriores que no tienen miniatura muestran un fotograma del
+  propio archivo, sin obligar al editor a darle play.
+- Si el video todavía está cargando, se ve un estado claro y no un bloque vacío.
+
+![Carátula visible en el banco de videos](/changelog/v3.94-pipeline-caratulas.png)
+
+Vista: [preview HTML](/previews/v3.94-pipeline-caratulas.html)
+
 ## v3.93 — 2026-08-30
 
 **Login más simple, con Google y sesión que de verdad se mantiene.**
@@ -34,6 +88,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
   el navegador. Además sigue recordando tu correo.
 
 ![Login simple con Google](/changelog/v3.93-login-simple-google.png)
+## v3.93 — 2026-08-28
+
+**El pipeline diseñado en el preview ya es la pantalla de trabajo.**
+
+- Cada editor ve sus **dos espacios activos**, el próximo video en espera y si
+  todavía tiene capacidad para tomar trabajo.
+- El banco se ve como una biblioteca de carátulas por cliente, con duración,
+  quién grabó y un selector para reasignar el video sin salir de Pipeline.
+- Abajo aparece el **ritmo real de edición**: mediana de días, entregas de los
+  últimos 30 días y tendencia contra el periodo anterior.
+- La vista se adapta a móvil, tableta y escritorio sin desplazar toda la página
+  horizontalmente; solo la tabla de métricas conserva su desplazamiento propio.
+
+![Pipeline real con espacios, banco y ritmo](/changelog/v3.93-pipeline-real.png)
+
+Vista: [preview HTML](/previews/v3.93-pipeline-real.html)
 
 ## v3.92 — 2026-08-28
 
