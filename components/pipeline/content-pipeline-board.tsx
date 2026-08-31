@@ -21,6 +21,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
 import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
+import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
 import { buildEditorPace } from '@/lib/pipeline/editor-pace'
 import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
@@ -70,6 +71,10 @@ export function ContentPipelineBoard(props: {
   clientRunway?: Record<string, Runway>
   /** Owner y supervisor — sección fija en el Banco. */
   bankAdmins?: BankAdmin[]
+  /** WIP dinámico por editor (editorWipLimitFor); sin entrada → 2. */
+  wipLimits?: Record<string, number>
+  /** Pool global de b-roll (todos los clientes) — visible para todo editor. */
+  globalBroll?: GlobalBrollGroup[]
   /** Solo owner/supervisor reciben navegación, filtros y datos del pipeline global. */
   canSeeAll?: boolean
 }) {
@@ -91,6 +96,8 @@ function ContentPipelineBoardInner({
   clientColors = {},
   clientRunway = {},
   bankAdmins = [],
+  wipLimits = {},
+  globalBroll = [],
   canSeeAll = true,
 }: {
   ideas: Idea[]
@@ -102,6 +109,8 @@ function ContentPipelineBoardInner({
   clientColors?: Record<string, string | null>
   clientRunway?: Record<string, Runway>
   bankAdmins?: BankAdmin[]
+  wipLimits?: Record<string, number>
+  globalBroll?: GlobalBrollGroup[]
   canSeeAll?: boolean
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
@@ -303,7 +312,7 @@ function ContentPipelineBoardInner({
   const bankRows = useMemo(() => {
     const q = search.trim().toLowerCase()
     const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
-    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors }, names)
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits }, names)
       .filter((row) => {
         if (assigneeFilter === 'unassigned') return row.editorId == null
         if (assigneeFilter) return row.editorId === assigneeFilter
@@ -319,7 +328,7 @@ function ContentPipelineBoardInner({
         }),
       }))
       .filter((row) => row.clients.length > 0)
-  }, [ideas, teamMembers, clientLogos, clientColors, assigneeFilter, clientFilter, search])
+  }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, assigneeFilter, clientFilter, search])
 
   const visualVideoBank = useMemo(() => {
     const names = Object.fromEntries(teamMembers.map((member) => [member.id, member.name]))
@@ -481,6 +490,7 @@ function ContentPipelineBoardInner({
           paces={editorPaces}
           teamMembers={teamMembers}
           clientRunway={clientRunway}
+          globalBroll={globalBroll}
         />
       ) : (
       <div

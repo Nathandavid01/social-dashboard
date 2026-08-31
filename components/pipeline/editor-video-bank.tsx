@@ -10,7 +10,9 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
-import { EDITOR_WIP_LIMIT, type BankAdmin, type EditorBankClip, type EditorBankFile, type EditorBankRow } from '@/lib/pipeline/editor-video-bank'
+import type { BankAdmin, EditorBankClip, EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
+import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import { GlobalBrollSection } from './global-broll-section'
 import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pipeline/editor-pace'
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
 import type { Runway, RunwayStatus } from '@/lib/utils/content-runway'
@@ -25,6 +27,7 @@ export function EditorVideoBank({
   paces = [],
   teamMembers = [],
   clientRunway = {},
+  globalBroll = [],
 }: {
   rows: EditorBankRow[]
   admins?: BankAdmin[]
@@ -32,6 +35,7 @@ export function EditorVideoBank({
   paces?: EditorPace[]
   teamMembers?: TeamMember[]
   clientRunway?: Record<string, Runway>
+  globalBroll?: GlobalBrollGroup[]
 }) {
   const canOpenProfile = useHasPermission('team.read')
   const teamPace = teamMedianDays(paces)
@@ -48,6 +52,7 @@ export function EditorVideoBank({
         )}
       </section>
       {videoBank && <VideoBankLibrary bank={videoBank} teamMembers={teamMembers} clientRunway={clientRunway} />}
+      <GlobalBrollSection groups={globalBroll} />
       {paces.length > 0 && <EditorPaceTable rows={rows} paces={paces} teamMembers={teamMembers} />}
       {admins.length > 0 && <AdminStrip admins={admins} />}
     </div>
@@ -64,23 +69,23 @@ function EmptyState({ text }: { text: string }) {
 
 function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
-  const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, EDITOR_WIP_LIMIT)
+  const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, row.wipLimit)
   const waiting = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'waiting')
   const estimate = estimateDaysForEditor(pace, { teamMedianDays: teamPace })
   const approved = row.clients.reduce((sum, client) => sum + client.approvedCount, 0)
 
   return (
     <article data-testid={`editor-load-${row.editorId ?? 'unassigned'}`} className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-[#12161a] shadow-[0_12px_30px_rgba(0,0,0,.18)]">
-      <span className="sr-only">Ahora {row.nowCount} de {EDITOR_WIP_LIMIT} · Banco {row.remainingInBank} · Revisión {row.inRevision}</span>
+      <span className="sr-only">Ahora {row.nowCount} de {row.wipLimit} · Banco {row.remainingInBank} · Revisión {row.inRevision}</span>
       <div className="flex flex-wrap items-start justify-between gap-2 px-3.5 py-3">
         <EditorIdentity editorId={row.editorId} editorName={row.editorName} clientCount={row.clients.length} canOpenProfile={canOpenProfile} profileTestId />
         <div className="text-right text-[10px] text-slate-500">
           <p>{pace?.medianDays != null ? <>Ritmo <span className="font-semibold text-slate-200">{pace.medianDays} d</span> por video</> : 'Ritmo sin historial'}</p>
-          <p className={row.nowCount >= EDITOR_WIP_LIMIT ? 'text-rose-300' : 'text-[#c8a34a]'}>{row.nowCount >= EDITOR_WIP_LIMIT ? '2 de 2' : `${EDITOR_WIP_LIMIT - row.nowCount} ${EDITOR_WIP_LIMIT - row.nowCount === 1 ? 'espacio libre' : 'espacios libres'}`}</p>
+          <p className={row.nowCount >= row.wipLimit ? 'text-rose-300' : 'text-[#c8a34a]'}>{row.nowCount >= row.wipLimit ? `${row.wipLimit} de ${row.wipLimit}` : `${row.wipLimit - row.nowCount} ${row.wipLimit - row.nowCount === 1 ? 'espacio libre' : 'espacios libres'}`}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 px-3.5 pb-3">
-        {Array.from({ length: EDITOR_WIP_LIMIT }).map((_, index) => {
+        {Array.from({ length: row.wipLimit }).map((_, index) => {
           const work = active[index]
           return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} /> : (
             <div key={`free-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-white/10 bg-black/10 px-3 text-center"><div><p className="text-[11px] font-medium text-slate-300">Espacio libre</p><p className="mt-1 text-[9px] text-slate-500">Puede tomar un video del banco</p><span className="mt-2 inline-block text-[10px] font-semibold text-[#c8a34a]">Disponible</span></div></div>
