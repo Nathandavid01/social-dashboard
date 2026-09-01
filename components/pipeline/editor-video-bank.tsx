@@ -78,7 +78,17 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }
     <article data-testid={`editor-load-${row.editorId ?? 'unassigned'}`} className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-[#12161a] shadow-[0_12px_30px_rgba(0,0,0,.18)]">
       <span className="sr-only">Ahora {row.nowCount} de {row.wipLimit} · Banco {row.remainingInBank} · Revisión {row.inRevision}</span>
       <div className="flex flex-wrap items-start justify-between gap-2 px-3.5 py-3">
-        <EditorIdentity editorId={row.editorId} editorName={row.editorName} clientCount={row.clients.length} canOpenProfile={canOpenProfile} profileTestId />
+        <div className="flex min-w-0 items-center gap-2">
+          <EditorIdentity editorId={row.editorId} editorName={row.editorName} clientCount={row.clients.length} canOpenProfile={canOpenProfile} profileTestId />
+          {row.approvalRate != null && (
+            <span
+              data-testid={`approval-rate-${row.editorId ?? 'unassigned'}`}
+              className="shrink-0 whitespace-nowrap rounded-md border border-[#c8a34a]/40 bg-[#c8a34a]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#d6b55f]"
+            >
+              {row.approvalRate}% aprobación
+            </span>
+          )}
+        </div>
         <div className="text-right text-[10px] text-slate-500">
           <p>{pace?.medianDays != null ? <>Ritmo <span className="font-semibold text-slate-200">{pace.medianDays} d</span> por video</> : 'Ritmo sin historial'}</p>
           <p className={row.nowCount >= row.wipLimit ? 'text-rose-300' : 'text-[#c8a34a]'}>{row.nowCount >= row.wipLimit ? `${row.wipLimit} de ${row.wipLimit}` : `${row.wipLimit - row.nowCount} ${row.wipLimit - row.nowCount === 1 ? 'espacio libre' : 'espacios libres'}`}</p>

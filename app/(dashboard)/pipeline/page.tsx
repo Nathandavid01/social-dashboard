@@ -1,5 +1,6 @@
-import { requirePermission, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
-import { canSeeAllEditorBanks, listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
+import { requirePermission, currentUserHas, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
+import { canSeeAllEditorBanks, editorWipIdeaIds, listBankAdmins, prepareIdeasForEditorBank } from '@/lib/pipeline/editor-video-bank'
+import { planAutoAssign } from '@/lib/pipeline/auto-assign'
 import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
 import { buildGlobalBroll } from '@/lib/pipeline/global-broll'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
@@ -25,7 +26,7 @@ export default async function PipelinePage() {
   await requirePermission('pipeline.read')
   const supabase = await createClient()
 
-  const [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId, pipelineTotals] = await Promise.all([
+  let [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId, pipelineTotals] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
@@ -41,11 +42,48 @@ export default async function PipelinePage() {
   ])
 
   // WIP dinámico: cada editor gana espacios con volumen + % de aprobación.
+  const editorProfiles = (teamProfiles ?? []).filter((p) => p.role === 'editor' || p.role === 'team_member')
+  const statsByEditor = Object.fromEntries(editorProfiles.map((p) => [p.id, editorApprovalStats(ideasRaw, p.id)]))
   const wipLimits: Record<string, number> = Object.fromEntries(
-    (teamProfiles ?? [])
-      .filter((p) => p.role === 'editor' || p.role === 'team_member')
-      .map((p) => [p.id, editorWipLimitFor(editorApprovalStats(ideasRaw, p.id))]),
+    editorProfiles.map((p) => [p.id, editorWipLimitFor(statsByEditor[p.id])]),
   )
+  // % de aprobación al lado del nombre (null sin historial).
+  const approvalRates: Record<string, number | null> = Object.fromEntries(
+    editorProfiles.map((p) => {
+      const st = statsByEditor[p.id]
+      const total = st.approved + st.returned
+      return [p.id, total === 0 ? null : Math.round((st.approved / total) * 100)]
+    }),
+  )
+  // Autoasignación: los crudos sin editor se reparten solos a los espacios
+  // libres por prioridad, al entrar un admin (planning.assign). Idempotente —
+  // lo ya asignado nunca entra al plan, así que recargar no re-baraja nada.
+  if (await currentUserHas('planning.assign')) {
+    const autoEditors = (teamProfiles ?? [])
+      .filter((p) => p.role === 'editor' || p.role === 'team_member')
+      .map((p) => ({
+        id: p.id,
+        freeSlots: Math.max(
+          0,
+          (wipLimits[p.id] ?? 0) - editorWipIdeaIds(ideasRaw, p.id, undefined, wipLimits[p.id]).size,
+        ),
+      }))
+    const plan = planAutoAssign(ideasRaw, autoEditors)
+    if (plan.length > 0) {
+      await Promise.all(
+        plan.map((move) =>
+          supabase
+            .from('production_tasks')
+            .update({ assigned_to_id: move.editorId })
+            .eq('id', move.productionTaskId)
+            .is('assigned_to_id', null),
+        ),
+      )
+      // Releer para que el reparto se vea en esta misma carga.
+      ideasRaw = await getIdeacionPipeline({ limit: 400 })
+    }
+  }
+
   const ideas = prepareIdeasForEditorBank(ideasRaw, { role, userId }, {
     wipLimit: userId ? wipLimits[userId] : undefined,
   })
@@ -127,6 +165,7 @@ export default async function PipelinePage() {
       clientColors={clientColors}
       clientRunway={clientRunway}
       wipLimits={wipLimits}
+      approvalRates={approvalRates}
       globalBroll={globalBroll}
       bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
       canSeeAll={canSeeAll}

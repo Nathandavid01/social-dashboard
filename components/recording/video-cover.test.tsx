@@ -29,14 +29,16 @@ describe('VideoCover', () => {
     expect(cover).toHaveAttribute('src', 'https://cdn.example/frame-1.jpg')
   })
 
-  it('no carga el video cuando todavía no hay una carátula guardada', async () => {
+  // Cambio de producto (v4.3, pedido de Eric): "tiene que tener una foto, no
+  // puede ser negro" — sin thumbs guardados, se pinta un frame real al vuelo.
+  it('sin carátula guardada cae al frame al vuelo (video oculto), no al placeholder', async () => {
     actionMocks.getPipelineVideoThumbViewUrls.mockResolvedValue({ urls: [] })
     actionMocks.getVideoPreviewUrl.mockResolvedValue({ url: 'https://cdn.example/video.mp4' })
 
     render(<VideoCover videoId="video-2" title="Video Prueba 9pm" />)
 
-    await waitFor(() => expect(screen.getByLabelText('Carátula no disponible')).toBeInTheDocument())
-    expect(actionMocks.getVideoPreviewUrl).not.toHaveBeenCalled()
-    expect(document.querySelector('video')).not.toBeInTheDocument()
+    await waitFor(() => expect(actionMocks.getVideoPreviewUrl).toHaveBeenCalledWith('video-2'))
+    await waitFor(() => expect(document.querySelector('video')).toBeInTheDocument())
+    expect(screen.queryByLabelText('Carátula no disponible')).not.toBeInTheDocument()
   })
 })

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.3 — Autoasignación + carátulas + % aprobación</title>
+<style>
+ :root{--bg:#0b0d0f;--card:#12161a;--border:rgba(255,255,255,.1);--fg:#fff;--muted:#94a3b8;--gold:#c8a34a}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:720px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .badge{border:1px solid rgba(200,163,74,.4);background:rgba(200,163,74,.1);color:#d6b55f;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600}
+ .slots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+ .slot{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#0d1013}
+ .cover{height:80px;background:linear-gradient(150deg,#3b4b63,#1a2230 60%,#0d1013);display:grid;place-items:center;font-size:9px;color:#cbd5e1;text-transform:uppercase}
+ .slot p{font-size:10px;padding:6px 8px;color:#e2e8f0}
+ .auto{border-color:rgba(200,163,74,.5)}
+ .note{font-size:11px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body><div class="wrap">
+ <h1>Pipeline v4.3</h1>
+ <p class="sub">Autoasignación por prioridad · carátulas con frame real · % de aprobación visible</p>
+ <div class="card">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+   <strong>Carlos Villalta</strong><span class="badge">95% aprobación</span><span style="font-size:10px;color:var(--muted)">5 clientes · 3 a la vez</span>
+  </div>
+  <div class="slots">
+   <div class="slot"><div class="cover">🎞 frame real</div><p>El Truco de Guin</p></div>
+   <div class="slot"><div class="cover">🎞 frame real</div><p>¿$7.99 te salva?</p></div>
+   <div class="slot auto"><div class="cover" style="background:linear-gradient(150deg,#4d3d1e,#1a1508)">⚡ autoasignado</div><p>Sorteo semanal <span style="color:#d6b55f">· recién repartido</span></p></div>
+  </div>
+  <p class="note">El espacio libre ya no espera: al entrar un admin, el crudo sin editor más urgente se asigna solo. Las carátulas pintan un frame del video cuando no hay miniatura — nunca un cuadro negro.</p>
+ </div>
+</div></body>
+</html>

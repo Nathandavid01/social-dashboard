@@ -73,6 +73,8 @@ export function ContentPipelineBoard(props: {
   bankAdmins?: BankAdmin[]
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → 2. */
   wipLimits?: Record<string, number>
+  /** % de aprobación (0–100) por editor; null/ausente = sin historial. */
+  approvalRates?: Record<string, number | null>
   /** Pool global de b-roll (todos los clientes) — visible para todo editor. */
   globalBroll?: GlobalBrollGroup[]
   /** Solo owner/supervisor reciben navegación, filtros y datos del pipeline global. */
@@ -97,6 +99,7 @@ function ContentPipelineBoardInner({
   clientRunway = {},
   bankAdmins = [],
   wipLimits = {},
+  approvalRates = {},
   globalBroll = [],
   canSeeAll = true,
 }: {
@@ -110,6 +113,7 @@ function ContentPipelineBoardInner({
   clientRunway?: Record<string, Runway>
   bankAdmins?: BankAdmin[]
   wipLimits?: Record<string, number>
+  approvalRates?: Record<string, number | null>
   globalBroll?: GlobalBrollGroup[]
   canSeeAll?: boolean
 }) {
@@ -312,7 +316,7 @@ function ContentPipelineBoardInner({
   const bankRows = useMemo(() => {
     const q = search.trim().toLowerCase()
     const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
-    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits }, names)
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits, approvalRates }, names)
       .filter((row) => {
         if (assigneeFilter === 'unassigned') return row.editorId == null
         if (assigneeFilter) return row.editorId === assigneeFilter
@@ -328,7 +332,7 @@ function ContentPipelineBoardInner({
         }),
       }))
       .filter((row) => row.clients.length > 0)
-  }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, assigneeFilter, clientFilter, search])
+  }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, approvalRates, assigneeFilter, clientFilter, search])
 
   const visualVideoBank = useMemo(() => {
     const names = Object.fromEntries(teamMembers.map((member) => [member.id, member.name]))
