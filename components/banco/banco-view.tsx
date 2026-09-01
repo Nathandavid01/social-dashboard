@@ -12,7 +12,7 @@
  */
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clapperboard, Film, RotateCcw, UserRound } from 'lucide-react'
+import { CalendarDays, CalendarPlus, Clapperboard, Film, MessageSquareText, RotateCcw, UserRound, Users } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
@@ -29,6 +29,8 @@ import { reassignVideo } from '@/lib/actions/content-ideas'
 import { setClientAssignment } from '@/lib/actions/client-assignments'
 import type { BankClientRail, BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
 import type { ProjectedCalendar } from '@/lib/pipeline/projected-calendar'
+import type { ClientCalendarDay } from '@/lib/pipeline/client-calendar'
+import { approvalTone } from '@/lib/pipeline/approval-tone'
 import { cn } from '@/lib/utils'
 
 export interface BancoDevuelto {
@@ -47,6 +49,16 @@ export interface BancoEditorStat {
   queueCount: number
 }
 
+export interface BancoClientPanel {
+  clientId: string
+  clientName: string
+  /** Próximo día favorable para agendar (slot de posteo vacío más cercano). */
+  nextSlotLabel: string | null
+  calendar: ClientCalendarDay[]
+  /** Mini-CRM: lo último que se dijo/hizo con este cliente. */
+  latest: Array<{ when: string; who: string | null; text: string }>
+}
+
 export interface BancoViewProps {
   bank: VideoBank
   calendar: ProjectedCalendar
@@ -54,9 +66,10 @@ export interface BancoViewProps {
   editors: BancoEditorStat[]
   teamEditors: Array<{ id: string; name: string }>
   clientLogos: Record<string, string | null>
+  clientsPanel?: BancoClientPanel[]
 }
 
-export function BancoView({ bank, calendar, devueltos, editors, teamEditors, clientLogos }: BancoViewProps) {
+export function BancoView({ bank, calendar, devueltos, editors, teamEditors, clientLogos, clientsPanel = [] }: BancoViewProps) {
   return (
     <Tabs defaultValue="banco" className="flex-1 space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
@@ -73,6 +86,9 @@ export function BancoView({ bank, calendar, devueltos, editors, teamEditors, cli
           </TabsTrigger>
           <TabsTrigger value="calendario">
             <CalendarDays className="mr-1.5 h-3.5 w-3.5" /> Calendario
+          </TabsTrigger>
+          <TabsTrigger value="clientes">
+            <Users className="mr-1.5 h-3.5 w-3.5" /> Clientes
           </TabsTrigger>
         </TabsList>
       </div>
@@ -101,6 +117,10 @@ export function BancoView({ bank, calendar, devueltos, editors, teamEditors, cli
       <TabsContent value="calendario" className="space-y-4">
         <ProjectedCalendarView calendar={calendar} />
       </TabsContent>
+
+      <TabsContent value="clientes" className="space-y-4">
+        <ClientsPanel clients={clientsPanel} clientLogos={clientLogos} />
+      </TabsContent>
     </Tabs>
   )
 }
@@ -123,11 +143,15 @@ function EditorStrip({ editors }: { editors: BancoEditorStat[] }) {
                 {ed.wipLimit} a la vez
               </span>
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              {rate === null ? 'Sin historial todavía' : (
-                <>Aprobación <strong className="text-foreground">{rate}%</strong> · {ed.approved} aprobados · {ed.returned} devueltos</>
-              )}
-              {' · '}cola: {ed.queueCount}
+            <p className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span
+                data-testid={`approval-badge-${ed.id}`}
+                className={cn('rounded-md border px-1.5 py-0.5 font-semibold', approvalTone(rate).badge)}
+              >
+                {rate === null ? 'Sin historial' : `${rate}%`}
+              </span>
+              {rate !== null && <span>{ed.approved} aprobados · {ed.returned} devueltos</span>}
+              <span>· cola: {ed.queueCount}</span>
             </p>
           </article>
         )
@@ -399,6 +423,123 @@ function ProjectedCalendarView({ calendar }: { calendar: ProjectedCalendar }) {
       )}
     </div>
   )
+}
+
+/** Sección Clientes: escoge un cliente → calendario de crudos/editados,
+ * cuándo agendar, y el mini-CRM de lo último que se dijo. */
+function ClientsPanel({
+  clients,
+  clientLogos,
+}: {
+  clients: BancoClientPanel[]
+  clientLogos: Record<string, string | null>
+}) {
+  const [selected, setSelected] = useState<string | null>(clients[0]?.clientId ?? null)
+  const active = clients.find((c) => c.clientId === selected) ?? null
+
+  if (clients.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card px-5 py-12 text-center text-sm text-muted-foreground">
+        No hay clientes activos que enseñar.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {clients.map((c) => (
+          <button
+            key={c.clientId}
+            type="button"
+            onClick={() => setSelected(c.clientId)}
+            className={cn(
+              'flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] transition-colors',
+              selected === c.clientId
+                ? 'border-primary/60 bg-primary/10 text-foreground'
+                : 'border-border text-muted-foreground hover:bg-secondary hover:text-foreground',
+            )}
+          >
+            <ClientLogo name={c.clientName} logoUrl={clientLogos[c.clientId] ?? null} className="h-5 w-5 text-[8px]" />
+            {c.clientName}
+          </button>
+        ))}
+      </div>
+
+      {active && (
+        <section data-testid={`client-panel-${active.clientId}`} className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-4 py-3">
+            <CalendarPlus className="h-4 w-4 shrink-0 text-primary" />
+            <p className="text-sm">
+              {active.nextSlotLabel ? (
+                <>Favorable agendar para el <strong>{active.nextSlotLabel}</strong> — su próximo slot de posteo sin video.</>
+              ) : (
+                'Este cliente no tiene días de posteo configurados.'
+              )}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
+            {active.calendar.map((day) => (
+              <div
+                key={day.date}
+                className={cn(
+                  'min-h-24 rounded-lg border p-2',
+                  day.isPostingDay ? 'border-primary/40 bg-primary/[0.04]' : 'border-border bg-card',
+                )}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {formatDayES(day.date)}
+                  {day.isPostingDay && <span className="ml-1 text-primary">·post</span>}
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {day.videos.map((v) => (
+                    <li key={v.videoId} className="rounded border border-border bg-background/60 px-1.5 py-1">
+                      <p className="truncate text-[10px] font-medium" title={v.ideaTitle}>{v.ideaTitle}</p>
+                      <span
+                        className={cn(
+                          'text-[8px] font-semibold uppercase tracking-wide',
+                          v.kind === 'edited' ? 'text-emerald-400' : 'text-amber-400',
+                        )}
+                      >
+                        {v.kind === 'edited' ? 'Editado' : 'Crudo'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <section data-testid={`client-crm-${active.clientId}`} className="rounded-xl border border-border bg-card">
+            <header className="flex items-center gap-2 border-b border-border px-4 py-3">
+              <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold">Lo último</h2>
+            </header>
+            {active.latest.length === 0 ? (
+              <p className="px-4 py-6 text-center text-[12px] text-muted-foreground">Sin actividad reciente.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {active.latest.map((entry, i) => (
+                  <li key={i} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2.5">
+                    <p className="min-w-0 flex-1 truncate text-[12px]">{entry.text}</p>
+                    <p className="shrink-0 whitespace-nowrap text-[10px] text-muted-foreground">
+                      {entry.who ? `${entry.who} · ` : ''}{formatDayES(entry.when.slice(0, 10))}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </section>
+      )}
+    </div>
+  )
+}
+
+function formatDayES(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('es-PR', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 function formatDuration(sec: number): string {

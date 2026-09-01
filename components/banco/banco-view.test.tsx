@@ -60,6 +60,26 @@ const CALENDAR: ProjectedCalendar = {
   overflow: [{ ideaId: 'i10', title: 'Sin espacio', clientId: 'c1', clientName: 'ARASIBO' }],
 }
 
+const CLIENTS_PANEL = [
+  {
+    clientId: 'c1',
+    clientName: 'ARASIBO',
+    nextSlotLabel: 'lun 7 sep',
+    calendar: [
+      {
+        date: '2026-08-31',
+        dayOfWeek: 1,
+        isPostingDay: true,
+        videos: [
+          { videoId: 'v1', ideaId: 'i1', ideaTitle: 'Intro clínica', kind: 'raw' as const, name: 'raw.mp4' },
+          { videoId: 'v9', ideaId: 'i9', ideaTitle: 'Ya editado', kind: 'edited' as const, name: 'final.mp4' },
+        ],
+      },
+    ],
+    latest: [{ when: '2026-08-30T10:00:00Z', who: 'Nathan', text: 'Aprobó "Intro clínica"' }],
+  },
+]
+
 function view(over: Partial<Parameters<typeof BancoView>[0]> = {}) {
   return render(
     <BancoView
@@ -69,6 +89,7 @@ function view(over: Partial<Parameters<typeof BancoView>[0]> = {}) {
       editors={[{ id: 'e1', name: 'María', wipLimit: 3, approved: 12, returned: 2, queueCount: 4 }]}
       teamEditors={[{ id: 'e1', name: 'María' }, { id: 'e2', name: 'Pablo' }]}
       clientLogos={{}}
+      clientsPanel={CLIENTS_PANEL}
       {...over}
     />,
   )
@@ -90,12 +111,28 @@ describe('BancoView', () => {
     expect(screen.getByTestId('devueltos')).toHaveTextContent('Reel virado')
   })
 
-  it('la tira de editores enseña el WIP dinámico y su % de aprobación', () => {
+  it('la tira de editores enseña el WIP dinámico y su % de aprobación EN COLOR', () => {
     view()
     const strip = screen.getByTestId('editor-strip')
     expect(strip).toHaveTextContent('María')
     expect(strip).toHaveTextContent('3 a la vez')
-    expect(strip).toHaveTextContent('86%') // 12/(12+2)
+    const badge = screen.getByTestId('approval-badge-e1')
+    expect(badge).toHaveTextContent('86%') // 12/(12+2) → amarillo
+    expect(badge.className).toContain('amber')
+  })
+
+  it('la pestaña Clientes: escojo un cliente y veo su calendario con crudos/editados, cuándo agendar y lo último', () => {
+    view()
+    fireEvent.mouseDown(screen.getByRole('tab', { name: /clientes/i }), { button: 0 })
+    fireEvent.click(screen.getByRole('tab', { name: /clientes/i }))
+    fireEvent.click(screen.getByRole('button', { name: /arasibo/i }))
+    const panel = screen.getByTestId('client-panel-c1')
+    expect(panel).toHaveTextContent('Intro clínica')
+    expect(panel).toHaveTextContent('Ya editado')
+    expect(panel).toHaveTextContent(/crudo/i)
+    expect(panel).toHaveTextContent(/editado/i)
+    expect(panel).toHaveTextContent('lun 7 sep') // cuándo agendar
+    expect(screen.getByTestId('client-crm-c1')).toHaveTextContent('Aprobó "Intro clínica"')
   })
 
   it('la pestaña Calendario proyecta fechas y enseña el overflow', () => {

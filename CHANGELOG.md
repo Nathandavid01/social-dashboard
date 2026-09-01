@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.4 — 2026-08-31
+
+**Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**
+
+- El % de aprobación de cada editor ahora es un **semáforo**: verde (90%+),
+  amarillo (75–89%), rojo (menos de 75%) — en el Banco y en Pipeline.
+- Nueva pestaña **Clientes** en el Banco de Video: escoges un cliente y ves su
+  **calendario de 2 semanas** con los videos crudos y editados en sus fechas,
+  con los días de posteo marcados.
+- Para cada cliente se enseña **cuándo es favorable agendar** (su próximo slot
+  de posteo sin video) y **"Lo último"** — las últimas 5 cosas que pasaron con
+  ese cliente (quién aprobó, subió, movió qué).
+
 ## v4.3 — 2026-08-31
 
 **El banco se reparte solo, las carátulas siempre tienen foto, y el % de aprobación va al lado del nombre.**
