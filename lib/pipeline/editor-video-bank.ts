@@ -73,6 +73,8 @@ export interface EditorBankResolvedMarks {
   brandColors?: Record<string, string | null>
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → EDITOR_WIP_LIMIT. */
   wipLimits?: Record<string, number>
+  /** % de aprobación (0–100) por editor; sin entrada → null (sin historial). */
+  approvalRates?: Record<string, number | null>
 }
 
 export interface EditorBankRow {
@@ -86,6 +88,8 @@ export interface EditorBankRow {
   inRevision: number
   /** Tope de espacios activos de ESTE editor (WIP dinámico; base EDITOR_WIP_LIMIT). */
   wipLimit: number
+  /** % de aprobación (0–100) de este editor, o null sin historial. */
+  approvalRate: number | null
   nextSlots: EditorBankNextSlot[]
 }
 
@@ -314,7 +318,7 @@ function clientBrandPrimary(client: IdeaWithPipeline['client']): string | null {
   return colors?.primary ?? null
 }
 
-function emptyRow(editor: { id: string | null; name: string }, wipLimit: number): EditorBankRow {
+function emptyRow(editor: { id: string | null; name: string }, wipLimit: number, approvalRate: number | null): EditorBankRow {
   return {
     editorId: editor.id,
     editorName: editor.name,
@@ -323,6 +327,7 @@ function emptyRow(editor: { id: string | null; name: string }, wipLimit: number)
     nowCount: 0,
     inRevision: 0,
     wipLimit,
+    approvalRate,
     nextSlots: [],
   }
 }
@@ -363,7 +368,7 @@ export function groupEditorVideoBank(
     const key = editor.id ?? '__unassigned__'
     let row = byEditor.get(key)
     if (!row) {
-      row = emptyRow(editor, (editor.id && resolved.wipLimits?.[editor.id]) || EDITOR_WIP_LIMIT)
+      row = emptyRow(editor, (editor.id && resolved.wipLimits?.[editor.id]) || EDITOR_WIP_LIMIT, (editor.id ? resolved.approvalRates?.[editor.id] : null) ?? null)
       byEditor.set(key, row)
     }
     const clientId = clientKey(idea)

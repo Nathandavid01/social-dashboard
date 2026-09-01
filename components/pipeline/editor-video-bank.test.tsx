@@ -32,6 +32,7 @@ function row(over: Partial<EditorBankRow> = {}): EditorBankRow {
     nowCount: 1,
     inRevision: 0,
     wipLimit: 2,
+    approvalRate: null,
     nextSlots: [],
     clients: [],
     ...over,

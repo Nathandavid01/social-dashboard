@@ -86,4 +86,15 @@ describe('groupEditorVideoBank con wipLimit por editor', () => {
     expect(byId['e1']).toBe(4)
     expect(byId['e2']).toBe(2)
   })
+
+  it('cada fila trae su % de aprobación (del mapa) y null sin historial', () => {
+    const rows = groupEditorVideoBank(
+      [mine(), idea({ assignee: { id: 'e2', full_name: 'Pablo' } as never })],
+      { e1: 'María', e2: 'Pablo' },
+      { approvalRates: { e1: 95 } },
+    )
+    const byId = Object.fromEntries(rows.map((r) => [r.editorId, r.approvalRate]))
+    expect(byId['e1']).toBe(95)
+    expect(byId['e2']).toBeNull()
+  })
 })

@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.3 — 2026-08-31
+
+**El banco se reparte solo, las carátulas siempre tienen foto, y el % de aprobación va al lado del nombre.**
+
+- **Autoasignación**: los crudos sin editor se reparten solos a los espacios
+  libres, por prioridad (deadline más urgente primero, luego el más viejo).
+  Corre al entrar un admin al Pipeline y nunca re-baraja lo ya asignado.
+- **Carátulas sin negro**: si un video no tiene miniatura guardada, se pinta
+  un frame real del video al vuelo. El placeholder queda solo si todo falla.
+- Cada editor enseña su **% de aprobación** al lado del nombre (ej. "95%
+  aprobación"), el mismo número que sube su tope de videos a la vez.
+
 ## v4.2 — 2026-08-31
 
 **Menú más corto (2): Publicados y Verificación ahora son una sola pantalla.**

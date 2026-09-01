@@ -35,6 +35,8 @@ function idea(id: string, clientId: string, editorId: string): IdeaWithPipeline 
 
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: vi.fn(async () => undefined),
+  // false → la autoasignación no corre en estos tests de scope de lectura.
+  currentUserHas: vi.fn(async () => false),
   getEffectiveRole: () => mocks.role(),
   getEffectiveUserId: () => mocks.userId(),
 }))
