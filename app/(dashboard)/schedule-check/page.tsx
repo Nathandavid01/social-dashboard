@@ -1,14 +1,6 @@
-import { PageHeader } from '@/components/shared/page-header'
-import { ScheduleCalendar } from '@/components/metricool/schedule-calendar'
+import { redirect } from 'next/navigation'
 
+/** Fusionada (v4.2): Verificación vive como tab dentro de /published. */
 export default function ScheduleCheckPage() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Verificacion de Posts"
-        description="Calendario de publicaciones — verifica que cada post se publico correctamente"
-      />
-      <ScheduleCalendar />
-    </div>
-  )
+  redirect('/published')
 }

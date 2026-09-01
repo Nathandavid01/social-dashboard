@@ -3,7 +3,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { PublishedFeed } from './published-feed'
 import { ContentCalendar } from './content-calendar'
-import { Globe, CalendarDays, List, BarChart2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Globe, CalendarDays, List, BarChart2, ClipboardCheck, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { useHasPermission } from '@/components/auth/role-gate'
+import { ScheduleCalendar } from '@/components/metricool/schedule-calendar'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +18,7 @@ interface Client {
   metricool_blog_id: string | null
 }
 
-type Tab = 'feed' | 'calendar' | 'clients'
+type Tab = 'feed' | 'calendar' | 'clients' | 'verificacion'
 
 interface PublishedPageClientProps {
   clients: Client[]
@@ -344,6 +346,8 @@ function WeekActivityBar() {
 
 export function PublishedPageClient({ clients }: PublishedPageClientProps) {
   const [tab, setTab] = useState<Tab>('feed')
+  // Verificación (antes /schedule-check) vive aquí como tab, con su permiso.
+  const canVerify = useHasPermission('tasks.read.all')
   const [feedBlogId, setFeedBlogId] = useState<string>('all')
 
   function handleSelectClient(blogId: string) {
@@ -403,6 +407,20 @@ export function PublishedPageClient({ clients }: PublishedPageClientProps) {
             <BarChart2 className="h-3.5 w-3.5" />
             Por Cliente
           </button>
+          {canVerify && (
+            <button
+              onClick={() => setTab('verificacion')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                tab === 'verificacion'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <ClipboardCheck className="h-3.5 w-3.5" />
+              Verificación
+            </button>
+          )}
         </div>
       </div>
 
@@ -410,7 +428,9 @@ export function PublishedPageClient({ clients }: PublishedPageClientProps) {
       <WeekActivityBar />
 
       {/* Content */}
-      {tab === 'calendar' ? (
+      {tab === 'verificacion' && canVerify ? (
+        <ScheduleCalendar />
+      ) : tab === 'calendar' ? (
         <ContentCalendar clients={clients} />
       ) : tab === 'clients' ? (
         <ClientSummaryView clients={clients} onSelectClient={handleSelectClient} />
