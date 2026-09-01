@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.2 — 2026-08-31
+
+**Menú más corto (2): Publicados y Verificación ahora son una sola pantalla.**
+
+- "Verificación" desaparece del menú: ahora es un tab dentro de **Publicados**,
+  al lado de Por Fecha, Calendario y Por Cliente.
+- El link viejo /schedule-check redirige solo — nada se rompe.
+- El tab de Verificación solo lo ve quien tenía acceso a esa pantalla.
+
 ## v4.1 — 2026-08-31
 
 **Menú más corto: Runway sale de la barra lateral.**

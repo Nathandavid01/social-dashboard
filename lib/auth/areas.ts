@@ -76,7 +76,9 @@ export const AREAS: Area[] = [
   // ── Publicación: sacarlo a la calle y comprobar que salió ──
   { href: '/posting',            label: 'Posting',         permission: 'posting.read',       group: 'Publicación' },
   { href: '/published',          label: 'Publicados',      permission: 'metricool.read',     group: 'Publicación' },
-  { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all',     group: 'Publicación' },
+  // Fuera del menú (v4.2): fusionada como tab "Verificación" dentro de /published;
+  // la ruta redirige allá para no romper links viejos.
+  { href: '/schedule-check',     label: 'Verificación',    permission: 'tasks.read.all',     nav: false },
   { href: '/automation',         label: 'Automatización',  permission: 'automation.read',    group: 'Publicación' },
 
   // ── Clientes ──

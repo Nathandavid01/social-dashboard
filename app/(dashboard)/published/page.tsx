@@ -1,9 +1,11 @@
+import { requirePermission } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
 import { PublishedPageClient } from '@/components/published/published-page-client'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PublishedPage() {
+  await requirePermission('metricool.read')
   const supabase = await createClient()
   const { data: clients } = await supabase
     .from('clients')

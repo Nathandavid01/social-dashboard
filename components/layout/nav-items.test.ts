@@ -17,6 +17,8 @@ describe('navItems source', () => {
     // /runway salió del menú (v4.1): el runway por cliente ya vive en Pipeline
     // y la tarjeta de Home sigue enlazando la página completa por deep link.
     expect(hrefs).not.toContain('/runway')
+    // /schedule-check se fusionó como tab "Verificación" dentro de /published (v4.2).
+    expect(hrefs).not.toContain('/schedule-check')
   })
 
   it('includes /home and the regular nav areas', () => {
