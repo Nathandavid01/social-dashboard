@@ -14,6 +14,9 @@ describe('navItems source', () => {
     expect(hrefs).not.toContain('/alerts')
     expect(hrefs).not.toContain('/operations')
     expect(hrefs).not.toContain('/planning')
+    // /runway salió del menú (v4.1): el runway por cliente ya vive en Pipeline
+    // y la tarjeta de Home sigue enlazando la página completa por deep link.
+    expect(hrefs).not.toContain('/runway')
   })
 
   it('includes /home and the regular nav areas', () => {

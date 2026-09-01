@@ -69,7 +69,9 @@ export const AREAS: Area[] = [
 
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },
-  { href: '/runway',             label: 'Runway',          permission: 'runway.read',        group: 'Desarrollo' },
+  // Fuera del menú (v4.1): el runway por cliente ya vive dentro de Pipeline;
+  // la página completa (plan semanal + board) sigue viva vía la tarjeta de Home.
+  { href: '/runway',             label: 'Runway',          permission: 'runway.read',        nav: false },
 
   // ── Publicación: sacarlo a la calle y comprobar que salió ──
   { href: '/posting',            label: 'Posting',         permission: 'posting.read',       group: 'Publicación' },

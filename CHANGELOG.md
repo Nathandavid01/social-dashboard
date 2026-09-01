@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.1 — 2026-08-31
+
+**Menú más corto: Runway sale de la barra lateral.**
+
+- El runway por cliente ya se ve dentro de Pipeline, así que la entrada
+  "Runway" desaparece del menú de la izquierda.
+- La página completa (plan semanal + tablero) sigue viva: se entra desde la
+  tarjeta de Runway en Inicio.
+
 ## v4.0 — 2026-08-31
 
 **Nuevo Banco de Video para admins: todos los crudos, de todos los clientes, en una sola pantalla.**
