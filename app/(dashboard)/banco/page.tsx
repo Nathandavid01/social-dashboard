@@ -7,7 +7,10 @@ import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import { projectPostingCalendar, type ClientQueueInput } from '@/lib/pipeline/projected-calendar'
 import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
 import { clientAssigneeId } from '@/lib/pipeline/editor-video-bank'
-import { BancoView, type BancoDevuelto, type BancoEditorStat } from '@/components/banco/banco-view'
+import { buildClientCalendar } from '@/lib/pipeline/client-calendar'
+import { planNextVideoSlot } from '@/lib/utils/planned-sessions'
+import { getActivityLog } from '@/lib/actions/activity'
+import { BancoView, type BancoClientPanel, type BancoDevuelto, type BancoEditorStat } from '@/components/banco/banco-view'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -17,11 +20,28 @@ export const revalidate = 0
  * Banco de Video — biblioteca global de crudos, SOLO admins (owner/supervisor).
  * Los demás roles ni lo ven en el menú ni pueden entrar (500 limpio).
  */
+const ACTIVITY_ES: Record<string, string> = {
+  created: 'Creó',
+  status_changed: 'Movió',
+  published: 'Publicó',
+  approved: 'Aprobó',
+  submitted: 'Entregó',
+  revision_requested: 'Pidió revisión de',
+  caption_saved: 'Guardó caption de',
+  video_uploaded: 'Subió video de',
+  reassigned: 'Reasignó',
+}
+
+function describeActivity(action: string, ideaTitle: string | null): string {
+  const verb = ACTIVITY_ES[action] ?? action
+  return ideaTitle ? `${verb} "${ideaTitle}"` : verb
+}
+
 export default async function BancoPage() {
   await requirePermission('video_bank.read')
   const supabase = await createClient()
 
-  const [ideas, { data: clientsRaw }, metricoolPics, { data: teamProfiles }] = await Promise.all([
+  const [ideas, { data: clientsRaw }, metricoolPics, { data: teamProfiles }, activity] = await Promise.all([
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
@@ -30,6 +50,7 @@ export default async function BancoPage() {
       .order('name'),
     getMetricoolPicturesByBlogId(),
     supabase.from('profiles').select('id, full_name, email, role, status').eq('status', 'active'),
+    getActivityLog({ limit: 300 }),
   ])
 
   const clients = clientsRaw ?? []
@@ -89,6 +110,30 @@ export default async function BancoPage() {
     }
   })
 
+  // Sección Clientes: calendario de crudos/editados, cuándo agendar, mini-CRM.
+  const today = new Date()
+  const clientsPanel: BancoClientPanel[] = clients.map((c) => {
+    const postingDays = (c.posting_days ?? []) as number[]
+    const latest = activity
+      .filter((a) => a.client?.id === c.id)
+      .slice(0, 5)
+      .map((a) => ({
+        when: a.created_at,
+        who: (a as { user?: { full_name?: string | null } | null }).user?.full_name ?? null,
+        text: describeActivity(
+          a.action,
+          (a as { idea?: { title?: string | null } | null }).idea?.title ?? null,
+        ),
+      }))
+    return {
+      clientId: c.id,
+      clientName: c.name,
+      nextSlotLabel: planNextVideoSlot(postingDays, today)?.label ?? null,
+      calendar: buildClientCalendar(ideas, c.id, { from: today, days: 14, postingDays }),
+      latest,
+    }
+  })
+
   const clientLogos: Record<string, string | null> = Object.fromEntries(
     clients.map((c) => {
       const metricoolPic = c.metricool_blog_id ? metricoolPics[String(c.metricool_blog_id)] : undefined
@@ -111,6 +156,7 @@ export default async function BancoPage() {
         editors={editors}
         teamEditors={teamEditors}
         clientLogos={clientLogos}
+        clientsPanel={clientsPanel}
       />
     </div>
   )

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.4 — Clientes + semáforo</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .b{border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;border:1px solid}
+ .v{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1);color:#34d399}
+ .a{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#fbbf24}
+ .r{border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.1);color:#fb7185}
+ .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+ .chip{border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--muted)}
+ .chip.on{border-color:rgba(234,179,8,.6);background:rgba(234,179,8,.08);color:var(--fg)}
+ .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+ .day{min-height:70px;border:1px solid var(--border);border-radius:8px;padding:5px;font-size:9px;color:var(--muted)}
+ .day.post{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.04)}
+ .vid{margin-top:3px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;background:#0f0f0f}
+ .vid b{display:block;color:#e5e5e5;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .crudo{color:#fbbf24;font-size:8px;text-transform:uppercase}.edit{color:#34d399;font-size:8px;text-transform:uppercase}
+ .row{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--border);padding:8px 2px;font-size:12px}
+ .who{color:var(--muted);font-size:10px;white-space:nowrap}
+</style></head>
+<body><div class="wrap">
+ <h1>Banco de Video · Clientes <span class="sub">· v4.4</span></h1>
+ <p class="sub">Semáforo de aprobación + calendario por cliente + mini-CRM</p>
+ <div class="card">
+  Editores: Carlos <span class="b v">95%</span> · María <span class="b a">82%</span> · Pablo <span class="b r">61%</span>
+ </div>
+ <div class="card">
+  <div class="chips"><span class="chip on">🟡 ARASIBO</span><span class="chip">Lucky Pet</span><span class="chip">Speedy Net</span></div>
+  <p style="font-size:12px;margin-bottom:10px">📅 Favorable agendar para el <strong>lun 7 sep</strong> — su próximo slot de posteo sin video.</p>
+  <div class="cal">
+   <div class="day post">lun 31 ·post<div class="vid"><b>Intro clínica</b><span class="crudo">Crudo</span></div></div>
+   <div class="day">mar 1<div class="vid"><b>Ya editado</b><span class="edit">Editado</span></div></div>
+   <div class="day post">mié 2 ·post</div><div class="day">jue 3</div><div class="day">vie 4</div><div class="day">sáb 5</div><div class="day">dom 6</div>
+  </div>
+ </div>
+ <div class="card">
+  <strong style="font-size:13px">💬 Lo último</strong>
+  <div class="row"><span>Aprobó "Intro clínica"</span><span class="who">Nathan · sáb 30 ago</span></div>
+  <div class="row"><span>Subió video de "Testimonio"</span><span class="who">Neitan · vie 29 ago</span></div>
+ </div>
+</div></body></html>

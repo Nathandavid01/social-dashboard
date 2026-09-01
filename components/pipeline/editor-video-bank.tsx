@@ -12,6 +12,7 @@ import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import type { BankAdmin, EditorBankClip, EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import { approvalTone } from '@/lib/pipeline/approval-tone'
 import { GlobalBrollSection } from './global-broll-section'
 import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pipeline/editor-pace'
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
@@ -83,7 +84,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }
           {row.approvalRate != null && (
             <span
               data-testid={`approval-rate-${row.editorId ?? 'unassigned'}`}
-              className="shrink-0 whitespace-nowrap rounded-md border border-[#c8a34a]/40 bg-[#c8a34a]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#d6b55f]"
+              className={`shrink-0 whitespace-nowrap rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${approvalTone(row.approvalRate).badge}`}
             >
               {row.approvalRate}% aprobación
             </span>
