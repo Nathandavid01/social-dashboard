@@ -62,6 +62,13 @@ async function waitForPhase(id: string, phases: string[], timeoutMs = 2000) {
   throw new Error(`Timed out waiting for phase in [${phases.join(', ')}], last: ${JSON.stringify(useUploadStore.getState().uploads[id])}`)
 }
 
+function deferred<T = void>() {
+  let resolve!: (v: T) => void
+  let reject!: (e: Error) => void
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej })
+  return { promise, resolve, reject }
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   putBlobMock.mockImplementation(async (_url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
@@ -286,10 +293,8 @@ describe('upload-store — cancelar', () => {
   })
 
   it('cancelling during "preparando" — before startMultipartUpload has even resolved — still aborts server-side exactly once (no orphaned multipart)', async () => {
-    const deferred: { resolve?: (v: { uploadId: string; key: string }) => void } = {}
-    vi.mocked(startMultipartUpload).mockImplementationOnce(
-      () => new Promise((resolve) => { deferred.resolve = resolve }),
-    )
+    const started = deferred<{ uploadId: string; key: string }>()
+    vi.mocked(startMultipartUpload).mockImplementationOnce(() => started.promise)
 
     const file = bigFile()
     const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
@@ -302,7 +307,7 @@ describe('upload-store — cancelar', () => {
     expect(vi.mocked(abortMultipartUpload)).not.toHaveBeenCalled()
 
     // The server action resolves AFTER the cancel — this is the race.
-    deferred.resolve?.({ uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' })
+    started.resolve({ uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' })
 
     await new Promise((r) => setTimeout(r, 20))
     expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledWith(
@@ -322,5 +327,60 @@ describe('upload-store — sobrevive a que nadie esté "montado"', () => {
     // the way navigating away and the dock re-mounting elsewhere would.
     const item = await waitForPhase(id, ['listo', 'error'])
     expect(item.phase).toBe('listo')
+  })
+})
+
+describe('upload-store — el post-proceso (QC IA / carátula) no bloquea "listo"', () => {
+  it('un editado queda "listo" en cuanto se registra; el QC IA sigue en segundo plano', async () => {
+    const qc = deferred()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(item.pct).toBe(100)
+    expect(item.postprocess).toBe('pendiente')
+    expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('video-1', file)
+
+    qc.resolve()
+    await new Promise((r) => setTimeout(r, 10))
+    expect(useUploadStore.getState().uploads[id].postprocess).toBe('listo')
+    expect(useUploadStore.getState().uploads[id].phase).toBe('listo')
+  })
+
+  it('si el QC IA falla, la subida sigue "listo" y el post-proceso marca error', async () => {
+    const qc = deferred()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+
+    qc.reject(new Error('xAI caído'))
+    await new Promise((r) => setTimeout(r, 10))
+    const item = useUploadStore.getState().uploads[id]
+    expect(item.phase).toBe('listo')
+    expect(item.postprocess).toBe('error')
+  })
+
+  it('un crudo también queda "listo" antes de su carátula', async () => {
+    const thumbs = deferred()
+    vi.mocked(generateVideoThumbs).mockReturnValueOnce(thumbs.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.postprocess).toBe('pendiente')
+    thumbs.resolve()
+    await new Promise((r) => setTimeout(r, 10))
+    expect(useUploadStore.getState().uploads[id].postprocess).toBe('listo')
+  })
+
+  it('hasActiveUploads es false mientras solo queda post-proceso pendiente (no hay que avisar al cerrar la pestaña)', async () => {
+    const qc = deferred()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+    expect(useUploadStore.getState().hasActiveUploads()).toBe(false)
+    qc.resolve()
   })
 })

@@ -19,9 +19,11 @@ export function uploadPhaseText(item: UploadItem): string {
       return 'Ensamblando el archivo'
     case 'registrando':
       return 'Registrando el video'
-    case 'analizando':
-      return 'La IA está viendo el video…'
     case 'listo':
+      if (item.postprocess === 'pendiente') {
+        return item.kind === 'edited' ? 'Listo · la IA está viendo el video…' : 'Listo · generando carátula…'
+      }
+      if (item.postprocess === 'error') return 'Listo · el análisis de IA falló; se reintenta solo'
       return 'Listo'
     case 'error':
       return item.error ? `Falló: ${item.error}` : 'Falló la subida'

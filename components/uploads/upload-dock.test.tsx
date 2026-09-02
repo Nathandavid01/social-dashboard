@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { UploadDock } from './upload-dock'
 import { useUploadStore } from '@/lib/stores/upload-store'
+
+const refresh = vi.fn()
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
 
 function seed(id: string, overrides: Partial<Parameters<typeof useUploadStore.setState>[0]> = {}) {
   useUploadStore.setState((s) => ({
@@ -50,16 +53,17 @@ describe('UploadDock', () => {
   })
 
   it('each phase renders its own explanatory text, not a mute bar', async () => {
-    const cases: Array<[string, RegExp]> = [
+    const cases: Array<[string, RegExp, Record<string, unknown>?]> = [
       ['reintentando', /reintentando.*2 de 5/i],
       ['ensamblando', /ensamblando/i],
       ['registrando', /registrando/i],
-      ['analizando', /viendo el video/i],
-      ['listo', /listo/i],
+      // El QC IA ya no es una fase que bloquee: el video está listo y la IA sigue detrás.
+      ['listo', /listo · la ia está viendo el video/i, { kind: 'edited', postprocess: 'pendiente' }],
+      ['listo', /^listo$/i],
     ]
-    for (const [phase, matcher] of cases) {
+    for (const [phase, matcher, extra] of cases) {
       useUploadStore.setState({ uploads: {} })
-      seed('u1', { phase: phase as never, attempt: 2 })
+      seed('u1', { phase: phase as never, attempt: 2, ...(extra as object) })
       const { unmount } = render(<UploadDock />)
       fireEvent.click(await screen.findByTestId('upload-dock'))
       expect(screen.getAllByText(matcher).length).toBeGreaterThan(0)
@@ -111,5 +115,30 @@ describe('UploadDock', () => {
       fireEvent.click(screen.getByRole('button', { name: /cerrar/i }))
     })
     expect(screen.queryByTestId('upload-dock')).not.toBeInTheDocument()
+  })
+})
+
+describe('UploadDock — cuando el post-proceso termina, refresca la página', () => {
+  it('llama router.refresh() al pasar de pendiente a listo, para que las bolitas del QC se enciendan solas', async () => {
+    refresh.mockClear()
+    useUploadStore.setState({ uploads: {} })
+    seed('u1', { phase: 'listo' as never, pct: 100, postprocess: 'pendiente' as never })
+    render(<UploadDock />)
+    expect(refresh).not.toHaveBeenCalled()
+    act(() => {
+      useUploadStore.setState((s) => ({ uploads: { ...s.uploads, u1: { ...s.uploads.u1, postprocess: 'listo' } } }))
+    })
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('no refresca si el post-proceso falla ni por cambios que no sean pendiente→listo', () => {
+    refresh.mockClear()
+    useUploadStore.setState({ uploads: {} })
+    seed('u1', { phase: 'listo' as never, pct: 100, postprocess: 'pendiente' as never })
+    render(<UploadDock />)
+    act(() => {
+      useUploadStore.setState((s) => ({ uploads: { ...s.uploads, u1: { ...s.uploads.u1, postprocess: 'error' } } }))
+    })
+    expect(refresh).not.toHaveBeenCalled()
   })
 })
