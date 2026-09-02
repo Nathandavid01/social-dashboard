@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/lib/hooks/use-toast'
 import { setUserAreaAccess } from '@/lib/actions/users'
-import { AREAS, effectiveAreaHrefs, normalizeAreaAccess } from '@/lib/auth/areas'
+import { AREAS, NAV_GROUPS, effectiveAreaHrefs, normalizeAreaAccess, type Area, type NavGroup } from '@/lib/auth/areas'
 import { cn } from '@/lib/utils'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -39,6 +39,14 @@ export function AreaAccessPanel({
 
   const [restricted, setRestricted] = useState(isRestricted)
   const [selected, setSelected] = useState<Set<string>>(new Set(baseline))
+
+  function setGroup(hrefs: string[], on: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      for (const h of hrefs) on ? next.add(h) : next.delete(h)
+      return next
+    })
+  }
 
   function toggle(href: string) {
     setSelected((prev) => {
@@ -105,22 +113,57 @@ export function AreaAccessPanel({
       </div>
 
       {restricted && (
-        <div className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto rounded-lg border p-2 sm:grid-cols-3">
-          {AREAS.map((a) => {
-            const checked = selected.has(a.href)
-            return (
-              <label
-                key={a.href}
-                className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
-                  checked ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-accent',
-                )}
-              >
-                <input type="checkbox" checked={checked} onChange={() => toggle(a.href)} />
-                <span className="truncate">{a.label}</span>
-              </label>
-            )
-          })}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">
+            {selected.size === 0
+              ? 'Ninguna área marcada todavía'
+              : `${selected.size} ${selected.size === 1 ? 'área marcada' : 'áreas marcadas'} de ${AREAS.length}`}
+          </p>
+          <div className="grid max-h-80 gap-2 overflow-y-auto rounded-lg border p-2 sm:grid-cols-2">
+            {GROUPED_AREAS.map(({ group, areas }) => {
+              const hrefs = areas.map((a) => a.href)
+              const marked = hrefs.filter((h) => selected.has(h)).length
+              const all = marked === hrefs.length
+              return (
+                <section key={group} className="rounded-lg border bg-muted/30 p-2">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</h4>
+                    <button
+                      type="button"
+                      onClick={() => setGroup(hrefs, !all)}
+                      aria-label={`${all ? 'Nada' : 'Todo'} ${group}`}
+                      className={cn(
+                        'rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors',
+                        all ? 'border-primary/40 bg-primary/10 text-foreground' : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {all ? 'Nada' : 'Todo'} · {marked}/{hrefs.length}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {areas.map((a) => {
+                      const checked = selected.has(a.href)
+                      return (
+                        <label
+                          key={a.href}
+                          className={cn(
+                            'flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors',
+                            checked
+                              ? 'border-primary/40 bg-primary/10 text-foreground'
+                              : 'border-transparent text-muted-foreground hover:bg-accent hover:text-foreground',
+                          )}
+                        >
+                          <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(a.href)} />
+                          <span className={cn('h-1.5 w-1.5 rounded-full', checked ? 'bg-primary' : 'bg-muted-foreground/40')} aria-hidden />
+                          {a.label}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </section>
+              )
+            })}
+          </div>
         </div>
       )}
 
@@ -136,3 +179,9 @@ export function AreaAccessPanel({
     </div>
   )
 }
+
+/** Las áreas en el orden del menú, por sección; las que no salen en el menú, al final. Constantes: se calcula una vez. */
+const GROUPED_AREAS: { group: NavGroup | 'Otras'; areas: Area[] }[] = [
+  ...NAV_GROUPS.map((group) => ({ group, areas: AREAS.filter((a) => a.group === group) })),
+  { group: 'Otras' as const, areas: AREAS.filter((a) => !a.group) },
+].filter((g) => g.areas.length > 0)

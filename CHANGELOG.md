@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.8 — 2026-09-01
+
+**Usuarios: cada persona con su foto, y los accesos se dan por sección con un clic.**
+
+- En **Usuarios y permisos** cada tarjeta muestra la **foto real** de la persona
+  (antes salían iniciales aunque tuviera foto). Un owner puede **subir o quitar
+  la foto de cualquiera** tocando su avatar, sin salir de la lista.
+- El acceso de cada persona se lee de un vistazo: **Acceso completo** (verde) o
+  **N áreas** (ámbar).
+- El panel de áreas ahora va **por sección del menú** (Marketing, Recordings,
+  Trabajo, Clientes, Publicación, Métricas, Desarrollo, Equipo), con un botón
+  **Todo / Nada** por sección y el conteo de áreas marcadas.
+
+![Usuarios con foto y accesos por sección](/changelog/v4.8-usuarios-fotos-accesos.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

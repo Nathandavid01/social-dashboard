@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.8 — Usuarios: fotos y accesos</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+ .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+ .av{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.1);display:grid;place-items:center;font-weight:700;font-size:13px;color:#60a5fa;overflow:hidden}
+ .av img{width:100%;height:100%;object-fit:cover}
+ .cam{position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;border-radius:50%;background:#0a0a0a;border:1px solid var(--border);font-size:10px;display:grid;place-items:center}
+ .name{font-weight:600;font-size:13px}.mail{font-size:11px;color:var(--muted)}
+ .pill{border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;border:1px solid}
+ .role{border-color:rgba(59,130,246,.4);color:#60a5fa;background:rgba(59,130,246,.1)}
+ .ok{border-color:rgba(16,185,129,.35);color:#34d399;background:rgba(16,185,129,.1)}
+ .amb{border-color:rgba(245,158,11,.35);color:#fbbf24;background:rgba(245,158,11,.1)}
+ .menu{border:1px solid var(--border);border-radius:8px;background:#0f0f0f;padding:4px;font-size:12px;width:150px}
+ .menu div{padding:5px 8px;border-radius:6px}.menu div.red{color:#fb7185}
+ .groups{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+ .g{border:1px solid var(--border);border-radius:10px;background:#101010;padding:8px}
+ .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+ .gh h4{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+ .tog{font-size:10px;border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--muted)}.tog.on{border-color:rgba(234,179,8,.5);color:var(--fg);background:rgba(234,179,8,.08)}
+ .chips{display:flex;gap:4px;flex-wrap:wrap}.chip{font-size:11px;border:1px solid transparent;border-radius:6px;padding:3px 7px;color:var(--muted)}
+ .chip.on{border-color:rgba(234,179,8,.5);background:rgba(234,179,8,.08);color:var(--fg)}
+ .chip::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#444;margin-right:5px;vertical-align:1px}.chip.on::before{background:var(--gold)}
+ .note{color:var(--muted);font-size:12px}
+</style></head>
+<body><div class="wrap">
+ <h1>Usuarios y permisos <span class="sub">· v4.8</span></h1>
+ <p class="sub">Foto real por persona (el owner puede ponerla) y accesos por sección.</p>
+
+ <div class="card"><div class="row">
+  <div class="av"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Carlos" alt=""><span class="cam">📷</span></div>
+  <div style="min-width:0;flex:1"><p class="name">Carlos Editor</p><p class="mail">carlos@ejemplo.com · Editor senior</p></div>
+  <span class="pill role">Editor</span><span class="pill ok">Acceso completo</span><span class="pill ok">● Activo</span>
+ </div></div>
+
+ <div class="card"><div class="row">
+  <div class="av">RJ<span class="cam">📷</span></div>
+  <div style="min-width:0;flex:1"><p class="name">Richard Editor</p><p class="mail">richard@ejemplo.com</p></div>
+  <div class="menu"><div>🖼 Subir foto</div><div class="red">🗑 Quitar foto</div></div>
+  <span class="pill role">Editor</span><span class="pill amb">4 áreas</span>
+ </div>
+ <p class="note" style="margin:8px 0 2px">Define a qué secciones puede entrar Richard. <strong style="color:var(--fg)">4 áreas marcadas de 31</strong></p>
+ <div class="groups">
+  <div class="g"><div class="gh"><h4>Marketing</h4><span class="tog">Todo · 0/3</span></div><div class="chips"><span class="chip">Escribir ideas</span><span class="chip">Lab de Ideas</span><span class="chip">Ideas Aprobadas</span></div></div>
+  <div class="g"><div class="gh"><h4>Trabajo</h4><span class="tog on">Nada · 4/4</span></div><div class="chips"><span class="chip on">Pipeline</span><span class="chip on">Banco de Video</span><span class="chip on">Revisión</span><span class="chip on">Entregas</span></div></div>
+  <div class="g"><div class="gh"><h4>Recordings</h4><span class="tog">Todo · 0/2</span></div><div class="chips"><span class="chip">Grabación</span><span class="chip">On Site</span></div></div>
+  <div class="g"><div class="gh"><h4>Publicación</h4><span class="tog">Todo · 0/3</span></div><div class="chips"><span class="chip">Posting</span><span class="chip">Publicados</span><span class="chip">Automatización</span></div></div>
+ </div>
+ </div>
+</div></body></html>
