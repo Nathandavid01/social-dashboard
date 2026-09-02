@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.6 — 2026-09-01
+
+**Pipeline, Entregas y Revisión cargan con la mitad de datos: los tableros abren más rápido.**
+
+- Antes, cada apertura de /pipeline descargaba 1.1 MB de información
+  (las 400 ideas con TODAS sus columnas, incluidos briefs, prompts y datos
+  internos que el tablero nunca enseña). Ahora cruza al navegador solo lo que
+  se pinta: **648 KB** en /pipeline, **335 KB** en /entregas y /revisión
+  (antes 868 KB y 752 KB).
+- Las ideas descartadas ya no viajan al navegador (ningún tablero las muestra).
+  Lo mismo aplica a la lista de videos asignados en el perfil de cada persona
+  del equipo (/team).
+- Los tokens de los enlaces de revisión del cliente ya no salen del servidor.
+- No cambia nada de lo que se ve; si algún tablero necesita un dato nuevo,
+  se añade a una lista y el código lo exige.
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

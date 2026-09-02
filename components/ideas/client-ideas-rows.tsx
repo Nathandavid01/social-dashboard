@@ -20,7 +20,8 @@ import { computeIdeaPipeline } from '@/lib/utils/idea-pipeline-stages'
 import { nextAction } from '@/lib/utils/next-action'
 import { updateIdeaDates, reassignVideo } from '@/lib/actions/content-ideas'
 import { useToast } from '@/lib/hooks/use-toast'
-import type { IdeaWithPipeline, ContentIdeaType } from '@/lib/supabase/types'
+import type { ContentIdeaType } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 
 export type PersonOption = { id: string; full_name: string | null }
 
@@ -47,15 +48,15 @@ function toInputDate(value: string | null): string {
   return value ? value.slice(0, 10) : ''
 }
 
-interface ClientGroup {
+interface ClientGroup<T extends PipelineBoardIdea> {
   id: string
   name: string
   logoUrl: string | null
-  ideas: IdeaWithPipeline[]
+  ideas: T[]
 }
 
-function groupByClient(ideas: IdeaWithPipeline[]): ClientGroup[] {
-  const map = new Map<string, ClientGroup>()
+function groupByClient<T extends PipelineBoardIdea>(ideas: T[]): ClientGroup<T>[] {
+  const map = new Map<string, ClientGroup<T>>()
   for (const idea of ideas) {
     const id = idea.client_id
     if (!map.has(id)) {
@@ -66,9 +67,10 @@ function groupByClient(ideas: IdeaWithPipeline[]): ClientGroup[] {
   return Array.from(map.values())
 }
 
-interface ClientIdeasRowsProps {
-  ideas: IdeaWithPipeline[]
-  onAssign?: (idea: IdeaWithPipeline) => void
+/** Genérico: el tablero de planning pasa filas completas; el resto, la proyección del tablero. */
+interface ClientIdeasRowsProps<T extends PipelineBoardIdea> {
+  ideas: T[]
+  onAssign?: (idea: T) => void
   /** Enable bulk-select checkboxes (only assignable rows get one). */
   selectable?: boolean
   selectedIds?: Set<string>
@@ -87,7 +89,7 @@ interface ClientIdeasRowsProps {
   onReassigned?: (id: string, assignee: PersonOption | null) => void
 }
 
-export function ClientIdeasRows({
+export function ClientIdeasRows<T extends PipelineBoardIdea>({
   ideas,
   onAssign,
   selectable = false,
@@ -99,7 +101,7 @@ export function ClientIdeasRows({
   showNextAction = false,
   profiles,
   onReassigned,
-}: ClientIdeasRowsProps) {
+}: ClientIdeasRowsProps<T>) {
   const groups = groupByClient(ideas)
 
   return (
@@ -159,9 +161,9 @@ export function ClientIdeasRows({
   )
 }
 
-export interface IdeaRowProps {
-  idea: IdeaWithPipeline
-  onAssign?: (idea: IdeaWithPipeline) => void
+export interface IdeaRowProps<T extends PipelineBoardIdea = PipelineBoardIdea> {
+  idea: T
+  onAssign?: (idea: T) => void
   selectable?: boolean
   selected?: boolean
   onToggleSelect?: (id: string) => void
@@ -174,7 +176,7 @@ export interface IdeaRowProps {
   onReassigned?: (id: string, assignee: PersonOption | null) => void
 }
 
-export function IdeaRow({ idea, onAssign, selectable, selected, onToggleSelect, onDatesSaved, canAssign = true, showNextAction = false, profiles, onReassigned }: IdeaRowProps) {
+export function IdeaRow<T extends PipelineBoardIdea>({ idea, onAssign, selectable, selected, onToggleSelect, onDatesSaved, canAssign = true, showNextAction = false, profiles, onReassigned }: IdeaRowProps<T>) {
   const { toast } = useToast()
   const [editing, setEditing] = useState(false)
   const [recording, setRecording] = useState(toInputDate(idea.recording_date))

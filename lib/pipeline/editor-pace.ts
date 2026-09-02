@@ -1,4 +1,5 @@
-import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
+import type { ContentIdeaVideo } from '@/lib/supabase/types'
+import type { BoardVideo, PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import { clientAssigneeId, ideaAssigneeId } from './editor-video-bank'
 
 const DAY = 86_400_000
@@ -49,7 +50,7 @@ function time(iso: string | null | undefined): number | null {
 }
 
 /** El primer crudo subido: cuándo entró el material a manos del editor. */
-function firstSourceAt(videos: ContentIdeaVideo[] | null | undefined): number | null {
+function firstSourceAt(videos: BoardVideo[] | null | undefined): number | null {
   const times = (videos ?? [])
     .filter((v) => SOURCE.has(v.kind) && LIVE.has(v.status))
     .map((v) => time(v.uploaded_at))
@@ -58,7 +59,7 @@ function firstSourceAt(videos: ContentIdeaVideo[] | null | undefined): number | 
 }
 
 /** El primer editado subido: cuándo entregó. */
-function firstCutAt(videos: ContentIdeaVideo[] | null | undefined): number | null {
+function firstCutAt(videos: BoardVideo[] | null | undefined): number | null {
   const times = (videos ?? [])
     .filter((v) => v.kind === 'edited' && LIVE.has(v.status))
     .map((v) => time(v.uploaded_at))
@@ -72,7 +73,7 @@ interface Delivery {
   cutAt: number
 }
 
-function deliveriesOf(ideas: IdeaWithPipeline[]): Delivery[] {
+function deliveriesOf(ideas: PipelineBoardIdea[]): Delivery[] {
   const out: Delivery[] = []
   for (const idea of ideas) {
     if (idea.status === 'descartada') continue
@@ -93,7 +94,7 @@ function deliveriesOf(ideas: IdeaWithPipeline[]): Delivery[] {
  * Ritmo por editor, ordenado del más rápido al más lento. Solo aparecen los
  * editores con al menos una entrega medible dentro de la ventana.
  */
-export function buildEditorPace(ideas: IdeaWithPipeline[], options: EditorPaceOptions = {}): EditorPace[] {
+export function buildEditorPace(ideas: PipelineBoardIdea[], options: EditorPaceOptions = {}): EditorPace[] {
   const now = options.now ?? Date.now()
   const windowDays = options.windowDays ?? DEFAULT_WINDOW_DAYS
   const currentFrom = now - windowDays * DAY

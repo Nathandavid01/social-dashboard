@@ -1,4 +1,5 @@
-import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
+import type { ContentIdeaVideo } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 
 /**
  * Pool global de b-roll: recursos reutilizables que CUALQUIER editor puede ver
@@ -23,7 +24,7 @@ export interface GlobalBrollGroup {
   files: GlobalBrollFile[]
 }
 
-export function buildGlobalBroll(ideas: IdeaWithPipeline[]): GlobalBrollGroup[] {
+export function buildGlobalBroll(ideas: PipelineBoardIdea[]): GlobalBrollGroup[] {
   const groups = new Map<string, GlobalBrollGroup>()
 
   for (const idea of ideas) {

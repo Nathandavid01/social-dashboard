@@ -1,4 +1,5 @@
-import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
+import type { ContentIdeaVideo } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 
 export type BatchVideoThumbRef = {
   id: string
@@ -15,7 +16,7 @@ export type BatchVideoThumbRef = {
  * Only `edited` + non-archived rows: raw/broll are capture, not editor delivery.
  */
 export function pickBatchEditedVideos(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   limit = 3,
 ): BatchVideoThumbRef[] {
   const seen = new Set<string>()

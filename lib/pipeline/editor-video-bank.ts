@@ -1,4 +1,5 @@
-import type { ContentIdeaVideo, IdeaWithPipeline, UserRole, UserStatus } from '@/lib/supabase/types'
+import type { ContentIdeaVideo, UserRole, UserStatus } from '@/lib/supabase/types'
+import type { BoardVideo, PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import { ROLE_LABEL } from '@/lib/auth/permissions'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { deadlineStatus, todayISOInTimeZone, type DeadlineStatus } from '@/lib/utils/deadlines'
@@ -159,16 +160,16 @@ export function canDownloadIdeaVideo(access: EditorBankAccess, kind: string | un
   return canDownloadOrPreviewRaw(access)
 }
 
-export function ideaAssigneeId(idea: IdeaWithPipeline): string | null {
+export function ideaAssigneeId(idea: PipelineBoardIdea): string | null {
   return idea.assignee?.id ?? null
 }
 
-export function clientAssigneeId(idea: IdeaWithPipeline): string | null {
+export function clientAssigneeId(idea: PipelineBoardIdea): string | null {
   const client = idea.client as { assigned_to?: string | null } | null | undefined
   return client?.assigned_to ?? null
 }
 
-export function sourceFiles(videos: ContentIdeaVideo[] | null | undefined): EditorBankFile[] {
+export function sourceFiles(videos: BoardVideo[] | null | undefined): EditorBankFile[] {
   return (videos ?? [])
     .filter((v) => SOURCE.has(v.kind) && LIVE.has(v.status))
     .map((v) => ({
@@ -180,30 +181,30 @@ export function sourceFiles(videos: ContentIdeaVideo[] | null | undefined): Edit
     }))
 }
 
-export function isIdeaApproved(idea: Pick<IdeaWithPipeline, 'approval_status' | 'status' | 'published_at'>): boolean {
+export function isIdeaApproved(idea: Pick<PipelineBoardIdea, 'approval_status' | 'status' | 'published_at'>): boolean {
   return idea.approval_status === 'approved' || idea.status === 'publicada' || !!idea.published_at
 }
 
-export function isInRevision(idea: Pick<IdeaWithPipeline, 'approval_status' | 'status' | 'published_at'>): boolean {
+export function isInRevision(idea: Pick<PipelineBoardIdea, 'approval_status' | 'status' | 'published_at'>): boolean {
   if (idea.status === 'descartada' || isIdeaApproved(idea)) return false
   return idea.approval_status === 'submitted'
     || idea.approval_status === 'revision_needed'
     || idea.status === 'producida'
 }
 
-export function isRawReadyWork(idea: IdeaWithPipeline): boolean {
+export function isRawReadyWork(idea: PipelineBoardIdea): boolean {
   if (idea.status === 'descartada' || isIdeaApproved(idea) || isInRevision(idea)) return false
   return sourceFiles(idea.videos).length > 0
 }
 
-function ideaUrgency(idea: IdeaWithPipeline, today: string): number {
+function ideaUrgency(idea: PipelineBoardIdea, today: string): number {
   return URGENCY_RANK[deadlineStatus(idea.deadline, idea.status, today, idea.published_at)]
 }
 
 export function filterIdeasForEditorBank(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   viewer: { role: UserRole | null; userId: string | null },
-): IdeaWithPipeline[] {
+): PipelineBoardIdea[] {
   return ideas.filter((idea) =>
     canAccessEditorBank({
       role: viewer.role,
@@ -214,27 +215,27 @@ export function filterIdeasForEditorBank(
   )
 }
 
-function belongsToEditor(idea: IdeaWithPipeline, userId: string): boolean {
+function belongsToEditor(idea: PipelineBoardIdea, userId: string): boolean {
   return ideaAssigneeId(idea) === userId || clientAssigneeId(idea) === userId
 }
 
 /** Los 2 espacios: un video del cliente más urgente, luego del siguiente. */
 export function editorWipIdeaIds(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   userId: string | null,
   today: string = todayISOInTimeZone(NATE_TZ),
   limit: number = EDITOR_WIP_LIMIT,
 ): Set<string> {
   if (!userId) return new Set()
   const ready = ideas.filter((idea) => belongsToEditor(idea, userId) && isRawReadyWork(idea))
-  const byClient = new Map<string, IdeaWithPipeline[]>()
+  const byClient = new Map<string, PipelineBoardIdea[]>()
   for (const idea of ready) {
     const key = clientKey(idea) ?? idea.id
     const list = byClient.get(key) ?? []
     list.push(idea)
     byClient.set(key, list)
   }
-  const sortIdeas = (a: IdeaWithPipeline, b: IdeaWithPipeline) => {
+  const sortIdeas = (a: PipelineBoardIdea, b: PipelineBoardIdea) => {
     const u = ideaUrgency(b, today) - ideaUrgency(a, today)
     if (u !== 0) return u
     const byDate = (a.created_at ?? '').localeCompare(b.created_at ?? '')
@@ -247,7 +248,7 @@ export function editorWipIdeaIds(
     if (ub !== ua) return ub - ua
     return sortIdeas(a[0], b[0])
   })
-  const picked: IdeaWithPipeline[] = []
+  const picked: PipelineBoardIdea[] = []
   for (const list of clients) {
     if (picked.length >= limit) break
     picked.push(list[0])
@@ -261,10 +262,10 @@ export function editorWipIdeaIds(
 
 /** Filtro de asignación + tope de 2: los extras llegan sin ids de archivo. */
 export function prepareIdeasForEditorBank(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   viewer: { role: UserRole | null; userId: string | null },
   opts: { wipLimit?: number } = {},
-): IdeaWithPipeline[] {
+): PipelineBoardIdea[] {
   const assigned = filterIdeasForEditorBank(ideas, viewer)
   if (canSeeAllEditorBanks(viewer.role)) return assigned
   if (viewer.role !== 'editor' && viewer.role !== 'team_member') return assigned
@@ -280,7 +281,7 @@ export function prepareIdeasForEditorBank(
 }
 
 function editorOf(
-  idea: IdeaWithPipeline,
+  idea: PipelineBoardIdea,
   names: Record<string, string> = {},
 ): { id: string | null; name: string } {
   if (idea.assignee?.id) {
@@ -293,15 +294,15 @@ function editorOf(
   return { id: null, name: 'Sin asignar' }
 }
 
-function ideaTitle(idea: IdeaWithPipeline): string {
+function ideaTitle(idea: PipelineBoardIdea): string {
   return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
 }
 
-function clientKey(idea: IdeaWithPipeline): string | null {
+function clientKey(idea: PipelineBoardIdea): string | null {
   return idea.client?.id ?? idea.client_id ?? null
 }
 
-function countApprovedByClient(ideas: IdeaWithPipeline[]): Record<string, number> {
+function countApprovedByClient(ideas: PipelineBoardIdea[]): Record<string, number> {
   const counts: Record<string, number> = {}
   for (const idea of ideas) {
     const cid = clientKey(idea)
@@ -313,7 +314,7 @@ function countApprovedByClient(ideas: IdeaWithPipeline[]): Record<string, number
 }
 
 /** Una fila por editor de video; dentro, banco por cliente con clips que tienen crudo. */
-function clientBrandPrimary(client: IdeaWithPipeline['client']): string | null {
+function clientBrandPrimary(client: PipelineBoardIdea['client']): string | null {
   const colors = (client as { brand_colors?: { primary?: string | null } } | null | undefined)?.brand_colors
   return colors?.primary ?? null
 }
@@ -334,7 +335,7 @@ function emptyRow(editor: { id: string | null; name: string }, wipLimit: number,
 
 function emptyClient(
   clientId: string,
-  idea: IdeaWithPipeline,
+  idea: PipelineBoardIdea,
   approvedByClient: Record<string, number>,
   resolved: EditorBankResolvedMarks,
 ): EditorBankClient {
@@ -355,7 +356,7 @@ function emptyClient(
 }
 
 export function groupEditorVideoBank(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   profileNames: Record<string, string> = {},
   resolved: EditorBankResolvedMarks = {},
   recorderNames: Record<string, string> = {},
@@ -363,7 +364,7 @@ export function groupEditorVideoBank(
   const approvedByClient = countApprovedByClient(ideas)
   const byEditor = new Map<string, EditorBankRow>()
 
-  const ensure = (idea: IdeaWithPipeline) => {
+  const ensure = (idea: PipelineBoardIdea) => {
     const editor = editorOf(idea, profileNames)
     const key = editor.id ?? '__unassigned__'
     let row = byEditor.get(key)

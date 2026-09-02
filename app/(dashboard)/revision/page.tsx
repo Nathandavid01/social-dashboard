@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { filterEntregasDeliveredIdeas } from '@/lib/utils/entregas-delivery'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { toBoardIdeas } from '@/lib/pipeline/board-idea'
 import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
 import { VistaEditor } from '@/components/entregas/vista-editor'
 import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
@@ -95,7 +96,7 @@ export default async function RevisionPage() {
     <div className="space-y-4">
       {showProcess && <SupervisorProcessSteps pathname="/revision" />}
       <EntregasBoard
-        ideas={mios}
+        ideas={toBoardIdeas(mios)}
         reviewNotes={reviewNotes}
         allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}
         submitClients={submitClients}

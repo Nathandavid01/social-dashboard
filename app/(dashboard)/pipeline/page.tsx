@@ -13,6 +13,7 @@ import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { computeRunway } from '@/lib/utils/content-runway'
 import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
+import { toBoardIdeas, type PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
@@ -156,7 +157,7 @@ export default async function PipelinePage() {
 
   return (
     <ContentPipelineBoard
-      ideas={ideas}
+      ideas={toBoardIdeas(ideas)}
       plannedClients={plannedClients}
       allClients={allClients}
       clientCadence={clientCadence}
@@ -179,7 +180,7 @@ export default async function PipelinePage() {
  * batch card, so nothing shows twice (see shouldPlanForClient).
  */
 function buildPlannedClients(
-  ideas: Awaited<ReturnType<typeof getIdeacionPipeline>>,
+  ideas: PipelineBoardIdea[],
   activeClients: { id: string; name: string; logo_url: string | null; created_at: string; updated_at: string; platforms: string[] | null; status: string; posting_days: number[] | null; posting_time?: string | null; metricool_blog_id?: string | null }[],
   metricoolPics: Record<string, string>,
   stepAssignees: PipelineStepAssignees,

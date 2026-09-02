@@ -1,4 +1,4 @@
-import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import {
   countMetricoolScheduled,
   findNextNewVideoSlot,
@@ -58,12 +58,12 @@ export interface ClientPipelineSummary {
   videos: ClientPipelineVideoSummary[]
 }
 
-function ideaTitle(idea: IdeaWithPipeline): string {
+function ideaTitle(idea: PipelineBoardIdea): string {
   const t = idea.title?.trim() || idea.hook?.trim()
   return t || 'Sin título'
 }
 
-function summarizeActiveIdeas(active: IdeaWithPipeline[], cadence: ClientCadence = {}): ClientPipelineSummary {
+function summarizeActiveIdeas(active: PipelineBoardIdea[], cadence: ClientCadence = {}): ClientPipelineSummary {
   const stage = batchStage(active)
   const published = active.filter((i) => i.published_at || i.status === 'publicada').length
   const videos = active
@@ -97,10 +97,10 @@ function summarizeActiveIdeas(active: IdeaWithPipeline[], cadence: ClientCadence
 
 /** Per-client pipeline snapshot for the Nuevo video picker. */
 export function buildClientPipelineIndex(
-  ideas: IdeaWithPipeline[],
+  ideas: PipelineBoardIdea[],
   clientCadence: Record<string, ClientCadence> = {},
 ): Record<string, ClientPipelineSummary> {
-  const byClient = new Map<string, IdeaWithPipeline[]>()
+  const byClient = new Map<string, PipelineBoardIdea[]>()
   for (const i of ideas) {
     const cid = i.client?.id ?? i.client_id
     if (!cid) continue
@@ -139,7 +139,7 @@ export function emptyClientPipelineSummary(cadence: ClientCadence = {}): ClientP
  * everything before the edit (idea / title / caption / recording) collapses
  * into the first "Video" column.
  */
-export function ideaStage(idea: IdeaWithPipeline): BatchStageKey {
+export function ideaStage(idea: PipelineBoardIdea): BatchStageKey {
   if (idea.published_at || idea.status === 'publicada') return 'publication'
   if (idea.approval_status === 'approved' || idea.approval_status === 'submitted') return 'approval'
   if (idea.status === 'producida') return 'edited'
@@ -157,7 +157,7 @@ export interface ClientBatch {
   assignee: { id: string; name: string } | null
   /** Every distinct person with a video in this batch (for the "Mis videos" filter). */
   assigneeIds: string[]
-  ideas: IdeaWithPipeline[]
+  ideas: PipelineBoardIdea[]
   /** Column the batch sits in — the LEAST-advanced active video (they move together). */
   stage: BatchStageKey
   /** How many of the batch's videos sit at each pipeline stage (status breakdown). */
@@ -175,7 +175,7 @@ export function batchProgress(stage: BatchStageKey): number {
 }
 
 /** Stage of a whole batch: the least-advanced active video, or publication when all are out. */
-export function batchStage(ideas: IdeaWithPipeline[]): BatchStageKey {
+export function batchStage(ideas: PipelineBoardIdea[]): BatchStageKey {
   const active = ideas.filter((i) => i.status !== 'descartada')
   if (active.length === 0) return 'video'
   const allPublished = active.every((i) => i.published_at || i.status === 'publicada')
@@ -189,7 +189,7 @@ export function batchStage(ideas: IdeaWithPipeline[]): BatchStageKey {
 }
 
 /** Pick the assignee that owns the most videos in the batch (ties → first seen). */
-function dominantAssignee(ideas: IdeaWithPipeline[]): { id: string; name: string } | null {
+function dominantAssignee(ideas: PipelineBoardIdea[]): { id: string; name: string } | null {
   const counts = new Map<string, { id: string; name: string; n: number }>()
   for (const i of ideas) {
     const a = i.assignee
@@ -204,8 +204,8 @@ function dominantAssignee(ideas: IdeaWithPipeline[]): { id: string; name: string
 }
 
 /** Group ideas into one batch per client (excludes fully-discarded clients). */
-export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
-  const byClient = new Map<string, IdeaWithPipeline[]>()
+export function groupIntoBatches(ideas: PipelineBoardIdea[]): ClientBatch[] {
+  const byClient = new Map<string, PipelineBoardIdea[]>()
   for (const i of ideas) {
     const cid = i.client?.id ?? i.client_id
     if (!cid) continue
@@ -252,8 +252,8 @@ export function groupIntoBatches(ideas: IdeaWithPipeline[]): ClientBatch[] {
  * Per-VIDEO board: each active idea bucketed into its OWN pipeline-stage column
  * (one card per video, not per client). Discarded videos are excluded.
  */
-export function bucketIdeasByStage(ideas: IdeaWithPipeline[]): Record<BatchStageKey, IdeaWithPipeline[]> {
-  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, IdeaWithPipeline[]>
+export function bucketIdeasByStage(ideas: PipelineBoardIdea[]): Record<BatchStageKey, PipelineBoardIdea[]> {
+  const out = { video: [], edited: [], approval: [], publication: [] } as Record<BatchStageKey, PipelineBoardIdea[]>
   for (const i of ideas) {
     if (i.status === 'descartada') continue
     out[ideaStage(i)].push(i)

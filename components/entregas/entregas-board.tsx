@@ -31,12 +31,13 @@ import { semanaDeEntregas } from '@/lib/entregas/semana'
 import { WeekView } from './week-view'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
-import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
+import type { SocialPlatform } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import type { ReviewNote } from '@/lib/actions/review-notes-core'
 import { EnlaceClienteBoton } from './enlace-cliente-boton'
 import { marcaAprobacionCliente, type EstadoCliente } from '@/lib/entregas/marca-cliente'
 
-type Idea = IdeaWithPipeline
+type Idea = PipelineBoardIdea
 
 /** A client's planned recording sessions, shown as empty-slot cards in Ideas. */
 export interface PlannedClient {
