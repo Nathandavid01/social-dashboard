@@ -1,3 +1,6 @@
+import type { DuplicateVideo } from '@/lib/actions/video-dedupe'
+import { duplicateVideoMessage } from './duplicate-video-message'
+
 /**
  * The submit chain for one video: create the idea → presign → PUT the file to
  * R2 → register it. Order matters: getR2UploadUrl keys the object under the
@@ -8,6 +11,10 @@
  */
 
 export interface SubmitDeps {
+  /** Huella del archivo (lib/utils/video-fingerprint). Opcional: sin ella no se deduplica. */
+  fingerprint?: (file: File) => Promise<string>
+  /** ¿Ya se subió esta huella? Devuelve el video existente o null. */
+  findDuplicate?: (fingerprint: string) => Promise<DuplicateVideo | null>
   createIdea: (input: {
     clientId: string
     title: string
@@ -31,6 +38,8 @@ export interface SubmitDeps {
     mimeType: string
     /** El File subido, para poder disparar el QC IA tras registrar. */
     file: File
+    /** Huella calculada antes de subir, para anotarla junto al video. */
+    fingerprint?: string
   }) => Promise<{ ok?: true; id?: string; error?: string }>
 }
 
@@ -44,7 +53,7 @@ export interface SubmitInput {
   file: File
 }
 
-export type SubmitStage = 'creando' | 'subiendo' | 'registrando' | 'listo' | 'error'
+export type SubmitStage = 'comprobando' | 'duplicado' | 'creando' | 'subiendo' | 'registrando' | 'listo' | 'error'
 
 export interface SubmitResult {
   ok: boolean
@@ -52,6 +61,8 @@ export interface SubmitResult {
   videoId?: string
   stage: SubmitStage
   error?: string
+  /** Cuando stage === 'duplicado': el video que ya existe. */
+  duplicateOf?: DuplicateVideo
 }
 
 /**
@@ -64,6 +75,20 @@ export async function submitOneVideo(
   input: SubmitInput,
   onProgress: (stage: SubmitStage, pct: number) => void = () => {},
 ): Promise<SubmitResult> {
+  // Antes de crear nada: si este archivo ya se subió, se para aquí y no queda
+  // ni una idea huérfana. Un fallo de la comprobación nunca bloquea la subida.
+  let fingerprint: string | undefined
+  if (deps.fingerprint) {
+    onProgress('comprobando', 0)
+    try {
+      fingerprint = await deps.fingerprint(input.file)
+      const dup = deps.findDuplicate ? await deps.findDuplicate(fingerprint) : null
+      if (dup) return { ok: false, stage: 'duplicado', error: duplicateVideoMessage(dup), duplicateOf: dup }
+    } catch {
+      fingerprint = undefined
+    }
+  }
+
   onProgress('creando', 0)
   let ideaId: string
   try {
@@ -112,6 +137,7 @@ export async function submitOneVideo(
       sizeBytes: input.file.size,
       mimeType: input.file.type || 'video/mp4',
       file: input.file,
+      fingerprint,
     })
     if (reg.error) return { ok: false, ideaId, stage: 'registrando', error: reg.error }
     onProgress('listo', 100)

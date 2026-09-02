@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+vi.mock('@/lib/actions/video-dedupe', () => ({
+  findDuplicateVideo: vi.fn(async () => null),
+  rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
+}))
 import { UploadDock } from './upload-dock'
 import { useUploadStore } from '@/lib/stores/upload-store'
 

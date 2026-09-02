@@ -30,3 +30,10 @@ describe('uploadPhaseText', () => {
     expect(uploadPhaseText(item('error'))).toBe('Falló la subida')
   })
 })
+
+describe('uploadPhaseText — duplicado', () => {
+  it('dice que ya estaba subido, con el detalle que trae el error', () => {
+    expect(uploadPhaseText(item('duplicado', { error: 'Ya subido para «Intro clínica» (ARASIBO) el 28 ago' })))
+      .toBe('No se subió: Ya subido para «Intro clínica» (ARASIBO) el 28 ago')
+  })
+})

@@ -3,11 +3,9 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useUploadStore, type UploadPhase } from '@/lib/stores/upload-store'
+import { useUploadStore, TERMINAL_UPLOAD_PHASES } from '@/lib/stores/upload-store'
 import { uploadPhaseText as phaseText } from '@/lib/utils/upload-phase-text'
 import { NateUploadLogo } from './nate-upload-logo'
-
-const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set<UploadPhase>(['listo', 'error', 'cancelado'])
 
 /**
  * Small, always-visible corner indicator for uploads in flight — the whole
@@ -23,7 +21,7 @@ export function UploadDock() {
   const [expanded, setExpanded] = useState(false)
 
   const items = Object.values(uploads).sort((a, b) => (a.id < b.id ? -1 : 1))
-  const active = items.filter((i) => !TERMINAL_PHASES.has(i.phase))
+  const active = items.filter((i) => !TERMINAL_UPLOAD_PHASES.has(i.phase))
 
   // Closing the tab kills the upload (the File lives in memory) — warn before
   // that happens. Navigating within the app is fine; the engine survives it.
@@ -55,7 +53,7 @@ export function UploadDock() {
                     {phaseText(item)}
                   </p>
                 </div>
-                {TERMINAL_PHASES.has(item.phase) ? (
+                {TERMINAL_UPLOAD_PHASES.has(item.phase) ? (
                   <button
                     type="button"
                     aria-label="Cerrar"

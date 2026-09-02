@@ -27,6 +27,10 @@ vi.mock('@/lib/actions/video-preview', () => ({
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn().mockResolvedValue(undefined),
 }))
+vi.mock('@/lib/actions/video-dedupe', () => ({
+  findDuplicateVideo: vi.fn(async () => null),
+  rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
+}))
 
 // Real-shaped toast() return ({id, dismiss, update}) so the component's
 // `t.dismiss()` after the undo window doesn't blow up on a bare vi.fn().
@@ -53,6 +57,7 @@ vi.mock('@/components/auth/role-gate', () => ({
 import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { registerR2Video, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { findDuplicateVideo } from '@/lib/actions/video-dedupe'
 
 function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   return {
@@ -481,6 +486,35 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     await flush()
 
     expect(vi.mocked(processUploadedVideo)).not.toHaveBeenCalled()
+  })
+
+  it('si la huella ya existe, no se queda colgado: avisa y deja cerrar', async () => {
+    vi.mocked(findDuplicateVideo).mockResolvedValueOnce({
+      videoId: 'vid-9',
+      kind: 'edited',
+      fileName: 'final.mp4',
+      uploadedAt: '2026-08-28T15:00:00Z',
+      ideaId: 'idea-9',
+      ideaTitle: 'Intro clínica',
+      clientName: 'ARASIBO',
+      uploadedBy: 'Carlos',
+    })
+    const { container } = render(<IdeaVideoPanel ideaId="idea-1" videos={[]} />)
+    await flush()
+    const inputs = container.querySelectorAll('input[type="file"]')
+    const editedInput = inputs[0] as HTMLInputElement
+    const file = new File(['x'], 'final.mp4', { type: 'video/mp4' })
+    await act(async () => {
+      fireEvent.change(editedInput, { target: { files: [file] } })
+    })
+    await flush()
+
+    expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
+    expect(toastSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ title: expect.stringMatching(/ya estaba/i) }),
+    )
+    expect(screen.getByRole('button', { name: 'Cerrar' })).toBeInTheDocument()
+    expect(screen.getByText(/No se subió/)).toBeInTheDocument()
   })
 })
 

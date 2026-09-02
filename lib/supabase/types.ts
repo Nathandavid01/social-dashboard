@@ -113,6 +113,14 @@ export interface ContentIdeaVideo {
   uploader?: Pick<Profile, 'id' | 'full_name' | 'email'> | null
 }
 
+/** Huella de archivo (migración 0089). PK = fingerprint; unicidad en la base. */
+export interface ContentIdeaVideoFingerprint {
+  fingerprint: string
+  video_id: string
+  size_bytes: number
+  created_at: string
+}
+
 export type NotificationKind =
   | 'task_assigned' | 'task_due_soon' | 'task_overdue' | 'task_completed'
   | 'request_new' | 'review_pending' | 'review_approved' | 'review_rejected'
