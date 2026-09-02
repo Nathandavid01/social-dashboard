@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.9 — 2026-09-02
+
+**Toda grabación lleva cliente y videógrafo; las que no lo tienen se marcan para completarlas.**
+
+- Al crear o editar una sesión en **Grabación**, el cliente y el videógrafo son
+  obligatorios: ya no existe "Sin cliente" ni "Sin asignar". Si falta alguno,
+  el formulario lo dice antes de guardar.
+- Un videógrafo que crea su propia sesión queda asignado automáticamente.
+- Arriba del calendario aparece cuántas sesiones viejas están **sin cliente o
+  sin videógrafo**, y en la lista cada una muestra "Falta cliente" / "Falta
+  videógrafo" para corregirlas de un vistazo (hoy hay 20 futuras así).
+
+![Grabación con cliente y videógrafo](/changelog/v4.9-grabacion-cliente-videografo.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

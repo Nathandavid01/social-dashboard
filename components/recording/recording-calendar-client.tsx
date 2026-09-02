@@ -161,8 +161,9 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
   const { toast } = useToast()
 
   const [date, setDate] = useState(editing?.session_date ?? defaultDate ?? format(new Date(), 'yyyy-MM-dd'))
-  const [clientId, setClientId] = useState(editing?.client_id ?? 'none')
-  const [videographerId, setVideographerId] = useState(editing?.videographer_id ?? 'none')
+  const [clientId, setClientId] = useState(editing?.client_id ?? '')
+  const [videographerId, setVideographerId] = useState(editing?.videographer_id ?? '')
+  const [formError, setFormError] = useState<string | null>(null)
   const [title, setTitle] = useState(editing?.title ?? '')
   const [startTime, setStartTime] = useState(editing?.start_time ?? '')
   const [endTime, setEndTime] = useState(editing?.end_time ?? '')
@@ -175,16 +176,21 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
+    // Cliente y videógrafo obligatorios (2026-09-01): el servidor lo vuelve a
+    // comprobar; aquí se avisa antes de enviar.
+    if (!clientId) { setFormError('Elige el cliente de la grabación.'); return }
+    if (canAssign && !videographerId) { setFormError('Elige el videógrafo que va a grabar.'); return }
+    setFormError(null)
     startTransition(async () => {
       const values = {
         session_date: date,
-        client_id: clientId === 'none' ? null : clientId,
+        client_id: clientId,
         title: title.trim(),
         start_time: startTime || null,
         end_time: endTime || null,
         notes: notes || null,
         ...(canAssign ? {
-          videographer_id: videographerId === 'none' ? null : videographerId,
+          videographer_id: videographerId,
           location: location || null,
           location_address: locationAddress || null,
           location_lat: locationLat,
@@ -273,11 +279,10 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Sin cliente" /></SelectTrigger>
+            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente *</Label>
+            <Select value={clientId} onValueChange={(v) => { setClientId(v); setFormError(null) }}>
+              <SelectTrigger className={cn('h-9', formError && !clientId && 'border-destructive')}><SelectValue placeholder="Elige el cliente" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Sin cliente</SelectItem>
                 {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -285,16 +290,17 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
 
           {canAssign && (
             <div className="space-y-1.5">
-              <Label className="text-xs flex items-center gap-1"><User className="h-3 w-3" /> Videógrafo</Label>
-              <Select value={videographerId} onValueChange={setVideographerId}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Sin asignar" /></SelectTrigger>
+              <Label className="text-xs flex items-center gap-1"><User className="h-3 w-3" /> Videógrafo *</Label>
+              <Select value={videographerId} onValueChange={(v) => { setVideographerId(v); setFormError(null) }}>
+                <SelectTrigger className={cn('h-9', formError && !videographerId && 'border-destructive')}><SelectValue placeholder="Elige quién graba" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sin asignar</SelectItem>
                   {teamMembers.map((m) => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           )}
+
+          {formError && <p role="alert" className="text-xs text-destructive">{formError}</p>}
 
           <div className="space-y-1.5">
             <Label className="text-xs">Notas</Label>
@@ -341,18 +347,26 @@ function SessionCard({
           <Badge variant="outline" className={cn('text-[10px]', sc.bg, sc.color)}>{sc.label}</Badge>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-          {session.client && (
+          {session.client ? (
             <span className="flex items-center gap-1 text-primary font-medium">
               <Building2 className="h-3 w-3" />
               {session.client.name}
             </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+              <Building2 className="h-3 w-3" /> Falta cliente
+            </span>
           )}
-          {session.videographer && (
+          {session.videographer ? (
             <span className="flex items-center gap-1">
               <Avatar className="h-4 w-4">
                 <AvatarFallback className="text-[8px] bg-primary text-primary-foreground">{initials(session.videographer.full_name)}</AvatarFallback>
               </Avatar>
               {session.videographer.full_name}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+              <User className="h-3 w-3" /> Falta videógrafo
             </span>
           )}
           {session.start_time && (
@@ -443,6 +457,10 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const [ideasSession, setIdeasSession] = useState<ExtendedSession | undefined>()
   const [ideasMap, setIdeasMap] = useState<Record<string, ContentIdea[]>>(clientIdeasMap)
   const { toast } = useToast()
+  const incompletas = useMemo(
+    () => sessions.filter((s) => s.status !== 'cancelled' && (!s.client_id || !s.videographer_id)).length,
+    [sessions],
+  )
   const conflicts = useMemo(
     () => videographerConflictsInRange(sessions, currentMonth),
     [sessions, currentMonth],
@@ -522,8 +540,9 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   }
 
   function handleAvailabilityPick(sessionId: string, videographerId: string) {
-    const nextId = videographerId === 'none' ? null : videographerId
-    const videographer = nextId ? teamMembers.find((m) => m.id === nextId) ?? null : null
+    // Reasignar siempre a alguien: una sesión no puede quedar sin videógrafo.
+    const nextId = videographerId
+    const videographer = teamMembers.find((m) => m.id === nextId) ?? null
     setSessions((prev) => prev.map((s) => s.id === sessionId ? { ...s, videographer_id: nextId, videographer } : s))
     startTransition(async () => {
       const result = await updateRecordingSession(sessionId, { videographer_id: nextId })
@@ -637,6 +656,15 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
         )}
       </div>
 
+      {incompletas > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+          <span className="font-medium">
+            {incompletas} {incompletas === 1 ? 'sesión sin cliente o sin videógrafo' : 'sesiones sin cliente o sin videógrafo'}
+          </span>
+          <span className="text-muted-foreground">· desde hoy toda grabación los lleva; edita estas para completarlas.</span>
+        </div>
+      )}
+
       {conflicts.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-border bg-muted/30 px-3 py-2">
           <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Conflicto de disponibilidad</span>
@@ -652,7 +680,6 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                     <SelectValue placeholder="Quién está disponible" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Sin asignar</SelectItem>
                     {teamMembers.map((m) => (
                       <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>
                     ))}

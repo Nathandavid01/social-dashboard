@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { currentUserHas, requirePermission } from '@/lib/auth/server'
 import type { RecordingSession } from '@/lib/supabase/types'
 
 const SELECT = `
@@ -87,8 +87,20 @@ export async function createRecordingSession(values: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  // Decisión 2026-09-01: toda grabación lleva cliente y videógrafo. Sin
+  // cliente, el On Site no sabe de quién es el material y el pipeline no
+  // puede enlazarlo; sin videógrafo, nadie tiene la sesión en su agenda.
+  if (!values.client_id) return { error: 'Elige el cliente de la grabación.' }
+  let videographerId = values.videographer_id ?? null
+  if (!videographerId) {
+    // Quien no puede asignar (rol video) graba él mismo: la sesión es suya.
+    if (await currentUserHas('recording.brief')) return { error: 'Elige el videógrafo que va a grabar.' }
+    videographerId = user.id
+  }
+
   const { error } = await supabase.from('recording_sessions').insert({
     ...values,
+    videographer_id: videographerId,
     created_by: user.id,
   })
   if (error) return { error: error.message }
@@ -115,6 +127,8 @@ export async function updateRecordingSession(id: string, values: Partial<{
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
+  if ('client_id' in values && !values.client_id) return { error: 'La grabación tiene que tener cliente.' }
+  if ('videographer_id' in values && !values.videographer_id) return { error: 'La grabación tiene que tener videógrafo.' }
 
   const supabase = await createClient()
   const { error } = await supabase.from('recording_sessions').update(values).eq('id', id)
