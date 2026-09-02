@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.7 — 2026-09-01
+
+**Al subir un video, "Listo" aparece en cuanto el archivo está guardado; la IA lo revisa detrás sin hacerte esperar.**
+
+- Antes, al subir un corte final el editor veía "La IA está viendo el video…"
+  durante minutos, aunque el archivo ya estaba guardado y registrado. Ahora ve
+  **Listo** enseguida y debajo "la IA está viendo el video…" mientras el QC
+  corre en segundo plano; las bolitas del panel se encienden cuando termina.
+- Con los crudos pasa lo mismo con la carátula: "Listo · generando carátula…".
+- Ya no sale el aviso de "¿seguro que quieres salir?" solo porque la IA siga
+  analizando: el video ya está a salvo. Si el navegador se cierra a medias, el
+  chequeo nocturno de videos recoge el análisis pendiente.
+- Si el análisis falla, el video sigue subido: "Listo · el análisis de IA falló;
+  se reintenta solo".
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

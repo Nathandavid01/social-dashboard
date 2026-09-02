@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUploadStore, type UploadPhase } from '@/lib/stores/upload-store'
@@ -21,12 +22,29 @@ export function UploadDock() {
   const cancelUpload = useUploadStore((s) => s.cancelUpload)
   const dismissUpload = useUploadStore((s) => s.dismissUpload)
   const [expanded, setExpanded] = useState(false)
+  const router = useRouter()
 
   const items = Object.values(uploads).sort((a, b) => (a.id < b.id ? -1 : 1))
   const active = items.filter((i) => !TERMINAL_PHASES.has(i.phase))
 
+  // El QC IA y la carátula corren en segundo plano después de "listo". Cuando
+  // uno termina, los datos del servidor cambiaron (bolitas, tira de escenas):
+  // se refresca la página para que se enciendan solas, sin recargar a mano.
+  const pendingIds = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    let finished = false
+    for (const item of items) {
+      if (item.postprocess === 'pendiente') pendingIds.current.add(item.id)
+      else if (pendingIds.current.delete(item.id) && item.postprocess === 'listo') finished = true
+    }
+    if (finished) router.refresh()
+  }, [items, router])
+
   // Closing the tab kills the upload (the File lives in memory) — warn before
   // that happens. Navigating within the app is fine; the engine survives it.
+  // A propósito se mira solo la fase: el QC IA/carátula pendientes no cuentan.
+  // El video ya está guardado; si la pestaña se cierra a medias, el cron
+  // video-health recoge el análisis que falte.
   useEffect(() => {
     if (active.length === 0) return
     const handler = (e: BeforeUnloadEvent) => {

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.7 — Subida lista sin esperar</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .tag{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;border:1px solid;margin-bottom:10px}
+ .antes{border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.1);color:#fb7185}
+ .despues{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1);color:#34d399}
+ .dock{border:1px solid var(--border);border-radius:12px;background:#0f0f0f;padding:10px;width:100%}
+ .row{display:flex;align-items:center;gap:10px}
+ .logo{width:28px;height:28px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;font-size:10px;color:var(--gold)}
+ .name{font-size:12px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .st{font-size:11px;color:var(--muted)}
+ .tl{display:flex;gap:4px;margin-top:10px}.tl span{flex:1;height:6px;border-radius:3px;background:#262626}.tl span.ok{background:#34d399}.tl span.wait{background:#fb7185}.tl span.bg{background:repeating-linear-gradient(45deg,#c8a34a,#c8a34a 4px,#262626 4px,#262626 8px)}
+ .lab{display:flex;gap:4px;font-size:9px;color:var(--muted)}.lab span{flex:1;text-align:center}
+ .note{color:var(--muted);font-size:12px;margin-top:8px}
+</style></head>
+<body><div class="wrap">
+ <h1>Subida de video · corte final <span class="sub">· v4.7</span></h1>
+ <p class="sub">El archivo ya está guardado: "Listo" no espera a la IA.</p>
+ <div class="grid">
+  <div class="card"><span class="tag antes">Antes</span>
+   <div class="dock"><div class="row"><div class="logo">100</div><div style="min-width:0"><p class="name">ARASIBO — Intro clínica.mp4</p><p class="st">La IA está viendo el video…</p></div></div></div>
+   <div class="tl"><span class="ok"></span><span class="ok"></span><span class="ok"></span><span class="wait"></span><span class="wait"></span><span class="wait"></span></div>
+   <div class="lab"><span>subir</span><span>ensamblar</span><span>registrar</span><span colspan="3" style="flex:3">analizando (2–5 min bloqueado)</span></div>
+   <p class="note">El editor esperaba minutos con el aviso de "¿seguro que quieres salir?" activo.</p>
+  </div>
+  <div class="card"><span class="tag despues">Después</span>
+   <div class="dock"><div class="row"><div class="logo">✓</div><div style="min-width:0"><p class="name">ARASIBO — Intro clínica.mp4</p><p class="st">Listo · la IA está viendo el video…</p></div></div></div>
+   <div class="tl"><span class="ok"></span><span class="ok"></span><span class="ok"></span><span class="bg"></span><span class="bg"></span><span class="bg"></span></div>
+   <div class="lab"><span>subir</span><span>ensamblar</span><span>listo</span><span style="flex:3">QC IA en segundo plano</span></div>
+   <p class="note">Puede seguir trabajando o cerrar la pestaña. Las bolitas del panel se encienden cuando el QC termina; si falla: "Listo · el análisis de IA falló; se reintenta solo".</p>
+  </div>
+ </div>
+</div></body></html>
