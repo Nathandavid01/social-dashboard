@@ -14,6 +14,9 @@ import {
   abortMultipartUpload,
 } from '@/lib/actions/multipart-upload'
 import { generateVideoThumbs, processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { findDuplicateVideo, rememberVideoFingerprint, type DuplicateVideo } from '@/lib/actions/video-dedupe'
+import { fingerprintFile } from '@/lib/utils/video-fingerprint'
+import { duplicateVideoMessage } from '@/lib/utils/duplicate-video-message'
 import { videoNameFromIdea } from '@/lib/uploads/video-name-from-idea'
 
 /**
@@ -38,6 +41,8 @@ export type UploadPhase =
   | 'listo'
   | 'error'
   | 'cancelado'
+  /** No se subió: este archivo ya estaba (huella igual). `error` trae el detalle. */
+  | 'duplicado'
 
 export type UploadProvider = 'r2' | 'entregas-r2'
 
@@ -55,6 +60,8 @@ export interface UploadItem {
   attempt: number
   error?: string
   videoId?: string
+  /** Cuando phase === 'duplicado': el video que ya existe. */
+  duplicateOf?: DuplicateVideo
 }
 
 const MAX_ATTEMPTS = 5
@@ -68,6 +75,7 @@ const CONCURRENCY = 3
  */
 interface Engine {
   file: File
+  fingerprint?: string
   controller: AbortController
   uploadId?: string
   key?: string
@@ -153,7 +161,7 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
   },
 
   hasActiveUploads() {
-    return Object.values(get().uploads).some((u) => !['listo', 'error', 'cancelado'].includes(u.phase))
+    return Object.values(get().uploads).some((u) => !['listo', 'error', 'cancelado', 'duplicado'].includes(u.phase))
   },
 }))
 
@@ -418,6 +426,10 @@ async function finishAfterRegister(id: string, videoId?: string): Promise<void> 
   const eng = engines.get(id)!
   const item = useUploadStore.getState().uploads[id]
   patchUpload(id, { videoId })
+  if (videoId && eng.fingerprint) {
+    // Best-effort: el video ya está registrado; la huella evita la próxima repetición.
+    void rememberVideoFingerprint({ fingerprint: eng.fingerprint, videoId, sizeBytes: eng.file.size }).catch(() => {})
+  }
   if (videoId) {
     if (item.kind === 'edited') {
       patchUpload(id, { phase: 'analizando' })
@@ -442,6 +454,20 @@ async function runEngine(id: string): Promise<void> {
   if (!eng) return
   patchUpload(id, { phase: 'preparando' })
   try {
+    // Nunca dos veces el mismo archivo: huella (3 muestras, milisegundos) y
+    // consulta antes de abrir el multipart. Si la comprobación falla, se sube.
+    try {
+      eng.fingerprint = await fingerprintFile(eng.file)
+      const dup = await findDuplicateVideo(eng.fingerprint)
+      if (dup) {
+        patchUpload(id, { phase: 'duplicado', error: duplicateVideoMessage(dup), duplicateOf: dup })
+        return
+      }
+    } catch {
+      eng.fingerprint = undefined
+    }
+    // Si cancelaron mientras se calculaba la huella, no se abre nada en R2.
+    if (eng.controller.signal.aborted) return
     if (shouldUseMultipart(eng.file.size)) {
       await runMultipart(id)
     } else {

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.10 — Videos sin duplicados</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .dock{border:1px solid var(--border);border-radius:12px;background:#0f0f0f;padding:10px}
+ .row{display:flex;align-items:center;gap:10px}
+ .logo{width:28px;height:28px;border-radius:50%;border:2px solid #fb7185;display:grid;place-items:center;font-size:12px;color:#fb7185}
+ .logo.ok{border-color:#34d399;color:#34d399}
+ .name{font-size:12px;color:#e5e5e5}.st{font-size:11px;color:#fb7185}.st.ok{color:var(--muted)}
+ .steps{display:flex;gap:4px;margin-top:10px}.steps span{flex:1;height:6px;border-radius:3px;background:#262626}.steps .a{background:#fbbf24}.steps .r{background:#fb7185}.steps .g{background:#34d399}
+ .lab{display:flex;gap:4px;font-size:9px;color:var(--muted)}.lab span{flex:1;text-align:center}
+ .note{color:var(--muted);font-size:12px;margin-top:8px}
+ ul{margin:8px 0 0 16px;font-size:12px;color:var(--muted)}li{margin:3px 0}
+</style></head>
+<body><div class="wrap">
+ <h1>Subida de video · sin duplicados <span class="sub">· v4.10</span></h1>
+ <p class="sub">La huella del archivo se comprueba antes de empezar a subir.</p>
+ <div class="grid">
+  <div class="card">
+   <div class="dock"><div class="row"><div class="logo">!</div><div><p class="name">Intro clínica.mp4</p><p class="st">No se subió: Ya subido para «Intro clínica» (ARASIBO) el 28 ago por Carlos</p></div></div></div>
+   <div class="steps"><span class="a"></span><span class="r"></span><span></span><span></span></div>
+   <div class="lab"><span>huella</span><span>ya existe</span><span>—</span><span>—</span></div>
+   <p class="note">No se abre nada en R2 ni se crea una idea. El editor ve para qué idea y cliente estaba.</p>
+  </div>
+  <div class="card">
+   <div class="dock"><div class="row"><div class="logo ok">✓</div><div><p class="name">Testimonio v2.mp4</p><p class="st ok">Listo</p></div></div></div>
+   <div class="steps"><span class="a"></span><span class="g"></span><span class="g"></span><span class="g"></span></div>
+   <div class="lab"><span>huella</span><span>subir</span><span>registrar</span><span>huella guardada</span></div>
+   <p class="note">Contenido nuevo: sube igual que siempre y su huella queda anotada para la próxima.</p>
+  </div>
+ </div>
+ <div class="card">
+  <strong style="font-size:13px">Cómo funciona la huella</strong>
+  <ul>
+   <li>Tamaño del archivo + SHA-256 de 3 muestras de 1 MB (inicio, medio, fin): milisegundos aunque pese 5 GB.</li>
+   <li>Cambiar el nombre del archivo no la engaña; un re-export distinto es otro video.</li>
+   <li>La base la guarda como clave única: dos subidas simultáneas del mismo archivo dejan una sola.</li>
+   <li>Si la comprobación falla (red, tabla aún no migrada), la subida sigue: nunca bloquea un video legítimo.</li>
+  </ul>
+ </div>
+</div></body></html>

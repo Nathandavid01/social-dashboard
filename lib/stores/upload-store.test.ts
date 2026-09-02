@@ -26,6 +26,10 @@ vi.mock('@/lib/actions/multipart-upload', () => ({
   completeMultipartUpload: vi.fn(async () => ({ ok: true })),
   abortMultipartUpload: vi.fn(async () => ({ ok: true })),
 }))
+vi.mock('@/lib/actions/video-dedupe', () => ({
+  findDuplicateVideo: vi.fn(async () => null),
+  rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
+}))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn(async () => {}),
   generateVideoThumbs: vi.fn(async () => {}),
@@ -42,6 +46,7 @@ import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { startMultipartUpload, completeMultipartUpload, abortMultipartUpload } from '@/lib/actions/multipart-upload'
 import { generateVideoThumbs, processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { findDuplicateVideo, rememberVideoFingerprint } from '@/lib/actions/video-dedupe'
 import { PART_SIZE_BYTES } from '@/lib/utils/upload-parts'
 
 function smallFile(name = 'clip.mp4', bytes = 1024): File {
@@ -60,6 +65,13 @@ async function waitForPhase(id: string, phases: string[], timeoutMs = 2000) {
     await new Promise((r) => setTimeout(r, 5))
   }
   throw new Error(`Timed out waiting for phase in [${phases.join(', ')}], last: ${JSON.stringify(useUploadStore.getState().uploads[id])}`)
+}
+
+function deferred<T = void>() {
+  let resolve!: (v: T) => void
+  let reject!: (e: Error) => void
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej })
+  return { promise, resolve, reject }
 }
 
 beforeEach(() => {
@@ -285,30 +297,19 @@ describe('upload-store — cancelar', () => {
     expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
   })
 
-  it('cancelling during "preparando" — before startMultipartUpload has even resolved — still aborts server-side exactly once (no orphaned multipart)', async () => {
-    const deferred: { resolve?: (v: { uploadId: string; key: string }) => void } = {}
-    vi.mocked(startMultipartUpload).mockImplementationOnce(
-      () => new Promise((resolve) => { deferred.resolve = resolve }),
-    )
+  it('cancelling during "preparando" (mientras se calcula la huella) no abre ningún multipart en R2', async () => {
+    const started = deferred<{ uploadId: string; key: string }>()
+    vi.mocked(startMultipartUpload).mockImplementationOnce(() => started.promise)
 
     const file = bigFile()
     const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
-    await waitForPhase(id, ['preparando'])
-
-    // Cancel fires while startMultipartUpload is still in flight — nobody has
-    // an uploadId/key yet, so a naive cancelUpload would have nothing to abort.
+    // La huella y la comprobación de duplicado van ANTES de startMultipartUpload:
+    // cancelar aquí significa que nunca llega a abrirse nada que haya que abortar.
     useUploadStore.getState().cancelUpload(id)
     expect(useUploadStore.getState().uploads[id].phase).toBe('cancelado')
+    await new Promise((r) => setTimeout(r, 30))
+    expect(vi.mocked(startMultipartUpload)).not.toHaveBeenCalled()
     expect(vi.mocked(abortMultipartUpload)).not.toHaveBeenCalled()
-
-    // The server action resolves AFTER the cancel — this is the race.
-    deferred.resolve?.({ uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' })
-
-    await new Promise((r) => setTimeout(r, 20))
-    expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledWith(
-      expect.objectContaining({ provider: 'r2', uploadId: 'up-late', key: 'ideas/idea-1/edited/late.mp4' }),
-    )
-    expect(vi.mocked(abortMultipartUpload)).toHaveBeenCalledTimes(1)
     expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
   })
 })
@@ -321,6 +322,40 @@ describe('upload-store — sobrevive a que nadie esté "montado"', () => {
     // No component ever subscribes/renders here — reading raw store state,
     // the way navigating away and the dock re-mounting elsewhere would.
     const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+  })
+})
+
+describe('upload-store — nunca se sube un video repetido', () => {
+  it('si la huella ya existe, no sube nada y termina en "duplicado" con el detalle', async () => {
+    vi.mocked(findDuplicateVideo).mockResolvedValueOnce({
+      videoId: 'vid-9', kind: 'edited', fileName: 'final.mp4', uploadedAt: '2026-08-28T15:00:00Z',
+      ideaId: 'idea-9', ideaTitle: 'Intro clínica', clientName: 'ARASIBO', uploadedBy: 'Carlos',
+    })
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    const item = await waitForPhase(id, ['duplicado', 'listo', 'error'])
+    expect(item.phase).toBe('duplicado')
+    expect(item.error).toMatch(/Intro clínica/)
+    expect(item.error).toMatch(/ARASIBO/)
+    expect(item.duplicateOf).toEqual(expect.objectContaining({ ideaId: 'idea-9', videoId: 'vid-9' }))
+    expect(vi.mocked(getR2UploadUrl)).not.toHaveBeenCalled()
+    expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
+    expect(useUploadStore.getState().hasActiveUploads()).toBe(false)
+  })
+
+  it('si no hay duplicado, sube y anota la huella del video registrado', async () => {
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+    expect(vi.mocked(findDuplicateVideo)).toHaveBeenCalledWith(expect.stringMatching(/^v1-1024-[0-9a-f]{64}$/))
+    expect(vi.mocked(rememberVideoFingerprint)).toHaveBeenCalledWith(
+      expect.objectContaining({ videoId: 'video-1', sizeBytes: 1024, fingerprint: expect.stringMatching(/^v1-1024-/) }),
+    )
+  })
+
+  it('si la comprobación falla, la subida sigue (nunca bloquea por un error nuestro)', async () => {
+    vi.mocked(findDuplicateVideo).mockRejectedValueOnce(new Error('red'))
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error', 'duplicado'])
     expect(item.phase).toBe('listo')
   })
 })

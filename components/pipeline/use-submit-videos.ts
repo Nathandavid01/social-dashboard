@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react'
 import { createSubmittedIdea, reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { findDuplicateVideo, rememberVideoFingerprint } from '@/lib/actions/video-dedupe'
+import { fingerprintFile } from '@/lib/utils/video-fingerprint'
 import { submitOneVideo, type SubmitDeps, type SubmitStage } from '@/lib/utils/submit-upload-core'
 import type { SubmitVideoPayload } from './submit-video-card'
 
@@ -64,12 +66,17 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
 }
 
 const deps: SubmitDeps = {
+  fingerprint: fingerprintFile,
+  findDuplicate: findDuplicateVideo,
   createIdea: (i) => createSubmittedIdea(i),
   getUploadUrl: (i) => getEntregasUploadUrl({ ideaId: i.ideaId, fileName: i.fileName, contentType: i.contentType }),
   putFile: putWithProgress,
   registerVideo: async (i) => {
     const res = await registerEntregasVideo({ ideaId: i.ideaId, key: i.key, name: i.name, sizeBytes: i.sizeBytes, mimeType: i.mimeType })
-    if (res.ok && res.id) void processUploadedVideo(res.id, i.file)
+    if (res.ok && res.id) {
+      void processUploadedVideo(res.id, i.file)
+      if (i.fingerprint) void rememberVideoFingerprint({ fingerprint: i.fingerprint, videoId: res.id, sizeBytes: i.sizeBytes }).catch(() => {})
+    }
     return res
   },
 }
@@ -105,7 +112,7 @@ export function useSubmitVideos(onDone?: () => void) {
         )
         if (!res.ok) {
           setRows((r) =>
-            r.map((row, j) => (j === i ? { ...row, stage: 'error' as SubmitStage, error: res.error } : row)),
+            r.map((row, j) => (j === i ? { ...row, stage: (res.stage === 'duplicado' ? 'duplicado' : 'error') as SubmitStage, error: res.error } : row)),
           )
         } else {
           setRows((r) =>
