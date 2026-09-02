@@ -1,4 +1,5 @@
-import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
+import type { ContentIdeaVideo } from '@/lib/supabase/types'
+import type { BoardVideo, PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { clientAssigneeId, isIdeaApproved } from './editor-video-bank'
 
@@ -63,16 +64,16 @@ export interface VideoBankOptions {
   onlyUnassigned?: boolean
 }
 
-function ideaTitle(idea: IdeaWithPipeline): string {
+function ideaTitle(idea: PipelineBoardIdea): string {
   return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
 }
 
-function clientKey(idea: IdeaWithPipeline): string | null {
+function clientKey(idea: PipelineBoardIdea): string | null {
   return idea.client?.id ?? idea.client_id ?? null
 }
 
 function editorOf(
-  idea: IdeaWithPipeline,
+  idea: PipelineBoardIdea,
   names: Record<string, string>,
 ): { id: string | null; name: string | null; via: AssignedVia } {
   if (idea.assignee?.id) {
@@ -87,21 +88,21 @@ function editorOf(
   return { id: null, name: null, via: null }
 }
 
-function brandPrimary(client: IdeaWithPipeline['client']): string | null {
+function brandPrimary(client: PipelineBoardIdea['client']): string | null {
   return (client as { brand_colors?: { primary?: string | null } } | null | undefined)?.brand_colors?.primary ?? null
 }
 
-function postingDaysOf(client: IdeaWithPipeline['client']): number[] {
+function postingDaysOf(client: PipelineBoardIdea['client']): number[] {
   const days = (client as { posting_days?: number[] } | null | undefined)?.posting_days
   return Array.isArray(days) ? days : []
 }
 
 /** Crudo y b-roll vivos: lo que un editor puede tomar para cortar. */
-function sourceVideos(idea: IdeaWithPipeline): ContentIdeaVideo[] {
+function sourceVideos(idea: PipelineBoardIdea): BoardVideo[] {
   return (idea.videos ?? []).filter((v) => SOURCE.has(v.kind) && LIVE.has(v.status))
 }
 
-export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOptions = {}): VideoBank {
+export function buildVideoBank(ideas: PipelineBoardIdea[], options: VideoBankOptions = {}): VideoBank {
   const editorNames = options.editorNames ?? {}
   const recorderNames = options.recorderNames ?? {}
 

@@ -2,6 +2,7 @@ import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
+import { toBoardIdeas } from '@/lib/pipeline/board-idea'
 import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
 import { buildPostedLinks } from '@/lib/entregas/posted-links'
 import type { EstadoCliente } from '@/lib/entregas/marca-cliente'
@@ -75,7 +76,7 @@ export default async function EntregasPage() {
     <div className="space-y-4">
       {showProcess && <SupervisorProcessSteps pathname="/entregas" />}
       <EntregasBoard
-        ideas={entregas}
+        ideas={toBoardIdeas(entregas)}
         clientApprovals={clientApprovals}
         postedLinks={postedLinks}
         allClients={activeClients.map((c) => ({ id: c.id, name: c.name }))}

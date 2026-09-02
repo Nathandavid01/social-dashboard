@@ -43,7 +43,8 @@ type PipelineIdea = Pick<
  */
 export function computeIdeaPipeline(input: {
   idea: PipelineIdea
-  videos: ContentIdeaVideo[]
+  /** Solo tipo y estado: sirve tanto la fila completa como la proyección del tablero. */
+  videos: Pick<ContentIdeaVideo, 'kind' | 'status'>[]
   recordingScheduled: boolean
 }): IdeaPipeline {
   const { idea, videos, recordingScheduled } = input

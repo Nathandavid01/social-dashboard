@@ -6,6 +6,7 @@ import { MemberUploadHistory } from '@/components/team/member-upload-history'
 import { MemberPipelineHistory } from '@/components/team/member-pipeline-history'
 import { ClientIdeasRows } from '@/components/ideas/client-ideas-rows'
 import { getAssignedVideosForMember } from '@/lib/actions/content-ideas'
+import { toBoardIdeas } from '@/lib/pipeline/board-idea'
 import { getEditorPipelineHistory } from '@/lib/actions/pipeline-bank'
 import { getVideoUploadMetricsByUser } from '@/lib/actions/video-uploads'
 import { Film, ArrowLeft } from 'lucide-react'
@@ -90,7 +91,7 @@ export default async function MemberPage({ params }: Props) {
             <p className="text-xs text-muted-foreground">
               Asignados a {firstName} — permanecen aquí hasta que se envíen a revisión.
             </p>
-            <ClientIdeasRows ideas={assignedVideos} canAssign={false} showNextAction />
+            <ClientIdeasRows ideas={toBoardIdeas(assignedVideos)} canAssign={false} showNextAction />
           </>
         )}
       </section>

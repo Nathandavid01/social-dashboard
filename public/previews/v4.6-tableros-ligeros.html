@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.6 — Tableros ligeros</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 4px;border-top:1px solid var(--border)}th{color:var(--muted);font-weight:500;border-top:0}
+ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .bar{height:8px;border-radius:4px;background:#262626;overflow:hidden;margin-top:5px;position:relative}.bar i{display:block;height:100%;background:#fb7185}.bar b{position:absolute;left:0;top:0;height:100%;background:#34d399}
+ .leg{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px}.leg span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+ .leg .a::before{background:#fb7185}.leg .d::before{background:#34d399}
+ .note{color:var(--muted);font-size:12px}
+ .chips{display:flex;gap:6px;flex-wrap:wrap;font-size:11px}.chips span{border:1px solid var(--border);border-radius:6px;padding:3px 7px;color:var(--muted)}.chips span.k{border-color:rgba(234,179,8,.6);color:var(--fg)}.chips span.x{text-decoration:line-through;opacity:.6}
+</style></head>
+<body><div class="wrap">
+ <h1>Tableros · datos que viajan al navegador <span class="sub">· v4.6</span></h1>
+ <p class="sub">Lo mismo en pantalla, con la mitad de descarga.</p>
+ <div class="card">
+  <table>
+   <tr><th>Página</th><th class="n">Antes</th><th class="n">Después</th><th style="width:45%"></th></tr>
+   <tr><td>/pipeline</td><td class="n">1.11 MB</td><td class="n"><strong>648 KB</strong></td><td><div class="bar"><i style="width:100%"></i><b style="width:58%"></b></div></td></tr>
+   <tr><td>/entregas</td><td class="n">868 KB</td><td class="n"><strong>335 KB</strong></td><td><div class="bar"><i style="width:78%"></i><b style="width:30%"></b></div></td></tr>
+   <tr><td>/revision</td><td class="n">752 KB</td><td class="n"><strong>334 KB</strong></td><td><div class="bar"><i style="width:68%"></i><b style="width:30%"></b></div></td></tr>
+  </table>
+  <div class="leg"><span class="a">Antes</span><span class="d">Después</span></div>
+  <p class="note" style="margin-top:8px">Medido en el HTML que recibe el navegador, 2026-09-01. Comprimido, /pipeline pasa de 124 KB a 82 KB.</p>
+ </div>
+ <div class="card">
+  <p class="note" style="margin-bottom:8px">Por cada idea, lo que cruza (dorado) y lo que se queda en el servidor (tachado):</p>
+  <div class="chips">
+   <span class="k">título</span><span class="k">estado</span><span class="k">aprobación</span><span class="k">fecha de posteo</span><span class="k">hook</span><span class="k">brief visual</span><span class="k">caption</span><span class="k">cliente</span><span class="k">editor</span><span class="k">videos (estado, miniaturas)</span>
+   <span class="x">rationale</span><span class="x">prompt de generación</span><span class="x">modelo</span><span class="x">hashtags sugeridos</span><span class="x">token de revisión</span><span class="x">ideas descartadas</span><span class="x">notas y errores de cada archivo</span><span class="x">tamaño y mime</span>
+  </div>
+ </div>
+</div></body></html>

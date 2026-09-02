@@ -25,10 +25,11 @@ import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
 import { buildEditorPace } from '@/lib/pipeline/editor-pace'
 import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
-import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
+import type { SocialPlatform } from '@/lib/supabase/types'
+import type { PipelineBoardIdea } from '@/lib/pipeline/board-idea'
 import type { Runway } from '@/lib/utils/content-runway'
 
-type Idea = IdeaWithPipeline
+type Idea = PipelineBoardIdea
 
 /** A client's planned recording sessions, shown as empty-slot cards in Ideas. */
 export interface PlannedClient {
@@ -788,7 +789,7 @@ function BatchVideoStrip({
   logoUrl,
   total,
 }: {
-  ideas: IdeaWithPipeline[]
+  ideas: PipelineBoardIdea[]
   clientName: string
   logoUrl?: string | null
   total: number
