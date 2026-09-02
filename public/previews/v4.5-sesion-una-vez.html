@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.5 — Sesión validada una vez por página</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .tag{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;border:1px solid;margin-bottom:8px}
+ .antes{border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.1);color:#fb7185}
+ .despues{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1);color:#34d399}
+ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:6px 4px;border-top:1px solid var(--border)}th{color:var(--muted);font-weight:500;border-top:0}
+ td.n{text-align:right;font-variant-numeric:tabular-nums}
+ .bar{height:6px;border-radius:3px;background:#262626;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:var(--gold)}
+ .bar.ok i{background:#34d399}
+ .flow{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--muted)}.flow span{border:1px solid var(--border);border-radius:6px;padding:3px 7px}
+ .flow span.hit{border-color:rgba(234,179,8,.6);color:var(--fg)}
+ .note{color:var(--muted);font-size:12px}
+</style></head>
+<body><div class="wrap">
+ <h1>Dashboard · rendimiento <span class="sub">· v4.5</span></h1>
+ <p class="sub">La sesión se valida una sola vez por carga de página. Nada cambia en pantalla.</p>
+ <div class="grid">
+  <div class="card"><span class="tag antes">Antes</span>
+   <div class="flow"><span class="hit">Menú</span><span class="hit">Permisos</span><span class="hit">Rol</span><span class="hit">Ver como</span><span class="hit">Notificaciones</span><span class="hit">Tablero</span></div>
+   <p class="note" style="margin-top:8px">Cada pieza le preguntaba a Supabase "¿quién es este usuario?" por su cuenta: <strong>8 a 15 veces</strong> por página.</p>
+  </div>
+  <div class="card"><span class="tag despues">Después</span>
+   <div class="flow"><span class="hit">Sesión ×1</span><span>Menú</span><span>Permisos</span><span>Rol</span><span>Ver como</span><span>Notificaciones</span><span>Tablero</span></div>
+   <p class="note" style="margin-top:8px">Se pregunta <strong>una vez</strong> y todos reutilizan la respuesta durante esa carga.</p>
+  </div>
+ </div>
+ <div class="card">
+  <table>
+   <tr><th>Página</th><th class="n">Validaciones de sesión</th><th class="n">Consultas a la base</th></tr>
+   <tr><td>/pipeline</td><td class="n">15 → <strong>1</strong><div class="bar ok"><i style="width:7%"></i></div></td><td class="n">22 → <strong>12</strong><div class="bar"><i style="width:55%"></i></div></td></tr>
+   <tr><td>/home</td><td class="n">13 → <strong>1</strong><div class="bar ok"><i style="width:8%"></i></div></td><td class="n">35 → <strong>27</strong><div class="bar"><i style="width:77%"></i></div></td></tr>
+   <tr><td>/entregas</td><td class="n">10 → <strong>1</strong><div class="bar ok"><i style="width:10%"></i></div></td><td class="n">16 → <strong>10</strong><div class="bar"><i style="width:63%"></i></div></td></tr>
+   <tr><td>/banco</td><td class="n">8 → <strong>1</strong><div class="bar ok"><i style="width:12%"></i></div></td><td class="n">14 → <strong>10</strong><div class="bar"><i style="width:71%"></i></div></td></tr>
+   <tr><td>/settings/users</td><td class="n">11 → <strong>1</strong><div class="bar ok"><i style="width:9%"></i></div></td><td class="n">14 → <strong>8</strong><div class="bar"><i style="width:57%"></i></div></td></tr>
+   <tr><td>/mi-dia</td><td class="n">11 → <strong>1</strong><div class="bar ok"><i style="width:9%"></i></div></td><td class="n">14 → <strong>11</strong><div class="bar"><i style="width:79%"></i></div></td></tr>
+  </table>
+  <p class="note" style="margin-top:10px">Medido con una sonda temporal en el servidor, carga caliente, 2026-09-01.</p>
+ </div>
+</div></body></html>

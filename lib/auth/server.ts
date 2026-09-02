@@ -2,6 +2,7 @@ import 'server-only'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { memoPerRequest } from '@/lib/supabase/request-memo'
 import { hasPermission, type Permission } from './permissions'
 import { areaGrantsPermission } from './areas'
 import {
@@ -11,7 +12,7 @@ import {
   resolveEffectiveRole,
   resolveEffectiveUserId,
 } from './view-as-core'
-import type { UserRole } from '@/lib/supabase/types'
+import type { Profile, UserRole } from '@/lib/supabase/types'
 
 export interface ViewAsEditor {
   id: string
@@ -58,27 +59,46 @@ async function ensureProfileRole(user: {
   }
 }
 
-async function getRoleAndAreas(): Promise<RoleAndAreas> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+/** Usuario de la sesión, validado UNA vez por request (memo). */
+export async function getAuthUser() {
+  return memoPerRequest('auth.user', async () => {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  })
+}
+
+/** Fila completa de `profiles` del usuario en sesión, UNA lectura por request. */
+export async function getOwnProfile(): Promise<Profile | null> {
+  return memoPerRequest('auth.ownProfile', async () => {
+    const user = await getAuthUser()
+    if (!user) return null
+    const supabase = await createClient()
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+    return (data as Profile | null) ?? null
+  })
+}
+
+function getRoleAndAreas(): Promise<RoleAndAreas> {
+  return memoPerRequest('auth.roleAndAreas', getRoleAndAreasUncached)
+}
+
+async function getRoleAndAreasUncached(): Promise<RoleAndAreas> {
+  const user = await getAuthUser()
   if (!user) return { role: null, areaAccess: null }
 
-  const { data } = await supabase
-    .from('profiles')
-    .select('role, area_access')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (data?.role) {
+  const profile = await getOwnProfile()
+  if (profile?.role) {
     return {
-      role: data.role as UserRole,
-      areaAccess: (data.area_access as string[] | null | undefined) ?? null,
+      role: profile.role as UserRole,
+      areaAccess: (profile.area_access as string[] | null | undefined) ?? null,
     }
   }
 
   const backfilled = await ensureProfileRole(user)
   if (!backfilled) return { role: null, areaAccess: null }
 
+  const supabase = await createClient()
   const { data: refreshed } = await supabase
     .from('profiles')
     .select('role, area_access')
@@ -114,32 +134,31 @@ export async function getViewAsEditorId(): Promise<string | null> {
 }
 
 export async function getEffectiveRole(): Promise<UserRole | null> {
-  const real = await getCurrentRole()
-  return resolveEffectiveRole(real, await getViewAsEditorId())
+  const [real, viewAs] = await Promise.all([getCurrentRole(), getViewAsEditorId()])
+  return resolveEffectiveRole(real, viewAs)
 }
 
 export async function getEffectiveUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const realRole = await getCurrentRole()
-  return resolveEffectiveUserId(user?.id ?? null, realRole, await getViewAsEditorId())
+  const [user, realRole, viewAs] = await Promise.all([getAuthUser(), getCurrentRole(), getViewAsEditorId()])
+  return resolveEffectiveUserId(user?.id ?? null, realRole, viewAs)
 }
 
 export async function getViewAsEditor(): Promise<ViewAsEditor | null> {
   const id = await getViewAsEditorId()
   if (!id) return null
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('id', id)
-    .maybeSingle()
-  return { id, full_name: data?.full_name ?? null }
+  return memoPerRequest(`auth.viewAsEditor:${id}`, async () => {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .eq('id', id)
+      .maybeSingle()
+    return { id, full_name: data?.full_name ?? null }
+  })
 }
 
 async function getEffectiveRoleAndAreas(): Promise<RoleAndAreas> {
-  const real = await getRoleAndAreas()
-  const viewAs = await getViewAsEditorId()
+  const [real, viewAs] = await Promise.all([getRoleAndAreas(), getViewAsEditorId()])
   const role = resolveEffectiveRole(real.role, viewAs)
   if (viewAs && role === 'editor') return { role: 'editor', areaAccess: null }
   return real

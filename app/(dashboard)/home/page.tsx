@@ -14,7 +14,7 @@ import { WeeklyComplianceCard } from '@/components/home/weekly-compliance-card'
 import { getWeeklyComplianceByClient } from '@/lib/utils/weekly-compliance'
 import { CadenciaCard } from '@/components/home/cadencia-card'
 import { getCadenciaData } from '@/lib/actions/cadencia'
-import { currentUserHas } from '@/lib/auth/server'
+import { currentUserHas, getAuthUser, getOwnProfile } from '@/lib/auth/server'
 import { PageSpinner } from '@/components/shared/page-spinner'
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -41,7 +41,7 @@ export default async function HomePage() {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   const [
     { count: activeClients },
@@ -100,7 +100,8 @@ export default async function HomePage() {
       : Promise.resolve({ data: [] }),
     supabase.from('tasks').select('assignee_id, status, due_at, assignee:profiles(id, full_name)').neq('status', 'completed').not('assignee_id', 'is', null),
     supabase.from('tasks').select('id, title, updated_at, client:clients(name), assignee:profiles!tasks_assignee_id_fkey(full_name)').eq('status', 'completed').order('updated_at', { ascending: false }).limit(8),
-    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    // Perfil propio: el layout ya lo leyó en este request (memo).
+    getOwnProfile().then((p) => ({ data: p ? { full_name: p.full_name } : null })),
     supabase.from('production_tasks').select('id', { count: 'exact', head: true }).in('status', ['en_revision', 'revisiones']),
     supabase.from('production_tasks').select('id', { count: 'exact', head: true }).eq('publish_date', now.toISOString().slice(0, 10)).in('status', ['aprobado', 'publicado']),
   ] as const)
