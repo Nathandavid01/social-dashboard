@@ -10,7 +10,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
-import type { BankAdmin, EditorBankClip, EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
+import { EDITOR_RETURNED_CAP, type BankAdmin, type EditorBankClip, type EditorBankFile, type EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
 import { approvalTone } from '@/lib/pipeline/approval-tone'
 import { GlobalBrollSection } from './global-broll-section'
@@ -70,7 +70,7 @@ function EmptyState({ text }: { text: string }) {
 
 function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
-  const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, row.wipLimit)
+  const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, Math.max(0, row.wipLimit - row.returned.length))
   const waiting = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'waiting')
   const estimate = estimateDaysForEditor(pace, { teamMedianDays: teamPace })
   const approved = row.clients.reduce((sum, client) => sum + client.approvedCount, 0)
@@ -95,10 +95,29 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }
           <p className={row.nowCount >= row.wipLimit ? 'text-rose-300' : 'text-[#c8a34a]'}>{row.nowCount >= row.wipLimit ? `${row.wipLimit} de ${row.wipLimit}` : `${row.wipLimit - row.nowCount} ${row.wipLimit - row.nowCount === 1 ? 'espacio libre' : 'espacios libres'}`}</p>
         </div>
       </div>
+      {row.returned.length > 0 && (
+        <div className="mx-3.5 mb-2 rounded-lg border border-rose-400/30 bg-rose-500/[0.06] p-2.5" data-testid={`editor-returned-${row.editorId ?? 'unassigned'}`}>
+          <p className="text-[9px] uppercase tracking-[.14em] text-rose-300">Devueltos · corrige primero{row.blockedByReturned ? ` · ${row.returned.length} de ${EDITOR_RETURNED_CAP}: banco cerrado` : ''}</p>
+          <div className="mt-1.5 space-y-1.5">
+            {row.returned.map((r) => (
+              <div key={r.ideaId} className="flex min-w-0 items-start gap-2 text-[10px]">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <Link href={`/produccion/idea/${r.ideaId}`} className="block truncate text-slate-200 underline-offset-2 hover:underline">{r.title}</Link>
+                  <p className="truncate text-[9px] text-slate-500">{r.clientName}{r.note ? ` · ${r.note}` : ' · sin nota de corrección'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2 px-3.5 pb-3">
-        {Array.from({ length: row.wipLimit }).map((_, index) => {
+        {Array.from({ length: Math.max(0, row.wipLimit - row.returned.length) }).map((_, index) => {
           const work = active[index]
-          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} /> : (
+          if (work) return <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} />
+          return row.blockedByReturned ? (
+            <div key={`blocked-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-rose-400/30 bg-rose-500/[0.04] px-3 text-center"><div><p className="text-[11px] font-medium text-rose-200">Bloqueado</p><p className="mt-1 text-[9px] text-slate-500">Corrige los devueltos para tomar del banco</p></div></div>
+          ) : (
             <div key={`free-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-white/10 bg-black/10 px-3 text-center"><div><p className="text-[11px] font-medium text-slate-300">Espacio libre</p><p className="mt-1 text-[9px] text-slate-500">Puede tomar un video del banco</p><span className="mt-2 inline-block text-[10px] font-semibold text-[#c8a34a]">Disponible</span></div></div>
           )
         })}

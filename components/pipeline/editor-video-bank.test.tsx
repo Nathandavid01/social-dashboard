@@ -34,6 +34,8 @@ function row(over: Partial<EditorBankRow> = {}): EditorBankRow {
     wipLimit: 2,
     approvalRate: null,
     nextSlots: [],
+    returned: [],
+    blockedByReturned: false,
     clients: [],
     ...over,
   }
@@ -377,5 +379,33 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('SP')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /subir logo/i })
     expect(link).toHaveAttribute('href', '/clients/c-speedy')
+  })
+})
+
+describe('devueltos primero', () => {
+  const base = () => row({
+    nowCount: 1,
+    returned: [
+      { ideaId: 'r1', title: 'Intro clínica v2', clientId: 'c1', clientName: 'Blue Chiropractic', note: 'Falta el logo al final', returnedAt: '2026-09-01' },
+    ],
+    blockedByReturned: false,
+    clients: [{ clientId: 'c1', clientName: 'Blue Chiropractic', logoUrl: null, cardColor: '#c8a34a', approvedCount: 0, remainingInBank: 1, inRevision: 1, postingDays: [], clips: [clip({ ideaId: 'i1', yours: true, queue: 'active' })] }],
+  })
+
+  it('muestra los devueltos arriba, con la nota de la corrección', () => {
+    render(<EditorVideoBank rows={[base()]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    expect(screen.getByText(/Devueltos · corrige primero/i)).toBeInTheDocument()
+    expect(screen.getByText('Intro clínica v2')).toBeInTheDocument()
+    expect(screen.getByText(/Falta el logo al final/)).toBeInTheDocument()
+  })
+
+  it('con el tope de devueltos alcanzado, los espacios del banco quedan bloqueados', () => {
+    const r = base()
+    r.blockedByReturned = true
+    r.nowCount = 0
+    r.clients[0].clips[0].queue = 'waiting'
+    render(<EditorVideoBank rows={[r]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    expect(screen.getAllByText(/Corrige los devueltos para tomar del banco/i).length).toBeGreaterThan(0)
+    expect(screen.queryByText('Espacio libre')).not.toBeInTheDocument()
   })
 })

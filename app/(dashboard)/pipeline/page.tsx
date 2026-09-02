@@ -6,6 +6,7 @@ import { buildGlobalBroll } from '@/lib/pipeline/global-broll'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
+import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
 import { shouldPlanForClient, planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
@@ -135,6 +136,21 @@ export default async function PipelinePage() {
       )
     : []
 
+  // Devueltos primero: la última nota de corrección de cada video devuelto,
+  // para que el editor vea qué arreglar sin abrir la idea.
+  const devueltos = ideas.filter((i) => i.approval_status === 'revision_needed').map((i) => i.id)
+  const { data: notasRaw } = devueltos.length
+    ? await supabase
+        .from('content_idea_activity')
+        .select('content_idea_id, metadata, created_at, user:profiles(full_name)')
+        .in('action', ['changes_requested', 'client_requested_changes'])
+        .in('content_idea_id', devueltos)
+        .order('created_at', { ascending: false })
+    : { data: [] }
+  const returnNotes: Record<string, string> = Object.fromEntries(
+    Object.entries(latestNoteByIdea((notasRaw ?? []) as unknown as ReviewNoteRow[])).map(([id, n]) => [id, n.note]),
+  )
+
   const teamMembers = visibleProfiles.map((p) => ({
     id: p.id,
     name: p.full_name ?? 'Sin nombre',
@@ -166,6 +182,7 @@ export default async function PipelinePage() {
       clientRunway={clientRunway}
       wipLimits={wipLimits}
       approvalRates={approvalRates}
+      returnNotes={returnNotes}
       globalBroll={globalBroll}
       bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
       canSeeAll={canSeeAll}

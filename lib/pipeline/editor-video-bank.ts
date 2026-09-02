@@ -12,6 +12,14 @@ const SOURCE = new Set<ContentIdeaVideo['kind']>(['raw', 'broll'])
 /** Tope de trabajo activo del editor: 2 videos a la vez. */
 export const EDITOR_WIP_LIMIT = 2
 
+/**
+ * Devueltos primero (Eric, 2026-09-02): un video devuelto (revision_needed)
+ * ocupa un espacio del WIP antes que cualquier crudo del banco, y con este
+ * número de devueltos pendientes el editor no toma nada del banco hasta
+ * corregirlos.
+ */
+export const EDITOR_RETURNED_CAP = 2
+
 export interface EditorBankAccess {
   role: UserRole | null
   userId: string | null
@@ -68,7 +76,20 @@ export interface EditorBankClient {
   clips: EditorBankClip[]
 }
 
+/** Un corte que volvió al editor con correcciones: se corrige antes de tomar del banco. */
+export interface EditorBankReturned {
+  ideaId: string
+  title: string
+  clientId: string | null
+  clientName: string
+  /** Última nota de corrección (del equipo o del cliente), si se cargó. */
+  note: string | null
+  returnedAt: string | null
+}
+
 export interface EditorBankResolvedMarks {
+  /** Última nota de corrección por idea devuelta (latestNoteByIdea). */
+  returnNotes?: Record<string, string>
   logos?: Record<string, string | null>
   brandColors?: Record<string, string | null>
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → EDITOR_WIP_LIMIT. */
@@ -91,6 +112,10 @@ export interface EditorBankRow {
   /** % de aprobación (0–100) de este editor, o null sin historial. */
   approvalRate: number | null
   nextSlots: EditorBankNextSlot[]
+  /** Cortes devueltos con correcciones: van antes que el banco. */
+  returned: EditorBankReturned[]
+  /** true cuando returned.length >= EDITOR_RETURNED_CAP: nada del banco hasta corregir. */
+  blockedByReturned: boolean
 }
 
 /** Owner y supervisor: quién opera el banco (no son filas de edición). */
@@ -218,6 +243,18 @@ function belongsToEditor(idea: IdeaWithPipeline, userId: string): boolean {
   return ideaAssigneeId(idea) === userId || clientAssigneeId(idea) === userId
 }
 
+export function isReturnedToEditor(idea: Pick<IdeaWithPipeline, 'approval_status' | 'status' | 'published_at'>): boolean {
+  return idea.status !== 'descartada' && !isIdeaApproved(idea) && idea.approval_status === 'revision_needed'
+}
+
+/** Devueltos del editor, del más antiguo al más nuevo. */
+export function returnedIdeasFor(ideas: IdeaWithPipeline[], userId: string | null): IdeaWithPipeline[] {
+  if (!userId) return []
+  return ideas
+    .filter((idea) => belongsToEditor(idea, userId) && isReturnedToEditor(idea))
+    .sort((a, b) => (a.updated_at ?? '').localeCompare(b.updated_at ?? '') || a.id.localeCompare(b.id))
+}
+
 /** Los 2 espacios: un video del cliente más urgente, luego del siguiente. */
 export function editorWipIdeaIds(
   ideas: IdeaWithPipeline[],
@@ -226,6 +263,11 @@ export function editorWipIdeaIds(
   limit: number = EDITOR_WIP_LIMIT,
 ): Set<string> {
   if (!userId) return new Set()
+  // Devueltos primero: ocupan espacios del WIP y, al llegar al tope, cierran el banco.
+  const returnedCount = returnedIdeasFor(ideas, userId).length
+  if (returnedCount >= EDITOR_RETURNED_CAP) return new Set()
+  limit = Math.max(0, limit - returnedCount)
+  if (limit === 0) return new Set()
   const ready = ideas.filter((idea) => belongsToEditor(idea, userId) && isRawReadyWork(idea))
   const byClient = new Map<string, IdeaWithPipeline[]>()
   for (const idea of ready) {
@@ -329,6 +371,8 @@ function emptyRow(editor: { id: string | null; name: string }, wipLimit: number,
     wipLimit,
     approvalRate,
     nextSlots: [],
+    returned: [],
+    blockedByReturned: false,
   }
 }
 
@@ -388,6 +432,16 @@ export function groupEditorVideoBank(
     if (isInRevision(idea)) {
       row.inRevision += 1
       client.inRevision += 1
+      if (isReturnedToEditor(idea)) {
+        row.returned.push({
+          ideaId: idea.id,
+          title: ideaTitle(idea),
+          clientId: client.clientId,
+          clientName: client.clientName,
+          note: resolved.returnNotes?.[idea.id] ?? null,
+          returnedAt: idea.updated_at ?? null,
+        })
+      }
       continue
     }
 
@@ -418,6 +472,8 @@ export function groupEditorVideoBank(
 
   const rows = Array.from(byEditor.values())
   for (const row of rows) {
+    row.returned.sort((a, b) => (a.returnedAt ?? '').localeCompare(b.returnedAt ?? ''))
+    row.blockedByReturned = row.editorId != null && row.returned.length >= EDITOR_RETURNED_CAP
     row.clients = row.clients.filter((c) => c.clips.length > 0 || c.inRevision > 0)
     for (const client of row.clients) {
       client.remainingInBank = client.clips.length
@@ -428,7 +484,8 @@ export function groupEditorVideoBank(
         .filter((clip) => clip.queue === 'active')
         .map((clip) => ({ ideaId: clip.ideaId, title: clip.title, clientName: c.clientName })),
     )
-    row.nowCount = row.nextSlots.length
+    // Los devueltos ocupan espacios del WIP antes que el banco.
+    row.nowCount = Math.min(row.wipLimit, row.nextSlots.length + row.returned.length)
     row.clients.sort((a, b) => a.clientName.localeCompare(b.clientName, 'es'))
   }
   rows.sort((a, b) => {

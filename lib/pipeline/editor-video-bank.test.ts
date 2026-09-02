@@ -10,6 +10,7 @@ import {
   isIdeaApproved,
   prepareIdeasForEditorBank,
   listBankAdmins,
+  EDITOR_RETURNED_CAP,
 } from './editor-video-bank'
 
 function raw(over: Partial<ContentIdeaVideo> = {}): ContentIdeaVideo {
@@ -470,5 +471,49 @@ describe('listBankAdmins', () => {
     expect(admins.map((a) => a.id)).toEqual(['o1', 's1'])
     expect(admins[0]).toMatchObject({ name: 'Eric', email: 'eric@nate.media', role: 'owner', roleLabel: 'Owner' })
     expect(admins[1]).toMatchObject({ name: 'Ana', role: 'supervisor', roleLabel: 'Supervisor' })
+  })
+})
+
+describe('devueltos primero (2026-09-02): corrigen antes de tomar del banco', () => {
+  const returned = (id: string) =>
+    idea({ id, status: 'producida', approval_status: 'revision_needed', videos: [raw({ id: 'v' + id, idea_id: id, kind: 'raw' })] })
+  const raws = [
+    idea({ id: 'a', created_at: '2026-08-01', videos: [raw({ id: 'va', idea_id: 'a' })] }),
+    idea({ id: 'b', created_at: '2026-08-02', videos: [raw({ id: 'vb', idea_id: 'b' })] }),
+    idea({ id: 'c', created_at: '2026-08-03', videos: [raw({ id: 'vc', idea_id: 'c' })] }),
+  ]
+
+  it('un devuelto ocupa un espacio del WIP: con tope 2 solo entra 1 crudo del banco', () => {
+    const ids = editorWipIdeaIds([returned('r1'), ...raws], 'ed-maria')
+    expect(Array.from(ids)).toEqual(['a'])
+  })
+
+  it(`con ${EDITOR_RETURNED_CAP} devueltos o más, el editor no toma nada del banco hasta corregirlos`, () => {
+    const ids = editorWipIdeaIds([returned('r1'), returned('r2'), ...raws], 'ed-maria')
+    expect(ids.size).toBe(0)
+    const prepared = prepareIdeasForEditorBank([returned('r1'), returned('r2'), ...raws], { role: 'editor', userId: 'ed-maria' })
+    expect(prepared.filter((i) => i.bankQueue === 'waiting').map((i) => i.id)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('el WIP dinámico también cuenta los devueltos: tope 3 con 1 devuelto deja 2 crudos', () => {
+    const ids = editorWipIdeaIds([returned('r1'), ...raws], 'ed-maria', undefined, 3)
+    expect(Array.from(ids)).toEqual(['a', 'b'])
+  })
+
+  it('groupEditorVideoBank lista los devueltos arriba con su nota y marca el bloqueo', () => {
+    const rows = groupEditorVideoBank([returned('r1'), returned('r2'), ...raws], {}, {
+      returnNotes: { r1: 'Falta el logo al final' },
+    })
+    const maria = rows.find((r) => r.editorId === 'ed-maria')!
+    expect(maria.returned.map((r) => r.ideaId)).toEqual(['r1', 'r2'])
+    expect(maria.returned[0].note).toBe('Falta el logo al final')
+    expect(maria.returned[0].clientName).toBe('Blue Chiropractic')
+    expect(maria.blockedByReturned).toBe(true)
+    expect(maria.inRevision).toBe(2)
+  })
+
+  it('con un solo devuelto no hay bloqueo', () => {
+    const rows = groupEditorVideoBank([returned('r1'), ...raws])
+    expect(rows.find((r) => r.editorId === 'ed-maria')!.blockedByReturned).toBe(false)
   })
 })
