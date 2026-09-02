@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.12 — 2026-09-02
+
+**Los videos devueltos van primero: el editor los corrige antes de tomar nada nuevo del banco.**
+
+- En el banco de cada editor, los videos **devueltos con correcciones** salen
+  arriba en una franja roja "Devueltos · corrige primero", con la última nota
+  de quien lo devolvió (equipo o cliente) y enlace directo a la idea.
+- Cada devuelto **ocupa un espacio** del WIP del editor: con tope 2 y un
+  devuelto, solo entra un crudo del banco.
+- Con **2 devueltos pendientes**, el banco se cierra para ese editor: los
+  espacios aparecen "Bloqueado · corrige los devueltos para tomar del banco" y
+  no recibe crudos nuevos hasta que los entregue.
+
+![Devueltos primero en el banco](/changelog/v4.12-devueltos-primero.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**
