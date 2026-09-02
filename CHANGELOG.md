@@ -4,6 +4,23 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.10 — 2026-09-02
+
+**Un video no se sube dos veces: si ya estaba, el dashboard lo dice y no lo repite.**
+
+- Antes de subir, el navegador calcula una **huella del archivo** (tamaño +
+  tres muestras del contenido, en milisegundos aunque pese 5 GB). Si esa
+  huella ya existe, la subida no empieza y se ve: **"No se subió: Ya subido
+  para «Intro clínica» (ARASIBO) el 28 ago por Carlos"**.
+- Aplica al botón **+** de las tarjetas (crudo, b-roll, editado) y a **Enviar
+  videos editados** del Pipeline. Cambiar el nombre del archivo no engaña a la
+  huella; un re-export distinto sí es otro video.
+- La base guarda la huella como clave única: aunque dos personas suban el mismo
+  archivo a la vez, solo queda uno. Si la comprobación falla por lo que sea,
+  la subida sigue: nunca se bloquea un video legítimo por un error nuestro.
+
+![Video repetido detectado](/changelog/v4.10-videos-sin-duplicados.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

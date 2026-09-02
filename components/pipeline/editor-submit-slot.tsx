@@ -14,6 +14,8 @@ import type { DiaKey } from '@/lib/entregas/dias'
  */
 
 const STAGE_LABEL: Record<string, string> = {
+  comprobando: 'Comprobando que no esté repetido…',
+  duplicado: 'Ya estaba subido',
   creando: 'Creando…',
   subiendo: 'Subiendo',
   registrando: 'Registrando…',
@@ -49,14 +51,14 @@ export function EditorSubmitSlot({
                 <span
                   className={cn(
                     'flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] tabular-nums',
-                    r.stage === 'error' && 'text-destructive',
+                    (r.stage === 'error' || r.stage === 'duplicado') && 'text-destructive',
                     r.stage === 'listo' && 'text-emerald-600 dark:text-emerald-400',
-                    r.stage !== 'error' && r.stage !== 'listo' && 'text-muted-foreground',
+                    r.stage !== 'error' && r.stage !== 'listo' && r.stage !== 'duplicado' && 'text-muted-foreground',
                   )}
                 >
                   {r.stage === 'listo' && <CheckCircle2 className="h-3 w-3" aria-hidden="true" />}
-                  {r.stage === 'error' && <AlertCircle className="h-3 w-3" aria-hidden="true" />}
-                  {r.stage !== 'listo' && r.stage !== 'error' && (
+                  {(r.stage === 'error' || r.stage === 'duplicado') && <AlertCircle className="h-3 w-3" aria-hidden="true" />}
+                  {r.stage !== 'listo' && r.stage !== 'error' && r.stage !== 'duplicado' && (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                   )}
                   {STAGE_LABEL[r.stage]}

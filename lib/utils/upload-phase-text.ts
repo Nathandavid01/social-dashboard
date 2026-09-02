@@ -27,5 +27,7 @@ export function uploadPhaseText(item: UploadItem): string {
       return item.error ? `Falló: ${item.error}` : 'Falló la subida'
     case 'cancelado':
       return 'Cancelado'
+    case 'duplicado':
+      return item.error ? `No se subió: ${item.error}` : 'No se subió: este video ya estaba'
   }
 }

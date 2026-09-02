@@ -7,7 +7,7 @@ import { useUploadStore, type UploadPhase } from '@/lib/stores/upload-store'
 import { uploadPhaseText as phaseText } from '@/lib/utils/upload-phase-text'
 import { NateUploadLogo } from './nate-upload-logo'
 
-const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set<UploadPhase>(['listo', 'error', 'cancelado'])
+const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set<UploadPhase>(['listo', 'error', 'cancelado', 'duplicado'])
 
 /**
  * Small, always-visible corner indicator for uploads in flight — the whole
