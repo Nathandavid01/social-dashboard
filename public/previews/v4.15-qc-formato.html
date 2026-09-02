@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.15 — QC de formato</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+ .row{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:5px 0}
+ .dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:none}.g{background:#34d399}.a{background:#fbbf24}.w{background:#444}
+ .note{margin:4px 0 0 18px;background:rgba(245,158,11,.1);border-radius:6px;padding:6px 8px;font-size:11px;color:#fde68a}
+</style></head>
+<body><div class="wrap">
+ <h1>QC del video · fila Formato <span class="sub">· v4.15</span></h1>
+ <p class="sub">Reglas sobre ancho, alto y duración reales del archivo. Sin gastar IA.</p>
+ <div class="grid">
+  <div class="card">
+   <div class="row"><span class="dot g"></span>Del cliente · 91% de confiabilidad</div>
+   <div class="row"><span class="dot g"></span>Captions: Libre de errores</div>
+   <div class="row"><span class="dot g"></span>Formato: 9:16 · 1080×1920 · 18 s</div>
+   <div class="row"><span class="dot g"></span>Lo subió Carlos</div>
+   <div class="row"><span class="dot g"></span>Sin errores de QC</div>
+   <div class="row"><span class="dot g"></span>72 fotogramas extraídos</div>
+  </div>
+  <div class="card">
+   <div class="row"><span class="dot g"></span>Del cliente · 88% de confiabilidad</div>
+   <div class="row"><span class="dot g"></span>Captions: Libre de errores</div>
+   <div class="row"><span class="dot a"></span>Formato: 2 avisos · 16:9 · 1920×1080 · 100 s</div>
+   <div class="note">El video es horizontal (16:9) y va para Reels/TikTok, que piden vertical 9:16. → Exportar en 1080×1920.</div>
+   <div class="note">Dura 100 s; un Reel de Instagram debe quedar en 90 s o menos. → Recortar o entregar versión corta.</div>
+   <div class="row"><span class="dot g"></span>Lo subió Jeander</div>
+   <div class="row"><span class="dot a"></span>Hay errores de QC</div>
+   <div class="row"><span class="dot g"></span>80 fotogramas extraídos</div>
+  </div>
+ </div>
+</div></body></html>

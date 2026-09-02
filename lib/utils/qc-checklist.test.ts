@@ -20,6 +20,7 @@ describe('qcChecklist (5 checks fijos al subir)', () => {
     expect(rows.map((r) => r.text)).toEqual([
       '¿Del cliente? …',
       'Captions …',
+      'Formato …',
       'Quién lo subió …',
       'Errores …',
       '12 fotogramas extraídos',
@@ -41,6 +42,7 @@ describe('qcChecklist (5 checks fijos al subir)', () => {
     expect(rows.map((r) => `${r.state}|${r.text}`)).toEqual([
       'ok|Del cliente · 87% de confiabilidad',
       'ok|Captions: Libre de errores',
+      'wait|Formato: sin dato',
       'ok|Lo subió María',
       'ok|Sin errores de QC',
       'ok|48 fotogramas extraídos',
@@ -59,8 +61,8 @@ describe('qcChecklist (5 checks fijos al subir)', () => {
       state: 'warn',
       text: 'No parece del cliente · 45% de confiabilidad',
     })
-    expect(rows[2].text).toBe('Quién lo subió: sin dato')
-    expect(rows[2].state).toBe('wait')
+    expect(rows[3].text).toBe('Quién lo subió: sin dato')
+    expect(rows[3].state).toBe('wait')
   })
 
   it('captions vacíos → No tiene captions; issues → N error(es)', () => {
@@ -81,7 +83,7 @@ describe('qcChecklist (5 checks fijos al subir)', () => {
       uploadedBy: 'Eric',
     })
     expect(bad[1]).toEqual({ key: 'captions', state: 'warn', text: 'Captions: 1 error' })
-    expect(bad[3]).toEqual({ key: 'errors', state: 'warn', text: 'Hay errores de QC' })
+    expect(bad[4]).toEqual({ key: 'errors', state: 'warn', text: 'Hay errores de QC' })
   })
 
   it('sin fotogramas extraídos todavía → wait, no se oculta la fila', () => {
@@ -91,6 +93,21 @@ describe('qcChecklist (5 checks fijos al subir)', () => {
       frameCount: null,
       uploadedBy: 'Eric',
     })
-    expect(rows[4]).toEqual({ key: 'frames', state: 'wait', text: 'Fotogramas: todavía no' })
+    expect(rows[5]).toEqual({ key: 'frames', state: 'wait', text: 'Fotogramas: todavía no' })
+  })
+})
+
+describe('qcChecklist — fila Formato (v4.15)', () => {
+  it('con formato limpio: 9:16 · 1080×1920 · 18 s en verde', () => {
+    const rows = qcChecklist({ status: 'done', uploadedBy: 'Carlos', frameCount: 5, findings: findings({ format: { width: 1080, height: 1920, durationSec: 18, aspect: '9:16', orientation: 'vertical', issues: [] } }) })
+    expect(rows.find((r) => r.key === 'format')).toEqual({ key: 'format', state: 'ok', text: 'Formato: 9:16 · 1080×1920 · 18 s' })
+  })
+  it('con avisos: los cuenta y queda en ámbar', () => {
+    const rows = qcChecklist({ status: 'done', uploadedBy: null, frameCount: 5, findings: findings({ format: { width: 1920, height: 1080, durationSec: 100, aspect: '16:9', orientation: 'horizontal', issues: [{ problem: 'a', suggestion: 'b' }, { problem: 'c', suggestion: 'd' }] } }) })
+    expect(rows.find((r) => r.key === 'format')).toEqual({ key: 'format', state: 'warn', text: 'Formato: 2 avisos · 16:9 · 1920×1080 · 100 s' })
+  })
+  it('análisis viejo sin formato: "sin dato", no inventa', () => {
+    const rows = qcChecklist({ status: 'done', uploadedBy: null, frameCount: 5, findings: findings() })
+    expect(rows.find((r) => r.key === 'format')).toEqual({ key: 'format', state: 'wait', text: 'Formato: sin dato' })
   })
 })

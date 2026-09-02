@@ -179,3 +179,19 @@ describe('generateVideoThumbs — carátula del crudo', () => {
     expect(deps.register).not.toHaveBeenCalled()
   })
 })
+
+describe('processUploadedVideo — meta de formato', () => {
+  it('manda ancho/alto/duración en el body del primer chunk', async () => {
+    const post = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response('{}', { status: 200 }))
+    const frames = Array.from({ length: 3 }, (_, i) => `data:image/jpeg;base64,F${i}`)
+    await processUploadedVideo('vid-1', new File(['x'], 'a.mp4', { type: 'video/mp4' }), {
+      extract: async () => ({ frames, timestamps: [0, 1, 2], meta: { width: 1080, height: 1920, durationSec: 18 } }),
+      post: post as unknown as typeof fetch,
+      getUploadUrls: async () => ({ urls: [], keys: [] }),
+      register: async () => ({ ok: true }),
+      putThumb: async () => {},
+    })
+    const body = JSON.parse(String(post.mock.calls[0][1]?.body))
+    expect(body.meta).toEqual({ width: 1080, height: 1920, durationSec: 18 })
+  })
+})

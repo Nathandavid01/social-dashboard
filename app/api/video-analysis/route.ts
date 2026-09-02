@@ -6,6 +6,7 @@ import { mergeVideoAnalysisFindings, type VideoAnalysisFindings } from '@/lib/ll
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
+import { formatFindings, isValidFormatMeta } from '@/lib/utils/video-format-rules'
 
 /** El análisis con hasta 90 imágenes por chunk tarda; sin esto Vercel corta a los 10-15s. */
 export const maxDuration = 300
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null) as
-    { videoId?: unknown; frames?: unknown; timestamps?: unknown; cuts?: unknown; chunk?: unknown } | null
+    { videoId?: unknown; frames?: unknown; timestamps?: unknown; cuts?: unknown; chunk?: unknown; meta?: unknown } | null
   const videoId = typeof body?.videoId === 'string' ? body.videoId : null
   const frames = Array.isArray(body?.frames)
     ? (body!.frames as unknown[]).filter(
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: video } = await supabase
     .from('content_idea_videos')
-    .select('id, idea_id, kind, drive_file_id, storage_provider, idea:content_ideas!content_idea_videos_idea_id_fkey(id, title, hook, client:clients(name, brand_voice, caption_language, caption_notes))')
+    .select('id, idea_id, kind, drive_file_id, storage_provider, idea:content_ideas!content_idea_videos_idea_id_fkey(id, title, hook, client:clients(name, brand_voice, caption_language, caption_notes, platforms, default_platforms))')
     .eq('id', videoId)
     .single()
   if (!video || video.kind !== 'edited') {
@@ -125,8 +126,11 @@ export async function POST(request: Request) {
 
   const idea = video.idea as {
     title?: string | null; hook?: string | null
-    client?: { name?: string | null; brand_voice?: string | null; caption_language?: string | null; caption_notes?: string | null } | null
+    client?: { name?: string | null; brand_voice?: string | null; caption_language?: string | null; caption_notes?: string | null; platforms?: string[] | null; default_platforms?: string[] | null } | null
   } | null
+  // QC de formato: reglas sobre el ancho/alto/duración que manda el navegador
+  // con el primer chunk. Sin IA; si el body no trae meta válido, no hay fila.
+  const formatMeta = isFirstChunk && isValidFormatMeta(body?.meta) ? body!.meta : null
   try {
     // Chunk >0: lee lo que ya hay ANTES de gastar la llamada a Grok, para
     // fundir con lo nuevo. Si esta lectura falla, se trata como "sin previo"
@@ -161,7 +165,16 @@ export async function POST(request: Request) {
     const chunkFindings = cuts.length > 0
       ? await analyzeVideoFrames(frames, analysisCtx, timestamps, cuts)
       : await analyzeVideoFrames(frames, analysisCtx, timestamps)
-    const findings = isFirstChunk ? chunkFindings : mergeVideoAnalysisFindings(previousFindings, chunkFindings)
+    // Copia, no mutación: analyzeVideoFrames puede devolver un objeto compartido.
+    const withFormat: VideoAnalysisFindings = formatMeta
+      ? {
+          ...chunkFindings,
+          format: formatFindings(formatMeta, {
+            platforms: idea?.client?.default_platforms?.length ? idea.client.default_platforms : idea?.client?.platforms ?? [],
+          }),
+        }
+      : chunkFindings
+    const findings = isFirstChunk ? withFormat : mergeVideoAnalysisFindings(previousFindings, withFormat)
     const { error } = await upsert({
       status: 'done',
       findings,

@@ -52,6 +52,8 @@ export interface VideoAnalysisFindings {
    *  esa casilla está vacía — ver app/api/video-analysis/route.ts. Opcional:
    *  ausente en respuestas viejas o cuando el modelo no lo trajo. */
   video_topic?: string
+  /** QC de formato (reglas, sin IA): proporción, resolución, duración. Lo añade la ruta con el meta del primer chunk. */
+  format?: import('@/lib/utils/video-format-rules').VideoFormatFindings
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -268,6 +270,8 @@ export function mergeVideoAnalysisFindings(
   b: VideoAnalysisFindings,
 ): VideoAnalysisFindings {
   if (!a) return b
+  // El formato viene solo con el primer chunk: se conserva.
+  const format = a.format ?? b.format
 
   const seen = new Set(a.burned_captions.issues.map((i) => `${i.quote}|${i.t ?? ''}`))
   const mergedIssues = [...a.burned_captions.issues]
@@ -291,5 +295,6 @@ export function mergeVideoAnalysisFindings(
     },
     visual_summary: mergeText(a.visual_summary, b.visual_summary),
     ...(mergedTopic ? { video_topic: mergedTopic } : {}),
+    ...(format ? { format } : {}),
   }
 }

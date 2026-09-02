@@ -173,7 +173,7 @@ async function waitForEnoughBuffer(
 export async function extractFramesInParallel(
   createVideo: () => HTMLVideoElement,
   opts: ExtractFramesOptions & { workers?: number; waitForBuffer?: boolean },
-): Promise<{ frames: string[]; timestamps: number[] }> {
+): Promise<{ frames: string[]; timestamps: number[]; meta?: ExtractedFrames['meta'] }> {
   const workers = Math.max(1, opts.workers ?? FRAME_EXTRACT_WORKERS)
   const probe = createVideo()
   await withTimeout(
@@ -202,6 +202,7 @@ export async function extractFramesInParallel(
   return {
     timestamps,
     frames: timestamps.map((t) => byT.get(t)).filter((f): f is string => typeof f === 'string'),
+    meta: { width: probe.videoWidth, height: probe.videoHeight, durationSec: duration },
   }
 }
 
@@ -209,6 +210,8 @@ export interface ExtractedFrames {
   frames: string[]
   timestamps: number[]
   fingerprints?: { t: number; fingerprint: number[] }[]
+  /** Ancho/alto/duración reales del archivo, para el QC de formato. */
+  meta?: { width: number; height: number; durationSec: number }
 }
 
 async function captureFromSrc(
