@@ -6,6 +6,7 @@ import { mergeVideoAnalysisFindings, type VideoAnalysisFindings } from '@/lib/ll
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
+import { qcSaysItIsTheClients } from '@/lib/utils/qc-gate'
 
 /** El análisis con hasta 90 imágenes por chunk tarda; sin esto Vercel corta a los 10-15s. */
 export const maxDuration = 300
@@ -205,7 +206,11 @@ export async function POST(request: Request) {
     // porque el hook SIEMPRE se normaliza a null cuando está vacío — nunca
     // queda como cadena vacía (ver updateIdeaBrief y updateIdeaHook: ambos
     // hacen `'' → null` antes de escribir).
-    if (isLastChunk) {
+    // Gate del cliente (Eric: "asegurándote de que es del cliente"): si el QC
+    // dijo "no parece del cliente", ni hook ni caption — un video ajeno no
+    // puede llevarse el brand voice ni los hashtags del cliente equivocado.
+    const itIsTheClients = qcSaysItIsTheClients(findings)
+    if (isLastChunk && itIsTheClients) {
       const videoTopic = findings.video_topic?.trim()
       if (videoTopic) {
         try {
@@ -233,7 +238,7 @@ export async function POST(request: Request) {
     // ya persistida arriba (incluido el hook que se acaba de escribir, si
     // aplica). Best-effort: sus errores ("falta hook", draft ya existente) no
     // son errores del análisis.
-    if (isLastChunk) {
+    if (isLastChunk && itIsTheClients) {
       await generateIdeaCaption(video.idea_id, { auto: true }).catch(() => null)
     }
 

@@ -600,3 +600,20 @@ describe('POST /api/video-analysis — transcripción (escucha el video en paral
     ])
   })
 })
+
+describe('POST /api/video-analysis — gate del cliente', () => {
+  it('QC "no parece del cliente" → guarda el análisis pero NO escribe el hook ni encadena el caption', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, hook: '' } } }
+    analyzeVideoFrames.mockResolvedValueOnce({
+      ...GOOD_FINDINGS,
+      relevance: { verdict: 'warning', explanation: 'Es un gimnasio, no la clínica', confidence: 22 },
+      video_topic: 'Rutina de pesas en un gimnasio',
+    })
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME] }))
+    expect(res.status).toBe(200)
+    expect(calls.filter((c) => c.op === 'upsert')).toHaveLength(2)
+    expect((calls[1].payload as { status: string }).status).toBe('done')
+    expect(hookUpdates).toEqual([])
+    expect(generateIdeaCaption).not.toHaveBeenCalled()
+  })
+})
