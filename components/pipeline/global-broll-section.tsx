@@ -19,7 +19,7 @@ export function GlobalBrollSection({ groups }: { groups: GlobalBrollGroup[] }) {
   if (total === 0) return null
 
   return (
-    <section data-testid="global-broll" className="rounded-xl border border-border bg-card">
+    <section id="global-broll" data-testid="global-broll" className="rounded-xl border border-border bg-card">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

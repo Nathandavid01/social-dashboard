@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.13 — 2026-09-02
+
+**En cada video del banco siempre hay un enlace a los logos y a los B-rolls del cliente.**
+
+- Debajo de cada video en los espacios de edición aparece **"Logos (n) · B-rolls (n)"**.
+  Logos lleva a los activos del cliente; B-rolls lleva a la **carpeta externa**
+  del cliente si la tiene, si no al B-roll global, y si no hay nada, dice
+  "ninguno · subir" y lleva a donde subirlos. Nunca queda sin enlace.
+- En la pestaña **Activos** del cliente hay un botón **Añadir enlace** para
+  registrar dónde viven los B-rolls o los logos fuera del dashboard (Drive,
+  Dropbox…). Si el nombre dice "B-rolls", el banco lo usa como destino.
+
+![Enlaces a logos y B-rolls](/changelog/v4.13-enlaces-brolls-logos.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

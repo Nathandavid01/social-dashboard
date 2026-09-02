@@ -109,6 +109,28 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks }
   )
 }
 
+/** Siempre un enlace a los logos y a los B-rolls del cliente (Eric, 2026-09-02). */
+function ResourceLinks({ resources, compact = false }: { resources: EditorBankRow['clients'][number]['resources']; compact?: boolean }) {
+  const external = resources.brollFolderUrl != null
+  return (
+    <div className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 ${compact ? 'text-[8px]' : 'text-[9px]'} text-slate-500`}>
+      <Link href={resources.logosHref} className="underline-offset-2 hover:text-[#c8a34a] hover:underline">
+        {resources.logosCount > 0 ? `Logos (${resources.logosCount})` : 'Logos: ninguno · subir'}
+      </Link>
+      <span aria-hidden>·</span>
+      {external ? (
+        <a href={resources.brollHref} target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-[#c8a34a] hover:underline">
+          {resources.brollCount > 0 ? `B-rolls (${resources.brollCount})` : 'B-rolls'} · carpeta ↗
+        </a>
+      ) : (
+        <Link href={resources.brollHref} className="underline-offset-2 hover:text-[#c8a34a] hover:underline">
+          {resources.brollCount > 0 ? `B-rolls (${resources.brollCount})` : 'B-rolls: ninguno · subir'}
+        </Link>
+      )}
+    </div>
+  )
+}
+
 function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const file = clip.files[0]
@@ -124,6 +146,7 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark }: { 
         <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-slate-300">{clip.title}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[9px] text-slate-500"><span className="rounded bg-[#c8a34a]/15 px-1 py-0.5 font-semibold uppercase text-[#d6b55f]">Te toca</span>{elapsed != null && <span>Día {elapsed}{estimate != null ? ` de ~${Math.max(1, Math.round(estimate))}` : ''}</span>}</div>
         {clip.shootingNotes && <p className="mt-1 text-[9px] text-slate-500">Anotaciones · {clip.shootingNotes}</p>}
+        <div className="mt-1"><ResourceLinks resources={client.resources} compact /></div>
         {file && <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1"><span className="max-w-[8rem] truncate text-[9px] text-slate-500">{file.name}</span><BankFileActions file={file} compact /></div>}
       </div>
     </article>

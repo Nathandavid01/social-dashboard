@@ -8,6 +8,7 @@ import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
 import { shouldPlanForClient, planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { resolveClientLogo } from '@/lib/utils/client-logo'
+import { summarizeClientAssets, type ClientAssetSummaryRow } from '@/lib/utils/client-asset-summary'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
 import { getPipelineTotals } from '@/lib/utils/content-pipeline'
 import { computeRunway } from '@/lib/utils/content-runway'
@@ -135,6 +136,14 @@ export default async function PipelinePage() {
       )
     : []
 
+  // Enlaces del banco: cuántos logos tiene cada cliente y su carpeta externa de
+  // B-rolls (un activo-enlace cuyo nombre diga "b-roll"). Best-effort.
+  const { data: assetsRaw } = await supabase
+    .from('client_assets')
+    .select('client_id, kind, name, url, storage_path')
+    .in('client_id', activeClients.map((c) => c.id))
+  const clientAssets = summarizeClientAssets((assetsRaw ?? []) as ClientAssetSummaryRow[])
+
   const teamMembers = visibleProfiles.map((p) => ({
     id: p.id,
     name: p.full_name ?? 'Sin nombre',
@@ -166,6 +175,7 @@ export default async function PipelinePage() {
       clientRunway={clientRunway}
       wipLimits={wipLimits}
       approvalRates={approvalRates}
+      clientAssets={clientAssets}
       globalBroll={globalBroll}
       bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
       canSeeAll={canSeeAll}

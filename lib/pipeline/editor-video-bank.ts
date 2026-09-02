@@ -66,9 +66,22 @@ export interface EditorBankClient {
   inRevision: number
   postingDays: number[]
   clips: EditorBankClip[]
+  resources: EditorBankResources
+}
+
+/** Dónde están los recursos de un cliente: siempre hay un enlace, aunque sea "ninguno · subir". */
+export interface EditorBankResources {
+  logosCount: number
+  logosHref: string
+  brollCount: number
+  brollHref: string
+  /** Carpeta externa (Drive) registrada como enlace en los activos del cliente. */
+  brollFolderUrl: string | null
 }
 
 export interface EditorBankResolvedMarks {
+  /** Activos por cliente: logos subidos y carpeta externa de B-rolls (client_assets). */
+  assets?: Record<string, { logos: number; brollFolderUrl: string | null }>
   logos?: Record<string, string | null>
   brandColors?: Record<string, string | null>
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → EDITOR_WIP_LIMIT. */
@@ -351,7 +364,19 @@ function emptyClient(
       ? ((idea.client as { posting_days?: number[] }).posting_days ?? [])
       : [],
     clips: [],
+    resources: {
+      logosCount: resolved.assets?.[clientId]?.logos ?? 0,
+      logosHref: `/clients/${clientId}?tab=assets`,
+      brollCount: 0,
+      brollHref: `/clients/${clientId}?tab=assets`,
+      brollFolderUrl: resolved.assets?.[clientId]?.brollFolderUrl ?? null,
+    },
   }
+}
+
+/** B-rolls vivos del cliente (videos kind broll), para el conteo del enlace. */
+function countLiveBroll(videos: ContentIdeaVideo[] | null | undefined): number {
+  return (videos ?? []).filter((v) => v.kind === 'broll' && LIVE.has(v.status)).length
 }
 
 export function groupEditorVideoBank(
@@ -385,6 +410,7 @@ export function groupEditorVideoBank(
     if (idea.status === 'descartada') continue
     const { row, client } = ensure(idea)
     if (!client) continue
+    client.resources.brollCount += countLiveBroll(idea.videos)
     if (isInRevision(idea)) {
       row.inRevision += 1
       client.inRevision += 1
@@ -422,6 +448,10 @@ export function groupEditorVideoBank(
     for (const client of row.clients) {
       client.remainingInBank = client.clips.length
       row.remainingInBank += client.remainingInBank
+      // Siempre un destino: la carpeta externa si la hay; si no, el B-roll global
+      // cuando el cliente tiene; si no, los activos del cliente para subirlos.
+      const r = client.resources
+      r.brollHref = r.brollFolderUrl ?? (r.brollCount > 0 ? '#global-broll' : `/clients/${client.clientId}?tab=assets`)
     }
     row.nextSlots = row.clients.flatMap((c) =>
       c.clips
