@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 
-const { updateRecordingSession, canAssign } = vi.hoisted(() => ({
+const { updateRecordingSession, createRecordingSession, canAssign } = vi.hoisted(() => ({
   updateRecordingSession: vi.fn(),
+  createRecordingSession: vi.fn(),
   canAssign: { current: true },
 }))
 vi.mock('@/lib/actions/recording-sessions', () => ({
-  createRecordingSession: vi.fn(),
+  createRecordingSession,
   updateRecordingSession,
   deleteRecordingSession: vi.fn(),
 }))
@@ -262,5 +263,40 @@ describe('namesLookLikeSamePerson', () => {
 
   it('no junta videógrafo y cliente distintos', () => {
     expect(namesLookLikeSamePerson('María R.', 'Nora Fitness')).toBe(false)
+  })
+})
+
+describe('cliente y videógrafo obligatorios', () => {
+  it('no deja guardar sin cliente: avisa y no llama a la acción', async () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByText('7'))
+    fireEvent.change(screen.getByPlaceholderText(/sesión de marca/i), { target: { value: 'Sesión Nora' } })
+    fireEvent.submit(screen.getByPlaceholderText(/sesión de marca/i).closest('form')!)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/elige el cliente de la grabación/i)
+    expect(createRecordingSession).not.toHaveBeenCalled()
+  })
+
+  it('el diálogo ya no ofrece "Sin cliente" ni "Sin asignar"', () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByText('7'))
+    expect(screen.queryByText('Sin cliente')).not.toBeInTheDocument()
+    expect(screen.queryByText('Sin asignar')).not.toBeInTheDocument()
+    expect(screen.getByText(/cliente \*/i)).toBeInTheDocument()
+    expect(screen.getByText(/videógrafo \*/i)).toBeInTheDocument()
+  })
+
+  it('una sesión vieja sin videógrafo o sin cliente se marca en la lista', () => {
+    render(
+      <RecordingCalendarClient
+        initialSessions={[session({ id: 'a', videographer_id: null, videographer: null }), session({ id: 'b', client_id: null, client: null, title: 'LUCKY PET' })]}
+        clients={clients}
+        teamMembers={team}
+        clientIdeasMap={{}}
+      />,
+    )
+    expect(screen.getByText(/2 sesiones sin cliente o sin videógrafo/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /lista/i }))
+    expect(screen.getByText('Falta videógrafo')).toBeInTheDocument()
+    expect(screen.getByText('Falta cliente')).toBeInTheDocument()
   })
 })

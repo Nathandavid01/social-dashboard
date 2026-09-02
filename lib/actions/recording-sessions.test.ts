@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const requirePermission = vi.fn(async (_perm: string) => undefined)
+const currentUserHas = vi.fn(async (_perm: string) => true)
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: (perm: string) => requirePermission(perm),
+  currentUserHas: (perm: string) => currentUserHas(perm),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
@@ -40,12 +42,13 @@ import { createRecordingSession, updateRecordingSession } from './recording-sess
 const baseCreate = {
   session_date: '2026-08-23',
   client_id: 'c1',
-  videographer_id: null as string | null,
+  videographer_id: 'v1' as string | null,
   title: 'Blue Chiro - Recording',
 }
 
 beforeEach(() => {
   requirePermission.mockReset().mockResolvedValue(undefined)
+  currentUserHas.mockReset().mockResolvedValue(true)
   insertPayload = null
   updatePayload = null
   userId = 'admin-1'
@@ -60,12 +63,13 @@ describe('createRecordingSession — gates', () => {
     expect(insertPayload).toBeNull()
   })
 
-  it('sesión sin quién/dónde solo pide recording.create', async () => {
-    const res = await createRecordingSession(baseCreate)
+  it('quien no puede asignar (rol video) crea la sesión a su nombre: solo pide recording.create', async () => {
+    currentUserHas.mockResolvedValue(false)
+    const res = await createRecordingSession({ ...baseCreate, videographer_id: null })
     expect(res).toEqual({ success: true })
     expect(requirePermission).toHaveBeenCalledWith('recording.create')
     expect(requirePermission).not.toHaveBeenCalledWith('recording.brief')
-    expect(insertPayload).toEqual(expect.objectContaining({ title: 'Blue Chiro - Recording' }))
+    expect(insertPayload).toEqual(expect.objectContaining({ title: 'Blue Chiro - Recording', videographer_id: 'admin-1' }))
   })
 
   it('asignar videógrafo al crear pide recording.brief', async () => {
@@ -121,5 +125,43 @@ describe('updateRecordingSession — gates', () => {
     const res = await updateRecordingSession('s1', { location: 'Estudio' })
     expect(res.error).toMatch(/autorizado/i)
     expect(updatePayload).toBeNull()
+  })
+})
+
+describe('createRecordingSession — cliente y videógrafo obligatorios (decisión 2026-09-01)', () => {
+  it('sin cliente no se crea', async () => {
+    const res = await createRecordingSession({ ...baseCreate, client_id: null })
+    expect(res.error).toMatch(/cliente/i)
+    expect(insertPayload).toBeNull()
+  })
+
+  it('quien puede asignar tiene que elegir videógrafo', async () => {
+    const res = await createRecordingSession({ ...baseCreate, videographer_id: null })
+    expect(res.error).toMatch(/videógrafo/i)
+    expect(insertPayload).toBeNull()
+  })
+
+  it('con cliente y videógrafo se crea', async () => {
+    const res = await createRecordingSession(baseCreate)
+    expect(res).toEqual({ success: true })
+    expect(insertPayload).toEqual(expect.objectContaining({ client_id: 'c1', videographer_id: 'v1' }))
+  })
+})
+
+describe('updateRecordingSession — no se puede dejar sin cliente ni sin videógrafo', () => {
+  it('client_id null se rechaza', async () => {
+    const res = await updateRecordingSession('s1', { client_id: null })
+    expect(res.error).toMatch(/cliente/i)
+    expect(updatePayload).toBeNull()
+  })
+  it('videographer_id null se rechaza', async () => {
+    const res = await updateRecordingSession('s1', { videographer_id: null })
+    expect(res.error).toMatch(/videógrafo/i)
+    expect(updatePayload).toBeNull()
+  })
+  it('cambiar de videógrafo sigue funcionando', async () => {
+    const res = await updateRecordingSession('s1', { videographer_id: 'v2' })
+    expect(res).toEqual({ success: true })
+    expect(updatePayload).toEqual(expect.objectContaining({ videographer_id: 'v2' }))
   })
 })
