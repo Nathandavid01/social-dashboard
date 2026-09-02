@@ -600,3 +600,20 @@ describe('POST /api/video-analysis — transcripción (escucha el video en paral
     ])
   })
 })
+
+describe('POST /api/video-analysis — QC de formato con el meta del primer chunk', () => {
+  it('guarda findings.format con las reglas (horizontal para Instagram → aviso)', async () => {
+    videoResult = { data: { ...VIDEO, idea: { ...IDEA, client: { ...IDEA.client, platforms: ['instagram'] } } } }
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], meta: { width: 1920, height: 1080, durationSec: 20 } }))
+    expect(res.status).toBe(200)
+    const done = calls.filter((c) => c.op === 'upsert')[1].payload as { findings: { format?: { aspect: string; issues: unknown[] } } }
+    expect(done.findings.format?.aspect).toBe('16:9')
+    expect(done.findings.format?.issues).toHaveLength(1)
+  })
+  it('meta inválido o ausente: sin fila de formato, todo lo demás igual', async () => {
+    const res = await POST(req({ videoId: 'video-1', frames: [FRAME], meta: { width: 'x' } }))
+    expect(res.status).toBe(200)
+    const done = calls.filter((c) => c.op === 'upsert')[1].payload as { findings: { format?: unknown } }
+    expect(done.findings.format).toBeUndefined()
+  })
+})

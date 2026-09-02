@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.15 — 2026-09-02
+
+**El QC del video ahora también revisa el formato: proporción, resolución y duración.**
+
+- Al subir un corte final, el navegador manda el ancho, alto y duración reales
+  del archivo y el dashboard aplica reglas (sin gastar IA): vertical 9:16 para
+  Reels/TikTok, mínimo 1080p, Reel de Instagram de 90 s o menos, TikTok hasta
+  10 min, y aviso si el archivo dura menos de 3 s.
+- En el panel de QC aparece la fila **Formato**: "9:16 · 1080×1920 · 18 s" en
+  verde, o "2 avisos · 16:9 · 1920×1080 · 100 s" en ámbar con el detalle.
+- Los videos analizados antes dicen "Formato: sin dato": no se inventa.
+
+![Fila Formato en el QC](/changelog/v4.15-qc-formato.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

@@ -1,9 +1,10 @@
 import type { VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 import { relevanceConfidence } from '@/lib/llm/video-analysis-core'
+import { formatSummaryText } from './video-format-rules'
 
 export type QcCheckState = 'wait' | 'ok' | 'warn'
 export interface QcCheckRow {
-  key: 'client' | 'captions' | 'uploader' | 'errors' | 'frames'
+  key: 'client' | 'captions' | 'format' | 'uploader' | 'errors' | 'frames'
   state: QcCheckState
   text: string
 }
@@ -88,5 +89,16 @@ export function qcChecklist(input: {
           text: status === 'pending' ? 'Fotogramas: extrayendo…' : 'Fotogramas: todavía no',
         }
 
-  return [client, captions, uploader, errors, frames]
+  // Formato (reglas, sin IA): llega con el meta del primer chunk. Los videos
+  // analizados antes de v4.15 no lo traen: se dice "sin dato", no se inventa.
+  const fmt = data?.format
+  const format: QcCheckRow = !data
+    ? { key: 'format', state: 'wait', text: unavailable ? 'Formato: no disponible' : 'Formato …' }
+    : !fmt
+      ? { key: 'format', state: 'wait', text: 'Formato: sin dato' }
+      : fmt.issues.length === 0
+        ? { key: 'format', state: 'ok', text: `Formato: ${formatSummaryText(fmt)}` }
+        : { key: 'format', state: 'warn', text: `Formato: ${fmt.issues.length === 1 ? '1 aviso' : `${fmt.issues.length} avisos`} · ${formatSummaryText(fmt)}` }
+
+  return [client, captions, format, uploader, errors, frames]
 }

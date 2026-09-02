@@ -10,12 +10,15 @@
  * seguridad (en la práctica FRAME_CHUNK_SIZE ya cabe, ~3.2MB medido).
  */
 import { capFramesAndTimestampsToBudget } from './video-frames'
+import type { VideoFormatMeta } from './video-format-rules'
 
 export async function postVideoAnalysisChunks(
   videoId: string,
   chunks: { frames: string[]; timestamps: number[] }[],
   post: typeof fetch,
   cuts: number[] = [],
+  /** Ancho/alto/duración del archivo: va solo en el primer chunk (QC de formato). */
+  meta?: VideoFormatMeta,
 ): Promise<void> {
   const total = chunks.length
   for (let index = 0; index < total; index++) {
@@ -28,6 +31,7 @@ export async function postVideoAnalysisChunks(
         body: JSON.stringify({
           videoId, frames, timestamps,
           ...(chunkCuts.length > 0 ? { cuts: chunkCuts } : {}),
+          ...(index === 0 && meta ? { meta } : {}),
           chunk: { index, total },
         }),
       })
