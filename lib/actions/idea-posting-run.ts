@@ -46,7 +46,7 @@ export async function runIdeaPost(
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, content_type, generated_caption, status, approval_status, approved_video_id, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
+      'id, title, content_type, generated_caption, status, approval_status, approved_video_id, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
     )
     .eq('id', ideaId)
     .single()
@@ -83,6 +83,7 @@ export async function runIdeaPost(
     platforms?: string[] | null
     default_platforms?: string[] | null
     posting_time?: string | null
+    posting_schedule?: Record<string, string> | null
   }
   // Trimmed client blog id — readiness REFUSES if blank, so we never fall back
   // to the global default account when auto-publishing a real post.
@@ -153,7 +154,9 @@ export async function runIdeaPost(
   }
 
   // A hand-picked time wins over the planned date + the client's posting_time.
-  const scheduledFor = overrideIso ?? buildPublishDateTime(idea.publish_date as string | null, client.posting_time)
+  const scheduledFor =
+    overrideIso ??
+    buildPublishDateTime(idea.publish_date as string | null, client.posting_time, Date.now(), client.posting_schedule as Record<string, string> | null)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   try {

@@ -7,6 +7,7 @@
  */
 import { addDaysISO } from './deadlines'
 import { isoWeekday, type CadenceRow, type CadenceType } from './next-autopost-core'
+import { resolveSlotTime } from './posting-schedule'
 
 export function jsWeekdayToIso(js: number): number {
   return js === 0 ? 7 : js
@@ -26,6 +27,10 @@ export function claimNextPostingSlot(opts: {
   occupiedDates: string[]
   fromISO: string
   windowDays?: number
+  /** HH:MM actual (zona del cliente). Con él, el slot de HOY solo vale si su hora no pasó. */
+  nowHHMM?: string
+  postingTime?: string | null
+  postingSchedule?: Record<string, string> | null
 }): string | null {
   const days = new Set(cleanJsDays(opts.postingDays))
   if (days.size === 0) return null
@@ -34,10 +39,20 @@ export function claimNextPostingSlot(opts: {
   for (let offset = 0; offset <= windowDays; offset++) {
     const dateISO = addDaysISO(opts.fromISO, offset)
     const js = isoWeekdayToJs(isoWeekday(dateISO))
-    if (days.has(js) && !taken.has(dateISO)) return dateISO
+    if (!days.has(js) || taken.has(dateISO)) continue
+    // Hoy a las 15:00 con posteo a las 10:00: "próximo día de posteo" es el
+    // siguiente, no un post con hora ya vencida (Metricool lo dispararía al momento).
+    if (offset === 0 && opts.nowHHMM) {
+      const slotTime = resolveSlotTime(js, opts.postingTime, opts.postingSchedule) ?? DEFAULT_POSTING_TIME
+      if (slotTime <= opts.nowHHMM) continue
+    }
+    return dateISO
   }
   return null
 }
+
+/** La hora que asume Metricool cuando el cliente no tiene ninguna configurada (idea-posting-core). */
+const DEFAULT_POSTING_TIME = '10:00'
 
 export function occupiedDatesFromSiblings(
   ideaId: string,

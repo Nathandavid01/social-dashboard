@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.11 — Autopublish con horario real</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .tag{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;border:1px solid;margin-bottom:10px}
+ .antes{border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.1);color:#fb7185}
+ .despues{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1);color:#34d399}
+ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px 4px;border-top:1px solid var(--border);text-align:left}th{color:var(--muted);font-weight:500;border-top:0}
+ .bad{color:#fb7185}.ok{color:#34d399}.note{color:var(--muted);font-size:12px;margin-top:8px}
+</style></head>
+<body><div class="wrap">
+ <h1>Autopublish · horario real del cliente <span class="sub">· v4.11</span></h1>
+ <p class="sub">Cliente: lunes 9:00 · jueves 18:00 (posting_schedule). Se aprueba un video el jueves a las 19:30.</p>
+ <div class="grid">
+  <div class="card"><span class="tag antes">Antes</span>
+   <table><tr><th>Paso</th><th>Resultado</th></tr>
+   <tr><td>Próximo día de posteo</td><td class="bad">jueves (hoy), aunque las 18:00 ya pasaron</td></tr>
+   <tr><td>Hora</td><td class="bad">10:00 por defecto: ignoraba el horario por día</td></tr>
+   <tr><td>Metricool recibe</td><td class="bad">jueves 10:00 → ya vencido → publica al momento</td></tr></table>
+  </div>
+  <div class="card"><span class="tag despues">Después</span>
+   <table><tr><th>Paso</th><th>Resultado</th></tr>
+   <tr><td>Próximo día de posteo</td><td class="ok">lunes (la hora de hoy ya pasó)</td></tr>
+   <tr><td>Hora</td><td class="ok">09:00, la del lunes en su horario</td></tr>
+   <tr><td>Metricool recibe</td><td class="ok">lunes 09:00</td></tr></table>
+  </div>
+ </div>
+ <p class="note">"Hoy" se calcula en hora de Puerto Rico. Sin horario configurado, hoy cuenta hasta las 10:00 (la hora por defecto).</p>
+</div></body></html>

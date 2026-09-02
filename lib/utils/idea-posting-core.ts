@@ -3,6 +3,11 @@
  * `'use server'` action so the readiness/scheduling logic is unit-testable
  * without mocking Supabase/Metricool.
  */
+import { todayISOInTimeZone } from './deadlines'
+import { isoWeekday } from './next-autopost-core'
+import { isoWeekdayToJs } from './posting-days-sot'
+import { resolveSlotTime } from './posting-schedule'
+import { POST_TZ } from './idea-lab-send-core'
 
 export interface PostableIdea {
   approval_status: string | null
@@ -68,14 +73,18 @@ export function buildPublishDateTime(
   publishDate: string | null | undefined,
   postingTime: string | null | undefined,
   nowMs: number = Date.now(),
+  postingSchedule?: Record<string, string> | null,
 ): string {
   // Only schedule on the planned date if it's today or in the future. A PAST
   // planned date (approving an overdue idea) would otherwise produce a past
   // publicationDate — which an auto-publish could fire IMMEDIATELY. Clamp those
   // to +24h so an overdue approval can't blast the video live on the spot.
-  const todayUtc = new Date(nowMs).toISOString().slice(0, 10)
-  if (publishDate && publishDate >= todayUtc) {
-    const time = normalizeTime(postingTime) ?? '10:00'
+  // "Hoy" en la zona del post: en UTC ya es mañana a partir de las 8pm en PR.
+  const today = todayISOInTimeZone(POST_TZ, new Date(nowMs))
+  if (publishDate && publishDate >= today) {
+    // El horario por día del cliente (posting_schedule) manda sobre posting_time.
+    const dow = isoWeekdayToJs(isoWeekday(publishDate))
+    const time = normalizeTime(resolveSlotTime(dow, postingTime, postingSchedule)) ?? '10:00'
     return `${publishDate}T${time}:00`
   }
   return new Date(nowMs + 24 * 60 * 60 * 1000).toISOString().slice(0, 19)

@@ -162,3 +162,28 @@ describe('postingDaysFromIsoWeekdays', () => {
     expect(postingDaysFromIsoWeekdays([5, 1, 7, 1])).toEqual([0, 1, 5])
   })
 })
+
+describe('claimNextPostingSlot — la hora de hoy ya pasó', () => {
+  // 2026-09-01 es martes. Cliente: martes y jueves.
+  const MJ = [2, 4]
+  it('si hoy es día de posteo pero la hora ya pasó, salta al siguiente día de posteo', () => {
+    const slot = claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01', nowHHMM: '15:00', postingTime: '10:00' })
+    expect(slot).toBe('2026-09-03')
+  })
+  it('si la hora de hoy todavía no llegó, hoy sigue disponible', () => {
+    const slot = claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01', nowHHMM: '08:00', postingTime: '10:00' })
+    expect(slot).toBe('2026-09-01')
+  })
+  it('respeta el horario por día (posting_schedule) para decidir si hoy ya pasó', () => {
+    // Martes a las 18:00 por override: a las 15:00 todavía vale hoy.
+    const slot = claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01', nowHHMM: '15:00', postingTime: '10:00', postingSchedule: { '2': '18:00' } })
+    expect(slot).toBe('2026-09-01')
+  })
+  it('sin hora configurada, hoy cuenta hasta las 10:00 (la hora por defecto de Metricool)', () => {
+    expect(claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01', nowHHMM: '10:00' })).toBe('2026-09-03')
+    expect(claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01', nowHHMM: '09:59' })).toBe('2026-09-01')
+  })
+  it('sin nowHHMM se comporta como antes (hoy disponible)', () => {
+    expect(claimNextPostingSlot({ postingDays: MJ, occupiedDates: [], fromISO: '2026-09-01' })).toBe('2026-09-01')
+  })
+})

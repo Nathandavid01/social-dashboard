@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { todayISOInTimeZone } from '@/lib/utils/deadlines'
+import { nowHHMMInTimeZone, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POST_TZ } from '@/lib/utils/idea-lab-send-core'
 import {
   claimNextPostingSlot,
@@ -32,7 +32,7 @@ export async function assignCadencePublishDate(
     if (!idea?.client_id) return null
 
     const [{ data: client }, { data: siblings }] = await Promise.all([
-      supabase.from('clients').select('posting_days').eq('id', idea.client_id).single(),
+      supabase.from('clients').select('posting_days, posting_time, posting_schedule').eq('id', idea.client_id).single(),
       supabase
         .from('content_ideas')
         .select('id, publish_date, approval_status, published_at, metricool_post_id, status')
@@ -40,10 +40,15 @@ export async function assignCadencePublishDate(
         .neq('status', 'descartada'),
     ])
 
+    const now = new Date()
     const slot = claimNextPostingSlot({
       postingDays: (client?.posting_days as number[] | null) ?? [],
       occupiedDates: occupiedDatesFromSiblings(ideaId, (siblings ?? []) as Sibling[]),
-      fromISO: todayISOInTimeZone(POST_TZ),
+      fromISO: todayISOInTimeZone(POST_TZ, now),
+      // "Próximo día de posteo": si hoy ya pasó la hora del cliente, hoy no cuenta.
+      nowHHMM: nowHHMMInTimeZone(POST_TZ, now),
+      postingTime: (client?.posting_time as string | null) ?? null,
+      postingSchedule: (client?.posting_schedule as Record<string, string> | null) ?? null,
     })
     if (!slot) return null
 

@@ -101,3 +101,11 @@ export function formatDateShortES(iso: string): string {
   const [, m, d] = iso.split('-').map(Number)
   return `${d} ${MES_ES[(m ?? 1) - 1]}`
 }
+
+/** HH:MM (24h) actual en la zona dada; para saber si el slot de hoy ya pasó. */
+export function nowHHMMInTimeZone(timeZone: string, now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(now)
+  const hh = parts.find((p) => p.type === 'hour')?.value ?? '00'
+  const mm = parts.find((p) => p.type === 'minute')?.value ?? '00'
+  return `${hh === '24' ? '00' : hh}:${mm}`
+}
