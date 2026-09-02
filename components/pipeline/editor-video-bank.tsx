@@ -18,6 +18,7 @@ import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pi
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
 import type { Runway, RunwayStatus } from '@/lib/utils/content-runway'
 import { formatDateShortES } from '@/lib/utils/deadlines'
+import { approvalTargetText } from '@/lib/utils/approval-target'
 
 type TeamMember = { id: string; name: string }
 
@@ -123,6 +124,7 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark }: { 
         <div className="flex min-w-0 items-center gap-1.5">{showClientMark && <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-5 w-5 text-[7px]" />}<h3 className="min-w-0 flex-1 truncate text-[11px] font-semibold text-white">{client.clientName}</h3>{showClientMark && !client.logoUrl && canSetLogo && <Link href={`/clients/${client.clientId}`} className="shrink-0 text-[8px] text-[#c8a34a] underline underline-offset-2">Subir logo</Link>}</div>
         <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-slate-300">{clip.title}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[9px] text-slate-500"><span className="rounded bg-[#c8a34a]/15 px-1 py-0.5 font-semibold uppercase text-[#d6b55f]">Te toca</span>{elapsed != null && <span>Día {elapsed}{estimate != null ? ` de ~${Math.max(1, Math.round(estimate))}` : ''}</span>}</div>
+        <p data-testid="approval-target" className={`mt-1 text-[9px] ${clip.approvalAt ? 'text-[#d6b55f]' : 'text-rose-300'}`}>{approvalTargetText(clip.approvalAt)}</p>
         {clip.shootingNotes && <p className="mt-1 text-[9px] text-slate-500">Anotaciones · {clip.shootingNotes}</p>}
         {file && <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1"><span className="max-w-[8rem] truncate text-[9px] text-slate-500">{file.name}</span><BankFileActions file={file} compact /></div>}
       </div>

@@ -12,6 +12,8 @@ const WEEKDAY_SHORT_ES = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] as 
 export interface ClientCadence {
   postingTime?: string | null
   postingDays?: number[]
+  /** Horario por día de la semana ("1" → "09:00"); manda sobre postingTime. */
+  postingSchedule?: Record<string, string> | null
   metricoolBlogId?: string | null
 }
 

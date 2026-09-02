@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.16 — 2026-09-02
+
+**Al bajar un crudo, el editor ve para cuándo tiene que estar aprobado.**
+
+- Cada video activo en el banco muestra **"Aprobado para mié 2 sep · 10:00 a. m.
+  · publica jue 3 sep · 10:00 a. m."**: la fecha de publicación a la hora real
+  del cliente (incluido su horario por día) menos 24 h de margen de revisión.
+- Si la idea tiene fecha límite más temprana, manda la fecha límite.
+- Si el video no tiene fecha de publicación, lo dice en rojo: "Sin fecha de
+  publicación: pide la fecha antes de editar". No se inventa una hora.
+
+![Hora de aprobación en el banco](/changelog/v4.16-hora-de-aprobacion.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

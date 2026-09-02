@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.16 — Hora de aprobación</title>
+<style>
+ :root{--bg:#0b0d0f;--card:#12161a;--border:rgba(255,255,255,.1);--fg:#fafafa;--muted:#94a3b8;--gold:#c8a34a}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .slot{border:1px solid rgba(200,163,74,.4);border-radius:10px;background:#0d1013;overflow:hidden}
+ .cover{height:80px;background:linear-gradient(135deg,#1e293b,#020617);border-bottom:1px solid var(--border);position:relative}
+ .cover span{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.7);font-size:8px;text-transform:uppercase;padding:2px 4px;border-radius:3px;color:#e2e8f0}
+ .body{padding:8px}.body b{font-size:11px;display:block}.body p{font-size:10px;color:#cbd5e1;margin-top:2px}
+ .tag{display:inline-block;background:rgba(200,163,74,.15);color:#d6b55f;font-size:8px;text-transform:uppercase;font-weight:700;padding:1px 4px;border-radius:3px;margin-top:6px}
+ .eta{font-size:9px;color:#d6b55f;margin-top:6px}.eta.red{color:#fda4af}
+ .note{color:var(--muted);font-size:12px;margin-top:12px}
+</style></head>
+<body><div class="wrap">
+ <h1>Banco del editor · hora de aprobación <span class="sub">· v4.16</span></h1>
+ <p class="sub">Publicación a la hora del cliente menos 24 h de revisión; la fecha límite gana si es antes.</p>
+ <div class="grid">
+  <div class="slot"><div class="cover"><span>Crudo</span></div><div class="body"><b>ARASIBO Steakhouse</b><p>Intro del chef · toma 2</p><span class="tag">Te toca</span><div class="eta">Aprobado para mié 2 sep · 10:00 a. m. · publica jue 3 sep · 10:00 a. m.</div></div></div>
+  <div class="slot"><div class="cover"><span>Crudo</span></div><div class="body"><b>Speedy Net</b><p>Promo fibra · casa</p><span class="tag">Te toca</span><div class="eta red">Sin fecha de publicación: pide la fecha antes de editar</div></div></div>
+ </div>
+ <p class="note">El margen de 24 h es una constante (REVIEW_BUFFER_HOURS); si el equipo revisa más lento o más rápido, se ajusta en un sitio.</p>
+</div></body></html>
