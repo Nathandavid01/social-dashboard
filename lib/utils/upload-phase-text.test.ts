@@ -20,7 +20,7 @@ describe('uploadPhaseText', () => {
   })
 
   it('every phase has its own text', () => {
-    const phases: UploadPhase[] = ['preparando', 'subiendo', 'reintentando', 'ensamblando', 'registrando', 'analizando', 'listo', 'error', 'cancelado']
+    const phases: UploadPhase[] = ['preparando', 'subiendo', 'reintentando', 'ensamblando', 'registrando', 'listo', 'error', 'cancelado']
     const texts = new Set(phases.map((p) => uploadPhaseText(item(p))))
     expect(texts.size).toBe(phases.length)
   })
@@ -35,5 +35,20 @@ describe('uploadPhaseText — duplicado', () => {
   it('dice que ya estaba subido, con el detalle que trae el error', () => {
     expect(uploadPhaseText(item('duplicado', { error: 'Ya subido para «Intro clínica» (ARASIBO) el 28 ago' })))
       .toBe('No se subió: Ya subido para «Intro clínica» (ARASIBO) el 28 ago')
+  })
+})
+
+describe('uploadPhaseText — post-proceso en segundo plano', () => {
+  it('editado listo con QC pendiente lo dice sin bloquear', () => {
+    expect(uploadPhaseText(item('listo', { kind: 'edited', postprocess: 'pendiente' }))).toBe('Listo · la IA está viendo el video…')
+  })
+  it('crudo listo con carátula pendiente', () => {
+    expect(uploadPhaseText(item('listo', { kind: 'raw', postprocess: 'pendiente' }))).toBe('Listo · generando carátula…')
+  })
+  it('post-proceso terminado = Listo a secas', () => {
+    expect(uploadPhaseText(item('listo', { kind: 'edited', postprocess: 'listo' }))).toBe('Listo')
+  })
+  it('post-proceso fallido: el video está, el análisis no', () => {
+    expect(uploadPhaseText(item('listo', { kind: 'edited', postprocess: 'error' }))).toBe('Listo · el análisis de IA falló; se reintenta solo')
   })
 })

@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.102 — 2026-09-21
+
+**Al subir un video, «Listo» aparece en cuanto el archivo está guardado; la IA lo revisa detrás.**
+- Antes, al subir un corte final el editor veía «La IA está viendo el video…» durante minutos, aunque el archivo ya estaba en R2. Ahora ve **Listo** y debajo «la IA está viendo el video…» mientras el QC corre en segundo plano.
+- Con los crudos pasa lo mismo con la carátula: «Listo · generando carátula…».
+- Ya no sale el aviso de «¿seguro que quieres salir?» solo porque la IA siga analizando: el video ya está a salvo.
+- Si el análisis falla, el video sigue subido: «Listo · el análisis de IA falló; se reintenta solo».
+- Convive con la huella de duplicados (v5.96): Listo no espera al QC; un archivo ya subido sigue siendo «duplicado».
+
 ## v5.101 — 2026-09-21
 
 **Publicado se confirma con Metricool, no solo con «Ya se posteó».**

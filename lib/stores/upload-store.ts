@@ -37,7 +37,6 @@ export type UploadPhase =
   | 'reintentando'
   | 'ensamblando'
   | 'registrando'
-  | 'analizando'
   | 'listo'
   | 'error'
   | 'cancelado'
@@ -69,6 +68,12 @@ export interface UploadItem {
   videoId?: string
   /** Cuando phase === 'duplicado': el video que ya existe. */
   duplicateOf?: DuplicateVideo
+  /**
+   * Lo que pasa DESPUÉS de que el archivo ya está guardado y registrado: el
+   * QC IA del corte final o la carátula del crudo. Corre en segundo plano y
+   * no bloquea "listo". Ausente en fases anteriores.
+   */
+  postprocess?: 'pendiente' | 'listo' | 'error'
 }
 
 const MAX_ATTEMPTS = 5
@@ -158,6 +163,8 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
     abortServerSideOnce(id)
   },
 
+  // Quita el item del dock. No detiene ni libera el post-proceso en curso:
+  // el File sigue vivo en esa promesa hasta que termine (igual que antes).
   dismissUpload(id) {
     engines.delete(id)
     set((s) => {
@@ -424,36 +431,31 @@ async function runMultipart(id: string): Promise<void> {
 }
 
 /**
- * Después de registrar: el corte final va al QC IA; el crudo y el b-roll solo
- * generan su carátula, que es lo que hace visible el banco de video (el QC IA
- * se cobra por fotograma y es del corte, no del material bruto).
- * Best-effort las dos: la subida ya está hecha y no se revierte.
+ * Después de registrar: la subida ya está hecha y no se revierte, así que se
+ * marca "listo" de inmediato. El corte final va al QC IA y el crudo/b-roll a
+ * su carátula (lo que hace visible el banco de video), pero en segundo plano:
+ * `postprocess` cuenta cómo va, y el cron video-health recoge lo que quede sin
+ * análisis si el navegador se cierra a medias.
  */
 async function finishAfterRegister(id: string, videoId?: string): Promise<void> {
   const eng = engines.get(id)!
   const item = useUploadStore.getState().uploads[id]
-  patchUpload(id, { videoId })
-  if (videoId && eng.fingerprint) {
+  if (!videoId) {
+    patchUpload(id, { phase: 'listo', pct: 100 })
+    return
+  }
+  patchUpload(id, { videoId, phase: 'listo', pct: 100, postprocess: 'pendiente' })
+  if (eng.fingerprint) {
     // Best-effort: el video ya está registrado; la huella evita la próxima repetición.
     void rememberVideoFingerprint({ fingerprint: eng.fingerprint, videoId, sizeBytes: eng.file.size }).catch(() => {})
   }
-  if (videoId) {
-    if (item.kind === 'edited') {
-      patchUpload(id, { phase: 'analizando' })
-      try {
-        await processUploadedVideo(videoId, eng.file)
-      } catch {
-        // El video ya está subido y registrado; que falle el análisis no revierte la subida.
-      }
-    } else {
-      try {
-        await generateVideoThumbs(videoId, eng.file)
-      } catch {
-        // Sin carátula el banco muestra un marcador; no es motivo para fallar la subida.
-      }
-    }
-  }
-  patchUpload(id, { phase: 'listo', pct: 100 })
+
+  const work = item.kind === 'edited' ? processUploadedVideo(videoId, eng.file) : generateVideoThumbs(videoId, eng.file)
+  void work.then(
+    () => patchUpload(id, { postprocess: 'listo' }),
+    // El video ya está subido y registrado; que falle el análisis o la carátula no revierte nada.
+    () => patchUpload(id, { postprocess: 'error' }),
+  )
 }
 
 async function runEngine(id: string): Promise<void> {
