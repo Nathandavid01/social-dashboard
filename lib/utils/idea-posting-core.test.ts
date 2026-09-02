@@ -299,3 +299,19 @@ describe('resolveVideoForPublish — el aprobado es contrato, no preferencia', (
     ).toBe(resolveVideoForPublish([aprobado, masNuevoSinAprobar], { ideaId: 'idea-1' }).video?.id)
   })
 })
+
+describe('buildPublishDateTime — horario por día del cliente', () => {
+  const NOW = Date.UTC(2026, 5, 1, 12, 0, 0)
+  it('usa el override de posting_schedule del día de la semana del publish_date', () => {
+    // 2026-06-15 es lunes (1). Lunes a las 09:00 por override; default 14:30.
+    expect(buildPublishDateTime('2026-06-15', '14:30', NOW, { '1': '09:00' })).toBe('2026-06-15T09:00:00')
+  })
+  it('sin override para ese día, usa posting_time', () => {
+    expect(buildPublishDateTime('2026-06-16', '14:30', NOW, { '1': '09:00' })).toBe('2026-06-16T14:30:00')
+  })
+  it('"hoy" se decide en hora de Puerto Rico, no en UTC', () => {
+    // 2026-06-16 01:00 UTC = 2026-06-15 21:00 en PR: el 15 sigue siendo hoy y se respeta.
+    const lateUtc = Date.UTC(2026, 5, 16, 1, 0, 0)
+    expect(buildPublishDateTime('2026-06-15', '22:00', lateUtc)).toBe('2026-06-15T22:00:00')
+  })
+})

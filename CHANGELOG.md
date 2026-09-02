@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.11 — 2026-09-02
+
+**El autopublish respeta el horario por día del cliente y nunca agenda un post con la hora ya pasada.**
+
+- Si un cliente postea lunes a las 9:00 y jueves a las 18:00, el video aprobado
+  se programa **a la hora de ese día**, no a la hora por defecto (antes el
+  publicador ignoraba el horario por día aunque la ficha lo mostrara).
+- Si se aprueba un video **después de la hora de posteo de hoy**, el "próximo
+  día de posteo" es el siguiente en el calendario; antes podía quedar
+  programado para hoy con una hora ya vencida y Metricool lo disparaba en el
+  acto.
+- "Hoy" se decide en hora de Puerto Rico: en el servidor (UTC) ya era mañana a
+  partir de las 8pm y eso empujaba fechas.
+
+![Autopublish con horario real](/changelog/v4.11-autopost-horario-real.png)
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**
