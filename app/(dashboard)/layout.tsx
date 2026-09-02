@@ -14,12 +14,12 @@ import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { UpdateNotice } from '@/components/shared/update-notice'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
-import { getCurrentRole, getViewAsEditor } from '@/lib/auth/server'
+import { getAuthUser, getCurrentRole, getOwnProfile, getViewAsEditor } from '@/lib/auth/server'
 import { listEditorsForViewAs } from '@/lib/actions/view-as'
 import { canStartViewAs } from '@/lib/auth/view-as-core'
 import { ViewAsBanner } from '@/components/auth/view-as-banner'
 import { resolveDashboardRedirect } from '@/lib/utils/approval-core'
-import type { Profile, UserRole } from '@/lib/supabase/types'
+import type { UserRole } from '@/lib/supabase/types'
 
 export default async function DashboardLayout({
   children,
@@ -27,24 +27,19 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   // Sin sesión no hay dashboard: antes el shell se renderizaba anónimo con un
   // usuario placeholder y el sitio "salía logueado" sin estarlo.
   if (!user) redirect(resolveDashboardRedirect(false, null)!)
 
-  // Backfills profile if the signup trigger never ran.
-  const [ensuredRole, viewAsEditor] = await Promise.all([
-    getCurrentRole(),
+  // Sesión, rol y perfil vienen memoizados por request: los helpers de
+  // permisos que llame la página reutilizan estas mismas lecturas.
+  const [ensuredRole, viewAsEditor, profile] = await Promise.all([
+    getCurrentRole(), // Backfills profile if the signup trigger never ran.
     getViewAsEditor(),
+    getOwnProfile(),
   ])
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle()
-  const profile = data as Profile | null
   const realRole: UserRole | null = profile?.role ?? ensuredRole
   const effectiveRole: UserRole | null = viewAsEditor ? 'editor' : realRole
   const editors = canStartViewAs(realRole) ? await listEditorsForViewAs() : []

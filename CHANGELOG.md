@@ -4,6 +4,20 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.5 — 2026-09-01
+
+**El dashboard hace menos trabajo por cada página: la sesión se valida una sola vez por carga.**
+
+- Antes, cada página del dashboard le preguntaba a Supabase "¿quién es este
+  usuario?" entre 8 y 15 veces por carga (el menú, los permisos, las
+  notificaciones… cada uno por su cuenta). Ahora se pregunta **una vez** y todos
+  reutilizan la respuesta.
+- Las lecturas del perfil propio y de "ver como editor" también se hacen una
+  sola vez por carga. En /pipeline las consultas a la base bajaron de 22 a 12;
+  en /home de 35 a 27.
+- Menos carga en Supabase y en el servidor con más gente conectada; no cambia
+  nada de lo que se ve en pantalla.
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**
