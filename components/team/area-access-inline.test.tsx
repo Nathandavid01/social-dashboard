@@ -38,3 +38,29 @@ describe('AreaAccessPanel', () => {
     expect(setAccessMock).toHaveBeenCalledWith('u1', ['/pipeline'])
   })
 })
+
+describe('AreaAccessPanel — por grupos', () => {
+  it('al restringir, las áreas aparecen agrupadas por sección del menú', () => {
+    render(<AreaAccessPanel userId="u1" userName="Ana" currentAccess={['/pipeline']} role="editor" />)
+    for (const g of ['Marketing', 'Recordings', 'Trabajo', 'Clientes', 'Publicación', 'Métricas', 'Desarrollo', 'Equipo']) {
+      expect(screen.getByRole('heading', { name: g })).toBeInTheDocument()
+    }
+  })
+
+  it('el interruptor del grupo marca y desmarca todas sus áreas', () => {
+    render(<AreaAccessPanel userId="u1" userName="Ana" currentAccess={['/pipeline']} role="editor" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Todo Trabajo' }))
+    for (const label of ['Pipeline', 'Banco de Video', 'Revisión', 'Entregas']) {
+      expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(true)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Nada Trabajo' }))
+    for (const label of ['Pipeline', 'Banco de Video', 'Revisión', 'Entregas']) {
+      expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false)
+    }
+  })
+
+  it('muestra cuántas áreas quedan marcadas', () => {
+    render(<AreaAccessPanel userId="u1" userName="Ana" currentAccess={['/pipeline', '/banco']} role="editor" />)
+    expect(screen.getByText(/2 áreas marcadas/)).toBeInTheDocument()
+  })
+})

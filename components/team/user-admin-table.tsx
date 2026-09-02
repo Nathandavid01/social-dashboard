@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
-import { MoreVertical, Pencil, Loader2, UserCheck, UserX, Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { useMemo, useRef, useState, useTransition } from 'react'
+import { MoreVertical, Pencil, Loader2, UserCheck, UserX, Search, SlidersHorizontal, ChevronDown, Camera, ImagePlus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -25,7 +25,8 @@ import { RoleSelector } from '@/components/team/role-selector'
 import { AreaAccessPanel } from '@/components/team/area-access-inline'
 import { ResetPasswordDialog } from '@/components/team/reset-password-dialog'
 import { CreateUserDialog } from '@/components/team/create-user-dialog'
-import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
+import { updateUserProfile, setUserStatus, setUserAvatar, removeUserAvatar } from '@/lib/actions/users'
+import { initialsFrom, validateAvatarFile } from '@/lib/utils/avatar-core'
 import { normalizeAreaAccess } from '@/lib/auth/areas'
 import type { Profile, UserRole, UserStatus } from '@/lib/supabase/types'
 
@@ -50,18 +51,15 @@ const ROLE_AVATAR: Record<UserRole, string> = {
   team_member: 'text-muted-foreground border-border bg-muted',
 }
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/)
-  const raw = parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)
-  return raw.toUpperCase()
-}
-
 export function UserAdminTable({
   users,
   currentUserId,
+  canEditPhotos = false,
 }: {
   users: Profile[]
   currentUserId: string
+  /** Solo owners: poner o quitar la foto de otra persona desde su avatar. */
+  canEditPhotos?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [segment, setSegment] = useState('all')
@@ -124,7 +122,7 @@ export function UserAdminTable({
       ) : (
         <div className="space-y-2">
           {filtered.map((u) => (
-            <UserCard key={u.id} user={u} isSelf={u.id === currentUserId} />
+            <UserCard key={u.id} user={u} isSelf={u.id === currentUserId} canEditPhoto={canEditPhotos} />
           ))}
         </div>
       )}
@@ -132,7 +130,7 @@ export function UserAdminTable({
   )
 }
 
-function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
+function UserCard({ user, isSelf, canEditPhoto }: { user: Profile; isSelf: boolean; canEditPhoto: boolean }) {
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
@@ -158,15 +156,7 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
       )}
     >
       <div className="flex flex-wrap items-center gap-3 p-3">
-      <div
-        className={cn(
-          'grid h-11 w-11 shrink-0 place-items-center rounded-full border text-sm font-bold',
-          ROLE_AVATAR[user.role],
-        )}
-        aria-hidden
-      >
-        {initials(displayName)}
-      </div>
+      <UserPhoto user={user} displayName={displayName} editable={canEditPhoto} />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">
@@ -188,7 +178,9 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
         title="Configurar áreas a las que puede acceder"
       >
         <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />
-        {areaGrant ? `Áreas (${areaGrant.length})` : 'Áreas'}
+        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-medium', areaGrant ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600')}>
+          {areaGrant ? `${areaGrant.length} ${areaGrant.length === 1 ? 'área' : 'áreas'}` : 'Acceso completo'}
+        </span>
         <ChevronDown className={cn('ml-1 h-3.5 w-3.5 transition-transform', areasOpen && 'rotate-180')} />
       </Button>
       <ResetPasswordDialog userId={user.id} userName={displayName} />
@@ -344,5 +336,109 @@ function EditProfileDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+/**
+ * Avatar de la tarjeta: la foto real si existe (antes se pedía `avatar_url` y
+ * se pintaban iniciales igual), iniciales teñidas por rol si no. Para un owner
+ * es un botón: subir una foto nueva o quitarla, sin salir de la lista.
+ */
+function UserPhoto({ user, displayName, editable }: { user: Profile; displayName: string; editable: boolean }) {
+  const { toast } = useToast()
+  const [isPending, startTransition] = useTransition()
+  const fileRef = useRef<HTMLInputElement>(null)
+  // La foto nueva llega por revalidación del servidor; mientras, el spinner.
+  const src = user.avatar_url ?? null
+
+  const circle = (
+    <span
+      className={cn(
+        'relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full border text-sm font-bold',
+        ROLE_AVATAR[user.role],
+      )}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={`Foto de ${displayName}`} className="h-full w-full object-cover" />
+      ) : (
+        <span aria-hidden>{initialsFrom(displayName)}</span>
+      )}
+      {isPending && (
+        <span className="absolute inset-0 grid place-items-center bg-background/70">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </span>
+      )}
+    </span>
+  )
+
+  if (!editable) return circle
+
+  function onPick(file: File | null) {
+    const valid = validateAvatarFile(file)
+    if (!valid.ok) {
+      toast({ title: 'No se pudo usar esa imagen', description: valid.error, variant: 'destructive' })
+      return
+    }
+    const fd = new FormData()
+    fd.set('file', valid.file)
+    startTransition(async () => {
+      const res = await setUserAvatar(user.id, fd)
+      if (res.error) {
+        toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Foto actualizada', description: `${displayName} ya tiene su foto de perfil.` })
+      }
+    })
+  }
+
+  function onRemove() {
+    startTransition(async () => {
+      const res = await removeUserAvatar(user.id)
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else toast({ title: 'Foto quitada', description: `${displayName} vuelve a sus iniciales.` })
+    })
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="group relative shrink-0 rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label={`Cambiar foto de ${displayName}`}
+          title="Cambiar foto"
+          disabled={isPending}
+        >
+          {circle}
+          <span className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors group-hover:text-foreground">
+            <Camera className="h-3 w-3" />
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onSelect={() => fileRef.current?.click()}>
+          <ImagePlus className="mr-2 h-4 w-4" />
+          {src ? 'Cambiar foto' : 'Subir foto'}
+        </DropdownMenuItem>
+        {src && (
+          <DropdownMenuItem onSelect={onRemove} className="text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Quitar foto
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        aria-label={`Archivo de foto de ${displayName}`}
+        onChange={(e) => {
+          onPick(e.target.files?.[0] ?? null)
+          e.target.value = ''
+        }}
+      />
+    </DropdownMenu>
   )
 }

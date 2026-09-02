@@ -93,3 +93,19 @@ export function shouldPromptForAvatar(
 ): boolean {
   return !hasRealAvatar(avatarUrl) && !sessionPostponed
 }
+
+export const AVATAR_MAX_BYTES = 4 * 1024 * 1024
+
+/** Misma regla para la foto propia y la que un owner pone a otro usuario. */
+export function validateAvatarFile(file: File | null | undefined): { ok: true; file: File } | { ok: false; error: string } {
+  if (!file || file.size === 0) return { ok: false, error: 'Archivo requerido' }
+  if (!file.type.startsWith('image/')) return { ok: false, error: 'Solo se permiten imágenes' }
+  if (file.size > AVATAR_MAX_BYTES) return { ok: false, error: 'Imagen mayor a 4 MB' }
+  return { ok: true, file }
+}
+
+/** Ruta estable por usuario: re-subir sobreescribe; el cache-bust va en la URL. */
+export function avatarStoragePath(userId: string, fileName: string): string {
+  const ext = (fileName.split('.').pop() || 'jpg').toLowerCase()
+  return `${userId}/avatar.${ext}`
+}

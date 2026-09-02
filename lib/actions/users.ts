@@ -7,6 +7,8 @@ import { assertOwner } from '@/lib/auth/server'
 import { validateNewUser } from '@/lib/utils/user-admin-core'
 import { validateNewPassword } from '@/lib/utils/password-core'
 import { AREAS } from '@/lib/auth/areas'
+import { validateAvatarFile } from '@/lib/utils/avatar-core'
+import { storeAvatar } from '@/lib/utils/avatar-storage'
 import type { UserRole, UserStatus } from '@/lib/supabase/types'
 
 type Result = { ok?: true; error?: string }
@@ -219,4 +221,58 @@ export async function setUserStatus(userId: string, status: UserStatus): Promise
 
   revalidatePath('/team')
   return { ok: true }
+}
+
+/**
+ * Owner-only: poner la foto de perfil de OTRA persona del equipo desde
+ * /settings/users. Misma ruta y reglas que la foto propia (`uploadAvatar`),
+ * para que si la persona luego la cambia ella misma, sobreescriba la misma.
+ */
+export async function setUserAvatar(userId: string, formData: FormData): Promise<Result & { url?: string }> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!userId) return { error: 'Usuario no válido' }
+  const valid = validateAvatarFile(formData.get('file') as File | null)
+  if (!valid.ok) return { error: valid.error }
+
+  const supabase = await createClient()
+  const stored = await storeAvatar(supabase, userId, valid.file)
+  if ('error' in stored) return { error: stored.error }
+
+  const saved = await writeAvatarUrl(userId, stored.url)
+  if (saved.error) return saved
+  return { ok: true, url: stored.url }
+}
+
+/**
+ * Escribe `avatar_url` de OTRO perfil. Con RLS, un update que no alcanza la
+ * fila devuelve 0 filas y ningún error (mismo patrón que setUserAreaAccess):
+ * se comprueba para no decir "listo" sin haber guardado nada.
+ */
+async function writeAvatarUrl(userId: string, url: string | null): Promise<Result> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: url, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select('id')
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'No se pudo guardar la foto (sin permiso sobre ese perfil).' }
+  revalidatePath('/settings/users')
+  revalidatePath('/', 'layout')
+  return { ok: true }
+}
+
+/** Owner-only: quitar la foto de otra persona (vuelve a las iniciales). */
+export async function removeUserAvatar(userId: string): Promise<Result> {
+  try {
+    await assertOwner()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!userId) return { error: 'Usuario no válido' }
+  return writeAvatarUrl(userId, null)
 }

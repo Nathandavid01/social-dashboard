@@ -3,9 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { canUpdateOwnAvatar, isAllowedAvatarUrl } from '@/lib/utils/avatar-core'
-
-const AVATARS_BUCKET = 'avatars'
+import { canUpdateOwnAvatar, isAllowedAvatarUrl, validateAvatarFile } from '@/lib/utils/avatar-core'
+import { storeAvatar } from '@/lib/utils/avatar-storage'
 
 async function requireOwnAvatarWrite(): Promise<{ userId: string } | { error: string }> {
   try {
@@ -42,24 +41,11 @@ export async function uploadAvatar(formData: FormData): Promise<{ ok?: true; url
   const supabase = await createClient()
   const user = { id: gate.userId }
 
-  const file = formData.get('file') as File | null
-  if (!file || file.size === 0) return { error: 'Archivo requerido' }
-  if (!file.type.startsWith('image/')) return { error: 'Solo se permiten imágenes' }
-  if (file.size > 4 * 1024 * 1024) return { error: 'Imagen mayor a 4 MB' }
-
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
-  // Stable path per user so re-uploads overwrite; cache-bust via ?v=timestamp.
-  const path = `${user.id}/avatar.${ext}`
-
-  const { error: upErr } = await supabase.storage.from(AVATARS_BUCKET).upload(path, file, {
-    contentType: file.type,
-    cacheControl: '3600',
-    upsert: true,
-  })
-  if (upErr) return { error: upErr.message }
-
-  const { data: pub } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path)
-  const url = `${pub.publicUrl}?v=${Date.now()}`
+  const valid = validateAvatarFile(formData.get('file') as File | null)
+  if (!valid.ok) return { error: valid.error }
+  const stored = await storeAvatar(supabase, user.id, valid.file)
+  if ('error' in stored) return { error: stored.error }
+  const url = stored.url
 
   const { error: updErr } = await supabase
     .from('profiles')
