@@ -472,3 +472,19 @@ describe('listBankAdmins', () => {
     expect(admins[1]).toMatchObject({ name: 'Ana', role: 'supervisor', roleLabel: 'Supervisor' })
   })
 })
+
+describe('hora de aprobación por clip', () => {
+  it('usa publish_date + cadencia del cliente (24 h antes de publicar)', () => {
+    const rows = groupEditorVideoBank(
+      [idea({ id: 'a', publish_date: '2026-09-03', videos: [raw({ id: 'va', idea_id: 'a' })] })],
+      {},
+      { cadence: { c1: { postingTime: '10:00', postingSchedule: { '4': '15:00' } } } },
+    )
+    const clip = rows[0].clients[0].clips[0]
+    expect(clip.approvalAt).toEqual({ at: '2026-09-02T15:00', basis: 'publish', publishAt: '2026-09-03T15:00' })
+  })
+  it('sin publish_date ni deadline → null', () => {
+    const rows = groupEditorVideoBank([idea({ id: 'a', publish_date: null, videos: [raw({ id: 'va', idea_id: 'a' })] })])
+    expect(rows[0].clients[0].clips[0].approvalAt).toBeNull()
+  })
+})

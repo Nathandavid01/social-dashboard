@@ -2,6 +2,8 @@ import type { ContentIdeaVideo, IdeaWithPipeline, UserRole, UserStatus } from '@
 import { ROLE_LABEL } from '@/lib/auth/permissions'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { deadlineStatus, todayISOInTimeZone, type DeadlineStatus } from '@/lib/utils/deadlines'
+import { approvalTarget, type ApprovalTarget } from '@/lib/utils/approval-target'
+import type { ClientCadence } from '@/lib/utils/client-pipeline-publish'
 
 const URGENCY_RANK: Record<DeadlineStatus, number> = { none: 0, future: 1, 'due-soon': 2, overdue: 3 }
 const NATE_TZ = 'America/Puerto_Rico'
@@ -39,6 +41,8 @@ export interface EditorBankClip {
   recordedBy: string | null
   recordedAt: string | null
   deadline: string | null
+  /** "Aprobado para las ___": publicación menos margen de revisión, o la fecha límite. null = sin fecha. */
+  approvalAt: ApprovalTarget | null
   location: string | null
   contentType: string | null
   /** Este clip ocupa uno de los 2 espacios del editor. */
@@ -69,6 +73,8 @@ export interface EditorBankClient {
 }
 
 export interface EditorBankResolvedMarks {
+  /** Cadencia por cliente (hora de posteo, horario por día) para la hora de aprobación. */
+  cadence?: Record<string, ClientCadence>
   logos?: Record<string, string | null>
   brandColors?: Record<string, string | null>
   /** WIP dinámico por editor (editorWipLimitFor); sin entrada → EDITOR_WIP_LIMIT. */
@@ -408,6 +414,12 @@ export function groupEditorVideoBank(
       recordedBy: uploaderId ? (recorderNames[uploaderId] ?? null) : null,
       recordedAt: recordedAt ?? null,
       deadline: idea.deadline ?? null,
+      approvalAt: approvalTarget({
+        publishDate: idea.publish_date,
+        deadline: idea.deadline ?? null,
+        postingTime: resolved.cadence?.[client.clientId]?.postingTime ?? null,
+        postingSchedule: resolved.cadence?.[client.clientId]?.postingSchedule ?? null,
+      }),
       location,
       contentType: idea.content_type ?? null,
       yours: !waiting,

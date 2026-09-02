@@ -30,7 +30,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
@@ -118,6 +118,7 @@ export default async function PipelinePage() {
       {
         postingTime: c.posting_time ?? null,
         postingDays: (c.posting_days ?? []) as number[],
+        postingSchedule: ((c as { posting_schedule?: Record<string, string> | null }).posting_schedule ?? null),
         metricoolBlogId: c.metricool_blog_id ?? null,
       },
     ]),

@@ -15,6 +15,7 @@ function clip(over: EditorBankRow['clients'][0]['clips'][0] extends infer C ? Pa
     recordedBy: null,
     recordedAt: null,
     deadline: null,
+    approvalAt: null,
     location: null,
     contentType: 'R' as const,
     yours: false,
@@ -200,6 +201,7 @@ describe('EditorVideoBank', () => {
                 recordedBy: 'Diego',
                 recordedAt: null,
                 deadline: null,
+                approvalAt: null,
                 location: null,
                 contentType: 'R',
                 yours: true,
@@ -377,5 +379,20 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('SP')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /subir logo/i })
     expect(link).toHaveAttribute('href', '/clients/c-speedy')
+  })
+})
+
+describe('hora de aprobación en el espacio activo', () => {
+  it('muestra "Aprobado para …" calculado, o pide la fecha si no hay', () => {
+    const withDate = row({ clients: [{ clientId: 'c1', clientName: 'Blue Chiropractic', logoUrl: null, cardColor: '#c8a34a', approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [],
+      clips: [clip({ ideaId: 'i1', yours: true, queue: 'active', approvalAt: { at: '2026-09-02T10:00', basis: 'publish', publishAt: '2026-09-03T10:00' } })] }] })
+    render(<EditorVideoBank rows={[withDate]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    expect(screen.getByTestId('approval-target')).toHaveTextContent('Aprobado para mié 2 sep · 10:00 a. m. · publica jue 3 sep · 10:00 a. m.')
+  })
+  it('sin fecha lo dice en rojo suave', () => {
+    const noDate = row({ clients: [{ clientId: 'c1', clientName: 'Blue Chiropractic', logoUrl: null, cardColor: '#c8a34a', approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [],
+      clips: [clip({ ideaId: 'i1', yours: true, queue: 'active', approvalAt: null })] }] })
+    render(<EditorVideoBank rows={[noDate]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    expect(screen.getByTestId('approval-target')).toHaveTextContent(/Sin fecha de publicación/)
   })
 })
