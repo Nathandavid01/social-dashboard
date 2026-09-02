@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.14 — 2026-09-02
+
+**Si el QC de IA dice que el video no parece del cliente, no se le escribe caption ni "de qué es el video".**
+
+- Antes, aunque la IA marcara "No parece del cliente", el dashboard igual
+  generaba el caption con la voz de marca y los hashtags de ese cliente, y
+  escribía "de qué es el video" en la idea. Ahora esas dos cosas solo pasan
+  cuando el QC confirma que el video es del cliente.
+- El análisis (captions, resumen, bolitas) se guarda igual; el editor sigue
+  viendo el aviso "No parece del cliente" y puede generar el caption a mano si
+  la IA se equivocó.
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

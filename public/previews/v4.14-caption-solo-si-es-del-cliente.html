@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.14 — Caption solo si es del cliente</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+ .dots{display:flex;gap:8px;font-size:12px;margin-bottom:10px}.dots span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+ .g::before{background:#34d399}.a::before{background:#fbbf24}.r::before{background:#fb7185}.n::before{background:#444}
+ .step{display:flex;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid var(--border)}.step b{min-width:110px;color:var(--muted);font-weight:500}
+ .bad{color:#fb7185}.ok{color:#34d399}
+</style></head>
+<body><div class="wrap">
+ <h1>QC de IA · gate del cliente <span class="sub">· v4.14</span></h1>
+ <p class="sub">Video subido a la idea de «Clínica Dental Sonrisa»; la IA ve un gimnasio.</p>
+ <div class="grid">
+  <div class="card"><p style="font-size:12px;font-weight:600;margin-bottom:8px">Antes</p>
+   <div class="dots"><span class="r">No parece del cliente · 22%</span><span class="g">Captions ok</span><span class="g">Caption generado</span></div>
+   <div class="step"><b>Hook</b><span class="bad">"Rutina de pesas en un gimnasio" → escrito en la idea</span></div>
+   <div class="step"><b>Caption</b><span class="bad">Generado con la voz y los hashtags de la clínica</span></div>
+  </div>
+  <div class="card"><p style="font-size:12px;font-weight:600;margin-bottom:8px">Después</p>
+   <div class="dots"><span class="r">No parece del cliente · 22%</span><span class="g">Captions ok</span><span class="n">Sin caption</span></div>
+   <div class="step"><b>Hook</b><span class="ok">No se toca</span></div>
+   <div class="step"><b>Caption</b><span class="ok">No se genera solo. El editor puede generarlo a mano si la IA se equivocó.</span></div>
+  </div>
+ </div>
+</div></body></html>
