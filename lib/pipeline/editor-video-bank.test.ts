@@ -472,3 +472,37 @@ describe('listBankAdmins', () => {
     expect(admins[1]).toMatchObject({ name: 'Ana', role: 'supervisor', roleLabel: 'Supervisor' })
   })
 })
+
+describe('enlaces a recursos: siempre se sabe dónde están los logos y los B-rolls', () => {
+  const withBroll = idea({ id: 'x', videos: [raw({ id: 'vx', idea_id: 'x' }), raw({ id: 'bx', idea_id: 'x', kind: 'broll' })] })
+
+  it('cuenta logos (activos) y B-rolls (videos) y arma los destinos', () => {
+    const rows = groupEditorVideoBank([withBroll], {}, {
+      assets: { c1: { logos: 2, brollFolderUrl: null } },
+    })
+    const client = rows[0].clients[0]
+    expect(client.resources).toEqual({
+      logosCount: 2,
+      logosHref: '/clients/c1?tab=assets',
+      brollCount: 1,
+      brollHref: '#global-broll',
+      brollFolderUrl: null,
+    })
+  })
+
+  it('si hay carpeta externa de B-rolls, ese es el destino', () => {
+    const rows = groupEditorVideoBank([withBroll], {}, {
+      assets: { c1: { logos: 0, brollFolderUrl: 'https://drive.google.com/x' } },
+    })
+    expect(rows[0].clients[0].resources.brollHref).toBe('https://drive.google.com/x')
+    expect(rows[0].clients[0].resources.logosCount).toBe(0)
+  })
+
+  it('sin activos cargados, los enlaces igual existen y llevan a los activos del cliente', () => {
+    const rows = groupEditorVideoBank([idea({ id: 'y', videos: [raw({ id: 'vy', idea_id: 'y' })] })])
+    const r = rows[0].clients[0].resources
+    expect(r.logosHref).toBe('/clients/c1?tab=assets')
+    expect(r.brollCount).toBe(0)
+    expect(r.brollHref).toBe('/clients/c1?tab=assets')
+  })
+})

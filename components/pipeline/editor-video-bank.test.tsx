@@ -24,6 +24,8 @@ function clip(over: EditorBankRow['clients'][0]['clips'][0] extends infer C ? Pa
   }
 }
 
+const RES = { logosCount: 0, logosHref: '/clients/c1?tab=assets', brollCount: 0, brollHref: '/clients/c1?tab=assets', brollFolderUrl: null }
+
 function row(over: Partial<EditorBankRow> = {}): EditorBankRow {
   return {
     editorId: 'ed-maria',
@@ -132,7 +134,7 @@ describe('EditorVideoBank', () => {
           nextSlots: [{ ideaId: 'i1', title: 'Baño y corte, antes y después', clientName: 'Lucky Pet' }],
           clients: [{
             clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
-            approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [1, 3, 5],
+            approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [1, 3, 5], resources: RES,
             clips: [clip({ ideaId: 'i1', title: 'Baño y corte, antes y después', yours: true, queue: 'active' })],
           }],
         })]}
@@ -190,7 +192,7 @@ describe('EditorVideoBank', () => {
               approvedCount: 4,
               remainingInBank: 1,
               inRevision: 2,
-              postingDays: [],
+              postingDays: [], resources: RES,
               clips: [{
                 ideaId: 'i1',
                 title: 'Intro clínica',
@@ -249,7 +251,7 @@ describe('EditorVideoBank', () => {
             approvedCount: 0,
             remainingInBank: 1,
             inRevision: 0,
-            postingDays: [],
+            postingDays: [], resources: RES,
             clips: [clip({ title: 'Toma' })],
           }],
         })]}
@@ -278,7 +280,7 @@ describe('EditorVideoBank', () => {
               approvedCount: 0,
               remainingInBank: 1,
               inRevision: 0,
-              postingDays: [],
+              postingDays: [], resources: RES,
               clips: [clip({ title: 'Intro clínica', queue: 'waiting' })],
             }],
           }),
@@ -308,7 +310,7 @@ describe('EditorVideoBank', () => {
             approvedCount: 0,
             remainingInBank: 1,
             inRevision: 0,
-            postingDays: [],
+            postingDays: [], resources: RES,
             clips: [clip({ ideaId: 'i9', title: 'Tercera toma', queue: 'waiting' })],
           }],
         })]}
@@ -331,7 +333,7 @@ describe('EditorVideoBank', () => {
             approvedCount: 1,
             remainingInBank: 1,
             inRevision: 0,
-            postingDays: [],
+            postingDays: [], resources: RES,
             clips: [clip({
               title: 'Promo',
               yours: true,
@@ -368,7 +370,7 @@ describe('EditorVideoBank', () => {
             approvedCount: 0,
             remainingInBank: 1,
             inRevision: 0,
-            postingDays: [],
+            postingDays: [], resources: RES,
             clips: [clip({ title: 'Promo', queue: 'waiting' })],
           }],
         })]}
@@ -377,5 +379,31 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('SP')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /subir logo/i })
     expect(link).toHaveAttribute('href', '/clients/c-speedy')
+  })
+})
+
+describe('enlaces a logos y B-rolls en cada tarjeta', () => {
+  it('el espacio activo muestra siempre Logos y B-rolls con su destino', () => {
+    const r = row({
+      clients: [{ clientId: 'c1', clientName: 'Blue Chiropractic', logoUrl: null, cardColor: '#c8a34a', approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [],
+        resources: { logosCount: 2, logosHref: '/clients/c1?tab=assets', brollCount: 3, brollHref: 'https://drive.google.com/brolls', brollFolderUrl: 'https://drive.google.com/brolls' },
+        clips: [clip({ ideaId: 'i1', yours: true, queue: 'active' })] }],
+    })
+    render(<EditorVideoBank rows={[r]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    const logos = screen.getByRole('link', { name: /Logos \(2\)/ })
+    expect(logos).toHaveAttribute('href', '/clients/c1?tab=assets')
+    const brolls = screen.getByRole('link', { name: /B-rolls \(3\)/ })
+    expect(brolls).toHaveAttribute('href', 'https://drive.google.com/brolls')
+  })
+
+  it('sin logos ni B-rolls lo dice, y el enlace lleva a donde subirlos', () => {
+    const r = row({
+      clients: [{ clientId: 'c1', clientName: 'Blue Chiropractic', logoUrl: null, cardColor: '#c8a34a', approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [],
+        resources: { logosCount: 0, logosHref: '/clients/c1?tab=assets', brollCount: 0, brollHref: '/clients/c1?tab=assets', brollFolderUrl: null },
+        clips: [clip({ ideaId: 'i1', yours: true, queue: 'active' })] }],
+    })
+    render(<EditorVideoBank rows={[r]} videoBank={{ rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }} />)
+    expect(screen.getByRole('link', { name: /Logos: ninguno/ })).toHaveAttribute('href', '/clients/c1?tab=assets')
+    expect(screen.getByRole('link', { name: /B-rolls: ninguno/ })).toHaveAttribute('href', '/clients/c1?tab=assets')
   })
 })

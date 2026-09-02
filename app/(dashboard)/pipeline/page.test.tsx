@@ -51,6 +51,8 @@ vi.mock('@/lib/supabase/server', () => ({
         eq: () => table === 'clients'
           ? { order: async () => ({ data: clients, error: null }) }
           : Promise.resolve({ data: profiles, error: null }),
+        // client_assets (enlaces del banco): sin activos en este test.
+        in: async () => ({ data: [], error: null }),
       }),
     }),
   })),

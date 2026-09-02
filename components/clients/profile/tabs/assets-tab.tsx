@@ -23,6 +23,9 @@ import {
 import { Upload, Trash2, Image as ImageIcon, FileText, Palette, Type, Shield, FileSignature, FolderOpen, Loader2 } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { uploadClientAsset, deleteClientAsset } from '@/lib/actions/client-profile'
+import { addClientAssetLink } from '@/lib/actions/client-asset-links'
+import { useRouter } from 'next/navigation'
+import { Link2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClientAsset, ClientAssetKind } from '@/lib/supabase/types'
 
@@ -79,7 +82,7 @@ export function AssetsTab({ clientId, assets }: Props) {
             )
           })}
         </div>
-        <UploadAssetDialog clientId={clientId} />
+        <div className="flex items-center gap-2"><AddLinkDialog clientId={clientId} /><UploadAssetDialog clientId={clientId} /></div>
       </div>
 
       {/* Gallery */}
@@ -129,11 +132,11 @@ function AssetCard({ asset, clientId, index }: { asset: ClientAsset; clientId: s
       <CardContent className="space-y-1 p-3">
         <p className="truncate text-sm font-medium">{asset.name}</p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{formatBytes(asset.size_bytes)}</span>
+          <span>{asset.storage_path ? formatBytes(asset.size_bytes) : 'Enlace externo'}</span>
           <div className="flex items-center gap-1">
-            {isImage && (
+            {(isImage || !asset.storage_path) && (
               <a href={asset.url} target="_blank" rel="noreferrer" className="rounded p-1 hover:text-foreground" aria-label="Abrir">
-                <FileText className="h-3.5 w-3.5" />
+                {asset.storage_path ? <FileText className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
               </a>
             )}
             <button
@@ -259,6 +262,81 @@ function UploadAssetDialog({ clientId }: { clientId: string }) {
           <Button onClick={submit} disabled={!file || isPending}>
             {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
             Subir
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/**
+ * Enlace externo como activo (carpeta de Drive con los B-rolls, el Drive de
+ * logos…). El banco del editor lo usa como destino de "B-rolls" cuando el
+ * nombre menciona b-roll. Siempre tiene que haber un enlace (Eric, 2026-09-02).
+ */
+function AddLinkDialog({ clientId }: { clientId: string }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [url, setUrl] = useState('')
+  const [kind, setKind] = useState<ClientAssetKind>('other')
+  const [isPending, startTransition] = useTransition()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  function submit() {
+    startTransition(async () => {
+      const res = await addClientAssetLink(clientId, { name, url, kind })
+      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      else {
+        toast({ title: 'Enlace guardado', description: 'El banco del editor ya apunta aquí.' })
+        setOpen(false)
+        setName('')
+        setUrl('')
+        router.refresh()
+      }
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Link2 className="mr-1.5 h-3.5 w-3.5" /> Añadir enlace
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Añadir enlace</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Dónde están los B-rolls o los logos fuera del dashboard (Drive, Dropbox…). Si el nombre dice
+            «B-rolls», el banco del editor lo usa como destino.
+          </p>
+          <div className="space-y-1.5">
+            <Label htmlFor="asset-link-name">Nombre</Label>
+            <Input id="asset-link-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="B-rolls en Drive" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="asset-link-url">URL</Label>
+            <Input id="asset-link-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://drive.google.com/…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Tipo</Label>
+            <Select value={kind} onValueChange={(v) => setKind(v as ClientAssetKind)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(KIND_META) as ClientAssetKind[]).map((k) => (
+                  <SelectItem key={k} value={k}>{KIND_META[k].label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={submit} disabled={isPending || !name.trim() || !url.trim()}>
+            {isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+            Guardar enlace
           </Button>
         </DialogFooter>
       </DialogContent>
