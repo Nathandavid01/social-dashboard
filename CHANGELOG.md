@@ -4,6 +4,58 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.8 — 2026-09-06
+
+**"Mejorar descripción": la IA escribe la descripción de tu gráfica por ti.**
+
+- Nuevo botón **Mejorar descripción** en Gráficas: escribes tu idea cruda
+  ("promo 2x1 cortes") y Grok la convierte en una descripción rica con el
+  texto exacto del arte, ambiente y estilo — usando la marca del cliente.
+- Si adjuntaste una **foto del shoot**, Grok Visión **mira la foto de verdad**
+  y escribe la descripción basada en lo que aparece en ella.
+- La descripción queda **editable** en el cuadro de texto: tú revisas precios
+  y textos antes de generar. Nada sale solo.
+- Costo: fracciones de centavo por mejora.
+
+## v4.7 — 2026-09-06
+
+**Gráficas con tus propias fotos: sube la foto del shoot y la IA la convierte en el arte.**
+
+- En **Gráficas** ahora puedes adjuntar una **foto propia** (la que tiraron en
+  el shoot) y la IA la transforma en un arte con la marca del cliente —
+  manteniendo el sujeto real de la foto, sin inventarlo.
+- La foto se sube directo al almacenamiento (aguanta fotos pesadas de celular)
+  y queda registrada junto al arte generado en el historial.
+- Con foto propia, el formato del arte lo define tu foto; sin foto, eliges el
+  formato como siempre.
+- Costo extra mínimo: ~$0.01 por foto de entrada además de los ~$0.04 por arte.
+
+## v4.6 — 2026-09-06
+
+**Tipografías de marca por cliente — y las Gráficas IA las respetan.**
+
+- En la pestaña **Marca** del cliente ahora puedes escribir su **tipografía
+  primaria y secundaria** (ej: "Montserrat Bold" / "Lato"), junto a la paleta.
+- Las **Gráficas IA** usan esas tipografías: piden a la IA titulares y textos
+  con un estilo fiel a las fuentes de la marca, además de sus colores.
+- El archivo de la fuente (.ttf/.otf) se sigue subiendo en **Assets →
+  Tipografía**, como siempre; aquí solo va el nombre.
+- Recordatorio: el logo se sube en el perfil del cliente (arriba, con variante
+  clara/oscura) y la paleta de colores se edita en Marca — eso ya existía.
+
+## v4.5 — 2026-09-06
+
+**Nueva sección Gráficas: la IA diseña artes para las redes usando la marca de cada cliente.**
+
+- Nueva página **Gráficas** en el menú (grupo Marketing): eliges el cliente,
+  describes qué debe mostrar el arte y la IA (Grok Imagine) genera hasta
+  **4 variantes** usando los **colores y la voz de marca** del cliente.
+- Formatos listos para redes: post cuadrado, post vertical, Story/Reel y
+  banner horizontal.
+- Cada imagen cuesta ~$0.04 y queda guardada en un **historial compartido**
+  para que todo el equipo pueda abrirla y descargarla después.
+- Pueden usarla owner, supervisor y diseñador.
+
 ## v4.4 — 2026-08-31
 
 **Aprobaciones por colores y una sección de Clientes con calendario y mini-CRM en el Banco.**

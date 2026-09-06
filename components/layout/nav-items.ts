@@ -25,6 +25,7 @@ import {
   Activity,
   ClipboardList,
   PenLine,
+  Palette,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -58,6 +59,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/escribir-ideas': PenLine,
   '/idea-lab': Lightbulb,
   '/ideas-aprobadas': CheckCircle2,
+  '/graficas': Palette,
   '/revision': ClipboardCheck,
   '/entregas': PackageCheck,
   '/pipeline': KanbanSquare,

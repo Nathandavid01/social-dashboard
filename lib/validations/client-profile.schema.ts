@@ -15,6 +15,19 @@ export const brandColorsSchema = z.object({
   text: hex,
 })
 
+const fontName = z
+  .string()
+  .max(120, 'Nombre de fuente demasiado largo')
+  .nullable()
+  .optional()
+  .or(z.literal(''))
+  .transform((v) => (v === '' ? null : v ?? null))
+
+export const brandFontsSchema = z.object({
+  primary: fontName,
+  secondary: fontName,
+})
+
 const dateOnly = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida (YYYY-MM-DD)')
@@ -55,6 +68,7 @@ export const clientProfilePatchSchema = z
     owner_email: emailMaybe,
     owner_phone: phoneStr,
     brand_colors: brandColorsSchema.optional(),
+    brand_fonts: brandFontsSchema.optional(),
     logo_url: z.string().nullable().optional(),
     logo_dark_url: z.string().nullable().optional(),
     posting_days: z.array(z.number().int().min(0).max(6)).max(7).optional(),

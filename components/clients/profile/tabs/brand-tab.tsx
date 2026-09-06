@@ -10,7 +10,7 @@ import { ColorPicker } from '../color-picker'
 import { Loader2, Save, Palette, Sparkles } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { updateClientProfile } from '@/lib/actions/client-profile'
-import type { Client, BrandColors } from '@/lib/supabase/types'
+import type { Client, BrandColors, BrandFonts } from '@/lib/supabase/types'
 
 interface Props {
   client: Client
@@ -18,6 +18,7 @@ interface Props {
 
 export function BrandTab({ client }: Props) {
   const [colors, setColors] = useState<BrandColors>(client.brand_colors ?? {})
+  const [fonts, setFonts] = useState<BrandFonts>(client.brand_fonts ?? {})
   const [brandVoice, setBrandVoice] = useState(client.brand_voice ?? '')
   const [defaultCta, setDefaultCta] = useState(client.default_cta ?? '')
   const [defaultHashtags, setDefaultHashtags] = useState(client.default_hashtags ?? '')
@@ -27,9 +28,9 @@ export function BrandTab({ client }: Props) {
 
   function saveColors() {
     startTransition(async () => {
-      const res = await updateClientProfile(client.id, { brand_colors: colors })
+      const res = await updateClientProfile(client.id, { brand_colors: colors, brand_fonts: fonts })
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-      else toast({ title: 'Colores guardados' })
+      else toast({ title: 'Paleta y tipografías guardadas' })
     })
   }
 
@@ -59,9 +60,35 @@ export function BrandTab({ client }: Props) {
             <ColorPicker label="Acento" value={colors.accent ?? null} onChange={(v) => setColors({ ...colors, accent: v })} />
             <ColorPicker label="Texto" value={colors.text ?? null} onChange={(v) => setColors({ ...colors, text: v })} />
           </div>
+          <div className="grid grid-cols-2 gap-3 border-t pt-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="font-primary" className="text-xs">Tipografía primaria</Label>
+              <Input
+                id="font-primary"
+                value={fonts.primary ?? ''}
+                onChange={(e) => setFonts({ ...fonts, primary: e.target.value })}
+                placeholder="Ej: Montserrat Bold"
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="font-secondary" className="text-xs">Tipografía secundaria</Label>
+              <Input
+                id="font-secondary"
+                value={fonts.secondary ?? ''}
+                onChange={(e) => setFonts({ ...fonts, secondary: e.target.value })}
+                placeholder="Ej: Lato"
+                className="h-9"
+              />
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Las Gráficas IA usan estos colores y tipografías. El archivo de la fuente (.ttf/.otf) se sube en la
+            pestaña Assets como &ldquo;Tipografía&rdquo;.
+          </p>
           <Button onClick={saveColors} disabled={isPending} size="sm" className="w-full">
             {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-2 h-3.5 w-3.5" />}
-            Guardar paleta
+            Guardar paleta y tipografías
           </Button>
         </CardContent>
       </Card>

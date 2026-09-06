@@ -44,6 +44,12 @@ export interface BrandColors {
   text?: string | null
 }
 
+/** Tipografías de marca (nombres de fuente, no archivos). */
+export interface BrandFonts {
+  primary?: string | null
+  secondary?: string | null
+}
+
 export type ClientAssetKind = 'logo' | 'color_guide' | 'font' | 'legal' | 'contract' | 'other'
 
 export interface ClientAsset {
@@ -146,6 +152,7 @@ export interface Client {
   owner_email: string | null
   owner_phone: string | null
   brand_colors: BrandColors
+  brand_fonts: BrandFonts
   logo_url: string | null
   logo_dark_url: string | null
   posting_days: number[]
@@ -565,6 +572,22 @@ export interface PostingDraft {
   client?: Pick<Client, 'id' | 'name'> | null
 }
 
+export interface GeneratedGraphicRow {
+  id: string
+  client_id: string | null
+  generated_by: string | null
+  concept: string
+  prompt: string | null
+  aspect_ratio: string
+  model: string | null
+  image_url: string
+  storage_path: string | null
+  source_image_url: string | null
+  created_at: string
+  // Joined
+  client?: Pick<Client, 'id' | 'name'> | null
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -583,6 +606,7 @@ export interface Database {
       posting_drafts: { Row: PostingDraft }
       content_ideas: { Row: ContentIdea }
       saved_captions: { Row: SavedCaptionRow }
+      generated_graphics: { Row: GeneratedGraphicRow }
       ui_events: { Row: UiEvent }
       user_time_days: { Row: UserTimeDay }
     }

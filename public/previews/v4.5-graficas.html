@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview v4.5 — Gráficas IA</title>
+<style>
+ :root{--bg:#0a0a0a;--card:#141414;--border:#262626;--fg:#fafafa;--muted:#a3a3a3;--gold:#eab308}
+ *{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:24px}
+ .wrap{max-width:860px;margin:0 auto}h1{font-size:18px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+ .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+ .head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+ .head b{font-size:13px}.cost{color:var(--muted);font-size:11px;white-space:nowrap}
+ .grid3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-bottom:10px}
+ label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)}
+ .field{border:1px solid var(--border);border-radius:8px;background:#0f0f0f;color:var(--fg);padding:8px 10px;font-size:13px}
+ textarea.field{resize:none;font-family:inherit;width:100%}
+ .btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:8px;background:var(--gold);color:#1c1300;font-weight:600;font-size:13px;padding:8px 14px;margin-top:10px}
+ .imgs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+ .art{aspect-ratio:1/1;border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--muted);text-align:center;padding:8px}
+ .a1{background:linear-gradient(135deg,#3b2f00,#0f0f0f 70%)}.a2{background:linear-gradient(160deg,#1c1300,#292929)}
+ .a3{background:radial-gradient(circle at 30% 20%,#4a3a05,#0d0d0d 75%)}.a4{background:linear-gradient(200deg,#242424,#3b2f00)}
+ .art b{color:#fde68a;font-size:13px}
+ .links{color:var(--muted);font-size:10px}
+ .hist{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+ .thumb{aspect-ratio:1/1;border:1px solid var(--border);border-radius:8px;background:linear-gradient(145deg,#1d1a10,#101010)}
+ .cap{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+</style></head>
+<body><div class="wrap">
+ <h1>Gráficas <span class="sub">· v4.5</span></h1>
+ <p class="sub">La IA (Grok Imagine) diseña artes para las redes con los colores y la voz de marca del cliente.</p>
+
+ <div class="card">
+  <div class="head"><b>Nueva gráfica</b><span class="cost">~$0.04 por imagen</span></div>
+  <div class="grid3">
+   <label>Cliente<span class="field">Barbería El Jefe</span></label>
+   <label>Formato<span class="field">Cuadrado — post de feed ▾</span></label>
+   <label>Variantes<span class="field">4 ▾</span></label>
+  </div>
+  <label>¿Qué debe mostrar? (para la IA)
+   <textarea class="field" rows="2" readonly>Promo 2x1 en cortes de pelo este fin de semana, ambiente de barbería moderna…</textarea>
+  </label>
+  <button class="btn">✨ Generar con IA</button>
+  <div class="imgs">
+   <div><div class="art a1"><b>2x1</b>EN CORTES<br>ESTE FIN DE SEMANA</div><div class="links">↗ Abrir · ⬇ Descargar</div></div>
+   <div><div class="art a2"><b>2x1</b>SOLO SÁB Y DOM</div><div class="links">↗ Abrir · ⬇ Descargar</div></div>
+   <div><div class="art a3"><b>EL JEFE</b>2x1 · RESERVA YA</div><div class="links">↗ Abrir · ⬇ Descargar</div></div>
+   <div><div class="art a4"><b>WEEKEND</b>2 CORTES × 1 PRECIO</div><div class="links">↗ Abrir · ⬇ Descargar</div></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="head"><b>Historial</b></div>
+  <div class="hist">
+   <div><div class="thumb"></div><div class="cap">Barbería El Jefe · 6 sep 14:02</div></div>
+   <div><div class="thumb"></div><div class="cap">Lucky Pet · 5 sep 10:31</div></div>
+   <div><div class="thumb"></div><div class="cap">Speedy Net · 4 sep 16:45</div></div>
+   <div><div class="thumb"></div><div class="cap">ARASIBO · 4 sep 09:12</div></div>
+   <div><div class="thumb"></div><div class="cap">Lucky Pet · 3 sep 11:58</div></div>
+   <div><div class="thumb"></div><div class="cap">Barbería El Jefe · 2 sep 15:20</div></div>
+  </div>
+ </div>
+</div></body></html>

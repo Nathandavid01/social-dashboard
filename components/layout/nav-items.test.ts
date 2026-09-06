@@ -28,12 +28,13 @@ describe('navItems source', () => {
     expect(hrefs).toContain('/settings/users')
   })
 
-  it('el menú de proceso empieza por generar ideas, grabar, luego Pipeline', () => {
+  it('el menú de proceso empieza por generar ideas (con Gráficas), grabar, luego Pipeline', () => {
     const process = navItems.filter((n) => n.group).map((n) => n.href)
-    expect(process.slice(0, 6)).toEqual([
+    expect(process.slice(0, 7)).toEqual([
       '/escribir-ideas',
       '/idea-lab',
       '/ideas-aprobadas',
+      '/graficas',
       '/recording-calendar',
       '/onsite',
       '/pipeline',

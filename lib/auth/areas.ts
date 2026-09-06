@@ -56,6 +56,8 @@ export const AREAS: Area[] = [
   { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Marketing' },
+  // Artes con IA (Grok Imagine) usando los colores y voz de marca del cliente.
+  { href: '/graficas',           label: 'Gráficas',        permission: 'graphics.generate',  group: 'Marketing' },
 
   // ── 2. Grabar ──
   { href: '/recording-calendar', label: 'Grabación',       permission: 'recording.read',     group: 'Recordings' },
