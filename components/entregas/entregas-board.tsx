@@ -819,10 +819,7 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
         {/* Publicación es la única columna con una acción externa: mandar el
             video a Metricool. Va en la tarjeta porque no hace falta abrir nada
             para decidirlo — el copy ya está escrito y aprobado. */}
-        {/* La fecha que Metricool va a RECIBIR, no la planificada:
-            buildPublishDateTime corre a +24h una fecha pasada o ausente para que
-            aprobar algo atrasado no publique al instante. La tarjeta además deja
-            elegir la hora a mano — un turno de hoy que ya pasó es un 400 seguro. */}
+        {/* Una fecha ausente o vencida requiere elegir otra antes de enviar. */}
         {stage === 'publication' && (
           <PublishScheduleCard
             ideaIds={batch.ideas.map((i) => i.id)}

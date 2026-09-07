@@ -43,7 +43,7 @@ function setup(over: Partial<React.ComponentProps<typeof PublishScheduleCard>> =
 describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () => {
   it('muestra la fecha que Metricool va a recibir', () => {
     setup({ publishDate: '2026-08-03' })
-    expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/Publicación en Metricool/i)).toBeInTheDocument()
     expect(screen.getByText(/3 ago 2026 · 10:00/i)).toBeInTheDocument()
   })
 
@@ -59,10 +59,10 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
     expect(screen.getByLabelText(/fecha y hora/i)).toBeInTheDocument()
   })
 
-  it('propone el día siguiente cuando el turno de hoy ya pasó', () => {
+  it('requiere elegir una nueva fecha cuando el turno de hoy ya pasó', () => {
     setup()
     fireEvent.click(screen.getByRole('button', { name: /cambiar fecha y hora/i }))
-    expect(screen.getByLabelText(/fecha y hora/i)).toHaveValue('2026-07-30T10:00')
+    expect(screen.getByLabelText(/fecha y hora/i)).toHaveValue('')
   })
 
   it('envía a Metricool la hora elegida, no la planificada', async () => {
@@ -123,7 +123,7 @@ describe('PublishScheduleCard — la hora se puede cambiar antes de enviar', () 
     expect(screen.queryByRole('button', { name: /cambiar fecha y hora/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /enviar a metricool/i })).not.toBeInTheDocument()
     // La fecha sigue siendo informativa para todos.
-    expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/Publicación en Metricool/i)).toBeInTheDocument()
   })
 
   it('avisa que la hora elegida aplica a todo el batch', () => {

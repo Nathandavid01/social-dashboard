@@ -1,13 +1,4 @@
-import { buildPublishDateTime } from '@/lib/utils/idea-posting-core'
-
-/**
- * The date/time a video will ACTUALLY be sent to Metricool, with its weekday.
- *
- * Not the same as the planned publish_date: buildPublishDateTime clamps a past
- * or missing date to +24h so an overdue approval can't auto-publish on the
- * spot. Showing the planned date on the card would then be a lie, so `clamped`
- * says when that happened and the label reflects the real schedule.
- */
+import { automaticPublishSchedule } from './automatic-publish-schedule'
 
 const DAY_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 const MONTH_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -17,8 +8,8 @@ export interface PublishSchedule {
   iso: string
   /** Human label, e.g. "Jue 30 jul 2026 · 14:30". */
   label: string
-  /** True when the planned date was missing or past and got pushed to +24h. */
-  clamped: boolean
+  /** An invalid schedule requires an explicit date change before sending. */
+  blockedReason?: string
 }
 
 /**
@@ -40,9 +31,7 @@ export function publishSchedule(
   postingTime: string | null | undefined,
   nowMs: number = Date.now(),
 ): PublishSchedule {
-  const iso = buildPublishDateTime(publishDate, postingTime, nowMs)
-  const todayUtc = new Date(nowMs).toISOString().slice(0, 10)
-  const clamped = !publishDate || publishDate < todayUtc
-
-  return { iso, clamped, label: formatScheduleLabel(iso) }
+  const result = automaticPublishSchedule(publishDate, postingTime, nowMs)
+  if (!result.ok) return { iso: '', label: 'Fecha pendiente de corregir', blockedReason: result.error }
+  return { iso: result.iso, label: formatScheduleLabel(result.iso) }
 }

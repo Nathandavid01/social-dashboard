@@ -38,7 +38,7 @@ export type AutoPostOutcome = { posted: boolean; skipped?: string } | null
  * approval must succeed even if Metricool fails. Honors the
  * METRICOOL_AUTOPOST_ON_APPROVAL=false kill switch. Idempotent: a no-op if the
  * idea isn't fully ready or was already posted. Returns the outcome (posted /
- * why it was skipped) purely as UI feedback; null = kill-switched or errored.
+ * why it was skipped) purely as UI feedback; null = kill-switched.
  */
 export async function maybeAutoPostIdea(
   ideaId: string,
@@ -49,11 +49,10 @@ export async function maybeAutoPostIdea(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const res = await runIdeaPost(supabase, ideaId, user?.id ?? null, null, opts)
-    if (res.error) return null // recorded on the row; approval stays green
+    if (res.error) return { posted: false, skipped: res.error }
     if (res.skipped) return { posted: false, skipped: res.skipped }
     return { posted: true }
-  } catch {
-    /* swallow — approval already committed; the failure is recorded on the row */
-    return null
+  } catch (err) {
+    return { posted: false, skipped: err instanceof Error ? err.message : 'No se pudo confirmar el envío a Metricool' }
   }
 }

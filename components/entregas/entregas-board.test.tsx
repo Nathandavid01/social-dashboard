@@ -163,18 +163,19 @@ describe('EntregasBoard — batch model', () => {
     // La semana que viene siempre es futura; en la actual la fecha puede haber
     // pasado ya y la tarjeta no anuncia un borrador vencido.
     fireEvent.click(screen.getByRole('button', { name: 'Semana siguiente' }))
-    expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/Publicación en Metricool/i)).toBeInTheDocument()
     expect(screen.getByText(/· 14:30/)).toBeInTheDocument()
   })
 
-  it('avisa cuando no hay fecha y Metricool la corre a +24h', () => {
+  it('bloquea el envío sin fecha y pide corregirla', () => {
     render(<EntregasBoard
       stages={['edited','approval','copy','publication']}
       ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: null })]}
     />)
     // Sin fecha el video vive en la pestaña "Sin día", no en un día concreto.
     fireEvent.click(screen.getByRole('button', { name: /sin día/i }))
-    expect(screen.getByText(/se corre a \+24h/i)).toBeInTheDocument()
+    expect(screen.getByText(/falta una fecha/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /enviar a metricool/i })).toBeDisabled()
   })
 
   it('solo las tarjetas de Publicación traen el botón de Metricool', () => {

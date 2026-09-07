@@ -52,7 +52,8 @@ describe('reconcilePostedIdeas', () => {
 
   it('un borrador no cuenta como publicado aunque sus redes lo digan', () => {
     const res = reconcilePostedIdeas([idea('a', 1)], [post(1, ['PUBLISHED'], true)])
-    expect(res.counts.scheduled).toBe(1)
+    expect(res.counts.draft).toBe(1)
+    expect(res.counts.scheduled).toBe(0)
     expect(res.toMarkPublished).toEqual([])
   })
 
@@ -79,6 +80,6 @@ describe('reconcilePostedIdeas', () => {
       [idea('a', 1), idea('b', 2), idea('c', 3), idea('d', 4)],
       [post(1, ['PUBLISHED']), post(2, ['PENDING']), post(3, ['ERROR'])],
     )
-    expect(res.counts).toEqual({ published: 1, scheduled: 1, failed: 1, missing: 1, unknown: 0 })
+    expect(res.counts).toEqual({ published: 1, scheduled: 1, draft: 0, failed: 1, missing: 1, unknown: 0 })
   })
 })

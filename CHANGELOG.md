@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.9 — 2026-09-07
+
+**Revisa qué publicaciones están listas para salir en Metricool.**
+
+- En Publicaciones, **Verificar en Metricool** consulta los próximos 14 días por cliente y separa publicaciones programadas, borradores y casos que necesitan atención.
+- Un borrador con fecha sigue siendo un borrador: el dashboard ya no lo clasifica como programado.
+- Las tarjetas piden corregir fechas vencidas o ausentes antes de enviar. Aprobar un video conserva su fecha existente y no mueve trabajo atrasado al día siguiente.
+- Los errores de envío se devuelven al flujo de aprobación para mostrar por qué el video no llegó a Metricool; los videos descartados quedan bloqueados.
+
+![Verificación de publicaciones, vista de ejemplo](/changelog/v4.9-flujo-metricool.png)
+
 ## v4.8 — 2026-09-06
 
 **"Mejorar descripción": la IA escribe la descripción de tu gráfica por ti.**

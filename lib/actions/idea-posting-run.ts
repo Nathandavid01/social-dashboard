@@ -8,11 +8,11 @@ import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import {
   ideaPostReadiness,
-  buildPublishDateTime,
   resolvePlatforms,
   resolveVideoForPublish,
   type VideoWatchBoard,
 } from '@/lib/utils/idea-posting-core'
+import { automaticPublishSchedule } from '@/lib/utils/automatic-publish-schedule'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
@@ -102,6 +102,12 @@ export async function runIdeaPost(
   )
   if (!readiness.ready) return { skipped: readiness.reason }
 
+  const schedule = overrideIso
+    ? { ok: true as const, iso: overrideIso }
+    : automaticPublishSchedule(idea.publish_date as string | null, client.posting_time)
+  if (!schedule.ok) return { skipped: schedule.error }
+  const scheduledFor = schedule.iso
+
   // ── Atomic claim: the real guard against double-posting. Sets posting_started_at
   // ONLY where metricool_post_id is null AND the slot is free or stale (>5 min, a
   // crashed prior attempt). If no row is claimed, another trigger already owns it
@@ -153,7 +159,6 @@ export async function runIdeaPost(
   }
 
   // A hand-picked time wins over the planned date + the client's posting_time.
-  const scheduledFor = overrideIso ?? buildPublishDateTime(idea.publish_date as string | null, client.posting_time)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   try {
