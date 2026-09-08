@@ -312,3 +312,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - TDD: 3 regresiones fallaron antes; 7 pruebas focales aprobadas. TypeScript y merge-gate aprobados; preview móvil simulado inspeccionado. No se emitió voto público real.
 - Límite explícito: loadeddata indica datos reproducibles, no que se haya visto todo el video o revisado captions/audio. Es una protección del visor; no sustituye la validación del RPC público. Pendientes concurrency del voto, activación 0074/0075 en Nathan y circuito completo.
 - Suite completa v4.61: 390 archivos aprobados, 3094 pruebas aprobadas, 3 omitidas. Local, sin desplegar.
+
+## Preparación SQL — Guardias del voto público (0076)
+
+- La función 0055 ya tenía FOR UPDATE sobre el voto y transacción para comentario+devolución. Probado localmente: historial y estado se revierten si falla la inserción del comentario; un segundo voto devuelve ya_votado.
+- Defecto reproducido: un video con metricool_post_id aceptaba rechazo y regresaba a revision_needed. Nueva assertion falló con ok:true. Migración staged 0076 bloquea la idea y rechaza ideas enviadas, con claim, publicadas o descartadas; mantiene voto único y comentario atómico. También rechaza decisión null.
+- Assertions locales aprobadas. Diez procesos simultáneos como anon, decisiones alternadas: 1 aceptado, 9 ya_votado. Merge-gate aprobado. Instancia local detenida al terminar; sin votos remotos.
+- Sin versión de UI: SQL preparado, no aplicado. 0076 reemplaza un RPC activo al aplicarse: necesita verificación de esquema y mensaje de error antes de activarlo. 0074/0075 también pendientes de Nathan. La identidad exacta del archivo que vio el cliente continúa pendiente de revisión.
