@@ -18,6 +18,7 @@ export type Permission =
   | 'clients.contract.edit'
   | 'clients.assets.upload'
   | 'clients.sms.send'
+  | 'operations.overview'
   // Tasks / operations
   | 'tasks.read.all'
   | 'tasks.read.own'
@@ -94,6 +95,7 @@ const RBAC: Record<UserRole, RolePerms> = {
 
   // Supervisor — manage team, content, see (but not edit) billing/contracts.
   supervisor: [
+    'operations.overview',
     'clients.read', 'clients.create', 'clients.edit', 'clients.brand.edit',
     'clients.billing.read', 'clients.contract.read', 'clients.assets.upload',
     'clients.sms.send',

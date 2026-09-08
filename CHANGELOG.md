@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.10 — 2026-09-08
+
+**Mi Día reúne las prioridades del equipo en un resumen operativo.**
+
+- Owner y Supervisor ven el checklist de publicaciones de hoy, incluidos clientes sin video fechado según su cadencia.
+- Muestra los espacios por llenar de cada editor, las revisiones, las correcciones y los videos listos para agendar en Metricool.
+- Los atrasos se consultan aparte. Enviado a Metricool queda pendiente de verificar hasta que conste publicado.
+- Los editores conservan su vista personal; si los datos no cargan completos, el resumen muestra un error en vez de ceros.
+
+![Resumen operativo, datos de ejemplo](/changelog/v4.10-mi-dia-overview.png)
+
 ## v4.9 — 2026-09-07
 
 **Revisa qué publicaciones están listas para salir en Metricool.**
