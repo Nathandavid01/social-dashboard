@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.42 — 2026-09-08
+
+**El chat también reconoce los compromisos publicados directamente en Metricool.**
+
+- El resumen distingue “Publicados Hoy” y “Por Publicar Hoy” usando la misma conciliación del checklist.
+- Las publicaciones externas confirmadas se identifican como piezas sin vínculo local.
+- Una consulta fallida o parcial se anuncia expresamente para evitar confundir pendientes locales con publicaciones faltantes.
+
 ## v4.41 — 2026-09-08
 
 **El checklist reconoce una publicación de hoy confirmada directamente en Metricool.**

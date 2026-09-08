@@ -160,3 +160,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - QA real posterior: contador bajó de 30 a 29 por publicar, 1/30 publicados, Arasibo muestra 'Publicado En Metricool · Sin Pieza Vinculada'. Sin mutaciones ni publicaciones externas.
 - 10 pruebas focales pasan, TypeScript y merge-gate pasan. Preview: `/previews/v4.41-checklist-metricool.html`.
 - Pendiente: aplicar esta conciliación también al resumen de chat del servidor; mejorar la lista larga de cobertura y los responsables 'Sin Asignar'; la revisión atómica permanece sin activar en Supabase de Nathan.
+
+## v4.42 — Conciliación de checklist en el briefing
+
+- La contradicción observada en QA autenticada v4.41 queda atendida en el generador de contexto del chat: `execGetDashboardSummary` obtiene `auditOperationalPublications` y usa `reconcileTodayChecklist` en el formatter, igual que la pantalla.
+- Incluye contadores separados de compromisos publicados y por publicar. No marca aprobaciones internas ni enlaza posts a videos distintos. Fallos/parcialidad remota se comunican expresamente.
+- Dos regresiones fallaron antes del cambio; 14 pruebas focales pasan, TypeScript, merge-gate y diff-check pasan.
+- Preview de estados simulado `/previews/v4.42-chat-checklist.html`. El cambio está local; la síntesis final del modelo aún requiere una nueva comprobación autenticada. Se conserva el pendiente de tareas/alertas textuales antiguas y errores en consultas secundarias del briefing.

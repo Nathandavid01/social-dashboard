@@ -1,3 +1,4 @@
+import { auditOperationalPublications } from '@/lib/actions/operational-publications'
 import { getAlerts } from '@/lib/actions/alerts'
 import { getOperationsOverview } from '@/lib/actions/operations-overview'
 import { formatOperationsBriefing } from '@/lib/utils/operations-briefing'
@@ -787,6 +788,7 @@ async function execGetDashboardSummary(): Promise<string> {
       { data: profiles },
       workflow,
       todayPosts,
+      publicationAudit,
     ] = await Promise.all([
       supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
       getAlerts(),
@@ -796,6 +798,7 @@ async function execGetDashboardSummary(): Promise<string> {
       supabase.from('profiles').select('id, full_name').order('full_name'),
       getOperationsOverview(),
       execGetTodaysPosts(),
+      auditOperationalPublications(),
     ])
 
     const all = tasks ?? []
@@ -853,7 +856,7 @@ async function execGetDashboardSummary(): Promise<string> {
     lines.push(``)
 
     // Content workflow must match the canonical Mi día snapshot.
-    lines.push(formatOperationsBriefing(workflow), '', todayPosts, '')
+    lines.push(formatOperationsBriefing(workflow, publicationAudit), '', todayPosts, '')
 
     // Team
     if (teamLines.length > 0) {

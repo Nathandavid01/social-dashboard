@@ -24,3 +24,16 @@ it('keeps totals exact and labels a shortened detail list',()=>{
  expect(result).toContain('22 más')
  expect(result).not.toContain('Clip 29')
 })
+it('matches Mi Dia completion when Metricool confirms an external daily commitment',()=>{
+ const source={...overview,today:[{...item,id:'missing-c',missing:true,state:'Sin Video Fechado'}]}
+ const evidence={report:{today:overview.date,clients:[{id:'c',days:[{date:overview.date,covered:true,published:1}]}]}} as any
+ const result=formatOperationsBriefing({data:source},evidence)
+ expect(result).toContain('Publicados Hoy: 1')
+ expect(result).toContain('Por Publicar Hoy: 0')
+ expect(result).toContain('Publicado En Metricool · Sin Pieza Vinculada')
+})
+it('explicitly marks remote reconciliation as incomplete on failure',()=>{
+ const result=formatOperationsBriefing({data:overview},{error:'Metricool Sin Verificar'})
+ expect(result).toContain('Metricool Sin Verificar')
+ expect(result).toContain('No se confirmó la conciliación')
+})
