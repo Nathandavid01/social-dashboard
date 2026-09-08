@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.58 — 2026-09-08
+
+**Los controles del enlace del cliente se recuperan de fallos de conexión.**
+
+- Generar y descargar dejan de quedar bloqueados cuando falla la petición.
+- Copiar muestra un error si el navegador rechaza el portapapeles.
+- La creación solo se confirma después de consultar el mismo enlace recién generado; un resultado incierto pide consultar antes de volver a crear.
+
+![Creación sin confirmar (simulación)](/changelog/v4.58-enlace-acciones.png)
+
 ## v4.57 — 2026-09-08
 
 **Un fallo al cargar el enlace del cliente no se interpreta como enlace ausente.**

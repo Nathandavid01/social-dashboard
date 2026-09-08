@@ -39,7 +39,7 @@ export function EnlaceClienteBoton({
   const [loadError, setLoadError] = useState(false)
   const requestId = useRef(0)
 
-  const cargar = useCallback(async () => {
+  const cargar = useCallback(async (expectedToken?: string) => {
     const request = ++requestId.current
     setCargando(true)
     setLoadError(false)
@@ -49,7 +49,7 @@ export function EnlaceClienteBoton({
         getEntregaVideoEditado(ideaId),
       ])
       if (request !== requestId.current) return false
-      if (enlaceRes.error || videoRes.error) throw new Error('No se pudo cargar')
+      if (enlaceRes.error || videoRes.error || (expectedToken && enlaceRes.enlace?.token !== expectedToken)) throw new Error('No se pudo cargar')
       setEnlace(enlaceRes.enlace ?? null)
       setEditedVideoId(videoRes.id ?? null)
       return true
@@ -79,36 +79,52 @@ export function EnlaceClienteBoton({
 
   async function generar(e: React.MouseEvent) {
     parar(e)
+    if (generando) return
     setGenerando(true)
-    const res = await crearEnlaceCliente({ clientId, ideaIds: [ideaId] })
-    setGenerando(false)
-    if (res.error) {
-      toast({ title: 'No se pudo generar', description: res.error, variant: 'destructive' })
-      return
+    try {
+      const res = await crearEnlaceCliente({ clientId, ideaIds: [ideaId] })
+      if (res.error) {
+        toast({ title: 'No se pudo generar', description: res.error, variant: 'destructive' })
+        setLoadError(true)
+        return
+      }
+      if (!res.token) throw new Error('Resultado sin confirmar')
+      if (!await cargar(res.token)) return
+      toast({ title: `Enlace de ${clientName}`, description: `Listo para enviar. Vence en ${DIAS_DE_VIGENCIA} días.` })
+    } catch {
+      setLoadError(true)
+      toast({ title: 'Creación Sin Confirmar', description: 'Consulta el enlace antes de intentar crearlo otra vez.', variant: 'destructive' })
+    } finally {
+      setGenerando(false)
     }
-    if (!await cargar()) return
-    toast({ title: `Enlace de ${clientName}`, description: `Listo para enviar. Vence en ${DIAS_DE_VIGENCIA} días.` })
   }
 
   async function copiar(e: React.MouseEvent) {
     parar(e)
-    await navigator.clipboard.writeText(url)
-    setCopiado(true)
-    setTimeout(() => setCopiado(false), 1500)
-    toast({ title: 'Enlace copiado' })
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 1500)
+      toast({ title: 'Enlace copiado' })
+    } catch {
+      setCopiado(false)
+      toast({ title: 'No Se Pudo Copiar', description: 'Puedes abrir el enlace y copiarlo desde la barra del navegador.', variant: 'destructive' })
+    }
   }
 
   async function bajar(e: React.MouseEvent) {
     parar(e)
     if (!editedVideoId || bajando) return
     setBajando(true)
-    const res = await getEntregasDownloadUrl(editedVideoId)
-    setBajando(false)
-    if (res.error || !res.url) {
-      toast({ title: 'No se pudo descargar', description: res.error ?? 'Error inesperado', variant: 'destructive' })
-      return
+    try {
+      const res = await getEntregasDownloadUrl(editedVideoId)
+      if (res.error || !res.url) throw new Error(res.error ?? 'Error inesperado')
+      window.open(res.url, '_blank')
+    } catch (error) {
+      toast({ title: 'No se pudo descargar', description: error instanceof Error ? error.message : 'Vuelve a intentar.', variant: 'destructive' })
+    } finally {
+      setBajando(false)
     }
-    window.open(res.url, '_blank')
   }
 
   if (cargando) return null

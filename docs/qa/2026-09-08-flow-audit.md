@@ -277,3 +277,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Hallazgo: getEnlaceCliente ignoraba el error de la primera consulta y devolvía enlace:null; la UI también ignoraba errores y rechazos, ofreciendo generación o desapareciendo indefinidamente. Ahora propaga error, muestra reintento y no ofrece generación hasta consultar correctamente. Un contador de petición ignora resultados obsoletos.
 - TDD: 3 fallos reproducidos antes; 11 pruebas de enlace aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se regeneraron enlaces reales.
 - Pendiente: crearEnlaceCliente aún borra enlaces previos antes de completar la nueva creación y omite algunos errores; generación/copiar/descargar requieren manejo de rechazo. Auditar ese flujo antes de considerarlo confiable. Local sin desplegar; revisión atómica y ciclo real siguen pendientes.
+
+## v4.58 — Acciones del enlace se recuperan de rechazo
+
+- Fuente: generar/copiar/bajar no capturaban rechazos; generar y bajar conservaban loading, y creación sin token o sin lectura posterior podía mostrar éxito.
+- TDD: 5 casos nuevos fallaron primero. Generación y descarga liberan su estado con finally; copiar reporta rechazo; creación incierta exige consultar antes de crear otra vez y no repite automáticamente la mutación. Éxito requiere leer de vuelta el token recibido.
+- 15 pruebas de controles aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se crearon enlaces ni descargaron archivos reales.
+- Límite pendiente: creación del servidor aún elimina enlaces previos antes de terminar y necesita atomicidad; popup bloqueado por navegador en descargar también requiere manejo específico. Local sin desplegar, ciclo real y revisión atómica siguen pendientes.
