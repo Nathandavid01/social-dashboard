@@ -235,3 +235,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - getCompleteReviewNotes usa el cliente autenticado de la página y los ids ya visibles; divide ids en grupos de 100 y resultados en páginas de 500, verifica conteos y duplicados, y conserva la nota más reciente por video. Incluye cambios internos y del cliente. Un fallo mantiene el aviso recuperable de v4.50.
 - Prueba inicial falló por módulo ausente. 21 pruebas aprobadas entre consulta, selección de última nota y página; TypeScript y merge-gate aprobados. CUA confirmó /revision cargada como Denisha; preview móvil simulado inspeccionado. No se crearon comentarios ni decisiones reales para la prueba.
 - Local, sin desplegar. No es snapshot transaccional de múltiples consultas. Pendiente comprobar reproducción y corrección real, y aplicar revisión atómica con acceso a Supabase de Nathan.
+
+## v4.52 — Recuperación del visor ante rechazos de red
+
+- QA autenticado: abrí Anibal Fuentes PNP, idea 3301450a-13ce-4fb2-8b80-3f6bc11a772e. El medio mostró un fotograma y duración 0:06; no se ha probado reproducción completa/audio. El análisis reporta ausencia de captions; la UI bloquea auto-revisión de Eric, coincidiendo con la identidad real que usa decideReview aunque se vea el rol Denisha. No se emitieron decisiones ni cambios.
+- Código: ReviewOverlay y ReviewQueue no capturaban rechazos de sus promesas de consulta/firma. Se añaden captura, mensaje y reintento, con descarte de respuestas obsoletas. Al cambiar la pieza se limpian error y contenido anteriores.
+- TDD: 2 fallos de overlay y 1 fallo de preview con rechazos no manejados antes del cambio. Final: 15 pruebas aprobadas, TypeScript y merge-gate aprobados; preview móvil simulado inspeccionado.
+- Local, sin desplegar. Pendiente: carga de preview muestra temporalmente “Todavía no hay video editado” mientras firma; separar ese estado de un archivo ausente. Falta prueba completa de medios/correcciones/publicación y acceso de Nathan para revisión atómica.

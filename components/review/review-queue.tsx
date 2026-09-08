@@ -49,6 +49,7 @@ export function ReviewQueue({
   const [index, setIndex] = useState(0)
   const [url, setUrl] = useState<string | null>(null)
   const [urlError, setUrlError] = useState<string | null>(null)
+  const [previewRetry, setPreviewRetry] = useState(0)
   const [decisionError,setDecisionError]=useState('')
   const [pending, setPending] = useState(false)
 
@@ -79,9 +80,11 @@ export function ReviewQueue({
       if (!alive) return
       if (res.url) setUrl(res.url)
       else setUrlError(res.error ?? 'No se pudo cargar el video')
+    }).catch(() => {
+      if (alive) setUrlError('No se pudo cargar el video. Vuelve a intentar.')
     })
     return () => { alive = false }
-  }, [current?.videoFileId, current, getPreviewUrl])
+  }, [current?.videoFileId, current, getPreviewUrl, previewRetry])
 
   async function decide(decision: 'approve' | 'request_changes', note: string) {
     if (!current || pending) return
@@ -154,10 +157,11 @@ export function ReviewQueue({
 
       {decisionError && <p role="alert" className="rounded-lg border border-rose-500/30 p-3 text-sm text-rose-500">{decisionError}</p>}
       {urlError && (
-        <p className="flex items-start gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-2 text-[11px] text-destructive">
+        <div role="alert" className="flex flex-wrap items-start gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-2 text-[11px] text-destructive">
           <AlertCircle className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {urlError}
-        </p>
+          {current.videoFileId && <button className="min-h-11 rounded-lg border px-3" onClick={() => setPreviewRetry((n) => n + 1)}>Reintentar Video</button>}
+        </div>
       )}
 
       <InternalReviewPanel

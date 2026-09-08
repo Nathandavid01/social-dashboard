@@ -138,3 +138,12 @@ describe('ReviewQueue — one video at a time', () => {
     expect(await screen.findByText('Uno')).toBeInTheDocument()
   })
 })
+
+it('lets the reviewer retry a rejected preview request', async () => {
+  getPreviewUrl.mockRejectedValueOnce(new Error('network'))
+  renderQueue([video()])
+  expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar el video')
+  fireEvent.click(screen.getByRole('button', { name: 'Reintentar Video' }))
+  await waitFor(() => expect(document.querySelector('video')).toHaveAttribute('src', 'https://r2.example/signed.mp4'))
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})

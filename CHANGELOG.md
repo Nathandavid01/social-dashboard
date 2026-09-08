@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.52 — 2026-09-08
+
+**El visor de revisión permite recuperarse de errores de conexión.**
+
+- Si falla la petición de videos, aparece un error con la opción de volver a intentar.
+- Si falla la carga del enlace del video, puedes reintentarlo desde el visor.
+- Al abrir otra pieza se limpian los errores anteriores y se ignoran respuestas de una pieza ya cerrada.
+
+![Error de conexión del visor (simulación)](/changelog/v4.52-visor-reintento.png)
+
 ## v4.51 — 2026-09-08
 
 **Las correcciones siguen visibles aunque crezca el historial.**
