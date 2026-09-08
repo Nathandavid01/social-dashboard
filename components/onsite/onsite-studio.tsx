@@ -224,6 +224,7 @@ export function OnsiteStudio({
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Jornada de grabación</p>
               <h1 className="truncate text-xl font-semibold tracking-tight">{active.clientName}</h1>
+              <p className="mt-2 w-fit max-w-full break-words rounded-lg border border-violet-500/25 bg-violet-500/10 px-3 py-2 text-xs font-medium text-violet-700 dark:text-violet-300">Editor De Videos · {active.editorName || 'Sin Editor Asignado'}</p>
               <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
                 <span className={cn('rounded-full px-2 py-0.5', active.arrivedAt ? 'bg-emerald-500/15 text-emerald-500' : 'bg-muted')}>1 Llegada</span>
                 <span aria-hidden>→</span>

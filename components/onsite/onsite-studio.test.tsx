@@ -281,3 +281,9 @@ describe('OnsiteStudio', () => {
     expect(screen.getByText('Subida El primer sandwich del día')).toBeInTheDocument()
   })
 })
+
+it.each([['Carlos Villalta', 'Carlos Villalta'], [null, 'Sin Editor Asignado']])('shows the client editor in the session header: %s', (name, expected) => {
+  const active=session({editorName:name})
+  render(<OnsiteStudio sessions={[active]} active={active} shots={[]} addable={[]} canBrief canRecord canUpload today="2026-08-20" currentUserId="u1" />)
+  expect(screen.getByText(`Editor De Videos · ${expected}`)).toBeInTheDocument()
+})

@@ -23,6 +23,7 @@ export interface OnsiteSession {
   date: string
   clientId: string | null
   clientName: string
+  editorName?: string | null
   location: string | null
   status: string
   /** Días de posteo por semana, del perfil. */
@@ -45,7 +46,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
   }
 
   const supabase = await createClient()
-  const base = 'id, title, session_date, client_id, location, status, client:clients(name, posting_days)'
+  const base = 'id, title, session_date, client_id, location, status, client:clients(name, posting_days, assigned_to)'
   const first = await supabase
     .from('recording_sessions')
     .select(`${base}, arrived_at, arrived_by`)
@@ -72,9 +73,15 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
     arrived_by?: string | null
   }>
   const arriverIds = Array.from(new Set(rows.map((s) => s.arrived_by).filter((id): id is string => Boolean(id))))
+  const editorIds = rows.flatMap(s => {
+    const raw = s.client as { assigned_to?: string | null } | { assigned_to?: string | null }[] | null
+    const c = Array.isArray(raw) ? raw[0] : raw
+    return c?.assigned_to ? [c.assigned_to] : []
+  })
+  const peopleIds = Array.from(new Set([...arriverIds, ...editorIds]))
   const names: Record<string, string> = {}
-  if (arriverIds.length > 0) {
-    const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', arriverIds)
+  if (peopleIds.length > 0) {
+    const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', peopleIds)
     for (const p of people ?? []) {
       if (p.full_name) names[p.id] = p.full_name
     }
@@ -82,7 +89,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
 
   return {
     sessions: rows.map((s) => {
-      const raw = s.client as { name?: string; posting_days?: number[] | null } | { name?: string; posting_days?: number[] | null }[] | null
+      const raw = s.client as { name?: string; posting_days?: number[] | null; assigned_to?: string | null } | { name?: string; posting_days?: number[] | null; assigned_to?: string | null }[] | null
       const c = Array.isArray(raw) ? raw[0] : raw
       const quota = requiredForOnsite({ postingDays: c?.posting_days, ref: new Date(s.session_date + 'T12:00:00') })
       const arrivedBy = (s as { arrived_by?: string | null }).arrived_by ?? null
@@ -92,6 +99,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
         date: s.session_date,
         clientId: s.client_id,
         clientName: c?.name ?? 'Sin cliente',
+        editorName: c?.assigned_to ? (names[c.assigned_to] ?? 'Nombre No Disponible') : null,
         location: s.location,
         status: s.status,
         perWeek: quota.perWeek,

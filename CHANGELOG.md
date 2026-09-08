@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.14 — 2026-09-08
+
+**On Site muestra quién editará los videos del cliente.**
+
+- El encabezado identifica al editor asignado al cliente, separado de la persona que registra la llegada.
+- Si no hay asignación, muestra “Sin Editor Asignado”.
+
+![Editor del cliente en On Site, datos de ejemplo](/changelog/v4.14-editor-onsite.png)
+
 ## v4.13 — 2026-09-08
 
 **El cliente define el título y la meta de videos de la grabación.**
