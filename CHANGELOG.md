@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.26 — 2026-09-08
+
+**Un envío incierto no se repite solo porque pasaron cinco minutos.**
+
+- Si Metricool no confirma el resultado, la idea conserva el bloqueo y muestra que necesita verificación.
+- Los rechazos confirmados permiten corregir el problema y reintentar.
+- Una respuesta sin ID ni UUID ya no cuenta como envío exitoso.
+
 ## v4.25 — 2026-09-08
 
 **El dashboard informa si Metricool creó el post pero falló el registro local.**

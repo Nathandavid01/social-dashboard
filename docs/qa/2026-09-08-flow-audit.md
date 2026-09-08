@@ -36,3 +36,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - v4.25 corrige el éxito falso si las tres escrituras de bookkeeping devuelven error. El resultado ahora contiene error e ID remoto; no ok, y no libera el claim en esta ruta.
 - La regresión reproduce tres fallos de DB después de una única creación remota. El flujo exitoso conserva su cobertura existente.
 - Sigue pendiente la recuperación/reconciliación: la expiración de claims y los fallos de transporte aún requieren tratamiento. Esta corrección no garantiza por sí sola ausencia de duplicados después de cinco minutos.
+
+## Continuación · Resultado Incierto
+
+- v4.26 elimina el takeover automático de claims vencidos. Un timeout o error ambiguo conserva posting_started_at; otro click incluso después de seis minutos no ejecuta POST.
+- Rechazos HTTP explícitos y ausencia de configuración se clasifican como definitivamente no creados; pueden liberar el claim. Respuestas sin identificadores conservan estado incierto.
+- Pruebas focales: 37 pasan; TypeScript y merge-gate pasan.
+- **Pendiente para cerrar este flujo:** implementar una acción autenticada de reconciliación con evidencia remota y UI para resolver los claims inciertos (incluidos los anteriores). Por ahora permanecen bloqueados; no hay una liberación automática ni se debe editar la DB a ciegas.
+- También revisar errores previos al POST que lanzan excepciones, comparaciones atómicas con aprobación/archivo y observabilidad en Mi Día. No hay envíos reales en estas pruebas.

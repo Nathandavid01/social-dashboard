@@ -118,20 +118,17 @@ export async function runIdeaPost(
   if (!schedule.ok) return { skipped: schedule.error }
   const scheduledFor = schedule.iso
 
-  // ── Atomic claim: the real guard against double-posting. Sets posting_started_at
-  // ONLY where metricool_post_id is null AND the slot is free or stale (>5 min, a
-  // crashed prior attempt). If no row is claimed, another trigger already owns it
-  // (approve + manual button, retries) — abort instead of posting twice. ──
-  const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+  // No timeout-based takeover: a lost response may hide a successful remote
+  // creation. An unresolved claim must be reconciled before another POST.
   const { data: claimed, error: claimErr } = await supabase
     .from('content_ideas')
     .update({ posting_started_at: new Date().toISOString() })
     .eq('id', ideaId)
     .is('metricool_post_id', null)
-    .or(`posting_started_at.is.null,posting_started_at.lt.${staleBefore}`)
+    .is('posting_started_at', null)
     .select('id')
   if (claimErr) return { error: claimErr.message }
-  if (!claimed || claimed.length === 0) return { skipped: 'Ya se publicó o hay una publicación en curso' }
+  if (!claimed || claimed.length === 0) return { skipped: 'Hay un envío en curso o pendiente de verificar en Metricool. No se reenviará hasta confirmar su resultado.' }
 
   const releaseClaim = async (postingError: string) => {
     await supabase
@@ -182,11 +179,10 @@ export async function runIdeaPost(
     )
     const postId = res.data?.id ?? null
     const uuid = res.data?.uuid ?? null
+    if (postId == null && !uuid) throw new Error('Metricool no devolvió un identificador de la publicación')
 
-    // The Metricool post EXISTS now — this bookkeeping must stick or a stale-claim
-    // retry (>5 min) could post twice. Retry the UPDATE; on total failure DO NOT
-    // release the claim (posting_started_at keeps blocking retries for 5 min and
-    // the posted_at readiness backstop covers rows where it did persist).
+    // Remote creation succeeded. Keep the durable claim if bookkeeping fails;
+    // no retry may create another post until reconciliation finishes.
     let recorded = false
     for (let attempt = 0; attempt < 3 && !recorded; attempt++) {
       const { error: recordErr } = await supabase
@@ -234,7 +230,12 @@ export async function runIdeaPost(
     return { ok: true, metricoolPostId: postId }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
-    await releaseClaim(msg)
-    return { error: msg }
+    if (err instanceof Error && 'definitelyNotCreated' in err && err.definitelyNotCreated === true) {
+      await releaseClaim(msg)
+      return { error: msg }
+    }
+    const uncertain = `No se pudo confirmar el resultado del envío. Debes verificarlo en Metricool antes de reenviar. ${msg}`
+    await supabase.from('content_ideas').update({ posting_error: uncertain }).eq('id', ideaId)
+    return { error: uncertain }
   }
 }

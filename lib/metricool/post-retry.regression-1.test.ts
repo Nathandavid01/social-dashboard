@@ -31,3 +31,10 @@ describe('Metricool POST retries', () => {
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 })
+
+it('distinguishes a definite rejection from an uncertain server outcome', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => ({ok:false,status:401,text:async()=> 'Unauthorized'})))
+  await expect(send()).rejects.toMatchObject({definitelyNotCreated:true})
+  vi.stubGlobal('fetch', vi.fn(async () => ({ok:false,status:503,text:async()=> 'Unavailable'})))
+  await expect(send()).rejects.not.toHaveProperty('definitelyNotCreated', true)
+})

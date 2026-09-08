@@ -1,3 +1,7 @@
+class MetricoolPostRejected extends Error {
+  readonly definitelyNotCreated = true
+}
+
 const METRICOOL_BASE = 'https://app.metricool.com/api'
 
 export interface MetricoolServerConfig {
@@ -79,7 +83,7 @@ export async function createDraftPost(
   },
 ): Promise<MetricoolDraftResponse> {
   const config = getServerConfig()
-  if (!config) throw new Error('Metricool server credentials not configured')
+  if (!config) throw new MetricoolPostRejected('Metricool server credentials not configured')
 
   const effectiveBlogId = blogId || config.blogId
 
@@ -140,7 +144,11 @@ export async function createDraftPost(
 
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`Metricool API error: ${res.status} - ${text}`)
+    const message = `Metricool API error: ${res.status} - ${text}`
+    if ([400, 401, 403, 404, 405, 413, 415, 422, 429].includes(res.status)) {
+      throw new MetricoolPostRejected(message)
+    }
+    throw new Error(message)
   }
 
   return res.json() as Promise<MetricoolDraftResponse>
