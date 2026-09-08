@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { activeNavHref } from './active-nav'
 import { navItems } from './nav-items'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -41,7 +42,7 @@ export function MobileNav({ videoReviewCount = 0 }: MobileNavProps) {
         </div>
         <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {allowed.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const isActive = item.href === activeNavHref(pathname, allowed.map(item => item.href))
             // Only /video-reviews is in the nav; /operations and /inbox are
             // nav:false, so their badges could never render.
             const badge =
@@ -52,6 +53,7 @@ export function MobileNav({ videoReviewCount = 0 }: MobileNavProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => setOpen(false)}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',

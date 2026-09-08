@@ -5,6 +5,7 @@ import { Fragment, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { activeNavHref } from './active-nav'
 import { navItems, visibleNavItems } from './nav-items'
 import { Eye, EyeOff, GripVertical, Check, RotateCcw, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { saveNavPreferences } from '@/lib/actions/nav-preferences'
@@ -199,7 +200,7 @@ export function Sidebar({
         {visibleHrefs.map((href, i) => {
           const item = itemsByHref.get(href)
           if (!item) return null
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          const isActive = item.href === activeNavHref(pathname, visibleHrefs)
           const isHidden = hidden.has(item.href) && !(role === 'supervisor' && ['/pipeline', '/banco'].includes(item.href))
           const heading = headingBefore(href, i)
 
@@ -296,6 +297,7 @@ export function Sidebar({
               )}
               <Link
                 href={item.href}
+                aria-current={isActive ? 'page' : undefined}
                 onPointerDown={startLongPress}
                 onPointerMove={onPressMove}
                 onPointerUp={clearLongPress}
