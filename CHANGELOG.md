@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.17 — 2026-09-08
+
+**Un calendario de grabación más claro en escritorio y en iPhone.**
+
+- Resumen del mes con sesiones, asignaciones pendientes y grabaciones completadas, respetando los filtros.
+- Tarjetas con hora, cliente y videógrafo. Los nombres pueden ocupar dos líneas; las sesiones sin responsable lo indican claramente.
+- Botón Hoy, navegación accesible entre meses y Ver Más para abrir días cargados sin crear otra sesión.
+- En pantallas pequeñas el calendario se presenta como agenda, con controles que se acomodan al ancho disponible.
+
+![Calendario de grabación rediseñado](/changelog/v4.17-calendario.png)
+
 ## v4.16 — 2026-09-08
 
 **Perfiles de todo el equipo y enlaces directos a sus redes.**

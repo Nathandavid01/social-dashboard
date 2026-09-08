@@ -144,7 +144,7 @@ describe('RecordingCalendarClient — premium redesign', () => {
     render(<RecordingCalendarClient initialSessions={[session({ title: 'Blue Chiro - Recording' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
     const clientName = screen.getByText('Nora Fitness')
     expect(clientName).toHaveAttribute('data-slot', 'session-chip-client')
-    expect(clientName).toHaveClass('truncate', 'text-[11px]', 'font-semibold', 'tracking-tight', 'text-foreground')
+    expect(clientName).toHaveClass('line-clamp-2', 'text-xs', 'font-semibold', 'tracking-tight', 'text-foreground')
     expect(screen.queryByText('Blue Chiro - Recording')).not.toBeInTheDocument()
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
   })
@@ -165,7 +165,7 @@ describe('RecordingCalendarClient — premium redesign', () => {
     />)
     const fallback = screen.getByText('Sin cliente')
     expect(fallback).toHaveAttribute('data-slot', 'session-chip-client')
-    expect(fallback).toHaveClass('text-[11px]', 'font-semibold')
+    expect(fallback).toHaveClass('text-xs', 'font-semibold')
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
   })
 
@@ -274,4 +274,27 @@ it('uses the selected client name as a read-only title and shows the recording t
   expect(screen.getByLabelText(/título de la sesión/i)).toHaveValue('Nora Fitness')
   expect(screen.getByLabelText(/título de la sesión/i)).toHaveAttribute('readonly')
   expect(screen.getByText('14 Videos Para Grabar')).toBeInTheDocument()
+})
+
+it('shows recording time and a visible assignment warning in the monthly grid',()=>{
+ render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00',videographer_id:null,videographer:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ expect(screen.getByText('09:30')).toBeInTheDocument()
+ expect(screen.getByText('Asignar Videógrafo')).toBeInTheDocument()
+ expect(screen.getByRole('button',{name:'Mes Anterior'})).toBeInTheDocument()
+ expect(screen.getByRole('button',{name:'Volver A Hoy'})).toBeInTheDocument()
+})
+it('expands a busy day without opening a new-session form',()=>{
+ render(<RecordingCalendarClient initialSessions={[1,2,3,4].map(n=>session({id:`s${n}`,title:`Sesión ${n}`,client_id:null,client:null}))} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ fireEvent.click(screen.getByRole('button',{name:/ver 1 más/i}))
+ expect(screen.getByText('Sesión 4')).toBeInTheDocument()
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
+
+it('uses an agenda on narrow screens instead of a compressed month grid',()=>{
+ const previous=window.matchMedia
+ window.matchMedia=vi.fn().mockReturnValue({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})
+ render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00'})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ expect(screen.getByText('Tu agenda, día por día')).toBeInTheDocument()
+ expect(screen.queryByText('Lun')).not.toBeInTheDocument()
+ window.matchMedia=previous
 })
