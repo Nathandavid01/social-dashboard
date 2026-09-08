@@ -1,3 +1,11 @@
+## v4.73
+
+**Clientes Solo Por Selección**
+- Quitamos El Campo De Texto En Editores Por Cliente.
+- Elige Un Cliente De La Lista Para Ver Y Asignar Sus Editores.
+
+![Selector De Clientes](/changelog/v4.73-clientes.png)
+
 ## v4.72
 
 **Una Sola Sección Seleccionada**
