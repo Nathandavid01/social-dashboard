@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.51 — 2026-09-08
+
+**Las correcciones siguen visibles aunque crezca el historial.**
+
+- Revisión consulta todas las páginas de comentarios de los videos devueltos.
+- Cada tarjeta conserva la última corrección del equipo o del cliente.
+- Si el historial no se puede cargar completo, aparece el aviso para volver a cargar Revisión.
+
+![Aviso de historial incompleto (simulación)](/changelog/v4.51-correcciones.png)
+
 ## v4.50 — 2026-09-08
 
 **Revisión carga la cola completa y avisa si no puede verificarla.**

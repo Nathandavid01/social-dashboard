@@ -3,7 +3,7 @@ import {render,screen} from '@testing-library/react'
 const h=vi.hoisted(()=>({ fail:'' }))
 vi.mock('@/lib/auth/server',()=>({requirePermission:async()=>{},getEffectiveRole:async()=> 'supervisor',getEffectiveUserId:async()=> 'u',currentUserHas:async()=>true}))
 vi.mock('@/lib/actions/content-ideas',()=>({getIdeacionPipeline:async()=>{if(h.fail==='ideas')throw Error('offline');return [{id:'i',client_id:'c',approval_status:'revision_needed',videos:[{kind:'edited',storage_provider:'entregas-r2'}]}]}}))
-vi.mock('@/lib/supabase/server',()=>({createClient:async()=>({from:(table:string)=>{const q:any={select:()=>q,eq:()=>q,in:()=>q,order:()=>q,then:(resolve:any)=>Promise.resolve(h.fail===table?{data:null,error:{message:'offline'}}:{data:[]}).then(resolve)};return q}})}))
+vi.mock('@/lib/supabase/server',()=>({createClient:async()=>({from:(table:string)=>{const q:any={select:()=>q,eq:()=>q,in:()=>q,order:()=>q,range:()=>q,then:(resolve:any)=>Promise.resolve(h.fail===table?{data:null,error:{message:'offline'}}:{data:[],count:0}).then(resolve)};return q}})}))
 vi.mock('@/components/entregas/entregas-board',()=>({EntregasBoard:()=> <div>Review Board</div>}))
 vi.mock('@/components/entregas/vista-editor',()=>({VistaEditor:()=> <div>Editor</div>}))
 vi.mock('@/components/onsite/supervisor-process-steps',()=>({SupervisorProcessSteps:()=>null}))

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { clientsForUser, visibleClientIds } from '@/lib/utils/client-visibility'
 import { filterEntregasDeliveredIdeas } from '@/lib/utils/entregas-delivery'
 import { EntregasBoard } from '@/components/entregas/entregas-board'
-import { latestNoteByIdea, type ReviewNoteRow } from '@/lib/actions/review-notes-core'
+import { getCompleteReviewNotes } from '@/lib/actions/review-notes-query'
 import { VistaEditor } from '@/components/entregas/vista-editor'
 import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
 
@@ -62,18 +62,7 @@ export default async function RevisionPage() {
     // Las correcciones de la última ronda, para enseñarlas en la tarjeta que
     // volvió al editor. Solo de lo visible: no hace falta traerlas todas.
     const devueltos = mios.filter((i) => i.approval_status === 'revision_needed').map((i) => i.id)
-    const notesResult = devueltos.length
-      ? await supabase
-          .from('content_idea_activity')
-          .select('content_idea_id, metadata, created_at, user:profiles(full_name)')
-          // Las dos: el revisor del equipo y el cliente por su enlace. El editor
-          // corrige lo mismo venga de quien venga; distinguirlo es cosa del autor.
-          .in('action', ['changes_requested', 'client_requested_changes'])
-          .in('content_idea_id', devueltos)
-          .order('created_at', { ascending: false })
-      : { data: [], error: null }
-    if (notesResult.error) throw new Error('No se pudieron cargar las correcciones.')
-    const reviewNotes = latestNoteByIdea((notesResult.data ?? []) as unknown as ReviewNoteRow[])
+    const reviewNotes = await getCompleteReviewNotes(supabase, devueltos)
 
     // El editor y el diseñador solo entregan: no reparten trabajo del equipo, así
     // que las pestañas de día y el selector de semana les sobran. Y la fecha ya

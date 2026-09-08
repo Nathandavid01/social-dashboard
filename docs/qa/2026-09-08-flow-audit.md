@@ -228,3 +228,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Revisión usa esa opción y muestra un aviso recuperable si falla cualquiera de sus tres consultas principales, en vez de renderizar una cola vacía o comentarios ausentes por error.
 - TDD: 4 casos del loader y 3 de error de página fallaron antes del cambio. Validación final: 23 pruebas aprobadas (incluidas relaciones), TypeScript y merge-gate aprobados. CUA /revision autenticado como Denisha cargó Martes con 11 piezas en Revisión. Preview móvil inspeccionado, error simulado sin modificar datos reales.
 - Local, sin publicación. Pendiente: verificar el reproductor y correcciones con medios reales; la actividad de notas aún usa una consulta limitada por el máximo del servidor, susceptible a truncamiento si crece; migración atómica sigue pendiente de acceso de Nathan. La suite completa anterior fue v4.49 (3027 aprobadas).
+
+## v4.51 — Historial de correcciones sin truncamiento silencioso
+
+- Fuente: la consulta única de content_idea_activity podía omitir la última nota de un video cuando las revisiones de otros videos ocupaban el máximo de filas del servidor.
+- getCompleteReviewNotes usa el cliente autenticado de la página y los ids ya visibles; divide ids en grupos de 100 y resultados en páginas de 500, verifica conteos y duplicados, y conserva la nota más reciente por video. Incluye cambios internos y del cliente. Un fallo mantiene el aviso recuperable de v4.50.
+- Prueba inicial falló por módulo ausente. 21 pruebas aprobadas entre consulta, selección de última nota y página; TypeScript y merge-gate aprobados. CUA confirmó /revision cargada como Denisha; preview móvil simulado inspeccionado. No se crearon comentarios ni decisiones reales para la prueba.
+- Local, sin desplegar. No es snapshot transaccional de múltiples consultas. Pendiente comprobar reproducción y corrección real, y aplicar revisión atómica con acceso a Supabase de Nathan.
