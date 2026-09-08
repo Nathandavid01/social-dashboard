@@ -1,3 +1,4 @@
+vi.mock('@/lib/context/auth-context',()=>({useAuth:()=>({role:'supervisor'})}))
 import {render,screen,fireEvent} from '@testing-library/react'
 import {it,expect,vi} from 'vitest'
 import {RecordingPending} from './recording-pending'
