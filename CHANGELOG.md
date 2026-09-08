@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.40 — 2026-09-08
+
+**El chat no anuncia que todo está bien si las alertas no se pudieron verificar.**
+
+- La lista de alertas y el resumen del chat usan el mismo lector.
+- Ya no se revisan únicamente las cinco o diez alertas más recientes para concluir que no hay problemas.
+- Los errores y resultados incompletos se indican expresamente; las alertas vencidas o descartadas se excluyen.
+
 ## v4.39 — 2026-09-08
 
 **El resumen operativo del chat usa la misma fuente que Mi Día.**

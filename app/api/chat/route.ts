@@ -1,3 +1,4 @@
+import { getAlerts } from '@/lib/actions/alerts'
 import { getOperationsOverview } from '@/lib/actions/operations-overview'
 import { formatOperationsBriefing } from '@/lib/utils/operations-briefing'
 import { getTodayBriefing } from '@/lib/metricool/today-briefing'
@@ -779,7 +780,7 @@ async function execGetDashboardSummary(): Promise<string> {
 
     const [
       { data: tasks },
-      { data: alerts },
+      alerts,
       { count: clientCount },
       { count: pendingRequests },
       { count: pendingVideos },
@@ -788,7 +789,7 @@ async function execGetDashboardSummary(): Promise<string> {
       todayPosts,
     ] = await Promise.all([
       supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
-      supabase.from('alerts').select('title, severity, message').order('created_at', { ascending: false }).limit(5),
+      getAlerts(),
       supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('client_requests').select('*', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
       supabase.from('video_reviews').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'head_editor_review', 'pending_final_check', 'final_check_review', 'revision_needed']),
@@ -881,12 +882,7 @@ async function execGetDashboardSummary(): Promise<string> {
 
 async function execGetActiveAlerts(): Promise<string> {
   try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('alerts')
-      .select('title, message, severity, created_at, expires_at')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const data = await getAlerts()
 
     if (!data?.length) return 'No active alerts at this time.'
 

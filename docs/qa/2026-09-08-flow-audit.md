@@ -143,3 +143,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - El detalle se limita a ocho filas por sección con cantidad restante y enlace a Mi día; los totales no se recortan. Se mantienen las secciones de tareas generales, clientes, inbox y QC.
 - 13 pruebas focales pasan, TypeScript y merge-gate pasan. Preview simulado `/previews/v4.39-resumen-compartido.html`. Sin publicar ni generar mensajes a usuarios.
 - Pendiente: las secciones antiguas de tareas/alertas/inbox del briefing todavía requieren manejo de error explícito y filtro temporal de alertas; verificar respuesta final del chat autenticado, no solo el formatter. Acceso al proyecto Supabase de Nathan sigue necesario para revisión atómica.
+
+## v4.40 — Lectura fiable de alertas
+
+- La política SQL existente ya filtra vencidas, target_role y dismissed_by; no se ha afirmado que la política viva falle. El fallo confirmado de aplicación era consulta limitada a 5/10 filas e ignorar `error` en el chat, que podía producir un falso 'All clear'.
+- Las dos herramientas de chat usan `getAlerts`; el lector exige sesión, propaga errores, detecta respuesta truncada mediante count exacto y refuerza exclusión de vencidas/descartadas.
+- Tres regresiones fallaron antes del cambio; cinco pruebas del lector pasan. Suite completa: 374 archivos pasan, 1 omitido; 2983 pruebas pasan, 3 omitidas. TypeScript, merge-gate y diff-check pasan.
+- Local, no se descartaron ni enviaron alertas reales. Preview simulado: `/previews/v4.40-alertas-verificadas.html`.
+- Pendiente: otras consultas de tareas/inbox/clientes del briefing conservan manejo de errores insuficiente; verificar chat autenticado y política real de alertas. La migración de revisión atómica sigue sin aplicar por falta de acceso al proyecto de Nathan.
