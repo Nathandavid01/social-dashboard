@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2, XCircle, Loader2, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { textoDecision, type DecisionCliente } from '@/lib/entregas/client-review'
-import { votarRevisionPublica, type RevisionPublica, type VideoDelEnlace } from '@/lib/actions/entregas-client-review'
+import { getRevisionPublica, votarRevisionPublica, type RevisionPublica, type VideoDelEnlace } from '@/lib/actions/entregas-client-review'
 
 /**
  * La pantalla que ve el cliente: sus videos, y cada uno con sus dos botones.
@@ -99,11 +99,14 @@ function VideoCliente({
   const [name, setName] = useState('')
   const [enviando, setEnviando] = useState<DecisionCliente | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [uncertain, setUncertain] = useState(false)
+  const [checking, setChecking] = useState(false)
 
   const decidido = yaDecidido ?? (video.status !== 'pending' ? video.status : null)
   const abierto = !decidido && !vencido
 
   async function votar(decision: DecisionCliente) {
+    if (enviando || uncertain || !abierto) return
     const check = textoDecision(decision, comment)
     if (!check.ok) {
       setError(check.error ?? 'Escribe qué hay que cambiar.')
@@ -111,13 +114,39 @@ function VideoCliente({
     }
     setError(null)
     setEnviando(decision)
-    const res = await votarRevisionPublica({ token, ideaId: video.ideaId, decision, comment, name })
-    setEnviando(null)
-    if (res.error) {
-      setError(res.error)
-      return
+    try {
+      const res = await votarRevisionPublica({ token, ideaId: video.ideaId, decision, comment, name })
+      if (res.error) { setError(res.error); return }
+      if (!res.ok) throw new Error('Unconfirmed')
+      onDecidido(decision)
+    } catch {
+      setUncertain(true)
+      setError('No pudimos confirmar si se guardó tu respuesta. Consúltala antes de enviarla otra vez.')
+    } finally {
+      setEnviando(null)
     }
-    onDecidido(decision)
+  }
+
+  async function consultar() {
+    if (checking) return
+    setChecking(true)
+    try {
+      const current = await getRevisionPublica(token)
+      const item = current?.videos.find(v => v.ideaId === video.ideaId)
+      if (!item || !current) throw new Error('Unavailable')
+      if (item.status === 'approved' || item.status === 'rejected') {
+        onDecidido(item.status)
+      } else if (item.status === 'pending' && new Date(current.expiresAt).getTime() > Date.now()) {
+        setUncertain(false)
+        setError('Tu respuesta todavía no aparece guardada. Puedes volver a enviarla.')
+      } else {
+        setError('El enlace venció. Escríbenos para continuar.')
+      }
+    } catch {
+      setError('No pudimos consultar tu respuesta. Conservamos tu comentario; vuelve a consultar cuando tengas conexión.')
+    } finally {
+      setChecking(false)
+    }
   }
 
   return (
@@ -195,11 +224,12 @@ function VideoCliente({
           </div>
 
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          {uncertain && <button disabled={checking} onClick={() => void consultar()} className="min-h-11 rounded-lg border px-4 text-sm disabled:opacity-50">Consultar Mi Respuesta</button>}
 
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => votar('approved')}
-              disabled={enviando !== null}
+              disabled={enviando !== null || uncertain}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
             >
               {enviando === 'approved'
@@ -209,7 +239,7 @@ function VideoCliente({
             </button>
             <button
               onClick={() => votar('rejected')}
-              disabled={enviando !== null}
+              disabled={enviando !== null || uncertain}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold transition hover:bg-muted disabled:opacity-50"
             >
               {enviando === 'rejected'

@@ -298,3 +298,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - 10 procesos psql simultáneos, rol authenticated, mismo request UUID: un solo token. El lock por cliente serializa reemplazos; los padres vacíos se conservan expirados para impedir que un reintento antiguo recree un enlace.
 - SECURITY INVOKER, rol activo owner/supervisor/editor/copy conforme a captions.edit actual. El fixture no reproduce RLS real; debe validarse en el proyecto de Nathan antes de activar. No se modificaron enlaces remotos.
 - Guía reproducible: scripts/tests/README-client-link-atomic.md. Pendiente aplicar y conectar 0074/0075 con acceso de Nathan, validar roles y completar el ciclo real.
+
+## v4.60 — Respuesta pública con resultado incierto
+
+- Fuente: VideoCliente esperaba votarRevisionPublica sin catch/finally y consideraba éxito cualquier respuesta sin error, aunque faltara ok. Ahora recupera el estado de envío, conserva comentario/nombre y bloquea otro voto hasta consultar mediante getRevisionPublica.
+- Consulta resuelve al estado aprobado/rechazado guardado o habilita envío si el servidor muestra pending y el enlace no venció. Consulta fallida conserva el bloqueo y permite consultar otra vez. No repite automáticamente votos.
+- TDD: 4 pruebas fallaron antes (rechazo, respuesta vacía, consulta pending, consulta fallida); 21 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado; no se emitieron votos reales.
+- Pendiente: revisar concurrencia/idempotencia del RPC público, rechazo con comentarios frente a aprobación, manejo de error del medio público, y completar el circuito con un video de prueba. 0074/0075 siguen staged; local sin desplegar.

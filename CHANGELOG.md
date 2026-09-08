@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.60 — 2026-09-08
+
+**El cliente puede recuperar una respuesta cuyo envío quedó sin confirmar.**
+
+- Si se corta la conexión, conserva el comentario y ofrece consultar si la respuesta se guardó.
+- No muestra aprobación ni rechazo exitoso sin confirmación.
+- Si la consulta también falla, mantiene la opción de consultar sin repetir automáticamente el envío.
+
+![Respuesta sin confirmar (simulación)](/changelog/v4.60-respuesta-cliente.png)
+
 ## v4.59 — 2026-09-08
 
 **El enlace del cliente valida todos sus videos antes de crearse.**
