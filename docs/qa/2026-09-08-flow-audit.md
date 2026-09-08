@@ -249,3 +249,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Dos pruebas de regresión fallaron primero. Final: 26 pruebas de queue/panel, TypeScript y merge-gate aprobados; preview móvil de tres estados inspeccionado.
 - CUA: presioné reproducir del medio de Anibal Fuentes PNP (idea 3301450a-13ce-4fb2-8b80-3f6bc11a772e) y observé cambio de fotograma y fin 0:06/0:06. No se emitió aprobación ni corrección. Audio no escuchado/validado; el análisis muestra sin captions.
 - Local, sin desplegar. Próximo punto: error del elemento video luego de obtener URL todavía no tiene manejo específico ni invalida verificaciones previas; revisar antes de declarar robusta la aprobación. Sigue pendiente revisión atómica de Nathan y el ciclo real completo.
+
+## v4.54 — Error del elemento video invalida verificaciones
+
+- Reproducción en pruebas: un evento error del video dejaba casillas marcadas y Aprobar habilitado. Se captura el error, se desmarcan verificaciones, se bloquea Aprobar y se ofrece reintento que renueva la URL desde la cola. Cambiar video/URL también limpia las verificaciones.
+- TDD: 3 regresiones fallaron antes de implementar; 29 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se dañó ni alteró un medio real para inducir el error.
+- Límite: esto protege el estado del visor, no demuestra que una persona haya visto el video completo ni valida por sí mismo captions/audio. La revisión atómica y el ciclo real de corrección/publicación siguen pendientes.
+- Suite completa v4.54: 384 archivos aprobados, 3055 pruebas aprobadas y 3 omitidas; salida /tmp/nate-v454-suite.log. Local, sin desplegar.

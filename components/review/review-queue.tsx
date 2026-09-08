@@ -171,6 +171,7 @@ export function ReviewQueue({
         role={role}
         userId={userId}
         pending={pending}
+        onRetryPreview={() => setPreviewRetry((n) => n + 1)}
         onDecision={decide}
       />
     </div>

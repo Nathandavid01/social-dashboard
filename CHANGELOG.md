@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.54 — 2026-09-08
+
+**Un error de reproducción invalida las verificaciones del video.**
+
+- Si falla el reproductor, se bloquea Aprobar y se desmarcan las verificaciones de video y subtítulos.
+- Puedes reintentar la reproducción y obtener un enlace nuevo desde el visor.
+- Al cambiar el archivo, sus verificaciones deben realizarse de nuevo.
+
+![Error de reproducción (simulación)](/changelog/v4.54-error-reproduccion.png)
+
 ## v4.53 — 2026-09-08
 
 **El visor distingue un video cargando de un archivo ausente.**
