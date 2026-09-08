@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link2, Copy, Check, Loader2, CheckCircle2, XCircle, ExternalLink, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -36,18 +36,32 @@ export function EnlaceClienteBoton({
   const [generando, setGenerando] = useState(false)
   const [copiado, setCopiado] = useState(false)
   const [bajando, setBajando] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const requestId = useRef(0)
 
   const cargar = useCallback(async () => {
-    const [enlaceRes, videoRes] = await Promise.all([
-      getEnlaceCliente(ideaId),
-      getEntregaVideoEditado(ideaId),
-    ])
-    setEnlace(enlaceRes.enlace ?? null)
-    setEditedVideoId(videoRes.id ?? null)
-    setCargando(false)
+    const request = ++requestId.current
+    setCargando(true)
+    setLoadError(false)
+    try {
+      const [enlaceRes, videoRes] = await Promise.all([
+        getEnlaceCliente(ideaId),
+        getEntregaVideoEditado(ideaId),
+      ])
+      if (request !== requestId.current) return false
+      if (enlaceRes.error || videoRes.error) throw new Error('No se pudo cargar')
+      setEnlace(enlaceRes.enlace ?? null)
+      setEditedVideoId(videoRes.id ?? null)
+      return true
+    } catch {
+      if (request === requestId.current) setLoadError(true)
+      return false
+    } finally {
+      if (request === requestId.current) setCargando(false)
+    }
   }, [ideaId])
 
-  useEffect(() => { void cargar() }, [cargar])
+  useEffect(() => { void cargar(); return () => { requestId.current++ } }, [cargar])
 
   // window en el cliente: el enlace lleva el dominio desde el que se trabaja, no
   // uno fijo que dejaría de valer al cambiar de dominio.
@@ -72,7 +86,7 @@ export function EnlaceClienteBoton({
       toast({ title: 'No se pudo generar', description: res.error, variant: 'destructive' })
       return
     }
-    await cargar()
+    if (!await cargar()) return
     toast({ title: `Enlace de ${clientName}`, description: `Listo para enviar. Vence en ${DIAS_DE_VIGENCIA} días.` })
   }
 
@@ -98,6 +112,10 @@ export function EnlaceClienteBoton({
   }
 
   if (cargando) return null
+  if (loadError) return <div onClick={parar} role="alert" className="text-xs text-destructive">
+    <p>No Se Pudo Cargar El Enlace</p>
+    <button className="mt-1 min-h-11 rounded border px-2" onClick={() => void cargar()}>Reintentar Enlace</button>
+  </div>
 
   return (
     <div onClick={parar} className="flex items-center gap-1">

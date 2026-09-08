@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.57 — 2026-09-08
+
+**Un fallo al cargar el enlace del cliente no se interpreta como enlace ausente.**
+
+- La tarjeta muestra un aviso y permite reintentar la consulta.
+- Mientras no se verifica el enlace existente, no ofrece crear uno nuevo.
+- Las respuestas de una tarjeta anterior se ignoran al cambiar de video.
+
+![Error al consultar el enlace (simulación)](/changelog/v4.57-enlace-carga.png)
+
 ## v4.56 — 2026-09-08
 
 **Entregas distingue la etapa de publicación de los envíos a Metricool.**

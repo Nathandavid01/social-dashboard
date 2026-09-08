@@ -270,3 +270,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - TDD: 2 pruebas fallaron primero; 66 pruebas del tablero aprobadas, TypeScript y merge-gate aprobados. CUA /entregas real mostró 25 tarjetas, 21 En Publicación y 14 Videos Enviados A Metricool. Preview móvil inspeccionado sin desbordamiento.
 - Los 14 envíos son registros internos, no una nueva auditoría remota de publicación. No se envió ningún post. Sigue pendiente auditoría completa de medios y Metricool, revisión atómica con acceso de Nathan, y elección del voto cliente en múltiples rondas.
 - Commit local, sin desplegar.
+
+## v4.57 — Lectura del enlace distingue ausencia y error
+
+- Investigación de rondas: lectura remota read-only encontró 45/45 filas, cero ideas con múltiples rondas. No afirmar duplicados actuales. La selección de votos por ronda sigue siendo deuda potencial, no reproducción actual.
+- Hallazgo: getEnlaceCliente ignoraba el error de la primera consulta y devolvía enlace:null; la UI también ignoraba errores y rechazos, ofreciendo generación o desapareciendo indefinidamente. Ahora propaga error, muestra reintento y no ofrece generación hasta consultar correctamente. Un contador de petición ignora resultados obsoletos.
+- TDD: 3 fallos reproducidos antes; 11 pruebas de enlace aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se regeneraron enlaces reales.
+- Pendiente: crearEnlaceCliente aún borra enlaces previos antes de completar la nueva creación y omite algunos errores; generación/copiar/descargar requieren manejo de rechazo. Auditar ese flujo antes de considerarlo confiable. Local sin desplegar; revisión atómica y ciclo real siguen pendientes.

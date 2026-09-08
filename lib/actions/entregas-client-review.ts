@@ -102,13 +102,14 @@ export async function getEnlaceCliente(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
   const supabase = await createClient()
-  const { data: item } = await supabase
+  const { data: item, error: itemError } = await supabase
     .from('entregas_client_review_items')
     .select('review_id')
     .eq('idea_id', ideaId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+  if (itemError) return { error: itemError.message }
   if (!item) return { enlace: null }
 
   const { data, error } = await supabase
