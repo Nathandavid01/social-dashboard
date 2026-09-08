@@ -1,3 +1,5 @@
+import { getTodayBriefing } from '@/lib/metricool/today-briefing'
+import { getScheduledPosts } from '@/lib/metricool/scheduler'
 import { generateCaptionText, captionModelId } from '@/lib/llm/caption-llm'
 import { toGrokTools, toGrokMessages, parseGrokToolCalls, type GrokMessage, type AnthropicToolDef } from '@/lib/llm/tool-adapter'
 import { parseSseTextDeltas } from '@/lib/llm/grok-stream'
@@ -1249,57 +1251,13 @@ async function execGetTodaysPosts(clientName?: string): Promise<string> {
     if (!token || !userId) return 'Metricool not configured.'
 
     const supabase = await createClient()
-    const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().slice(0, 19)
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString().slice(0, 19)
-
-    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
-    if (clientName) dbQuery = dbQuery.ilike('name', `%${clientName}%`)
-    const { data: clients } = await dbQuery.limit(clientName ? 3 : 50)
-    if (!clients?.length) return 'No Metricool clients configured.'
-
-    const results = await Promise.allSettled(
-      clients.map(async (c) => {
-        const url = `https://app.metricool.com/api/v2/scheduler/posts?userId=${userId}&blogId=${c.metricool_blog_id}&start=${todayStart}&end=${todayEnd}`
-        const res = await fetch(url, { headers: { 'X-Mc-Auth': token } })
-        if (!res.ok) return []
-        const json = await res.json() as { data?: { text: string; publicationDate: { dateTime: string }; providers?: { network: string }[]; draft?: boolean }[] }
-        return (json.data || [])
-          .filter((p) => p.text?.trim())
-          .map((p) => ({
-            client: c.name,
-            text: p.text || '',
-            date: p.publicationDate?.dateTime || '',
-            platforms: (p.providers || []).map((x) => x.network),
-            isDraft: p.draft ?? false,
-          }))
-      })
-    )
-
-    const posts = results
-      .filter((r) => r.status === 'fulfilled')
-      .flatMap((r) => (r as PromiseFulfilledResult<{ client: string; text: string; date: string; platforms: string[]; isDraft: boolean }[]>).value)
-      .sort((a, b) => a.date.localeCompare(b.date))
-
-    if (!posts.length) return `No posts scheduled or published today${clientName ? ` for ${clientName}` : ''}.`
-
-    const published = posts.filter((p) => new Date(p.date) <= now && !p.isDraft)
-    const scheduled = posts.filter((p) => new Date(p.date) > now || p.isDraft)
-
-    const formatTime = (d: string) => new Date(d).toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', hour12: true })
-
-    let out = `**Today's posts (${posts.length} total):**\n`
-    if (published.length) {
-      out += `\n✅ **Published (${published.length}):**\n` + published.map((p) =>
-        `• **${p.client}** @ ${formatTime(p.date)} (${p.platforms.join(', ')})\n  ${p.text.slice(0, 80)}${p.text.length > 80 ? '…' : ''}`
-      ).join('\n')
-    }
-    if (scheduled.length) {
-      out += `\n\n📅 **Scheduled (${scheduled.length}):**\n` + scheduled.map((p) =>
-        `• **${p.client}** @ ${formatTime(p.date)} (${p.platforms.join(', ')})\n  ${p.text.slice(0, 80)}${p.text.length > 80 ? '…' : ''}`
-      ).join('\n')
-    }
-    return out
+    let query = supabase.from('clients').select('name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
+    if (clientName) query = query.ilike('name', `%${clientName}%`)
+    const { data: clients, error } = await query
+    if (error) return 'Consulta Incompleta: no se pudo cargar la lista de clientes. No inferir que no hay publicaciones.'
+    if (!clients?.length) return 'No hay clientes activos con Metricool para esta consulta.'
+    return await getTodayBriefing(clients, (blogId, start, end) =>
+      getScheduledPosts({ userId, userToken: token, blogId }, start, end))
   } catch (err) {
     return `Error: ${err instanceof Error ? err.message : 'Unknown error'}`
   }

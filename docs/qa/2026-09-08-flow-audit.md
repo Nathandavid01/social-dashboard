@@ -119,3 +119,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Permiso dedicado `video.discard`, solo para owner/supervisor. Se exige en la acción y se consulta en el botón. Subir archivos no concede el poder de cerrar trabajo.
 - Ocho regresiones fallaron antes del cambio; 98 pruebas focales pasan después (acción, botón, tablero, permisos). TypeScript, merge-gate y diff-check pasan.
 - Preview explicativo: `/previews/v4.36-permisos-descarte.html` (simulación). No se ejecutaron descartes con datos reales. Falta validar las políticas de base de datos y las pantallas autenticadas por rol; esto verifica la autorización en los puntos de entrada de la aplicación, no constituye una auditoría completa de RLS.
+
+## v4.37 — Evidencia real en el resumen de publicaciones de hoy
+
+- Inspección de `execGetTodaysPosts`: antes clasificaba como publicado cualquier post no borrador cuya fecha había pasado, descartaba textos vacíos y convertía respuestas HTTP fallidas en listas vacías. Usaba además el día local del servidor y un límite de 50 clientes.
+- Ahora usa el lector compartido de Metricool (timeout y errores), consulta el día de Puerto Rico, incluye todos los clientes activos devueltos y distingue confirmado/pendiente/error/borrador con estados por red. Confirma publicado solo mediante `isScheduledPostPublished`; no infiere éxito por tiempo transcurrido.
+- Evidencia de consulta incompleta explícita cuando falla una cuenta; no se transforma en ausencia de publicaciones. La hora de consulta se expone al modelo junto con la instrucción de no llamar atrasados a posts futuros.
+- 15 pruebas pasan (incluye UTC ya en el día siguiente, estados parciales, borradores, errores y texto vacío), TypeScript y merge-gate pasan.
+- Cambio local. Pendiente: comprobar respuesta final del chat autenticado y auditar las demás herramientas de briefing/agenda que tienen consultas independientes; verificar la ventana efectiva de resultados de `extendedRange` en datos vivos. No se ejecutaron publicaciones ni notificaciones.
