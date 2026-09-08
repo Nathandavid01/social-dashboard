@@ -1,8 +1,8 @@
 vi.mock('./workflow-refresh',()=>({WorkflowRefresh:()=>null}))
 import { vi } from 'vitest'
-vi.mock('./publication-checklist',()=>({PublicationChecklist:()=>null}))
+vi.mock('./publication-checklist',()=>({PublicationChecklist:({onReport}:any)=><button onClick={()=>onReport({today:'2026-09-08',clients:[{id:'c',days:[{date:'2026-09-08',covered:true,published:1}]}]})}>Resultado Metricool</button>}))
 import {it,expect} from 'vitest'
-import {render,screen} from '@testing-library/react'
+import {render,screen,fireEvent} from '@testing-library/react'
 import {OperationsOverviewView} from './operations-overview'
 import {buildOperationsOverview} from '@/lib/utils/operations-overview'
 it('shows an operational checklist and honest empty scheduling state',()=>{
@@ -14,4 +14,13 @@ it('shows an operational checklist and honest empty scheduling state',()=>{
  expect(screen.getByText(/2 espacios por llenar/)).toBeInTheDocument()
  expect(screen.getByText(/No hay videos listos para agendar/)).toBeInTheDocument()
  expect(screen.getByRole('link',{name:/Verificar En Metricool/})).toHaveAttribute('href','/published')
+})
+
+it('updates the daily checklist when the Metricool panel confirms an external post',()=>{
+ const data=buildOperationsOverview([],[{id:'c',name:'Arasibo',posting_days:[2],metricool_blog_id:'1'}],[],'2026-09-08')
+ render(<OperationsOverviewView data={data}/>)
+ fireEvent.click(screen.getByRole('button',{name:'Resultado Metricool'}))
+ expect(screen.queryByText('Falta Preparar El Video De Hoy')).not.toBeInTheDocument()
+ expect(screen.getByText('Publicado En Metricool · Sin Pieza Vinculada')).toBeInTheDocument()
+ expect(screen.getByRole('link',{name:/Por Publicar Hoy/})).toHaveTextContent('0')
 })

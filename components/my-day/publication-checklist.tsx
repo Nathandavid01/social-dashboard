@@ -3,9 +3,9 @@ import {useEffect,useState} from 'react'
 import {auditOperationalPublications} from '@/lib/actions/operational-publications'
 import type {OperationalPublicationReport} from '@/lib/utils/operational-publications'
 const labels:Record<string,string>={published:'Publicado',scheduled:'Programado',draft:'Borrador',partial:'Publicación Parcial',failed:'Falló',unknown:'Sin Verificar',unverified:'Sin Coincidencia En Metricool'}
-export function PublicationChecklist(){
+export function PublicationChecklist({onReport}:{onReport?:(report:OperationalPublicationReport|null)=>void}={}){
  const [report,setReport]=useState<OperationalPublicationReport|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState('')
- async function check(){setLoading(true);setError('');setReport(null);try{const r=await auditOperationalPublications();setReport(r.report??null);setError(r.error??'')}catch{setError('No se pudo verificar Metricool.')}finally{setLoading(false)}}
+ async function check(){setLoading(true);setError('');setReport(null);onReport?.(null);try{const r=await auditOperationalPublications();setReport(r.report??null);onReport?.(r.report??null);setError(r.error??'')}catch{setError('No se pudo verificar Metricool.')}finally{setLoading(false)}}
  useEffect(()=>{void check();const timer=setInterval(()=>{if(document.visibilityState==='visible')void check()},300000);return()=>clearInterval(timer)},[])
  const verified=report?.clients.filter(c=>!c.error)??[]
  return <section className="rounded-xl border border-sky-500/25 bg-card p-4 sm:p-5">

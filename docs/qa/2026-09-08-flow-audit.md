@@ -151,3 +151,12 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Tres regresiones fallaron antes del cambio; cinco pruebas del lector pasan. Suite completa: 374 archivos pasan, 1 omitido; 2983 pruebas pasan, 3 omitidas. TypeScript, merge-gate y diff-check pasan.
 - Local, no se descartaron ni enviaron alertas reales. Preview simulado: `/previews/v4.40-alertas-verificadas.html`.
 - Pendiente: otras consultas de tareas/inbox/clientes del briefing conservan manejo de errores insuficiente; verificar chat autenticado y política real de alertas. La migración de revisión atómica sigue sin aplicar por falta de acceso al proyecto de Nathan.
+
+## v4.41 — Checklist y publicaciones externas (QA autenticada)
+
+- Navegación real localhost:3038/mi-dia, sesión en vista de Denisha Matos (Supervisor). Mi día cargó 30 compromisos, 31 revisiones, 3 correcciones y 25 bloqueos; el chat respondió con esos mismos conteos. La respuesta aún mezcló 'pendientes' con 'draft' y repitió una alerta de cuatro posts: sigue pendiente revisar esa síntesis y las alertas almacenadas.
+- Bug observado: el chat y Metricool confirmaban Arasibo publicado, pero el checklist lo seguía mostrando como 'Falta Preparar El Video De Hoy'.
+- `PublicationChecklist` comunica su reporte a la vista; se concilian solo compromisos sintéticos sin pieza local cuando el día está cubierto con publicación real. Nunca se aprueba ni publica por asociación un video interno diferente. Resultados fallidos/de otro día no completan el compromiso.
+- QA real posterior: contador bajó de 30 a 29 por publicar, 1/30 publicados, Arasibo muestra 'Publicado En Metricool · Sin Pieza Vinculada'. Sin mutaciones ni publicaciones externas.
+- 10 pruebas focales pasan, TypeScript y merge-gate pasan. Preview: `/previews/v4.41-checklist-metricool.html`.
+- Pendiente: aplicar esta conciliación también al resumen de chat del servidor; mejorar la lista larga de cobertura y los responsables 'Sin Asignar'; la revisión atómica permanece sin activar en Supabase de Nathan.
