@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.63 — 2026-09-08
+
+**Asigna a cada persona qué tiene que hacer desde Perfil y Mi Día.**
+
+- Elige responsable, tarea, instrucciones, fecha límite y prioridad.
+- Cada persona ve sus tareas; quienes gestionan el equipo pueden filtrar por responsable.
+- Sigue el trabajo como Pendiente, En Progreso, Bloqueado o Completado.
+- La asignación genera un aviso; si falla el aviso, se indica que la tarea sí quedó guardada.
+
+![Asignar tareas (simulación)](/changelog/v4.63-tareas-personales.png)
+
 ## v4.62 — 2026-09-08
 
 **Grabación muestra cuántas sesiones del mes tienen tareas pendientes.**
