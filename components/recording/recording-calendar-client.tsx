@@ -230,7 +230,7 @@ export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, de
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
+      <DialogContent surface="raised" className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-4 w-4" />

@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.21 — 2026-09-08
+
+**La ventana de grabación se distingue claramente del calendario.**
+
+- Detalle y edición de sesión usan una superficie azul pizarra en modo oscuro, con borde claro y sombra profunda.
+- El calendario de fondo queda más oscuro y desenfocado mientras la ventana está abierta.
+- Márgenes laterales y esquinas redondeadas también en iPhone.
+
+![Ventana de sesión con mayor contraste](/changelog/v4.21-ventana-sesion.png)
+
 ## v4.20 — 2026-09-08
 
 **Un mes más fácil de leer, con los detalles dentro de cada sesión.**
