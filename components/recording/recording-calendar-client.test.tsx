@@ -134,8 +134,9 @@ describe('RecordingCalendarClient — premium redesign', () => {
     expect(screen.getByText('Grabación Nora')).toBeInTheDocument()
   })
 
-  it('en el chip del día se ve quién va y el lugar', () => {
+  it('la lista conserva quién va y el lugar', () => {
     render(<RecordingCalendarClient initialSessions={[session({ location: 'Blue Chiropractic' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button',{name:'Lista'}))
     expect(screen.getAllByText('María R.').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Blue Chiropractic')).toBeInTheDocument()
   })
@@ -195,8 +196,8 @@ describe('RecordingCalendarClient — premium redesign', () => {
     />)
     expect(screen.getByText('Dra. Delian Loyola')).toBeInTheDocument()
     expect(screen.queryByText('Delian Loyola')).not.toBeInTheDocument()
-    expect(screen.getByText('Oficina')).toBeInTheDocument()
-    expect(screen.getByText('1 ideas')).toBeInTheDocument()
+    expect(screen.queryByText('Oficina')).not.toBeInTheDocument()
+    expect(screen.queryByText('1 ideas')).not.toBeInTheDocument()
   })
 
   it('al pulsar la sesión del día, el admin asigna videógrafo y lugar', async () => {
@@ -279,7 +280,8 @@ it('uses the selected client name as a read-only title and shows the recording t
 it('shows recording time and a visible assignment warning in the monthly grid',()=>{
  render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00',videographer_id:null,videographer:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
  expect(screen.getByText('09:30')).toBeInTheDocument()
- expect(screen.getByText('Asignar Videógrafo')).toBeInTheDocument()
+ expect(screen.queryByText('Asignar Videógrafo')).not.toBeInTheDocument()
+ expect(screen.getByLabelText('Asignación Pendiente')).toBeInTheDocument()
  expect(screen.getByRole('button',{name:'Mes Anterior'})).toBeInTheDocument()
  expect(screen.getByRole('button',{name:'Volver A Hoy'})).toBeInTheDocument()
 })
@@ -300,10 +302,13 @@ it('uses an agenda on narrow screens instead of a compressed month grid',()=>{
 })
 it('shows the client editor separately from the videographer',()=>{
  render(<RecordingCalendarClient initialSessions={[session()]} clients={[{id:'c1',name:'nora fitness',assigned_to:'editor1'}]} teamMembers={[...team,{id:'editor1',full_name:'Carlos Villalta'}]} clientIdeasMap={{}} />)
+ expect(screen.queryByText('Editor · Carlos Villalta')).not.toBeInTheDocument()
+ fireEvent.click(screen.getByText('Nora Fitness'))
  expect(screen.getByText('Editor · Carlos Villalta')).toBeInTheDocument()
 })
 
 it('explains that a client link is needed before resolving its editor',()=>{
  render(<RecordingCalendarClient initialSessions={[session({client_id:null,client:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ fireEvent.click(screen.getByRole('button',{name:'Lista'}))
  expect(screen.getByText('Editor · Vincula El Cliente')).toBeInTheDocument()
 })

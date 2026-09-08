@@ -741,7 +741,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                 <div
                   key={dateStr}
                   className={cn(
-                    'group min-w-0 min-h-[140px] cursor-pointer rounded-xl border p-2 transition-colors xl:min-h-[160px]',
+                    'group min-w-0 min-h-[120px] cursor-pointer rounded-xl border p-2 transition-colors xl:min-h-[140px]',
                     isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border/70 bg-background/40 hover:border-sky-500/40',
                     !isCurrentMonth && 'opacity-30',
                   )}
@@ -760,35 +760,22 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                     {(expandedDays.includes(dateStr) ? daySessions : daySessions.slice(0, 3)).map((session) => {
                       const a = userAccent(session.videographer_id)
                       const clientLabel = sessionChipClientLabel(session, clients)
-                      const clientIdeas = session.client_id ? (ideasMap[session.client_id] ?? []) : []
-                      const sessionIdeaCount = clientIdeas.filter((i) => i.recording_session_id === session.id).length
                       return (
                         <button
                           type="button"
                           key={session.id}
-                          className="w-full text-left min-h-[60px] cursor-pointer rounded-lg px-2 py-2 text-[10px] leading-tight transition hover:opacity-80"
+                          className="w-full text-left min-h-[52px] cursor-pointer rounded-lg px-2 py-2 text-[10px] leading-tight transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+                          title={`${clientLabel} · ${session.start_time?.slice(0,5) || 'Hora Por Confirmar'} · Editor: ${editorFor(session)} · Videógrafo: ${session.videographer?.full_name || 'Sin Asignar'}`}
                           style={{ backgroundColor: a.soft, boxShadow: `inset 2px 0 0 0 ${a.dot}` }}
                           onClick={(e) => { e.stopPropagation(); setIdeasSession(session) }}
                         >
-                          <span className="mb-1 block text-[10px] font-medium tabular-nums" style={{color:a.dot}}>{session.start_time?.slice(0,5) || 'Hora Por Confirmar'}</span>
+                          <span className="mb-1 flex items-center justify-between gap-1 text-[10px] font-medium tabular-nums text-muted-foreground"><span>{session.start_time?.slice(0,5) || 'Sin Hora'}</span>{(!session.videographer_id || !session.client_id || !clients.find(c=>c.id===session.client_id)?.assigned_to) && <span aria-label="Asignación Pendiente" title="Asignación Pendiente · Abre La Sesión" className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />}</span>
                           <p
                             data-slot="session-chip-client"
                             className="min-h-[14px] line-clamp-2 break-words text-xs font-semibold tracking-tight leading-snug text-foreground"
                           >
                             {clientLabel}
                           </p>
-                          {session.videographer?.full_name &&
-                            !namesLookLikeSamePerson(session.videographer.full_name, clientLabel) && (
-                            <p className="truncate text-muted-foreground">{session.videographer.full_name}</p>
-                          )}
-                          <p className="mt-1 line-clamp-2 text-[10px] text-violet-500">Editor · {editorFor(session)}</p>
-                          {!session.videographer_id && <p className="mt-1 text-[10px] text-amber-500">Asignar Videógrafo</p>}
-                          {session.location && (
-                            <p className="truncate text-muted-foreground">{session.location}</p>
-                          )}
-                          {sessionIdeaCount > 0 && (
-                            <p className="text-muted-foreground">{sessionIdeaCount} ideas</p>
-                          )}
                         </button>
                       )
                     })}
@@ -879,6 +866,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           open={!!ideasSession}
           onClose={() => setIdeasSession(undefined)}
           session={ideasSession}
+          editorName={editorFor(ideasSession)}
           onDelete={() => { const id = ideasSession.id; setIdeasSession(undefined); handleDelete(id) }}
           clientIdeas={ideasSession.client_id ? (ideasMap[ideasSession.client_id] ?? []) : []}
           teamMembers={teamMembers}

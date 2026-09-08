@@ -32,6 +32,7 @@ interface ExtendedSession extends RecordingSession {
 }
 
 interface SessionIdeasPanelProps {
+  editorName?: string
   /** Quita la sesión de la agenda. Ausente = no se ofrece. */
   onDelete?: () => void
   open: boolean
@@ -348,6 +349,7 @@ function SessionAssignment({
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export function SessionIdeasPanel({
+  editorName,
   open,
   onClose,
   session,
@@ -420,6 +422,7 @@ export function SessionIdeasPanel({
           )}
         </div>
 
+        {editorName && <p className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-sm text-violet-500">Editor · {editorName}</p>}
         <SessionAssignment
           session={session}
           teamMembers={teamMembers}

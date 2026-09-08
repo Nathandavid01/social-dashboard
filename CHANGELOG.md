@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.20 — 2026-09-08
+
+**Un mes más fácil de leer, con los detalles dentro de cada sesión.**
+
+- Las tarjetas del mes muestran solo hora y cliente. Un punto ámbar discreto señala asignaciones pendientes.
+- Editor, videógrafo, ubicación e ideas se consultan al abrir la sesión; el editor también permanece visible en la lista.
+- Se redujo la altura de las tarjetas y se mantuvieron los nombres en dos líneas y el botón Ver Más.
+
+![Calendario simplificado](/changelog/v4.20-calendario-simple.png)
+
 ## v4.19 — 2026-09-08
 
 **Notificaciones personales, con destino claro y lecturas confirmadas.**
