@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.48 — 2026-09-08
+
+**On Site distingue una sesión vacía de una consulta fallida.**
+
+- Si no cargan las tomas o las ideas, aparece un aviso y la opción de volver a cargar la sesión.
+- Un error al consultar la sesión ya no se convierte en “sin ideas”.
+- Las sesiones cargadas correctamente mantienen su funcionamiento habitual.
+
+![Vista previa móvil del error de carga (simulación)](/changelog/v4.48-onsite-carga.png)
+
 ## v4.47 — 2026-09-08
 
 **“Ver Como Usuario” respeta el rol y las áreas de la persona seleccionada.**

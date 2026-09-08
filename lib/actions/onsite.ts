@@ -281,12 +281,13 @@ export async function getAddableIdeas(
   }
 
   const supabase = await createClient()
-  const { data: session } = await supabase
+  const { data: session, error: sessionError } = await supabase
     .from('recording_sessions')
     .select('client_id')
     .eq('id', sessionId)
     .single()
-  if (!session?.client_id) return { ideas: [] }
+  if (sessionError || !session) return { error: 'No se pudo cargar la sesión para consultar sus ideas. Vuelve a intentar.' }
+  if (!session.client_id) return { ideas: [] }
 
   const [{ data: pipeline, error: pipelineError }, { data: lab, error: labError }] = await Promise.all([
     supabase

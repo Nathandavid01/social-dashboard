@@ -205,3 +205,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - 22 pruebas focales pasan (incluye target supervisor, editor, inactivo, áreas restringidas, supervisor→owner prohibido y cookie de editor), TypeScript y merge-gate pasan.
 - Supabase CLI revalidado: 16 proyectos accesibles, target bgqdtfhelknmfudcvrzz ausente. La revisión atómica continúa pendiente de acceso de Nathan.
 - Preview simulado `/previews/v4.47-vista-usuario.html`. Local; auditoría global aún incompleta.
+
+## v4.48 — Errores de carga en On Site
+
+- La página ignoraba los errores devueltos por getOnsiteShots/getAddableIdeas y pasaba listas vacías al estudio. getAddableIdeas también confundía sesión ausente/error con sesión sin cliente.
+- Ahora la página bloquea el call sheet incompleto con mensaje y enlace de recarga de la misma sesión. Un cliente no vinculado consultado correctamente sí mantiene lista vacía legítima.
+- Cuatro regresiones fallaron antes; 13 pruebas focales pasan, TypeScript, merge-gate y diff-check pasan. Preview móvil simulado a 390x844 inspeccionado, sin desbordamiento horizontal, captura en public/changelog/v4.48-onsite-carga.png.
+- No se indujeron fallos en datos reales ni se alteraron sesiones. El flujo completo de medios y la revisión atómica pendiente de acceso siguen abiertos.
