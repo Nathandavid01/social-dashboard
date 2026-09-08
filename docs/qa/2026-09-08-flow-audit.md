@@ -90,3 +90,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - v4.33 añade condiciones al UPDATE que adquiere el claim: aprobación approved, mismo archivo/caption/status/publish_date y ausencia de posted_at/published_at. Evita usar la lectura previa al preflight cuando esa fila ya cambió.
 - Siete regresiones simulan cambios durante health check y el caso intacto; checks relacionados de idempotencia y errores siguen pasando. No se hicieron POST reales.
 - Sigue pendiente: impedir/coordinar cambios después de adquirir el claim, cambios concurrentes en configuración del cliente, e historia de revisión/estado atómicos.
+
+## Continuación · Revisión Atómica Preparada
+
+- Nueva migración `0074_atomic_internal_review.sql`: función `commit_internal_review` con SECURITY INVOKER, control de owner/supervisor activo, validación de captions/archivo propio, bloqueo de fila y escritura conjunta de estado e historial.
+- Probada en PostgreSQL 16 aislado mediante socket `/tmp/nate-review-socket`, sin acceso a datos de clientes. Fixture y assertions en scripts/tests. Casos: aprobación+historia; decisión obsoleta sin historia nueva; fallo de insert revierte estado; editor rechazado. Dos conexiones concurrentes produjeron una sola aprobación y un solo historial.
+- **No aplicada a Supabase ni conectada al server action**. Supabase CLI está autenticado y lista 16 proyectos, pero ninguno coincide con el host/ref de NEXT_PUBLIC_SUPABASE_URL de este checkout. No hay DATABASE_URL ni credencial directa de Postgres configurada. La acción actual sigue usando las escrituras separadas hasta resolver acceso y activar esta migración.
+- Antes de activar: verificar esquema y RLS reales; probar RPC autenticado por rol; migrar decideReview para llamar al RPC sin fallback no atómico; conservar notificaciones después del commit. Añadir test de autorización con las políticas reales. La migración local no demuestra que el fallo esté resuelto en la app.
