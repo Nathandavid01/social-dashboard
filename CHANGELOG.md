@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.62 — 2026-09-08
+
+**Grabación muestra cuántas sesiones del mes tienen tareas pendientes.**
+
+- El contador naranja cuenta cada sesión una vez, aunque tenga varios pendientes.
+- Abre “Tareas Pendientes” para ver las ideas, el videógrafo, el editor o la meta que faltan y entrar a la sesión.
+- Excluye completadas y canceladas; conserva las atrasadas del mes y se actualiza al cambiar la preparación.
+- Si falla la consulta, muestra un aviso en lugar de un cero incorrecto.
+
+![Pendientes de grabación (simulación)](/changelog/v4.62-grabaciones-pendientes.png)
+
 ## v4.61 — 2026-09-08
 
 **El cliente no puede aprobar un video ausente o con error de reproducción.**

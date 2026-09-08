@@ -1,5 +1,6 @@
 'use client'
 
+import { RecordingPending } from '@/components/recording/recording-pending'
 import { Fragment, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -231,6 +232,7 @@ export function Sidebar({
               {!collapsed && (
                 <span className="truncate">{supervisorNavLabel(item.href, role, item.label)}</span>
               )}
+              {!editing && item.href === '/recording-calendar' && <RecordingPending badge collapsed={collapsed} />}
               {/* Collapsed: a small dot signals a pending badge without the number */}
               {collapsed && !editing && badge > 0 && (
                 <span className={cn('absolute right-1 top-1 h-2 w-2 rounded-full', badgeColor)} />

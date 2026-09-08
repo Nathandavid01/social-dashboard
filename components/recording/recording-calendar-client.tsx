@@ -2,6 +2,7 @@
 
 import { clientDisplayName } from '@/lib/utils/client-display-name'
 import { RecordingMap } from './recording-map'
+import { RecordingPending } from './recording-pending'
 import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { useState, useMemo, useTransition, useEffect } from 'react'
 import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
@@ -571,6 +572,10 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     })
   }
 
+  useEffect(() => {
+    window.dispatchEvent(new Event('recording-preparation-changed'))
+  }, [sessions, ideasMap])
+
   function downloadMonthIcs() {
     const monthStr = format(currentMonth, 'yyyy-MM')
     const ics = sessionsToIcs(sessions.filter((s) => s.session_date.startsWith(monthStr)))
@@ -587,6 +592,11 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card p-4 text-foreground sm:p-6">
+      <RecordingPending onSelect={(id) => {
+        const session = sessions.find(s => s.id === id)
+        if (session) setIdeasSession(session)
+        else window.location.assign(`/onsite?s=${encodeURIComponent(id)}`)
+      }} />
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
