@@ -11,6 +11,14 @@ vi.mock('@/lib/actions/video-bank-covers', () => ({
 vi.mock('@/lib/actions/content-ideas', () => ({ reassignVideo: vi.fn(async () => ({ success: true })) }))
 vi.mock('@/lib/actions/client-assignments', () => ({ setClientAssignment: vi.fn(async () => ({ ok: true })) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
+vi.mock('@/lib/actions/banco-direct-upload', () => ({
+  createBankIdea: vi.fn(async () => ({ ideaId: 'n' })),
+  ensureClientBrollLibrary: vi.fn(async () => ({ ideaId: 'b' })),
+}))
+vi.mock('@/components/auth/role-gate', () => ({
+  RoleGate: ({ children }: { children: unknown }) => <>{children}</>,
+  useHasPermission: () => true,
+}))
 
 function tile(over: Partial<BankVideoTile> = {}): BankVideoTile {
   return {
@@ -47,6 +55,7 @@ function bank(): VideoBank {
         editorName: 'María',
         assignedVia: 'idea',
         videos: [tile(), tile({ videoId: 'v2', ideaId: 'i2', title: 'Testimonio', hasCover: false, thumbKeys: [] })],
+        brolls: [],
       },
     ],
     totals: { videos: 2, clients: 1, unassigned: 0 },
@@ -145,6 +154,12 @@ describe('BancoView', () => {
 
   it('banco vacío → estado vacío claro, sin carriles', () => {
     view({ bank: { rails: [], totals: { videos: 0, clients: 0, unassigned: 0 } }, devueltos: [] })
-    expect(screen.getByText(/no hay crudos/i)).toBeInTheDocument()
+    expect(screen.getByText(/sube videos aunque no haya grabación/i)).toBeInTheDocument()
+  })
+
+  it('cada cliente tiene una sección de B-roll permanente', () => {
+    view()
+    expect(screen.getByTestId('client-broll-c1')).toHaveTextContent(/b-roll del cliente/i)
+    expect(screen.getByRole('button', { name: /subir b-roll/i })).toBeInTheDocument()
   })
 })
