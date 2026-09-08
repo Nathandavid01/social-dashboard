@@ -202,6 +202,15 @@ export async function runIdeaPost(
       if (!recorded) console.error(`[idea-posting] bookkeeping attempt ${attempt + 1} failed for ${ideaId}:`, recordErr?.message)
     }
 
+    if (!recorded) {
+      // The remote side succeeded; never report a synchronized success or release
+      // its claim when all local persistence attempts failed.
+      return {
+        error: `Metricool creó la publicación ${postId ?? uuid ?? '(sin identificador)'}, pero no se pudo guardar en el dashboard. Verifica esa publicación en Metricool antes de volver a agendar.`,
+        metricoolPostId: postId,
+      }
+    }
+
     await logIdeaActivity(supabase, {
       ideaId,
       userId,

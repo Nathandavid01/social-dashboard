@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.25 — 2026-09-08
+
+**El dashboard informa si Metricool creó el post pero falló el registro local.**
+
+- Tras tres intentos fallidos de guardar la respuesta, ya no se muestra éxito.
+- El aviso incluye el ID de Metricool para verificar el post antes de volver a agendar.
+
 ## v4.24 — 2026-09-08
 
 **Metricool deja de repetir el envío cuando falla el servidor.**

@@ -30,3 +30,9 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - v4.24 limita el fallback de formato a 400/422. Regresiones nuevas cubren 401/403/408/429/500/502/503/504, validación y fallo de transporte.
 - **Pendiente prioritario:** `runIdeaPost` libera el claim ante resultados inciertos y permite recuperar claims después de cinco minutos. También devuelve éxito aunque fallen todos los intentos de guardar la respuesta remota. Hay que reconciliar con Metricool antes de permitir reenvíos y representar los resultados desconocidos sin éxito falso. La corrección del conector no resuelve ese riesgo en la capa superior.
 - Ninguna solicitud real fue enviada a Metricool en estas pruebas.
+
+## Continuación · Registro Del Resultado Remoto
+
+- v4.25 corrige el éxito falso si las tres escrituras de bookkeeping devuelven error. El resultado ahora contiene error e ID remoto; no ok, y no libera el claim en esta ruta.
+- La regresión reproduce tres fallos de DB después de una única creación remota. El flujo exitoso conserva su cobertura existente.
+- Sigue pendiente la recuperación/reconciliación: la expiración de claims y los fallos de transporte aún requieren tratamiento. Esta corrección no garantiza por sí sola ausencia de duplicados después de cinco minutos.
