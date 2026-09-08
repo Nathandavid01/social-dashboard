@@ -149,15 +149,26 @@ export async function runIdeaPost(
 
   // No timeout-based takeover: a lost response may hide a successful remote
   // creation. An unresolved claim must be reconciled before another POST.
-  const { data: claimed, error: claimErr } = await supabase
+  let claimQuery = supabase
     .from('content_ideas')
     .update({ posting_started_at: new Date().toISOString() })
     .eq('id', ideaId)
     .is('metricool_post_id', null)
     .is('posting_started_at', null)
-    .select('id')
+    .is('posted_at', null)
+    .is('published_at', null)
+    .eq('approval_status', 'approved')
+    .eq('approved_video_id', edited!.id)
+    .eq('generated_caption', idea.generated_caption)
+    .eq('status', idea.status)
+  // The media probe may take seconds. Compare the same reviewed snapshot in
+  // the claim UPDATE itself, so changes during that gap prevent the POST.
+  claimQuery = idea.publish_date == null
+    ? claimQuery.is('publish_date', null)
+    : claimQuery.eq('publish_date', idea.publish_date)
+  const { data: claimed, error: claimErr } = await claimQuery.select('id')
   if (claimErr) return { error: claimErr.message }
-  if (!claimed || claimed.length === 0) return { skipped: 'Hay un envío en curso o pendiente de verificar en Metricool. No se reenviará hasta confirmar su resultado.' }
+  if (!claimed || claimed.length === 0) return { skipped: 'El video cambió o tiene un envío en curso o pendiente de verificar. Actualiza y comprueba Metricool antes de reenviar.' }
 
   const releaseClaim = async (postingError: string) => {
     await supabase

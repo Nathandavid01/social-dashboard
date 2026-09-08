@@ -84,3 +84,9 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - v4.32 limita fetch del probe de video a 10 segundos y lo coloca antes del claim persistente. Si el video no es reproducible/no responde no hay escrituras de claim ni POST remoto.
 - Regresiones verifican AbortSignal y ausencia de escrituras después de preflight fallido, junto a idempotencia y resultado incierto existentes.
 - Se solicitó al usuario quién resolverá las asignaciones reales de las 19 próximas grabaciones. Esto no bloquea las correcciones de código pendientes.
+
+## Continuación · Snapshot De Publicación
+
+- v4.33 añade condiciones al UPDATE que adquiere el claim: aprobación approved, mismo archivo/caption/status/publish_date y ausencia de posted_at/published_at. Evita usar la lectura previa al preflight cuando esa fila ya cambió.
+- Siete regresiones simulan cambios durante health check y el caso intacto; checks relacionados de idempotencia y errores siguen pasando. No se hicieron POST reales.
+- Sigue pendiente: impedir/coordinar cambios después de adquirir el claim, cambios concurrentes en configuración del cliente, e historia de revisión/estado atómicos.
