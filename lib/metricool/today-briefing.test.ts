@@ -30,3 +30,28 @@ it('retains posts without text and exposes partial network status', async () => 
  expect(result).toContain('PUBLISHED')
  expect(result).toContain('Sin texto')
 })
+it('excludes yesterday returned by Metricool extendedRange', async () => {
+ const yesterday = { ...post(['PUBLISHED']), text: 'YESTERDAY', publicationDate: { dateTime: '2026-09-07T14:00:00', timezone: 'America/Puerto_Rico' } }
+ const result = await getTodayBriefing(clients, async () => [yesterday, post(['PENDING'])], now)
+ expect(result).not.toContain('YESTERDAY')
+ expect(result).toContain('PENDING')
+})
+it.each([
+ ['2026-09-09T01:00:00Z','UTC',true],
+ ['2026-09-08T01:00:00Z','UTC',false],
+ ['2026-09-09T02:00:00','Europe/Madrid',true],
+ ['2026-09-08T02:00:00','Europe/Madrid',false],
+ ['2026-09-09T01:00:00+02:00','Europe/Madrid',true],
+] as const)('normalizes %s in %s to the Puerto Rico day', async (dateTime, timezone, included) => {
+ const result = await getTodayBriefing(clients, async () => [{ ...post(['PENDING']), text: 'TARGET', publicationDate: { dateTime, timezone } }], now)
+ expect(result.includes('TARGET')).toBe(included)
+})
+it('marks unparseable dates as incomplete instead of treating them as today', async () => {
+ const result = await getTodayBriefing(clients, async () => [{ ...post(['PENDING']), publicationDate: { dateTime: 'bad', timezone: 'Invalid/Zone' } }], now)
+ expect(result).toContain('Fecha Sin Verificar')
+ expect(result).not.toContain('Sin publicaciones')
+})
+it.each(['2026-03-08T02:30:00', '2026-02-30T09:00:00'])('does not silently normalize an impossible wall time %s', async dateTime => {
+ const result = await getTodayBriefing(clients, async () => [{ ...post(['PENDING']), publicationDate: { dateTime, timezone: 'America/New_York' } }], now)
+ expect(result).toContain('Fecha Sin Verificar')
+})

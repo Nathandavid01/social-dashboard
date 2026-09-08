@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.38 — 2026-09-08
+
+**El resumen de hoy ya no mezcla publicaciones de ayer.**
+
+- Se filtran los resultados ampliados que devuelve Metricool por el día de Puerto Rico.
+- Las fechas con otra zona horaria se convierten antes de decidir si pertenecen a hoy.
+- Si una fecha no se puede interpretar, se informa que falta verificarla en lugar de incluirla como publicación del día.
+
 ## v4.37 — 2026-09-08
 
 **El resumen de publicaciones de hoy distingue lo confirmado de lo pendiente.**

@@ -127,3 +127,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Evidencia de consulta incompleta explícita cuando falla una cuenta; no se transforma en ausencia de publicaciones. La hora de consulta se expone al modelo junto con la instrucción de no llamar atrasados a posts futuros.
 - 15 pruebas pasan (incluye UTC ya en el día siguiente, estados parciales, borradores, errores y texto vacío), TypeScript y merge-gate pasan.
 - Cambio local. Pendiente: comprobar respuesta final del chat autenticado y auditar las demás herramientas de briefing/agenda que tienen consultas independientes; verificar la ventana efectiva de resultados de `extendedRange` en datos vivos. No se ejecutaron publicaciones ni notificaciones.
+
+## v4.38 — Ventana real de Metricool y fechas de hoy
+
+- Consulta read-only real a tres cuentas activas: HTTP 200 en las tres. Al pedir solo Sept 8 con extendedRange=true, la primera devolvió dos posts (Sept 7 14:00 publicado y Sept 8 09:00 pendiente). Las otras devolvieron un post pendiente cada una.
+- El resumen filtra por día de Puerto Rico tras interpretar ISO absoluto o fecha local con zona IANA; fechas imposibles o ilegibles se señalan aparte. No se oculta esa incertidumbre como una agenda vacía.
+- Se ejecutó el helper compilado contra la primera cuenta real: 2 posts recibidos, 1 incluido, ninguna fecha de ayer, estado PENDING preservado. Solo GET/SELECT; sin posts ni cambios de clientes.
+- 18 pruebas focales pasan (incluye otras zonas, offsets, fecha inválida y salto DST), TypeScript y merge-gate pasan. Cuatro regresiones fallaban antes del filtro.
+- Pendientes de la auditoría completa: otras herramientas del chat con consultas independientes, salida final del modelo con sesión autenticada y migración de revisión en el proyecto de Nathan.
