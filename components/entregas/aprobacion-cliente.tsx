@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, XCircle, Loader2, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { textoDecision, type DecisionCliente } from '@/lib/entregas/client-review'
@@ -101,12 +101,17 @@ function VideoCliente({
   const [error, setError] = useState<string | null>(null)
   const [uncertain, setUncertain] = useState(false)
   const [checking, setChecking] = useState(false)
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
+  const [mediaError, setMediaError] = useState(false)
+  const mediaRef = useRef<HTMLVideoElement>(null)
+  const mediaReady = !!video.videoUrl && loadedUrl === video.videoUrl && !mediaError
+  useEffect(() => { setLoadedUrl(null); setMediaError(false) }, [video.videoUrl])
 
   const decidido = yaDecidido ?? (video.status !== 'pending' ? video.status : null)
   const abierto = !decidido && !vencido
 
   async function votar(decision: DecisionCliente) {
-    if (enviando || uncertain || !abierto) return
+    if (enviando || uncertain || !abierto || (decision === 'approved' && !mediaReady)) return
     const check = textoDecision(decision, comment)
     if (!check.ok) {
       setError(check.error ?? 'Escribe qué hay que cambiar.')
@@ -160,6 +165,10 @@ function VideoCliente({
       <div className="overflow-hidden rounded-xl border bg-card">
         {video.videoUrl ? (
           <video
+            ref={mediaRef}
+            onLoadedData={() => { setLoadedUrl(video.videoUrl); setMediaError(false) }}
+            onLoadStart={() => setLoadedUrl(null)}
+            onError={() => { setLoadedUrl(null); setMediaError(true) }}
             controls
             playsInline
             preload="metadata"
@@ -174,6 +183,12 @@ function VideoCliente({
           </div>
         )}
       </div>
+
+      {abierto && video.videoUrl && !mediaReady && !mediaError && <p role="status" className="text-sm text-muted-foreground">Reproduce el video para poder aprobarlo cuando cargue.</p>}
+      {mediaError && <div role="alert" className="rounded-xl border border-destructive/30 p-3 text-sm">
+        <p>No se pudo reproducir el video. Vuelve a cargarlo o escríbenos qué ocurrió.</p>
+        <button className="mt-2 min-h-11 rounded-lg border px-3" onClick={() => { setLoadedUrl(null); setMediaError(false); mediaRef.current?.load() }}>Reintentar Video</button>
+      </div>}
 
       {decidido && (
         <div
@@ -229,7 +244,7 @@ function VideoCliente({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => votar('approved')}
-              disabled={enviando !== null || uncertain}
+              disabled={enviando !== null || uncertain || !mediaReady}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
             >
               {enviando === 'approved'

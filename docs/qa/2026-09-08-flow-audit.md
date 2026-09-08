@@ -305,3 +305,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Consulta resuelve al estado aprobado/rechazado guardado o habilita envío si el servidor muestra pending y el enlace no venció. Consulta fallida conserva el bloqueo y permite consultar otra vez. No repite automáticamente votos.
 - TDD: 4 pruebas fallaron antes (rechazo, respuesta vacía, consulta pending, consulta fallida); 21 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado; no se emitieron votos reales.
 - Pendiente: revisar concurrencia/idempotencia del RPC público, rechazo con comentarios frente a aprobación, manejo de error del medio público, y completar el circuito con un video de prueba. 0074/0075 siguen staged; local sin desplegar.
+
+## v4.61 — Aprobación pública bloqueada sin medio cargado
+
+- Fuente: Aprobar estaba habilitado con videoUrl=null o después de error del elemento video. Ahora espera loadeddata del URL actual, se invalida con loadstart/error/cambio de URL, y puede reintentar el medio. Rechazo con comentario continúa disponible para reportar el problema.
+- TDD: 3 regresiones fallaron antes; 7 pruebas focales aprobadas. TypeScript y merge-gate aprobados; preview móvil simulado inspeccionado. No se emitió voto público real.
+- Límite explícito: loadeddata indica datos reproducibles, no que se haya visto todo el video o revisado captions/audio. Es una protección del visor; no sustituye la validación del RPC público. Pendientes concurrency del voto, activación 0074/0075 en Nathan y circuito completo.
+- Suite completa v4.61: 390 archivos aprobados, 3094 pruebas aprobadas, 3 omitidas. Local, sin desplegar.
