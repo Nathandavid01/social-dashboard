@@ -1,3 +1,4 @@
+import { briefingQueryIssue } from '@/lib/utils/briefing-query'
 import { auditOperationalPublications } from '@/lib/actions/operational-publications'
 import { getAlerts } from '@/lib/actions/alerts'
 import { getOperationsOverview } from '@/lib/actions/operations-overview'
@@ -780,26 +781,41 @@ async function execGetDashboardSummary(): Promise<string> {
     const todayEnd = new Date().toISOString().slice(0, 10) + 'T23:59:59'
 
     const [
-      { data: tasks },
+      taskResult,
       alerts,
-      { count: clientCount },
-      { count: pendingRequests },
-      { count: pendingVideos },
-      { data: profiles },
+      clientResult,
+      requestResult,
+      videoResult,
       workflow,
       todayPosts,
       publicationAudit,
     ] = await Promise.all([
-      supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
+      supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)', { count: 'exact' }).neq('status', 'completed').order('id').limit(5000),
       getAlerts(),
       supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('client_requests').select('*', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
       supabase.from('video_reviews').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'head_editor_review', 'pending_final_check', 'final_check_review', 'revision_needed']),
-      supabase.from('profiles').select('id, full_name').order('full_name'),
       getOperationsOverview(),
       execGetTodaysPosts(),
       auditOperationalPublications(),
     ])
+
+    const issues = [
+      briefingQueryIssue(taskResult, 'Tareas'),
+      briefingQueryIssue(clientResult, 'Clientes', true),
+      briefingQueryIssue(requestResult, 'Solicitudes', true),
+      briefingQueryIssue(videoResult, 'Video QC', true),
+    ].filter(Boolean)
+    if (issues.length) return [
+      'Resumen General Sin Verificar. No inferir cero tareas, solicitudes o revisiones.',
+      ...issues,
+      formatOperationsBriefing(workflow, publicationAudit),
+      todayPosts,
+    ].join('\n\n')
+    const tasks = taskResult.data
+    const clientCount = clientResult.count
+    const pendingRequests = requestResult.count
+    const pendingVideos = videoResult.count
 
     const all = tasks ?? []
     const pending = all.filter((t) => t.status === 'pending').length

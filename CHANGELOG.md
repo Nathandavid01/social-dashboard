@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.44 — 2026-09-08
+
+**El resumen general no convierte fallos de consulta en cero pendientes.**
+
+- Tareas, clientes, solicitudes y QC requieren un conteo verificado.
+- Una lista incompleta de tareas se señala como información sin verificar.
+- Si falla esa parte del resumen, se conserva la información operativa y de publicaciones que sí se pudo consultar.
+
 ## v4.43 — 2026-09-08
 
 **La cobertura usa el día correcto y no da por cubiertos los posts fallidos.**
