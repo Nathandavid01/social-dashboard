@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { areaForPath, canAccessPath } from '@/lib/auth/areas'
 import { SESSION_ONLY_COOKIE, applyCookiePersistence } from '@/lib/supabase/cookie-persistence'
-import { VIEW_AS_COOKIE, resolveEffectiveRole } from '@/lib/auth/view-as-core'
+import { VIEW_AS_COOKIE, resolveEffectiveRole, canStartViewAs, isViewAsEditorId, viewAsTargetOk } from '@/lib/auth/view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
 
 export async function middleware(request: NextRequest) {
@@ -43,10 +43,16 @@ export async function middleware(request: NextRequest) {
       .single()
     const realRole = profile?.role as UserRole | undefined
     const viewAs = request.cookies.get(VIEW_AS_COOKIE)?.value
-    const effectiveRole = resolveEffectiveRole(realRole ?? null, viewAs)
-    const areaAccess = effectiveRole === 'editor' && viewAs
-      ? null
-      : (profile?.area_access as string[] | null | undefined) ?? null
+    let target: {role: UserRole; area_access: string[] | null} | null = null
+    if (canStartViewAs(realRole) && isViewAsEditorId(viewAs)) {
+      const {data, error} = await supabase.from('profiles')
+        .select('role,status,approval_status,area_access').eq('id', viewAs).maybeSingle()
+      if (!error && data && viewAsTargetOk(data) && (realRole === 'owner' || data.role !== 'owner')) {
+        target = {role: data.role as UserRole, area_access: data.area_access ?? null}
+      }
+    }
+    const effectiveRole = target ? resolveEffectiveRole(realRole, viewAs, target.role) : realRole ?? null
+    const areaAccess = target ? target.area_access : (profile?.area_access as string[] | null | undefined) ?? null
     if (profile && !canAccessPath(path, effectiveRole, areaAccess)) {
       const url = request.nextUrl.clone()
       url.pathname = '/home'

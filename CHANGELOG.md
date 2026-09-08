@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.47 — 2026-09-08
+
+**“Ver Como Usuario” respeta el rol y las áreas de la persona seleccionada.**
+
+- La navegación ya no trata automáticamente como editor a cualquier usuario consultado.
+- Calendario y otras áreas autorizadas abren según el perfil seleccionado.
+- Las restricciones individuales y los límites para consultar dueños se mantienen.
+
 ## v4.46 — 2026-09-08
 
 **Mi Día muestra al editor asignado al cliente cuando no hay responsable de tarea.**

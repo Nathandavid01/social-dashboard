@@ -196,3 +196,12 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - QA visual autenticada en /mi-dia#hoy: Arasibo → Carlos Villalta, Arte Digital → Lisneidy Lopez, Beyond PVC → Jeander Loop, Café El Bosque → Richard Jimenez, Casita Vieja → Alexa Kerocen; Beyond Performance sigue Sin Asignar. Arasibo conserva la confirmación de publicación externa.
 - Tres regresiones fallaron antes; 21 pruebas focales, TypeScript, merge-gate y diff-check pasan. Preview simulado `/previews/v4.46-editor-checklist.html`.
 - No se cambiaron asignaciones reales. Pendiente: sesiones aún sin cliente/videógrafo, migración atómica de revisión y validación completa de medios/revisión/Metricool.
+
+## v4.47 — Middleware de Ver Como Usuario
+
+- QA autenticada: Denisha (supervisor) era redirigida desde On Site. Inspección encontró que middleware llamaba resolveEffectiveRole sin targetRole, convirtiendo cualquier target en editor aunque layout/actions ya usaban el rol real del target.
+- El middleware consulta y valida perfil destino (activo/aprobado, dueño solo consultable por dueño), aplica su rol y area_access; cookie de no-admin no habilita suplantación.
+- Segunda comprobación read-only aclaró que Denisha NO tiene /onsite en area_access: la redirección sigue siendo correcta para esa ruta. Sí tiene /recording-calendar; QA visual posterior confirmó que abre Calendario de Grabación como Denisha (31 sesiones este mes, todas sin videógrafo). No se cambiaron permisos ni asignaciones reales.
+- 22 pruebas focales pasan (incluye target supervisor, editor, inactivo, áreas restringidas, supervisor→owner prohibido y cookie de editor), TypeScript y merge-gate pasan.
+- Supabase CLI revalidado: 16 proyectos accesibles, target bgqdtfhelknmfudcvrzz ausente. La revisión atómica continúa pendiente de acceso de Nathan.
+- Preview simulado `/previews/v4.47-vista-usuario.html`. Local; auditoría global aún incompleta.
