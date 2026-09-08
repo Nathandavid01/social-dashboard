@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.64 — 2026-09-08
+
+**Los supervisores siempre ven el paso 2 · Edición.**
+
+- Edición permanece accesible aunque el supervisor tenga una lista personalizada de áreas.
+- Las preferencias antiguas del menú ya no pueden ocultar este paso a los supervisores.
+- El mapa de trabajo identifica el paso 2 como Edición.
+
+![Edición para supervisores (simulación)](/changelog/v4.64-edicion-supervisores.png)
+
 ## v4.63 — 2026-09-08
 
 **Asigna a cada persona qué tiene que hacer desde Perfil y Mi Día.**

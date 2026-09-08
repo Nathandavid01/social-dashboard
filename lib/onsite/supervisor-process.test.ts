@@ -4,7 +4,7 @@ import { SUPERVISOR_PROCESS, supervisorNavLabel, supervisorProcessView } from '.
 describe('SUPERVISOR_PROCESS', () => {
   it('On Site es el paso 1 y Pipeline el 2', () => {
     expect(SUPERVISOR_PROCESS[0]).toMatchObject({ n: 1, href: '/onsite', label: 'On Site' })
-    expect(SUPERVISOR_PROCESS[1]).toMatchObject({ n: 2, href: '/pipeline', label: 'Pipeline' })
+    expect(SUPERVISOR_PROCESS[1]).toMatchObject({ n: 2, href: '/pipeline', label: 'Edición' })
     expect(SUPERVISOR_PROCESS[2]).toMatchObject({ n: 3, href: '/revision', label: 'Revisión' })
   })
 
@@ -26,3 +26,5 @@ describe('supervisorNavLabel', () => {
     expect(supervisorNavLabel('/onsite', null, 'On Site')).toBe('On Site')
   })
 })
+
+it('names supervisor step 2 Edición',()=>{expect(supervisorNavLabel('/pipeline','supervisor','Pipeline')).toBe('2 · Edición')})

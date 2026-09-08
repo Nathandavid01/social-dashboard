@@ -109,3 +109,8 @@ describe('visibleNavItems with an areaAccess grant (the branch the sidebar uses)
     expect(visible).not.toContain('/pipeline')
   })
 })
+
+it('keeps step 2 in a supervisor restricted navigation',()=>{
+ expect(visibleNavItems('supervisor',['/revision']).map(n=>n.href)).toContain('/pipeline')
+ expect(visibleNavItems('editor',['/revision']).map(n=>n.href)).not.toContain('/pipeline')
+})
