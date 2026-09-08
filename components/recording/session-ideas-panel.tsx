@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { SessionIdeaPicker } from './session-idea-picker'
-import { RecordingEditors } from './recording-editors'
+import Link from 'next/link'
 import { useState, useTransition, useEffect } from 'react'
 import type { ContentIdea, ContentIdeaType, RecordingSession, Client, Profile } from '@/lib/supabase/types'
 import { assignIdeaToSession, markIdeaRecorded, createContentIdeaManual } from '@/lib/actions/content-ideas'
@@ -425,7 +424,7 @@ export function SessionIdeasPanel({
         </div>
 
         {editorName && <p className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-sm text-violet-500">Editor · {editorName}</p>}
-        {canLinkEditors && <details className="rounded-lg border border-violet-500/20 p-3"><summary className="cursor-pointer text-sm font-medium text-violet-600 dark:text-violet-300">Vincular Editores Al Cliente</summary><div className="mt-3"><RecordingEditors sessionId={session.id} onSaved={onClose} /></div></details>}
+        {canLinkEditors && <Link href="/clients/asignaciones" className="block rounded-lg border border-violet-500/20 p-3 text-sm font-medium text-violet-600 dark:text-violet-300">Asignar Editores En Clientes →</Link>}
         <SessionAssignment
           session={session}
           teamMembers={teamMembers}

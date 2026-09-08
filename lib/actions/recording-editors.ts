@@ -4,12 +4,12 @@ import {createClient} from '@/lib/supabase/server'
 import {getEffectiveRole,getEffectiveUserId} from '@/lib/auth/server'
 import {readCompletePages} from '@/lib/utils/read-complete-pages'
 export interface EditorSetup {clientId:string|null;clients:{id:string;name:string;assigned_to:string|null}[];editors:{id:string;full_name:string|null}[];links:{client_id:string;editor_id:string}[];error?:string}
-export async function getRecordingEditorSetup(sessionId:string):Promise<EditorSetup>{
+export async function getRecordingEditorSetup(sessionId?:string):Promise<EditorSetup>{
  const empty:EditorSetup={clientId:null,clients:[],editors:[],links:[]}
  if(!['owner','supervisor'].includes((await getEffectiveRole())||''))return {...empty,error:'Solo Administradores Y Supervisores Pueden Vincular Editores'}
  try{
   const db=await createClient()
-  const session=await db.from('recording_sessions').select('client_id').eq('id',sessionId).single()
+  const session=sessionId?await db.from('recording_sessions').select('client_id').eq('id',sessionId).single():{data:{client_id:null},error:null}
   if(session.error||!session.data)throw new Error('Sesión No Disponible')
   const clients=await readCompletePages<{id:string;name:string;assigned_to:string|null}>((from,to)=>db.from('clients').select('id,name,assigned_to',{count:'exact'}).eq('status','active').order('id').range(from,to))
   const editors=await readCompletePages<{id:string;full_name:string|null}>((from,to)=>db.from('profiles').select('id,full_name',{count:'exact'}).eq('role','editor').eq('status','active').eq('approval_status','approved').order('id').range(from,to))

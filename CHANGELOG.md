@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.69 — 2026-09-08
+
+**La asignación de editores se administra desde Clientes.**
+
+- Clientes → Asignaciones permite vincular uno o varios editores sin crear una grabación.
+- Grabación y el perfil enlazan a Clientes para administrar la asignación.
+- Los permisos siguen definiendo el acceso; los clientes vinculados aparecen en el perfil.
+- El guardado directo requiere la migración 0079, después de la 0078.
+
+![Asignar editores desde Clientes (simulación)](/changelog/v4.69-asignar-editores.png)
+
 ## v4.68 — 2026-09-08
 
 **Cada pieza reúne sus materiales y la entrega del editado para supervisión.**

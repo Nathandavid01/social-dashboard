@@ -365,3 +365,7 @@ Verificación final local v4.67: 400 archivos de prueba verdes, 3157 pruebas apr
 - Verificado en navegador autenticado local: pieza de Carlos muestra sus instrucciones, siete crudos y entrega deshabilitada hasta seleccionar archivo y confirmar subtítulos. No se subieron archivos de prueba a datos reales ni se aprobó/rechazó una pieza real.
 - 16 pruebas focales aprobadas; el resto de la suite pasó salvo una expectativa antigua por nombre duplicado, corregida y verificada. TypeScript y merge-gate verdes. Pruebas existentes de devolución y corrección verdes. Migraciones 0074–0077 siguen pendientes de integración; no se declara revisión atómica de producción verificada.
 - Trabajo de videógrafos múltiples permanece separado y pendiente de confirmar el mínimo obligatorio.
+
+## v4.69 — Asignaciones En Clientes
+
+Editor múltiple centralizado en Clientes → Asignaciones. Grabación y perfil enlazan allí; permisos de usuario no se modifican. 0079 agrega set_client_editors sobre 0078 sin tocar sesiones. SQL local comprobó múltiples miembros, rol inválido, permisos, RLS y que la sesión no cambia. 17 pruebas focales aprobadas. Activación del guardado directo pendiente de aplicación manual de 0079; no se ejecutó en Supabase remoto.

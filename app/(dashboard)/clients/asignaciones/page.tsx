@@ -1,3 +1,4 @@
+import { ClientEditorTeam } from '@/components/clients/client-editor-team'
 import { requirePermission } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
 import { AssignmentsTable } from '@/components/clients/assignments-table'
@@ -31,6 +32,7 @@ export default async function AsignacionesPage() {
   ])
 
   return (
+    <div className="space-y-4"><ClientEditorTeam />
     <AssignmentsTable
       clients={(clients ?? []).map((c) => ({
         id: c.id,
@@ -46,6 +48,6 @@ export default async function AsignacionesPage() {
         role: p.role,
       }))}
       currentUserId={user?.id ?? null}
-    />
+    /></div>
   )
 }
