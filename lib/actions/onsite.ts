@@ -8,6 +8,7 @@ import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { planOnsiteBriefFill, type BriefGenerated } from '@/lib/onsite/brief-fill'
 import { generateIdeaBatch } from '@/lib/llm/generate-ideas-run'
 import { clampVirality } from '@/lib/onsite/virality'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 
 /**
  * On Site — la lista de grabación de una sesión agendada.
@@ -184,18 +185,25 @@ export async function toggleShotRecorded(input: {
     .single()
   if (!idea) return { error: 'Toma no encontrada' }
 
-  if (!input.recorded && !['grabada', 'idea', 'asignada'].includes(idea.status ?? '')) {
-    return { error: 'Este video ya avanzó en el pipeline: no se puede desmarcar aquí.' }
+  if (!['grabada', 'idea', 'asignada'].includes(idea.status ?? '')) {
+    return { error: 'Este video ya avanzó en el pipeline o fue descartado. Actualiza On Site antes de continuar.' }
   }
+  // Retrying a successful recording must not move its original recording date.
+  if (input.recorded && idea.status === 'grabada') return { ok: true }
+  if (!input.recorded && idea.status !== 'grabada') return { ok: true }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('content_ideas')
     .update({
       status: input.recorded ? 'grabada' : 'idea',
-      recording_date: input.recorded ? new Date().toISOString().slice(0, 10) : null,
+      recording_date: input.recorded ? todayISOInTimeZone('America/Puerto_Rico') : null,
     })
     .eq('id', input.ideaId)
+    .eq('status', idea.status)
+    .select('id')
+    .maybeSingle()
   if (error) return { error: error.message }
+  if (!updated) return { error: 'La toma cambió mientras trabajabas. Actualiza On Site para ver su estado actual.' }
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')

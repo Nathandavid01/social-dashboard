@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.23 — 2026-09-08
+
+**On Site protege los videos que ya avanzaron en el flujo.**
+
+- Una pantalla desactualizada no puede devolver a grabación un video producido, publicado o descartado.
+- Si otra persona cambia la toma al mismo tiempo, aparece un aviso para actualizar antes de continuar.
+- Repetir una confirmación conserva la fecha original de grabación; las nuevas fechas siguen el día de Puerto Rico.
+
 ## v4.22 — 2026-09-08
 
 **Las próximas grabaciones aparecen en On Site desde que se agendan.**
