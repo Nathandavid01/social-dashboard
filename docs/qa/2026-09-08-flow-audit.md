@@ -290,3 +290,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Fuente: crearEnlaceCliente no validaba client_id de las ideas, aceptaba archived/failed, ignoraba lecturas fallidas y omitía videos sin medios sin avisar. Se validan sesión, todos los ids deduplicados, cliente/estado y archivos entregas-r2 no fallidos/archivados antes de escribir. Fallo de lectura de enlaces previos o fallo de borrado detiene el proceso.
 - TDD: 7 regresiones fallaron antes; 10 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil inspeccionado. Ningún enlace real fue regenerado ni eliminado.
 - No equivale a verificar el contenido remoto del archivo ni hace transaccional el reemplazo: todavía se borra antes de crear. Es necesaria una operación atómica en base de datos para no perder el enlace anterior si falla la creación, y para no afectar otras ideas de un enlace legacy compartido. Acceso de Nathan sigue pendiente. Local, sin desplegar.
+
+## Preparación SQL — Reemplazo atómico del enlace (0075)
+
+- Sin cambio de versión visible: RPC staged, no aplicada a Supabase y no conectada al servidor. El flujo actual sigue usando operaciones separadas.
+- PostgreSQL 16 local, base aislada nate_link_atomic: assertions fallaron primero por función ausente; pasaron después. Cubren idempotencia, rollback ante fallo de borrado, conservación de ideas hermanas en enlace legacy, cliente incorrecto, rol no permitido, y rechazo de solicitud sustituida.
+- 10 procesos psql simultáneos, rol authenticated, mismo request UUID: un solo token. El lock por cliente serializa reemplazos; los padres vacíos se conservan expirados para impedir que un reintento antiguo recree un enlace.
+- SECURITY INVOKER, rol activo owner/supervisor/editor/copy conforme a captions.edit actual. El fixture no reproduce RLS real; debe validarse en el proyecto de Nathan antes de activar. No se modificaron enlaces remotos.
+- Guía reproducible: scripts/tests/README-client-link-atomic.md. Pendiente aplicar y conectar 0074/0075 con acceso de Nathan, validar roles y completar el ciclo real.
