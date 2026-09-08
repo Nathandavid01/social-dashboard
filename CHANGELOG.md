@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.30 — 2026-09-08
+
+**Las decisiones de revisión avisan al siguiente responsable.**
+
+- El editor recibe el comentario cuando se piden cambios y un aviso cuando se aprueba su video.
+- Al reenviar, dueños y supervisores activos reciben un aviso para revisar la nueva versión.
+- Los avisos se generan después del cambio de estado; si falla su entrega, se informa al usuario sin deshacer la revisión.
+
 ## v4.29 — 2026-09-08
 
 **Reenviar una corrección ya no pisa cambios de otra persona.**

@@ -1,0 +1,6 @@
+import {expect,it,vi} from 'vitest'
+import {notifyReviewChange} from './review-notification'
+function database(){const insert=vi.fn(async()=>({error:null}));const q:any={select:()=>q,in:()=>q,eq:async()=>({data:[{id:'owner'},{id:'owner'},{id:'editor'}],error:null})};return {db:{from:(t:string)=>t==='profiles'?q:{insert}} as any,insert}}
+it('sends correction text to the responsible editor',async()=>{const{db,insert}=database();await notifyReviewChange(db,{ideaId:'i',title:'Video',editorId:'editor',actorId:'owner',outcome:'revision_needed',note:'Corrige captions'});expect(insert).toHaveBeenCalledWith([expect.objectContaining({user_id:'editor',kind:'review_rejected',body:expect.stringContaining('Corrige captions'),link:'/mi-dia'})])})
+it('notifies reviewers once each and excludes the submitting actor',async()=>{const{db,insert}=database();await notifyReviewChange(db,{ideaId:'i',title:'Video',editorId:'editor',actorId:'editor',outcome:'submitted'});expect(insert).toHaveBeenCalledWith([expect.objectContaining({user_id:'owner',kind:'review_pending',link:'/revision'})])})
+it('surfaces failed notification delivery',async()=>{const db={from:()=>({insert:async()=>({error:{message:'offline'}})})} as any;expect(await notifyReviewChange(db,{ideaId:'i',title:'Video',editorId:'editor',actorId:'owner',outcome:'approved'})).toMatch(/aviso/i)})

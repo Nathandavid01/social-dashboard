@@ -64,3 +64,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - v4.29 añade lectura de estados de publicación y un update condicionado a approval_status y ausencia de envío. Se conservan el control del editor asignado y archivo posterior a changes_requested.
 - Regresiones: envío con ID, posted_at, claim incierto, publicada/descartada y cambio concurrente. Caso válido conserva reenvío y filtros de concurrencia comprobados.
 - Pendiente: atomicidad entre historia de revisión y estado (decideReview escribe historia antes del update), carrera con subida de una nueva versión y envío a Metricool; evidencia real de revisión completa y notificación al editor.
+
+## Continuación · Avisos De Revisión
+
+- v4.30 conecta decideReview/resubmitForReview a notificaciones personales después de guardar el estado. Correcciones y aprobación van al editor de tarea, cliente o creador en ese orden; reenvíos a dueños/supervisores activos, excluyendo actor y duplicados.
+- Fallos devuelven warning, mostrado por la subida de corrección, overlay de revisión y botón de envío inicial. Se mantiene el estado guardado y se indica consultar Mi Día.
+- Pruebas locales cubren destinatarios, comentario, deduplicación y fallo de entrega. No se enviaron notificaciones reales: entrega end-to-end sigue pendiente.
+- Las notificaciones son best effort; falta outbox transaccional para garantizar entrega tras caídas. La atomicidad historia/estado continúa pendiente.

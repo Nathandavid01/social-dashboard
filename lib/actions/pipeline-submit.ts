@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas } from '@/lib/auth/server'
+import { notifyReviewChange } from '@/lib/utils/review-notification'
 import { applyReviewDecision } from '@/lib/utils/internal-review'
 import { reviewQualityError, type ReviewVerification } from '@/lib/utils/review-quality'
 import type { ContentIdea, IdeaApprovalStatus } from '@/lib/supabase/types'
@@ -83,7 +84,7 @@ export async function decideReview(input: {
   ideaId: string
   decision: 'approve' | 'request_changes'
   note?: string
-} & ReviewVerification): Promise<{ ok?: true; status?: IdeaApprovalStatus; error?: string }> {
+} & ReviewVerification): Promise<{ ok?: true; status?: IdeaApprovalStatus; warning?: string; error?: string }> {
   try {
     await requirePermission('video.approve')
   } catch (err) {
@@ -98,7 +99,7 @@ export async function decideReview(input: {
 
   const { data: idea, error: readErr } = await supabase
     .from('content_ideas')
-    .select('id, approval_status, created_by, metricool_post_id, posted_at')
+    .select('id, title, approval_status, created_by, metricool_post_id, posted_at, client:clients(assigned_to), production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id)')
     .eq('id', input.ideaId)
     .single()
   if (readErr || !idea) return { error: 'Video no encontrado' }
@@ -141,11 +142,14 @@ export async function decideReview(input: {
   revalidatePath('/pipeline')
   revalidatePath('/revision')
   revalidatePath('/entregas')
-  return { ok: true, status: next }
+  const client = idea.client as unknown as {assigned_to?:string}|null
+  const task = idea.production_task as unknown as {assigned_to_id?:string}|null
+  const warning = await notifyReviewChange(supabase,{ideaId:input.ideaId,title:idea.title || 'Video',editorId:task?.assigned_to_id ?? client?.assigned_to ?? idea.created_by,actorId:user?.id,outcome:next as 'approved'|'revision_needed',note:input.note})
+  return { ok: true, status: next, ...(warning ? {warning} : {}) }
 }
 
 /** The editor resubmits after fixing what the reviewer asked for. */
-export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; error?: string }> {
+export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; warning?: string; error?: string }> {
   try {
     await requirePermission('video.upload')
   } catch (err) {
@@ -155,7 +159,7 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('approval_status, status, metricool_post_id, posted_at, posting_started_at, created_by, client:clients(assigned_to), production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id)')
+    .select('title, approval_status, status, metricool_post_id, posted_at, posting_started_at, created_by, client:clients(assigned_to), production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id)')
     .eq('id', ideaId)
     .single()
   if (!idea) return { error: 'Video no encontrado' }
@@ -194,7 +198,8 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
   revalidatePath('/revision')
   revalidatePath('/entregas')
   revalidatePath('/pipeline')
-  return { ok: true }
+  const warning = await notifyReviewChange(supabase,{ideaId,title:idea.title || 'Video',editorId:ownerId,actorId:user.id,outcome:'submitted'})
+  return { ok: true, ...(warning ? {warning} : {}) }
 }
 
 

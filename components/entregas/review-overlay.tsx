@@ -1,4 +1,5 @@
 'use client'
+import {useToast} from '@/lib/hooks/use-toast'
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -58,14 +59,16 @@ export function ReviewOverlay({
     [],
   )
 
+  const {toast} = useToast()
   const onDecide = useCallback(
     async (ideaId: string, decision: 'approve' | 'request_changes', note: string, verification?: {videoFileId:string|null;captionsVerified:boolean;videoVerified:boolean}) => {
       const res = await decideReview({ ideaId, decision, note, ...verification })
       if (res.error) throw new Error(res.error)
+      if (res.warning) toast({title: 'Aviso Pendiente', description: res.warning, variant: 'destructive'})
       // Refresh so the board reflects the new column right away.
       router.refresh()
     },
-    [router],
+    [router, toast],
   )
 
   return (

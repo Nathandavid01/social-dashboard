@@ -30,6 +30,6 @@ export function ApprovalButton({ ideaId, approvalStatus }: Props) {
   if (approvalStatus !== 'pending' || !canUpload) return <span className="text-xs text-muted-foreground">Pendiente Del Responsable</span>
   return <Button size="sm" variant="outline" disabled={pending} onClick={() => startTransition(async () => {
     const result = await submitIdeaForApproval(ideaId)
-    toast(result.error ? { title: 'No Se Pudo Enviar', description: result.error, variant: 'destructive' } : { title: 'Enviado A Revisión' })
+    toast(result.error ? { title: 'No Se Pudo Enviar', description: result.error, variant: 'destructive' } : { title: 'Enviado A Revisión', description: result.warning })
   })}>Enviar A Revisión</Button>
 }
