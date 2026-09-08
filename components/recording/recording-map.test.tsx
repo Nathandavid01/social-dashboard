@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest'
+import {render,screen,fireEvent} from '@testing-library/react'
+import {RecordingMap} from './recording-map'
+it('shows only stored coordinates and lets the user choose a session',()=>{render(<RecordingMap sessions={[{id:'1',title:'casa plaza',session_date:'2026-09-08',location_lat:18.4,location_lng:-66.1},{id:'2',title:'sin gps',session_date:'2026-09-08',location_lat:null,location_lng:null}]} onOpen={()=>{}}/>);expect(screen.getByTitle('Mapa De Grabaciones En Puerto Rico')).toHaveAttribute('src',expect.stringContaining('openstreetmap.org'));expect(screen.getByText(/1 Sin Coordenadas/)).toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Casa Plaza/}));expect(screen.getByTitle('Mapa De Grabaciones En Puerto Rico')).toHaveAttribute('src',expect.stringContaining('marker=18.4%2C-66.1'))})

@@ -163,7 +163,7 @@ describe('RecordingCalendarClient — premium redesign', () => {
       teamMembers={team}
       clientIdeasMap={{}}
     />)
-    const fallback = screen.getByText('Sin cliente')
+    const fallback = screen.getByText('Sin Cliente')
     expect(fallback).toHaveAttribute('data-slot', 'session-chip-client')
     expect(fallback).toHaveClass('text-xs', 'font-semibold')
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
@@ -248,11 +248,11 @@ describe('sessionChipClientLabel', () => {
     expect(sessionChipClientLabel(session(), clients)).toBe('Nora Fitness')
   })
 
-  it('si el nombre viene vacío, usa título de cliente o Sin cliente', () => {
+  it('si el nombre viene vacío, usa título de cliente o Sin Cliente', () => {
     expect(sessionChipClientLabel(session({ client: null, client_id: 'c1' }), clients)).toBe('Nora Fitness')
     expect(sessionChipClientLabel(session({ client: { id: 'c9', name: '' }, client_id: null, title: 'Danny Mudano' }), [])).toBe('Danny Mudano')
     expect(sessionChipClientLabel(session({ client: null, client_id: null, title: 'Recording - Casa Sol' }), [])).toBe('Casa Sol')
-    expect(sessionChipClientLabel(session({ client: { name: '  ' }, client_id: null, title: 'Recording' }), [])).toBe('Sin cliente')
+    expect(sessionChipClientLabel(session({ client: { name: '  ' }, client_id: null, title: 'Recording' }), [])).toBe('Sin Cliente')
   })
 })
 
@@ -297,4 +297,13 @@ it('uses an agenda on narrow screens instead of a compressed month grid',()=>{
  expect(screen.getByText('Tu agenda, día por día')).toBeInTheDocument()
  expect(screen.queryByText('Lun')).not.toBeInTheDocument()
  window.matchMedia=previous
+})
+it('shows the client editor separately from the videographer',()=>{
+ render(<RecordingCalendarClient initialSessions={[session()]} clients={[{id:'c1',name:'nora fitness',assigned_to:'editor1'}]} teamMembers={[...team,{id:'editor1',full_name:'Carlos Villalta'}]} clientIdeasMap={{}} />)
+ expect(screen.getByText('Editor · Carlos Villalta')).toBeInTheDocument()
+})
+
+it('explains that a client link is needed before resolving its editor',()=>{
+ render(<RecordingCalendarClient initialSessions={[session({client_id:null,client:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ expect(screen.getByText('Editor · Vincula El Cliente')).toBeInTheDocument()
 })

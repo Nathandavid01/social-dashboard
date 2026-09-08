@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.18 — 2026-09-08
+
+**Clientes en Title Case, editores visibles y mapa de Puerto Rico.**
+
+- Los nombres visibles del calendario y la agenda usan Title Case, conservando siglas como PR y PVC.
+- Cada sesión muestra el editor asignado al cliente, separado del videógrafo. Las asignaciones faltantes quedan explícitas.
+- La vista Mapa De Puerto Rico sigue el mes y los filtros del calendario. Selecciona una grabación para ver su ubicación GPS y abrir sus detalles.
+- Las sesiones sin coordenadas aparecen como Falta GPS; no se inventan ubicaciones.
+
+![Calendario con mapa y editores](/changelog/v4.18-mapa-editores.png)
+
 ## v4.17 — 2026-09-08
 
 **Un calendario de grabación más claro en escritorio y en iPhone.**

@@ -26,7 +26,7 @@ export default async function RecordingCalendarPage({ searchParams }: { searchPa
       .lt('session_date', monthEnd)
       .order('session_date')
       .order('start_time', { nullsFirst: true }),
-    supabase.from('clients').select('id, name, posting_days').eq('status', 'active').order('name'),
+    supabase.from('clients').select('id, name, posting_days, assigned_to').eq('status', 'active').order('name'),
     supabase.from('profiles').select('id, full_name').eq('status', 'active').order('full_name'),
     // Fetch all non-discarded/non-published ideas for active clients
     supabase
@@ -47,7 +47,7 @@ export default async function RecordingCalendarPage({ searchParams }: { searchPa
     <RecordingCalendarClient
       initialVideographer={videographer}
       initialSessions={(sessionsResult.data ?? []) as unknown as Parameters<typeof RecordingCalendarClient>[0]['initialSessions']}
-      clients={(clients ?? []) as Pick<Client, 'id' | 'name' | 'posting_days'>[]}
+      clients={(clients ?? []) as Pick<Client, 'id' | 'name' | 'posting_days' | 'assigned_to'>[]}
       teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
       clientIdeasMap={clientIdeasMap}
     />
