@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.55 — 2026-09-08
+
+**Entregas carga los datos completos antes de permitir agendar.**
+
+- Se elimina el recorte a las primeras 400 ideas y se consultan por páginas clientes, aprobaciones y registros de envío.
+- Si falla una consulta o sus resultados están incompletos, aparece un aviso para volver a cargar Entregas.
+- Los archivos fallidos o archivados ya no cuentan como entregas válidas.
+
+![Aviso de carga de Entregas (simulación)](/changelog/v4.55-entregas-carga.png)
+
 ## v4.54 — 2026-09-08
 
 **Un error de reproducción invalida las verificaciones del video.**

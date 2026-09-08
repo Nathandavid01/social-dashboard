@@ -256,3 +256,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - TDD: 3 regresiones fallaron antes de implementar; 29 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se dañó ni alteró un medio real para inducir el error.
 - Límite: esto protege el estado del visor, no demuestra que una persona haya visto el video completo ni valida por sí mismo captions/audio. La revisión atómica y el ciclo real de corrección/publicación siguen pendientes.
 - Suite completa v4.54: 384 archivos aprobados, 3055 pruebas aprobadas y 3 omitidas; salida /tmp/nate-v454-suite.log. Local, sin desplegar.
+
+## v4.55 — Entregas lee datos completos antes de agendar
+
+- Fuente: /entregas limitaba ideas a 400, ignoraba errores de clientes/votos/envíos y aceptaba archivos edited entregas-r2 incluso failed/archived. Ahora usa la consulta completa de ideas, el filtro canónico de entregas y readCompletePages para consultas secundarias (conteo, orden estable, detección de duplicados/cambios).
+- TDD: 8 casos de página fallaron antes; helper probado desde archivo ausente. Final: 22 pruebas de página/paginación/filtro aprobadas, TypeScript y merge-gate aprobados. CUA /entregas cargó con fechas vencidas bloqueadas para Metricool; no se hizo ningún envío. Preview móvil simulado inspeccionado.
+- Hallazgo pendiente real: encabezado “21 publicados” incluye tarjetas con fecha pasada y sin envío a Metricool (Arte Digital Online). No equivale a publicación verificada: corregir contador/etiqueta. También revisar elección de voto cuando hay múltiples rondas para una misma idea; hoy Object.fromEntries no elige por fecha de ronda.
+- Local, sin desplegar. Paginación no es snapshot transaccional; entradas masivas de ids aún pueden requerir fragmentación. Revisión atómica de Nathan y ciclo completo real siguen pendientes.
