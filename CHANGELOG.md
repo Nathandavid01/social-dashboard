@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.16 — 2026-09-08
+
+**Perfiles de todo el equipo y enlaces directos a sus redes.**
+
+- El menú Ver Como Usuario incluye todos los roles activos y aprobados, con nombre y rol. Mi Perfil, Mi Día y la agenda personal consultan la persona elegida.
+- Un aviso visible permite salir de la vista. Solo administradores acceden al selector; un supervisor no puede adoptar el rol de dueño.
+- Los iconos de redes en Metricool abren el perfil real en una pestaña nueva. Cuando falta un identificador verificable, muestran Enlace No Disponible.
+
+![Vista previa de perfiles y enlaces sociales](/changelog/v4.16-perfiles-redes.png)
+
 ## v4.15 — 2026-09-08
 
 **De la corrección a la publicación: revisión verificable y agenda con un clic explícito.**

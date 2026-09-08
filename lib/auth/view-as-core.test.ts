@@ -29,10 +29,10 @@ describe('isViewAsEditorId', () => {
 })
 
 describe('viewAsTargetOk', () => {
-  it('solo un editor activo y aprobado', () => {
+  it('cualquier rol activo y aprobado', () => {
     expect(viewAsTargetOk({ role: 'editor', status: 'active', approval_status: 'approved' })).toBe(true)
     expect(viewAsTargetOk({ role: 'editor', status: 'inactive', approval_status: 'approved' })).toBe(false)
-    expect(viewAsTargetOk({ role: 'disenador', status: 'active', approval_status: 'approved' })).toBe(false)
+    expect(viewAsTargetOk({ role: 'disenador', status: 'active', approval_status: 'approved' })).toBe(true)
     expect(viewAsTargetOk({ role: 'editor', status: 'active', approval_status: 'pending' })).toBe(false)
     expect(viewAsTargetOk(null)).toBe(false)
   })
@@ -67,3 +67,5 @@ describe('resolveEffectiveUserId', () => {
     expect(resolveEffectiveUserId('editor-1', 'editor', EDITOR)).toBe('editor-1')
   })
 })
+
+it('uses the selected persons real role',()=>{expect(resolveEffectiveRole('owner', EDITOR, 'video')).toBe('video');expect(resolveEffectiveRole('owner', EDITOR, 'copy')).toBe('copy')})

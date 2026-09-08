@@ -22,6 +22,7 @@ const COOKIE_OPTS = {
 export interface ViewAsEditorOption {
   id: string
   full_name: string | null
+  role?: import('@/lib/supabase/types').UserRole
 }
 
 export async function listEditorsForViewAs(): Promise<ViewAsEditorOption[]> {
@@ -31,22 +32,21 @@ export async function listEditorsForViewAs(): Promise<ViewAsEditorOption[]> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('profiles')
-    .select('id, full_name')
-    .eq('role', 'editor')
+    .select('id, full_name, role')
     .eq('status', 'active')
     .eq('approval_status', 'approved')
     .order('full_name')
 
-  return data ?? []
+  return (data ?? []).filter(p => role === 'owner' || p.role !== 'owner')
 }
 
 export async function startViewAsEditor(editorId: string): Promise<{ ok?: true; error?: string }> {
   const role = await getCurrentRole()
   if (!canStartViewAs(role)) {
-    return { error: 'Solo un admin puede ver como un editor.' }
+    return { error: 'Solo un admin puede ver como otro usuario.' }
   }
   if (!isViewAsEditorId(editorId)) {
-    return { error: 'Editor no válido.' }
+    return { error: 'Usuario no válido.' }
   }
 
   const supabase = await createClient()
@@ -56,8 +56,8 @@ export async function startViewAsEditor(editorId: string): Promise<{ ok?: true; 
     .eq('id', editorId)
     .maybeSingle()
 
-  if (!viewAsTargetOk(data)) {
-    return { error: 'Esa persona no es un editor activo.' }
+  if (!viewAsTargetOk(data) || (role !== 'owner' && data?.role === 'owner')) {
+    return { error: 'Selecciona un usuario activo permitido.' }
   }
 
   const store = await cookies()

@@ -46,7 +46,7 @@ export default async function DashboardLayout({
     .maybeSingle()
   const profile = data as Profile | null
   const realRole: UserRole | null = profile?.role ?? ensuredRole
-  const effectiveRole: UserRole | null = viewAsEditor ? 'editor' : realRole
+  const effectiveRole: UserRole | null = viewAsEditor ? viewAsEditor.role : realRole
   const editors = canStartViewAs(realRole) ? await listEditorsForViewAs() : []
 
   // Deactivated accounts are locked out of the entire dashboard.
@@ -97,7 +97,7 @@ export default async function DashboardLayout({
         <Sidebar
           videoReviewCount={videoReviewCount ?? 0}
           navPreferences={profile?.nav_preferences}
-          areaAccess={viewAsEditor ? null : profile?.area_access ?? null}
+          areaAccess={viewAsEditor ? viewAsEditor.area_access : profile?.area_access ?? null}
         />
         <SidebarAwareContent>
           <Topbar

@@ -45,25 +45,28 @@ const platformIcons: Record<SocialPlatform, ComponentType<IconProps>> = {
   linkedin: LinkedinIcon,
 }
 
-export function PlatformBadges({ platforms }: { platforms: SocialPlatform[] }) {
+export function PlatformBadges({ platforms, links }: { platforms: SocialPlatform[]; links?: Partial<Record<SocialPlatform, string>> }) {
   if (!platforms.length) return <span className="text-muted-foreground text-xs">—</span>
 
   return (
     <div className="flex items-center gap-1.5">
       {platforms.map((platform) => {
         const Icon = platformIcons[platform]
+        const href = links?.[platform]
+        const Tag = href ? 'a' : 'span'
         return (
-          <span
+          <Tag
+            {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})}
             key={platform}
-            title={platformLabels[platform]}
+            title={links && !href ? `${platformLabels[platform]} · Enlace No Disponible` : platformLabels[platform]}
             aria-label={platformLabels[platform]}
             className={cn(
-              'inline-flex h-7 w-7 items-center justify-center rounded-lg border transition-transform hover:scale-105',
+              'inline-flex shrink-0 h-7 w-7 items-center justify-center rounded-lg border transition-transform hover:scale-105',
               platformColors[platform],
             )}
           >
             <Icon className="h-3.5 w-3.5" />
-          </span>
+          </Tag>
         )
       })}
     </div>

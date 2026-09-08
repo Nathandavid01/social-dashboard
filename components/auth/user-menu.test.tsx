@@ -65,6 +65,6 @@ describe('UserMenu', () => {
     const user = userEvent.setup()
     render(<UserMenu />)
     await user.click(screen.getByRole('button'))
-    expect(await screen.findByText('Ver como editor')).toBeInTheDocument()
+    expect(await screen.findByText('Ver Como Usuario')).toBeInTheDocument()
   })
 })
