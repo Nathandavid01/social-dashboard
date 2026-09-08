@@ -135,3 +135,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Se ejecutó el helper compilado contra la primera cuenta real: 2 posts recibidos, 1 incluido, ninguna fecha de ayer, estado PENDING preservado. Solo GET/SELECT; sin posts ni cambios de clientes.
 - 18 pruebas focales pasan (incluye otras zonas, offsets, fecha inválida y salto DST), TypeScript y merge-gate pasan. Cuatro regresiones fallaban antes del filtro.
 - Pendientes de la auditoría completa: otras herramientas del chat con consultas independientes, salida final del modelo con sesión autenticada y migración de revisión en el proyecto de Nathan.
+
+## v4.39 — Resumen operativo compartido con el chat
+
+- `execGetDashboardSummary` contaba producción desde `production_tasks` (200 filas), mientras Mi día usa `content_ideas` y la revisión verificada. Ese cálculo independiente se eliminó del briefing.
+- Ahora se llama al mismo `getOperationsOverview`, conservando su RBAC y detección de errores/límites. Formatter presenta checklist, revisiones/correcciones/bloqueos/listos y capacidad de editores. También incluye `execGetTodaysPosts` para evidencia remota.
+- El detalle se limita a ocho filas por sección con cantidad restante y enlace a Mi día; los totales no se recortan. Se mantienen las secciones de tareas generales, clientes, inbox y QC.
+- 13 pruebas focales pasan, TypeScript y merge-gate pasan. Preview simulado `/previews/v4.39-resumen-compartido.html`. Sin publicar ni generar mensajes a usuarios.
+- Pendiente: las secciones antiguas de tareas/alertas/inbox del briefing todavía requieren manejo de error explícito y filtro temporal de alertas; verificar respuesta final del chat autenticado, no solo el formatter. Acceso al proyecto Supabase de Nathan sigue necesario para revisión atómica.

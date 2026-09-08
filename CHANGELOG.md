@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.39 — 2026-09-08
+
+**El resumen operativo del chat usa la misma fuente que Mi Día.**
+
+- Revisiones, correcciones, subidas, bloqueos y espacios de edición salen del resumen operativo compartido.
+- Se incluye el estado de cada paso del checklist, sin confundir enviado con publicado.
+- El resumen consulta la agenda confirmada de Metricool; los errores o la falta de acceso se muestran como información sin verificar.
+
 ## v4.38 — 2026-09-08
 
 **El resumen de hoy ya no mezcla publicaciones de ayer.**

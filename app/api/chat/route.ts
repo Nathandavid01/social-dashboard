@@ -1,3 +1,5 @@
+import { getOperationsOverview } from '@/lib/actions/operations-overview'
+import { formatOperationsBriefing } from '@/lib/utils/operations-briefing'
 import { getTodayBriefing } from '@/lib/metricool/today-briefing'
 import { getScheduledPosts } from '@/lib/metricool/scheduler'
 import { generateCaptionText, captionModelId } from '@/lib/llm/caption-llm'
@@ -782,7 +784,8 @@ async function execGetDashboardSummary(): Promise<string> {
       { count: pendingRequests },
       { count: pendingVideos },
       { data: profiles },
-      { data: prodTasks },
+      workflow,
+      todayPosts,
     ] = await Promise.all([
       supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
       supabase.from('alerts').select('title, severity, message').order('created_at', { ascending: false }).limit(5),
@@ -790,7 +793,8 @@ async function execGetDashboardSummary(): Promise<string> {
       supabase.from('client_requests').select('*', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
       supabase.from('video_reviews').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'head_editor_review', 'pending_final_check', 'final_check_review', 'revision_needed']),
       supabase.from('profiles').select('id, full_name').order('full_name'),
-      supabase.from('production_tasks').select('status, content_type, publish_date, client:clients!production_tasks_client_id_fkey(name)').neq('status', 'publicado').order('publish_date').limit(200),
+      getOperationsOverview(),
+      execGetTodaysPosts(),
     ])
 
     const all = tasks ?? []
@@ -847,28 +851,8 @@ async function execGetDashboardSummary(): Promise<string> {
     if (dueTodayTasks.length > 0) lines.push(`• ⏰ ${dueTodayTasks.length} due today`)
     lines.push(``)
 
-    // Production module stats
-    const prod = prodTasks ?? []
-    if (prod.length > 0) {
-      const prodPendiente = prod.filter((t) => t.status === 'pendiente').length
-      const prodEdicion = prod.filter((t) => t.status === 'en_edicion').length
-      const prodRevision = prod.filter((t) => t.status === 'en_revision').length
-      const prodCambios = prod.filter((t) => t.status === 'revisiones').length
-      const prodAprobado = prod.filter((t) => t.status === 'aprobado').length
-      const prodReels = prod.filter((t) => t.content_type === 'R').length
-      const prodPosts = prod.filter((t) => t.content_type === 'P').length
-      const today = new Date().toISOString().slice(0, 10)
-      const publishingToday = prod.filter((t) => t.publish_date === today)
-      lines.push(`**🎬 Producción:** ${prod.length} activas (${prodReels} Reels · ${prodPosts} Posts)`)
-      lines.push(`• ${prodEdicion} en edición · ${prodRevision} en revisión · ${prodCambios} necesitan cambios · ${prodAprobado} aprobados`)
-      if (prodPendiente > 0) lines.push(`• ${prodPendiente} pendientes de asignar`)
-      if (publishingToday.length > 0) {
-        const clientNames = Array.from(new Set(publishingToday.map((t) => (t.client as { name?: string } | null)?.name).filter(Boolean))).slice(0, 3).join(', ')
-        lines.push(`• 📅 ${publishingToday.length} publicando hoy${clientNames ? ` (${clientNames})` : ''}`)
-      }
-      if (prodRevision + prodCambios > 0) lines.push(`• ⚠️ ${prodRevision + prodCambios} piezas necesitan atención en Para Revisar`)
-      lines.push(``)
-    }
+    // Content workflow must match the canonical Mi día snapshot.
+    lines.push(formatOperationsBriefing(workflow), '', todayPosts, '')
 
     // Team
     if (teamLines.length > 0) {
