@@ -58,3 +58,9 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - GET real del scheduler en dos blogs de clientes activos, septiembre 2026: ambos HTTP 200; 8 y 3 posts. Media es un array de strings, formato aceptado por el matcher. No se guardaron tokens ni contenido de posts en el informe. Esto valida el contrato de lectura, no una recuperación real ni coincidencias de archivos.
 - Reproducido corte de conexión en PublishCardButton: la promesa rechazada escapaba sin restaurar busy, y resultados vacíos contaban como éxito. v4.28 captura el error por video, conserva el conteo confirmado y continúa el lote sin reenviar la idea fallida.
 - No se enviaron publicaciones ni se modificaron registros externos en esta auditoría.
+
+## Continuación · Reenvío De Correcciones
+
+- v4.29 añade lectura de estados de publicación y un update condicionado a approval_status y ausencia de envío. Se conservan el control del editor asignado y archivo posterior a changes_requested.
+- Regresiones: envío con ID, posted_at, claim incierto, publicada/descartada y cambio concurrente. Caso válido conserva reenvío y filtros de concurrencia comprobados.
+- Pendiente: atomicidad entre historia de revisión y estado (decideReview escribe historia antes del update), carrera con subida de una nueva versión y envío a Metricool; evidencia real de revisión completa y notificación al editor.

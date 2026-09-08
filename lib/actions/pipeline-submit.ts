@@ -155,10 +155,14 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('approval_status, created_by, client:clients(assigned_to), production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id)')
+    .select('approval_status, status, metricool_post_id, posted_at, posting_started_at, created_by, client:clients(assigned_to), production_task:production_tasks!content_ideas_production_task_id_fkey(assigned_to_id)')
     .eq('id', ideaId)
     .single()
   if (!idea) return { error: 'Video no encontrado' }
+  if (idea.metricool_post_id != null || idea.posted_at || idea.posting_started_at || ['publicada','descartada'].includes(idea.status)) {
+    return { error: 'Este video ya fue enviado, está en verificación de envío o fue cerrado. Actualiza antes de reenviar.' }
+  }
+
 
   const { data: { user } } = await supabase.auth.getUser()
   const client = idea.client as unknown as {assigned_to?:string}|null
@@ -176,11 +180,15 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; er
   const next = applyReviewDecision(idea.approval_status as IdeaApprovalStatus, 'submit')
   if (!next) return { error: 'Este video no está esperando cambios.' }
 
-  const { error } = await supabase
+  const { data: changed, error } = await supabase
     .from('content_ideas')
     .update({ approved_video_id: null, approved_at: null, approved_by: null, approval_status: next, submitted_at: new Date().toISOString() })
     .eq('id', ideaId)
-  if (error) return { error: error.message }
+    .eq('approval_status', idea.approval_status)
+    .is('metricool_post_id', null).is('posted_at', null).is('posting_started_at', null)
+    .not('status', 'in', '(publicada,descartada)')
+    .select('id').maybeSingle()
+  if (error || !changed) return { error: error?.message ?? 'El video cambió mientras trabajabas. Actualiza antes de reenviar.' }
 
   revalidatePath('/mi-dia')
   revalidatePath('/revision')

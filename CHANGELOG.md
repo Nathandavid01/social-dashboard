@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.29 — 2026-09-08
+
+**Reenviar una corrección ya no pisa cambios de otra persona.**
+
+- Se mantiene el requisito de subir una versión nueva después de los comentarios.
+- Un video enviado a Metricool, con envío incierto, publicado o descartado no vuelve a revisión desde una pantalla vieja.
+- Si el estado cambia durante el reenvío, aparece un aviso para actualizar y no se informa éxito.
+
 ## v4.28 — 2026-09-08
 
 **Un corte de conexión ya no deja el lote atascado en “Enviando”.**
