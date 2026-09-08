@@ -10,7 +10,7 @@
  * Semántica: el banco enseña crudos PENDIENTES; lo aprobado vive en el
  * calendario. Poblaciones disjuntas a propósito.
  */
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, CalendarPlus, Clapperboard, Film, MessageSquareText, RotateCcw, UserRound, Users } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -27,7 +27,11 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { getBankCoverUrls } from '@/lib/actions/video-bank-covers'
 import { reassignVideo } from '@/lib/actions/content-ideas'
 import { setClientAssignment } from '@/lib/actions/client-assignments'
+import { RoleGate } from '@/components/auth/role-gate'
+import { BancoUploadDialog, type BancoUploadClient } from '@/components/banco/banco-upload-dialog'
+import type { AttachableBankIdea } from '@/lib/pipeline/banco-direct-upload'
 import type { BankClientRail, BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
+import { railsWithEveryClient } from '@/lib/pipeline/video-bank'
 import type { ProjectedCalendar } from '@/lib/pipeline/projected-calendar'
 import type { ClientCalendarDay } from '@/lib/pipeline/client-calendar'
 import { approvalTone } from '@/lib/pipeline/approval-tone'
@@ -67,9 +71,12 @@ export interface BancoViewProps {
   teamEditors: Array<{ id: string; name: string }>
   clientLogos: Record<string, string | null>
   clientsPanel?: BancoClientPanel[]
+  clients?: BancoUploadClient[]
+  ideas?: AttachableBankIdea[]
 }
 
-export function BancoView({ bank, calendar, devueltos, editors, teamEditors, clientLogos, clientsPanel = [] }: BancoViewProps) {
+export function BancoView({ bank, calendar, devueltos, editors, teamEditors, clientLogos, clientsPanel = [], clients = [], ideas = [] }: BancoViewProps) {
+  const library = useMemo(() => railsWithEveryClient(bank.rails, clients), [bank.rails, clients])
   return (
     <Tabs defaultValue="banco" className="flex-1 space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
@@ -80,6 +87,10 @@ export function BancoView({ bank, calendar, devueltos, editors, teamEditors, cli
             <strong className="text-foreground">{bank.totals.unassigned}</strong> sin editor
           </span>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <RoleGate perm="video.upload">
+            <BancoUploadDialog clients={clients} ideas={ideas} />
+          </RoleGate>
         <TabsList className="shrink-0">
           <TabsTrigger value="banco">
             <Film className="mr-1.5 h-3.5 w-3.5" /> Banco
@@ -91,24 +102,27 @@ export function BancoView({ bank, calendar, devueltos, editors, teamEditors, cli
             <Users className="mr-1.5 h-3.5 w-3.5" /> Clientes
           </TabsTrigger>
         </TabsList>
+        </div>
       </div>
 
       <TabsContent value="banco" className="space-y-4">
         {editors.length > 0 && <EditorStrip editors={editors} />}
         {devueltos.length > 0 && <Devueltos items={devueltos} />}
-        {bank.rails.length === 0 ? (
+        {library.length === 0 ? (
           <div className="flex items-center justify-center rounded-xl border border-border bg-card px-5 py-16 text-center">
             <p className="max-w-sm text-sm text-muted-foreground">
-              No hay crudos pendientes en el banco. Lo aprobado ya salió hacia el calendario de posteo.
+              Sube videos aunque no haya grabación agendada. El B-roll del cliente se queda aquí.
             </p>
           </div>
         ) : (
-          bank.rails.map((rail) => (
+          library.map((rail) => (
             <ClientRail
               key={rail.clientId}
               rail={rail}
               logoUrl={clientLogos[rail.clientId] ?? rail.logoUrl}
               teamEditors={teamEditors}
+              clients={clients}
+              ideas={ideas}
             />
           ))
         )}
@@ -187,10 +201,14 @@ function ClientRail({
   rail,
   logoUrl,
   teamEditors,
+  clients,
+  ideas,
 }: {
   rail: BankClientRail
   logoUrl: string | null
   teamEditors: Array<{ id: string; name: string }>
+  clients: BancoUploadClient[]
+  ideas: AttachableBankIdea[]
 }) {
   const { toast } = useToast()
   const router = useRouter()
@@ -244,7 +262,28 @@ function ClientRail({
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
-      <CoverGrid videos={rail.videos} teamEditors={teamEditors} />
+      {rail.videos.length > 0 && <CoverGrid videos={rail.videos} teamEditors={teamEditors} />}
+      <section data-testid={`client-broll-${rail.clientId}`} className="border-t border-border px-3 pb-3 pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-1 py-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">B-roll del cliente</h3>
+            <p className="text-[11px] text-muted-foreground">Siempre aquí. No se va cuando publicas un video.</p>
+          </div>
+          <RoleGate perm="video.upload">
+            <BancoUploadDialog
+              clients={clients.length > 0 ? clients : [{ id: rail.clientId, name: rail.clientName }]}
+              ideas={ideas}
+              defaultClientId={rail.clientId}
+              defaultKind="broll"
+              triggerLabel="Subir B-roll"
+              triggerClassName="border border-border bg-background text-foreground"
+            />
+          </RoleGate>
+        </div>
+        {(rail.brolls ?? []).length > 0
+          ? <CoverGrid videos={rail.brolls ?? []} teamEditors={teamEditors} />
+          : <p className="px-1 pb-2 text-xs text-muted-foreground">Todavía no hay B-roll de {rail.clientName}.</p>}
+      </section>
     </section>
   )
 }

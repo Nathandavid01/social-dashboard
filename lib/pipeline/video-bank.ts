@@ -1,6 +1,7 @@
 import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { clientAssigneeId, isIdeaApproved } from './editor-video-bank'
+import { isClientBrollLibrary } from './banco-direct-upload'
 
 /**
  * El banco visto como biblioteca de video: una carátula por crudo, agrupadas
@@ -12,7 +13,6 @@ import { clientAssigneeId, isIdeaApproved } from './editor-video-bank'
  */
 
 const LIVE = new Set<ContentIdeaVideo['status']>(['uploading', 'uploaded', 'processing'])
-const SOURCE = new Set<ContentIdeaVideo['kind']>(['raw', 'broll'])
 
 /** De dónde sale el editor: asignado a la idea, heredado del cliente, o nadie. */
 export type AssignedVia = 'idea' | 'client' | null
@@ -48,6 +48,8 @@ export interface BankClientRail {
   editorName: string | null
   assignedVia: AssignedVia
   videos: BankVideoTile[]
+  /** B-roll del cliente: no se va cuando se aprueba un video. */
+  brolls?: BankVideoTile[]
 }
 
 export interface VideoBank {
@@ -96,9 +98,35 @@ function postingDaysOf(client: IdeaWithPipeline['client']): number[] {
   return Array.isArray(days) ? days : []
 }
 
-/** Crudo y b-roll vivos: lo que un editor puede tomar para cortar. */
-function sourceVideos(idea: IdeaWithPipeline): ContentIdeaVideo[] {
-  return (idea.videos ?? []).filter((v) => SOURCE.has(v.kind) && LIVE.has(v.status))
+function liveOf(idea: IdeaWithPipeline, kind: 'raw' | 'broll'): ContentIdeaVideo[] {
+  return (idea.videos ?? []).filter((v) => v.kind === kind && LIVE.has(v.status))
+}
+
+function toTile(
+  video: ContentIdeaVideo,
+  idea: IdeaWithPipeline,
+  rail: BankClientRail,
+  editor: { id: string | null; name: string | null; via: AssignedVia },
+  recorderNames: Record<string, string>,
+): BankVideoTile {
+  const thumbKeys = (video.thumb_keys ?? []).filter(Boolean)
+  return {
+    videoId: video.id,
+    ideaId: idea.id,
+    productionTaskId: idea.production_task_id ?? null,
+    title: ideaTitle(idea),
+    kind: video.kind as 'raw' | 'broll',
+    durationSec: video.duration_sec ?? null,
+    thumbKeys,
+    hasCover: thumbKeys.length > 0,
+    recordedBy: video.uploaded_by ? recorderNames[video.uploaded_by] ?? null : null,
+    uploadedAt: video.uploaded_at ?? null,
+    clientId: rail.clientId,
+    clientName: rail.clientName,
+    editorId: editor.id,
+    editorName: editor.name,
+    assignedVia: editor.via,
+  }
 }
 
 export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOptions = {}): VideoBank {
@@ -109,17 +137,18 @@ export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOpti
 
   for (const idea of ideas) {
     if (idea.status === 'descartada') continue
-    // Lo aprobado ya salió del banco: ese trabajo está hecho.
-    if (isIdeaApproved(idea)) continue
 
     const clientId = clientKey(idea)
     if (!clientId) continue
 
-    const videos = sourceVideos(idea)
-    if (videos.length === 0) continue
-
     const editor = editorOf(idea, editorNames)
     if (options.onlyUnassigned && editor.id) continue
+
+    const pendingRaw = !isIdeaApproved(idea) && !isClientBrollLibrary(idea)
+      ? liveOf(idea, 'raw')
+      : []
+    const broll = liveOf(idea, 'broll')
+    if (pendingRaw.length === 0 && broll.length === 0) continue
 
     let rail = rails.get(clientId)
     if (!rail) {
@@ -134,31 +163,19 @@ export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOpti
         editorName: editor.name,
         assignedVia: editor.via,
         videos: [],
+        brolls: [],
       }
       rails.set(clientId, rail)
     }
 
-    for (const video of videos) {
-      const thumbKeys = (video.thumb_keys ?? []).filter(Boolean)
-      rail.videos.push({
-        videoId: video.id,
-        ideaId: idea.id,
-        productionTaskId: idea.production_task_id ?? null,
-        title: ideaTitle(idea),
-        kind: video.kind as 'raw' | 'broll',
-        durationSec: video.duration_sec ?? null,
-        thumbKeys,
-        hasCover: thumbKeys.length > 0,
-        recordedBy: video.uploaded_by ? recorderNames[video.uploaded_by] ?? null : null,
-        uploadedAt: video.uploaded_at ?? null,
-        clientId,
-        clientName: rail.clientName,
-        editorId: editor.id,
-        editorName: editor.name,
-        assignedVia: editor.via,
-      })
-      rail.videoCount += 1
+    rail.brolls ??= []
+    for (const video of pendingRaw) {
+      rail.videos.push(toTile(video, idea, rail, editor, recorderNames))
     }
+    for (const video of broll) {
+      rail.brolls.push(toTile(video, idea, rail, editor, recorderNames))
+    }
+    rail.videoCount = rail.videos.length + rail.brolls.length
   }
 
   const list = Array.from(rails.values())
@@ -177,4 +194,33 @@ export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOpti
       unassigned: list.filter((r) => !r.editorId).length,
     },
   }
+}
+
+export function emptyClientRail(client: { id: string; name: string }): BankClientRail {
+  return {
+    clientId: client.id,
+    clientName: client.name,
+    logoUrl: null,
+    cardColor: clientCardColor({ id: client.id }).dot,
+    postingDays: [],
+    videoCount: 0,
+    editorId: null,
+    editorName: null,
+    assignedVia: null,
+    videos: [],
+    brolls: [],
+  }
+}
+
+export function railsWithEveryClient(
+  rails: BankClientRail[],
+  clients: Array<{ id: string; name: string }>,
+): BankClientRail[] {
+  if (clients.length === 0) return rails
+  const byId = new Map(rails.map((r) => [r.clientId, r]))
+  const out = clients.map((c) => byId.get(c.id) ?? emptyClientRail(c))
+  for (const rail of rails) {
+    if (!clients.some((c) => c.id === rail.clientId)) out.push(rail)
+  }
+  return out
 }

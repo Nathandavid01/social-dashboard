@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
-import { buildVideoBank } from './video-bank'
+import { buildVideoBank, railsWithEveryClient } from './video-bank'
 
 const NOW = Date.parse('2026-08-28T12:00:00.000Z')
 
@@ -62,13 +62,34 @@ describe('buildVideoBank', () => {
     ])
   })
 
-  it('cuenta cada video, no cada idea: dos crudos de una idea son dos carátulas', () => {
+  it('cuenta cada video, no cada idea: crudo y B-roll son dos archivos, en secciones distintas', () => {
     const bank = buildVideoBank(
       [idea({ id: 'a', videos: [{ id: 'v1' }, { id: 'v2', kind: 'broll' }] })],
       { now: NOW },
     )
     expect(bank.rails[0].videoCount).toBe(2)
-    expect(bank.rails[0].videos.map((v) => v.videoId)).toEqual(['v1', 'v2'])
+    expect(bank.rails[0].videos.map((v) => v.videoId)).toEqual(['v1'])
+    expect((bank.rails[0].brolls ?? []).map((v) => v.videoId)).toEqual(['v2'])
+  })
+
+  it('el B-roll del cliente se queda aunque la idea ya esté aprobada', () => {
+    const bank = buildVideoBank(
+      [idea({
+        id: 'a',
+        approvalStatus: 'approved',
+        videos: [{ id: 'raw1', kind: 'raw' }, { id: 'b1', kind: 'broll' }],
+      })],
+      { now: NOW },
+    )
+    expect(bank.rails[0].videos).toEqual([])
+    expect((bank.rails[0].brolls ?? []).map((v) => v.videoId)).toEqual(['b1'])
+  })
+
+  it('cada cliente tiene carril aunque no tenga crudos, para el B-roll permanente', () => {
+    const rails = railsWithEveryClient([], [{ id: 'c1', name: 'ARASIBO' }])
+    expect(rails).toHaveLength(1)
+    expect(rails[0].clientName).toBe('ARASIBO')
+    expect(rails[0].brolls).toEqual([])
   })
 
   it('dice a qué editor le tocaría cada video, y por qué', () => {

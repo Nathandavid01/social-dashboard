@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.66 — 2026-09-08
+
+**Subes videos al Banco sin grabación agendada, y el B-roll del cliente se queda.**
+- **Subir videos** en Banco: eliges cliente, idea nueva o existente, y sueltas los archivos. No se crea sesión en el calendario.
+- Cada cliente tiene **B-roll del cliente**, siempre visible. **Subir B-roll** lo guarda ahí y no desaparece cuando publicas un video.
+- Si no hay crudos pendientes, el carril del cliente igual existe para esa librería.
+
 ## v4.65 — 2026-09-08
 
 **Banco de Video también queda disponible para los supervisores.**

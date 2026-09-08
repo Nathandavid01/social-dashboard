@@ -165,6 +165,7 @@ export async function registerR2Video(input: {
   revalidatePath(`/produccion/idea/${input.ideaId}`)
   revalidatePath('/planning')
   revalidatePath('/pipeline') // Content Pipeline board — so the card re-buckets into its new column
+  revalidatePath('/banco')
   return { ok: true, id: data.id }
 }
 
