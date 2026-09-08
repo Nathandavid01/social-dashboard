@@ -343,3 +343,7 @@ Verified authenticated /account/profile renders Eric Owner, active people option
 User explicitly required supervisors to see step 2. Their RBAC already grants pipeline.read, but explicit area_access lists and saved hidden navigation can remove it. effectiveAreaHrefs now includes /pipeline for supervisors even with an empty explicit grant. Sidebar ignores stale hidden preferences for that route and removes its hide control for supervisors. Step label is 2 · Edición. Other role restrictions remain unchanged.
 
 57 focused permission/navigation/process tests pass, TypeScript and merge-gate pass. Standalone mobile preview inspected (simulation). No stored profile settings were overwritten; no database migration. Production remains pending PR review/merge.
+
+### v4.65 — supervisor video bank
+
+Extended the explicitly required supervisor access to /banco, alongside /pipeline. Restricted area lists and stale hidden preferences no longer hide the video bank for supervisors. No profile records changed. Added negative editor-role tests. 53 focused tests, TypeScript and merge-gate pass; mobile simulated preview inspected. Production pending PR merge.

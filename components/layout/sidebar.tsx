@@ -147,7 +147,7 @@ export function Sidebar({
   }
 
   // Filter to allowed first, then apply user prefs
-  const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h) || (role === 'supervisor' && h === '/pipeline')))
+  const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h) || (role === 'supervisor' && ['/pipeline', '/banco'].includes(h))))
     .filter((h) => allowedHrefs.has(h))
 
   // Section headings turn a 20-item wall into a menu you can scan. They only make
@@ -200,7 +200,7 @@ export function Sidebar({
           const item = itemsByHref.get(href)
           if (!item) return null
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          const isHidden = hidden.has(item.href) && !(role === 'supervisor' && item.href === '/pipeline')
+          const isHidden = hidden.has(item.href) && !(role === 'supervisor' && ['/pipeline', '/banco'].includes(item.href))
           const heading = headingBefore(href, i)
 
           // Only /video-reviews is actually in the sidebar; the other three badges
@@ -245,7 +245,7 @@ export function Sidebar({
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
-              {editing && !collapsed && !(role === 'supervisor' && item.href === '/pipeline') && (
+              {editing && !collapsed && !(role === 'supervisor' && ['/pipeline', '/banco'].includes(item.href)) && (
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleHidden(item.href) }}

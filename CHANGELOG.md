@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.65 — 2026-09-08
+
+**Banco de Video también queda disponible para los supervisores.**
+
+- Los supervisores conservan acceso aunque tengan áreas personalizadas.
+- Las preferencias antiguas ya no pueden ocultar Banco de Video.
+
+![Banco de Video para supervisores (simulación)](/changelog/v4.65-banco-supervisores.png)
+
 ## v4.64 — 2026-09-08
 
 **Los supervisores siempre ven el paso 2 · Edición.**

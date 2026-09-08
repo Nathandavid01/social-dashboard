@@ -114,3 +114,8 @@ it('keeps step 2 in a supervisor restricted navigation',()=>{
  expect(visibleNavItems('supervisor',['/revision']).map(n=>n.href)).toContain('/pipeline')
  expect(visibleNavItems('editor',['/revision']).map(n=>n.href)).not.toContain('/pipeline')
 })
+
+it('keeps the video bank in restricted supervisor navigation',()=>{
+ expect(visibleNavItems('supervisor',[]).map(n=>n.href)).toContain('/banco')
+ expect(visibleNavItems('editor',['/revision']).map(n=>n.href)).not.toContain('/banco')
+})
