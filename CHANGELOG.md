@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.11 — 2026-09-08
+
+**El costo por imagen en Gráficas es visible solo para administradores.**
+
+- Owner y Supervisor conservan el estimado por imagen.
+- Los demás roles ven el formulario sin el costo; generar gráficas mantiene sus permisos actuales.
+
+![Costo según el rol, vista de ejemplo](/changelog/v4.11-graficas-costo.png)
+
 ## v4.10 — 2026-09-08
 
 **Mi Día reúne las prioridades del equipo en un resumen operativo.**

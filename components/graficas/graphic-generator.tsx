@@ -1,5 +1,6 @@
 'use client'
 
+import { RoleGate } from '@/components/auth/role-gate'
 import { useState, useTransition } from 'react'
 import { Sparkles, Loader2, Download, ExternalLink, ImagePlus, X, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -134,7 +135,7 @@ export function GraphicGenerator({
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <CardTitle className="min-w-0 truncate text-base">Nueva gráfica</CardTitle>
-          <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">~$0.04 por imagen</span>
+          <RoleGate perm="graphics.cost.read"><span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">~$0.04 por imagen</span></RoleGate>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-3">

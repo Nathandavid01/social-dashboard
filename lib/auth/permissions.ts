@@ -47,6 +47,7 @@ export type Permission =
   | 'captions.edit'
   /** Gráficas IA: generar artes con Grok Imagine usando la marca del cliente. */
   | 'graphics.generate'
+  | 'graphics.cost.read'
   | 'metricool.read'
   | 'metricool.write'
   // Insights
@@ -105,7 +106,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
-    'graphics.generate',
+    'graphics.generate', 'graphics.cost.read',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
