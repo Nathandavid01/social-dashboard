@@ -188,3 +188,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Se cubren resumen, búsqueda/listado de tareas, carga del equipo, eficiencia por cliente y tareas abiertas. Tareas completed no se marcan vencidas; fechas ausentes/ilegibles no generan plazos inventados.
 - 24 pruebas focales pasan (incluye cambio de día UTC, offsets que ordenan al revés y tareas completadas), TypeScript, merge-gate y diff-check pasan. Preview simulado `/previews/v4.45-tareas-horario.html`.
 - Local; no se cambiaron fechas de tareas reales. El ciclo completo de revisión/publicación y la síntesis final autenticada siguen pendientes de auditoría; acceso a Supabase de Nathan continúa pendiente.
+
+## v4.46 — Responsables del checklist
+
+- SELECT read-only real: 66 clientes activos, 50 con assigned_to. El generador omitía ese campo para compromisos sintéticos y solo mostraba el responsable de production_task en los videos.
+- El resumen obtiene assigned_to y resuelve nombre desde perfiles ya consultados; responsable específico de tarea conserva prioridad. Si el perfil asignado no está disponible se muestra asignado/nombre no disponible, no se inventa un nombre.
+- QA visual autenticada en /mi-dia#hoy: Arasibo → Carlos Villalta, Arte Digital → Lisneidy Lopez, Beyond PVC → Jeander Loop, Café El Bosque → Richard Jimenez, Casita Vieja → Alexa Kerocen; Beyond Performance sigue Sin Asignar. Arasibo conserva la confirmación de publicación externa.
+- Tres regresiones fallaron antes; 21 pruebas focales, TypeScript, merge-gate y diff-check pasan. Preview simulado `/previews/v4.46-editor-checklist.html`.
+- No se cambiaron asignaciones reales. Pendiente: sesiones aún sin cliente/videógrafo, migración atómica de revisión y validación completa de medios/revisión/Metricool.

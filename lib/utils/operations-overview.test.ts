@@ -25,3 +25,24 @@ describe('operations overview',()=>{
   expect(build([idea({approved_video_id:'gone'})]).ready).toHaveLength(0)
  })
 })
+describe('editor responsibility',()=>{
+ const assignedClient={...client,assigned_to:'e'}
+ const editor={id:'e',full_name:'Alexa',role:'editor',status:'active'}
+ it('uses the assigned client editor for missing daily commitments',()=>{
+  const r=buildOperationsOverview([],[assignedClient],[editor],today)
+  expect(r.today[0].owner).toBe('Alexa')
+ })
+ it('uses the client editor when a video has no task assignee',()=>{
+  const r=buildOperationsOverview([idea({approval_status:'submitted'})],[assignedClient],[editor],today)
+  expect(r.reviews[0].owner).toBe('Alexa')
+ })
+ it('preserves an explicit task assignee over the client default',()=>{
+  const r=buildOperationsOverview([idea({assignee:{id:'other',full_name:'Carlos'}})],[assignedClient],[editor],today)
+  expect(r.today[0].owner).toBe('Carlos')
+ })
+ it('does not call an unavailable assigned profile unassigned',()=>{
+  const r=buildOperationsOverview([],[assignedClient],[],today)
+  expect(r.today[0].owner).toContain('Asignado')
+  expect(r.today[0].owner).not.toBe('Sin Asignar')
+ })
+})

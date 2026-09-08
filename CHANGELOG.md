@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.46 — 2026-09-08
+
+**Mi Día muestra al editor asignado al cliente cuando no hay responsable de tarea.**
+
+- Los compromisos de hoy y videos en revisión muestran al editor del cliente como respaldo.
+- Una asignación específica de la tarea conserva prioridad.
+- Si existe una asignación pero no se puede mostrar su nombre, se distingue de “Sin Asignar”.
+
 ## v4.45 — 2026-09-08
 
 **Las tareas de hoy y vencidas se calculan con la hora correcta.**

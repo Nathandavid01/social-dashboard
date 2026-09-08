@@ -5,11 +5,12 @@ import { ideaHasEntregasEditedVideo } from './entregas-delivery'
 import { resolveVideoForPublish } from './idea-posting-core'
 import { automaticPublishSchedule } from './automatic-publish-schedule'
 
-export interface OverviewClient { id:string; name:string; posting_days:number[]|null; metricool_blog_id:string|null; posting_time?:string|null }
+export interface OverviewClient { assigned_to?:string|null; id:string; name:string; posting_days:number[]|null; metricool_blog_id:string|null; posting_time?:string|null }
 export interface OverviewEditor { id:string; full_name:string|null; role:string; status:string }
 export interface OverviewItem { id:string; title:string; client:string; owner:string; date:string|null; state:string; href:string; done:boolean; missing?:boolean; checks:{label:string;done:boolean}[] }
 export interface OperationsOverview { date:string; today:OverviewItem[]; overdue:OverviewItem[]; reviews:OverviewItem[]; corrections:OverviewItem[]; ready:OverviewItem[]; blocked:OverviewItem[]; uploads:OverviewItem[]; editors:{id:string;name:string;used:number;limit:number;free:number}[] }
 export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:OverviewClient[], profiles:OverviewEditor[], today:string, now=Date.now()):OperationsOverview {
+ const clientOwner=(client:OverviewClient)=>client.assigned_to?(profiles.find(profile=>profile.id===client.assigned_to)?.full_name||'Editor Asignado · Nombre No Disponible'):'Sin Asignar'
  const activeClients=new Map(clients.map(c=>[c.id,c]))
  const active=ideas.filter(i=>i.status!=='descartada'&&activeClients.has(i.client_id??''))
  const result:OperationsOverview={date:today,today:[],overdue:[],reviews:[],corrections:[],ready:[],blocked:[],uploads:[],editors:[]}
@@ -31,7 +32,7 @@ export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:Overvi
   const needsReview=edited&&i.approval_status==='submitted'&&!published&&!sent
   const correction=edited&&i.approval_status==='revision_needed'&&!published&&!sent
   const state=published?'Publicado':sent?'Enviado · Falta Verificar':!edited?(raw?'Falta Subir Editado':'Falta Subir Crudo'):correction?`Corregir Video${reviewNote?' · '+reviewNote:''}`:!approved?'Revisar Video':!sealed?'Revisar Archivo Aprobado':!reviewVerified?'Verificar Video Y Subtítulos':!copy?'Completar Copy':!c.metricool_blog_id?.trim()?'Conectar Metricool':!schedule.ok?schedule.error:'Listo Para Agendar'
-  const item:OverviewItem={id:i.id,title:i.title||'Sin Título',client:c.name,owner:i.assignee?.full_name||'Sin Asignar',date:i.publish_date,state,done:published,href:`/produccion/idea/${i.id}`,checks:[{label:'Crudo',done:raw},{label:'Editado',done:edited},{label:'Video Y Subtítulos',done:reviewVerified},{label:'Aprobado',done:approved},{label:'Copy',done:copy},{label:'Enviado',done:sent||published},{label:'Publicado',done:published}]}
+  const item:OverviewItem={id:i.id,title:i.title||'Sin Título',client:c.name,owner:i.assignee?(i.assignee.full_name||'Editor Asignado · Nombre No Disponible'):clientOwner(c),date:i.publish_date,state,done:published,href:`/produccion/idea/${i.id}`,checks:[{label:'Crudo',done:raw},{label:'Editado',done:edited},{label:'Video Y Subtítulos',done:reviewVerified},{label:'Aprobado',done:approved},{label:'Copy',done:copy},{label:'Enviado',done:sent||published},{label:'Publicado',done:published}]}
   if(i.publish_date===today){result.today.push(item);if(!edited&&!published&&!sent)result.uploads.push(item)}
   if(i.publish_date&&i.publish_date<today&&!published&&!sent)result.overdue.push(item)
   if(needsReview)result.reviews.push(item)
@@ -42,7 +43,7 @@ export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:Overvi
  const weekday=new Date(today+'T12:00:00Z').getUTCDay()
  for(const c of clients){
   if(c.posting_days?.includes(weekday)&&!active.some(i=>i.client_id===c.id&&i.publish_date===today)){
-   result.today.push({id:'missing-'+c.id,title:'Falta Preparar El Video De Hoy',client:c.name,owner:'Sin Asignar',date:today,state:'Sin Video Fechado',href:`/clients/${c.id}`,done:false,missing:true,checks:[]})
+   result.today.push({id:'missing-'+c.id,title:'Falta Preparar El Video De Hoy',client:c.name,owner:clientOwner(c),date:today,state:'Sin Video Fechado',href:`/clients/${c.id}`,done:false,missing:true,checks:[]})
   }
  }
  result.editors=profiles.filter(p=>p.status==='active'&&(p.role==='editor'||p.role==='team_member')).map(p=>{

@@ -14,7 +14,7 @@ export async function getOperationsOverview():Promise<{data?:OperationsOverview;
  if(profile.error||!profile.data||profile.data.status==='inactive'||['pending','rejected'].includes(profile.data.approval_status))return null
  const [ideas,clients,editors,activity]=await Promise.all([
   db.from('content_ideas').select('*, client:clients!content_ideas_client_id_fkey(id,name,assigned_to), videos:content_idea_videos!content_idea_videos_idea_id_fkey(*), production_task:production_tasks!content_ideas_production_task_id_fkey(id,status,publish_date,assigned_to:profiles!production_tasks_assigned_to_id_fkey(id,full_name))', { count: 'exact' }).order('id').limit(5000),
-  db.from('clients').select('id,name,posting_days,posting_time,metricool_blog_id', { count: 'exact' }).eq('status','active').order('id').limit(5000),
+  db.from('clients').select('id,name,assigned_to,posting_days,posting_time,metricool_blog_id', { count: 'exact' }).eq('status','active').order('id').limit(5000),
   db.from('profiles').select('id,full_name,role,status', { count: 'exact' }).eq('status','active').order('id').limit(5000),
   db.from('content_idea_activity').select('content_idea_id,action,metadata,created_at',{count:'exact'}).in('action',['review_verified','changes_requested']).order('created_at',{ascending:false}).limit(5000),
  ])
