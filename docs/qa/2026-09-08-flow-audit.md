@@ -23,3 +23,10 @@ Objetivo activo: un sistema y flujo sin fallos. No se considera completado por p
 - Investigar pruebas omitidas y cobertura faltante; verificar CI y producción por separado. Trabajo actual local, sin publicación ni migraciones ejecutadas.
 
 No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes durante esta revisión.
+
+## Continuación · Reintentos Metricool
+
+- Reproducido: `createDraftPost` reenviaba POST tras cualquier HTTP no exitoso si había opciones de formato. Una respuesta 5xx no prueba que el primer POST no creó la publicación.
+- v4.24 limita el fallback de formato a 400/422. Regresiones nuevas cubren 401/403/408/429/500/502/503/504, validación y fallo de transporte.
+- **Pendiente prioritario:** `runIdeaPost` libera el claim ante resultados inciertos y permite recuperar claims después de cinco minutos. También devuelve éxito aunque fallen todos los intentos de guardar la respuesta remota. Hay que reconciliar con Metricool antes de permitir reenvíos y representar los resultados desconocidos sin éxito falso. La corrección del conector no resuelve ese riesgo en la capa superior.
+- Ninguna solicitud real fue enviada a Metricool en estas pruebas.

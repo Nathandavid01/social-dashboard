@@ -131,10 +131,10 @@ export async function createDraftPost(
 
   const hasFormatHints = Object.keys(formatData).length > 0
   let res = await send(hasFormatHints)
-  // The format hints are best-effort: if Metricool rejects them (some accounts/
-  // networks don't accept a format override via the API), never let that block
-  // the publish — retry once without the format override.
-  if (!res.ok && hasFormatHints) {
+  // Only a validation rejection proves this request was not accepted. A
+  // timeout/server failure may happen after creation: replaying POST can create
+  // a duplicate. Auth and rate-limit errors also cannot be fixed by format hints.
+  if (!res.ok && hasFormatHints && [400, 422].includes(res.status)) {
     res = await send(false)
   }
 

@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.24 — 2026-09-08
+
+**Metricool deja de repetir el envío cuando falla el servidor.**
+
+- Errores de servidor, tiempo de espera, permisos o límite de solicitudes ya no provocan un segundo envío sin formato.
+- El ajuste automático de formato queda limitado a rechazos de validación (400/422).
+- El error original se conserva para poder investigarlo antes de volver a agendar.
+
 ## v4.23 — 2026-09-08
 
 **On Site protege los videos que ya avanzaron en el flujo.**
