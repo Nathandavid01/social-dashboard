@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.56 — 2026-09-08
+
+**Entregas distingue la etapa de publicación de los envíos a Metricool.**
+
+- El resumen deja de llamar “publicados” a todos los videos de la última columna.
+- Muestra tarjetas en Publicación y, por separado, videos con identificador de envío a Metricool.
+- Los conteos respetan los filtros visibles; un envío no se presenta como publicación confirmada.
+
+![Resumen del tablero (simulación)](/changelog/v4.56-resumen-envios.png)
+
 ## v4.55 — 2026-09-08
 
 **Entregas carga los datos completos antes de permitir agendar.**

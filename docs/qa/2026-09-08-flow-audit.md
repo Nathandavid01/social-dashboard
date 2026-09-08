@@ -263,3 +263,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - TDD: 8 casos de página fallaron antes; helper probado desde archivo ausente. Final: 22 pruebas de página/paginación/filtro aprobadas, TypeScript y merge-gate aprobados. CUA /entregas cargó con fechas vencidas bloqueadas para Metricool; no se hizo ningún envío. Preview móvil simulado inspeccionado.
 - Hallazgo pendiente real: encabezado “21 publicados” incluye tarjetas con fecha pasada y sin envío a Metricool (Arte Digital Online). No equivale a publicación verificada: corregir contador/etiqueta. También revisar elección de voto cuando hay múltiples rondas para una misma idea; hoy Object.fromEntries no elige por fecha de ronda.
 - Local, sin desplegar. Paginación no es snapshot transaccional; entradas masivas de ids aún pueden requerir fragmentación. Revisión atómica de Nathan y ciclo completo real siguen pendientes.
+
+## v4.56 — No llamar publicados a videos en etapa Publicación
+
+- Fuente: el encabezado contaba stage='publication' y lo etiquetaba “publicados”, incluyendo tarjetas sin envío. Se cambia a “En Publicación” y se añade conteo separado de ids de video únicos con metricool_post_id no nulo, sobre tarjetas visibles.
+- TDD: 2 pruebas fallaron primero; 66 pruebas del tablero aprobadas, TypeScript y merge-gate aprobados. CUA /entregas real mostró 25 tarjetas, 21 En Publicación y 14 Videos Enviados A Metricool. Preview móvil inspeccionado sin desbordamiento.
+- Los 14 envíos son registros internos, no una nueva auditoría remota de publicación. No se envió ningún post. Sigue pendiente auditoría completa de medios y Metricool, revisión atómica con acceso de Nathan, y elección del voto cliente en múltiples rondas.
+- Commit local, sin desplegar.

@@ -287,7 +287,9 @@ function EntregasBoardInner({
   // siempre refleja el estado real del video.
   const moveCard = useCallback((_b: EntregaBatch, _d: 1 | -1) => {}, [])
 
-  const published = visible.filter((b) => stageOf(b) === 'publication').length
+  const inPublication = visible.filter((b) => stageOf(b) === 'publication').length
+
+  const sentToMetricool = new Set(visible.flatMap((b) => b.ideas).filter((i) => i.metricool_post_id != null).map((i) => i.id)).size
 
   // ── Click-and-drag horizontal panning of the columns (grab/grabbing cursor) ──
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -360,8 +362,8 @@ function EntregasBoardInner({
           value={assigneeFilter}
           onChange={setAssigneeFilter}
         />
-        <p className="ml-auto text-[11px] tabular-nums text-muted-foreground">
-          <span className="text-foreground">{visible.length}</span> batches · <span className="text-emerald-400">{published}</span> publicados
+        <p aria-label="Resumen Del Tablero" className="ml-auto flex flex-wrap gap-x-2 text-[11px] tabular-nums text-muted-foreground">
+          <span>{visible.length} Tarjetas</span><span>· {inPublication} En Publicación</span><span>· {sentToMetricool} Videos Enviados A Metricool</span>
         </p>
       </div>
 

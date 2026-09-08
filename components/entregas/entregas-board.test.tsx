@@ -397,9 +397,10 @@ describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
     expect(cardsText).toContain('Lumen')
   })
 
-  it('still shows the batches/publicados stats line', () => {
+  it('shows stage counts without claiming publication', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
-    expect(screen.getByText(/publicados/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('En Publicación')
+    expect(screen.queryByText(/publicados/i)).not.toBeInTheDocument()
   })
 })
 
@@ -685,4 +686,14 @@ describe('EntregasBoard — enlace al post enviado', () => {
     fireEvent.click(screen.getByRole('link', { name: /ver post enviado/i }))
     expect(screen.queryByTestId('review-overlay')).toBeNull()
   })
+})
+
+it('counts Metricool receipts separately from publication-stage cards', () => {
+ render(<EntregasBoard stages={['copy','publication']} ideas={[
+  idea({id:'ready',approval_status:'approved',generated_caption:'Caption',metricool_post_id:null}),
+  idea({id:'sent',approval_status:'approved',generated_caption:'Caption',metricool_post_id:123}),
+ ]}/> )
+ expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('2 En Publicación')
+ expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('1 Videos Enviados A Metricool')
+ expect(screen.queryByText(/publicados/i)).not.toBeInTheDocument()
 })
