@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor, within, act } from '@testing-library/react'
 import type { IdeaWithPipeline, UserRole } from '@/lib/supabase/types'
 
@@ -60,8 +60,20 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-09-07T16:00:00Z'))
   cleanup()
   resetNav('')
+})
+
+afterEach(() => vi.useRealTimers())
+
+it.each([['2026-09-08T16:00:00Z', 'Martes'], ['2026-09-09T02:00:00Z', 'Martes'], ['2026-09-13T16:00:00Z', 'Domingo']])('abre el día de Puerto Rico para %s', (instant, day) => {
+  vi.setSystemTime(new Date(instant))
+  render(<EntregasBoard stages={['edited', 'approval']} ideas={[]} />)
+  expect(screen.getByRole('button', { name: day })).toHaveAttribute('aria-pressed', 'true')
+  fireEvent.click(screen.getByRole('button', { name: 'Viernes' }))
+  expect(screen.getByRole('button', { name: 'Viernes' })).toHaveAttribute('aria-pressed', 'true')
 })
 
 describe('EntregasBoard — las columnas las define la ruta', () => {

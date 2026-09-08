@@ -4,7 +4,7 @@ import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useT
 import { Search, Filter, LayoutGrid, Plus, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, RotateCcw, CalendarClock, CheckCircle2, ExternalLink } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
-import { worstDeadlineStatus, deadlineTone } from '@/lib/utils/deadlines'
+import { worstDeadlineStatus, deadlineTone, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { ENTREGA_BATCH_STAGES, groupIntoBatches, bucketBatches, adjacentBatchStage, batchProgress, buildClientPipelineIndex, emptyStageBuckets, splitBatchesByStage, ENTREGA_LABEL_ES, entregaCardKey, type EntregaStageKey, type EntregaBatch, type ClientCadence } from '@/lib/entregas/batches'
 import { userAccent } from '@/lib/utils/user-accent'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -15,7 +15,7 @@ import { ReviewOverlay } from './review-overlay'
 import { CopyOverlay } from './copy-overlay'
 import { PublishScheduleCard } from './publish-schedule-card'
 import { DiscardCardButton } from './discard-card-button'
-import { DIAS, diaDeTablero, offsetSemanaTablero, rangoSemana, type DiaKey, type ModoDia } from '@/lib/entregas/dias'
+import { DIAS, diaDeFecha, diaDeTablero, offsetSemanaTablero, rangoSemana, type DiaKey, type ModoDia } from '@/lib/entregas/dias'
 
 /** '3 – 8 ago' — con "Esta semana" a secas no se sabe de qué fechas se habla. */
 function etiquetaRango(semana: number): string {
@@ -134,7 +134,8 @@ function EntregasBoardInner({
   // La operación es POR DÍA: cada día tiene su tablero completo. Sin esto,
   // el lunes y el jueves se mezclan en las mismas columnas y nadie sabe qué
   // toca hoy.
-  const [dia, setDia] = useState<DiaKey | 'sin'>(DIAS[0].key)
+  const [hoyDia] = useState<DiaKey>(() => diaDeFecha(todayISOInTimeZone('America/Puerto_Rico'))!)
+  const [dia, setDia] = useState<DiaKey | 'sin'>(hoyDia)
   // Las pestañas contestan "qué hago hoy"; la semana, "cómo viene". Empieza en
   // día: es lo que se abre para trabajar.
   const [vista, setVista] = useState<'dia' | 'semana'>('dia')
@@ -142,13 +143,6 @@ function EntregasBoardInner({
   // la vez sobre lo que se ve y sobre para cuándo se entrega, para que no
   // puedan contradecirse.
   const [semanaOffset, setSemanaOffset] = useState(0)
-  // Sin useMemo con new Date(): se calcula una vez al montar. El domingo no
-  // resalta ninguna columna, que es correcto — nadie entrega en domingo.
-  const [hoyDia] = useState<DiaKey | null>(() => {
-    const d = new Date().getDay()
-    return d >= 1 && d <= 6 ? (d as DiaKey) : null
-  })
-
   const [clientFilter, setClientFilter] = useState<string | null>(null)
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null)
   const [search, setSearch] = useState('')

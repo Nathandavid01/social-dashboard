@@ -212,3 +212,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Ahora la página bloquea el call sheet incompleto con mensaje y enlace de recarga de la misma sesión. Un cliente no vinculado consultado correctamente sí mantiene lista vacía legítima.
 - Cuatro regresiones fallaron antes; 13 pruebas focales pasan, TypeScript, merge-gate y diff-check pasan. Preview móvil simulado a 390x844 inspeccionado, sin desbordamiento horizontal, captura en public/changelog/v4.48-onsite-carga.png.
 - No se indujeron fallos en datos reales ni se alteraron sesiones. El flujo completo de medios y la revisión atómica pendiente de acceso siguen abiertos.
+
+## v4.49 — Revisión abre el día actual
+
+- Evidencia: el tablero inicializaba siempre `DIAS[0].key` (lunes); la selección de “hoy” además omitía domingos y usaba la zona del navegador.
+- Pruebas nuevas fallaron primero: martes, martes en Puerto Rico cuando UTC ya es miércoles, domingo. El cambio manual de pestaña se conserva. Las 62 pruebas anteriores se fijaron a una fecha de lunes explícita para evitar depender del reloj real.
+- Se inicializa la selección y el indicador semanal con la fecha de America/Puerto_Rico. No cambia fechas guardadas ni agenda publicaciones.
+- Validación: 65 pruebas del tablero; suite completa 380 archivos aprobados, 3027 pruebas aprobadas, 3 omitidas; TypeScript y merge-gate aprobados. CUA en /revision, vista Denisha Matos, confirmó Martes seleccionado y 11 piezas en Revisión. Preview móvil inspeccionado, sin desbordamiento.
+- Local, sin desplegar. Sigue pendiente el acceso al proyecto de Nathan para revisión atómica y comprobar el ciclo real de medios, corrección y publicación. La síntesis previa del chat sigue mostrando datos viejos; no es evidencia de actualización actual.

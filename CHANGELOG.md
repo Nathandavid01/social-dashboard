@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.49 — 2026-09-08
+
+**Revisión Y Entregas abren en el día actual de Puerto Rico.**
+
+- Al entrar, se selecciona el día de hoy en lugar de mostrar siempre el lunes.
+- El domingo también se selecciona y se identifica en la vista semanal.
+- Puedes cambiar de día manualmente para consultar o preparar otras entregas.
+
+![Vista previa de la selección del día (simulación)](/changelog/v4.49-dia-actual.png)
+
 ## v4.48 — 2026-09-08
 
 **On Site distingue una sesión vacía de una consulta fallida.**
