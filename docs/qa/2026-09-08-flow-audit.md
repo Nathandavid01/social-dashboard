@@ -369,3 +369,7 @@ Verificación final local v4.67: 400 archivos de prueba verdes, 3157 pruebas apr
 ## v4.69 — Asignaciones En Clientes
 
 Editor múltiple centralizado en Clientes → Asignaciones. Grabación y perfil enlazan allí; permisos de usuario no se modifican. 0079 agrega set_client_editors sobre 0078 sin tocar sesiones. SQL local comprobó múltiples miembros, rol inválido, permisos, RLS y que la sesión no cambia. 17 pruebas focales aprobadas. Activación del guardado directo pendiente de aplicación manual de 0079; no se ejecutó en Supabase remoto.
+
+## v4.70 — Asignación Simplificada Y Anuncio
+
+Tres pasos con búsqueda, resumen de selección y confirmación por cliente. Tabla secundaria plegada. 3171 pruebas aprobadas, 3 omitidas, TypeScript y merge-gate verdes. RPC set_client_editors todavía ausente en OpenAPI remoto al verificar; 0079 pendiente. Usuario autorizó anuncio en Slack al terminar. Canal #updates-dashboard C0BRP1X3BHQ confirmado en Slack; instrucciones preparadas, no enviadas antes de activación y despliegue.

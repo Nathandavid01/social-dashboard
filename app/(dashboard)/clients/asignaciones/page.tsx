@@ -33,7 +33,7 @@ export default async function AsignacionesPage() {
 
   return (
     <div className="space-y-4"><ClientEditorTeam />
-    <AssignmentsTable
+    <details className="rounded-xl border p-4"><summary className="cursor-pointer text-sm font-medium">Ver Editor Principal Y Diseñadores</summary><div className="mt-4"><AssignmentsTable
       clients={(clients ?? []).map((c) => ({
         id: c.id,
         name: c.name,
@@ -48,6 +48,6 @@ export default async function AsignacionesPage() {
         role: p.role,
       }))}
       currentUserId={user?.id ?? null}
-    /></div>
+    /></div></details></div>
   )
 }
