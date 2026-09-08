@@ -357,3 +357,11 @@ The user reported applying `0078_client_editor_assignments.sql` manually to proj
 No actual production client/editor assignment was made for QA. Authenticated save, subsequent editor-profile readback and production RLS behavior remain unverified. Release CI, merge and deployment must be verified separately; migration availability alone is not evidence that v4.67 is deployed. The preview is simulated. Migrations 0074–0077 remain staged pending coordinated review/publication integration and live verification; they are not prerequisites for this editor-linking feature and are not claimed as applied.
 
 Verificación final local v4.67: 400 archivos de prueba verdes, 3157 pruebas aprobadas, 3 omitidas; TypeScript y merge-gate aprobados. Navegador autenticado en localhost:3038: el diálogo Vincular Editores cargó clientes y nueve editores desde Supabase; no se guardó una asignación real durante la comprobación.
+
+## v4.68 — Materiales Y Entrega Por Pieza
+
+- Espacio activo de Edición: instrucciones, todos los archivos de la idea, B-roll disponible del cliente y entrega sobre la misma idea. No crea una idea duplicada ni cambia la fecha.
+- Envío valida responsable y estado, exige archivo edited en entregas-r2 registrado por el usuario y avisa a supervisores; un fallo de subida no envía a revisión.
+- Verificado en navegador autenticado local: pieza de Carlos muestra sus instrucciones, siete crudos y entrega deshabilitada hasta seleccionar archivo y confirmar subtítulos. No se subieron archivos de prueba a datos reales ni se aprobó/rechazó una pieza real.
+- 16 pruebas focales aprobadas; el resto de la suite pasó salvo una expectativa antigua por nombre duplicado, corregida y verificada. TypeScript y merge-gate verdes. Pruebas existentes de devolución y corrección verdes. Migraciones 0074–0077 siguen pendientes de integración; no se declara revisión atómica de producción verificada.
+- Trabajo de videógrafos múltiples permanece separado y pendiente de confirmar el mínimo obligatorio.

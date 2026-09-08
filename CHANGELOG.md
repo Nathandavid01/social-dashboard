@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.68 — 2026-09-08
+
+**Cada pieza reúne sus materiales y la entrega del editado para supervisión.**
+
+- Abre Material Y Entregar desde el espacio del editor para ver la idea, instrucciones y todos sus archivos.
+- Descarga los crudos y los B-rolls disponibles del cliente uno por uno.
+- Sube el editado con subtítulos sobre la misma idea, conservando su fecha e instrucciones.
+- La pieza pasa a Revisión después de registrar el archivo; el supervisor puede aprobar o pedir cambios con comentarios.
+
+![Material y entrega (simulación)](/changelog/v4.68-material-editor.png)
+
 ## v4.67 — 2026-09-08
 
 **Vincula varios editores por cliente desde Grabación.**
