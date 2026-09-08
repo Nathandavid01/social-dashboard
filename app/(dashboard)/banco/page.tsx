@@ -6,12 +6,13 @@ import { resolveClientLogo } from '@/lib/utils/client-logo'
 import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import { projectPostingCalendar, type ClientQueueInput } from '@/lib/pipeline/projected-calendar'
 import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
-import { clientAssigneeId } from '@/lib/pipeline/editor-video-bank'
+import { clientAssigneeId, isIdeaApproved } from '@/lib/pipeline/editor-video-bank'
 import { buildClientCalendar } from '@/lib/pipeline/client-calendar'
 import { planNextVideoSlot } from '@/lib/utils/planned-sessions'
 import { getActivityLog } from '@/lib/actions/activity'
 import { BancoView, type BancoClientPanel, type BancoDevuelto, type BancoEditorStat } from '@/components/banco/banco-view'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import type { AttachableBankIdea } from '@/lib/pipeline/banco-direct-upload'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -157,6 +158,20 @@ export default async function BancoPage() {
         teamEditors={teamEditors}
         clientLogos={clientLogos}
         clientsPanel={clientsPanel}
+        clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+        ideas={ideas.flatMap((idea): AttachableBankIdea[] => {
+          const clientId = idea.client?.id ?? idea.client_id
+          if (!clientId || idea.status === 'descartada' || isIdeaApproved(idea)) return []
+          return [{
+            id: idea.id,
+            title: idea.title?.trim() || idea.hook?.trim() || 'Sin título',
+            clientId,
+            status: idea.status,
+            approval_status: idea.approval_status,
+            published_at: idea.published_at,
+            theme: idea.theme,
+          }]
+        })}
       />
     </div>
   )

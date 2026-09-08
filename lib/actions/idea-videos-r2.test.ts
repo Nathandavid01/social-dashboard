@@ -131,6 +131,7 @@ import {
   restoreR2Video,
 } from '@/lib/actions/idea-videos-r2'
 import { r2Client } from '@/lib/integrations/r2'
+import { revalidatePath } from 'next/cache'
 
 beforeEach(() => {
   ops.length = 0
@@ -457,6 +458,7 @@ describe('registerR2Video — idea promotion', () => {
     expect(updates[0].payload).toMatchObject({ status: 'grabada' })
     // and it is NOT an archive of a video.
     expect(archiveUpdates()).toHaveLength(0)
+    expect(revalidatePath).toHaveBeenCalledWith('/banco')
   })
 
   it('promotes the idea to "producida" on edited upload (auto-advances the card to "Edited")', async () => {
