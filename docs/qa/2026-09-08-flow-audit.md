@@ -347,3 +347,13 @@ User explicitly required supervisors to see step 2. Their RBAC already grants pi
 ### v4.65 — supervisor video bank
 
 Extended the explicitly required supervisor access to /banco, alongside /pipeline. Restricted area lists and stale hidden preferences no longer hide the video bank for supervisors. No profile records changed. Added negative editor-role tests. 53 focused tests, TypeScript and merge-gate pass; mobile simulated preview inspected. Production pending PR merge.
+
+### v4.67 — multiple editors linked to a client
+
+Owners and supervisors can open Vincular Editores from a pending recording, select its client when not already linked, and select one or more active approved editors. The assignment is saved through `set_recording_client_editors`; linked clients appear in the editor's own profile and team detail. Existing primary assignments are retained when selected. Multiple client memberships do not automatically distribute individual videos between editors.
+
+The user reported applying `0078_client_editor_assignments.sql` manually to project `bgqdtfhelknmfudcvrzz`. A subsequent read-only REST check returned HTTP 200 for `client_editor_assignments`, and the API schema exposed `/rpc/set_recording_client_editors`. This confirms the table and RPC are available; it does not establish that every policy or trigger was exercised remotely. Local PostgreSQL assertions cover assignment persistence, invalid-editor rollback, primary-editor changes, unauthorized assignment rejection, and additional-editor read access against a minimal fixture, not the complete production schema.
+
+No actual production client/editor assignment was made for QA. Authenticated save, subsequent editor-profile readback and production RLS behavior remain unverified. Release CI, merge and deployment must be verified separately; migration availability alone is not evidence that v4.67 is deployed. The preview is simulated. Migrations 0074–0077 remain staged pending coordinated review/publication integration and live verification; they are not prerequisites for this editor-linking feature and are not claimed as applied.
+
+Verificación final local v4.67: 400 archivos de prueba verdes, 3157 pruebas aprobadas, 3 omitidas; TypeScript y merge-gate aprobados. Navegador autenticado en localhost:3038: el diálogo Vincular Editores cargó clientes y nueve editores desde Supabase; no se guardó una asignación real durante la comprobación.
