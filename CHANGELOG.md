@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.32 — 2026-09-08
+
+**Un video que no responde ya no deja bloqueado el envío.**
+
+- La comprobación del archivo termina en un máximo de 10 segundos si no responde.
+- Se comprueba el video antes de bloquear la idea para enviarla: un fallo previo no queda como envío incierto.
+- La protección contra envíos duplicados se conserva al contactar a Metricool.
+
 ## v4.31 — 2026-09-08
 
 **Los comentarios del cliente también exigen una versión corregida.**

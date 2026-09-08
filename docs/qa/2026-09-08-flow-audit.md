@@ -78,3 +78,9 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - 19 sesiones desde 8 septiembre, no canceladas: todas sin client_id y sin videographer_id. Requieren vinculación/asignación real; no se inventaron responsables.
 - v4.31 corrige resubmitForReview: consulta la última corrección entre changes_requested y client_requested_changes, como ya hace la tarjeta de revisión. Regresión reproduce un archivo anterior a un comentario de cliente y verifica que no escribe el estado.
 - La suite completa de v4.30 terminó; ver log local `/tmp/full-audit-current.log`. Los checks focales de v4.31 se ejecutaron después.
+
+## Continuación · Comprobación Del Video Antes Del Claim
+
+- v4.32 limita fetch del probe de video a 10 segundos y lo coloca antes del claim persistente. Si el video no es reproducible/no responde no hay escrituras de claim ni POST remoto.
+- Regresiones verifican AbortSignal y ausencia de escrituras después de preflight fallido, junto a idempotencia y resultado incierto existentes.
+- Se solicitó al usuario quién resolverá las asignaciones reales de las 19 próximas grabaciones. Esto no bloquea las correcciones de código pendientes.

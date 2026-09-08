@@ -118,6 +118,35 @@ export async function runIdeaPost(
   if (!schedule.ok) return { skipped: schedule.error }
   const scheduledFor = schedule.iso
 
+  // Public, permanent URL for the edited video. Only `edited` videos are ever
+  // exposed publicly — the query above already constrains kind + provider, and
+  // the Cloudflare Worker enforces the same `/edited/` restriction at the edge.
+  const editedVideo = edited as { id: string; drive_file_id: string | null; storage_provider?: string }
+  // El dominio público depende del bucket donde vive el archivo: usar el del
+  // otro tablero devolvería un 404 que Metricool reporta como "media inválida".
+  const publicUrl = !editedVideo.drive_file_id
+    ? null
+    : editedVideo.storage_provider === 'entregas-r2'
+      ? entregasR2PublicUrl(editedVideo.drive_file_id)
+      : r2PublicUrl(editedVideo.drive_file_id)
+  if (!publicUrl) {
+    const msg = 'No se pudo obtener la URL pública del video editado (¿falta R2_PUBLIC_BASE_URL?)'
+    return { error: msg }
+  }
+  const pub = { url: publicUrl }
+
+  // Pre-flight the public video the way Metricool's player will (a Range
+  // request expecting 206). Block here instead of silently sending a URL that
+  // makes the preview spin forever. See lib/integrations/video-health.ts.
+  const health = await checkVideoPlayable(pub.url)
+  if (!health.ok) {
+    const msg = `El video no se puede reproducir desde su URL pública: ${health.reason}`
+    return { error: msg }
+  }
+
+  // A hand-picked time wins over the planned date + the client's posting_time.
+  const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+
   // No timeout-based takeover: a lost response may hide a successful remote
   // creation. An unresolved claim must be reconciled before another POST.
   const { data: claimed, error: claimErr } = await supabase
@@ -136,37 +165,6 @@ export async function runIdeaPost(
       .update({ posting_started_at: null, posting_error: postingError })
       .eq('id', ideaId)
   }
-
-  // Public, permanent URL for the edited video. Only `edited` videos are ever
-  // exposed publicly — the query above already constrains kind + provider, and
-  // the Cloudflare Worker enforces the same `/edited/` restriction at the edge.
-  const editedVideo = edited as { id: string; drive_file_id: string | null; storage_provider?: string }
-  // El dominio público depende del bucket donde vive el archivo: usar el del
-  // otro tablero devolvería un 404 que Metricool reporta como "media inválida".
-  const publicUrl = !editedVideo.drive_file_id
-    ? null
-    : editedVideo.storage_provider === 'entregas-r2'
-      ? entregasR2PublicUrl(editedVideo.drive_file_id)
-      : r2PublicUrl(editedVideo.drive_file_id)
-  if (!publicUrl) {
-    const msg = 'No se pudo obtener la URL pública del video editado (¿falta R2_PUBLIC_BASE_URL?)'
-    await releaseClaim(msg)
-    return { error: msg }
-  }
-  const pub = { url: publicUrl }
-
-  // Pre-flight the public video the way Metricool's player will (a Range
-  // request expecting 206). Block here instead of silently sending a URL that
-  // makes the preview spin forever. See lib/integrations/video-health.ts.
-  const health = await checkVideoPlayable(pub.url)
-  if (!health.ok) {
-    const msg = `El video no se puede reproducir desde su URL pública: ${health.reason}`
-    await releaseClaim(msg)
-    return { error: msg }
-  }
-
-  // A hand-picked time wins over the planned date + the client's posting_time.
-  const platforms = resolvePlatforms(client.platforms, client.default_platforms)
 
   try {
     const res = await createDraftPost(
