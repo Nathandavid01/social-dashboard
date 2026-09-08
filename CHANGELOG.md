@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.50 — 2026-09-08
+
+**Revisión carga la cola completa y avisa si no puede verificarla.**
+
+- Las ideas anteriores a las 400 más recientes ya no quedan fuera de la consulta de Revisión.
+- Si falla la carga de videos, clientes o comentarios de corrección, aparece un aviso para volver a cargar.
+- Una consulta fallida no se presenta como una cola vacía ni permite trabajar con comentarios incompletos por ese fallo.
+
+![Aviso de carga de Revisión (simulación)](/changelog/v4.50-revision-carga.png)
+
 ## v4.49 — 2026-09-08
 
 **Revisión Y Entregas abren en el día actual de Puerto Rico.**

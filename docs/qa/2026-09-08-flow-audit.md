@@ -220,3 +220,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Se inicializa la selección y el indicador semanal con la fecha de America/Puerto_Rico. No cambia fechas guardadas ni agenda publicaciones.
 - Validación: 65 pruebas del tablero; suite completa 380 archivos aprobados, 3027 pruebas aprobadas, 3 omitidas; TypeScript y merge-gate aprobados. CUA en /revision, vista Denisha Matos, confirmó Martes seleccionado y 11 piezas en Revisión. Preview móvil inspeccionado, sin desbordamiento.
 - Local, sin desplegar. Sigue pendiente el acceso al proyecto de Nathan para revisión atómica y comprobar el ciclo real de medios, corrección y publicación. La síntesis previa del chat sigue mostrando datos viejos; no es evidencia de actualización actual.
+
+## v4.50 — Cola de revisión completa y errores explícitos
+
+- Fuente: /revision limitaba getIdeacionPipeline a 400 ideas antes de filtrar medios entregados; esa acción devolvía [] en error. Clientes y actividad de corrección también descartaban los errores.
+- Nueva opción complete carga páginas de 500 con conteo exacto y orden estable created_at/id; rechaza error, conteo ausente/cambiante, duplicados y carga incompleta. Los consumidores legacy mantienen su contrato limitado. No constituye snapshot transaccional entre páginas.
+- Revisión usa esa opción y muestra un aviso recuperable si falla cualquiera de sus tres consultas principales, en vez de renderizar una cola vacía o comentarios ausentes por error.
+- TDD: 4 casos del loader y 3 de error de página fallaron antes del cambio. Validación final: 23 pruebas aprobadas (incluidas relaciones), TypeScript y merge-gate aprobados. CUA /revision autenticado como Denisha cargó Martes con 11 piezas en Revisión. Preview móvil inspeccionado, error simulado sin modificar datos reales.
+- Local, sin publicación. Pendiente: verificar el reproductor y correcciones con medios reales; la actividad de notas aún usa una consulta limitada por el máximo del servidor, susceptible a truncamiento si crece; migración atómica sigue pendiente de acceso de Nathan. La suite completa anterior fue v4.49 (3027 aprobadas).
