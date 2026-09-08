@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.59 — 2026-09-08
+
+**El enlace del cliente valida todos sus videos antes de crearse.**
+
+- Rechaza videos de otro cliente, descartados o sin un archivo editado válido.
+- No genera un enlace parcial si falta uno de los videos solicitados.
+- Si falla la consulta de archivos o enlaces anteriores, se detiene antes de modificarlos.
+
+![Validación del enlace (simulación)](/changelog/v4.59-validar-enlace.png)
+
 ## v4.58 — 2026-09-08
 
 **Los controles del enlace del cliente se recuperan de fallos de conexión.**

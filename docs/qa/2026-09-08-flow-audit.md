@@ -284,3 +284,9 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - TDD: 5 casos nuevos fallaron primero. Generación y descarga liberan su estado con finally; copiar reporta rechazo; creación incierta exige consultar antes de crear otra vez y no repite automáticamente la mutación. Éxito requiere leer de vuelta el token recibido.
 - 15 pruebas de controles aprobadas, TypeScript y merge-gate aprobados. Preview móvil simulado inspeccionado. No se crearon enlaces ni descargaron archivos reales.
 - Límite pendiente: creación del servidor aún elimina enlaces previos antes de terminar y necesita atomicidad; popup bloqueado por navegador en descargar también requiere manejo específico. Local sin desplegar, ciclo real y revisión atómica siguen pendientes.
+
+## v4.59 — Validación previa de creación del enlace
+
+- Fuente: crearEnlaceCliente no validaba client_id de las ideas, aceptaba archived/failed, ignoraba lecturas fallidas y omitía videos sin medios sin avisar. Se validan sesión, todos los ids deduplicados, cliente/estado y archivos entregas-r2 no fallidos/archivados antes de escribir. Fallo de lectura de enlaces previos o fallo de borrado detiene el proceso.
+- TDD: 7 regresiones fallaron antes; 10 pruebas focales aprobadas, TypeScript y merge-gate aprobados. Preview móvil inspeccionado. Ningún enlace real fue regenerado ni eliminado.
+- No equivale a verificar el contenido remoto del archivo ni hace transaccional el reemplazo: todavía se borra antes de crear. Es necesaria una operación atómica en base de datos para no perder el enlace anterior si falla la creación, y para no afectar otras ideas de un enlace legacy compartido. Acceso de Nathan sigue pendiente. Local, sin desplegar.
