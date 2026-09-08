@@ -40,19 +40,25 @@ export function DiscardCardButton({
     }
 
     setBusy(true)
-    const res = await discardEntregaVideos(ideaIds)
-    setBusy(false)
-    setArmed(false)
-
-    if (res.error) {
-      toast({ title: 'No se pudo quitar', description: res.error, variant: 'destructive' })
-      return
+    try {
+      const res = await discardEntregaVideos(ideaIds)
+      if (!res?.ok) {
+        toast({ title: 'No se pudo quitar todo', description: res?.error ?? 'No se confirmó el resultado. Actualiza antes de intentar de nuevo.', variant: 'destructive' })
+        router.refresh()
+        return
+      }
+      toast({
+        title: `${clientName} — quitado del tablero`,
+        description: `${res.count} video${res.count === 1 ? '' : 's'} marcado${res.count === 1 ? '' : 's'} como descartado. No se borró nada.`,
+      })
+      router.refresh()
+    } catch {
+      toast({ title: 'No se confirmó el resultado', description: 'Actualiza el tablero antes de intentar de nuevo.', variant: 'destructive' })
+      router.refresh()
+    } finally {
+      setBusy(false)
+      setArmed(false)
     }
-    toast({
-      title: `${clientName} — quitado del tablero`,
-      description: `${res.count} video${res.count === 1 ? '' : 's'} marcado${res.count === 1 ? '' : 's'} como descartado. No se borró nada.`,
-    })
-    router.refresh()
   }
 
   return (

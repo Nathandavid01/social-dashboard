@@ -104,3 +104,11 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - `reopenReviewForVerification` ahora exige ausencia de `posting_started_at` y excluye estados cerrados en la misma actualización condicional. Conserva la aprobación si otra operación ya adquirió el envío.
 - Validación: 11 pruebas focales pasan, TypeScript y merge-gate pasan. Preview de estados (simulación) servido HTTP 200 en `/previews/v4.34-reabrir-revision.html`.
 - Cambio local: no se modificaron datos de clientes ni se enviaron posts. La migración atómica 0074 sigue pendiente de acceso al proyecto de Nathan y no está activa.
+
+## v4.35 — Descartar sin ocultar envíos de Metricool
+
+- Ocho regresiones reprodujeron descartes indebidos con ID remoto/claim/timestamps y conteos falsos de IDs duplicados, ausentes o cerrados.
+- El UPDATE excluye envíos en curso, enviados, publicados y estados cerrados; devuelve el número real de filas cambiadas. En lotes mixtos se descartan solo los elegibles y se informa explícitamente el resultado parcial.
+- Dos regresiones UI reprodujeron falta de refresh parcial y botón bloqueado por excepción de transporte. Ahora se actualiza el tablero y siempre se libera el botón sin inventar éxito.
+- Suite completa: 371 archivos pasan, 1 omitido; 2944 pruebas pasan, 3 omitidas. TypeScript, merge-gate y diff-check pasan. Preview de avisos simulado servido HTTP 200: `/previews/v4.35-descartar-entregas.html`.
+- Local, sin publicación ni cambios en datos reales. Pendiente: auditar autorización de descarte por propietario/asignación (la acción conserva el permiso existente `video.upload`); aplicar/verificar la revisión atómica cuando haya acceso a Supabase de Nathan; validar el flujo autenticado completo.

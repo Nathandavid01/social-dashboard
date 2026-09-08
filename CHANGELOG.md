@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.35 — 2026-09-08
+
+**Quitar del tablero conserva los videos enviados o pendientes de Metricool.**
+
+- Los videos agendados, publicados o con envío pendiente no se descartan.
+- Si solo se puede quitar parte de un lote, el aviso muestra la cantidad real y el tablero se actualiza.
+- Un fallo de conexión ya no deja el botón bloqueado ni muestra una confirmación falsa.
+
 ## v4.34 — 2026-09-08
 
 **La revisión queda protegida mientras se confirma el envío a Metricool.**

@@ -231,14 +231,31 @@ export async function discardEntregaVideos(
   if (ideaIds.length === 0) return { error: 'Nada que descartar' }
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const ids = [...new Set(ideaIds)]
+  // Apply the delivery guard in the write itself: a concurrent sender may
+  // have claimed a video after the board was rendered.
+  const { data, error } = await supabase
     .from('content_ideas')
     .update({ status: 'descartada' })
-    .in('id', ideaIds)
+    .in('id', ids)
+    .is('metricool_post_id', null)
+    .is('posting_started_at', null)
+    .is('posted_at', null)
+    .is('published_at', null)
+    .not('status', 'in', '(publicada,descartada)')
+    .select('id')
   if (error) return { error: error.message }
 
+  const count = data?.length ?? 0
   revalidatePath('/entregas')
-  return { ok: true, count: ideaIds.length }
+  revalidatePath('/mi-dia')
+  revalidatePath('/revision')
+  revalidatePath('/pipeline')
+  if (count !== ids.length) return {
+    count,
+    error: `Se quitaron ${count} de ${ids.length} videos. Los demás no se cambiaron: pueden tener un envío en curso, estar agendados, publicados o haber cambiado de estado. Actualiza y verifica Metricool.`,
+  }
+  return { ok: true, count }
 }
 
 /** Existing approvals without caption verification must return to the reviewer. */
