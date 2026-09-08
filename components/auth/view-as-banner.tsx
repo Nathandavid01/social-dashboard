@@ -13,7 +13,7 @@ export function ViewAsBanner() {
 
   if (!viewAsEditor) return null
 
-  const name = viewAsEditor.full_name?.trim() || 'un editor'
+  const name = viewAsEditor.full_name?.trim() || 'otro usuario'
 
   return (
     <div
@@ -23,7 +23,7 @@ export function ViewAsBanner() {
       <p className="min-w-0 text-sm text-foreground">
         <Eye className="mr-1.5 inline-block h-4 w-4 align-[-2px] text-amber-600" aria-hidden />
         Viendo como <span className="font-semibold">{name}</span>
-        <span className="text-muted-foreground"> · solo sus clientes</span>
+        <span className="text-muted-foreground"> · vista de su rol</span>
       </p>
       <button
         type="button"

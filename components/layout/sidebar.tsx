@@ -1,5 +1,6 @@
 'use client'
 
+import { RecordingPending } from '@/components/recording/recording-pending'
 import { Fragment, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -146,7 +147,7 @@ export function Sidebar({
   }
 
   // Filter to allowed first, then apply user prefs
-  const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h)))
+  const visibleHrefs = (editing ? orderedHrefs : orderedHrefs.filter((h) => !hidden.has(h) || (role === 'supervisor' && ['/pipeline', '/banco'].includes(h))))
     .filter((h) => allowedHrefs.has(h))
 
   // Section headings turn a 20-item wall into a menu you can scan. They only make
@@ -199,7 +200,7 @@ export function Sidebar({
           const item = itemsByHref.get(href)
           if (!item) return null
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          const isHidden = hidden.has(item.href)
+          const isHidden = hidden.has(item.href) && !(role === 'supervisor' && ['/pipeline', '/banco'].includes(item.href))
           const heading = headingBefore(href, i)
 
           // Only /video-reviews is actually in the sidebar; the other three badges
@@ -231,6 +232,7 @@ export function Sidebar({
               {!collapsed && (
                 <span className="truncate">{supervisorNavLabel(item.href, role, item.label)}</span>
               )}
+              {!editing && item.href === '/recording-calendar' && <RecordingPending badge collapsed={collapsed} />}
               {/* Collapsed: a small dot signals a pending badge without the number */}
               {collapsed && !editing && badge > 0 && (
                 <span className={cn('absolute right-1 top-1 h-2 w-2 rounded-full', badgeColor)} />
@@ -243,7 +245,7 @@ export function Sidebar({
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
-              {editing && !collapsed && (
+              {editing && !collapsed && !(role === 'supervisor' && ['/pipeline', '/banco'].includes(item.href)) && (
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleHidden(item.href) }}

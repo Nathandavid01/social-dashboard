@@ -140,7 +140,8 @@ export function areaForPath(pathname: string): Area | null {
 
 /**
  * The set of area hrefs a user can actually reach. Owners get everything;
- * a null grant uses role defaults; an explicit grant wins over the role.
+ * a null grant uses role defaults; explicit grants customize access, except
+ * supervisors always retain step 2 (editing) and the video bank, as required for team oversight.
  */
 export function effectiveAreaHrefs(
   role: UserRole | null | undefined,
@@ -151,7 +152,12 @@ export function effectiveAreaHrefs(
     return new Set(AREAS.filter((a) => !a.permission || hasPermission(role, a.permission)).map((a) => a.href))
   }
   const granted = new Set(AREAS.map((a) => a.href))
-  return new Set(areaAccess.filter((h) => granted.has(h)))
+  const reachable = new Set(areaAccess.filter((h) => granted.has(h)))
+  if (role === 'supervisor') {
+    reachable.add('/pipeline')
+    reachable.add('/banco')
+  }
+  return reachable
 }
 
 /** Whether the user may load the given path. */

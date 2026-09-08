@@ -36,25 +36,17 @@ export function pickOnsiteSession<T extends { id: string; date: string; slotTarg
     const hit = sessions.find((s) => s.id === requestedId)
     if (hit) return hit
   }
-  const named = sessions.filter((s) => s.clientId)
-  const withQuota = named.filter((s) => s.slotTarget > 0)
-  const upcomingQuota = withQuota.filter((s) => s.date >= today)
-  const pastQuota = withQuota.filter((s) => s.date < today)
-  return (
-    upcomingQuota[0]
-    ?? pastQuota[pastQuota.length - 1]
-    ?? named.find((s) => s.date >= today)
-    ?? named[0]
-    ?? sessions[0]
-  )
+  // Calendar order takes priority over client linkage or posting quota.
+  const chronological = [...sessions].sort((a, b) => a.date.localeCompare(b.date))
+  return chronological.find((s) => s.date >= today) ?? chronological.at(-1)
 }
 
 export type OnsiteLane = 'hoy' | 'proxima' | 'pasada' | 'sin_cliente'
 
 export function onsiteLane(s: { date: string; clientId: string | null }, today: string): OnsiteLane {
-  if (!s.clientId) return 'sin_cliente'
   if (s.date === today) return 'hoy'
   if (s.date > today) return 'proxima'
+  if (!s.clientId) return 'sin_cliente'
   return 'pasada'
 }
 

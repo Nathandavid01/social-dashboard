@@ -8,6 +8,7 @@ import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { planOnsiteBriefFill, type BriefGenerated } from '@/lib/onsite/brief-fill'
 import { generateIdeaBatch } from '@/lib/llm/generate-ideas-run'
 import { clampVirality } from '@/lib/onsite/virality'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 
 /**
  * On Site — la lista de grabación de una sesión agendada.
@@ -23,6 +24,7 @@ export interface OnsiteSession {
   date: string
   clientId: string | null
   clientName: string
+  editorName?: string | null
   location: string | null
   status: string
   /** Días de posteo por semana, del perfil. */
@@ -45,7 +47,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
   }
 
   const supabase = await createClient()
-  const base = 'id, title, session_date, client_id, location, status, client:clients(name, posting_days)'
+  const base = 'id, title, session_date, client_id, location, status, client:clients(name, posting_days, assigned_to)'
   const first = await supabase
     .from('recording_sessions')
     .select(`${base}, arrived_at, arrived_by`)
@@ -72,9 +74,15 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
     arrived_by?: string | null
   }>
   const arriverIds = Array.from(new Set(rows.map((s) => s.arrived_by).filter((id): id is string => Boolean(id))))
+  const editorIds = rows.flatMap(s => {
+    const raw = s.client as { assigned_to?: string | null } | { assigned_to?: string | null }[] | null
+    const c = Array.isArray(raw) ? raw[0] : raw
+    return c?.assigned_to ? [c.assigned_to] : []
+  })
+  const peopleIds = Array.from(new Set([...arriverIds, ...editorIds]))
   const names: Record<string, string> = {}
-  if (arriverIds.length > 0) {
-    const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', arriverIds)
+  if (peopleIds.length > 0) {
+    const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', peopleIds)
     for (const p of people ?? []) {
       if (p.full_name) names[p.id] = p.full_name
     }
@@ -82,9 +90,9 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
 
   return {
     sessions: rows.map((s) => {
-      const raw = s.client as { name?: string; posting_days?: number[] | null } | { name?: string; posting_days?: number[] | null }[] | null
+      const raw = s.client as { name?: string; posting_days?: number[] | null; assigned_to?: string | null } | { name?: string; posting_days?: number[] | null; assigned_to?: string | null }[] | null
       const c = Array.isArray(raw) ? raw[0] : raw
-      const quota = requiredForOnsite({ postingDays: c?.posting_days })
+      const quota = requiredForOnsite({ postingDays: c?.posting_days, ref: new Date(s.session_date + 'T12:00:00') })
       const arrivedBy = (s as { arrived_by?: string | null }).arrived_by ?? null
       return {
         id: s.id,
@@ -92,6 +100,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
         date: s.session_date,
         clientId: s.client_id,
         clientName: c?.name ?? 'Sin cliente',
+        editorName: c?.assigned_to ? (names[c.assigned_to] ?? 'Nombre No Disponible') : null,
         location: s.location,
         status: s.status,
         perWeek: quota.perWeek,
@@ -176,20 +185,28 @@ export async function toggleShotRecorded(input: {
     .single()
   if (!idea) return { error: 'Toma no encontrada' }
 
-  if (!input.recorded && !['grabada', 'idea', 'asignada'].includes(idea.status ?? '')) {
-    return { error: 'Este video ya avanzó en el pipeline: no se puede desmarcar aquí.' }
+  if (!['grabada', 'idea', 'asignada'].includes(idea.status ?? '')) {
+    return { error: 'Este video ya avanzó en el pipeline o fue descartado. Actualiza On Site antes de continuar.' }
   }
+  // Retrying a successful recording must not move its original recording date.
+  if (input.recorded && idea.status === 'grabada') return { ok: true }
+  if (!input.recorded && idea.status !== 'grabada') return { ok: true }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('content_ideas')
     .update({
       status: input.recorded ? 'grabada' : 'idea',
-      recording_date: input.recorded ? new Date().toISOString().slice(0, 10) : null,
+      recording_date: input.recorded ? todayISOInTimeZone('America/Puerto_Rico') : null,
     })
     .eq('id', input.ideaId)
+    .eq('status', idea.status)
+    .select('id')
+    .maybeSingle()
   if (error) return { error: error.message }
+  if (!updated) return { error: 'La toma cambió mientras trabajabas. Actualiza On Site para ver su estado actual.' }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   revalidatePath('/mi-dia')
   return { ok: true }
 }
@@ -216,6 +233,7 @@ export async function updateShotDetails(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -237,6 +255,7 @@ export async function removeShotFromSession(ideaId: string): Promise<{ ok?: true
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -262,14 +281,15 @@ export async function getAddableIdeas(
   }
 
   const supabase = await createClient()
-  const { data: session } = await supabase
+  const { data: session, error: sessionError } = await supabase
     .from('recording_sessions')
     .select('client_id')
     .eq('id', sessionId)
     .single()
-  if (!session?.client_id) return { ideas: [] }
+  if (sessionError || !session) return { error: 'No se pudo cargar la sesión para consultar sus ideas. Vuelve a intentar.' }
+  if (!session.client_id) return { ideas: [] }
 
-  const [{ data: pipeline }, { data: lab }] = await Promise.all([
+  const [{ data: pipeline, error: pipelineError }, { data: lab, error: labError }] = await Promise.all([
     supabase
       .from('content_ideas')
       .select('id, title, hook')
@@ -287,6 +307,7 @@ export async function getAddableIdeas(
       .limit(50),
   ])
 
+  if (pipelineError || labError) return { error: 'No se pudieron cargar todas las ideas del cliente.' }
   return {
     ideas: [
       ...(pipeline ?? []).map((i) => ({
@@ -328,6 +349,7 @@ export async function addIdeaToSession(input: {
       .eq('id', input.ideaId)
     if (error) return { error: error.message }
     revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
     return { ok: true }
   }
 
@@ -362,6 +384,7 @@ export async function addIdeaToSession(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -472,6 +495,7 @@ export async function generateOnsiteIdeas(input: {
   if (created === 0) return { error: 'No había ideas del Lab ni la IA devolvió ninguna' }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { created }
 }
 
@@ -507,6 +531,7 @@ export async function updateOnsiteIdea(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -529,6 +554,7 @@ export async function updateOnsiteAnnotations(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   revalidatePath('/revision')
   return { ok: true }
 }
@@ -561,5 +587,6 @@ export async function checkInOnsite(sessionId: string): Promise<{ ok?: true; err
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }

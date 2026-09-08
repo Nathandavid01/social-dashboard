@@ -30,7 +30,13 @@ export function shouldPulseBell(input: {
   const freshMs = input.freshMs ?? BELL_FRESH_MS
   const newest = newestUnreadAt(input.items)
   if (newest == null) return false
-  if (now - newest > freshMs) return false
+  if (newest > now || now - newest > freshMs) return false
   if (input.acknowledgedAt != null && newest <= input.acknowledgedAt) return false
   return true
+}
+
+/** Only local app destinations may be opened from an inbox item. */
+export function notificationDestination(link?: string | null): string | null {
+  if (!link || !link.startsWith('/') || link.startsWith('//') || /[\\\x00-\x20]/.test(link)) return null
+  return link
 }

@@ -65,6 +65,8 @@ async function schedulerFetch<T>(
 
   const response = await fetch(url.toString(), {
     headers: { 'X-Mc-Auth': config.userToken },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(12_000),
   })
 
   if (!response.ok) {

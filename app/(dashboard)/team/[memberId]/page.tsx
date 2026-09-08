@@ -1,3 +1,4 @@
+import { AssignedRecordings } from '@/components/recording/assigned-recordings'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
@@ -57,6 +58,8 @@ export default async function MemberPage({ params }: Props) {
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Team
       </Link>
+
+      <AssignedRecordings memberId={memberId} />
 
       <MemberTaskBoard
         member={profile as Profile}

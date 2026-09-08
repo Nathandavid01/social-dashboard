@@ -79,3 +79,13 @@ describe('captions.use / captions.edit (AI captions on the video card)', () => {
     expect(hasPermission(null, 'captions.edit')).toBe(false)
   })
 })
+
+describe('operations.overview', () => {
+  it('limits the team overview to owner and supervisor', () => {
+    expect(hasPermission('owner', 'operations.overview')).toBe(true)
+    expect(hasPermission('supervisor', 'operations.overview')).toBe(true)
+    for (const role of ['editor', 'video', 'disenador', 'copy', 'team_member', null] as const) {
+      expect(hasPermission(role, 'operations.overview')).toBe(false)
+    }
+  })
+})

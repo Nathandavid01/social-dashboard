@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import Link from 'next/link'
+import { SessionIdeaPicker } from './session-idea-picker'
+import { useState, useTransition, useEffect } from 'react'
 import type { ContentIdea, ContentIdeaType, RecordingSession, Client, Profile } from '@/lib/supabase/types'
 import { assignIdeaToSession, markIdeaRecorded, createContentIdeaManual } from '@/lib/actions/content-ideas'
 import { updateRecordingSession } from '@/lib/actions/recording-sessions'
@@ -30,6 +32,7 @@ interface ExtendedSession extends RecordingSession {
 }
 
 interface SessionIdeasPanelProps {
+  editorName?: string
   /** Quita la sesión de la agenda. Ausente = no se ofrece. */
   onDelete?: () => void
   open: boolean
@@ -99,7 +102,8 @@ function AddIdeaForm({
       }
       if (result.idea) {
         // Auto-assign to this session
-        await assignIdeaToSession(result.idea.id, sessionId)
+        const linked = await assignIdeaToSession(result.idea.id, sessionId)
+        if (linked.error) { toast({ title: 'Idea Creada Sin Vincular', description: friendlyError(linked.error), variant: 'destructive' }); return }
         onAdded({ ...result.idea, recording_session_id: sessionId })
       }
       setTitle('')
@@ -298,7 +302,7 @@ function SessionAssignment({
       }
       const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
       onSaved?.({ ...session, ...values, videographer })
-      toast({ title: 'Asignación guardada' })
+      toast({ title: 'Asignación guardada', description: result.warning || 'Visible en Mi Día, el calendario y Mi Perfil de la persona asignada.' })
     })
   }
 
@@ -335,7 +339,7 @@ function SessionAssignment({
           />
         </div>
       </div>
-      <Button type="submit" size="sm" className="w-full h-8 text-xs" disabled={isPending}>
+      <Button type="submit" size="sm" className="w-full h-9 bg-emerald-600 text-white hover:bg-emerald-700 text-xs" disabled={isPending}>
         {isPending ? 'Guardando...' : 'Guardar asignación'}
       </Button>
     </form>
@@ -345,6 +349,7 @@ function SessionAssignment({
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export function SessionIdeasPanel({
+  editorName,
   open,
   onClose,
   session,
@@ -357,9 +362,11 @@ export function SessionIdeasPanel({
 }: SessionIdeasPanelProps) {
   const [ideas, setIdeas] = useState<ContentIdea[]>(clientIdeas)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showPicker, setShowPicker] = useState(false)
+  useEffect(() => { setIdeas(clientIdeas) }, [clientIdeas])
 
   const sessionIdeas = ideas.filter((i) => i.recording_session_id === session.id)
-  const otherIdeas = ideas.filter((i) => !i.recording_session_id || i.recording_session_id !== session.id)
+  const otherIdeas = ideas.filter((i) => !i.recording_session_id)
   const recordedCount = ideas.filter((i) => i.status === 'grabada').length
 
   function updateIdea(updated: ContentIdea) {
@@ -381,14 +388,14 @@ export function SessionIdeasPanel({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent surface="raised" className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between gap-3 pr-6">
             <DialogTitle className="flex items-center gap-2 text-base">
               <Camera className="h-4 w-4 text-primary" />
               {session.title}
             </DialogTitle>
-            <Button type="button" size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={onEdit}>
+            <Button type="button" size="sm" variant="outline" className="h-9 gap-1.5 border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-300 hover:bg-sky-500/20 text-xs" onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" /> Editar sesión
             </Button>
           </div>
@@ -415,6 +422,7 @@ export function SessionIdeasPanel({
           )}
         </div>
 
+        {editorName && <p className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-sm text-violet-500">Editor · {editorName}</p>}
         <SessionAssignment
           session={session}
           teamMembers={teamMembers}
@@ -437,13 +445,19 @@ export function SessionIdeasPanel({
               Ideas para esta sesión ({sessionIdeas.length})
             </Label>
             <button
-              onClick={() => setShowAddForm((v) => !v)}
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              disabled={!session.client_id}
+              onClick={() => setShowPicker((v) => !v)}
+              className="text-xs text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
             >
               <Plus className="h-3 w-3" /> Agregar idea
             </button>
           </div>
 
+          <p className="text-xs text-muted-foreground">Ideas Del Cliente · On Site · Lab De Ideas · Escribir Ideas</p>
+          {showPicker && session.client_id && <SessionIdeaPicker sessionId={session.id} onAdded={() => setShowPicker(false)} />}
+          {!session.client_id && <p className="text-xs text-sky-600 dark:text-sky-400">Edita La Sesión Y Selecciona Un Cliente Para Vincular Sus Ideas.</p>}
+          {session.client_id && <button type="button" className="py-2 text-xs text-violet-600 dark:text-violet-400 underline" onClick={() => setShowAddForm(v => !v)}>Escribir Una Idea Nueva</button>}
+          <Link href={`/onsite?s=${session.id}`} className="block py-2 text-xs text-sky-600 dark:text-sky-400 underline">Abrir Brief En On Site</Link>
           {showAddForm && session.client_id && (
             <AddIdeaForm
               clientId={session.client_id}
@@ -456,7 +470,7 @@ export function SessionIdeasPanel({
             <div className="text-center py-6 text-muted-foreground rounded-lg border border-dashed">
               <BookOpen className="h-8 w-8 mx-auto opacity-20 mb-2" />
               <p className="text-xs">Sin ideas asignadas a esta sesión</p>
-              <button onClick={() => setShowAddForm(true)} className="text-xs text-primary hover:underline mt-1">
+              <button disabled={!session.client_id} onClick={() => setShowPicker(true)} className="text-xs text-violet-600 dark:text-violet-400 hover:underline mt-1 disabled:opacity-40">
                 + Agregar ideas
               </button>
             </div>

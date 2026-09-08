@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
 import { pickOnsiteSession } from '@/lib/onsite/slot-count'
@@ -38,12 +39,15 @@ export default async function OnsitePage({
   }
 
   const lista = sessions ?? []
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISOInTimeZone('America/Puerto_Rico')
   const activa = pickOnsiteSession(lista, sessionId, today)
 
-  const [{ shots }, { ideas }] = activa
+  const [shotResult, ideaResult] = activa
     ? await Promise.all([getOnsiteShots(activa.id), getAddableIdeas(activa.id)])
-    : [{ shots: [] }, { ideas: [] }]
+    : [{ shots: [], error: undefined }, { ideas: [], error: undefined }]
+  const loadError = shotResult.error || ideaResult.error
+  const shots = shotResult.shots
+  const ideas = ideaResult.ideas
 
   return (
     <div className="space-y-4">
@@ -80,6 +84,12 @@ export default async function OnsitePage({
             On Site trabaja sobre el calendario: agenda una sesión y aparecerá aquí.
           </p>
         </div>
+      ) : loadError ? (
+        <section role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
+          <h2 className="font-semibold">No Se Pudo Cargar La Sesión Completa</h2>
+          <p className="mt-2 text-sm">No se pudieron consultar las tomas o las ideas. Esto no significa que la sesión esté vacía.</p>
+          <a href={`/onsite?s=${encodeURIComponent(activa.id)}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium">Volver A Cargar La Sesión</a>
+        </section>
       ) : (
         <OnsiteStudio
           sessions={lista}

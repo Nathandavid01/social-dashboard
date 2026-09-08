@@ -4,7 +4,7 @@ import { hasPermission } from '@/lib/auth/permissions'
 /** El mapa: On Site → Pipeline (banco) → Revisión → Entregas. */
 export const SUPERVISOR_PROCESS = [
   { n: 1, href: '/onsite', label: 'On Site', hint: 'Generar las ideas y grabar' },
-  { n: 2, href: '/pipeline', label: 'Pipeline', hint: 'Los editores bajan el banco de crudos' },
+  { n: 2, href: '/pipeline', label: 'Edición', hint: 'Los editores bajan el banco de crudos' },
   { n: 3, href: '/revision', label: 'Revisión', hint: 'Los editores entregan el corte' },
   { n: 4, href: '/entregas', label: 'Entregas', hint: 'Copy, calendario y publicar' },
 ] as const

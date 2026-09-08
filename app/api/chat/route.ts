@@ -1,3 +1,11 @@
+import { taskIsOverdue, taskIsDueToday } from '@/lib/utils/task-deadline'
+import { briefingQueryIssue } from '@/lib/utils/briefing-query'
+import { auditOperationalPublications } from '@/lib/actions/operational-publications'
+import { getAlerts } from '@/lib/actions/alerts'
+import { getOperationsOverview } from '@/lib/actions/operations-overview'
+import { formatOperationsBriefing } from '@/lib/utils/operations-briefing'
+import { getTodayBriefing } from '@/lib/metricool/today-briefing'
+import { getScheduledPosts } from '@/lib/metricool/scheduler'
 import { generateCaptionText, captionModelId } from '@/lib/llm/caption-llm'
 import { toGrokTools, toGrokMessages, parseGrokToolCalls, type GrokMessage, type AnthropicToolDef } from '@/lib/llm/tool-adapter'
 import { parseSseTextDeltas } from '@/lib/llm/grok-stream'
@@ -493,7 +501,7 @@ async function execGetTasks(status?: string, clientName?: string): Promise<strin
   const nowIso = new Date().toISOString()
   return tasks.map((t) => {
     const client = (t.client as { name?: string } | null)?.name
-    const isOverdue = t.due_at && t.due_at < nowIso
+    const isOverdue = taskIsOverdue(t, nowIso)
     const due = t.due_at ? ` | Due: ${new Date(t.due_at).toLocaleDateString('es-PR')}${isOverdue ? ' ⏰OVERDUE' : ''}` : ''
     const priority = t.priority === 1 ? ' 🔴' : t.priority === 2 ? ' 🟡' : ''
     return `- [${t.status.toUpperCase()}] ${t.title}${client ? ` (${client})` : ''}${due}${priority}`
@@ -770,33 +778,50 @@ async function execGetDashboardSummary(): Promise<string> {
   try {
     const supabase = await createClient()
     const nowIso = new Date().toISOString()
-    const todayStart = new Date().toISOString().slice(0, 10) + 'T00:00:00'
-    const todayEnd = new Date().toISOString().slice(0, 10) + 'T23:59:59'
 
     const [
-      { data: tasks },
-      { data: alerts },
-      { count: clientCount },
-      { count: pendingRequests },
-      { count: pendingVideos },
-      { data: profiles },
-      { data: prodTasks },
+      taskResult,
+      alerts,
+      clientResult,
+      requestResult,
+      videoResult,
+      workflow,
+      todayPosts,
+      publicationAudit,
     ] = await Promise.all([
-      supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)').neq('status', 'completed'),
-      supabase.from('alerts').select('title, severity, message').order('created_at', { ascending: false }).limit(5),
+      supabase.from('tasks').select('id, title, status, due_at, priority, assignee:profiles!tasks_assignee_id_fkey(full_name), client:clients(name)', { count: 'exact' }).neq('status', 'completed').order('id').limit(5000),
+      getAlerts(),
       supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('client_requests').select('*', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
       supabase.from('video_reviews').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'head_editor_review', 'pending_final_check', 'final_check_review', 'revision_needed']),
-      supabase.from('profiles').select('id, full_name').order('full_name'),
-      supabase.from('production_tasks').select('status, content_type, publish_date, client:clients!production_tasks_client_id_fkey(name)').neq('status', 'publicado').order('publish_date').limit(200),
+      getOperationsOverview(),
+      execGetTodaysPosts(),
+      auditOperationalPublications(),
     ])
+
+    const issues = [
+      briefingQueryIssue(taskResult, 'Tareas'),
+      briefingQueryIssue(clientResult, 'Clientes', true),
+      briefingQueryIssue(requestResult, 'Solicitudes', true),
+      briefingQueryIssue(videoResult, 'Video QC', true),
+    ].filter(Boolean)
+    if (issues.length) return [
+      'Resumen General Sin Verificar. No inferir cero tareas, solicitudes o revisiones.',
+      ...issues,
+      formatOperationsBriefing(workflow, publicationAudit),
+      todayPosts,
+    ].join('\n\n')
+    const tasks = taskResult.data
+    const clientCount = clientResult.count
+    const pendingRequests = requestResult.count
+    const pendingVideos = videoResult.count
 
     const all = tasks ?? []
     const pending = all.filter((t) => t.status === 'pending').length
     const inProgress = all.filter((t) => t.status === 'in_progress').length
     const blocked = all.filter((t) => t.status === 'blocked').length
-    const overdueTasks = all.filter((t) => t.due_at && t.due_at < nowIso)
-    const dueTodayTasks = all.filter((t) => t.due_at && t.due_at >= todayStart && t.due_at <= todayEnd)
+    const overdueTasks = all.filter((t) => taskIsOverdue(t, nowIso))
+    const dueTodayTasks = all.filter((t) => taskIsDueToday(t, nowIso))
     const highPriorityTasks = all.filter((t) => t.priority === 1)
     const criticalAlerts = (alerts ?? []).filter((a) => a.severity === 'error')
     const warningAlerts = (alerts ?? []).filter((a) => a.severity === 'warning')
@@ -808,7 +833,7 @@ async function execGetDashboardSummary(): Promise<string> {
       if (!assignee?.full_name) continue
       if (!tasksByMember[assignee.full_name]) tasksByMember[assignee.full_name] = { name: assignee.full_name, count: 0, overdue: 0 }
       tasksByMember[assignee.full_name].count++
-      if (t.due_at && t.due_at < nowIso) tasksByMember[assignee.full_name].overdue++
+      if (taskIsOverdue(t, nowIso)) tasksByMember[assignee.full_name].overdue++
     }
     const teamLines = Object.values(tasksByMember)
       .sort((a, b) => b.count - a.count)
@@ -845,28 +870,8 @@ async function execGetDashboardSummary(): Promise<string> {
     if (dueTodayTasks.length > 0) lines.push(`• ⏰ ${dueTodayTasks.length} due today`)
     lines.push(``)
 
-    // Production module stats
-    const prod = prodTasks ?? []
-    if (prod.length > 0) {
-      const prodPendiente = prod.filter((t) => t.status === 'pendiente').length
-      const prodEdicion = prod.filter((t) => t.status === 'en_edicion').length
-      const prodRevision = prod.filter((t) => t.status === 'en_revision').length
-      const prodCambios = prod.filter((t) => t.status === 'revisiones').length
-      const prodAprobado = prod.filter((t) => t.status === 'aprobado').length
-      const prodReels = prod.filter((t) => t.content_type === 'R').length
-      const prodPosts = prod.filter((t) => t.content_type === 'P').length
-      const today = new Date().toISOString().slice(0, 10)
-      const publishingToday = prod.filter((t) => t.publish_date === today)
-      lines.push(`**🎬 Producción:** ${prod.length} activas (${prodReels} Reels · ${prodPosts} Posts)`)
-      lines.push(`• ${prodEdicion} en edición · ${prodRevision} en revisión · ${prodCambios} necesitan cambios · ${prodAprobado} aprobados`)
-      if (prodPendiente > 0) lines.push(`• ${prodPendiente} pendientes de asignar`)
-      if (publishingToday.length > 0) {
-        const clientNames = Array.from(new Set(publishingToday.map((t) => (t.client as { name?: string } | null)?.name).filter(Boolean))).slice(0, 3).join(', ')
-        lines.push(`• 📅 ${publishingToday.length} publicando hoy${clientNames ? ` (${clientNames})` : ''}`)
-      }
-      if (prodRevision + prodCambios > 0) lines.push(`• ⚠️ ${prodRevision + prodCambios} piezas necesitan atención en Para Revisar`)
-      lines.push(``)
-    }
+    // Content workflow must match the canonical Mi día snapshot.
+    lines.push(formatOperationsBriefing(workflow, publicationAudit), '', todayPosts, '')
 
     // Team
     if (teamLines.length > 0) {
@@ -895,12 +900,7 @@ async function execGetDashboardSummary(): Promise<string> {
 
 async function execGetActiveAlerts(): Promise<string> {
   try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('alerts')
-      .select('title, message, severity, created_at, expires_at')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const data = await getAlerts()
 
     if (!data?.length) return 'No active alerts at this time.'
 
@@ -962,7 +962,7 @@ async function execGetClientEfficiency(showIssuesOnly?: boolean): Promise<string
       if (!t.client_id) continue
       if (!clientTasks[t.client_id]) clientTasks[t.client_id] = { total: 0, overdue: 0, blocked: 0 }
       clientTasks[t.client_id].total++
-      if (t.due_at && t.due_at < nowIso) clientTasks[t.client_id].overdue++
+      if (taskIsOverdue(t, nowIso)) clientTasks[t.client_id].overdue++
       if (t.status === 'blocked') clientTasks[t.client_id].blocked++
     }
 
@@ -1160,7 +1160,7 @@ async function execGetTeamWorkload(memberName?: string): Promise<string> {
 
     let members = profiles.map((p) => {
       const mt = tasksByMember[p.id] ?? []
-      const overdue = mt.filter((t) => t.due_at && t.due_at < nowIso).length
+      const overdue = mt.filter((t) => taskIsOverdue(t, nowIso)).length
       const inProgress = mt.filter((t) => t.status === 'in_progress').length
       return { ...p, total: mt.length, overdue, inProgress, tasks: mt }
     })
@@ -1175,7 +1175,7 @@ async function execGetTeamWorkload(memberName?: string): Promise<string> {
       const icon = m.overdue > 0 ? '🔴' : m.total === 0 ? '🟢' : '🔵'
       const taskList = m.tasks.slice(0, 5).map((t) => {
         const client = (t.client as { name?: string } | null)?.name
-        const isOverdue = t.due_at && t.due_at < nowIso
+        const isOverdue = taskIsOverdue(t, nowIso)
         return `  • ${t.title}${client ? ` (${client})` : ''}${isOverdue ? ' ⏰' : ''}`
       }).join('\n')
       return [
@@ -1249,57 +1249,13 @@ async function execGetTodaysPosts(clientName?: string): Promise<string> {
     if (!token || !userId) return 'Metricool not configured.'
 
     const supabase = await createClient()
-    const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().slice(0, 19)
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString().slice(0, 19)
-
-    let dbQuery = supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
-    if (clientName) dbQuery = dbQuery.ilike('name', `%${clientName}%`)
-    const { data: clients } = await dbQuery.limit(clientName ? 3 : 50)
-    if (!clients?.length) return 'No Metricool clients configured.'
-
-    const results = await Promise.allSettled(
-      clients.map(async (c) => {
-        const url = `https://app.metricool.com/api/v2/scheduler/posts?userId=${userId}&blogId=${c.metricool_blog_id}&start=${todayStart}&end=${todayEnd}`
-        const res = await fetch(url, { headers: { 'X-Mc-Auth': token } })
-        if (!res.ok) return []
-        const json = await res.json() as { data?: { text: string; publicationDate: { dateTime: string }; providers?: { network: string }[]; draft?: boolean }[] }
-        return (json.data || [])
-          .filter((p) => p.text?.trim())
-          .map((p) => ({
-            client: c.name,
-            text: p.text || '',
-            date: p.publicationDate?.dateTime || '',
-            platforms: (p.providers || []).map((x) => x.network),
-            isDraft: p.draft ?? false,
-          }))
-      })
-    )
-
-    const posts = results
-      .filter((r) => r.status === 'fulfilled')
-      .flatMap((r) => (r as PromiseFulfilledResult<{ client: string; text: string; date: string; platforms: string[]; isDraft: boolean }[]>).value)
-      .sort((a, b) => a.date.localeCompare(b.date))
-
-    if (!posts.length) return `No posts scheduled or published today${clientName ? ` for ${clientName}` : ''}.`
-
-    const published = posts.filter((p) => new Date(p.date) <= now && !p.isDraft)
-    const scheduled = posts.filter((p) => new Date(p.date) > now || p.isDraft)
-
-    const formatTime = (d: string) => new Date(d).toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit', hour12: true })
-
-    let out = `**Today's posts (${posts.length} total):**\n`
-    if (published.length) {
-      out += `\n✅ **Published (${published.length}):**\n` + published.map((p) =>
-        `• **${p.client}** @ ${formatTime(p.date)} (${p.platforms.join(', ')})\n  ${p.text.slice(0, 80)}${p.text.length > 80 ? '…' : ''}`
-      ).join('\n')
-    }
-    if (scheduled.length) {
-      out += `\n\n📅 **Scheduled (${scheduled.length}):**\n` + scheduled.map((p) =>
-        `• **${p.client}** @ ${formatTime(p.date)} (${p.platforms.join(', ')})\n  ${p.text.slice(0, 80)}${p.text.length > 80 ? '…' : ''}`
-      ).join('\n')
-    }
-    return out
+    let query = supabase.from('clients').select('name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
+    if (clientName) query = query.ilike('name', `%${clientName}%`)
+    const { data: clients, error } = await query
+    if (error) return 'Consulta Incompleta: no se pudo cargar la lista de clientes. No inferir que no hay publicaciones.'
+    if (!clients?.length) return 'No hay clientes activos con Metricool para esta consulta.'
+    return await getTodayBriefing(clients, (blogId, start, end) =>
+      getScheduledPosts({ userId, userToken: token, blogId }, start, end))
   } catch (err) {
     return `Error: ${err instanceof Error ? err.message : 'Unknown error'}`
   }
@@ -1392,7 +1348,7 @@ async function execGetMemberTasks(memberName: string, status?: string): Promise<
 
     const lines = tasks.map((t) => {
       const clientName = (t.client as { name?: string } | null)?.name
-      const overdue = t.due_at && t.due_at < now && t.status !== 'completed' ? ' ⚠️ OVERDUE' : ''
+      const overdue = taskIsOverdue(t, now) ? ' ⚠️ OVERDUE' : ''
       const due = t.due_at ? ` · Due ${new Date(t.due_at).toLocaleDateString('es-PR', { month: 'short', day: 'numeric' })}` : ''
       const client = clientName ? ` @ ${clientName}` : ''
       return `${statusLabel[t.status] ?? '⬜'} ${priorityLabel(t.priority)} **${t.title}**${client}${due}${overdue}`
@@ -1521,7 +1477,7 @@ async function execGetClientSnapshot(clientName: string): Promise<string> {
       } catch { /* skip */ }
     }
 
-    const overdue = (openTasks ?? []).filter((t) => t.due_at && t.due_at < nowIso)
+    const overdue = (openTasks ?? []).filter((t) => taskIsOverdue(t, nowIso))
     const priorityIcon = (p: number) => p === 1 ? '🔴' : p === 2 ? '🟡' : '🟢'
 
     const lines: string[] = [

@@ -18,6 +18,7 @@ export type Permission =
   | 'clients.contract.edit'
   | 'clients.assets.upload'
   | 'clients.sms.send'
+  | 'operations.overview'
   // Tasks / operations
   | 'tasks.read.all'
   | 'tasks.read.own'
@@ -31,6 +32,7 @@ export type Permission =
   | 'video_reviews.write'
   | 'video.upload'
   | 'video.approve'
+  | 'video.discard'
   | 'production.read'
   | 'production.edit'
   // Calendar
@@ -46,6 +48,7 @@ export type Permission =
   | 'captions.edit'
   /** Gráficas IA: generar artes con Grok Imagine usando la marca del cliente. */
   | 'graphics.generate'
+  | 'graphics.cost.read'
   | 'metricool.read'
   | 'metricool.write'
   // Insights
@@ -94,16 +97,17 @@ const RBAC: Record<UserRole, RolePerms> = {
 
   // Supervisor — manage team, content, see (but not edit) billing/contracts.
   supervisor: [
+    'operations.overview',
     'clients.read', 'clients.create', 'clients.edit', 'clients.brand.edit',
     'clients.billing.read', 'clients.contract.read', 'clients.assets.upload',
     'clients.sms.send',
     'tasks.read.all', 'tasks.create', 'tasks.edit', 'tasks.delete',
     'ideas.read', 'ideas.edit',
-    'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve',
+    'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
-    'graphics.generate',
+    'graphics.generate', 'graphics.cost.read',
     'metricool.read', 'metricool.write',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',

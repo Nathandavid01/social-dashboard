@@ -47,33 +47,59 @@ export async function getContentIdeas(filter?: {
 /**
  * Ideas enriched for the Ideación pipeline-rows view: joins the linked recording
  * session (for the "Agendada" stage) and the uploaded videos (for grabación/edición).
- * Returns a flat list; the board groups by client. Degrades to [] on error.
+ * Returns a flat list; the board groups by client. Complete reads throw on error.
+ * Legacy bounded callers retain their empty-list fallback.
  */
 export async function getIdeacionPipeline(filter?: {
   clientId?: string
   limit?: number
+  /** Load every page and fail explicitly if the queue cannot be verified. */
+  complete?: boolean
 }): Promise<IdeaWithPipeline[]> {
   const supabase = await createClient()
-  let query = supabase
-    .from('content_ideas')
-    .select(`
-      *,
-      client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms, status, assigned_to, posting_days),
-      recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status, location, location_address),
-      videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
-      production_task:production_tasks!content_ideas_production_task_id_fkey(
-        id, status, publish_date,
-        assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)
-      )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(filter?.limit ?? 300)
-  if (filter?.clientId) query = query.eq('client_id', filter.clientId)
+  const buildQuery = () => {
+    let query = supabase
+      .from('content_ideas')
+      .select(`
+        *,
+        client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms, status, assigned_to, posting_days),
+        recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status, location, location_address),
+        videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
+        production_task:production_tasks!content_ideas_production_task_id_fkey(
+          id, status, publish_date,
+          assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name, avatar_url)
+        )
+      `, filter?.complete ? { count: 'exact' } : undefined)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+    if (filter?.clientId) query = query.eq('client_id', filter.clientId)
 
-  const { data, error } = await query
-  if (error) {
-    console.warn('[content-ideas] pipeline fetch failed:', error.message)
-    return []
+    return query
+  }
+  let data: unknown[] = []
+  if (filter?.complete) {
+    let expected: number | null = null
+    const seen = new Set<string>()
+    for (let offset = 0; ; offset += 500) {
+      const result = await buildQuery().range(offset, offset + 499)
+      if (result.error || result.count == null || !result.data) throw new Error('No se pudo cargar la cola completa de revisión.')
+      if (expected !== null && expected !== result.count) throw new Error('La cola cambió durante la consulta. Vuelve a cargarla.')
+      expected = result.count
+      for (const row of result.data) {
+        if (seen.has(row.id)) throw new Error('La cola cambió durante la consulta. Vuelve a cargarla.')
+        seen.add(row.id)
+      }
+      data.push(...result.data)
+      if (data.length === expected) break
+      if (data.length > expected || result.data.length === 0 || offset >= 99500) throw new Error('No se pudo cargar la cola completa de revisión.')
+    }
+  } else {
+    const result = await buildQuery().limit(filter?.limit ?? 300)
+    if (result.error) {
+      console.warn('[content-ideas] pipeline fetch failed:', result.error.message)
+      return []
+    }
+    data = result.data ?? []
   }
   return (data ?? []).map((row) => {
     const r = row as unknown as ContentIdea & {

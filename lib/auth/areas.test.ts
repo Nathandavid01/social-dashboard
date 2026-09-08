@@ -157,3 +157,15 @@ describe('areaGrantsPermission', () => {
     expect(areaGrantsPermission('team.read', 'editor', null)).toBe(false)
   })
 })
+
+it('supervisors always retain editing access even with a restricted area list', () => {
+ expect(effectiveAreaHrefs('supervisor', ['/revision'])).toContain('/pipeline')
+ expect(canAccessPath('/pipeline', 'supervisor', [])).toBe(true)
+ expect(effectiveAreaHrefs('editor', ['/revision'])).not.toContain('/pipeline')
+})
+
+it('supervisors retain the video bank with restricted areas',()=>{
+ expect(canAccessPath('/banco','supervisor',[])).toBe(true)
+ expect(effectiveAreaHrefs('supervisor',['/revision'])).toContain('/banco')
+ expect(effectiveAreaHrefs('editor',['/revision'])).not.toContain('/banco')
+})

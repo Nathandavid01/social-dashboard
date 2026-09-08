@@ -41,7 +41,7 @@ export function ReviewQueue({
   role: UserRole | null | undefined
   userId: string | null | undefined
   getPreviewUrl: (videoFileId: string) => Promise<{ url?: string; error?: string }>
-  onDecide: (ideaId: string, decision: 'approve' | 'request_changes', note: string) => Promise<void>
+  onDecide: (ideaId: string, decision: 'approve' | 'request_changes', note: string, verification?: {videoFileId: string | null; captionsVerified: boolean; videoVerified: boolean}) => Promise<void>
 }) {
   // Local decisions layer over the incoming props so the queue advances without
   // waiting for the parent to refetch the board.
@@ -49,6 +49,8 @@ export function ReviewQueue({
   const [index, setIndex] = useState(0)
   const [url, setUrl] = useState<string | null>(null)
   const [urlError, setUrlError] = useState<string | null>(null)
+  const [previewRetry, setPreviewRetry] = useState(0)
+  const [decisionError,setDecisionError]=useState('')
   const [pending, setPending] = useState(false)
 
   const statusOf = useCallback(
@@ -78,20 +80,25 @@ export function ReviewQueue({
       if (!alive) return
       if (res.url) setUrl(res.url)
       else setUrlError(res.error ?? 'No se pudo cargar el video')
+    }).catch(() => {
+      if (alive) setUrlError('No se pudo cargar el video. Vuelve a intentar.')
     })
     return () => { alive = false }
-  }, [current?.videoFileId, current, getPreviewUrl])
+  }, [current?.videoFileId, current, getPreviewUrl, previewRetry])
 
   async function decide(decision: 'approve' | 'request_changes', note: string) {
     if (!current || pending) return
     setPending(true)
+    setDecisionError('')
     try {
-      await onDecide(current.id, decision, note)
+      await onDecide(current.id, decision, note, {videoFileId:current.videoFileId,captionsVerified:decision==='approve',videoVerified:decision==='approve'})
       setDecided((d) => ({
         ...d,
         [current.id]: decision === 'approve' ? 'approved' : 'revision_needed',
       }))
       setIndex(0) // next pending video slides into place
+    } catch(e) {
+      setDecisionError(e instanceof Error?e.message:'No se pudo guardar la revisión.')
     } finally {
       setPending(false)
     }
@@ -148,18 +155,23 @@ export function ReviewQueue({
         </div>
       </div>
 
+      {decisionError && <p role="alert" className="rounded-lg border border-rose-500/30 p-3 text-sm text-rose-500">{decisionError}</p>}
       {urlError && (
-        <p className="flex items-start gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-2 text-[11px] text-destructive">
+        <div role="alert" className="flex flex-wrap items-start gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-2.5 py-2 text-[11px] text-destructive">
           <AlertCircle className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {urlError}
-        </p>
+          {current.videoFileId && <button className="min-h-11 rounded-lg border px-3" onClick={() => setPreviewRetry((n) => n + 1)}>Reintentar Video</button>}
+        </div>
       )}
 
       <InternalReviewPanel
+        key={current.id + (current.videoFileId ?? "")}
         video={panelVideo}
+        previewState={current.videoFileId && !url ? (urlError ? 'error' : 'loading') : undefined}
         role={role}
         userId={userId}
         pending={pending}
+        onRetryPreview={() => setPreviewRetry((n) => n + 1)}
         onDecision={decide}
       />
     </div>

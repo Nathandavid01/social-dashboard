@@ -4,6 +4,534 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.65 — 2026-09-08
+
+**Banco de Video también queda disponible para los supervisores.**
+
+- Los supervisores conservan acceso aunque tengan áreas personalizadas.
+- Las preferencias antiguas ya no pueden ocultar Banco de Video.
+
+![Banco de Video para supervisores (simulación)](/changelog/v4.65-banco-supervisores.png)
+
+## v4.64 — 2026-09-08
+
+**Los supervisores siempre ven el paso 2 · Edición.**
+
+- Edición permanece accesible aunque el supervisor tenga una lista personalizada de áreas.
+- Las preferencias antiguas del menú ya no pueden ocultar este paso a los supervisores.
+- El mapa de trabajo identifica el paso 2 como Edición.
+
+![Edición para supervisores (simulación)](/changelog/v4.64-edicion-supervisores.png)
+
+## v4.63 — 2026-09-08
+
+**Asigna a cada persona qué tiene que hacer desde Perfil y Mi Día.**
+
+- Elige responsable, tarea, instrucciones, fecha límite y prioridad.
+- Cada persona ve sus tareas; quienes gestionan el equipo pueden filtrar por responsable.
+- Sigue el trabajo como Pendiente, En Progreso, Bloqueado o Completado.
+- La asignación genera un aviso; si falla el aviso, se indica que la tarea sí quedó guardada.
+
+![Asignar tareas (simulación)](/changelog/v4.63-tareas-personales.png)
+
+## v4.62 — 2026-09-08
+
+**Grabación muestra cuántas sesiones del mes tienen tareas pendientes.**
+
+- El contador naranja cuenta cada sesión una vez, aunque tenga varios pendientes.
+- Abre “Tareas Pendientes” para ver las ideas, el videógrafo, el editor o la meta que faltan y entrar a la sesión.
+- Excluye completadas y canceladas; conserva las atrasadas del mes y se actualiza al cambiar la preparación.
+- Si falla la consulta, muestra un aviso en lugar de un cero incorrecto.
+
+![Pendientes de grabación (simulación)](/changelog/v4.62-grabaciones-pendientes.png)
+
+## v4.61 — 2026-09-08
+
+**El cliente no puede aprobar un video ausente o con error de reproducción.**
+
+- Aprobar espera a que carguen los datos del video.
+- Si falla el reproductor, se bloquea la aprobación y se ofrece reintentar.
+- El cliente puede escribir el problema y enviarlo con “No aprobar”.
+
+![Error del video del cliente (simulación)](/changelog/v4.61-video-cliente.png)
+
+## v4.60 — 2026-09-08
+
+**El cliente puede recuperar una respuesta cuyo envío quedó sin confirmar.**
+
+- Si se corta la conexión, conserva el comentario y ofrece consultar si la respuesta se guardó.
+- No muestra aprobación ni rechazo exitoso sin confirmación.
+- Si la consulta también falla, mantiene la opción de consultar sin repetir automáticamente el envío.
+
+![Respuesta sin confirmar (simulación)](/changelog/v4.60-respuesta-cliente.png)
+
+## v4.59 — 2026-09-08
+
+**El enlace del cliente valida todos sus videos antes de crearse.**
+
+- Rechaza videos de otro cliente, descartados o sin un archivo editado válido.
+- No genera un enlace parcial si falta uno de los videos solicitados.
+- Si falla la consulta de archivos o enlaces anteriores, se detiene antes de modificarlos.
+
+![Validación del enlace (simulación)](/changelog/v4.59-validar-enlace.png)
+
+## v4.58 — 2026-09-08
+
+**Los controles del enlace del cliente se recuperan de fallos de conexión.**
+
+- Generar y descargar dejan de quedar bloqueados cuando falla la petición.
+- Copiar muestra un error si el navegador rechaza el portapapeles.
+- La creación solo se confirma después de consultar el mismo enlace recién generado; un resultado incierto pide consultar antes de volver a crear.
+
+![Creación sin confirmar (simulación)](/changelog/v4.58-enlace-acciones.png)
+
+## v4.57 — 2026-09-08
+
+**Un fallo al cargar el enlace del cliente no se interpreta como enlace ausente.**
+
+- La tarjeta muestra un aviso y permite reintentar la consulta.
+- Mientras no se verifica el enlace existente, no ofrece crear uno nuevo.
+- Las respuestas de una tarjeta anterior se ignoran al cambiar de video.
+
+![Error al consultar el enlace (simulación)](/changelog/v4.57-enlace-carga.png)
+
+## v4.56 — 2026-09-08
+
+**Entregas distingue la etapa de publicación de los envíos a Metricool.**
+
+- El resumen deja de llamar “publicados” a todos los videos de la última columna.
+- Muestra tarjetas en Publicación y, por separado, videos con identificador de envío a Metricool.
+- Los conteos respetan los filtros visibles; un envío no se presenta como publicación confirmada.
+
+![Resumen del tablero (simulación)](/changelog/v4.56-resumen-envios.png)
+
+## v4.55 — 2026-09-08
+
+**Entregas carga los datos completos antes de permitir agendar.**
+
+- Se elimina el recorte a las primeras 400 ideas y se consultan por páginas clientes, aprobaciones y registros de envío.
+- Si falla una consulta o sus resultados están incompletos, aparece un aviso para volver a cargar Entregas.
+- Los archivos fallidos o archivados ya no cuentan como entregas válidas.
+
+![Aviso de carga de Entregas (simulación)](/changelog/v4.55-entregas-carga.png)
+
+## v4.54 — 2026-09-08
+
+**Un error de reproducción invalida las verificaciones del video.**
+
+- Si falla el reproductor, se bloquea Aprobar y se desmarcan las verificaciones de video y subtítulos.
+- Puedes reintentar la reproducción y obtener un enlace nuevo desde el visor.
+- Al cambiar el archivo, sus verificaciones deben realizarse de nuevo.
+
+![Error de reproducción (simulación)](/changelog/v4.54-error-reproduccion.png)
+
+## v4.53 — 2026-09-08
+
+**El visor distingue un video cargando de un archivo ausente.**
+
+- Mientras se obtiene el enlace aparece “Cargando Vista Previa”.
+- Si falla el enlace, aparece “Vista Previa No Disponible” y se conserva la opción de reintentar.
+- “Todavía no hay video editado” se reserva para piezas sin archivo disponible.
+
+![Estados del visor (simulación)](/changelog/v4.53-estado-video.png)
+
+## v4.52 — 2026-09-08
+
+**El visor de revisión permite recuperarse de errores de conexión.**
+
+- Si falla la petición de videos, aparece un error con la opción de volver a intentar.
+- Si falla la carga del enlace del video, puedes reintentarlo desde el visor.
+- Al abrir otra pieza se limpian los errores anteriores y se ignoran respuestas de una pieza ya cerrada.
+
+![Error de conexión del visor (simulación)](/changelog/v4.52-visor-reintento.png)
+
+## v4.51 — 2026-09-08
+
+**Las correcciones siguen visibles aunque crezca el historial.**
+
+- Revisión consulta todas las páginas de comentarios de los videos devueltos.
+- Cada tarjeta conserva la última corrección del equipo o del cliente.
+- Si el historial no se puede cargar completo, aparece el aviso para volver a cargar Revisión.
+
+![Aviso de historial incompleto (simulación)](/changelog/v4.51-correcciones.png)
+
+## v4.50 — 2026-09-08
+
+**Revisión carga la cola completa y avisa si no puede verificarla.**
+
+- Las ideas anteriores a las 400 más recientes ya no quedan fuera de la consulta de Revisión.
+- Si falla la carga de videos, clientes o comentarios de corrección, aparece un aviso para volver a cargar.
+- Una consulta fallida no se presenta como una cola vacía ni permite trabajar con comentarios incompletos por ese fallo.
+
+![Aviso de carga de Revisión (simulación)](/changelog/v4.50-revision-carga.png)
+
+## v4.49 — 2026-09-08
+
+**Revisión Y Entregas abren en el día actual de Puerto Rico.**
+
+- Al entrar, se selecciona el día de hoy en lugar de mostrar siempre el lunes.
+- El domingo también se selecciona y se identifica en la vista semanal.
+- Puedes cambiar de día manualmente para consultar o preparar otras entregas.
+
+![Vista previa de la selección del día (simulación)](/changelog/v4.49-dia-actual.png)
+
+## v4.48 — 2026-09-08
+
+**On Site distingue una sesión vacía de una consulta fallida.**
+
+- Si no cargan las tomas o las ideas, aparece un aviso y la opción de volver a cargar la sesión.
+- Un error al consultar la sesión ya no se convierte en “sin ideas”.
+- Las sesiones cargadas correctamente mantienen su funcionamiento habitual.
+
+![Vista previa móvil del error de carga (simulación)](/changelog/v4.48-onsite-carga.png)
+
+## v4.47 — 2026-09-08
+
+**“Ver Como Usuario” respeta el rol y las áreas de la persona seleccionada.**
+
+- La navegación ya no trata automáticamente como editor a cualquier usuario consultado.
+- Calendario y otras áreas autorizadas abren según el perfil seleccionado.
+- Las restricciones individuales y los límites para consultar dueños se mantienen.
+
+## v4.46 — 2026-09-08
+
+**Mi Día muestra al editor asignado al cliente cuando no hay responsable de tarea.**
+
+- Los compromisos de hoy y videos en revisión muestran al editor del cliente como respaldo.
+- Una asignación específica de la tarea conserva prioridad.
+- Si existe una asignación pero no se puede mostrar su nombre, se distingue de “Sin Asignar”.
+
+## v4.45 — 2026-09-08
+
+**Las tareas de hoy y vencidas se calculan con la hora correcta.**
+
+- El chat mantiene las tareas nocturnas dentro del día de Puerto Rico, aunque en UTC ya sea mañana.
+- Los vencimientos se comparan por su hora real, incluyendo fechas con distintos offsets.
+- Las tareas completadas no se cuentan como vencidas en las consultas de carga del equipo y clientes.
+
+## v4.44 — 2026-09-08
+
+**El resumen general no convierte fallos de consulta en cero pendientes.**
+
+- Tareas, clientes, solicitudes y QC requieren un conteo verificado.
+- Una lista incompleta de tareas se señala como información sin verificar.
+- Si falla esa parte del resumen, se conserva la información operativa y de publicaciones que sí se pudo consultar.
+
+## v4.43 — 2026-09-08
+
+**La cobertura usa el día correcto y no da por cubiertos los posts fallidos.**
+
+- La agenda y el resumen comparten la interpretación de fechas en horario de Puerto Rico.
+- Una publicación fuera del calendario habitual también necesita confirmación para completar el día.
+- Si Metricool devuelve fechas que no se pueden interpretar, la cuenta aparece sin verificar.
+
+## v4.42 — 2026-09-08
+
+**El chat también reconoce los compromisos publicados directamente en Metricool.**
+
+- El resumen distingue “Publicados Hoy” y “Por Publicar Hoy” usando la misma conciliación del checklist.
+- Las publicaciones externas confirmadas se identifican como piezas sin vínculo local.
+- Una consulta fallida o parcial se anuncia expresamente para evitar confundir pendientes locales con publicaciones faltantes.
+
+## v4.41 — 2026-09-08
+
+**El checklist reconoce una publicación de hoy confirmada directamente en Metricool.**
+
+- Si no hay pieza local fechada pero Metricool confirma el compromiso del día, deja de aparecer como video sin preparar.
+- Se identifica como “Publicado En Metricool · Sin Pieza Vinculada”, sin inventar una aprobación interna.
+- Los borradores, errores y resultados no verificados conservan el compromiso pendiente.
+
+## v4.40 — 2026-09-08
+
+**El chat no anuncia que todo está bien si las alertas no se pudieron verificar.**
+
+- La lista de alertas y el resumen del chat usan el mismo lector.
+- Ya no se revisan únicamente las cinco o diez alertas más recientes para concluir que no hay problemas.
+- Los errores y resultados incompletos se indican expresamente; las alertas vencidas o descartadas se excluyen.
+
+## v4.39 — 2026-09-08
+
+**El resumen operativo del chat usa la misma fuente que Mi Día.**
+
+- Revisiones, correcciones, subidas, bloqueos y espacios de edición salen del resumen operativo compartido.
+- Se incluye el estado de cada paso del checklist, sin confundir enviado con publicado.
+- El resumen consulta la agenda confirmada de Metricool; los errores o la falta de acceso se muestran como información sin verificar.
+
+## v4.38 — 2026-09-08
+
+**El resumen de hoy ya no mezcla publicaciones de ayer.**
+
+- Se filtran los resultados ampliados que devuelve Metricool por el día de Puerto Rico.
+- Las fechas con otra zona horaria se convierten antes de decidir si pertenecen a hoy.
+- Si una fecha no se puede interpretar, se informa que falta verificarla en lugar de incluirla como publicación del día.
+
+## v4.37 — 2026-09-08
+
+**El resumen de publicaciones de hoy distingue lo confirmado de lo pendiente.**
+
+- El chat solo indica publicado cuando Metricool confirma todas las redes; pasar la hora ya no cuenta como publicación.
+- Borradores, errores y resultados parciales aparecen con su estado por red.
+- El día se consulta en horario de Puerto Rico y los fallos se muestran como consulta incompleta.
+
+## v4.36 — 2026-09-08
+
+**Solo dueños y supervisores pueden quitar videos de Entregas.**
+
+- El permiso para subir videos ya no permite descartar trabajo.
+- El botón de quitar se oculta para los demás roles.
+- La misma restricción se verifica al guardar, aunque se intente llamar la acción directamente.
+
+## v4.35 — 2026-09-08
+
+**Quitar del tablero conserva los videos enviados o pendientes de Metricool.**
+
+- Los videos agendados, publicados o con envío pendiente no se descartan.
+- Si solo se puede quitar parte de un lote, el aviso muestra la cantidad real y el tablero se actualiza.
+- Un fallo de conexión ya no deja el botón bloqueado ni muestra una confirmación falsa.
+
+## v4.34 — 2026-09-08
+
+**La revisión queda protegida mientras se confirma el envío a Metricool.**
+
+- Reabrir una revisión ya no cambia el archivo aprobado durante un envío en curso o pendiente de verificar.
+- Los videos publicados o descartados tampoco vuelven a revisión mediante esta acción.
+- Los videos aprobados que todavía no se han enviado siguen pudiendo reabrirse.
+
+## v4.33 — 2026-09-08
+
+**Metricool no recibe una revisión que cambió mientras se comprobaba el video.**
+
+- Antes de enviar se exige que sigan iguales el archivo aprobado, caption, fecha y estado.
+- Si otra persona cambia alguno durante la comprobación, se detiene el envío y se pide actualizar.
+- El envío normal continúa cuando la revisión sigue intacta.
+
+## v4.32 — 2026-09-08
+
+**Un video que no responde ya no deja bloqueado el envío.**
+
+- La comprobación del archivo termina en un máximo de 10 segundos si no responde.
+- Se comprueba el video antes de bloquear la idea para enviarla: un fallo previo no queda como envío incierto.
+- La protección contra envíos duplicados se conserva al contactar a Metricool.
+
+## v4.31 — 2026-09-08
+
+**Los comentarios del cliente también exigen una versión corregida.**
+
+- Para reenviar, el archivo debe ser posterior al último comentario de corrección, venga del cliente o del revisor interno.
+- Una versión anterior al comentario del cliente ya no puede volver a revisión como corregida.
+
+## v4.30 — 2026-09-08
+
+**Las decisiones de revisión avisan al siguiente responsable.**
+
+- El editor recibe el comentario cuando se piden cambios y un aviso cuando se aprueba su video.
+- Al reenviar, dueños y supervisores activos reciben un aviso para revisar la nueva versión.
+- Los avisos se generan después del cambio de estado; si falla su entrega, se informa al usuario sin deshacer la revisión.
+
+## v4.29 — 2026-09-08
+
+**Reenviar una corrección ya no pisa cambios de otra persona.**
+
+- Se mantiene el requisito de subir una versión nueva después de los comentarios.
+- Un video enviado a Metricool, con envío incierto, publicado o descartado no vuelve a revisión desde una pantalla vieja.
+- Si el estado cambia durante el reenvío, aparece un aviso para actualizar y no se informa éxito.
+
+## v4.28 — 2026-09-08
+
+**Un corte de conexión ya no deja el lote atascado en “Enviando”.**
+
+- El envío por lote informa el fallo y continúa con los otros videos.
+- Solo cuenta como enviado un resultado confirmado; una respuesta vacía no se presenta como éxito.
+- El aviso pide verificar Metricool antes de reintentar un envío incierto.
+
+## v4.27 — 2026-09-08
+
+**Recupera el vínculo de un post existente sin volver a publicarlo.**
+
+- Metricool muestra los envíos pendientes de verificar al equipo con permiso de publicación.
+- Introduce el ID del post: se comprueban cliente, archivo aprobado, caption y redes antes de guardarlo.
+- Si no coincide o no aparece, el bloqueo permanece; nunca se crea otro post desde esta herramienta.
+
+![Recuperación de envío](/changelog/v4.27-recuperar-metricool.png)
+
+## v4.26 — 2026-09-08
+
+**Un envío incierto no se repite solo porque pasaron cinco minutos.**
+
+- Si Metricool no confirma el resultado, la idea conserva el bloqueo y muestra que necesita verificación.
+- Los rechazos confirmados permiten corregir el problema y reintentar.
+- Una respuesta sin ID ni UUID ya no cuenta como envío exitoso.
+
+## v4.25 — 2026-09-08
+
+**El dashboard informa si Metricool creó el post pero falló el registro local.**
+
+- Tras tres intentos fallidos de guardar la respuesta, ya no se muestra éxito.
+- El aviso incluye el ID de Metricool para verificar el post antes de volver a agendar.
+
+## v4.24 — 2026-09-08
+
+**Metricool deja de repetir el envío cuando falla el servidor.**
+
+- Errores de servidor, tiempo de espera, permisos o límite de solicitudes ya no provocan un segundo envío sin formato.
+- El ajuste automático de formato queda limitado a rechazos de validación (400/422).
+- El error original se conserva para poder investigarlo antes de volver a agendar.
+
+## v4.23 — 2026-09-08
+
+**On Site protege los videos que ya avanzaron en el flujo.**
+
+- Una pantalla desactualizada no puede devolver a grabación un video producido, publicado o descartado.
+- Si otra persona cambia la toma al mismo tiempo, aparece un aviso para actualizar antes de continuar.
+- Repetir una confirmación conserva la fecha original de grabación; las nuevas fechas siguen el día de Puerto Rico.
+
+## v4.22 — 2026-09-08
+
+**Las próximas grabaciones aparecen en On Site desde que se agendan.**
+
+- Hoy y Próximas incluyen las sesiones aunque falte vincular el cliente, usando su título para identificarlas.
+- On Site abre primero la grabación más cercana, incluso si todavía no tiene cuota de videos. Los enlaces a una sesión específica se respetan.
+- El indicador «Vincular Cliente» deja visible lo pendiente; las fechas siguen el día de Puerto Rico.
+
+![Próximas grabaciones en On Site](/changelog/v4.22-proximas-onsite.png)
+
+## v4.21 — 2026-09-08
+
+**La ventana de grabación se distingue claramente del calendario.**
+
+- Detalle y edición de sesión usan una superficie azul pizarra en modo oscuro, con borde claro y sombra profunda.
+- El calendario de fondo queda más oscuro y desenfocado mientras la ventana está abierta.
+- Márgenes laterales y esquinas redondeadas también en iPhone.
+
+![Ventana de sesión con mayor contraste](/changelog/v4.21-ventana-sesion.png)
+
+## v4.20 — 2026-09-08
+
+**Un mes más fácil de leer, con los detalles dentro de cada sesión.**
+
+- Las tarjetas del mes muestran solo hora y cliente. Un punto ámbar discreto señala asignaciones pendientes.
+- Editor, videógrafo, ubicación e ideas se consultan al abrir la sesión; el editor también permanece visible en la lista.
+- Se redujo la altura de las tarjetas y se mantuvieron los nombres en dos líneas y el botón Ver Más.
+
+![Calendario simplificado](/changelog/v4.20-calendario-simple.png)
+
+## v4.19 — 2026-09-08
+
+**Notificaciones personales, con destino claro y lecturas confirmadas.**
+
+- Ver Todas Las Notificaciones abre el historial personal, en lugar del sistema separado de alertas.
+- La campana actualiza su contador cuando llega información nueva del servidor y evita duplicar avisos repetidos.
+- Leer, eliminar o marcar todas requiere confirmación de guardado. Si falla, el aviso conserva su estado y muestra un error.
+- Los avisos globales de solicitudes y Video QC se limitan a administradores y supervisores. Aprobar en QC no se presenta como publicación confirmada.
+- Una bandeja vacía no afirma que todo el trabajo está completo; Mi Día sigue mostrando los pendientes operativos.
+
+![Notificaciones personales](/changelog/v4.19-notificaciones.png)
+
+## v4.18 — 2026-09-08
+
+**Clientes en Title Case, editores visibles y mapa de Puerto Rico.**
+
+- Los nombres visibles del calendario y la agenda usan Title Case, conservando siglas como PR y PVC.
+- Cada sesión muestra el editor asignado al cliente, separado del videógrafo. Las asignaciones faltantes quedan explícitas.
+- La vista Mapa De Puerto Rico sigue el mes y los filtros del calendario. Selecciona una grabación para ver su ubicación GPS y abrir sus detalles.
+- Las sesiones sin coordenadas aparecen como Falta GPS; no se inventan ubicaciones.
+
+![Calendario con mapa y editores](/changelog/v4.18-mapa-editores.png)
+
+## v4.17 — 2026-09-08
+
+**Un calendario de grabación más claro en escritorio y en iPhone.**
+
+- Resumen del mes con sesiones, asignaciones pendientes y grabaciones completadas, respetando los filtros.
+- Tarjetas con hora, cliente y videógrafo. Los nombres pueden ocupar dos líneas; las sesiones sin responsable lo indican claramente.
+- Botón Hoy, navegación accesible entre meses y Ver Más para abrir días cargados sin crear otra sesión.
+- En pantallas pequeñas el calendario se presenta como agenda, con controles que se acomodan al ancho disponible.
+
+![Calendario de grabación rediseñado](/changelog/v4.17-calendario.png)
+
+## v4.16 — 2026-09-08
+
+**Perfiles de todo el equipo y enlaces directos a sus redes.**
+
+- El menú Ver Como Usuario incluye todos los roles activos y aprobados, con nombre y rol. Mi Perfil, Mi Día y la agenda personal consultan la persona elegida.
+- Un aviso visible permite salir de la vista. Solo administradores acceden al selector; un supervisor no puede adoptar el rol de dueño.
+- Los iconos de redes en Metricool abren el perfil real en una pestaña nueva. Cuando falta un identificador verificable, muestran Enlace No Disponible.
+
+![Vista previa de perfiles y enlaces sociales](/changelog/v4.16-perfiles-redes.png)
+
+## v4.15 — 2026-09-08
+
+**De la corrección a la publicación: revisión verificable y agenda con un clic explícito.**
+
+- Revisión exige confirmar los subtítulos incrustados y el video completo. La aprobación queda ligada al archivo visto; un comentario pendiente bloquea aprobar y pide devolver al editor.
+- El editor sube la corrección sobre la misma pieza y la reenvía a revisión, conservando fecha e historial. No se pierde el comentario si falla su guardado.
+- Agendar requiere aprobación, verificación del archivo, copy y fecha válida. Aprobar o guardar copy ya no agenda automáticamente.
+- Mi Día muestra las correcciones, verificaciones pendientes y un botón para agendar. Consulta Metricool por red para confirmar fechas vencidas, hoy y cobertura de los próximos 14 días.
+- Los resultados parciales, borradores y conexiones sin verificar permanecen visibles. El estado se consulta periódicamente mientras Mi Día está abierto.
+
+![Demo del flujo de revisión, datos simulados](/changelog/v4.15-flujo-publicacion.png)
+
+## v4.14 — 2026-09-08
+
+**On Site muestra quién editará los videos del cliente.**
+
+- El encabezado identifica al editor asignado al cliente, separado de la persona que registra la llegada.
+- Si no hay asignación, muestra “Sin Editor Asignado”.
+
+![Editor del cliente en On Site, datos de ejemplo](/changelog/v4.14-editor-onsite.png)
+
+## v4.13 — 2026-09-08
+
+**El cliente define el título y la meta de videos de la grabación.**
+
+- Selecciona el cliente primero; su nombre se utiliza automáticamente como título de la sesión.
+- El formulario muestra la meta de videos de On Site: publicaciones del mes de la sesión × 1.5, redondeado.
+- Al cambiar fecha o cliente se recalcula la meta. Sin cadencia configurada aparece “Videos Por Definir”.
+
+![Formulario de grabación, datos de ejemplo](/changelog/v4.13-meta-grabacion.png)
+
+## v4.12 — 2026-09-08
+
+**Las grabaciones asignadas llegan a la agenda y al perfil de cada persona.**
+
+- Mi Día y Mi Perfil muestran las próximas sesiones con fecha, hora, lugar y acceso al brief. También aparecen en el perfil del equipo.
+- Al asignar un videógrafo se crea un aviso en su campana; guardar la misma asignación no repite el aviso. El calendario permite abrir la agenda filtrada por persona.
+- Desde la sesión puedes buscar ideas existentes de On Site / Escribir Ideas y propuestas aprobadas del Lab. Para vincularlas, la sesión debe tener un cliente seleccionado.
+- Editar usa azul, guardar asignación usa verde e ideas usa violeta. Rojo se reserva para eliminar.
+
+![Sesión de grabación, datos de ejemplo](/changelog/v4.12-grabacion-asignada.png)
+
+## v4.11 — 2026-09-08
+
+**El costo por imagen en Gráficas es visible solo para administradores.**
+
+- Owner y Supervisor conservan el estimado por imagen.
+- Los demás roles ven el formulario sin el costo; generar gráficas mantiene sus permisos actuales.
+
+![Costo según el rol, vista de ejemplo](/changelog/v4.11-graficas-costo.png)
+
+## v4.10 — 2026-09-08
+
+**Mi Día reúne las prioridades del equipo en un resumen operativo.**
+
+- Owner y Supervisor ven el checklist de publicaciones de hoy, incluidos clientes sin video fechado según su cadencia.
+- Muestra los espacios por llenar de cada editor, las revisiones, las correcciones y los videos listos para agendar en Metricool.
+- Los atrasos se consultan aparte. Enviado a Metricool queda pendiente de verificar hasta que conste publicado.
+- Los editores conservan su vista personal; si los datos no cargan completos, el resumen muestra un error en vez de ceros.
+
+![Resumen operativo, datos de ejemplo](/changelog/v4.10-mi-dia-overview.png)
+
+## v4.9 — 2026-09-07
+
+**Revisa qué publicaciones están listas para salir en Metricool.**
+
+- En Publicaciones, **Verificar en Metricool** consulta los próximos 14 días por cliente y separa publicaciones programadas, borradores y casos que necesitan atención.
+- Un borrador con fecha sigue siendo un borrador: el dashboard ya no lo clasifica como programado.
+- Las tarjetas piden corregir fechas vencidas o ausentes antes de enviar. Aprobar un video conserva su fecha existente y no mueve trabajo atrasado al día siguiente.
+- Los errores de envío se devuelven al flujo de aprobación para mostrar por qué el video no llegó a Metricool; los videos descartados quedan bloqueados.
+
+![Verificación de publicaciones, vista de ejemplo](/changelog/v4.9-flujo-metricool.png)
+
 ## v4.8 — 2026-09-06
 
 **"Mejorar descripción": la IA escribe la descripción de tu gráfica por ti.**

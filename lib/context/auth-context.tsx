@@ -6,6 +6,7 @@ import type { Profile, UserRole } from '@/lib/supabase/types'
 export interface ViewAsEditorOption {
   id: string
   full_name: string | null
+  role?: UserRole
 }
 
 interface AuthContextValue {

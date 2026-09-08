@@ -26,10 +26,13 @@ export async function assignCadencePublishDate(
   try {
     const { data: idea } = await supabase
       .from('content_ideas')
-      .select('id, client_id')
+      .select('id, client_id, publish_date')
       .eq('id', ideaId)
       .single()
     if (!idea?.client_id) return null
+    // Approval must preserve the planned date. Old dates require an explicit
+    // reschedule, not an invisible move into tomorrow's queue.
+    if (idea.publish_date) return idea.publish_date as string
 
     const [{ data: client }, { data: siblings }] = await Promise.all([
       supabase.from('clients').select('posting_days').eq('id', idea.client_id).single(),

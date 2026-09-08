@@ -34,12 +34,13 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
 
   it('el revisor ve las dos decisiones; devolver espera al comentario', () => {
     renderPanel()
-    expect(screen.getByRole('button', { name: /aprobar/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /aprobar/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeDisabled()
   })
 
   it('approving reports the decision', () => {
     renderPanel()
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
     expect(onDecision).toHaveBeenCalledWith('approve', '')
   })
@@ -75,6 +76,7 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
 
   it('aprobar no exige comentario', () => {
     renderPanel()
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
     expect(onDecision).toHaveBeenCalledWith('approve', '')
   })
@@ -102,4 +104,32 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
     expect(screen.getByText('Cambios pedidos')).toBeInTheDocument()
     expect(screen.getByText(/Corta los primeros 2s/)).toBeInTheDocument()
   })
+})
+
+it('invalidates approval checks when playback fails and requires rechecking after recovery', () => {
+  const {container}=renderPanel()
+  screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
+  expect(screen.getByRole('button',{name:'Aprobar'})).toBeEnabled()
+  fireEvent.error(container.querySelector('video')!)
+  expect(screen.getByRole('alert')).toHaveTextContent('No Se Pudo Reproducir El Video')
+  expect(screen.getByRole('button',{name:'Aprobar'})).toBeDisabled()
+  screen.getAllByRole('checkbox').forEach(c=>{expect(c).not.toBeChecked();expect(c).toBeDisabled()})
+  fireEvent.loadedData(container.querySelector('video')!)
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  expect(screen.getByRole('button',{name:'Aprobar'})).toBeDisabled()
+})
+it('does not transfer verification checks to a different preview', () => {
+  const {rerender}=renderPanel()
+  screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
+  rerender(<InternalReviewPanel video={video({editedUrl:'https://cdn.example.com/new.mp4'})} role="supervisor" userId="sup-1" onDecision={onDecision}/> )
+  expect(screen.getByRole('button',{name:'Aprobar'})).toBeDisabled()
+  screen.getAllByRole('checkbox').forEach(c=>expect(c).not.toBeChecked())
+})
+it('offers preview renewal after a media error', () => {
+ const retry=vi.fn()
+ const {container}=render(<InternalReviewPanel video={video()} role="supervisor" userId="sup-1" onDecision={onDecision} onRetryPreview={retry}/> )
+ fireEvent.error(container.querySelector('video')!)
+ fireEvent.click(screen.getByRole('button',{name:'Reintentar Reproducción'}))
+ expect(retry).toHaveBeenCalledOnce()
+ expect(screen.getByRole('button',{name:'Aprobar'})).toBeDisabled()
 })

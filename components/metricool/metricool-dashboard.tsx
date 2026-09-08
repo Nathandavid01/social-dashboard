@@ -23,6 +23,7 @@ import {
   type PublicPost,
 } from '@/lib/metricool/client'
 import { useToast } from '@/lib/hooks/use-toast'
+import { metricoolProfileLinks } from '@/lib/utils/metricool-profile-links'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import type { CachedMetricoolProfile } from '@/lib/actions/metricool-profiles'
 import {
@@ -50,7 +51,7 @@ function normalizeProfile(p: PublicBlog): CachedMetricoolProfile {
   const networks = (['instagram', 'facebook', 'tiktok', 'linkedin'] as const).filter(
     (k) => p[k],
   )
-  return { id: String(p.id), name, picture: picture ?? null, networks }
+  return { id: String(p.id), name, picture: picture ?? null, networks, links: metricoolProfileLinks(p) }
 }
 
 type DateRange = '7d' | '30d' | '90d'
@@ -209,7 +210,7 @@ export function MetricoolDashboard({ onDisconnect, cachedProfiles = [] }: Metric
           <CardContent>
             <div className="space-y-3">
               {profiles.map((profile, i) => (
-                <div key={profile.id ?? i} className="flex items-center justify-between rounded-lg border p-3">
+                <div key={profile.id ?? i} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
                   <div className="flex min-w-0 items-center gap-3">
                     {profile.picture ? (
                       <img
@@ -224,7 +225,7 @@ export function MetricoolDashboard({ onDisconnect, cachedProfiles = [] }: Metric
                     )}
                     <p className="min-w-0 truncate text-sm font-medium">{profile.name}</p>
                   </div>
-                  {profile.networks.length > 0 && <PlatformBadges platforms={profile.networks} />}
+                  {profile.networks.length > 0 && <PlatformBadges platforms={profile.networks} links={profile.links ?? {}} />}
                 </div>
               ))}
             </div>

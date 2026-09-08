@@ -1,4 +1,5 @@
 'use client'
+import {useToast} from '@/lib/hooks/use-toast'
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,18 +34,23 @@ export function ReviewOverlay({
   const { user, role } = useAuth()
   const [videos, setVideos] = useState<QueueVideo[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [retry, setRetry] = useState(0)
 
   useEffect(() => {
     let alive = true
+    setError(null)
+    setVideos(null)
     getEntregaReviewVideos(clientId).then((res) => {
       if (!alive) return
       if (res.error) setError(res.error)
       // Solo el video de la tarjeta. Se filtra aqui y no en el servidor para no
       // tocar una accion que tambien usa el otro tablero.
       else setVideos((res.videos ?? []).filter((v) => v.id === ideaId))
+    }).catch(() => {
+      if (alive) setError('No Se Pudieron Cargar Los Videos. Revisa La Conexión Y Vuelve A Intentar.')
     })
     return () => { alive = false }
-  }, [clientId, ideaId])
+  }, [clientId, ideaId, retry])
 
   // Esc closes — a full-screen overlay with no keyboard exit is a trap.
   useEffect(() => {
@@ -58,14 +64,16 @@ export function ReviewOverlay({
     [],
   )
 
+  const {toast} = useToast()
   const onDecide = useCallback(
-    async (ideaId: string, decision: 'approve' | 'request_changes', note: string) => {
-      const res = await decideReview({ ideaId, decision, note })
+    async (ideaId: string, decision: 'approve' | 'request_changes', note: string, verification?: {videoFileId:string|null;captionsVerified:boolean;videoVerified:boolean}) => {
+      const res = await decideReview({ ideaId, decision, note, ...verification })
       if (res.error) throw new Error(res.error)
+      if (res.warning) toast({title: 'Aviso Pendiente', description: res.warning, variant: 'destructive'})
       // Refresh so the board reflects the new column right away.
       router.refresh()
     },
-    [router],
+    [router, toast],
   )
 
   return (
@@ -88,9 +96,10 @@ export function ReviewOverlay({
 
       <div className="mx-auto max-w-2xl p-5">
         {error && (
-          <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
+          <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            <p>{error}</p>
+            <button onClick={() => setRetry((n) => n + 1)} className="mt-3 min-h-11 rounded-lg border px-4 font-medium">Volver A Intentar</button>
+          </div>
         )}
 
         {!videos && !error && (

@@ -8,11 +8,11 @@ import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import {
   ideaPostReadiness,
-  buildPublishDateTime,
   resolvePlatforms,
   resolveVideoForPublish,
   type VideoWatchBoard,
 } from '@/lib/utils/idea-posting-core'
+import { automaticPublishSchedule } from '@/lib/utils/automatic-publish-schedule'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 
@@ -33,8 +33,9 @@ export async function runIdeaPost(
    * here — the browser's copy of the rule is a convenience, not the authority.
    */
   scheduleOverride?: string | null,
-  opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null },
+  opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null; manualScheduling?: boolean },
 ): Promise<PostResult> {
+  if (!opts?.manualScheduling) return { skipped: 'El equipo debe pulsar Agendar En Metricool después de completar la revisión.' }
   // Before any DB work: a bad override must not burn the posting claim.
   let overrideIso: string | null = null
   if (scheduleOverride) {
@@ -102,27 +103,20 @@ export async function runIdeaPost(
   )
   if (!readiness.ready) return { skipped: readiness.reason }
 
-  // ── Atomic claim: the real guard against double-posting. Sets posting_started_at
-  // ONLY where metricool_post_id is null AND the slot is free or stale (>5 min, a
-  // crashed prior attempt). If no row is claimed, another trigger already owns it
-  // (approve + manual button, retries) — abort instead of posting twice. ──
-  const staleBefore = new Date(Date.now() - 5 * 60 * 1000).toISOString()
-  const { data: claimed, error: claimErr } = await supabase
-    .from('content_ideas')
-    .update({ posting_started_at: new Date().toISOString() })
-    .eq('id', ideaId)
-    .is('metricool_post_id', null)
-    .or(`posting_started_at.is.null,posting_started_at.lt.${staleBefore}`)
-    .select('id')
-  if (claimErr) return { error: claimErr.message }
-  if (!claimed || claimed.length === 0) return { skipped: 'Ya se publicó o hay una publicación en curso' }
+  const { data: verifiedRows, error: verifiedError } = await supabase.from('content_idea_activity')
+    .select('metadata').eq('content_idea_id', ideaId).eq('action', 'review_verified')
+    .order('created_at', { ascending: false }).limit(50)
+  const verified = (verifiedRows ?? []).some(row => {
+    const m = row.metadata as { videoFileId?: string; captionsVerified?: boolean; videoVerified?: boolean } | null
+    return m?.videoFileId === edited?.id && m?.captionsVerified === true && m?.videoVerified === true
+  })
+  if (verifiedError || !verified) return { skipped: 'Falta verificar el archivo final con subtítulos en Revisión antes de agendar.' }
 
-  const releaseClaim = async (postingError: string) => {
-    await supabase
-      .from('content_ideas')
-      .update({ posting_started_at: null, posting_error: postingError })
-      .eq('id', ideaId)
-  }
+  const schedule = overrideIso
+    ? { ok: true as const, iso: overrideIso }
+    : automaticPublishSchedule(idea.publish_date as string | null, client.posting_time)
+  if (!schedule.ok) return { skipped: schedule.error }
+  const scheduledFor = schedule.iso
 
   // Public, permanent URL for the edited video. Only `edited` videos are ever
   // exposed publicly — the query above already constrains kind + provider, and
@@ -137,7 +131,6 @@ export async function runIdeaPost(
       : r2PublicUrl(editedVideo.drive_file_id)
   if (!publicUrl) {
     const msg = 'No se pudo obtener la URL pública del video editado (¿falta R2_PUBLIC_BASE_URL?)'
-    await releaseClaim(msg)
     return { error: msg }
   }
   const pub = { url: publicUrl }
@@ -148,13 +141,41 @@ export async function runIdeaPost(
   const health = await checkVideoPlayable(pub.url)
   if (!health.ok) {
     const msg = `El video no se puede reproducir desde su URL pública: ${health.reason}`
-    await releaseClaim(msg)
     return { error: msg }
   }
 
   // A hand-picked time wins over the planned date + the client's posting_time.
-  const scheduledFor = overrideIso ?? buildPublishDateTime(idea.publish_date as string | null, client.posting_time)
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+
+  // No timeout-based takeover: a lost response may hide a successful remote
+  // creation. An unresolved claim must be reconciled before another POST.
+  let claimQuery = supabase
+    .from('content_ideas')
+    .update({ posting_started_at: new Date().toISOString() })
+    .eq('id', ideaId)
+    .is('metricool_post_id', null)
+    .is('posting_started_at', null)
+    .is('posted_at', null)
+    .is('published_at', null)
+    .eq('approval_status', 'approved')
+    .eq('approved_video_id', edited!.id)
+    .eq('generated_caption', idea.generated_caption)
+    .eq('status', idea.status)
+  // The media probe may take seconds. Compare the same reviewed snapshot in
+  // the claim UPDATE itself, so changes during that gap prevent the POST.
+  claimQuery = idea.publish_date == null
+    ? claimQuery.is('publish_date', null)
+    : claimQuery.eq('publish_date', idea.publish_date)
+  const { data: claimed, error: claimErr } = await claimQuery.select('id')
+  if (claimErr) return { error: claimErr.message }
+  if (!claimed || claimed.length === 0) return { skipped: 'El video cambió o tiene un envío en curso o pendiente de verificar. Actualiza y comprueba Metricool antes de reenviar.' }
+
+  const releaseClaim = async (postingError: string) => {
+    await supabase
+      .from('content_ideas')
+      .update({ posting_started_at: null, posting_error: postingError })
+      .eq('id', ideaId)
+  }
 
   try {
     const res = await createDraftPost(
@@ -167,11 +188,10 @@ export async function runIdeaPost(
     )
     const postId = res.data?.id ?? null
     const uuid = res.data?.uuid ?? null
+    if (postId == null && !uuid) throw new Error('Metricool no devolvió un identificador de la publicación')
 
-    // The Metricool post EXISTS now — this bookkeeping must stick or a stale-claim
-    // retry (>5 min) could post twice. Retry the UPDATE; on total failure DO NOT
-    // release the claim (posting_started_at keeps blocking retries for 5 min and
-    // the posted_at readiness backstop covers rows where it did persist).
+    // Remote creation succeeded. Keep the durable claim if bookkeeping fails;
+    // no retry may create another post until reconciliation finishes.
     let recorded = false
     for (let attempt = 0; attempt < 3 && !recorded; attempt++) {
       const { error: recordErr } = await supabase
@@ -185,6 +205,15 @@ export async function runIdeaPost(
         .eq('id', ideaId)
       recorded = !recordErr
       if (!recorded) console.error(`[idea-posting] bookkeeping attempt ${attempt + 1} failed for ${ideaId}:`, recordErr?.message)
+    }
+
+    if (!recorded) {
+      // The remote side succeeded; never report a synchronized success or release
+      // its claim when all local persistence attempts failed.
+      return {
+        error: `Metricool creó la publicación ${postId ?? uuid ?? '(sin identificador)'}, pero no se pudo guardar en el dashboard. Verifica esa publicación en Metricool antes de volver a agendar.`,
+        metricoolPostId: postId,
+      }
     }
 
     await logIdeaActivity(supabase, {
@@ -210,7 +239,12 @@ export async function runIdeaPost(
     return { ok: true, metricoolPostId: postId }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
-    await releaseClaim(msg)
-    return { error: msg }
+    if (err instanceof Error && 'definitelyNotCreated' in err && err.definitelyNotCreated === true) {
+      await releaseClaim(msg)
+      return { error: msg }
+    }
+    const uncertain = `No se pudo confirmar el resultado del envío. Debes verificarlo en Metricool antes de reenviar. ${msg}`
+    await supabase.from('content_ideas').update({ posting_error: uncertain }).eq('id', ideaId)
+    return { error: uncertain }
   }
 }

@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { currentUserHas } from '@/lib/auth/server'
+import { getEffectiveUserId, currentUserHas } from '@/lib/auth/server'
 import { effectiveAreaHrefs } from '@/lib/auth/areas'
 import type { UserRole } from '@/lib/supabase/types'
 import { buildMyDay, type MyDay, type OwnedVideo } from '@/lib/utils/my-day-core'
@@ -35,11 +35,12 @@ export async function getMyDay(): Promise<MyDayResult> {
   } = await supabase.auth.getUser()
   if (!user) return null
 
+  const effectiveId = await getEffectiveUserId() || user.id
   // A server action is NOT behind the layout, so it has to re-check the account
   // itself: an authenticated-but-pending/deactivated user could otherwise call
   // this directly. `content_ideas` RLS is `using (true)` for any authenticated
   // role, so this check is the only gate there is.
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', effectiveId).single()
   if (!profile) return null
   const p = profile as {
     full_name?: string | null
@@ -95,7 +96,7 @@ export async function getMyDay(): Promise<MyDayResult> {
   const day = (videos: OwnedVideo[]): MyDay =>
     buildMyDay(videos, {
       today: todayISOInTimeZone(POST_TZ),
-      userId: user.id,
+      userId: effectiveId,
       capacity,
       canApprove,
       canPublish,

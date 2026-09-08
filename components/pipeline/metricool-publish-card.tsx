@@ -5,16 +5,6 @@ import { Send, CheckCircle2, AlertTriangle, CalendarClock, Loader2 } from 'lucid
 import { Button } from '@/components/ui/button'
 import { publishSchedule } from '@/lib/utils/publish-schedule'
 
-/**
- * The Publicación card: one thing only — send this video to Metricool, and say
- * exactly when it lands there.
- *
- * The date shown is the one Metricool will actually receive, not the planned
- * publish_date. A past or missing date gets clamped to +24h upstream (so an
- * overdue approval can't fire immediately), and the card says so rather than
- * showing a date that will never happen.
- */
-
 export interface PublishVideo {
   id: string
   title: string
@@ -41,7 +31,7 @@ export function MetricoolPublishCard({
   const s = publishSchedule(video.publishDate, video.postingTime, nowMs)
 
   async function send() {
-    if (pending || posted) return
+    if (pending || posted || s.blockedReason) return
     setPending(true)
     try {
       await onPublish(video.id)
@@ -71,16 +61,16 @@ export function MetricoolPublishCard({
           Se envía para
         </p>
         <p className="text-sm font-semibold tabular-nums">{s.label}</p>
-        {s.clamped && (
+        {s.blockedReason && (
           <p className="flex items-start gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
             <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            {video.publishDate ? 'Fecha pasada — se corre a +24h' : 'Sin fecha planificada — se corre a +24h'}
+            {s.blockedReason}
           </p>
         )}
       </div>
 
       {!posted && canPublish && (
-        <Button size="sm" className="w-full" disabled={pending} onClick={send}>
+        <Button size="sm" className="w-full" disabled={pending || !!s.blockedReason} onClick={send}>
           {pending
             ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
             : <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />}

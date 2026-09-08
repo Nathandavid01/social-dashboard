@@ -1,6 +1,6 @@
 import type { UserRole } from '@/lib/supabase/types'
 
-/** Cookie httpOnly: id del editor cuya cartera está viendo un admin. */
+/** Cookie httpOnly: id del usuario que está consultando un admin. Nombre conservado por compatibilidad. */
 export const VIEW_AS_COOKIE = 'nm_view_as_editor'
 
 const UUID_RE =
@@ -10,7 +10,7 @@ export function isViewAsEditorId(value: string | null | undefined): value is str
   return typeof value === 'string' && UUID_RE.test(value)
 }
 
-/** Owner y supervisor pueden entrar a la vista de un editor. */
+/** Owner y supervisor pueden consultar otros usuarios. */
 export function canStartViewAs(role: UserRole | null | undefined): boolean {
   return role === 'owner' || role === 'supervisor'
 }
@@ -22,20 +22,21 @@ export function viewAsTargetOk(profile: {
 } | null): boolean {
   if (!profile) return false
   const approval = profile.approval_status ?? 'approved'
-  return profile.role === 'editor' && profile.status === 'active' && approval === 'approved'
+  return ['owner','supervisor','editor','video','disenador','copy','team_member'].includes(profile.role) && profile.status === 'active' && approval === 'approved'
 }
 
 /** Rol para menú, permisos de pantalla y filtro de clientes. */
 export function resolveEffectiveRole(
   realRole: UserRole | null | undefined,
   viewAsEditorId: string | null | undefined,
+  targetRole: UserRole = 'editor',
 ): UserRole | null {
   if (!realRole) return null
-  if (canStartViewAs(realRole) && isViewAsEditorId(viewAsEditorId)) return 'editor'
+  if (canStartViewAs(realRole) && isViewAsEditorId(viewAsEditorId)) return targetRole
   return realRole
 }
 
-/** Id usado para `assigned_to` cuando el admin mira como un editor. */
+/** Id usado para `assigned_to` cuando el admin consulta otro usuario. */
 export function resolveEffectiveUserId(
   realUserId: string | null | undefined,
   realRole: UserRole | null | undefined,

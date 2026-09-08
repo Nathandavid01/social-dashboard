@@ -7,21 +7,24 @@ export async function getAlerts() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data, error } = await supabase
+  if (!user) throw new Error('No autenticado')
+
+  const { data, error, count } = await supabase
     .from('alerts')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false }).limit(5000)
 
   if (error) throw new Error(error.message)
+  if ((count ?? 0) > (data?.length ?? 0) || (data?.length ?? 0) >= 5000) throw new Error('Consulta de alertas incompleta. No se puede confirmar que no haya alertas pendientes.')
 
   // Filter out alerts dismissed by the current user (client-side because
   // postgrest's array-contains filter on uuid[] doesn't accept JSON syntax —
   // and the list is small).
   const rows = data ?? []
-  if (!user) return rows
   return rows.filter((r) => {
     const dismissed = (r as { dismissed_by?: string[] | null }).dismissed_by ?? []
-    return !dismissed.includes(user.id)
+    const expires = r.expires_at ? new Date(r.expires_at).getTime() : null
+    return !dismissed.includes(user.id) && (expires === null || expires > Date.now())
   })
 }
 

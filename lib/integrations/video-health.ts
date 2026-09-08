@@ -21,7 +21,7 @@ export async function checkVideoPlayable(
 
   let res: Response
   try {
-    res = await fetchImpl(url, { headers: { Range: 'bytes=0-1' }, redirect: 'follow' })
+    res = await fetchImpl(url, { headers: { Range: 'bytes=0-1' }, redirect: 'follow', signal: AbortSignal.timeout(10_000) })
   } catch (e) {
     return {
       ok: false,

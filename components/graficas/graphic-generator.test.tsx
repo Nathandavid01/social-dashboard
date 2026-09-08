@@ -1,7 +1,11 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { GraphicGenerator } from './graphic-generator'
 import type { GeneratedGraphicRow } from '@/lib/supabase/types'
+
+const auth = vi.hoisted(() => ({ role: 'owner' as string | null }))
+vi.mock('@/lib/context/auth-context', () => ({ useAuth: () => ({ role: auth.role }) }))
+beforeEach(() => { auth.role = 'owner' })
 
 const enhanceGraphicConcept = vi.fn(async () => ({ concept: 'Descripción rica y detallada "2X1 SOLO SÁB Y DOM"' }))
 vi.mock('@/lib/actions/graphics', () => ({
@@ -27,6 +31,17 @@ const historyRow: GeneratedGraphicRow = {
 }
 
 describe('GraphicGenerator', () => {
+  it.each(['editor', 'video', 'disenador', 'copy', 'team_member', null])('hides image cost for %s', (role) => {
+    auth.role = role
+    render(<GraphicGenerator clients={clients} history={[]} />)
+    expect(screen.queryByText('~$0.04 por imagen')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Generar con IA/ })).toBeInTheDocument()
+  })
+  it.each(['owner', 'supervisor'])('shows image cost for admin %s', (role) => {
+    auth.role = role
+    render(<GraphicGenerator clients={clients} history={[]} />)
+    expect(screen.getByText('~$0.04 por imagen')).toBeInTheDocument()
+  })
   it('renders the form and disables Generar until client + concept are set', () => {
     render(<GraphicGenerator clients={clients} history={[]} />)
     expect(screen.getByText('Nueva gráfica')).toBeInTheDocument()

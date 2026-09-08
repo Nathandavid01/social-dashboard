@@ -8,14 +8,15 @@ import {
   VIEW_AS_COOKIE,
   canStartViewAs,
   isViewAsEditorId,
-  resolveEffectiveRole,
-  resolveEffectiveUserId,
+  viewAsTargetOk,
 } from './view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
 
 export interface ViewAsEditor {
   id: string
   full_name: string | null
+  role: UserRole
+  area_access: string[] | null
 }
 
 interface RoleAndAreas {
@@ -106,42 +107,38 @@ async function readViewAsCookie(): Promise<string | null> {
   }
 }
 
-/** Cookie de vista, solo si el usuario real puede usarla. */
-export async function getViewAsEditorId(): Promise<string | null> {
+/** Resolve the target from the database; a cookie never establishes a role. */
+export async function getViewAsEditor(): Promise<ViewAsEditor | null> {
   const role = await getCurrentRole()
   if (!canStartViewAs(role)) return null
-  return readViewAsCookie()
+  const id = await readViewAsCookie()
+  if (!id) return null
+  const db = await createClient()
+  const { data, error } = await db.from('profiles')
+    .select('id,full_name,role,status,approval_status,area_access').eq('id', id).maybeSingle()
+  if (error || !viewAsTargetOk(data) || !data || (role !== 'owner' && data.role === 'owner')) return null
+  return { id: data.id, full_name: data.full_name, role: data.role as UserRole, area_access: data.area_access ?? null }
+}
+
+export async function getViewAsEditorId(): Promise<string | null> {
+  return (await getViewAsEditor())?.id ?? null
 }
 
 export async function getEffectiveRole(): Promise<UserRole | null> {
-  const real = await getCurrentRole()
-  return resolveEffectiveRole(real, await getViewAsEditorId())
+  return (await getViewAsEditor())?.role ?? await getCurrentRole()
 }
 
 export async function getEffectiveUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const realRole = await getCurrentRole()
-  return resolveEffectiveUserId(user?.id ?? null, realRole, await getViewAsEditorId())
-}
-
-export async function getViewAsEditor(): Promise<ViewAsEditor | null> {
-  const id = await getViewAsEditorId()
-  if (!id) return null
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('id', id)
-    .maybeSingle()
-  return { id, full_name: data?.full_name ?? null }
+  const target = await getViewAsEditor()
+  if (target) return target.id
+  const db = await createClient()
+  return (await db.auth.getUser()).data.user?.id ?? null
 }
 
 async function getEffectiveRoleAndAreas(): Promise<RoleAndAreas> {
   const real = await getRoleAndAreas()
-  const viewAs = await getViewAsEditorId()
-  const role = resolveEffectiveRole(real.role, viewAs)
-  if (viewAs && role === 'editor') return { role: 'editor', areaAccess: null }
+  const target = await getViewAsEditor()
+  if (target) return { role: target.role, areaAccess: target.area_access }
   return real
 }
 

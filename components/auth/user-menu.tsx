@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound, Eye } from 'lucide-react'
 import { startViewAsEditor, stopViewAs } from '@/lib/actions/view-as'
+import { ROLE_LABEL } from '@/lib/auth/permissions'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ThemeToggleMenuItem } from '@/components/shared/theme-toggle'
@@ -158,13 +159,13 @@ export function UserMenu() {
                 }}
               >
                 <Eye className="mr-2 h-4 w-4" />
-                Salir de vista de editor
+                Salir De Esta Vista
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="cursor-pointer">
                 <Eye className="mr-2 h-4 w-4" />
-                Ver como editor
+                Ver Como Usuario
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-72 overflow-y-auto">
                 {editors.map((ed) => (
@@ -179,12 +180,12 @@ export function UserMenu() {
                           toast({ title: 'No se pudo cambiar la vista', description: res.error, variant: 'destructive' })
                           return
                         }
-                        router.push('/revision')
+                        router.push('/account/profile')
                         router.refresh()
                       })
                     }}
                   >
-                    {ed.full_name?.trim() || 'Sin nombre'}
+                    {ed.full_name?.trim() || 'Sin Nombre'}{ed.role ? ` · ${ROLE_LABEL[ed.role]}` : ''}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuSubContent>
@@ -192,6 +193,9 @@ export function UserMenu() {
           </>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/account/profile">Mi Perfil</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/account/security">
             <KeyRound className="mr-2 h-4 w-4" />

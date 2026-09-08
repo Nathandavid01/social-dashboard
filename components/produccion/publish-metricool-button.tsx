@@ -65,7 +65,7 @@ export function PublishToMetricoolButton({
         })
       }
     >
-      <Send className="h-4 w-4" /> Publicar a Metricool
+      <Send className="h-4 w-4" /> Agendar En Metricool
     </Button>
   )
 }

@@ -33,13 +33,12 @@ export function PublishScheduleCard({
   const [value, setValue] = useState<string | null>(null)
 
   const planned = publishSchedule(publishDate ?? null, postingTime)
-  const plannedCheck = validateScheduleOverride(toDatetimeLocalValue(planned.iso))
+  const plannedCheck = planned.blockedReason
+    ? { ok: false as const, error: planned.blockedReason }
+    : validateScheduleOverride(toDatetimeLocalValue(planned.iso))
 
-  // The picker opens on something sendable: the planned slot if it still works,
-  // otherwise the same clock time tomorrow.
-  const defaultValue = plannedCheck.ok
-    ? toDatetimeLocalValue(planned.iso)
-    : toDatetimeLocalValue(planned.iso, 24 * 60 * 60 * 1000)
+  // Invalid schedules require the user to choose a date explicitly.
+  const defaultValue = plannedCheck.ok ? toDatetimeLocalValue(planned.iso) : ''
 
   const override = value ?? (editing ? defaultValue : null)
   const check = override ? validateScheduleOverride(override) : plannedCheck
@@ -60,7 +59,7 @@ export function PublishScheduleCard({
         <div className="flex items-center justify-between gap-x-2">
           <p className="flex min-w-0 items-center gap-1 text-[9px] uppercase tracking-wide text-muted-foreground">
             <CalendarClock className="h-2.5 w-2.5 shrink-0" aria-hidden />
-            <span className="truncate">Borrador en Metricool</span>
+            <span className="truncate">Publicación en Metricool</span>
           </p>
           {canPublish && !editing && (
             <button
@@ -74,17 +73,12 @@ export function PublishScheduleCard({
         </div>
 
         <p className={cn('text-[11px] font-semibold tabular-nums', override && check.ok && 'text-foreground')}>
-          {formatScheduleLabel(shownIso)}
+          {shownIso ? formatScheduleLabel(shownIso) : planned.label}
         </p>
 
         {/* Sin override el aviso describe la fecha planificada; con override, la elegida. */}
         {!check.ok && (
           <p className="text-[9px] font-medium text-red-600 dark:text-red-400">{check.error}</p>
-        )}
-        {check.ok && planned.clamped && !override && (
-          <p className="text-[9px] text-amber-600 dark:text-amber-400">
-            {publishDate ? 'Fecha pasada — se corre a +24h' : 'Sin fecha planificada — se corre a +24h'}
-          </p>
         )}
         {override && check.ok && (
           <p className="text-[9px] text-muted-foreground">Fecha y hora elegidas a mano</p>

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor, within, act } from '@testing-library/react'
 import type { IdeaWithPipeline, UserRole } from '@/lib/supabase/types'
 
@@ -60,8 +60,20 @@ function idea(over: Partial<IdeaWithPipeline> = {}): IdeaWithPipeline {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-09-07T16:00:00Z'))
   cleanup()
   resetNav('')
+})
+
+afterEach(() => vi.useRealTimers())
+
+it.each([['2026-09-08T16:00:00Z', 'Martes'], ['2026-09-09T02:00:00Z', 'Martes'], ['2026-09-13T16:00:00Z', 'Domingo']])('abre el día de Puerto Rico para %s', (instant, day) => {
+  vi.setSystemTime(new Date(instant))
+  render(<EntregasBoard stages={['edited', 'approval']} ideas={[]} />)
+  expect(screen.getByRole('button', { name: day })).toHaveAttribute('aria-pressed', 'true')
+  fireEvent.click(screen.getByRole('button', { name: 'Viernes' }))
+  expect(screen.getByRole('button', { name: 'Viernes' })).toHaveAttribute('aria-pressed', 'true')
 })
 
 describe('EntregasBoard — las columnas las define la ruta', () => {
@@ -163,18 +175,19 @@ describe('EntregasBoard — batch model', () => {
     // La semana que viene siempre es futura; en la actual la fecha puede haber
     // pasado ya y la tarjeta no anuncia un borrador vencido.
     fireEvent.click(screen.getByRole('button', { name: 'Semana siguiente' }))
-    expect(screen.getByText(/Borrador en Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/Publicación en Metricool/i)).toBeInTheDocument()
     expect(screen.getByText(/· 14:30/)).toBeInTheDocument()
   })
 
-  it('avisa cuando no hay fecha y Metricool la corre a +24h', () => {
+  it('bloquea el envío sin fecha y pide corregirla', () => {
     render(<EntregasBoard
       stages={['edited','approval','copy','publication']}
       ideas={[idea({ id: '1', status: 'producida', approval_status: 'approved', generated_caption: 'Copy', publish_date: null })]}
     />)
     // Sin fecha el video vive en la pestaña "Sin día", no en un día concreto.
     fireEvent.click(screen.getByRole('button', { name: /sin día/i }))
-    expect(screen.getByText(/se corre a \+24h/i)).toBeInTheDocument()
+    expect(screen.getByText(/falta una fecha/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /enviar a metricool/i })).toBeDisabled()
   })
 
   it('solo las tarjetas de Publicación traen el botón de Metricool', () => {
@@ -384,9 +397,10 @@ describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
     expect(cardsText).toContain('Lumen')
   })
 
-  it('still shows the batches/publicados stats line', () => {
+  it('shows stage counts without claiming publication', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
-    expect(screen.getByText(/publicados/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('En Publicación')
+    expect(screen.queryByText(/publicados/i)).not.toBeInTheDocument()
   })
 })
 
@@ -672,4 +686,14 @@ describe('EntregasBoard — enlace al post enviado', () => {
     fireEvent.click(screen.getByRole('link', { name: /ver post enviado/i }))
     expect(screen.queryByTestId('review-overlay')).toBeNull()
   })
+})
+
+it('counts Metricool receipts separately from publication-stage cards', () => {
+ render(<EntregasBoard stages={['copy','publication']} ideas={[
+  idea({id:'ready',approval_status:'approved',generated_caption:'Caption',metricool_post_id:null}),
+  idea({id:'sent',approval_status:'approved',generated_caption:'Caption',metricool_post_id:123}),
+ ]}/> )
+ expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('2 En Publicación')
+ expect(screen.getByLabelText('Resumen Del Tablero')).toHaveTextContent('1 Videos Enviados A Metricool')
+ expect(screen.queryByText(/publicados/i)).not.toBeInTheDocument()
 })

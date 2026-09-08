@@ -40,6 +40,7 @@ export function ideaPostReadiness(
   // back (or whose bookkeeping partially failed) must still never re-post.
   if (idea.posted_at) return { ready: false, reason: 'Ya se publicó en Metricool' }
   if (idea.published_at || idea.status === 'publicada') return { ready: false, reason: 'El video ya está publicado' }
+  if (idea.status === 'descartada') return { ready: false, reason: 'El video está descartado' }
   if (idea.approval_status !== 'approved') return { ready: false, reason: 'El video no está aprobado' }
   if (!idea.generated_caption || idea.generated_caption.trim().length === 0) return { ready: false, reason: 'Falta el caption' }
   if (!hasEditedVideo) return { ready: false, reason: 'Falta el video editado' }

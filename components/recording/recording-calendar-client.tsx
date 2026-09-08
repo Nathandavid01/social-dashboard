@@ -1,6 +1,10 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { clientDisplayName } from '@/lib/utils/client-display-name'
+import { RecordingMap } from './recording-map'
+import { RecordingPending } from './recording-pending'
+import { requiredForOnsite } from '@/lib/onsite/slot-count'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
 import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -33,7 +37,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { SessionIdeasPanel } from '@/components/recording/session-ideas-panel'
-import { useHasPermission } from '@/components/auth/role-gate'
+import { useHasPermission, useCurrentUserId } from '@/components/auth/role-gate'
 import {
   Camera,
   Plus,
@@ -78,8 +82,9 @@ interface ExtendedSession extends RecordingSession {
 }
 
 interface RecordingCalendarClientProps {
+  initialVideographer?: string
   initialSessions: ExtendedSession[]
-  clients: Pick<Client, 'id' | 'name'>[]
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days' | 'assigned_to'>>)[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
   clientIdeasMap: Record<string, ContentIdea[]>  // clientId → ideas
 }
@@ -117,15 +122,15 @@ function clientLabelFromTitle(title?: string | null): string | null {
 /** Nombre visible del chip: cliente, lista, título-si-es-cliente, o “Sin cliente”. */
 export function sessionChipClientLabel(
   session: { client?: { name?: string | null } | null; client_id?: string | null; title?: string | null },
-  clients: Pick<Client, 'id' | 'name'>[] = [],
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days' | 'assigned_to'>>)[] = [],
 ): string {
   const fromJoin = session.client?.name?.trim()
-  if (fromJoin) return fromJoin
+  if (fromJoin) return clientDisplayName(fromJoin)
   const fromList = session.client_id
     ? clients.find((c) => c.id === session.client_id)?.name?.trim()
     : undefined
-  if (fromList) return fromList
-  return clientLabelFromTitle(session.title) ?? 'Sin cliente'
+  if (fromList) return clientDisplayName(fromList)
+  return clientDisplayName(clientLabelFromTitle(session.title) ?? 'Sin Cliente')
 }
 
 /** Videógrafo y cliente se leen como la misma persona (p. ej. Delian / Dra. Delian). */
@@ -149,13 +154,13 @@ interface SessionDialogProps {
   open: boolean
   onClose: () => void
   onSaved: (session: ExtendedSession) => void
-  clients: Pick<Client, 'id' | 'name'>[]
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days' | 'assigned_to'>>)[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
   defaultDate?: string
   editing?: ExtendedSession
 }
 
-function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDate, editing }: SessionDialogProps) {
+export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDate, editing }: SessionDialogProps) {
   const canAssign = useHasPermission('recording.brief')
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
@@ -163,7 +168,9 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
   const [date, setDate] = useState(editing?.session_date ?? defaultDate ?? format(new Date(), 'yyyy-MM-dd'))
   const [clientId, setClientId] = useState(editing?.client_id ?? 'none')
   const [videographerId, setVideographerId] = useState(editing?.videographer_id ?? 'none')
-  const [title, setTitle] = useState(editing?.title ?? '')
+  const selectedClient = clients.find(c => c.id === clientId)
+  const title = selectedClient?.name ?? ''
+  const target = requiredForOnsite({ postingDays: selectedClient?.posting_days, ref: date ? new Date(date + 'T12:00:00') : new Date() })
   const [startTime, setStartTime] = useState(editing?.start_time ?? '')
   const [endTime, setEndTime] = useState(editing?.end_time ?? '')
   const [location, setLocation] = useState(editing?.location ?? '')
@@ -191,9 +198,11 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
           location_lng: locationLng,
         } : {}),
       }
+      let warning: string | undefined
       if (editing) {
         const result = await updateRecordingSession(editing.id, values)
         if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
+        warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
         onSaved({ ...editing, ...values, client, videographer })
@@ -201,10 +210,11 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
         const result = await createRecordingSession(values)
         if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
         // Optimistic: create a temp session object
+        warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
         onSaved({
-          id: Math.random().toString(),
+          id: result.id!,
           status: 'scheduled',
           created_by: '',
           created_at: new Date().toISOString(),
@@ -214,14 +224,14 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
           videographer,
         } as ExtendedSession)
       }
-      toast({ title: editing ? 'Sesión actualizada' : 'Sesión agregada' })
+      toast({ title: editing ? 'Sesión actualizada' : 'Sesión agregada', description: warning })
       onClose()
     })
   }
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent surface="raised" className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-4 w-4" />
@@ -230,10 +240,25 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs">Título de la Sesión *</Label>
-            <Input autoFocus placeholder="p.ej. Sesión de Marca — Casita Vieja" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente *</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger aria-label="Cliente" className="h-9"><SelectValue placeholder="Sin cliente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sin cliente</SelectItem>
+                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{clientDisplayName(c.name)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="session-client-title" className="text-xs">Título de la Sesión</Label>
+            <Input id="session-client-title" readOnly placeholder="Selecciona Un Cliente" value={title} />
+            <p className="text-xs text-muted-foreground">Se usa automáticamente el nombre del cliente.</p>
           </div>
 
+          <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-3" aria-live="polite">
+            <p className="font-semibold text-violet-600 dark:text-violet-300">{target.slotTarget > 0 ? `${target.slotTarget} Videos Para Grabar` : 'Videos Por Definir'}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{!selectedClient ? 'Selecciona El Cliente Para Ver La Meta De Grabación.' : !target.slotTarget ? 'Configura Los Días De Publicación Del Cliente Para Calcular La Meta.' : `${target.perMonth} publicaciones en el mes de la sesión × 1.5. Meta recomendada de On Site.`}</p>
+          </div>
           <div className={cn('grid gap-3', canAssign ? 'grid-cols-2' : 'grid-cols-1')}>
             <div className="space-y-1.5">
               <Label htmlFor="rc-fecha" className="text-xs flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Fecha *</Label>
@@ -272,16 +297,7 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Sin cliente" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin cliente</SelectItem>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {canAssign && (
             <div className="space-y-1.5">
@@ -322,6 +338,7 @@ function SessionCard({
   onDelete,
   onOpenIdeas,
   ideaCount,
+  editorName,
 }: {
   session: ExtendedSession
   onEdit: () => void
@@ -329,6 +346,7 @@ function SessionCard({
   onDelete: () => void
   onOpenIdeas: () => void
   ideaCount: number
+  editorName: string
 }) {
   const sc = statusConfig[session.status] ?? statusConfig.scheduled
 
@@ -337,14 +355,15 @@ function SessionCard({
       <Camera className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
-          <p className="text-sm font-medium">{session.title}</p>
+          <p className="text-sm font-medium">{clientDisplayName(session.title)}</p>
           <Badge variant="outline" className={cn('text-[10px]', sc.bg, sc.color)}>{sc.label}</Badge>
         </div>
+        <p className="mb-2 text-xs font-medium text-violet-500">Editor · {editorName}</p>
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           {session.client && (
             <span className="flex items-center gap-1 text-primary font-medium">
               <Building2 className="h-3 w-3" />
-              {session.client.name}
+              {clientDisplayName(session.client.name)}
             </span>
           )}
           {session.videographer && (
@@ -355,6 +374,7 @@ function SessionCard({
               {session.videographer.full_name}
             </span>
           )}
+          {!session.videographer_id && <span className="text-amber-500">Asignar Videógrafo</span>}
           {session.start_time && (
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
@@ -428,13 +448,23 @@ function SessionCard({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap }: RecordingCalendarClientProps) {
+export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap, initialVideographer }: RecordingCalendarClientProps) {
   const canAssign = useHasPermission('recording.brief')
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
-  const [view, setView] = useState<'calendar' | 'list'>('calendar')
+  const [compact, setCompact] = useState(false)
+  const [expandedDays, setExpandedDays] = useState<string[]>([])
+  useEffect(() => {
+    if (!window.matchMedia) return
+    const media = window.matchMedia('(max-width: 767px)')
+    const update = () => setCompact(media.matches)
+    update(); media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+  const [view, setView] = useState<'calendar' | 'list' | 'map'>('calendar')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [search, setSearch] = useState('')
-  const [filterVideographer, setFilterVideographer] = useState('all')
+  const currentUserId = useCurrentUserId()
+  const [filterVideographer, setFilterVideographer] = useState(initialVideographer ?? (canAssign ? 'all' : currentUserId ?? 'all'))
   const [filterClient, setFilterClient] = useState('all')
   const [isPending, startTransition] = useTransition()
   const [showAdd, setShowAdd] = useState(false)
@@ -442,6 +472,8 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const [editing, setEditing] = useState<ExtendedSession | undefined>()
   const [ideasSession, setIdeasSession] = useState<ExtendedSession | undefined>()
   const [ideasMap, setIdeasMap] = useState<Record<string, ContentIdea[]>>(clientIdeasMap)
+  useEffect(() => { setSessions(initialSessions) }, [initialSessions])
+  useEffect(() => { setIdeasMap(clientIdeasMap) }, [clientIdeasMap])
   const { toast } = useToast()
   const conflicts = useMemo(
     () => videographerConflictsInRange(sessions, currentMonth),
@@ -471,6 +503,12 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     }
     return result
   }, [sessions, filterVideographer, filterClient, search])
+
+  function editorFor(session: ExtendedSession) {
+    if (!session.client_id) return 'Vincula El Cliente'
+    const client = clients.find(c=>c.id===session.client_id)
+    return client?.assigned_to ? teamMembers.find(m=>m.id===client.assigned_to)?.full_name || 'Nombre No Disponible' : 'Sin Editor Asignado'
+  }
 
   function sessionsForDay(day: Date) {
     return filtered.filter((s) => isSameDay(parseISO(s.session_date), day))
@@ -528,10 +566,15 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     startTransition(async () => {
       const result = await updateRecordingSession(sessionId, { videographer_id: nextId })
       if (result.error) {
+        setSessions(sessions)
         toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
-      }
+      } else if (result.warning) toast({ title: 'Asignación Guardada', description: result.warning })
     })
   }
+
+  useEffect(() => {
+    window.dispatchEvent(new Event('recording-preparation-changed'))
+  }, [sessions, ideasMap])
 
   function downloadMonthIcs() {
     const monthStr = format(currentMonth, 'yyyy-MM')
@@ -548,52 +591,65 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all'
 
   return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-foreground sm:p-5">
+    <div className="space-y-5 rounded-2xl border border-border bg-card p-4 text-foreground sm:p-6">
+      <RecordingPending onSelect={(id) => {
+        const session = sessions.find(s => s.id === id)
+        if (session) setIdeasSession(session)
+        else window.location.assign(`/onsite?s=${encodeURIComponent(id)}`)
+      }} />
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-amber-600 text-black shadow-lg shadow-primary/20">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-sky-500/30 bg-sky-500/10 text-sky-500">
             <Camera className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h1 className="text-[15px] font-semibold leading-tight tracking-tight">Calendario de Grabación</h1>
-            <p className="text-[11px] text-muted-foreground">Todas las grabaciones agendadas · color por videógrafo</p>
+            <h1 className="text-xl font-semibold leading-tight tracking-tight sm:text-2xl">Calendario de Grabación</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Organiza las tomas, coordina el equipo y prepara cada sesión.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className={cn('items-center gap-1 rounded-lg border border-border bg-muted/40 p-1', compact ? 'hidden' : 'flex')}>
             <button
               onClick={() => setView('calendar')}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'calendar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              className={cn('flex items-center gap-1.5 rounded-md min-h-9 px-3 py-1.5 text-xs font-medium transition-colors', view === 'calendar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
             >
-              <CalendarDays className="h-3.5 w-3.5" /> Calendario
+              <CalendarDays className="h-3.5 w-3.5" /> {compact ? 'Agenda' : 'Calendario'}
             </button>
             <button
               onClick={() => setView('list')}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors', view === 'list' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              className={cn('flex items-center gap-1.5 rounded-md min-h-9 px-3 py-1.5 text-xs font-medium transition-colors', view === 'list' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
             >
               <List className="h-3.5 w-3.5" /> Lista
             </button>
           </div>
+          <button type="button" onClick={()=>setView(view==='map'?'calendar':'map')} className={cn('inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium',view==='map'?'border-sky-500/40 bg-sky-500/10 text-sky-500':'border-border')}><MapPin className="h-4 w-4"/>{view==='map'?'Cerrar Mapa':'Mapa De Puerto Rico'}</button>
           <a
             href={GOOGLE_CALENDAR_HOME_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
           >
             <ExternalLink className="h-3.5 w-3.5" /> Google Calendar
           </a>
           <button
             type="button"
             onClick={downloadMonthIcs}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-xs font-medium text-foreground transition hover:bg-muted"
           >
             Descargar .ics
           </button>
-          <button onClick={() => { setAddDate(undefined); setShowAdd(true) }} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
+          <button onClick={() => { setAddDate(undefined); setShowAdd(true) }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black transition hover:bg-primary/90">
             <Plus className="h-3.5 w-3.5" /> Agregar sesión
           </button>
         </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-label="Resumen Del Mes">
+        {[{label:'Sesiones Del Mes',value:monthSessions.length,color:'text-sky-500',bg:'bg-sky-500/5 border-sky-500/20'},
+          {label:'Sin Videógrafo',value:monthSessions.filter(s=>!s.videographer_id && !['cancelled','completed'].includes(s.status)).length,color:'text-amber-500',bg:'bg-amber-500/5 border-amber-500/20'},
+          {label:'Completadas',value:monthSessions.filter(s=>s.status==='completed').length,color:'text-emerald-500',bg:'bg-emerald-500/5 border-emerald-500/20'}].map(stat=><div key={stat.label} className={cn('rounded-xl border p-3 sm:p-4',stat.bg)}><p className="text-[11px] text-muted-foreground sm:text-xs">{stat.label}</p><p className={cn('mt-1 text-2xl font-semibold tabular-nums',stat.color)}>{stat.value}</p></div>)}
+
       </div>
 
       {/* Filters */}
@@ -604,7 +660,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
             placeholder="Buscar por título, cliente, videógrafo, ubicación..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-8 text-xs"
+            className="pl-9 h-11 text-sm"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -613,7 +669,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           )}
         </div>
         <Select value={filterVideographer} onValueChange={setFilterVideographer}>
-          <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
+          <SelectTrigger className="h-11 w-full text-xs sm:w-[190px]">
             <SelectValue placeholder="Todos los videógrafos" />
           </SelectTrigger>
           <SelectContent>
@@ -622,12 +678,12 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </SelectContent>
         </Select>
         <Select value={filterClient} onValueChange={setFilterClient}>
-          <SelectTrigger className="h-8 w-full text-xs sm:w-[160px]">
+          <SelectTrigger className="h-11 w-full text-xs sm:w-[190px]">
             <SelectValue placeholder="Todos los clientes" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los clientes</SelectItem>
-            {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            {clients.map((c) => <SelectItem key={c.id} value={c.id}>{clientDisplayName(c.name)}</SelectItem>)}
           </SelectContent>
         </Select>
         {hasFilters && (
@@ -664,18 +720,17 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
         </div>
       )}
 
-      {/* Month nav */}
-      <div className="flex items-center justify-between">
-        <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 rounded hover:bg-muted transition-colors">
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <h2 className="text-base font-semibold capitalize">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
-        <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 rounded hover:bg-muted transition-colors">
-          <ChevronRight className="h-4 w-4" />
-        </button>
+      {/* Month navigation stays separate from filters for quick scanning. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+        <div><h2 className="text-xl font-semibold capitalize">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2><p className="mt-1 text-xs text-muted-foreground">{compact ? 'Tu agenda, día por día' : 'Color por videógrafo · Abre una sesión para ver su call sheet'}</p></div>
+        <div className="flex items-center gap-1 rounded-xl border border-border p-1">
+          <button aria-label="Mes Anterior" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronLeft className="h-4 w-4" /></button>
+          <button aria-label="Volver A Hoy" onClick={() => setCurrentMonth(new Date())} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-muted">Hoy</button>
+          <button aria-label="Mes Siguiente" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronRight className="h-4 w-4" /></button>
+        </div>
       </div>
 
-      {view === 'calendar' ? (
+      {view === 'map' ? <RecordingMap sessions={monthSessions.map(s=>({...s,title:sessionChipClientLabel(s,clients)}))} onOpen={id=>setIdeasSession(sessions.find(s=>s.id===id))}/> : view === 'calendar' && !compact ? (
         <div className="space-y-3">
           {/* Day-of-week headers */}
           <div className="grid grid-cols-7 text-center">
@@ -685,7 +740,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1.5">
+          <div className="grid grid-cols-7 gap-2">
             {paddedDays.map((day, i) => {
               if (!day) return <div key={`pad-${i}`} />
               const daySessions = sessionsForDay(day)
@@ -696,8 +751,8 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                 <div
                   key={dateStr}
                   className={cn(
-                    'group min-h-[96px] cursor-pointer rounded-lg border p-2 transition-colors',
-                    isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border bg-muted/20 hover:border-primary/40',
+                    'group min-w-0 min-h-[120px] cursor-pointer rounded-xl border p-2 transition-colors xl:min-h-[140px]',
+                    isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border/70 bg-background/40 hover:border-sky-500/40',
                     !isCurrentMonth && 'opacity-30',
                   )}
                   onClick={() => { setAddDate(dateStr); setShowAdd(true) }}
@@ -712,39 +767,30 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
 
                   {/* Sessions — colored by videographer */}
                   <div className="space-y-1">
-                    {daySessions.slice(0, 3).map((session) => {
+                    {(expandedDays.includes(dateStr) ? daySessions : daySessions.slice(0, 3)).map((session) => {
                       const a = userAccent(session.videographer_id)
                       const clientLabel = sessionChipClientLabel(session, clients)
-                      const clientIdeas = session.client_id ? (ideasMap[session.client_id] ?? []) : []
-                      const sessionIdeaCount = clientIdeas.filter((i) => i.recording_session_id === session.id).length
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={session.id}
-                          className="min-h-[22px] cursor-pointer rounded-md px-1.5 py-1 text-[9px] leading-tight transition hover:opacity-80"
+                          className="w-full text-left min-h-[52px] cursor-pointer rounded-lg px-2 py-2 text-[10px] leading-tight transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+                          title={`${clientLabel} · ${session.start_time?.slice(0,5) || 'Hora Por Confirmar'} · Editor: ${editorFor(session)} · Videógrafo: ${session.videographer?.full_name || 'Sin Asignar'}`}
                           style={{ backgroundColor: a.soft, boxShadow: `inset 2px 0 0 0 ${a.dot}` }}
                           onClick={(e) => { e.stopPropagation(); setIdeasSession(session) }}
                         >
+                          <span className="mb-1 flex items-center justify-between gap-1 text-[10px] font-medium tabular-nums text-muted-foreground"><span>{session.start_time?.slice(0,5) || 'Sin Hora'}</span>{(!session.videographer_id || !session.client_id || !clients.find(c=>c.id===session.client_id)?.assigned_to) && <span aria-label="Asignación Pendiente" title="Asignación Pendiente · Abre La Sesión" className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />}</span>
                           <p
                             data-slot="session-chip-client"
-                            className="min-h-[14px] truncate text-[11px] font-semibold tracking-tight leading-snug text-foreground"
+                            className="min-h-[14px] line-clamp-2 break-words text-xs font-semibold tracking-tight leading-snug text-foreground"
                           >
                             {clientLabel}
                           </p>
-                          {session.videographer?.full_name &&
-                            !namesLookLikeSamePerson(session.videographer.full_name, clientLabel) && (
-                            <p className="truncate text-muted-foreground">{session.videographer.full_name}</p>
-                          )}
-                          {session.location && (
-                            <p className="truncate text-muted-foreground">{session.location}</p>
-                          )}
-                          {sessionIdeaCount > 0 && (
-                            <p className="text-muted-foreground">{sessionIdeaCount} ideas</p>
-                          )}
-                        </div>
+                        </button>
                       )
                     })}
                     {daySessions.length > 3 && (
-                      <p className="pl-0.5 text-[9px] text-muted-foreground">+{daySessions.length - 3} más</p>
+                      <button type="button" className="min-h-9 w-full rounded-md text-xs font-medium text-sky-500 hover:bg-sky-500/10" onClick={e=>{e.stopPropagation();setExpandedDays(days=>days.includes(dateStr)?days.filter(d=>d!==dateStr):[...days,dateStr])}}>{expandedDays.includes(dateStr)?'Ver Menos':`Ver ${daySessions.length - 3} Más`}</button>
                     )}
                   </div>
 
@@ -783,7 +829,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                       {isToday(parseISO(dateStr)) && <span className="ml-1.5 text-primary">· Hoy</span>}
                     </h3>
                     <div className="flex-1 border-t border-border" />
-                    <span className="text-xs text-muted-foreground">{daySessions.length} sesión{daySessions.length !== 1 ? 'es' : ''}</span>
+                    <span className="text-xs text-muted-foreground">{daySessions.length} {daySessions.length !== 1 ? 'sesiones' : 'sesión'}</span>
                   </div>
                   <div className="space-y-2">
                     {daySessions.map((session) => {
@@ -798,6 +844,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                           onDelete={() => handleDelete(session.id)}
                           onOpenIdeas={() => setIdeasSession(session)}
                           ideaCount={sessionIdeaCount}
+                          editorName={editorFor(session)}
                         />
                       )
                     })}
@@ -829,6 +876,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           open={!!ideasSession}
           onClose={() => setIdeasSession(undefined)}
           session={ideasSession}
+          editorName={editorFor(ideasSession)}
           onDelete={() => { const id = ideasSession.id; setIdeasSession(undefined); handleDelete(id) }}
           clientIdeas={ideasSession.client_id ? (ideasMap[ideasSession.client_id] ?? []) : []}
           teamMembers={teamMembers}

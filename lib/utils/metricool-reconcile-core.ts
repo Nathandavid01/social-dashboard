@@ -17,6 +17,8 @@ export type ReconcileOutcome =
   | 'published'
   /** Existe y sigue esperando su fecha, o alguna red aún no publica. */
   | 'scheduled'
+  /** Exists only as a draft: it will not publish automatically. */
+  | 'draft'
   /** Existe pero alguna red falló: necesita mano. */
   | 'failed'
   /** El post ya no existe en Metricool: o lo borraron, o nunca se creó. */
@@ -46,7 +48,7 @@ export interface ReconcileResult {
 }
 
 function outcomeOf(post: ReconcilePost): ReconcileOutcome {
-  if (post.draft) return 'scheduled'
+  if (post.draft) return 'draft'
   const providers = post.providers ?? []
   if (providers.length === 0) return 'scheduled'
   if (providers.some((p) => p.status === 'ERROR')) return 'failed'
@@ -83,6 +85,7 @@ export function reconcilePostedIdeas(
   const counts: Record<ReconcileOutcome, number> = {
     published: 0,
     scheduled: 0,
+    draft: 0,
     failed: 0,
     missing: 0,
     unknown: 0,

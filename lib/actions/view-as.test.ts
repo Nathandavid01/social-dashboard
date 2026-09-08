@@ -69,9 +69,9 @@ describe('startViewAsEditor', () => {
   })
 
   it('rechaza a alguien que no es editor activo', async () => {
-    profile = { id: EDITOR, role: 'copy', status: 'active', approval_status: 'approved' }
+    profile = { id: EDITOR, role: 'copy', status: 'inactive', approval_status: 'approved' }
     const res = await startViewAsEditor(EDITOR)
-    expect(res.error).toMatch(/editor activo/)
+    expect(res.error).toMatch(/usuario activo/)
     expect(cookieSet).not.toHaveBeenCalled()
   })
 })
@@ -82,3 +82,6 @@ describe('stopViewAs', () => {
     expect(cookieDelete).toHaveBeenCalledWith('nm_view_as_editor')
   })
 })
+
+it('allows a designer preview',async()=>{profile={id:EDITOR,role:'disenador',status:'active',approval_status:'approved'};expect(await startViewAsEditor(EDITOR)).toEqual({ok:true})})
+it('does not allow supervisor to assume owner',async()=>{getCurrentRole.mockResolvedValue('supervisor');profile={id:EDITOR,role:'owner',status:'active',approval_status:'approved'};expect((await startViewAsEditor(EDITOR)).error).toBeTruthy();expect(cookieSet).not.toHaveBeenCalled()})

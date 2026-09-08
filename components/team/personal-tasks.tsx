@@ -1,0 +1,37 @@
+'use client'
+import {useEffect,useState} from 'react'
+import {getPersonalTasks,assignPersonalTask,setPersonalTaskStatus} from '@/lib/actions/personal-tasks'
+const statuses:Record<string,string>={pending:'Pendiente',in_progress:'En Progreso',blocked:'Bloqueada',completed:'Completada'}
+const input='w-full rounded-lg border bg-background px-3 py-2 text-sm'
+export function PersonalTasks(){
+ const [data,setData]=useState<Awaited<ReturnType<typeof getPersonalTasks>>|null>(null)
+ const [open,setOpen]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[filter,setFilter]=useState('all'),[history,setHistory]=useState(false)
+ const [requestId,setRequestId]=useState('')
+ const [uncertain,setUncertain]=useState(false)
+ const [person,setPerson]=useState(''),[title,setTitle]=useState(''),[description,setDescription]=useState(''),[date,setDate]=useState(''),[priority,setPriority]=useState('2')
+ async function load(){try{setData(await getPersonalTasks())}catch{setData({tasks:[],people:[],canAssign:false,userId:'',error:'No Se Pudieron Cargar Las Tareas'})}}
+ useEffect(()=>{void load()},[])
+ async function save(e:React.FormEvent){e.preventDefault();setBusy(true);setMessage('');try{
+  const result=await assignPersonalTask({id:requestId,assignee_id:person,title,description,due_at:date+'T17:00:00-04:00',priority:Number(priority)})
+  if(!result.ok){setMessage(result.error||'No Se Pudo Confirmar La Asignación');setUncertain(!!result.uncertain);return}
+  setOpen(false);setUncertain(false);setMessage(result.warning||'Tarea Asignada. Ya Aparece En El Perfil Y Mi Día De La Persona.');await load()
+ }catch{setUncertain(true);setMessage('No Se Pudo Confirmar El Envío. Reintenta La Misma Solicitud Para Evitar Duplicados.')}finally{setBusy(false)}}
+ async function change(id:string,status:string){setBusy(true);setMessage('');try{const result=await setPersonalTaskStatus(id,status);if(!result.ok)setMessage(result.error||'No Se Pudo Guardar');else await load()}catch{setMessage('No Se Pudo Confirmar El Cambio. Actualiza La Lista Antes De Reintentar.')}finally{setBusy(false)}}
+ if(!data)return <section className="my-4 rounded-xl border p-4">Cargando Tareas…</section>
+ if(data.error)return <section role="alert" className="my-4 rounded-xl border p-4">{data.error} <button onClick={load} className="underline">Reintentar</button></section>
+ const tasks=data.tasks.filter(t=>(filter==='all'||t.assignee_id===filter)&&(history?t.status==='completed':t.status!=='completed')).sort((a,b)=>(a.due_at||'9999').localeCompare(b.due_at||'9999')||a.priority-b.priority)
+ return <section id="tareas" className="my-6 space-y-4 rounded-2xl border bg-card p-4 sm:p-6">
+  <header className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-semibold">{data.canAssign?'Tareas Del Equipo':'Mis Tareas'}</h2><p className="mt-1 text-sm text-muted-foreground">Responsable, instrucciones y fecha para cada trabajo.</p></div>{data.canAssign&&<button className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={()=>{setRequestId(crypto.randomUUID());setPerson('');setTitle('');setDescription('');setDate('');setPriority('2');setUncertain(false);setOpen(true);setMessage('')}} disabled={open}>Asignar Tarea</button>}</header>
+  {message&&<p role="status" className="rounded-lg border p-3 text-sm">{message}</p>}
+  {open&&<form onSubmit={save} className="grid gap-4 rounded-xl border bg-muted/30 p-4 sm:grid-cols-2">
+   <label className="space-y-1 text-sm">Persona<select aria-label="Persona" className={input} required disabled={busy||uncertain} value={person} onChange={e=>setPerson(e.target.value)}><option value="">Selecciona Una Persona</option>{data.people.map(p=><option key={p.id} value={p.id}>{p.full_name||'Sin Nombre'}</option>)}</select></label>
+   <label className="space-y-1 text-sm">Qué Tiene Que Hacer<input aria-label="Qué Tiene Que Hacer" className={input} required maxLength={200} disabled={busy||uncertain} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Ej. Preparar Las Ideas De La Grabación"/></label>
+   <label className="space-y-1 text-sm sm:col-span-2">Instrucciones<textarea aria-label="Instrucciones" className={input} maxLength={1000} disabled={busy||uncertain} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Explica el resultado esperado y lo que debe entregar."/></label>
+   <label className="space-y-1 text-sm">Fecha Límite<input aria-label="Fecha Límite" className={input} type="date" required disabled={busy||uncertain} value={date} onChange={e=>setDate(e.target.value)}/><span className="text-xs text-muted-foreground">A las 5:00 p. m. de Puerto Rico.</span></label>
+   <label className="space-y-1 text-sm">Prioridad<select className={input} disabled={busy||uncertain} value={priority} onChange={e=>setPriority(e.target.value)}><option value="1">Alta</option><option value="2">Media</option><option value="3">Baja</option></select></label>
+   <div className="flex flex-wrap gap-2 sm:col-span-2"><button disabled={busy||!title.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground">{busy?'Guardando…':uncertain?'Reintentar Misma Asignación':'Guardar Asignación'}</button><button type="button" disabled={busy||uncertain} className="rounded-lg border px-4 py-2 text-sm" onClick={()=>setOpen(false)}>Cancelar</button></div>
+  </form>}
+  <div className="flex flex-wrap gap-3">{data.canAssign&&<select aria-label="Filtrar Por Persona" className="max-w-full rounded-lg border bg-background p-2 text-sm" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">Todas Las Personas</option><option value={data.userId}>Mis Tareas</option>{data.people.filter(p=>p.id!==data.userId).map(p=><option key={p.id} value={p.id}>{p.full_name}</option>)}</select>}<button className="rounded-lg border px-3 py-2 text-sm" onClick={()=>setHistory(!history)}>{history?'Ver Pendientes':'Ver Completadas'}</button><button className="text-sm underline" onClick={load}>Actualizar</button><span className="self-center text-sm text-muted-foreground">{tasks.length} Tareas</span></div>
+  <div className="max-h-[480px] space-y-3 overflow-y-auto">{!tasks.length&&<p className="py-4 text-sm text-muted-foreground">No Hay Tareas En Esta Vista.</p>}{tasks.map(t=><article key={t.id} className="rounded-xl border p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><h3 className="break-words font-semibold">{t.title}</h3><p className="mt-1 text-xs text-muted-foreground">{data.people.find(p=>p.id===t.assignee_id)?.full_name||(t.assignee_id===data.userId?'Asignada A Ti':'Sin Nombre Disponible')} · Prioridad {t.priority===1?'Alta':t.priority===3?'Baja':'Media'}</p></div><select aria-label={`Estado De ${t.title}`} value={t.status} disabled={busy} onChange={e=>change(t.id,e.target.value)} className="rounded-lg border bg-background p-2 text-sm">{Object.entries(statuses).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></div>{t.description&&<p className="mt-3 whitespace-pre-wrap break-words text-sm">{t.description}</p>}<p className="mt-3 text-xs text-muted-foreground">{t.due_at?`Fecha Límite: ${new Intl.DateTimeFormat('es-PR',{dateStyle:'medium',timeZone:'America/Puerto_Rico'}).format(new Date(t.due_at))}`:'Sin Fecha Límite'}</p></article>)}</div>
+ </section>
+}

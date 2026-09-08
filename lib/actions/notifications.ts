@@ -13,7 +13,7 @@ export async function getMyNotifications(limit = 30): Promise<Notification[]> {
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .limit(Math.min(200, Math.max(1, Math.trunc(limit) || 30)))
   if (error) return []
   return (data ?? []) as Notification[]
 }
@@ -32,10 +32,12 @@ export async function getMyUnreadCount(): Promise<number> {
 
 export async function markNotificationRead(id: string): Promise<{ ok?: true; error?: string }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
   const { error } = await supabase
     .from('notifications')
     .update({ read_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq('id', id).eq('user_id', user.id)
     .is('read_at', null)
   if (error) return { error: error.message }
   return { ok: true }
@@ -56,7 +58,9 @@ export async function markAllNotificationsRead(): Promise<{ ok?: true; error?: s
 
 export async function deleteNotification(id: string): Promise<{ ok?: true; error?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase.from('notifications').delete().eq('id', id)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { error } = await supabase.from('notifications').delete().eq('id', id).eq('user_id', user.id)
   if (error) return { error: error.message }
   return { ok: true }
 }

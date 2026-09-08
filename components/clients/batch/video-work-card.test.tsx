@@ -76,11 +76,11 @@ describe('VideoWorkCard — subida con el título de la idea', () => {
 })
 
 describe('VideoWorkCard — aprobación en el lote', () => {
-  it('lets an authorised user approve / request changes when submitted', () => {
+  it('routes an authorised user to verified review when submitted', () => {
     mockRole = 'supervisor'
     render(<VideoWorkCard video={video({ approval_status: 'submitted' })} index={0} clientName="Costa Sur Gym" />)
-    expect(screen.getByRole('button', { name: /aprobar/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /pedir revisión/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /revisar video y subtítulos/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /pedir revisión/i })).not.toBeInTheDocument()
   })
 
   it('shows the approved state once approved', () => {
@@ -93,7 +93,7 @@ describe('VideoWorkCard — aprobación en el lote', () => {
   it('explains the lack of permission for non-approvers', () => {
     mockRole = 'video'
     render(<VideoWorkCard video={video({ approval_status: 'submitted' })} index={0} />)
-    expect(screen.getByText(/sin permiso para aprobar/i)).toBeInTheDocument()
+    expect(screen.getByText(/pendiente del responsable/i)).toBeInTheDocument()
   })
 
   it('does not gate recording on a saved caption (video may already be recorded)', () => {
@@ -112,7 +112,7 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
     expect(screen.getByText(/siguiente: genera el caption/i)).toBeInTheDocument()
   })
 
-  it('offers "Publicar a Metricool" once approved (for posting.publish roles)', () => {
+  it('offers "Agendar En Metricool" once approved (for posting.publish roles)', () => {
     mockRole = 'supervisor'
     render(
       <VideoWorkCard
@@ -125,7 +125,7 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
         clientName="Costa Sur Gym"
       />,
     )
-    expect(screen.getByRole('button', { name: /publicar a metricool/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /agendar en metricool/i })).toBeInTheDocument()
     expect(screen.getByText(/aprobado — listo para metricool/i)).toBeInTheDocument()
   })
 
@@ -147,7 +147,7 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
     expect(screen.getByText(/error al publicar — revisa y reintenta/i)).toBeInTheDocument()
     expect(screen.getByText(/la url del video no responde \(503\)/i)).toBeInTheDocument()
     // Retry = the same publish button, still available.
-    expect(screen.getByRole('button', { name: /publicar a metricool/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /agendar en metricool/i })).toBeInTheDocument()
   })
 
   it('shows the "En Metricool" badge instead of the button once scheduled', () => {
@@ -158,7 +158,7 @@ describe('VideoWorkCard — publicación profesional (hint + Metricool)', () => 
         index={0}
       />,
     )
-    expect(screen.queryByRole('button', { name: /publicar a metricool/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /agendar en metricool/i })).not.toBeInTheDocument()
     // Both the "En Metricool" badge and the "Programado en Metricool" hint show.
     expect(screen.getAllByText(/en metricool/i).length).toBeGreaterThanOrEqual(1)
   })

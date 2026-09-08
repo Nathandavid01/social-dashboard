@@ -13,6 +13,7 @@ vi.mock('@/lib/actions/recording-sessions', () => ({
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('./gps-picker', () => ({ GpsPicker: () => null }))
 vi.mock('@/components/auth/role-gate', () => ({
+  useCurrentUserId: () => null,
   useHasPermission: (perm: string) => perm === 'recording.brief' && canAssign.current,
   RoleGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
@@ -133,8 +134,9 @@ describe('RecordingCalendarClient — premium redesign', () => {
     expect(screen.getByText('Grabación Nora')).toBeInTheDocument()
   })
 
-  it('en el chip del día se ve quién va y el lugar', () => {
+  it('la lista conserva quién va y el lugar', () => {
     render(<RecordingCalendarClient initialSessions={[session({ location: 'Blue Chiropractic' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button',{name:'Lista'}))
     expect(screen.getAllByText('María R.').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Blue Chiropractic')).toBeInTheDocument()
   })
@@ -143,7 +145,7 @@ describe('RecordingCalendarClient — premium redesign', () => {
     render(<RecordingCalendarClient initialSessions={[session({ title: 'Blue Chiro - Recording' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
     const clientName = screen.getByText('Nora Fitness')
     expect(clientName).toHaveAttribute('data-slot', 'session-chip-client')
-    expect(clientName).toHaveClass('truncate', 'text-[11px]', 'font-semibold', 'tracking-tight', 'text-foreground')
+    expect(clientName).toHaveClass('line-clamp-2', 'text-xs', 'font-semibold', 'tracking-tight', 'text-foreground')
     expect(screen.queryByText('Blue Chiro - Recording')).not.toBeInTheDocument()
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
   })
@@ -162,9 +164,9 @@ describe('RecordingCalendarClient — premium redesign', () => {
       teamMembers={team}
       clientIdeasMap={{}}
     />)
-    const fallback = screen.getByText('Sin cliente')
+    const fallback = screen.getByText('Sin Cliente')
     expect(fallback).toHaveAttribute('data-slot', 'session-chip-client')
-    expect(fallback).toHaveClass('text-[11px]', 'font-semibold')
+    expect(fallback).toHaveClass('text-xs', 'font-semibold')
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
   })
 
@@ -194,8 +196,8 @@ describe('RecordingCalendarClient — premium redesign', () => {
     />)
     expect(screen.getByText('Dra. Delian Loyola')).toBeInTheDocument()
     expect(screen.queryByText('Delian Loyola')).not.toBeInTheDocument()
-    expect(screen.getByText('Oficina')).toBeInTheDocument()
-    expect(screen.getByText('1 ideas')).toBeInTheDocument()
+    expect(screen.queryByText('Oficina')).not.toBeInTheDocument()
+    expect(screen.queryByText('1 ideas')).not.toBeInTheDocument()
   })
 
   it('al pulsar la sesión del día, el admin asigna videógrafo y lugar', async () => {
@@ -247,11 +249,11 @@ describe('sessionChipClientLabel', () => {
     expect(sessionChipClientLabel(session(), clients)).toBe('Nora Fitness')
   })
 
-  it('si el nombre viene vacío, usa título de cliente o Sin cliente', () => {
+  it('si el nombre viene vacío, usa título de cliente o Sin Cliente', () => {
     expect(sessionChipClientLabel(session({ client: null, client_id: 'c1' }), clients)).toBe('Nora Fitness')
     expect(sessionChipClientLabel(session({ client: { id: 'c9', name: '' }, client_id: null, title: 'Danny Mudano' }), [])).toBe('Danny Mudano')
     expect(sessionChipClientLabel(session({ client: null, client_id: null, title: 'Recording - Casa Sol' }), [])).toBe('Casa Sol')
-    expect(sessionChipClientLabel(session({ client: { name: '  ' }, client_id: null, title: 'Recording' }), [])).toBe('Sin cliente')
+    expect(sessionChipClientLabel(session({ client: { name: '  ' }, client_id: null, title: 'Recording' }), [])).toBe('Sin Cliente')
   })
 })
 
@@ -263,4 +265,50 @@ describe('namesLookLikeSamePerson', () => {
   it('no junta videógrafo y cliente distintos', () => {
     expect(namesLookLikeSamePerson('María R.', 'Nora Fitness')).toBe(false)
   })
+})
+
+it('uses the selected client name as a read-only title and shows the recording target', () => {
+  render(<RecordingCalendarClient initialSessions={[session()]} clients={[{id:'c1',name:'Nora Fitness',posting_days:[2,4]}]} teamMembers={team} clientIdeasMap={{}} />)
+  fireEvent.click(screen.getByText('Nora Fitness'))
+  fireEvent.click(screen.getByRole('button',{name:/editar sesión/i}))
+  fireEvent.change(screen.getByLabelText(/fecha/i),{target:{value:'2026-09-08'}})
+  expect(screen.getByLabelText(/título de la sesión/i)).toHaveValue('Nora Fitness')
+  expect(screen.getByLabelText(/título de la sesión/i)).toHaveAttribute('readonly')
+  expect(screen.getByText('14 Videos Para Grabar')).toBeInTheDocument()
+})
+
+it('shows recording time and a visible assignment warning in the monthly grid',()=>{
+ render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00',videographer_id:null,videographer:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ expect(screen.getByText('09:30')).toBeInTheDocument()
+ expect(screen.queryByText('Asignar Videógrafo')).not.toBeInTheDocument()
+ expect(screen.getByLabelText('Asignación Pendiente')).toBeInTheDocument()
+ expect(screen.getByRole('button',{name:'Mes Anterior'})).toBeInTheDocument()
+ expect(screen.getByRole('button',{name:'Volver A Hoy'})).toBeInTheDocument()
+})
+it('expands a busy day without opening a new-session form',()=>{
+ render(<RecordingCalendarClient initialSessions={[1,2,3,4].map(n=>session({id:`s${n}`,title:`Sesión ${n}`,client_id:null,client:null}))} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ fireEvent.click(screen.getByRole('button',{name:/ver 1 más/i}))
+ expect(screen.getByText('Sesión 4')).toBeInTheDocument()
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
+
+it('uses an agenda on narrow screens instead of a compressed month grid',()=>{
+ const previous=window.matchMedia
+ window.matchMedia=vi.fn().mockReturnValue({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})
+ render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00'})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ expect(screen.getByText('Tu agenda, día por día')).toBeInTheDocument()
+ expect(screen.queryByText('Lun')).not.toBeInTheDocument()
+ window.matchMedia=previous
+})
+it('shows the client editor separately from the videographer',()=>{
+ render(<RecordingCalendarClient initialSessions={[session()]} clients={[{id:'c1',name:'nora fitness',assigned_to:'editor1'}]} teamMembers={[...team,{id:'editor1',full_name:'Carlos Villalta'}]} clientIdeasMap={{}} />)
+ expect(screen.queryByText('Editor · Carlos Villalta')).not.toBeInTheDocument()
+ fireEvent.click(screen.getByText('Nora Fitness'))
+ expect(screen.getByText('Editor · Carlos Villalta')).toBeInTheDocument()
+})
+
+it('explains that a client link is needed before resolving its editor',()=>{
+ render(<RecordingCalendarClient initialSessions={[session({client_id:null,client:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+ fireEvent.click(screen.getByRole('button',{name:'Lista'}))
+ expect(screen.getByText('Editor · Vincula El Cliente')).toBeInTheDocument()
 })

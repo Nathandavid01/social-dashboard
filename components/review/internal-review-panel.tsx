@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check, RotateCcw, Lock, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -39,14 +39,33 @@ export function InternalReviewPanel({
   userId,
   onDecision,
   pending = false,
+  previewState,
+  onRetryPreview,
 }: {
   video: ReviewVideo
   role: UserRole | null | undefined
   userId: string | null | undefined
   onDecision: (decision: 'approve' | 'request_changes', note: string) => void
   pending?: boolean
+  previewState?: 'loading' | 'error'
+  onRetryPreview?: () => void
 }) {
+  const [captionsChecked, setCaptionsChecked] = useState(false)
+  const [videoChecked, setVideoChecked] = useState(false)
   const [note, setNote] = useState('')
+  const [mediaError, setMediaError] = useState(false)
+  const mediaRef = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    setCaptionsChecked(false)
+    setVideoChecked(false)
+    setMediaError(false)
+  }, [video.id, video.editedUrl])
+  function playbackFailed() {
+    setMediaError(true)
+    setCaptionsChecked(false)
+    setVideoChecked(false)
+  }
+
 
   const state = reviewState(video.approval_status)
   const canReview = canReviewVideo(role, video, userId)
@@ -72,15 +91,21 @@ export function InternalReviewPanel({
 
       <div className="bg-black/90">
         {video.editedUrl ? (
-          <video src={video.editedUrl} controls playsInline className="max-h-[320px] w-full object-contain" />
+          <video ref={mediaRef} onError={playbackFailed} onLoadedData={() => setMediaError(false)} src={video.editedUrl} controls playsInline className="max-h-[320px] w-full object-contain" />
         ) : (
-          <div className="grid h-40 place-items-center text-xs text-muted-foreground">
-            Todavía no hay video editado
+          <div role={previewState === 'loading' ? 'status' : undefined} className="grid h-40 place-items-center text-xs text-white/70">
+            {previewState === 'loading' ? 'Cargando Vista Previa…' : previewState === 'error' ? 'Vista Previa No Disponible' : 'Todavía no hay video editado'}
           </div>
         )}
       </div>
 
       <div className="space-y-3 px-4 py-3">
+        {mediaError && <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+          <p>No Se Pudo Reproducir El Video</p>
+          <p className="mt-1 text-xs">Vuelve a cargarlo y verifica nuevamente el video y sus subtítulos antes de aprobar.</p>
+          <button className="mt-3 min-h-11 rounded-lg border px-3" onClick={() => onRetryPreview ? onRetryPreview() : mediaRef.current?.load()}>Reintentar Reproducción</button>
+        </div>}
+
         {video.submittedByName && (
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -109,8 +134,10 @@ export function InternalReviewPanel({
               rows={3}
               className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
+            <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={captionsChecked} onChange={e=>setCaptionsChecked(e.target.checked)} disabled={!video.editedUrl || mediaError}/>Los Subtítulos Están Visibles, Correctos Y Sin Cortes</label>
+            <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={videoChecked} onChange={e=>setVideoChecked(e.target.checked)} disabled={!video.editedUrl || mediaError}/>Revisé El Video Completo, Audio, Marca Y Cierre</label>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" disabled={pending} onClick={() => onDecision('approve', note.trim())}>
+              <Button size="sm" disabled={pending || mediaError || !video.editedUrl || !captionsChecked || !videoChecked || !!note.trim()} onClick={() => onDecision('approve', note.trim())}>
                 <Check className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Aprobar
               </Button>
@@ -127,7 +154,7 @@ export function InternalReviewPanel({
             </div>
             {!note.trim() && (
               <p className="text-[11px] text-muted-foreground">
-                Escribe un comentario para poder pedir cambios. Aprobar no lo necesita.
+                Si hay algo que corregir, escribe el comentario y pide cambios. La aprobación requiere ambas verificaciones.
               </p>
             )}
           </div>

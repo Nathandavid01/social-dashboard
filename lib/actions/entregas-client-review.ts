@@ -53,25 +53,35 @@ export async function crearEnlaceCliente(input: {
   if (input.ideaIds.length === 0) return { error: 'No hay videos que aprobar.' }
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Solo los que tienen video subido: el cliente vería una ficha vacía sin
-  // entender por qué.
-  const { data: conVideo } = await supabase
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: 'No se pudo verificar tu sesión.' }
+  const requested = [...new Set(input.ideaIds)]
+  const { data: ideas, error: ideasError } = await supabase
+    .from('content_ideas').select('id, client_id, status').in('id', requested)
+  if (ideasError) return { error: 'No se pudieron verificar los videos del cliente.' }
+  if (!ideas || ideas.length !== requested.length || ideas.some(i => i.client_id !== input.clientId || i.status === 'descartada')) {
+    return { error: 'Todos los videos deben pertenecer a este cliente y estar activos.' }
+  }
+  const { data: conVideo, error: mediaError } = await supabase
     .from('content_idea_videos')
-    .select('idea_id')
-    .in('idea_id', input.ideaIds)
+    .select('idea_id, status')
+    .in('idea_id', requested)
     .eq('kind', 'edited')
     .eq('storage_provider', 'entregas-r2')
-  const listos = Array.from(new Set((conVideo ?? []).map((v) => v.idea_id as string)))
-  if (listos.length === 0) return { error: 'Ningún video de esta tarjeta está subido todavía.' }
+  if (mediaError) return { error: 'No se pudieron verificar los archivos editados.' }
+  const listos = Array.from(new Set((conVideo ?? []).filter(v => v.status !== 'failed' && v.status !== 'archived').map((v) => v.idea_id as string)))
+  if (requested.some(id => !listos.includes(id))) return { error: 'Cada video debe tener un archivo editado disponible antes de generar el enlace.' }
 
   // Solo los enlaces de ESTE video, no los del cliente entero: cada video
   // tiene el suyo y regenerar uno no debe tumbar los demás.
-  const { data: previos } = await supabase
+  const { data: previos, error: previousError } = await supabase
     .from('entregas_client_review_items').select('review_id').in('idea_id', listos)
+  if (previousError) return { error: 'No se pudieron verificar los enlaces anteriores.' }
   const aBorrar = Array.from(new Set((previos ?? []).map((r) => r.review_id as string)))
-  if (aBorrar.length) await supabase.from('entregas_client_reviews').delete().in('id', aBorrar)
+  if (aBorrar.length) {
+    const { error: deleteError } = await supabase.from('entregas_client_reviews').delete().in('id', aBorrar)
+    if (deleteError) return { error: 'No se pudieron reemplazar los enlaces anteriores.' }
+  }
 
   const expira = new Date()
   expira.setDate(expira.getDate() + DIAS_DE_VIGENCIA)
@@ -102,13 +112,14 @@ export async function getEnlaceCliente(
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
   const supabase = await createClient()
-  const { data: item } = await supabase
+  const { data: item, error: itemError } = await supabase
     .from('entregas_client_review_items')
     .select('review_id')
     .eq('idea_id', ideaId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+  if (itemError) return { error: itemError.message }
   if (!item) return { enlace: null }
 
   const { data, error } = await supabase

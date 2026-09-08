@@ -1,4 +1,5 @@
 'use client'
+import { CorrectionUpload } from '@/components/review/correction-upload'
 
 import { useRouter } from 'next/navigation'
 import { RotateCcw, PackageCheck } from 'lucide-react'
@@ -80,12 +81,7 @@ export function VistaEditor({
                     Sin detalle. Pregúntale a quien lo revisó qué hay que cambiar.
                   </p>
                 )}
-                <button
-                  onClick={() => router.refresh()}
-                  className="text-[11px] text-muted-foreground underline-offset-2 hover:underline"
-                >
-                  Vuelve a subirlo arriba cuando lo tengas
-                </button>
+                <CorrectionUpload ideaId={v.id} />
               </li>
             ))}
           </ul>

@@ -9,7 +9,7 @@ describe('publishSchedule — lo que REALMENTE se le manda a Metricool', () => {
     const s = publishSchedule('2026-07-30', '14:30', NOW)
     expect(s.label).toBe('Jue 30 jul 2026 · 14:30')
     expect(s.iso).toBe('2026-07-30T14:30:00')
-    expect(s.clamped).toBe(false)
+    expect(s.blockedReason).toBeUndefined()
   })
 
   it('sin hora del cliente cae a las 10:00', () => {
@@ -18,20 +18,15 @@ describe('publishSchedule — lo que REALMENTE se le manda a Metricool', () => {
 
   it('hoy todavía cuenta como válido', () => {
     const s = publishSchedule('2026-07-27', '09:00', NOW)
-    expect(s.clamped).toBe(false)
+    expect(s.blockedReason).toBeUndefined()
     expect(s.label).toBe('Lun 27 jul 2026 · 09:00')
   })
 
-  it('una fecha PASADA se corre a +24h y lo dice', () => {
-    const s = publishSchedule('2026-07-01', '10:00', NOW)
-    expect(s.clamped).toBe(true)
-    expect(s.label).toBe('Mar 28 jul 2026 · 12:00')
-  })
-
-  it('sin fecha planificada también se corre a +24h', () => {
-    const s = publishSchedule(null, '10:00', NOW)
-    expect(s.clamped).toBe(true)
-    expect(s.label).toMatch(/^Mar 28 jul 2026/)
+  it.each(['2026-07-01', null])('bloquea una fecha vencida o ausente sin inventar otra: %s', (date) => {
+    const s = publishSchedule(date, '10:00', NOW)
+    expect(s.blockedReason).toBeTruthy()
+    expect(s.iso).toBe('')
+    expect(s.label).toBe('Fecha pendiente de corregir')
   })
 
   it('cubre los 7 días de la semana', () => {

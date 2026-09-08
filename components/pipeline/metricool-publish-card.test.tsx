@@ -41,15 +41,17 @@ describe('MetricoolPublishCard', () => {
     expect(onPublish).toHaveBeenCalledWith('v1')
   })
 
-  it('avisa cuando la fecha planificada quedó atrás y se corre', () => {
+  it('bloquea una fecha vencida sin moverla', () => {
     setup(video({ publishDate: '2026-07-01' }))
-    expect(screen.getByText('Mar 28 jul 2026 · 12:00')).toBeInTheDocument()
-    expect(screen.getByText(/fecha pasada/i)).toBeInTheDocument()
+    expect(screen.getByText(/no se reprogramó/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /enviar a metricool/i })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: /enviar a metricool/i }))
+    expect(onPublish).not.toHaveBeenCalled()
   })
 
   it('sin fecha planificada también avisa', () => {
     setup(video({ publishDate: null }))
-    expect(screen.getByText(/sin fecha planificada/i)).toBeInTheDocument()
+    expect(screen.getByText(/falta una fecha/i)).toBeInTheDocument()
   })
 
   it('ya enviado: badge y sin botón', () => {
