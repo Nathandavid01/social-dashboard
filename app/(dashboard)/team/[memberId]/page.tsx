@@ -1,3 +1,4 @@
+import { EditorClients } from '@/components/account/editor-clients'
 import { AssignedRecordings } from '@/components/recording/assigned-recordings'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -60,6 +61,7 @@ export default async function MemberPage({ params }: Props) {
       </Link>
 
       <AssignedRecordings memberId={memberId} />
+      {profile?.role === 'editor' && <EditorClients memberId={memberId} />}
 
       <MemberTaskBoard
         member={profile as Profile}
