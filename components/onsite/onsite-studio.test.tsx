@@ -116,7 +116,7 @@ describe('OnsiteStudio', () => {
         currentUserId="u1"
       />,
     )
-    const abierto = screen.getByRole('link', { name: /El Truco de Guin/ })
+    const abierto = screen.getByRole('link', { name: /El Truco De Guin/ })
     expect(abierto).toHaveAttribute('aria-current', 'page')
     expect(abierto).toHaveTextContent(/Abierto/)
     expect(screen.getByRole('link', { name: /Blue Chiropractic/ })).not.toHaveAttribute('aria-current')
@@ -286,4 +286,19 @@ it.each([['Carlos Villalta', 'Carlos Villalta'], [null, 'Sin Editor Asignado']])
   const active=session({editorName:name})
   render(<OnsiteStudio sessions={[active]} active={active} shots={[]} addable={[]} canBrief canRecord canUpload today="2026-08-20" currentUserId="u1" />)
   expect(screen.getByText(`Editor De Videos · ${expected}`)).toBeInTheDocument()
+})
+
+it('muestra próximas sin cliente con su título sin desplegar una sección oculta', () => {
+  render(<OnsiteStudio sessions={[session(), session({ id: 'future', date: '2026-08-21', clientId: null, clientName: 'Sin cliente', title: 'casita vieja', slotTarget: 0 })]}
+    active={session()} shots={[]} addable={[]} canBrief canRecord canUpload today="2026-08-20" currentUserId="u1" />)
+  expect(screen.getByRole('heading', { name: 'Próximas' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /Casita Vieja/ })).toHaveAttribute('href', '/onsite?s=future')
+  expect(screen.getByRole('link', { name: /Casita Vieja/ })).toHaveTextContent('Vincular Cliente')
+})
+
+it('explica cómo preparar una sesión próxima sin cliente vinculado', () => {
+  const upcoming = session({ clientId: null, clientName: 'Sin cliente', title: 'casita vieja', slotTarget: 0 })
+  render(<OnsiteStudio sessions={[upcoming]} active={upcoming} shots={[]} addable={[]} canBrief canRecord canUpload today="2026-08-19" currentUserId="u1" />)
+  expect(screen.getByText('Vincula El Cliente Para Preparar La Grabación')).toBeInTheDocument()
+  expect(screen.queryByText('Este cliente no tiene /mes')).not.toBeInTheDocument()
 })

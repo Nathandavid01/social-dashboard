@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
 import { pickOnsiteSession } from '@/lib/onsite/slot-count'
@@ -38,7 +39,7 @@ export default async function OnsitePage({
   }
 
   const lista = sessions ?? []
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISOInTimeZone('America/Puerto_Rico')
   const activa = pickOnsiteSession(lista, sessionId, today)
 
   const [{ shots }, { ideas }] = activa

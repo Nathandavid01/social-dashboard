@@ -7,6 +7,7 @@ import {
   Camera, Check, ChevronDown, ChevronRight, ExternalLink, Loader2, MapPin, Plus, Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { clientDisplayName } from '@/lib/utils/client-display-name'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SHOT_TYPES, shotTypeLabel, type OnsiteShot } from '@/lib/onsite/shot-types'
 import { viralityBand } from '@/lib/onsite/virality'
@@ -190,7 +191,7 @@ export function OnsiteStudio({
                           <span className="absolute inset-y-0 left-0 w-1 bg-black/30" aria-hidden />
                         )}
                         <span className="flex items-center justify-between gap-2">
-                          <span className="block min-w-0 truncate text-[13px] font-semibold">{s.clientName}</span>
+                          <span className="block min-w-0 truncate text-[13px] font-semibold">{clientDisplayName(s.clientId ? s.clientName : s.title)}</span>
                           {sel && (
                             <span className="shrink-0 rounded-full bg-black/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
                               Abierto
@@ -202,6 +203,7 @@ export function OnsiteStudio({
                           sel ? 'text-primary-foreground/80' : 'text-muted-foreground',
                         )}>
                           <span>{fechaCorta(s.date)}</span>
+                          {!s.clientId && <span>Vincular Cliente</span>}
                           {s.slotTarget > 0 && (
                             <span className="tabular-nums">{s.slotTarget} vid.</span>
                           )}
@@ -223,7 +225,7 @@ export function OnsiteStudio({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Jornada de grabación</p>
-              <h1 className="truncate text-xl font-semibold tracking-tight">{active.clientName}</h1>
+              <h1 className="truncate text-xl font-semibold tracking-tight">{clientDisplayName(active.clientId ? active.clientName : active.title)}</h1>
               <p className="mt-2 w-fit max-w-full break-words rounded-lg border border-violet-500/25 bg-violet-500/10 px-3 py-2 text-xs font-medium text-violet-700 dark:text-violet-300">Editor De Videos · {active.editorName || 'Sin Editor Asignado'}</p>
               <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
                 <span className={cn('rounded-full px-2 py-0.5', active.arrivedAt ? 'bg-emerald-500/15 text-emerald-500' : 'bg-muted')}>1 Llegada</span>
@@ -323,9 +325,9 @@ export function OnsiteStudio({
         {shots.length === 0 && huecos === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-2xl border bg-card px-4 py-12 text-center">
             <Camera className="h-6 w-6 text-muted-foreground" />
-            <p className="text-sm font-medium">Este cliente no tiene /mes</p>
+            <p className="text-sm font-medium">{active.clientId ? 'Este cliente no tiene /mes' : 'Vincula El Cliente Para Preparar La Grabación'}</p>
             <p className="max-w-sm text-xs text-muted-foreground">
-              Pon Días de posting en el perfil, o añade ideas una a una.
+              {active.clientId ? 'Pon Días de posting en el perfil, o añade ideas una a una.' : 'Selecciona el cliente en el calendario para traer sus ideas y calcular los videos que se necesitan.'}
             </p>
           </div>
         ) : (

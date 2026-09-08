@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.22 — 2026-09-08
+
+**Las próximas grabaciones aparecen en On Site desde que se agendan.**
+
+- Hoy y Próximas incluyen las sesiones aunque falte vincular el cliente, usando su título para identificarlas.
+- On Site abre primero la grabación más cercana, incluso si todavía no tiene cuota de videos. Los enlaces a una sesión específica se respetan.
+- El indicador «Vincular Cliente» deja visible lo pendiente; las fechas siguen el día de Puerto Rico.
+
+![Próximas grabaciones en On Site](/changelog/v4.22-proximas-onsite.png)
+
 ## v4.21 — 2026-09-08
 
 **La ventana de grabación se distingue claramente del calendario.**

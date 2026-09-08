@@ -103,13 +103,13 @@ describe('pickOnsiteSession', () => {
     expect(pickOnsiteSession(lista, undefined, '2026-08-19')?.id).toBe('today')
   })
 
-  it('si lo próximo no tiene /mes, abre el último cliente con cupo', () => {
+  it('abre la próxima grabación aunque todavía no tenga cuota', () => {
     const lista = [
       s({ id: 'old', date: '2026-05-26', slotTarget: 0, clientId: null }),
       s({ id: 'blue', date: '2026-08-03', slotTarget: 20, clientId: 'c2' }),
       s({ id: 'pizza', date: '2026-08-29', slotTarget: 0, clientId: 'c3' }),
     ]
-    expect(pickOnsiteSession(lista, undefined, '2026-08-20')?.id).toBe('blue')
+    expect(pickOnsiteSession(lista, undefined, '2026-08-20')?.id).toBe('pizza')
   })
 })
 
@@ -126,3 +126,16 @@ describe('groupOnsiteSessions', () => {
     expect(g.map((x) => x.lane)).toEqual(['hoy', 'proxima', 'sin_cliente'])
   })
 })
+
+ it('mantiene las próximas sin cliente visibles y ordenadas por fecha', () => {
+   const sessions = [
+     { id: 'later', date: '2026-09-12', clientId: null, slotTarget: 0 },
+     { id: 'past', date: '2026-08-20', clientId: 'c1', slotTarget: 20 },
+     { id: 'next', date: '2026-09-09', clientId: null, slotTarget: 0 },
+     { id: 'today', date: '2026-09-08', clientId: null, slotTarget: 0 },
+   ]
+   expect(groupOnsiteSessions(sessions, '2026-09-08').map(g => [g.lane, g.items.map(s => s.id)]))
+     .toEqual([['hoy', ['today']], ['proxima', ['next', 'later']], ['pasada', ['past']]])
+   expect(pickOnsiteSession(sessions, undefined, '2026-09-08')?.id).toBe('today')
+   expect(pickOnsiteSession(sessions, 'past', '2026-09-08')?.id).toBe('past')
+ })
