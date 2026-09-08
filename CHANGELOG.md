@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.43 — 2026-09-08
+
+**La cobertura usa el día correcto y no da por cubiertos los posts fallidos.**
+
+- La agenda y el resumen comparten la interpretación de fechas en horario de Puerto Rico.
+- Una publicación fuera del calendario habitual también necesita confirmación para completar el día.
+- Si Metricool devuelve fechas que no se pueden interpretar, la cuenta aparece sin verificar.
+
 ## v4.42 — 2026-09-08
 
 **El chat también reconoce los compromisos publicados directamente en Metricool.**

@@ -1,3 +1,4 @@
+import { publicationDay } from '@/lib/metricool/publication-date'
 import type { ScheduledPost } from '@/lib/metricool/scheduler'
 export function publicationState(p:ScheduledPost) {
  if(p.draft)return 'draft'
@@ -9,13 +10,15 @@ export function publicationState(p:ScheduledPost) {
 }
 export interface AuditIdea {id:string;title:string;publish_date:string|null;metricool_post_id:number|null}
 export function buildCoverage(posts:ScheduledPost[], postingDays:number[], ideas:AuditIdea[], today:string, start:string, end:string) {
+ const datedPosts=posts.map(post=>({post,date:publicationDay(post.publicationDate)}))
+ const invalidDates=datedPosts.some(entry=>entry.date===null)
  const days=[]
  for(let d=new Date(start+'T12:00:00Z');d.toISOString().slice(0,10)<=end;d.setUTCDate(d.getUTCDate()+1)) {
   const date=d.toISOString().slice(0,10)
   const planned=ideas.filter(i=>i.publish_date===date)
-  const scheduled=posts.filter(p=>p.publicationDate?.dateTime?.slice(0,10)===date)
+  const scheduled=datedPosts.filter(entry=>entry.date===date).map(entry=>entry.post)
   if(!postingDays.includes(d.getUTCDay())&&!planned.length&&!scheduled.length)continue
-  const expected=Math.max(postingDays.includes(d.getUTCDay())?1:0,planned.length)
+  const expected=Math.max(postingDays.includes(d.getUTCDay())||scheduled.length?1:0,planned.length)
   const published=scheduled.filter(p=>publicationState(p)==='published').length
   const ready=scheduled.filter(p=>['scheduled','published'].includes(publicationState(p))).length
   // Today's completion is publication; future coverage may be scheduled.
@@ -24,7 +27,7 @@ export function buildCoverage(posts:ScheduledPost[], postingDays:number[], ideas
    videos:planned.map(i=>{const p=posts.find(p=>String(p.id)===String(i.metricool_post_id));return {...i,state:p?publicationState(p):'unverified',networks:p?.providers??[]}}),
    posts:scheduled.map(p=>({id:p.id,state:publicationState(p),networks:p.providers??[]}))})
  }
- return {days,overdue:days.filter(d=>d.date<today&&!d.covered).length,futureRequired:days.filter(d=>d.date>today&&d.expected>0).length,futureCovered:days.filter(d=>d.date>today&&d.expected>0&&d.covered).length,nextGap:days.find(d=>d.date>today&&d.expected>0&&!d.covered)?.date??null}
+ return {...(invalidDates?{error:'Metricool: Fechas Sin Verificar'}:{}),days,overdue:days.filter(d=>d.date<today&&!d.covered).length,futureRequired:days.filter(d=>d.date>today&&d.expected>0).length,futureCovered:days.filter(d=>d.date>today&&d.expected>0&&d.covered).length,nextGap:days.find(d=>d.date>today&&d.expected>0&&!d.covered)?.date??null}
 }
 export type ClientCoverage = ReturnType<typeof buildCoverage> & {id:string;name:string;error?:string}
 export interface OperationalPublicationReport {today:string;start:string;end:string;checkedAt:string;clients:ClientCoverage[]}

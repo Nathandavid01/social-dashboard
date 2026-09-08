@@ -167,3 +167,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Incluye contadores separados de compromisos publicados y por publicar. No marca aprobaciones internas ni enlaza posts a videos distintos. Fallos/parcialidad remota se comunican expresamente.
 - Dos regresiones fallaron antes del cambio; 14 pruebas focales pasan, TypeScript, merge-gate y diff-check pasan.
 - Preview de estados simulado `/previews/v4.42-chat-checklist.html`. El cambio está local; la síntesis final del modelo aún requiere una nueva comprobación autenticada. Se conserva el pendiente de tareas/alertas textuales antiguas y errores en consultas secundarias del briefing.
+
+## v4.43 — Fechas y cobertura fuera de cadencia
+
+- Cuatro regresiones reprodujeron: asignación UTC al día equivocado en PR; post ERROR/PENDING fuera de cadencia con expected=0 que se marcaba cubierto; fechas inválidas sin advertencia.
+- Se extrajo el parser de fechas ya probado a `lib/metricool/publication-date.ts`. `buildCoverage` y el resumen diario usan la misma conversión. Un día con posts remotos cuenta al menos un compromiso; ERROR/PENDING no completan hoy. Una fecha ilegible marca la cuenta con error para que no se sume como verificada.
+- 32 pruebas focales pasan, TypeScript y merge-gate pasan. Preview simulado `/previews/v4.43-cobertura-fechas.html`. No se modificaron datos ni publicaciones.
+- Sigue pendiente: respuesta final del chat autenticado después de v4.42; errores de consultas generales de briefing, asignaciones reales de sesiones, revisión atómica en Supabase de Nathan y auditoría completa del ciclo de medios.
