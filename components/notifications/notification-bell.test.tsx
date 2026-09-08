@@ -119,3 +119,24 @@ describe('NotificationBell', () => {
     expect(trigger).toHaveAttribute('data-pulse', 'false')
   })
 })
+
+it('updates the badge after a refreshed server snapshot',()=>{
+ const {rerender}=render(<NotificationBell initialNotifications={[makeNotification()]} initialUnreadCount={1} userId="u1"/>);
+ rerender(<NotificationBell initialNotifications={[makeNotification({read_at:new Date().toISOString()})]} initialUnreadCount={0} userId="u1"/>);
+ expect(screen.getByRole('button',{name:'Notificaciones'})).toBeInTheDocument()
+})
+it('does not claim that no notifications means all work is complete',async()=>{
+ render(<NotificationBell initialNotifications={[]} initialUnreadCount={0} userId="u1"/>);
+ await userEvent.setup().click(screen.getByRole('button',{name:'Notificaciones'}));
+ expect(screen.queryByText('Todo al día')).not.toBeInTheDocument()
+ expect(screen.getByRole('link',{name:/Ver Todas Las Notificaciones/})).toHaveAttribute('href','/account/notifications')
+})
+
+it('keeps unread notifications when marking all fails',async()=>{
+ const actions=await import('@/lib/actions/notifications')
+ vi.mocked(actions.markAllNotificationsRead).mockResolvedValueOnce({error:'No se pudo guardar'})
+ render(<NotificationBell initialNotifications={[makeNotification()]} initialUnreadCount={1} userId="u1"/>);
+ await userEvent.setup().click(screen.getByRole('button',{name:'1 notificaciones sin leer'}));
+ await userEvent.setup().click(screen.getByRole('button',{name:'Marcar Leídas'}));
+ expect(screen.getByText('1 sin leer')).toBeInTheDocument()
+})

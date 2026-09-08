@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState, useTransition, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -29,7 +29,7 @@ import {
   deleteNotification,
 } from '@/lib/actions/notifications'
 import { useToast } from '@/lib/hooks/use-toast'
-import { shouldPulseBell, unreadCount } from '@/lib/utils/notification-bell'
+import { shouldPulseBell, unreadCount, notificationDestination } from '@/lib/utils/notification-bell'
 import type { Notification, NotificationSeverity } from '@/lib/supabase/types'
 
 interface Props {
@@ -70,6 +70,8 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
   const [open, setOpen] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const [acknowledgedAt, setAcknowledgedAt] = useState<number | null>(null)
+  const openRef = useRef(open)
+  openRef.current = open
   const router = useRouter()
   const { toast } = useToast()
   const [extraUnread, setExtraUnread] = useState(() =>
@@ -77,6 +79,11 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
   )
   const unread = unreadCount(items) + extraUnread
   const pulse = shouldPulseBell({ items, acknowledgedAt })
+
+  useEffect(() => {
+    setItems(initialNotifications)
+    setExtraUnread(Math.max(0, initialUnreadCount - unreadCount(initialNotifications)))
+  }, [initialNotifications, initialUnreadCount, userId])
 
   useEffect(() => {
     const supabase = createClient()
@@ -87,10 +94,10 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => {
           const n = payload.new as Notification
-          setItems((prev) => [n, ...prev].slice(0, 50))
+          setItems((prev) => [n, ...prev.filter(p => p.id !== n.id)])
           setHighlightId(n.id)
           window.setTimeout(() => setHighlightId(null), 1500)
-          if (!open) {
+          if (!openRef.current) {
             toast({
               title: n.title,
               description: n.body ?? undefined,
@@ -133,15 +140,26 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
     if (next) setAcknowledgedAt(Date.now())
   }
 
-  function onItemClick(n: Notification) {
+  async function onItemClick(n: Notification) {
     if (!n.read_at) {
-      setItems((prev) => prev.map((p) => (p.id === n.id ? { ...p, read_at: new Date().toISOString() } : p)))
-      void markNotificationRead(n.id)
+      try {
+        const result = await markNotificationRead(n.id)
+        if (result?.error) throw new Error(result.error)
+        setItems(prev => prev.map(p => p.id === n.id ? {...p, read_at:new Date().toISOString()} : p))
+      } catch {
+        toast({title:'No Se Pudo Marcar Como Leída',description:'El aviso sigue pendiente. Intenta otra vez.',variant:'destructive'})
+      }
     }
-    if (n.link) {
-      setOpen(false)
-      router.push(n.link)
-    }
+    const destination = notificationDestination(n.link)
+    if (destination) {setOpen(false);router.push(destination)}
+  }
+
+  async function onDelete(id: string) {
+    try {
+      const result=await deleteNotification(id)
+      if(result?.error)throw new Error(result.error)
+      setItems(prev=>prev.filter(n=>n.id!==id))
+    } catch {toast({title:'No Se Pudo Eliminar El Aviso',variant:'destructive'})}
   }
 
   return (
@@ -174,7 +192,7 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-[360px] p-0 overflow-hidden"
+        className="w-[360px] max-w-[calc(100vw-24px)] p-0 overflow-hidden"
       >
         <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-2.5">
           <div className="flex items-center gap-2">
@@ -199,8 +217,8 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
         {items.length === 0 ? (
           <div className="grid place-items-center px-3 py-10 text-center">
             <Bell className="mb-2 h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm font-medium">Todo al día</p>
-            <p className="text-xs text-muted-foreground">No tienes notificaciones aún.</p>
+            <p className="text-sm font-medium">Sin Notificaciones</p>
+            <p className="text-xs text-muted-foreground">Consulta Mi Día Para Ver Tus Pendientes.</p>
           </div>
         ) : (
           <ScrollArea className="h-[400px]">
@@ -211,10 +229,7 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
                   notification={n}
                   highlight={highlightId === n.id}
                   onClick={() => onItemClick(n)}
-                  onDelete={() => {
-                    setItems((prev) => prev.filter((p) => p.id !== n.id))
-                    void deleteNotification(n.id)
-                  }}
+                  onDelete={() => void onDelete(n.id)}
                 />
               ))}
             </ul>
@@ -223,14 +238,14 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
 
         <div className="flex items-center justify-between border-t bg-muted/20 px-3 py-2">
           <Link
-            href="/alerts"
+            href="/account/notifications"
             onClick={() => setOpen(false)}
             className="text-xs font-medium text-primary hover:underline"
           >
-            Ver todas en /alerts →
+            Ver Todas Las Notificaciones →
           </Link>
           <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            Realtime
+            Personal
           </span>
         </div>
       </DropdownMenuContent>
@@ -249,8 +264,8 @@ function NotificationItem({
   onClick: () => void
   onDelete: () => void
 }) {
-  const Icon = severityIcon[notification.severity]
-  const tone = severityTone[notification.severity]
+  const Icon = severityIcon[notification.severity] ?? Info
+  const tone = severityTone[notification.severity] ?? severityTone.info
   const isUnread = !notification.read_at
 
   return (
@@ -262,6 +277,8 @@ function NotificationItem({
         highlight && 'animate-in fade-in slide-in-from-top-1 duration-500 bg-yellow-500/10',
       )}
       onClick={onClick}
+      tabIndex={0}
+      onKeyDown={e=>{if(e.target===e.currentTarget && (e.key==='Enter'||e.key===' ')){e.preventDefault();onClick()}}}
     >
       {isUnread && (
         <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500" />
@@ -284,7 +301,7 @@ function NotificationItem({
             e.stopPropagation()
             onDelete()
           }}
-          className="opacity-0 transition-opacity group-hover:opacity-100"
+          className="grid min-h-9 min-w-9 place-items-center opacity-70 transition-opacity hover:opacity-100"
           aria-label="Eliminar"
         >
           <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
@@ -296,6 +313,7 @@ function NotificationItem({
 
 function MarkAllReadButton({ onDone }: { onDone: () => void }) {
   const [isPending, startTransition] = useTransition()
+  const {toast}=useToast()
   return (
     <Button
       variant="ghost"
@@ -303,14 +321,17 @@ function MarkAllReadButton({ onDone }: { onDone: () => void }) {
       className="h-7 gap-1 text-xs"
       disabled={isPending}
       onClick={() => {
-        onDone()
         startTransition(async () => {
-          await markAllNotificationsRead()
+          try {
+            const result=await markAllNotificationsRead()
+            if(result?.error)throw new Error(result.error)
+            onDone()
+          } catch {toast({title:'No Se Pudieron Marcar Como Leídas',variant:'destructive'})}
         })
       }}
     >
       {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCheck className="h-3 w-3" />}
-      Marcar todas
+      Marcar Leídas
     </Button>
   )
 }

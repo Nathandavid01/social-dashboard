@@ -81,3 +81,11 @@ describe('newestUnreadAt', () => {
     ).toBe(Date.parse('2026-08-18T12:30:00.000Z'))
   })
 })
+
+it('rejects external and malformed notification destinations',async()=>{
+ const {notificationDestination}=await import('./notification-bell')
+ expect(notificationDestination('https://example.com')).toBeNull()
+ expect(notificationDestination('//example.com')).toBeNull()
+ expect(notificationDestination('/\\example.com')).toBeNull()
+ expect(notificationDestination('/onsite?s=123')).toBe('/onsite?s=123')
+})

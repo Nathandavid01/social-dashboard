@@ -1,0 +1,8 @@
+import Link from 'next/link'
+import {getMyNotifications,getMyUnreadCount} from '@/lib/actions/notifications'
+import {notificationDestination} from '@/lib/utils/notification-bell'
+export const dynamic='force-dynamic'
+export default async function NotificationsPage(){
+ const [items,count]=await Promise.all([getMyNotifications(200),getMyUnreadCount()])
+ return <div className="mx-auto max-w-3xl space-y-5"><header><h1 className="text-2xl font-semibold">Mis Notificaciones</h1><p className="mt-2 text-sm text-muted-foreground">{count} Sin Leer · Últimos {items.length} Avisos</p><p className="mt-2 text-sm text-muted-foreground">Los avisos registran lo que ocurrió. Leerlos no completa una tarea; consulta Mi Día para ver su estado actual.</p></header><Link href="/mi-dia" className="inline-flex min-h-11 items-center text-sky-500 underline">Ver Mis Pendientes En Mi Día</Link>{!items.length?<p>Sin Notificaciones</p>:<ul className="space-y-3">{items.map(n=><li key={n.id} className="rounded-xl border bg-card p-4"><div className="flex flex-wrap justify-between gap-2"><h2 className="break-words font-semibold">{n.title}</h2><span className="text-xs text-muted-foreground">{n.read_at?'Leída':'Sin Leer'}</span></div>{n.body&&<p className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{n.body}</p>}<p className="mt-3 text-xs text-muted-foreground">{new Date(n.created_at).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'})}</p>{notificationDestination(n.link)&&<Link className="mt-2 inline-flex min-h-11 items-center text-sm text-sky-500 underline" href={notificationDestination(n.link)!}>Abrir Detalle</Link>}</li>)}</ul>}</div>
+}

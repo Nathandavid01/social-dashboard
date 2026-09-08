@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.19 — 2026-09-08
+
+**Notificaciones personales, con destino claro y lecturas confirmadas.**
+
+- Ver Todas Las Notificaciones abre el historial personal, en lugar del sistema separado de alertas.
+- La campana actualiza su contador cuando llega información nueva del servidor y evita duplicar avisos repetidos.
+- Leer, eliminar o marcar todas requiere confirmación de guardado. Si falla, el aviso conserva su estado y muestra un error.
+- Los avisos globales de solicitudes y Video QC se limitan a administradores y supervisores. Aprobar en QC no se presenta como publicación confirmada.
+- Una bandeja vacía no afirma que todo el trabajo está completo; Mi Día sigue mostrando los pendientes operativos.
+
+![Notificaciones personales](/changelog/v4.19-notificaciones.png)
+
 ## v4.18 — 2026-09-08
 
 **Clientes en Title Case, editores visibles y mapa de Puerto Rico.**
