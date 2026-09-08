@@ -39,12 +39,14 @@ export function InternalReviewPanel({
   userId,
   onDecision,
   pending = false,
+  previewState,
 }: {
   video: ReviewVideo
   role: UserRole | null | undefined
   userId: string | null | undefined
   onDecision: (decision: 'approve' | 'request_changes', note: string) => void
   pending?: boolean
+  previewState?: 'loading' | 'error'
 }) {
   const [captionsChecked, setCaptionsChecked] = useState(false)
   const [videoChecked, setVideoChecked] = useState(false)
@@ -76,8 +78,8 @@ export function InternalReviewPanel({
         {video.editedUrl ? (
           <video src={video.editedUrl} controls playsInline className="max-h-[320px] w-full object-contain" />
         ) : (
-          <div className="grid h-40 place-items-center text-xs text-muted-foreground">
-            Todavía no hay video editado
+          <div role={previewState === 'loading' ? 'status' : undefined} className="grid h-40 place-items-center text-xs text-white/70">
+            {previewState === 'loading' ? 'Cargando Vista Previa…' : previewState === 'error' ? 'Vista Previa No Disponible' : 'Todavía no hay video editado'}
           </div>
         )}
       </div>

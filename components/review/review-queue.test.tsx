@@ -147,3 +147,18 @@ it('lets the reviewer retry a rejected preview request', async () => {
   await waitFor(() => expect(document.querySelector('video')).toHaveAttribute('src', 'https://r2.example/signed.mp4'))
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
+
+it('distinguishes a loading preview from a missing file', async () => {
+  getPreviewUrl.mockImplementationOnce(() => new Promise(() => {}))
+  renderQueue([video()])
+  expect(screen.getByRole('status')).toHaveTextContent('Cargando Vista Previa')
+  expect(screen.queryByText('Todavía no hay video editado')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Aprobar' })).toBeDisabled()
+})
+it('does not claim the edited file is missing after a signing error', async () => {
+  getPreviewUrl.mockResolvedValueOnce({ error: 'Signing failed' })
+  renderQueue([video()])
+  await screen.findByText('Signing failed')
+  expect(screen.getByText('Vista Previa No Disponible')).toBeInTheDocument()
+  expect(screen.queryByText('Todavía no hay video editado')).not.toBeInTheDocument()
+})

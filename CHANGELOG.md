@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.53 — 2026-09-08
+
+**El visor distingue un video cargando de un archivo ausente.**
+
+- Mientras se obtiene el enlace aparece “Cargando Vista Previa”.
+- Si falla el enlace, aparece “Vista Previa No Disponible” y se conserva la opción de reintentar.
+- “Todavía no hay video editado” se reserva para piezas sin archivo disponible.
+
+![Estados del visor (simulación)](/changelog/v4.53-estado-video.png)
+
 ## v4.52 — 2026-09-08
 
 **El visor de revisión permite recuperarse de errores de conexión.**

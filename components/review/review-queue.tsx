@@ -167,6 +167,7 @@ export function ReviewQueue({
       <InternalReviewPanel
         key={current.id + (current.videoFileId ?? "")}
         video={panelVideo}
+        previewState={current.videoFileId && !url ? (urlError ? 'error' : 'loading') : undefined}
         role={role}
         userId={userId}
         pending={pending}
