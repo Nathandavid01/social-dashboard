@@ -181,3 +181,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Se exige count exacto, ausencia de error y correspondencia entre filas y total en tareas. Si la consulta no se verifica, el briefing muestra el problema y conserva los resultados independientes de workflow/Metricool, sin publicar cifras generales falsas. Se eliminó una consulta de perfiles no utilizada.
 - Cuatro pruebas de respuestas fallidas/truncadas/vacías/exactas pasan; TypeScript, merge-gate y diff-check pasan. Preview simulado `/previews/v4.44-resumen-sin-verificar.html`.
 - No se manipularon datos vivos para inducir fallos. Pendiente: volver a comprobar síntesis autenticada del modelo; normalizar las fechas de tareas generales (aún usa UTC en ese bloque); resolver acceso a Supabase de Nathan y validar el ciclo de revisión real.
+
+## v4.45 — Fechas de tareas en el chat
+
+- Todas las comparaciones lexicográficas de `due_at` detectadas en la ruta del chat se sustituyeron por comparación de instantes. La condición 'hoy' usa día de Puerto Rico en lugar del día UTC del servidor.
+- Se cubren resumen, búsqueda/listado de tareas, carga del equipo, eficiencia por cliente y tareas abiertas. Tareas completed no se marcan vencidas; fechas ausentes/ilegibles no generan plazos inventados.
+- 24 pruebas focales pasan (incluye cambio de día UTC, offsets que ordenan al revés y tareas completadas), TypeScript, merge-gate y diff-check pasan. Preview simulado `/previews/v4.45-tareas-horario.html`.
+- Local; no se cambiaron fechas de tareas reales. El ciclo completo de revisión/publicación y la síntesis final autenticada siguen pendientes de auditoría; acceso a Supabase de Nathan continúa pendiente.

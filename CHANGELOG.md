@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.45 — 2026-09-08
+
+**Las tareas de hoy y vencidas se calculan con la hora correcta.**
+
+- El chat mantiene las tareas nocturnas dentro del día de Puerto Rico, aunque en UTC ya sea mañana.
+- Los vencimientos se comparan por su hora real, incluyendo fechas con distintos offsets.
+- Las tareas completadas no se cuentan como vencidas en las consultas de carga del equipo y clientes.
+
 ## v4.44 — 2026-09-08
 
 **El resumen general no convierte fallos de consulta en cero pendientes.**

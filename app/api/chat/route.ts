@@ -1,3 +1,4 @@
+import { taskIsOverdue, taskIsDueToday } from '@/lib/utils/task-deadline'
 import { briefingQueryIssue } from '@/lib/utils/briefing-query'
 import { auditOperationalPublications } from '@/lib/actions/operational-publications'
 import { getAlerts } from '@/lib/actions/alerts'
@@ -500,7 +501,7 @@ async function execGetTasks(status?: string, clientName?: string): Promise<strin
   const nowIso = new Date().toISOString()
   return tasks.map((t) => {
     const client = (t.client as { name?: string } | null)?.name
-    const isOverdue = t.due_at && t.due_at < nowIso
+    const isOverdue = taskIsOverdue(t, nowIso)
     const due = t.due_at ? ` | Due: ${new Date(t.due_at).toLocaleDateString('es-PR')}${isOverdue ? ' ⏰OVERDUE' : ''}` : ''
     const priority = t.priority === 1 ? ' 🔴' : t.priority === 2 ? ' 🟡' : ''
     return `- [${t.status.toUpperCase()}] ${t.title}${client ? ` (${client})` : ''}${due}${priority}`
@@ -777,8 +778,6 @@ async function execGetDashboardSummary(): Promise<string> {
   try {
     const supabase = await createClient()
     const nowIso = new Date().toISOString()
-    const todayStart = new Date().toISOString().slice(0, 10) + 'T00:00:00'
-    const todayEnd = new Date().toISOString().slice(0, 10) + 'T23:59:59'
 
     const [
       taskResult,
@@ -821,8 +820,8 @@ async function execGetDashboardSummary(): Promise<string> {
     const pending = all.filter((t) => t.status === 'pending').length
     const inProgress = all.filter((t) => t.status === 'in_progress').length
     const blocked = all.filter((t) => t.status === 'blocked').length
-    const overdueTasks = all.filter((t) => t.due_at && t.due_at < nowIso)
-    const dueTodayTasks = all.filter((t) => t.due_at && t.due_at >= todayStart && t.due_at <= todayEnd)
+    const overdueTasks = all.filter((t) => taskIsOverdue(t, nowIso))
+    const dueTodayTasks = all.filter((t) => taskIsDueToday(t, nowIso))
     const highPriorityTasks = all.filter((t) => t.priority === 1)
     const criticalAlerts = (alerts ?? []).filter((a) => a.severity === 'error')
     const warningAlerts = (alerts ?? []).filter((a) => a.severity === 'warning')
@@ -834,7 +833,7 @@ async function execGetDashboardSummary(): Promise<string> {
       if (!assignee?.full_name) continue
       if (!tasksByMember[assignee.full_name]) tasksByMember[assignee.full_name] = { name: assignee.full_name, count: 0, overdue: 0 }
       tasksByMember[assignee.full_name].count++
-      if (t.due_at && t.due_at < nowIso) tasksByMember[assignee.full_name].overdue++
+      if (taskIsOverdue(t, nowIso)) tasksByMember[assignee.full_name].overdue++
     }
     const teamLines = Object.values(tasksByMember)
       .sort((a, b) => b.count - a.count)
@@ -963,7 +962,7 @@ async function execGetClientEfficiency(showIssuesOnly?: boolean): Promise<string
       if (!t.client_id) continue
       if (!clientTasks[t.client_id]) clientTasks[t.client_id] = { total: 0, overdue: 0, blocked: 0 }
       clientTasks[t.client_id].total++
-      if (t.due_at && t.due_at < nowIso) clientTasks[t.client_id].overdue++
+      if (taskIsOverdue(t, nowIso)) clientTasks[t.client_id].overdue++
       if (t.status === 'blocked') clientTasks[t.client_id].blocked++
     }
 
@@ -1161,7 +1160,7 @@ async function execGetTeamWorkload(memberName?: string): Promise<string> {
 
     let members = profiles.map((p) => {
       const mt = tasksByMember[p.id] ?? []
-      const overdue = mt.filter((t) => t.due_at && t.due_at < nowIso).length
+      const overdue = mt.filter((t) => taskIsOverdue(t, nowIso)).length
       const inProgress = mt.filter((t) => t.status === 'in_progress').length
       return { ...p, total: mt.length, overdue, inProgress, tasks: mt }
     })
@@ -1176,7 +1175,7 @@ async function execGetTeamWorkload(memberName?: string): Promise<string> {
       const icon = m.overdue > 0 ? '🔴' : m.total === 0 ? '🟢' : '🔵'
       const taskList = m.tasks.slice(0, 5).map((t) => {
         const client = (t.client as { name?: string } | null)?.name
-        const isOverdue = t.due_at && t.due_at < nowIso
+        const isOverdue = taskIsOverdue(t, nowIso)
         return `  • ${t.title}${client ? ` (${client})` : ''}${isOverdue ? ' ⏰' : ''}`
       }).join('\n')
       return [
@@ -1349,7 +1348,7 @@ async function execGetMemberTasks(memberName: string, status?: string): Promise<
 
     const lines = tasks.map((t) => {
       const clientName = (t.client as { name?: string } | null)?.name
-      const overdue = t.due_at && t.due_at < now && t.status !== 'completed' ? ' ⚠️ OVERDUE' : ''
+      const overdue = taskIsOverdue(t, now) ? ' ⚠️ OVERDUE' : ''
       const due = t.due_at ? ` · Due ${new Date(t.due_at).toLocaleDateString('es-PR', { month: 'short', day: 'numeric' })}` : ''
       const client = clientName ? ` @ ${clientName}` : ''
       return `${statusLabel[t.status] ?? '⬜'} ${priorityLabel(t.priority)} **${t.title}**${client}${due}${overdue}`
@@ -1478,7 +1477,7 @@ async function execGetClientSnapshot(clientName: string): Promise<string> {
       } catch { /* skip */ }
     }
 
-    const overdue = (openTasks ?? []).filter((t) => t.due_at && t.due_at < nowIso)
+    const overdue = (openTasks ?? []).filter((t) => taskIsOverdue(t, nowIso))
     const priorityIcon = (p: number) => p === 1 ? '🔴' : p === 2 ? '🟡' : '🟢'
 
     const lines: string[] = [
