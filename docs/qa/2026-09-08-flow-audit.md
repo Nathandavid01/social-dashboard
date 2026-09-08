@@ -44,3 +44,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Pruebas focales: 37 pasan; TypeScript y merge-gate pasan.
 - **Pendiente para cerrar este flujo:** implementar una acción autenticada de reconciliación con evidencia remota y UI para resolver los claims inciertos (incluidos los anteriores). Por ahora permanecen bloqueados; no hay una liberación automática ni se debe editar la DB a ciegas.
 - También revisar errores previos al POST que lanzan excepciones, comparaciones atómicas con aprobación/archivo y observabilidad en Mi Día. No hay envíos reales en estas pruebas.
+
+## Continuación · Recuperación Con Evidencia Positiva
+
+- v4.27 añade panel en settings/metricool, bajo posting.publish, para introducir el ID remoto de una idea bloqueada.
+- GET del scheduler limitado al blog del cliente; requiere coincidencia de media URL, caption, redes, autoPublish y no-draft. La escritura es condicional al claim, cliente, caption, archivo aprobado y ausencia de ID anterior. No envía POST ni declara publicada la idea.
+- 14 pruebas iniciales pasan (matcher, permisos, ID inexistente, concurrencia y formulario); preview real del componente verificado en escritorio/móvil con mocks explícitos. TypeScript y merge-gate pasan.
+- **Límites pendientes:** comprobar contra respuesta real de Metricool; media de estructura no reconocida se rechaza. Ventana de búsqueda ±365 días de la fecha planificada; no encontrar un post no prueba ausencia. Recuperación de un envío realmente no creado continúa pendiente: no existe aún liberación sin evidencia. El panel muestra hasta 100 casos.

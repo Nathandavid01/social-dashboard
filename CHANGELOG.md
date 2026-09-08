@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.27 — 2026-09-08
+
+**Recupera el vínculo de un post existente sin volver a publicarlo.**
+
+- Metricool muestra los envíos pendientes de verificar al equipo con permiso de publicación.
+- Introduce el ID del post: se comprueban cliente, archivo aprobado, caption y redes antes de guardarlo.
+- Si no coincide o no aparece, el bloqueo permanece; nunca se crea otro post desde esta herramienta.
+
+![Recuperación de envío](/changelog/v4.27-recuperar-metricool.png)
+
 ## v4.26 — 2026-09-08
 
 **Un envío incierto no se repite solo porque pasaron cinco minutos.**
