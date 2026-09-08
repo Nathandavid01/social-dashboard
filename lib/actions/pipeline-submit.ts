@@ -246,8 +246,8 @@ export async function reopenReviewForVerification(ideaId:string):Promise<{ok?:tr
  try {await requirePermission('video.approve')} catch {return {error:'No autorizado'}}
  const db=await createClient()
  const {data,error}=await db.from('content_ideas').update({approval_status:'submitted',approved_video_id:null,approved_at:null,approved_by:null,submitted_at:new Date().toISOString()})
-  .eq('id',ideaId).eq('approval_status','approved').is('metricool_post_id',null).is('posted_at',null).is('published_at',null).select('id').maybeSingle()
- if(error||!data)return {error:'No se pudo reabrir. Verifica si ya se envió a Metricool o cambió de estado.'}
+  .eq('id',ideaId).eq('approval_status','approved').is('metricool_post_id',null).is('posted_at',null).is('published_at',null).is('posting_started_at',null).not('status','in','(publicada,descartada)').select('id').maybeSingle()
+ if(error||!data)return {error:'No se pudo reabrir. Hay un envío en curso o pendiente de verificar, ya se envió a Metricool o el video cambió de estado.'}
  revalidatePath('/mi-dia');revalidatePath('/revision');revalidatePath('/entregas')
  return {ok:true}
 }

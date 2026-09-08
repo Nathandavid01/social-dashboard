@@ -97,3 +97,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Probada en PostgreSQL 16 aislado mediante socket `/tmp/nate-review-socket`, sin acceso a datos de clientes. Fixture y assertions en scripts/tests. Casos: aprobación+historia; decisión obsoleta sin historia nueva; fallo de insert revierte estado; editor rechazado. Dos conexiones concurrentes produjeron una sola aprobación y un solo historial.
 - **No aplicada a Supabase ni conectada al server action**. Supabase CLI está autenticado y lista 16 proyectos, pero ninguno coincide con el host/ref de NEXT_PUBLIC_SUPABASE_URL de este checkout. No hay DATABASE_URL ni credencial directa de Postgres configurada. La acción actual sigue usando las escrituras separadas hasta resolver acceso y activar esta migración.
 - Antes de activar: verificar esquema y RLS reales; probar RPC autenticado por rol; migrar decideReview para llamar al RPC sin fallback no atómico; conservar notificaciones después del commit. Añadir test de autorización con las políticas reales. La migración local no demuestra que el fallo esté resuelto en la app.
+
+## v4.34 — Reabrir una aprobación durante un envío
+
+- Se reprodujo con cuatro regresiones fallidas: un envío activo o antiguo sin confirmar permitía quitar el archivo aprobado; estados publicada/descartada también se reabrían si faltaban timestamps históricos.
+- `reopenReviewForVerification` ahora exige ausencia de `posting_started_at` y excluye estados cerrados en la misma actualización condicional. Conserva la aprobación si otra operación ya adquirió el envío.
+- Validación: 11 pruebas focales pasan, TypeScript y merge-gate pasan. Preview de estados (simulación) servido HTTP 200 en `/previews/v4.34-reabrir-revision.html`.
+- Cambio local: no se modificaron datos de clientes ni se enviaron posts. La migración atómica 0074 sigue pendiente de acceso al proyecto de Nathan y no está activa.
