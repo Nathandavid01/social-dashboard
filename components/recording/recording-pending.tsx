@@ -1,6 +1,5 @@
 'use client'
-import {RecordingEditors} from './recording-editors'
-import {Dialog,DialogContent,DialogHeader,DialogTitle} from '@/components/ui/dialog'
+import Link from 'next/link'
 import {useAuth} from '@/lib/context/auth-context'
 import {clientDisplayName} from '@/lib/utils/client-display-name'
 import {useEffect,useState} from 'react'
@@ -9,7 +8,6 @@ import {getRecordingPendingTasks} from '@/lib/actions/recording-pending'
 export function RecordingPending({badge=false,collapsed=false,onSelect}:{badge?:boolean;collapsed?:boolean;onSelect?:(id:string)=>void}){
  const pathname=usePathname()
  const {role}=useAuth()
- const [editingSession,setEditingSession]=useState<string|null>(null)
  const [result,setResult]=useState<Awaited<ReturnType<typeof getRecordingPendingTasks>>|null>(null)
  const [retry,setRetry]=useState(0)
  useEffect(()=>{
@@ -35,7 +33,7 @@ export function RecordingPending({badge=false,collapsed=false,onSelect}:{badge?:
    {result.tasks.map(task=><div key={task.id} className="rounded-lg border bg-background"><button onClick={()=>onSelect?.(task.id)} className="block w-full rounded-lg border bg-background p-3 text-left hover:bg-accent">
     <span className="flex flex-wrap justify-between gap-2 text-sm"><strong>{clientDisplayName(task.title)}</strong><span className="text-muted-foreground">{task.date.slice(8)}/{task.date.slice(5,7)}</span></span>
     <span className="mt-2 flex flex-wrap gap-2">{task.reasons.map(reason=><span key={reason} className="rounded bg-orange-500/10 px-2 py-1 text-xs text-orange-700 dark:text-orange-300">{reason}</span>)}</span>
-   </button>{['owner','supervisor'].includes(role||'')&&<button className="m-3 mt-0 rounded-lg border border-violet-500/30 px-3 py-2 text-xs text-violet-600 dark:text-violet-300" onClick={()=>setEditingSession(task.id)}>Vincular Editores</button>}</div>)}
+   </button>{['owner','supervisor'].includes(role||'')&&<Link className="m-3 mt-0 inline-block rounded-lg border border-violet-500/30 px-3 py-2 text-xs text-violet-600 dark:text-violet-300" href="/clients/asignaciones">Asignar Editores En Clientes</Link>}</div>)}
   </div>}
- </details><Dialog open={!!editingSession} onOpenChange={open=>{if(!open)setEditingSession(null)}}><DialogContent className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>Vincular Editores Al Cliente</DialogTitle></DialogHeader>{editingSession&&<RecordingEditors sessionId={editingSession} onSaved={()=>{setEditingSession(null);setRetry(n=>n+1);window.dispatchEvent(new Event('recording-preparation-changed'))}}/>}</DialogContent></Dialog></>
+ </details></>
 }

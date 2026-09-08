@@ -177,7 +177,7 @@ export function AssignmentsTable({
           <thead>
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="pb-2 pr-3 font-medium">Cliente</th>
-              <th className="pb-2 pr-3 font-medium">Editor</th>
+              <th className="pb-2 pr-3 font-medium">Editor Principal</th>
               <th className="pb-2 pr-3 font-medium">Diseñador</th>
               <th className="pb-2 font-medium">Último cambio</th>
             </tr>

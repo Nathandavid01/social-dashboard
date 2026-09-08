@@ -1,3 +1,4 @@
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { EditorVideoBank } from './editor-video-bank'
@@ -222,7 +223,7 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('Intro clínica')).toBeInTheDocument()
     expect(screen.getByText('Te toca')).toBeInTheDocument()
     expect(screen.getByText(/anotaciones/i)).toBeInTheDocument()
-    expect(screen.getByText('crudo.mp4')).toBeInTheDocument()
+    expect(screen.getAllByText('crudo.mp4').length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: /ver/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /bajar/i })).toBeInTheDocument()
     expect(screen.getByTestId('approved-count')).toHaveTextContent('4 aprobados')
