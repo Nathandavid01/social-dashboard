@@ -178,7 +178,7 @@ export async function resubmitForReview(ideaId: string): Promise<{ ok?: true; wa
     .not('status','in','(archived,failed)').order('uploaded_at',{ascending:false}).limit(1)
   if (filesError || !files?.length) return { error: 'Sube el archivo editado corregido antes de enviarlo a revisión.' }
   const { data: changes, error: changesError } = await supabase.from('content_idea_activity')
-    .select('created_at').eq('content_idea_id',ideaId).eq('action','changes_requested').order('created_at',{ascending:false}).limit(1)
+    .select('created_at').eq('content_idea_id',ideaId).in('action',['changes_requested','client_requested_changes']).order('created_at',{ascending:false}).limit(1)
   if (changesError) return { error: 'No se pudo comprobar la última corrección.' }
   if (changes?.[0] && files[0].uploaded_at <= changes[0].created_at) return { error: 'Sube una nueva versión que atienda los comentarios antes de reenviar.' }
   const next = applyReviewDecision(idea.approval_status as IdeaApprovalStatus, 'submit')

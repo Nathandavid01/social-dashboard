@@ -71,3 +71,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Fallos devuelven warning, mostrado por la subida de corrección, overlay de revisión y botón de envío inicial. Se mantiene el estado guardado y se indica consultar Mi Día.
 - Pruebas locales cubren destinatarios, comentario, deduplicación y fallo de entrega. No se enviaron notificaciones reales: entrega end-to-end sigue pendiente.
 - Las notificaciones son best effort; falta outbox transaccional para garantizar entrega tras caídas. La atomicidad historia/estado continúa pendiente.
+
+## Continuación · Estado Real Y Comentarios Del Cliente
+
+- Lectura real: 493 ideas; 116 aprobadas sin approved_video_id (incluye históricas y descartadas). `review_verified`: 0 registros. No equivale a afirmar que nadie revisó los videos: falta la evidencia formal que exige el flujo nuevo.
+- 19 sesiones desde 8 septiembre, no canceladas: todas sin client_id y sin videographer_id. Requieren vinculación/asignación real; no se inventaron responsables.
+- v4.31 corrige resubmitForReview: consulta la última corrección entre changes_requested y client_requested_changes, como ya hace la tarjeta de revisión. Regresión reproduce un archivo anterior a un comentario de cliente y verifica que no escribe el estado.
+- La suite completa de v4.30 terminó; ver log local `/tmp/full-audit-current.log`. Los checks focales de v4.31 se ejecutaron después.

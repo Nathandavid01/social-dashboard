@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.31 — 2026-09-08
+
+**Los comentarios del cliente también exigen una versión corregida.**
+
+- Para reenviar, el archivo debe ser posterior al último comentario de corrección, venga del cliente o del revisor interno.
+- Una versión anterior al comentario del cliente ya no puede volver a revisión como corregida.
+
 ## v4.30 — 2026-09-08
 
 **Las decisiones de revisión avisan al siguiente responsable.**
