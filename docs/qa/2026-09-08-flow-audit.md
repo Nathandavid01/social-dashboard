@@ -51,3 +51,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - GET del scheduler limitado al blog del cliente; requiere coincidencia de media URL, caption, redes, autoPublish y no-draft. La escritura es condicional al claim, cliente, caption, archivo aprobado y ausencia de ID anterior. No envía POST ni declara publicada la idea.
 - 14 pruebas iniciales pasan (matcher, permisos, ID inexistente, concurrencia y formulario); preview real del componente verificado en escritorio/móvil con mocks explícitos. TypeScript y merge-gate pasan.
 - **Límites pendientes:** comprobar contra respuesta real de Metricool; media de estructura no reconocida se rechaza. Ventana de búsqueda ±365 días de la fecha planificada; no encontrar un post no prueba ausencia. Recuperación de un envío realmente no creado continúa pendiente: no existe aún liberación sin evidencia. El panel muestra hasta 100 casos.
+
+## Continuación · Verificación Real Y Lotes
+
+- Consultas de solo lectura a Supabase: 0 ideas con posting_started_at no nulo y metricool_post_id nulo al momento de consultar.
+- GET real del scheduler en dos blogs de clientes activos, septiembre 2026: ambos HTTP 200; 8 y 3 posts. Media es un array de strings, formato aceptado por el matcher. No se guardaron tokens ni contenido de posts en el informe. Esto valida el contrato de lectura, no una recuperación real ni coincidencias de archivos.
+- Reproducido corte de conexión en PublishCardButton: la promesa rechazada escapaba sin restaurar busy, y resultados vacíos contaban como éxito. v4.28 captura el error por video, conserva el conteo confirmado y continúa el lote sin reenviar la idea fallida.
+- No se enviaron publicaciones ni se modificaron registros externos en esta auditoría.

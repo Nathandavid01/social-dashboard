@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.28 — 2026-09-08
+
+**Un corte de conexión ya no deja el lote atascado en “Enviando”.**
+
+- El envío por lote informa el fallo y continúa con los otros videos.
+- Solo cuenta como enviado un resultado confirmado; una respuesta vacía no se presenta como éxito.
+- El aviso pide verificar Metricool antes de reintentar un envío incierto.
+
 ## v4.27 — 2026-09-08
 
 **Recupera el vínculo de un post existente sin volver a publicarlo.**

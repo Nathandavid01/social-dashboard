@@ -47,11 +47,19 @@ export function PublishCardButton({
     const errors: string[] = []
 
     for (const id of ideaIds) {
-      const res = await publishIdeaToMetricool(id, scheduleOverride, { watchedOn: 'entregas' })
-      if (res.error) errors.push(res.error)
-      else if (res.skipped) errors.push(res.skipped)
-      else ok++
-      setDone((d) => d + 1)
+      try {
+        const res = await publishIdeaToMetricool(id, scheduleOverride, { watchedOn: 'entregas' })
+        if (res?.error) errors.push(res.error)
+        else if (res?.skipped) errors.push(res.skipped)
+        else if (res?.ok === true) ok++
+        else errors.push('No se pudo confirmar el resultado. Verifica el envío en Metricool antes de reintentar.')
+      } catch {
+        // A transport failure may happen after the server created the post.
+        // Continue the independent videos, but never count or resend this one.
+        errors.push('Se perdió la conexión. Verifica el envío en Metricool antes de reintentar.')
+      } finally {
+        setDone((d) => d + 1)
+      }
     }
 
     setBusy(false)
