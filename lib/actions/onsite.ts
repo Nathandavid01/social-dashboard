@@ -190,6 +190,7 @@ export async function toggleShotRecorded(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   revalidatePath('/mi-dia')
   return { ok: true }
 }
@@ -216,6 +217,7 @@ export async function updateShotDetails(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -237,6 +239,7 @@ export async function removeShotFromSession(ideaId: string): Promise<{ ok?: true
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -269,7 +272,7 @@ export async function getAddableIdeas(
     .single()
   if (!session?.client_id) return { ideas: [] }
 
-  const [{ data: pipeline }, { data: lab }] = await Promise.all([
+  const [{ data: pipeline, error: pipelineError }, { data: lab, error: labError }] = await Promise.all([
     supabase
       .from('content_ideas')
       .select('id, title, hook')
@@ -287,6 +290,7 @@ export async function getAddableIdeas(
       .limit(50),
   ])
 
+  if (pipelineError || labError) return { error: 'No se pudieron cargar todas las ideas del cliente.' }
   return {
     ideas: [
       ...(pipeline ?? []).map((i) => ({
@@ -328,6 +332,7 @@ export async function addIdeaToSession(input: {
       .eq('id', input.ideaId)
     if (error) return { error: error.message }
     revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
     return { ok: true }
   }
 
@@ -362,6 +367,7 @@ export async function addIdeaToSession(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -472,6 +478,7 @@ export async function generateOnsiteIdeas(input: {
   if (created === 0) return { error: 'No había ideas del Lab ni la IA devolvió ninguna' }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { created }
 }
 
@@ -507,6 +514,7 @@ export async function updateOnsiteIdea(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }
 
@@ -529,6 +537,7 @@ export async function updateOnsiteAnnotations(input: {
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   revalidatePath('/revision')
   return { ok: true }
 }
@@ -561,5 +570,6 @@ export async function checkInOnsite(sessionId: string): Promise<{ ok?: true; err
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
+    revalidatePath('/recording-calendar')
   return { ok: true }
 }

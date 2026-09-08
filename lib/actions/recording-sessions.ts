@@ -1,9 +1,25 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import type { RecordingSession } from '@/lib/supabase/types'
+
+async function notifyAssignment(userId: string, sessionId: string, title: string, date: string) {
+  try {
+    const db = await createClient()
+    // Do not SELECT the inserted row: RLS allows reading only one's own inbox.
+    const { error } = await db.from('notifications').insert({
+      user_id: userId, kind: 'task_assigned', title: 'Nueva Grabación Asignada',
+      body: `${title} · ${date}. Revisa la hora, el lugar y las ideas en tu agenda.`,
+      link: `/onsite?s=${sessionId}`, severity: 'info', meta: { recording_session_id: sessionId },
+    })
+    return error ? 'La sesión se guardó, pero no se pudo enviar el aviso. La asignación está en la agenda personal.' : undefined
+  } catch {
+    return 'La sesión se guardó, pero el aviso no se pudo confirmar. Revisa la agenda personal.'
+  }
+}
 
 const SELECT = `
   *,
@@ -87,13 +103,20 @@ export async function createRecordingSession(values: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  const sessionId = randomUUID()
   const { error } = await supabase.from('recording_sessions').insert({
+    id: sessionId,
     ...values,
     created_by: user.id,
   })
   if (error) return { error: error.message }
+  const warning = values.videographer_id ? await notifyAssignment(values.videographer_id, sessionId, values.title, values.session_date) : undefined
   revalidatePath('/recording-calendar')
-  return { success: true }
+  revalidatePath('/mi-dia')
+  revalidatePath('/account/profile')
+  revalidatePath('/team/[memberId]', 'page')
+  revalidatePath('/onsite')
+  return warning ? { success: true, id: sessionId, warning } : { success: true, id: sessionId }
 }
 
 export async function updateRecordingSession(id: string, values: Partial<{
@@ -117,10 +140,20 @@ export async function updateRecordingSession(id: string, values: Partial<{
   }
 
   const supabase = await createClient()
+  const prior = values.videographer_id ? await supabase.from('recording_sessions')
+    .select('videographer_id,title,session_date').eq('id', id).single() : null
+  if (prior?.error) return { error: prior.error.message }
+  if (values.videographer_id && !prior?.data) return { error: 'Sesión No Encontrada' }
   const { error } = await supabase.from('recording_sessions').update(values).eq('id', id)
   if (error) return { error: error.message }
+  const warning = values.videographer_id && values.videographer_id !== prior?.data?.videographer_id
+    ? await notifyAssignment(values.videographer_id, id, values.title ?? prior?.data?.title ?? 'Grabación', values.session_date ?? prior?.data?.session_date ?? '') : undefined
   revalidatePath('/recording-calendar')
-  return { success: true }
+  revalidatePath('/mi-dia')
+  revalidatePath('/account/profile')
+  revalidatePath('/team/[memberId]', 'page')
+  revalidatePath('/onsite')
+  return warning ? { success: true, warning } : { success: true }
 }
 
 export async function deleteRecordingSession(id: string) {
@@ -135,5 +168,9 @@ export async function deleteRecordingSession(id: string) {
   const { error } = await supabase.from('recording_sessions').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/recording-calendar')
+  revalidatePath('/mi-dia')
+  revalidatePath('/account/profile')
+  revalidatePath('/team/[memberId]', 'page')
+  revalidatePath('/onsite')
   return { success: true }
 }

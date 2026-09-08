@@ -13,6 +13,7 @@ vi.mock('@/lib/actions/recording-sessions', () => ({
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('./gps-picker', () => ({ GpsPicker: () => null }))
 vi.mock('@/components/auth/role-gate', () => ({
+  useCurrentUserId: () => null,
   useHasPermission: (perm: string) => perm === 'recording.brief' && canAssign.current,
   RoleGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))

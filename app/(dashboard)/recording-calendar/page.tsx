@@ -4,7 +4,8 @@ import type { Client, Profile, ContentIdea } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function RecordingCalendarPage() {
+export default async function RecordingCalendarPage({ searchParams }: { searchParams: Promise<{ videographer?: string }> }) {
+  const { videographer } = await searchParams
   const supabase = await createClient()
 
   // Get the current month's sessions + clients + team members
@@ -26,7 +27,7 @@ export default async function RecordingCalendarPage() {
       .order('session_date')
       .order('start_time', { nullsFirst: true }),
     supabase.from('clients').select('id, name').eq('status', 'active').order('name'),
-    supabase.from('profiles').select('id, full_name').order('full_name'),
+    supabase.from('profiles').select('id, full_name').eq('status', 'active').order('full_name'),
     // Fetch all non-discarded/non-published ideas for active clients
     supabase
       .from('content_ideas')
@@ -44,6 +45,7 @@ export default async function RecordingCalendarPage() {
 
   return (
     <RecordingCalendarClient
+      initialVideographer={videographer}
       initialSessions={(sessionsResult.data ?? []) as unknown as Parameters<typeof RecordingCalendarClient>[0]['initialSessions']}
       clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
       teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}

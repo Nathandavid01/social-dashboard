@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
 import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -33,7 +33,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { SessionIdeasPanel } from '@/components/recording/session-ideas-panel'
-import { useHasPermission } from '@/components/auth/role-gate'
+import { useHasPermission, useCurrentUserId } from '@/components/auth/role-gate'
 import {
   Camera,
   Plus,
@@ -78,6 +78,7 @@ interface ExtendedSession extends RecordingSession {
 }
 
 interface RecordingCalendarClientProps {
+  initialVideographer?: string
   initialSessions: ExtendedSession[]
   clients: Pick<Client, 'id' | 'name'>[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
@@ -191,9 +192,11 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
           location_lng: locationLng,
         } : {}),
       }
+      let warning: string | undefined
       if (editing) {
         const result = await updateRecordingSession(editing.id, values)
         if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
+        warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
         onSaved({ ...editing, ...values, client, videographer })
@@ -201,10 +204,11 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
         const result = await createRecordingSession(values)
         if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
         // Optimistic: create a temp session object
+        warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
         onSaved({
-          id: Math.random().toString(),
+          id: result.id!,
           status: 'scheduled',
           created_by: '',
           created_at: new Date().toISOString(),
@@ -214,7 +218,7 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
           videographer,
         } as ExtendedSession)
       }
-      toast({ title: editing ? 'Sesión actualizada' : 'Sesión agregada' })
+      toast({ title: editing ? 'Sesión actualizada' : 'Sesión agregada', description: warning })
       onClose()
     })
   }
@@ -428,13 +432,14 @@ function SessionCard({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap }: RecordingCalendarClientProps) {
+export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap, initialVideographer }: RecordingCalendarClientProps) {
   const canAssign = useHasPermission('recording.brief')
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
   const [view, setView] = useState<'calendar' | 'list'>('calendar')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [search, setSearch] = useState('')
-  const [filterVideographer, setFilterVideographer] = useState('all')
+  const currentUserId = useCurrentUserId()
+  const [filterVideographer, setFilterVideographer] = useState(initialVideographer ?? (canAssign ? 'all' : currentUserId ?? 'all'))
   const [filterClient, setFilterClient] = useState('all')
   const [isPending, startTransition] = useTransition()
   const [showAdd, setShowAdd] = useState(false)
@@ -442,6 +447,8 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const [editing, setEditing] = useState<ExtendedSession | undefined>()
   const [ideasSession, setIdeasSession] = useState<ExtendedSession | undefined>()
   const [ideasMap, setIdeasMap] = useState<Record<string, ContentIdea[]>>(clientIdeasMap)
+  useEffect(() => { setSessions(initialSessions) }, [initialSessions])
+  useEffect(() => { setIdeasMap(clientIdeasMap) }, [clientIdeasMap])
   const { toast } = useToast()
   const conflicts = useMemo(
     () => videographerConflictsInRange(sessions, currentMonth),
@@ -528,8 +535,9 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     startTransition(async () => {
       const result = await updateRecordingSession(sessionId, { videographer_id: nextId })
       if (result.error) {
+        setSessions(sessions)
         toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
-      }
+      } else if (result.warning) toast({ title: 'Asignación Guardada', description: result.warning })
     })
   }
 

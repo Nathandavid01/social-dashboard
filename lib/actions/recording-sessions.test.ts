@@ -6,12 +6,17 @@ vi.mock('@/lib/auth/server', () => ({
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
+let notificationFails = false
+let writeFails = false
+let notification: Record<string, unknown> | null = null
+let previousVideographer: string | null = null
 let insertPayload: Record<string, unknown> | null = null
 let updatePayload: Record<string, unknown> | null = null
 let userId: string | null = 'admin-1'
 
 function makeSupabase() {
   const builder: Record<string, unknown> = {}
+  builder.single = vi.fn(async () => ({ data: { id: 's1', videographer_id: previousVideographer, title: 'Grabación', session_date: '2026-09-09' }, error: null }))
   builder.select = vi.fn(() => builder)
   builder.eq = vi.fn(() => builder)
   builder.order = vi.fn(() => builder)
@@ -25,10 +30,10 @@ function makeSupabase() {
     updatePayload = payload
     return builder
   })
-  builder.then = (resolve: (v: unknown) => unknown) => resolve({ data: [], error: null })
+  builder.then = (resolve: (v: unknown) => unknown) => resolve({ data: [], error: writeFails ? { message: "write failed" } : null })
   return {
     auth: { getUser: vi.fn(async () => ({ data: { user: userId ? { id: userId } : null }, error: null })) },
-    from: vi.fn(() => builder),
+    from: vi.fn((table: string) => table === 'notifications' ? { insert: async (payload: Record<string, unknown>) => { notification = payload; return { error: notificationFails ? { message: 'offline' } : null } } } : builder),
   }
 }
 
@@ -47,6 +52,10 @@ const baseCreate = {
 beforeEach(() => {
   requirePermission.mockReset().mockResolvedValue(undefined)
   insertPayload = null
+  notification = null
+  notificationFails = false
+  writeFails = false
+  previousVideographer = null
   updatePayload = null
   userId = 'admin-1'
   supabase = makeSupabase()
@@ -62,7 +71,7 @@ describe('createRecordingSession — gates', () => {
 
   it('sesión sin quién/dónde solo pide recording.create', async () => {
     const res = await createRecordingSession(baseCreate)
-    expect(res).toEqual({ success: true })
+    expect(res).toMatchObject({ success: true })
     expect(requirePermission).toHaveBeenCalledWith('recording.create')
     expect(requirePermission).not.toHaveBeenCalledWith('recording.brief')
     expect(insertPayload).toEqual(expect.objectContaining({ title: 'Blue Chiro - Recording' }))
@@ -91,7 +100,7 @@ describe('createRecordingSession — gates', () => {
 describe('updateRecordingSession — gates', () => {
   it('cambiar estado no pide recording.brief', async () => {
     const res = await updateRecordingSession('s1', { status: 'completed' })
-    expect(res).toEqual({ success: true })
+    expect(res).toMatchObject({ success: true })
     expect(requirePermission).toHaveBeenCalledWith('recording.create')
     expect(requirePermission).not.toHaveBeenCalledWith('recording.brief')
     expect(updatePayload).toEqual({ status: 'completed' })
@@ -122,4 +131,31 @@ describe('updateRecordingSession — gates', () => {
     expect(res.error).toMatch(/autorizado/i)
     expect(updatePayload).toBeNull()
   })
+})
+
+it('notifies the newly assigned videographer after saving', async () => {
+ await updateRecordingSession('s1', {videographer_id:'v2'})
+ expect(notification).toMatchObject({user_id:'v2',kind:'task_assigned',link:'/onsite?s=s1'})
+})
+it('does not notify again when the assignment is unchanged', async () => {
+ previousVideographer='v2'
+ await updateRecordingSession('s1', {videographer_id:'v2'})
+ expect(notification).toBeNull()
+})
+it('notifies a videographer assigned during creation', async () => {
+ await createRecordingSession({...baseCreate,videographer_id:'v1'})
+ expect(notification).toMatchObject({user_id:'v1',kind:'task_assigned'})
+})
+
+it('keeps a saved assignment and reports notification failure', async () => {
+ notificationFails=true
+ const result=await updateRecordingSession('s1',{videographer_id:'v2'})
+ expect(result).toMatchObject({success:true})
+ expect(result.warning).toContain('no se pudo enviar')
+})
+it('does not notify if the assignment fails to save', async () => {
+ writeFails=true
+ const result=await updateRecordingSession('s1',{videographer_id:'v2'})
+ expect(result.error).toBe('write failed')
+ expect(notification).toBeNull()
 })

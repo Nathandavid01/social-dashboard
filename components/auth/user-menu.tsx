@@ -193,6 +193,9 @@ export function UserMenu() {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/account/profile">Mi Perfil</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/account/security">
             <KeyRound className="mr-2 h-4 w-4" />
             Cambiar contraseña

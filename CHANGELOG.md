@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.12 — 2026-09-08
+
+**Las grabaciones asignadas llegan a la agenda y al perfil de cada persona.**
+
+- Mi Día y Mi Perfil muestran las próximas sesiones con fecha, hora, lugar y acceso al brief. También aparecen en el perfil del equipo.
+- Al asignar un videógrafo se crea un aviso en su campana; guardar la misma asignación no repite el aviso. El calendario permite abrir la agenda filtrada por persona.
+- Desde la sesión puedes buscar ideas existentes de On Site / Escribir Ideas y propuestas aprobadas del Lab. Para vincularlas, la sesión debe tener un cliente seleccionado.
+- Editar usa azul, guardar asignación usa verde e ideas usa violeta. Rojo se reserva para eliminar.
+
+![Sesión de grabación, datos de ejemplo](/changelog/v4.12-grabacion-asignada.png)
+
 ## v4.11 — 2026-09-08
 
 **El costo por imagen en Gráficas es visible solo para administradores.**
