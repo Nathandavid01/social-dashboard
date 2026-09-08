@@ -1,5 +1,6 @@
 'use client'
 
+import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { useState, useMemo, useTransition, useEffect } from 'react'
 import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
 import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
@@ -80,7 +81,7 @@ interface ExtendedSession extends RecordingSession {
 interface RecordingCalendarClientProps {
   initialVideographer?: string
   initialSessions: ExtendedSession[]
-  clients: Pick<Client, 'id' | 'name'>[]
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days'>>)[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
   clientIdeasMap: Record<string, ContentIdea[]>  // clientId → ideas
 }
@@ -118,7 +119,7 @@ function clientLabelFromTitle(title?: string | null): string | null {
 /** Nombre visible del chip: cliente, lista, título-si-es-cliente, o “Sin cliente”. */
 export function sessionChipClientLabel(
   session: { client?: { name?: string | null } | null; client_id?: string | null; title?: string | null },
-  clients: Pick<Client, 'id' | 'name'>[] = [],
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days'>>)[] = [],
 ): string {
   const fromJoin = session.client?.name?.trim()
   if (fromJoin) return fromJoin
@@ -150,13 +151,13 @@ interface SessionDialogProps {
   open: boolean
   onClose: () => void
   onSaved: (session: ExtendedSession) => void
-  clients: Pick<Client, 'id' | 'name'>[]
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days'>>)[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
   defaultDate?: string
   editing?: ExtendedSession
 }
 
-function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDate, editing }: SessionDialogProps) {
+export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDate, editing }: SessionDialogProps) {
   const canAssign = useHasPermission('recording.brief')
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
@@ -164,7 +165,9 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
   const [date, setDate] = useState(editing?.session_date ?? defaultDate ?? format(new Date(), 'yyyy-MM-dd'))
   const [clientId, setClientId] = useState(editing?.client_id ?? 'none')
   const [videographerId, setVideographerId] = useState(editing?.videographer_id ?? 'none')
-  const [title, setTitle] = useState(editing?.title ?? '')
+  const selectedClient = clients.find(c => c.id === clientId)
+  const title = selectedClient?.name ?? ''
+  const target = requiredForOnsite({ postingDays: selectedClient?.posting_days, ref: date ? new Date(date + 'T12:00:00') : new Date() })
   const [startTime, setStartTime] = useState(editing?.start_time ?? '')
   const [endTime, setEndTime] = useState(editing?.end_time ?? '')
   const [location, setLocation] = useState(editing?.location ?? '')
@@ -225,7 +228,7 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-4 w-4" />
@@ -234,10 +237,25 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs">Título de la Sesión *</Label>
-            <Input autoFocus placeholder="p.ej. Sesión de Marca — Casita Vieja" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente *</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger aria-label="Cliente" className="h-9"><SelectValue placeholder="Sin cliente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sin cliente</SelectItem>
+                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="session-client-title" className="text-xs">Título de la Sesión</Label>
+            <Input id="session-client-title" readOnly placeholder="Selecciona Un Cliente" value={title} />
+            <p className="text-xs text-muted-foreground">Se usa automáticamente el nombre del cliente.</p>
           </div>
 
+          <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-3" aria-live="polite">
+            <p className="font-semibold text-violet-600 dark:text-violet-300">{target.slotTarget > 0 ? `${target.slotTarget} Videos Para Grabar` : 'Videos Por Definir'}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{!selectedClient ? 'Selecciona El Cliente Para Ver La Meta De Grabación.' : !target.slotTarget ? 'Configura Los Días De Publicación Del Cliente Para Calcular La Meta.' : `${target.perMonth} publicaciones en el mes de la sesión × 1.5. Meta recomendada de On Site.`}</p>
+          </div>
           <div className={cn('grid gap-3', canAssign ? 'grid-cols-2' : 'grid-cols-1')}>
             <div className="space-y-1.5">
               <Label htmlFor="rc-fecha" className="text-xs flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Fecha *</Label>
@@ -276,16 +294,7 @@ function SessionDialog({ open, onClose, onSaved, clients, teamMembers, defaultDa
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs flex items-center gap-1"><Building2 className="h-3 w-3" /> Cliente</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Sin cliente" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin cliente</SelectItem>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {canAssign && (
             <div className="space-y-1.5">

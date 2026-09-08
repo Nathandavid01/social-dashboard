@@ -265,3 +265,13 @@ describe('namesLookLikeSamePerson', () => {
     expect(namesLookLikeSamePerson('María R.', 'Nora Fitness')).toBe(false)
   })
 })
+
+it('uses the selected client name as a read-only title and shows the recording target', () => {
+  render(<RecordingCalendarClient initialSessions={[session()]} clients={[{id:'c1',name:'Nora Fitness',posting_days:[2,4]}]} teamMembers={team} clientIdeasMap={{}} />)
+  fireEvent.click(screen.getByText('Nora Fitness'))
+  fireEvent.click(screen.getByRole('button',{name:/editar sesión/i}))
+  fireEvent.change(screen.getByLabelText(/fecha/i),{target:{value:'2026-09-08'}})
+  expect(screen.getByLabelText(/título de la sesión/i)).toHaveValue('Nora Fitness')
+  expect(screen.getByLabelText(/título de la sesión/i)).toHaveAttribute('readonly')
+  expect(screen.getByText('14 Videos Para Grabar')).toBeInTheDocument()
+})

@@ -84,7 +84,7 @@ export async function getOnsiteSessions(): Promise<{ sessions?: OnsiteSession[];
     sessions: rows.map((s) => {
       const raw = s.client as { name?: string; posting_days?: number[] | null } | { name?: string; posting_days?: number[] | null }[] | null
       const c = Array.isArray(raw) ? raw[0] : raw
-      const quota = requiredForOnsite({ postingDays: c?.posting_days })
+      const quota = requiredForOnsite({ postingDays: c?.posting_days, ref: new Date(s.session_date + 'T12:00:00') })
       const arrivedBy = (s as { arrived_by?: string | null }).arrived_by ?? null
       return {
         id: s.id,
