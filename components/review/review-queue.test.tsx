@@ -69,8 +69,10 @@ describe('ReviewQueue — one video at a time', () => {
   it('approving persists that video and moves to the next', async () => {
     renderQueue(three)
     await screen.findByText('Uno')
+    await waitFor(()=>expect(screen.getAllByRole('checkbox')[0]).toBeEnabled())
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
-    await waitFor(() => expect(onDecide).toHaveBeenCalledWith('v1', 'approve', ''))
+    await waitFor(() => expect(onDecide).toHaveBeenCalledWith('v1', 'approve', '', {videoFileId:'f1',captionsVerified:true,videoVerified:true}))
     expect(await screen.findByText('Dos')).toBeInTheDocument()
     expect(screen.getByText(/1 de 3 revisados/i)).toBeInTheDocument()
     await waitFor(() => expect(getPreviewUrl).toHaveBeenCalledWith('f2'))
@@ -84,7 +86,7 @@ describe('ReviewQueue — one video at a time', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /pedir cambios/i }))
     await waitFor(() =>
-      expect(onDecide).toHaveBeenCalledWith('v1', 'request_changes', 'Corta los primeros 2s'),
+      expect(onDecide).toHaveBeenCalledWith('v1', 'request_changes', 'Corta los primeros 2s', {videoFileId:'f1',captionsVerified:false,videoVerified:false}),
     )
     expect(await screen.findByText('Dos')).toBeInTheDocument()
   })
@@ -107,6 +109,8 @@ describe('ReviewQueue — one video at a time', () => {
   it('reaches the done state after deciding the last one', async () => {
     renderQueue([video({ id: 'v1', videoFileId: 'f1', title: 'Único' })])
     await screen.findByText('Único')
+    await waitFor(()=>expect(screen.getAllByRole('checkbox')[0]).toBeEnabled())
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
     expect(await screen.findByText(/no queda nada por revisar/i)).toBeInTheDocument()
   })
@@ -117,11 +121,11 @@ describe('ReviewQueue — one video at a time', () => {
     expect(await screen.findByText(/R2 no está configurado/i)).toBeInTheDocument()
   })
 
-  it('keeps the decision buttons usable even if the video will not load', async () => {
+  it('blocks approval if the video will not load', async () => {
     getPreviewUrl.mockResolvedValue({ error: 'boom' })
     renderQueue([video()])
     await screen.findByText(/boom/i)
-    expect(screen.getByRole('button', { name: /aprobar/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /aprobar/i })).toBeDisabled()
   })
 
   it('lets the reviewer step through without deciding', async () => {

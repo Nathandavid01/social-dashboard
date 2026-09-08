@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.15 — 2026-09-08
+
+**De la corrección a la publicación: revisión verificable y agenda con un clic explícito.**
+
+- Revisión exige confirmar los subtítulos incrustados y el video completo. La aprobación queda ligada al archivo visto; un comentario pendiente bloquea aprobar y pide devolver al editor.
+- El editor sube la corrección sobre la misma pieza y la reenvía a revisión, conservando fecha e historial. No se pierde el comentario si falla su guardado.
+- Agendar requiere aprobación, verificación del archivo, copy y fecha válida. Aprobar o guardar copy ya no agenda automáticamente.
+- Mi Día muestra las correcciones, verificaciones pendientes y un botón para agendar. Consulta Metricool por red para confirmar fechas vencidas, hoy y cobertura de los próximos 14 días.
+- Los resultados parciales, borradores y conexiones sin verificar permanecen visibles. El estado se consulta periódicamente mientras Mi Día está abierto.
+
+![Demo del flujo de revisión, datos simulados](/changelog/v4.15-flujo-publicacion.png)
+
 ## v4.14 — 2026-09-08
 
 **On Site muestra quién editará los videos del cliente.**

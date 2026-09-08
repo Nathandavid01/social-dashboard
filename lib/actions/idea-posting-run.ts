@@ -33,8 +33,9 @@ export async function runIdeaPost(
    * here — the browser's copy of the rule is a convenience, not the authority.
    */
   scheduleOverride?: string | null,
-  opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null },
+  opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null; manualScheduling?: boolean },
 ): Promise<PostResult> {
+  if (!opts?.manualScheduling) return { skipped: 'El equipo debe pulsar Agendar En Metricool después de completar la revisión.' }
   // Before any DB work: a bad override must not burn the posting claim.
   let overrideIso: string | null = null
   if (scheduleOverride) {
@@ -101,6 +102,15 @@ export async function runIdeaPost(
     blogId,
   )
   if (!readiness.ready) return { skipped: readiness.reason }
+
+  const { data: verifiedRows, error: verifiedError } = await supabase.from('content_idea_activity')
+    .select('metadata').eq('content_idea_id', ideaId).eq('action', 'review_verified')
+    .order('created_at', { ascending: false }).limit(50)
+  const verified = (verifiedRows ?? []).some(row => {
+    const m = row.metadata as { videoFileId?: string; captionsVerified?: boolean; videoVerified?: boolean } | null
+    return m?.videoFileId === edited?.id && m?.captionsVerified === true && m?.videoVerified === true
+  })
+  if (verifiedError || !verified) return { skipped: 'Falta verificar el archivo final con subtítulos en Revisión antes de agendar.' }
 
   const schedule = overrideIso
     ? { ok: true as const, iso: overrideIso }

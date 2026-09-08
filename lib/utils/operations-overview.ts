@@ -19,17 +19,19 @@ export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:Overvi
   const sent=!!i.metricool_post_id||!!i.posted_at
   const edited=ideaHasEntregasEditedVideo(i)
   const approved=i.approval_status==='approved'
+  const reviewVerified=(i as IdeaWithPipeline & {reviewVerified?:boolean}).reviewVerified===true
+  const reviewNote=(i as IdeaWithPipeline & {reviewNote?:string}).reviewNote
   const copy=!!i.generated_caption?.trim()
   const approvedVideoId=(i as IdeaWithPipeline & {approved_video_id?:string|null}).approved_video_id
   const choice=resolveVideoForPublish(i.videos.filter(v=>v.status!=='failed'),{ideaId:i.id,approvedVideoId})
   const sealed=!!choice.video&&!choice.skipped
   const raw=i.videos.some(v=>v.kind==='raw'&&v.status!=='archived'&&v.status!=='failed')
   const schedule=automaticPublishSchedule(i.publish_date,c.posting_time,now)
-  const ready=edited&&approved&&copy&&sealed&&!!c.metricool_blog_id?.trim()&&schedule.ok&&!sent&&!published
-  const needsReview=edited&&!approved&&i.approval_status!=='revision_needed'&&!published&&!sent
+  const ready=edited&&approved&&reviewVerified&&copy&&sealed&&!!c.metricool_blog_id?.trim()&&schedule.ok&&!sent&&!published
+  const needsReview=edited&&i.approval_status==='submitted'&&!published&&!sent
   const correction=edited&&i.approval_status==='revision_needed'&&!published&&!sent
-  const state=published?'Publicado':sent?'Enviado · Falta Verificar':!edited?(raw?'Falta Subir Editado':'Falta Subir Crudo'):correction?'Corregir Video':!approved?'Revisar Video':!sealed?'Revisar Archivo Aprobado':!copy?'Completar Copy':!c.metricool_blog_id?.trim()?'Conectar Metricool':!schedule.ok?schedule.error:'Listo Para Agendar'
-  const item:OverviewItem={id:i.id,title:i.title||'Sin Título',client:c.name,owner:i.assignee?.full_name||'Sin Asignar',date:i.publish_date,state,done:published,href:`/produccion/idea/${i.id}`,checks:[{label:'Crudo',done:raw},{label:'Editado',done:edited},{label:'Aprobado',done:approved},{label:'Copy',done:copy},{label:'Enviado',done:sent||published},{label:'Publicado',done:published}]}
+  const state=published?'Publicado':sent?'Enviado · Falta Verificar':!edited?(raw?'Falta Subir Editado':'Falta Subir Crudo'):correction?`Corregir Video${reviewNote?' · '+reviewNote:''}`:!approved?'Revisar Video':!sealed?'Revisar Archivo Aprobado':!reviewVerified?'Verificar Video Y Subtítulos':!copy?'Completar Copy':!c.metricool_blog_id?.trim()?'Conectar Metricool':!schedule.ok?schedule.error:'Listo Para Agendar'
+  const item:OverviewItem={id:i.id,title:i.title||'Sin Título',client:c.name,owner:i.assignee?.full_name||'Sin Asignar',date:i.publish_date,state,done:published,href:`/produccion/idea/${i.id}`,checks:[{label:'Crudo',done:raw},{label:'Editado',done:edited},{label:'Video Y Subtítulos',done:reviewVerified},{label:'Aprobado',done:approved},{label:'Copy',done:copy},{label:'Enviado',done:sent||published},{label:'Publicado',done:published}]}
   if(i.publish_date===today){result.today.push(item);if(!edited&&!published&&!sent)result.uploads.push(item)}
   if(i.publish_date&&i.publish_date<today&&!published&&!sent)result.overdue.push(item)
   if(needsReview)result.reviews.push(item)

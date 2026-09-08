@@ -6,7 +6,7 @@ import {getOperationsOverview} from './operations-overview'
 beforeEach(()=>{
  vi.clearAllMocks();h.allowed.mockResolvedValue(true);h.fail=false;h.count=0
  h.create.mockResolvedValue({auth:{getUser:async()=>({data:{user:{id:'owner'}}})},from(table:string){
- const q:any={select:()=>q,eq:()=>q,order:()=>q,limit:()=>q,single:async()=>({data:{status:'active',approval_status:'approved'},error:null}),then:(resolve:any)=>resolve({data:[],count:h.count,error:h.fail&&table==='content_ideas'?{message:'offline'}:null})};return q
+ const q:any={select:()=>q,eq:()=>q,in:()=>q,order:()=>q,limit:()=>q,single:async()=>({data:{status:'active',approval_status:'approved'},error:null}),then:(resolve:any)=>resolve({data:[],count:h.count,error:h.fail&&table==='content_ideas'?{message:'offline'}:null})};return q
  }})
 })
 it('rejects a viewer without team-overview permission before fetching any team data',async()=>{

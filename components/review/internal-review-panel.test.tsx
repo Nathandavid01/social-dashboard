@@ -34,12 +34,13 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
 
   it('el revisor ve las dos decisiones; devolver espera al comentario', () => {
     renderPanel()
-    expect(screen.getByRole('button', { name: /aprobar/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /aprobar/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /pedir cambios/i })).toBeDisabled()
   })
 
   it('approving reports the decision', () => {
     renderPanel()
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
     expect(onDecision).toHaveBeenCalledWith('approve', '')
   })
@@ -75,6 +76,7 @@ describe('InternalReviewPanel — the reviewer watches and decides', () => {
 
   it('aprobar no exige comentario', () => {
     renderPanel()
+    screen.getAllByRole('checkbox').forEach(c=>fireEvent.click(c))
     fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
     expect(onDecision).toHaveBeenCalledWith('approve', '')
   })

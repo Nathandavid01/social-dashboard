@@ -7,7 +7,7 @@ import { runIdeaPost, type PostResult } from '@/lib/actions/idea-posting-run'
 type Result = PostResult
 
 /** Emergency off-switch for the auto-on-approval behavior (manual button still works). */
-const AUTOPOST_ON_APPROVAL_DISABLED = process.env.METRICOOL_AUTOPOST_ON_APPROVAL === 'false'
+const AUTOPOST_ON_APPROVAL_DISABLED = true // Agendar requires an explicit staff click.
 
 /**
  * Manual "Publicar a Metricool" — gated by `posting.publish`. Publishes a
@@ -27,7 +27,7 @@ export async function publishIdeaToMetricool(
   }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  return runIdeaPost(supabase, ideaId, user?.id ?? null, scheduleOverride, opts)
+  return runIdeaPost(supabase, ideaId, user?.id ?? null, scheduleOverride, { ...opts, manualScheduling: true })
 }
 
 /** Outcome of the best-effort auto-post, so the approval UI can tell the user. */

@@ -4,7 +4,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 const today='2026-09-08'
 const client={id:'c',name:'Arasibo',posting_days:[2],metricool_blog_id:'blog',posting_time:'18:00'}
 const file={id:'f',kind:'edited',storage_provider:'entregas-r2',status:'uploaded',drive_file_id:'edited.mp4'}
-const idea=(over:Record<string,unknown>={})=>({id:'i',client_id:'c',title:'Video de hoy',status:'producida',approval_status:'approved',generated_caption:'Copy',publish_date:today,approved_video_id:'f',videos:[file],...over} as unknown as IdeaWithPipeline)
+const idea=(over:Record<string,unknown>={})=>({id:'i',client_id:'c',title:'Video de hoy',status:'producida',approval_status:'approved',generated_caption:'Copy',publish_date:today,approved_video_id:'f',reviewVerified:true,videos:[file],...over} as unknown as IdeaWithPipeline)
 const build=(ideas:IdeaWithPipeline[])=>buildOperationsOverview(ideas,[client],[{id:'e',full_name:'Alexa',role:'editor',status:'active'}],today,Date.parse(today+'T14:00:00Z'))
 describe('operations overview',()=>{
  it('keeps overdue work outside today and catches cadence without a dated video',()=>{

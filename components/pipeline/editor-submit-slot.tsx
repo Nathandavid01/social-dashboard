@@ -38,6 +38,7 @@ export function EditorSubmitSlot({
 
   return (
     <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">Entrega el archivo final con subtítulos incrustados, audio y marca revisados. Las correcciones se suben sobre la misma pieza en la sección de devoluciones.</p>
       <SubmitVideoCard clients={clients} onSubmit={submit} pending={running} />
 
       {rows.length > 0 && (

@@ -146,8 +146,8 @@ describe('ReviewActions', () => {
     expect(screen.getByText(/cambiar tu decisión/i)).toBeInTheDocument()
   })
 
-  it('warns that approving cannot be undone BEFORE the client clicks', () => {
+  it('explains that the team schedules after review', () => {
     render(<ReviewActions token={TOKEN} currentStatus="pending" expired={false} />)
-    expect(screen.getByText(/no se puede\s+deshacer/i)).toBeInTheDocument()
+    expect(screen.getByText(/El equipo verificará/i)).toBeInTheDocument()
   })
 })

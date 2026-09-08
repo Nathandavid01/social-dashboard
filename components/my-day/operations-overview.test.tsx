@@ -1,3 +1,6 @@
+vi.mock('./workflow-refresh',()=>({WorkflowRefresh:()=>null}))
+import { vi } from 'vitest'
+vi.mock('./publication-checklist',()=>({PublicationChecklist:()=>null}))
 import {it,expect} from 'vitest'
 import {render,screen} from '@testing-library/react'
 import {OperationsOverviewView} from './operations-overview'

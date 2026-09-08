@@ -46,6 +46,8 @@ export function InternalReviewPanel({
   onDecision: (decision: 'approve' | 'request_changes', note: string) => void
   pending?: boolean
 }) {
+  const [captionsChecked, setCaptionsChecked] = useState(false)
+  const [videoChecked, setVideoChecked] = useState(false)
   const [note, setNote] = useState('')
 
   const state = reviewState(video.approval_status)
@@ -109,8 +111,10 @@ export function InternalReviewPanel({
               rows={3}
               className="w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
+            <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={captionsChecked} onChange={e=>setCaptionsChecked(e.target.checked)} disabled={!video.editedUrl}/>Los Subtítulos Están Visibles, Correctos Y Sin Cortes</label>
+            <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={videoChecked} onChange={e=>setVideoChecked(e.target.checked)} disabled={!video.editedUrl}/>Revisé El Video Completo, Audio, Marca Y Cierre</label>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" disabled={pending} onClick={() => onDecision('approve', note.trim())}>
+              <Button size="sm" disabled={pending || !video.editedUrl || !captionsChecked || !videoChecked || !!note.trim()} onClick={() => onDecision('approve', note.trim())}>
                 <Check className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Aprobar
               </Button>
@@ -127,7 +131,7 @@ export function InternalReviewPanel({
             </div>
             {!note.trim() && (
               <p className="text-[11px] text-muted-foreground">
-                Escribe un comentario para poder pedir cambios. Aprobar no lo necesita.
+                Si hay algo que corregir, escribe el comentario y pide cambios. La aprobación requiere ambas verificaciones.
               </p>
             )}
           </div>

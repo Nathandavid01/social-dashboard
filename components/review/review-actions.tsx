@@ -152,10 +152,8 @@ export function ReviewActions({
 
           {/* Approving is irreversible — say so BEFORE the click, not after. */}
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Al aprobar, el video queda <strong className="font-medium text-foreground">programado
-            para publicarse</strong> en su fecha, y{' '}
-            <strong className="font-medium text-foreground">la aprobación ya no se puede
-            deshacer</strong>. Si tienes dudas, déjanos un comentario antes de aprobar.
+            Al aprobar, confirmas tu revisión. El equipo verificará el video y el copy
+            antes de agendarlo en Metricool para la fecha acordada.
           </p>
         </>
       ) : canChange ? (

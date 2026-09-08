@@ -59,8 +59,8 @@ export function ReviewOverlay({
   )
 
   const onDecide = useCallback(
-    async (ideaId: string, decision: 'approve' | 'request_changes', note: string) => {
-      const res = await decideReview({ ideaId, decision, note })
+    async (ideaId: string, decision: 'approve' | 'request_changes', note: string, verification?: {videoFileId:string|null;captionsVerified:boolean;videoVerified:boolean}) => {
+      const res = await decideReview({ ideaId, decision, note, ...verification })
       if (res.error) throw new Error(res.error)
       // Refresh so the board reflects the new column right away.
       router.refresh()

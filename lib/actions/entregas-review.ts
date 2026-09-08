@@ -26,7 +26,7 @@ export async function getEntregaReviewVideos(
   const { data, error } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, hook, approval_status, created_by, client:clients(name), videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at)',
+      'id, title, hook, approval_status, created_by, client:clients(name), videos:content_idea_videos!content_idea_videos_idea_id_fkey(id, kind, storage_provider, uploaded_at, status, uploaded_by)',
     )
     .eq('client_id', clientId)
     .eq('approval_status', 'submitted')
@@ -34,7 +34,7 @@ export async function getEntregaReviewVideos(
 
   if (error) return { error: error.message }
 
-  const ids = (data ?? []).map((i) => i.created_by).filter(Boolean) as string[]
+  const ids = (data ?? []).flatMap(i => [i.created_by,...(i.videos??[]).map((v:any)=>v.uploaded_by)]).filter(Boolean) as string[]
   const names = new Map<string, string>()
   if (ids.length > 0) {
     const { data: profiles } = await supabase
@@ -48,15 +48,15 @@ export async function getEntregaReviewVideos(
     // Mismo criterio que el tablero: sin archivo editado en R2 no hay nada que
     // revisar. Antes entraban las filas de subidas fallidas y, como se ordena
     // por antigüedad, la cola abría justo en una de ellas — tarjeta sin video.
-    const files = (i.videos ?? []) as { kind: string; storage_provider: string }[]
-    return files.some((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2')
+    const files = (i.videos ?? []) as { kind: string; storage_provider: string; status?:string; uploaded_by?:string|null }[]
+    return files.some((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2' && !['failed','archived'].includes(f.status ?? ''))
   })
 
   const videos: QueueVideo[] = rows.map((i) => {
-    const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string }[]
+    const files = (i.videos ?? []) as { id: string; kind: string; storage_provider: string; uploaded_at: string; status?:string; uploaded_by?:string|null }[]
     // Newest edited file in R2 — re-uploads leave the older rows behind.
     const edited = files
-      .filter((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2')
+      .filter((f) => f.kind === 'edited' && f.storage_provider === 'entregas-r2' && !['failed','archived'].includes(f.status ?? ''))
       .sort((a, b) => (a.uploaded_at < b.uploaded_at ? 1 : -1))[0]
 
     const client = i.client as { name?: string } | null
@@ -66,8 +66,8 @@ export async function getEntregaReviewVideos(
       title: i.title?.trim() || i.hook?.trim() || 'Sin título',
       clientName: client?.name ?? 'Cliente',
       approval_status: i.approval_status,
-      submitted_by: i.created_by,
-      submittedByName: i.created_by ? names.get(i.created_by) ?? null : null,
+      submitted_by: edited?.uploaded_by ?? i.created_by,
+      submittedByName: names.get(edited?.uploaded_by ?? i.created_by ?? '') ?? null,
     }
   })
 
