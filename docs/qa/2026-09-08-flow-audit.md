@@ -112,3 +112,10 @@ No se enviaron mensajes, se programaron posts ni se cambiaron datos de clientes 
 - Dos regresiones UI reprodujeron falta de refresh parcial y botón bloqueado por excepción de transporte. Ahora se actualiza el tablero y siempre se libera el botón sin inventar éxito.
 - Suite completa: 371 archivos pasan, 1 omitido; 2944 pruebas pasan, 3 omitidas. TypeScript, merge-gate y diff-check pasan. Preview de avisos simulado servido HTTP 200: `/previews/v4.35-descartar-entregas.html`.
 - Local, sin publicación ni cambios en datos reales. Pendiente: auditar autorización de descarte por propietario/asignación (la acción conserva el permiso existente `video.upload`); aplicar/verificar la revisión atómica cuando haya acceso a Supabase de Nathan; validar el flujo autenticado completo.
+
+## v4.36 — Autorización de descarte
+
+- El control anterior `video.upload` permitía a editores, videógrafos y diseñadores descartar entregas mediante la acción directa. Cinco pruebas UI también comprobaron que el botón se mostraba a roles no administrativos.
+- Permiso dedicado `video.discard`, solo para owner/supervisor. Se exige en la acción y se consulta en el botón. Subir archivos no concede el poder de cerrar trabajo.
+- Ocho regresiones fallaron antes del cambio; 98 pruebas focales pasan después (acción, botón, tablero, permisos). TypeScript, merge-gate y diff-check pasan.
+- Preview explicativo: `/previews/v4.36-permisos-descarte.html` (simulación). No se ejecutaron descartes con datos reales. Falta validar las políticas de base de datos y las pantallas autenticadas por rol; esto verifica la autorización en los puntos de entrada de la aplicación, no constituye una auditoría completa de RLS.

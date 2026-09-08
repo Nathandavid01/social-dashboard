@@ -224,7 +224,7 @@ export async function discardEntregaVideos(
   ideaIds: string[],
 ): Promise<{ ok?: true; count?: number; error?: string }> {
   try {
-    await requirePermission('video.upload')
+    await requirePermission('video.discard')
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -22,6 +23,7 @@ export function DiscardCardButton({
   ideaIds: string[]
   clientName: string
 }) {
+  const canDiscard = useHasPermission('video.discard')
   const router = useRouter()
   const { toast } = useToast()
   const [armed, setArmed] = useState(false)
@@ -60,6 +62,8 @@ export function DiscardCardButton({
       setArmed(false)
     }
   }
+
+  if (!canDiscard) return null
 
   return (
     <button

@@ -32,6 +32,7 @@ export type Permission =
   | 'video_reviews.write'
   | 'video.upload'
   | 'video.approve'
+  | 'video.discard'
   | 'production.read'
   | 'production.edit'
   // Calendar
@@ -102,7 +103,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'clients.sms.send',
     'tasks.read.all', 'tasks.create', 'tasks.edit', 'tasks.delete',
     'ideas.read', 'ideas.edit',
-    'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve',
+    'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',

@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.36 — 2026-09-08
+
+**Solo dueños y supervisores pueden quitar videos de Entregas.**
+
+- El permiso para subir videos ya no permite descartar trabajo.
+- El botón de quitar se oculta para los demás roles.
+- La misma restricción se verifica al guardar, aunque se intente llamar la acción directamente.
+
 ## v4.35 — 2026-09-08
 
 **Quitar del tablero conserva los videos enviados o pendientes de Metricool.**
