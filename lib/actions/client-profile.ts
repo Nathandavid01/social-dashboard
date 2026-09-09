@@ -15,7 +15,7 @@ import { syncSchedulesToPostingDays } from '@/lib/actions/sync-posting-cadence'
 
 /**
  * The fields in `clients` are gated by different permissions:
- *   - billing/contract fields           → 'clients.billing.edit' / 'clients.contract.edit' (owner)
+ *   - billing/contract fields           → 'clients.billing.edit' / 'clients.contract.edit' (owner; supervisor has contract.edit)
  *   - everything else (brand/owner/etc) → 'clients.brand.edit'
  * This function inspects the patch and throws if the user can't touch the
  * fields they're trying to change.
@@ -28,7 +28,7 @@ async function authorizeProfilePatch(patch: Record<string, unknown>): Promise<vo
   const touchesBilling  = 'monthly_fee' in patch
 
   if (touchesContract && !hasPermission(role, 'clients.contract.edit')) {
-    throw new Error('Solo Owners pueden editar el contrato.')
+    throw new Error('No tienes permiso para editar el contrato.')
   }
   if (touchesBilling && !hasPermission(role, 'clients.billing.edit')) {
     throw new Error('Solo Owners pueden editar facturación.')
