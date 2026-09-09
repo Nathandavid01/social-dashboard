@@ -4,10 +4,8 @@ import { OnsiteCallsheetPdf } from './onsite-callsheet-pdf'
 import type { OnsiteSession } from '@/lib/actions/onsite'
 import type { OnsiteShot } from '@/lib/onsite/shot-types'
 
-vi.mock('@/components/reportes/download-pdf-button', () => ({
-  DownloadPdfButton: ({ fileName }: { fileName: string }) => (
-    <button type="button">Descargar PDF {fileName}</button>
-  ),
+vi.mock('@/lib/hooks/use-toast', () => ({
+  useToast: () => ({ toast: vi.fn() }),
 }))
 
 const session = {
@@ -43,10 +41,11 @@ const shots: OnsiteShot[] = [
 ]
 
 describe('OnsiteCallsheetPdf', () => {
-  it('renders download when there are shots', () => {
+  it('shows download button when there are shots, without mounting call sheet yet', () => {
     render(<OnsiteCallsheetPdf session={session} shots={shots} />)
     expect(screen.getByRole('button', { name: /Descargar PDF/i })).toBeInTheDocument()
-    expect(document.getElementById('onsite-callsheet-s1')).toBeTruthy()
+    expect(document.getElementById('onsite-callsheet-s1')).toBeNull()
+    expect(screen.queryByText('Hook cocina')).not.toBeInTheDocument()
   })
 
   it('renders nothing without shots', () => {
