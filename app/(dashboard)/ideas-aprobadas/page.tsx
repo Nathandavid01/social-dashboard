@@ -6,6 +6,7 @@ import { getClients } from '@/lib/actions/clients'
 import { PageHeader } from '@/components/shared/page-header'
 import { ApprovedIdeasList } from '@/components/ideas/approved-ideas-list'
 import { ApprovedIdeasCaptions } from '@/components/ideas/approved-ideas-captions'
+import { IdeasClientPdf } from '@/components/ideas/ideas-client-pdf'
 import { QuickCaptionDialog, type QuickCaptionClient } from '@/components/ideas/quick-caption-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { ApprovedIdea } from '@/lib/actions/idea-feedback-types'
@@ -65,7 +66,8 @@ export default async function IdeasAprobadasPage() {
           <TabsTrigger value="ideas">Ideas</TabsTrigger>
           <TabsTrigger value="captions">Captions y Metricool</TabsTrigger>
         </TabsList>
-        <TabsContent value="ideas" className="mt-4">
+        <TabsContent value="ideas" className="mt-4 space-y-6">
+          <IdeasClientPdf ideas={ideas} />
           <ApprovedIdeasList ideas={ideas} />
         </TabsContent>
         <TabsContent value="captions" className="mt-4 space-y-4">
