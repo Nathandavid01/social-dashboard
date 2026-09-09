@@ -25,6 +25,7 @@ import {
   type OnsiteSession,
 } from '@/lib/actions/onsite'
 import { IdeaVideoLoader } from '@/components/recording/idea-video-loader'
+import { OnsiteCallsheetPdf } from '@/components/onsite/onsite-callsheet-pdf'
 
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
@@ -252,6 +253,7 @@ export function OnsiteStudio({
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <OnsiteCallsheetPdf session={active} shots={shots} />
               {canRecord && !alreadyCheckedIn(currentUserId, active.arrivedById ? [{ userId: active.arrivedById }] : []) && !active.arrivedAt && (
                 <button
                   type="button"
