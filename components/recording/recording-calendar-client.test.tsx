@@ -313,3 +313,32 @@ it('explains that a client link is needed before resolving its editor',()=>{
  fireEvent.click(screen.getByRole('button',{name:'Lista'}))
  expect(screen.getByText('Editor · Vincula El Cliente')).toBeInTheDocument()
 })
+
+
+describe('lista — click para editar (SessionCard)', () => {
+  it('al pulsar la tarjeta de lista abre SessionIdeasPanel', () => {
+    render(<RecordingCalendarClient initialSessions={[session()]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Lista' }))
+    fireEvent.click(screen.getByText('Grabación Nora'))
+    expect(screen.getByRole('button', { name: /editar sesión/i })).toBeInTheDocument()
+  })
+
+  it('muestra Editar siempre visible (no solo en hover) y abre el formulario', () => {
+    render(<RecordingCalendarClient initialSessions={[session({ start_time: '09:30:00' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Lista' }))
+    const editBtn = screen.getByRole('button', { name: /^editar$/i })
+    expect(editBtn).toBeInTheDocument()
+    expect(editBtn.className).toMatch(/opacity-100/)
+    fireEvent.click(editBtn)
+    expect(screen.getByText('Editar Sesión de Grabación')).toBeInTheDocument()
+  })
+
+  it('el menú ⋮ permanece visible sin hover', () => {
+    render(<RecordingCalendarClient initialSessions={[session()]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Lista' }))
+    const more = screen.getByRole('button', { name: /más acciones/i })
+    expect(more).toBeInTheDocument()
+    expect(more.className).toMatch(/opacity-100/)
+    expect(more.className).not.toMatch(/opacity-0/)
+  })
+})
