@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import type { ContentIdea, RecordingSession } from '@/lib/supabase/types'
 import { SessionIdeasPanel } from './session-ideas-panel'
 
@@ -117,5 +117,24 @@ describe('SessionIdeasPanel — subida de crudo', () => {
       />,
     )
     expect(screen.queryByTestId('subida')).not.toBeInTheDocument()
+  })
+})
+
+
+describe('SessionIdeasPanel — editar desde nombre del cliente', () => {
+  it('al pulsar el nombre del cliente llama onEdit', () => {
+    const onEdit = vi.fn()
+    render(
+      <SessionIdeasPanel
+        open
+        onClose={() => {}}
+        session={session()}
+        clientIdeas={[]}
+        onIdeasChange={() => {}}
+        onEdit={onEdit}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /blue/i }))
+    expect(onEdit).toHaveBeenCalledTimes(1)
   })
 })
