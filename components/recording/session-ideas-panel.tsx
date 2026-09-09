@@ -405,9 +405,14 @@ export function SessionIdeasPanel({
         {/* Session meta */}
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground pb-3 border-b border-border">
           {session.client && (
-            <span className="flex items-center gap-1 text-primary font-medium">
+            <button
+              type="button"
+              onClick={onEdit}
+              className="flex items-center gap-1 text-primary font-medium hover:underline"
+              title="Editar sesión"
+            >
               <Building2 className="h-3 w-3" /> {session.client.name}
-            </span>
+            </button>
           )}
           <span className="capitalize">{sessionDate}</span>
           {session.start_time && (

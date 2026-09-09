@@ -49,6 +49,7 @@ import {
   Clock,
   MapPin,
   MoreHorizontal,
+  Pencil,
   Trash2,
   CheckCircle2,
   X,
@@ -351,7 +352,19 @@ function SessionCard({
   const sc = statusConfig[session.status] ?? statusConfig.scheduled
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border bg-card px-4 py-3 hover:bg-muted/20 transition-colors group">
+    <div
+      role="button"
+      tabIndex={0}
+      data-slot="session-card"
+      onClick={onOpenIdeas}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpenIdeas()
+        }
+      }}
+      className="flex items-start gap-3 rounded-lg border bg-card px-4 py-3 hover:bg-muted/20 transition-colors group cursor-pointer"
+    >
       <Camera className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -409,6 +422,7 @@ function SessionCard({
         )}
         {/* Ideas button */}
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onOpenIdeas() }}
           className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors"
         >
@@ -416,32 +430,43 @@ function SessionCard({
           {ideaCount > 0 ? `${ideaCount} idea${ideaCount !== 1 ? 's' : ''} asignada${ideaCount !== 1 ? 's' : ''}` : 'Ver checklist de ideas'}
         </button>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100">
-            <MoreHorizontal className="h-3.5 w-3.5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onEdit}>Editar</DropdownMenuItem>
-          <DropdownMenuItem onClick={onOpenIdeas}>
-            <BookOpen className="mr-2 h-4 w-4" /> Ideas / Checklist
-          </DropdownMenuItem>
-          {session.status !== 'completed' && (
-            <DropdownMenuItem onClick={() => onStatusChange('completed')}>
-              <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> Marcar Completada
+      <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1 px-2 text-xs opacity-100"
+          onClick={onEdit}
+        >
+          <Pencil className="h-3.5 w-3.5" /> Editar
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 opacity-100" aria-label="Más acciones">
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onEdit}>Editar</DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenIdeas}>
+              <BookOpen className="mr-2 h-4 w-4" /> Ideas / Checklist
             </DropdownMenuItem>
-          )}
-          {session.status !== 'cancelled' && (
-            <DropdownMenuItem onClick={() => onStatusChange('cancelled')}>
-              <X className="mr-2 h-4 w-4 text-muted-foreground" /> Cancelar Sesión
+            {session.status !== 'completed' && (
+              <DropdownMenuItem onClick={() => onStatusChange('completed')}>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> Marcar Completada
+              </DropdownMenuItem>
+            )}
+            {session.status !== 'cancelled' && (
+              <DropdownMenuItem onClick={() => onStatusChange('cancelled')}>
+                <X className="mr-2 h-4 w-4 text-muted-foreground" /> Cancelar Sesión
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
+              <Trash2 className="mr-2 h-4 w-4" /> Eliminar
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-            <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   )
 }
