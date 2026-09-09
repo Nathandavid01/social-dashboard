@@ -40,6 +40,7 @@ export function OnsiteStudio({
   shots: initialShots,
   addable,
   canBrief,
+  canAddIdeas = false,
   canRecord,
   canUpload,
   today,
@@ -50,6 +51,8 @@ export function OnsiteStudio({
   shots: OnsiteShot[]
   addable: AddableIdea[]
   canBrief: boolean
+  /** Añadir ideas existentes a la sesión (recording.create). */
+  canAddIdeas?: boolean
   canRecord: boolean
   canUpload: boolean
   today: string
@@ -274,7 +277,7 @@ export function OnsiteStudio({
                   {generando ? 'Generando con IA…' : `Generar ${huecos} ideas con IA`}
                 </button>
               )}
-              {canBrief && (
+              {(canBrief || canAddIdeas) && (
                 <button
                   type="button"
                   onClick={() => setAñadiendo((v) => !v)}
@@ -300,7 +303,7 @@ export function OnsiteStudio({
           </div>
         </header>
 
-        {añadiendo && canBrief && (
+        {añadiendo && (canBrief || canAddIdeas) && (
           <ul className="max-h-48 space-y-1 overflow-y-auto rounded-2xl border bg-card p-2">
             {addable.length === 0 ? (
               <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">
@@ -351,7 +354,7 @@ export function OnsiteStudio({
               <EmptyIdeaSlot
                 key={`hueco-${i}`}
                 n={shots.length + i + 1}
-                canBrief={canBrief}
+                canBrief={canBrief || canAddIdeas}
                 onFill={() => setAñadiendo(true)}
               />
             ))}
