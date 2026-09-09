@@ -22,9 +22,10 @@ export default async function OnsitePage({
   await requirePermission('recording.read')
 
   const { s: sessionId } = await searchParams
-  const [{ sessions, error }, canBrief, canRecord, canUpload, currentUserId] = await Promise.all([
+  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId] = await Promise.all([
     getOnsiteSessions(),
     currentUserHas('recording.brief'),
+    currentUserHas('recording.create'),
     currentUserHas('recording.complete'),
     currentUserHas('video.upload'),
     getEffectiveUserId(),
@@ -97,6 +98,7 @@ export default async function OnsitePage({
           shots={shots ?? []}
           addable={ideas ?? []}
           canBrief={canBrief}
+          canAddIdeas={canAddIdeas}
           canRecord={canRecord}
           canUpload={canUpload}
           today={today}
