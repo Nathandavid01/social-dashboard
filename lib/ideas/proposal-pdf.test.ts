@@ -9,3 +9,11 @@ it('exporta todas las ideas con varias páginas, sin notas internas', () => {
   expect(output).toContain('Idea 19')
   expect(output).not.toContain('INTERNAL_SECRET')
 })
+
+it('incluye el objetivo que la idea busca lograr', () => {
+  const pdf = buildProposalPdf('Miti Miti', '2026-09-10', [{
+    id: 'goal', title: 'Promoción de temporada', objective: 'Aumentar reservas para septiembre',
+    hook: '¿Ya tienes tu mesa?', referenceUrl: null,
+  }])
+  expect(pdf.output()).toContain('Aumentar reservas para septiembre')
+})

@@ -147,16 +147,18 @@ export async function getOnsiteShots(
       : query.eq('recording_session_id', sessionId)
     return query.neq('status', 'descartada').order('created_at', { ascending: true }).order('id')
   }
-  const withNotes = 'id, title, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status'
-  const withoutNotes = 'id, title, hook, visual_brief, rationale, shot_type, reference_url, status'
+  const withNotes = 'id, title, objective, funnel_stage, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status'
+  const withoutNotes = 'id, title, objective, funnel_stage, hook, visual_brief, rationale, shot_type, reference_url, status'
   const first = await load(withNotes)
   const loaded = first.error ? await load(withoutNotes) : first
   if (loaded.error) return { error: loaded.error.message }
 
   return {
-    shots: ((loaded.data ?? []) as unknown as Array<{ id: string; title: string | null; hook: string | null; visual_brief: string | null; rationale: string | null; reference_url: string | null; shot_type: string | null; status: string }>).map((i) => ({
+    shots: ((loaded.data ?? []) as unknown as Array<{ id: string; title: string | null; objective?: string | null; funnel_stage?: string | null; hook: string | null; visual_brief: string | null; rationale: string | null; reference_url: string | null; shot_type: string | null; status: string }>).map((i) => ({
       id: i.id,
       title: i.title?.trim() || i.hook?.trim() || 'Sin título',
+      objective: i.objective?.trim() || null,
+      funnelStage: i.funnel_stage?.trim() || null,
       hook: i.hook,
       visualBrief: (i.visual_brief as string | null) ?? null,
       shootingNotes: (i as { shooting_notes?: string | null }).shooting_notes ?? null,

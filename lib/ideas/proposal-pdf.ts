@@ -33,12 +33,15 @@ export function buildProposalPdf(clientName: string, date: string, ideas: Propos
       return (pdf.splitTextToSize(text, width) as string[]).length * size * 1.45
     }
     const bodyHeight = measured(`${String(n + 1).padStart(2, '0')}  ${idea.title}`, 13, true) + 6
+      + (idea.objective ? 8 + measured(`Objetivo: ${idea.objective}`, 11, true) : 0)
       + (idea.hook ? measured(idea.hook, 11) : 0)
       + (idea.visualBrief ? 8 + measured(idea.visualBrief, 11) : 0)
       + (!idea.hook && !idea.visualBrief ? measured('Sin descripción adicional.', 10) : 0)
       + (idea.referenceUrl ? 8 + measured(`Referencia: ${idea.referenceUrl}`, 9) : 0)
     if (y + Math.min(bodyHeight, 200) > h - 70) page()
     paragraph(`${String(n + 1).padStart(2, '0')}  ${idea.title}`, 13, true); y += 6
+    if (idea.objective) { paragraph(`Objetivo: ${idea.objective}`, 11, true); y += 2 }
+    if (idea.funnelStage) paragraph(`Etapa: ${idea.funnelStage}`, 9)
     if (idea.hook) paragraph(idea.hook)
     if (idea.visualBrief) { y += 8; paragraph(idea.visualBrief) }
     if (!idea.hook && !idea.visualBrief) paragraph('Sin descripción adicional.', 10)

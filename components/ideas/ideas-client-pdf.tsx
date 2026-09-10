@@ -183,6 +183,12 @@ function IdeaPdfBlock({ idea }: { idea: ApprovedIdea }) {
         {meta && <span className="text-[11px] font-medium text-zinc-500">{meta}</span>}
       </div>
       <h3 className="text-base font-bold tracking-tight text-zinc-900">{idea.title}</h3>
+      {idea.objective && (
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+          <p className="font-semibold">Objetivo · Qué queremos lograr</p>
+          <p className="mt-0.5 leading-relaxed">{idea.objective}</p>
+        </div>
+      )}
       {idea.hook && <p className="mt-2 text-sm font-medium text-zinc-800">{idea.hook}</p>}
       <dl className="mt-3 space-y-2 text-xs text-zinc-600">
         {idea.visual_brief && (
