@@ -7,6 +7,7 @@ import { Target, Radio, Clock, AlertTriangle, ChevronDown, CalendarOff, CheckCir
 import { cn } from '@/lib/utils'
 import {
   percent,
+  postingTimeToMinutes,
   type CadenciaData,
   type CadenciaStatus,
   type CadenciaClientRow,
@@ -34,6 +35,16 @@ function tintFor(id: string): string {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
   return AVATAR_TINTS[h % AVATAR_TINTS.length]
+}
+
+function periodFor(row: CadenciaClientRow): { label: string; suggested: boolean } {
+  const minutes = postingTimeToMinutes(row.postingTime)
+  if (minutes !== null) return { label: minutes < 12 * 60 ? 'AM' : 'PM', suggested: false }
+  const industry = (row.industry ?? '').toLowerCase()
+  if (/restaurante|restaurant|comida|cafeter[ií]a|bar|panader[ií]a|food/.test(industry)) {
+    return { label: 'AM sugerido', suggested: true }
+  }
+  return { label: 'Sin hora', suggested: true }
 }
 
 const plural = (n: number, sing: string, plu: string) => `${n} ${n === 1 ? sing : plu}`
@@ -103,6 +114,7 @@ function Dot({ status }: { status: CadenciaStatus }) {
 }
 
 function ClientRow({ row }: { row: CadenciaClientRow }) {
+  const period = periodFor(row)
   return (
     <div className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/40">
       <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold', tintFor(row.clientId))}>
@@ -117,7 +129,7 @@ function ClientRow({ row }: { row: CadenciaClientRow }) {
       <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
         {row.published}/{row.planned}
       </span>
-      <span className="flex w-[92px] shrink-0 justify-end">
+      <span className="flex w-[112px] shrink-0 justify-end">
         {row.failedCount > 0 ? (
           <span title="Metricool reportó un fallo al publicar" className="flex items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-500">
             <AlertTriangle className="h-3 w-3" /> falló
@@ -140,9 +152,13 @@ function ClientRow({ row }: { row: CadenciaClientRow }) {
           <span className="text-xs text-green-500">✓</span>
         ) : row.postingTime ? (
           <span className="flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" /> {row.postingTime}
+            <Clock className="h-3 w-3" /> {row.postingTime} · {period.label}
           </span>
-        ) : null}
+        ) : (
+          <span className={cn('whitespace-nowrap text-[10px]', period.suggested ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground')}>
+            {period.label}
+          </span>
+        )}
       </span>
       <span className="hidden w-[52px] shrink-0 justify-end gap-1 sm:flex">
         {row.platforms.map((p) => (

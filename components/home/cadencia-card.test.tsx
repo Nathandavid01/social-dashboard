@@ -108,6 +108,19 @@ describe('CadenciaCard', () => {
     expect(link).toHaveAttribute('href', 'https://instagram.com/p/abc')
   })
 
+  it('identifica AM o PM y sugiere AM para restaurantes sin hora', () => {
+    const data = buildCadencia([
+      client({ clientId: 'am', clientName: 'Café AM', postingDays: [4], postingTime: '10:00' }),
+      client({ clientId: 'pm', clientName: 'Café PM', postingDays: [4], postingTime: '18:00' }),
+      client({ clientId: 'restaurant', clientName: 'Restaurante', industry: 'Restaurante', postingDays: [4] }),
+    ], WEEK, TODAY, 8 * 60)
+    render(<CadenciaCard data={data} />)
+    const drill = screen.getByTestId('cadencia-drilldown')
+    expect(within(drill).getByText(/10:00 · AM/)).toBeInTheDocument()
+    expect(within(drill).getByText(/18:00 · PM/)).toBeInTheDocument()
+    expect(within(drill).getByText('AM sugerido')).toBeInTheDocument()
+  })
+
   it('flags a failed publish reported by Metricool', () => {
     const data = buildCadencia(
       [client({ clientId: 'c1', clientName: 'Estancias', postingDays: [4], errorDates: [TODAY] })],
