@@ -33,3 +33,21 @@ describe('clientProfilePatchSchema — posting time + schedule', () => {
     expect(clientProfilePatchSchema.safeParse({ posting_schedule: { '9': '09:00' } }).success).toBe(false)
   })
 })
+
+describe('clientProfilePatchSchema — metricool_blog_id', () => {
+  it('accepts a numeric blog id string', () => {
+    const r = clientProfilePatchSchema.safeParse({ metricool_blog_id: '6170821' })
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.metricool_blog_id).toBe('6170821')
+  })
+
+  it('normalizes empty metricool_blog_id to null (unlink)', () => {
+    const r = clientProfilePatchSchema.safeParse({ metricool_blog_id: '' })
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.metricool_blog_id).toBeNull()
+  })
+
+  it('rejects an oversized blog id', () => {
+    expect(clientProfilePatchSchema.safeParse({ metricool_blog_id: 'x'.repeat(101) }).success).toBe(false)
+  })
+})

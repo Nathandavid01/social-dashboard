@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { diffImportableBrands } from './metricool-import-core'
+import { diffImportableBrands, suggestMetricoolBlogs } from './metricool-import-core'
 
 describe('diffImportableBrands', () => {
   const brands = [
@@ -50,5 +50,24 @@ describe('diffImportableBrands', () => {
       existing,
     )
     expect(out.map((b) => b.name)).toEqual(['Brand Nuevo'])
+  })
+})
+
+
+describe('suggestMetricoolBlogs', () => {
+  const blogs = [
+    { id: '1', name: 'Lucky Pet' },
+    { id: '2', name: 'Casita Vieja PR' },
+    { id: '3', name: 'Mojito Mojito' },
+    { id: '4', name: 'Unrelated Brand' },
+  ]
+
+  it('ranks exact and partial name matches first', () => {
+    const hits = suggestMetricoolBlogs('Lucky Pet', blogs)
+    expect(hits[0]?.id).toBe('1')
+  })
+
+  it('returns empty when nothing overlaps', () => {
+    expect(suggestMetricoolBlogs('Zzz Unknown', blogs)).toEqual([])
   })
 })

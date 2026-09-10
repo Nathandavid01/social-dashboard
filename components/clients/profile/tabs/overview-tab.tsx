@@ -6,7 +6,8 @@ import { LastMeetingEditor } from '../last-meeting-editor'
 import { ColorSwatches } from '../color-swatches'
 import { VideoThresholdCard } from '../video-threshold-card'
 import { ClientRunwayWidget } from '@/components/runway/client-runway-widget'
-import { CalendarDays, User, Users, Palette, Video } from 'lucide-react'
+import { CalendarDays, User, Users, Palette, Video, Globe } from 'lucide-react'
+import { MetricoolBlogEditor } from '../metricool-blog-editor'
 import { ClientOnboardingCard } from '../../client-onboarding-card'
 import { clientOnboardingStatus } from '@/lib/utils/client-onboarding'
 import type { Client } from '@/lib/supabase/types'
@@ -66,6 +67,20 @@ export function OverviewTab({ client, pipeline }: Props) {
         </CardHeader>
         <CardContent>
           <PostingDaysEditor clientId={client.id} initial={client.posting_days ?? []} />
+        </CardContent>
+      </Card>
+
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Globe className="h-4 w-4" /> Metricool</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MetricoolBlogEditor
+            clientId={client.id}
+            clientName={client.name}
+            initialBlogId={client.metricool_blog_id}
+          />
         </CardContent>
       </Card>
 

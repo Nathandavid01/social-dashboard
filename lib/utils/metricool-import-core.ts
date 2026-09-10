@@ -46,3 +46,32 @@ export function diffImportableBrands(brands: BrandLike[], clients: ClientLike[])
   }
   return out.sort((a, b) => a.name.localeCompare(b.name, 'es'))
 }
+
+/** Rank Metricool blogs for linking to an existing client by loose name match. */
+export function suggestMetricoolBlogs(
+  clientName: string,
+  blogs: BrandLike[],
+  opts?: { limit?: number },
+): BrandLike[] {
+  const target = norm(clientName)
+  if (!target) return []
+  const limit = opts?.limit ?? 5
+  const scored = blogs
+    .map((b) => {
+      const n = norm(b.name)
+      let score = 0
+      if (!n) score = 0
+      else if (n === target) score = 100
+      else if (n.includes(target) || target.includes(n)) score = 80
+      else {
+        const tw = new Set(target.split(' '))
+        const bw = n.split(' ')
+        const hit = bw.filter((w) => tw.has(w)).length
+        score = hit === 0 ? 0 : Math.round((hit / Math.max(tw.size, bw.length)) * 60)
+      }
+      return { b, score }
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score || a.b.name.localeCompare(b.b.name, 'es'))
+  return scored.slice(0, limit).map((x) => x.b)
+}
