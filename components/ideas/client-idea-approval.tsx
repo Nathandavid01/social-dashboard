@@ -27,6 +27,7 @@ function DecisionCard({ token, idea, number, response }: { token: string; idea: 
   }
   return <section className="space-y-4 rounded-xl border border-zinc-200 p-5">
     <h2 className="text-lg font-semibold">{number}. {idea.title}</h2>
+    {idea.objective && <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950"><p className="font-semibold">Objetivo · Qué queremos lograr</p><p className="mt-0.5 whitespace-pre-wrap">{idea.objective}</p></div>}
     {idea.hook && <p className="whitespace-pre-wrap text-sm leading-relaxed">{idea.hook}</p>}
     {idea.visualBrief && <p className="whitespace-pre-wrap text-sm leading-relaxed">{idea.visualBrief}</p>}
     {idea.referenceUrl && /^https?:\/\//i.test(idea.referenceUrl) && <a href={idea.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline">Ver referencia</a>}

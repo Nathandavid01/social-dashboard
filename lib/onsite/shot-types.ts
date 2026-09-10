@@ -21,6 +21,8 @@ export function shotTypeLabel(key: string | null | undefined): string {
 export interface OnsiteShot {
   id: string
   title: string
+  objective?: string | null
+  funnelStage?: string | null
   hook: string | null
   /** Qué grabar, paso a paso. */
   visualBrief: string | null

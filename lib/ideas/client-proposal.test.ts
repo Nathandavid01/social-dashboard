@@ -5,7 +5,7 @@ describe('propuesta para aprobación del cliente', () => {
     const original = { id: 'i1', title: '¿Otro cafecito?', hook: 'Texto original', visualBrief: null, referenceUrl: null, shootingNotes: 'No enviar', viralityScore: 9 }
     const snapshot = proposalSnapshot([original])
     original.hook = 'Editado después'
-    expect(snapshot).toEqual([{ id: 'i1', title: '¿Otro cafecito?', hook: 'Texto original', visualBrief: null, referenceUrl: null }])
+    expect(snapshot).toEqual([{ id: 'i1', title: '¿Otro cafecito?', objective: null, funnelStage: null, hook: 'Texto original', visualBrief: null, referenceUrl: null }])
   })
   it('acepta aprobar o rechazar, y limita comentarios', () => {
     expect(validateDecision('approved', 'Me gusta')).toBe(true)
