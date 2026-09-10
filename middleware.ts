@@ -6,6 +6,14 @@ import { VIEW_AS_COOKIE, resolveEffectiveRole, canStartViewAs, isViewAsEditorId,
 import type { UserRole } from '@/lib/supabase/types'
 
 export async function middleware(request: NextRequest) {
+  // Public client proposals use a capability validated in the server route.
+  if (request.nextUrl.pathname.startsWith('/aprobar-ideas/')) {
+    const response = NextResponse.next({ request })
+    response.headers.set('Referrer-Policy', 'no-referrer')
+    response.headers.set('Cache-Control', 'no-store')
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return response
+  }
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

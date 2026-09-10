@@ -24,6 +24,7 @@ import {
   type AddableIdea,
   type OnsiteSession,
 } from '@/lib/actions/onsite'
+import { ProposalPdfButton } from '@/components/ideas/proposal-pdf-button'
 import { IdeaVideoLoader } from '@/components/recording/idea-video-loader'
 import { OnsiteCallsheetPdf } from '@/components/onsite/onsite-callsheet-pdf'
 
@@ -99,7 +100,7 @@ export function OnsiteStudio({
     const siguiente = !shot.recorded
     setShots((ss) => ss.map((s) => (s.id === shot.id ? { ...s, recorded: siguiente } : s)))
     busy(shot.id, true)
-    const res = await toggleShotRecorded({ ideaId: shot.id, recorded: siguiente })
+    const res = await toggleShotRecorded({ ideaId: shot.id, recorded: siguiente, sessionId: active.id })
     busy(shot.id, false)
     if (res.error) {
       setShots((ss) => ss.map((s) => (s.id === shot.id ? { ...s, recorded: shot.recorded } : s)))
@@ -279,6 +280,7 @@ export function OnsiteStudio({
                   {generando ? 'Generando con IA…' : `Generar ${huecos} ideas con IA`}
                 </button>
               )}
+              {canBrief && <ProposalPdfButton sessionId={active.id} clientName={active.clientName} date={active.date} ideas={shots} />}
               {(canBrief || canAddIdeas) && (
                 <button
                   type="button"

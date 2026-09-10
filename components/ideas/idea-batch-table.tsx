@@ -1,5 +1,6 @@
 'use client'
 
+import { ProposalPdfButton } from './proposal-pdf-button'
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Loader2, Trash2, ExternalLink, Check } from 'lucide-react'
@@ -170,9 +171,10 @@ export function IdeaBatchTable({
       </section>
 
       <section className="space-y-2 rounded-xl border bg-card p-3">
-        <h2 className="text-[13px] font-semibold">
-          Sin grabar <span className="text-muted-foreground tabular-nums">({existing.length})</span>
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[13px] font-semibold">Sin grabar <span className="text-muted-foreground tabular-nums">({existing.length})</span></h2>
+          <ProposalPdfButton clientId={clientId} clientName={clientName} date={new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(new Date())} ideas={existing} />
+        </div>
         {existing.length === 0 ? (
           <p className="py-4 text-center text-[12px] text-muted-foreground">
             Este cliente no tiene ideas pendientes.

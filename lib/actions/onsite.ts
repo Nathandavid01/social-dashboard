@@ -125,26 +125,36 @@ export async function getOnsiteShots(
   }
 
   const supabase = await createClient()
+  const { data: session, error: sessionError } = await supabase
+    .from('recording_sessions').select('id, client_id, status').eq('id', sessionId).single()
+  if (sessionError || !session) return { error: sessionError?.message ?? 'Sesión no encontrada' }
+
+  // Pending ideas belong to the client. Only its next scheduled session shows
+  // them automatically; opening an old call sheet must not change its history.
+  let includePending = false
+  if (session.client_id && session.status === 'scheduled') {
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(new Date())
+    const { data: next, error } = await supabase.from('recording_sessions')
+      .select('id').eq('client_id', session.client_id).eq('status', 'scheduled')
+      .gte('session_date', today).order('session_date').order('id').limit(1)
+    if (error) return { error: error.message }
+    includePending = next?.[0]?.id === sessionId
+  }
+  const load = (fields: string) => {
+    let query = supabase.from('content_ideas').select(fields)
+    query = includePending
+      ? query.or(`recording_session_id.eq.${session.id},and(client_id.eq.${session.client_id},recording_session_id.is.null,status.in.(idea,asignada))`)
+      : query.eq('recording_session_id', sessionId)
+    return query.neq('status', 'descartada').order('created_at', { ascending: true }).order('id')
+  }
   const withNotes = 'id, title, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status'
   const withoutNotes = 'id, title, hook, visual_brief, rationale, shot_type, reference_url, status'
-  const first = await supabase
-    .from('content_ideas')
-    .select(withNotes)
-    .eq('recording_session_id', sessionId)
-    .neq('status', 'descartada')
-    .order('created_at', { ascending: true })
-  const loaded = first.error
-    ? await supabase
-      .from('content_ideas')
-      .select(withoutNotes)
-      .eq('recording_session_id', sessionId)
-      .neq('status', 'descartada')
-      .order('created_at', { ascending: true })
-    : first
+  const first = await load(withNotes)
+  const loaded = first.error ? await load(withoutNotes) : first
   if (loaded.error) return { error: loaded.error.message }
 
   return {
-    shots: (loaded.data ?? []).map((i) => ({
+    shots: ((loaded.data ?? []) as unknown as Array<{ id: string; title: string | null; hook: string | null; visual_brief: string | null; rationale: string | null; reference_url: string | null; shot_type: string | null; status: string }>).map((i) => ({
       id: i.id,
       title: i.title?.trim() || i.hook?.trim() || 'Sin título',
       hook: i.hook,
@@ -170,6 +180,7 @@ export async function getOnsiteShots(
 export async function toggleShotRecorded(input: {
   ideaId: string
   recorded: boolean
+  sessionId?: string
 }): Promise<{ ok?: true; error?: string }> {
   try {
     await requirePermission('recording.complete')
@@ -180,7 +191,7 @@ export async function toggleShotRecorded(input: {
   const supabase = await createClient()
   const { data: idea } = await supabase
     .from('content_ideas')
-    .select('status')
+    .select('status, client_id, recording_session_id')
     .eq('id', input.ideaId)
     .single()
   if (!idea) return { error: 'Toma no encontrada' }
@@ -192,9 +203,19 @@ export async function toggleShotRecorded(input: {
   if (input.recorded && idea.status === 'grabada') return { ok: true }
   if (!input.recorded && idea.status !== 'grabada') return { ok: true }
 
+  if (input.sessionId) {
+    const { data: session, error } = await supabase.from('recording_sessions')
+      .select('client_id, status').eq('id', input.sessionId).single()
+    if (error || !session || session.status === 'cancelled' || session.client_id !== idea.client_id
+      || (idea.recording_session_id && idea.recording_session_id !== input.sessionId)) {
+      return { error: 'La idea no pertenece a esta grabación.' }
+    }
+  }
+
   const { data: updated, error } = await supabase
     .from('content_ideas')
     .update({
+      ...(input.sessionId ? { recording_session_id: input.sessionId } : {}),
       status: input.recorded ? 'grabada' : 'idea',
       recording_date: input.recorded ? todayISOInTimeZone('America/Puerto_Rico') : null,
     })
@@ -207,6 +228,7 @@ export async function toggleShotRecorded(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   revalidatePath('/mi-dia')
   return { ok: true }
 }
@@ -234,6 +256,7 @@ export async function updateShotDetails(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -256,6 +279,7 @@ export async function removeShotFromSession(ideaId: string): Promise<{ ok?: true
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -350,6 +374,7 @@ export async function addIdeaToSession(input: {
     if (error) return { error: error.message }
     revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+    revalidatePath('/escribir-ideas')
     return { ok: true }
   }
 
@@ -385,6 +410,7 @@ export async function addIdeaToSession(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -496,6 +522,7 @@ export async function generateOnsiteIdeas(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { created }
 }
 
@@ -532,6 +559,7 @@ export async function updateOnsiteIdea(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -555,6 +583,7 @@ export async function updateOnsiteAnnotations(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   revalidatePath('/revision')
   return { ok: true }
 }
@@ -588,5 +617,6 @@ export async function checkInOnsite(sessionId: string): Promise<{ ok?: true; err
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
+  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
