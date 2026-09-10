@@ -1,0 +1,123 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PipelineCard } from '../pipeline-card'
+import { PostingDaysEditor } from '../posting-days-editor'
+import { OwnerForm } from '../owner-form'
+import { LastMeetingEditor } from '../last-meeting-editor'
+import { ColorSwatches } from '../color-swatches'
+import { VideoThresholdCard } from '../video-threshold-card'
+import { ClientRunwayWidget } from '@/components/runway/client-runway-widget'
+import { CalendarDays, User, Users, Palette, Video, Globe } from 'lucide-react'
+import { MetricoolBlogEditor } from '../metricool-blog-editor'
+import { ClientOnboardingCard } from '../../client-onboarding-card'
+import { clientOnboardingStatus } from '@/lib/utils/client-onboarding'
+import type { Client } from '@/lib/supabase/types'
+import type { ClientPipeline } from '@/lib/utils/content-pipeline'
+
+interface Props {
+  client: Client
+  pipeline: ClientPipeline | null
+}
+
+export function OverviewTab({ client, pipeline }: Props) {
+  const hasVideos =
+    !!pipeline && pipeline.ideas + pipeline.porGrabar + pipeline.porEditar + pipeline.porPublicar > 0
+  const onboarding = clientOnboardingStatus({
+    status: client.status,
+    metricool_blog_id: client.metricool_blog_id,
+    posting_days: client.posting_days,
+    brand_voice: client.brand_voice,
+    hasVideos,
+  })
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* Onboarding checklist — visible only while setup is incomplete */}
+      {!onboarding.complete && (
+        <div className="md:col-span-2 xl:col-span-3">
+          <ClientOnboardingCard clientId={client.id} status={onboarding} />
+        </div>
+      )}
+
+      {/* Pipeline spans full width on mobile, half on md, full on xl */}
+      <div className="md:col-span-2 xl:col-span-3">
+        {pipeline && <PipelineCard data={pipeline} title="Pipeline de contenido" linkable clientId={client.id} />}
+      </div>
+
+      {pipeline && <ClientRunwayWidget pipeline={pipeline} />}
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '60ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" /> Owner</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <OwnerForm
+            clientId={client.id}
+            initial={{
+              owner_name: client.owner_name,
+              owner_email: client.owner_email,
+              owner_phone: client.owner_phone,
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="h-4 w-4" /> Días de posting</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PostingDaysEditor clientId={client.id} initial={client.posting_days ?? []} />
+        </CardContent>
+      </Card>
+
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Globe className="h-4 w-4" /> Metricool</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MetricoolBlogEditor
+            clientId={client.id}
+            clientName={client.name}
+            initialBlogId={client.metricool_blog_id}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Último meeting</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LastMeetingEditor
+            clientId={client.id}
+            initialAt={client.last_meeting_at}
+            initialNotes={client.last_meeting_notes}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '210ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Video className="h-4 w-4" /> Buffer de videos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <VideoThresholdCard
+            clientId={client.id}
+            initialThreshold={client.video_threshold ?? 0}
+            accumulated={(pipeline?.porEditar ?? 0) + (pipeline?.porPublicar ?? 0)}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in duration-500 md:col-span-2 xl:col-span-3" style={{ animationDelay: '240ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Palette className="h-4 w-4" /> Brand colors</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ColorSwatches colors={client.brand_colors} />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
