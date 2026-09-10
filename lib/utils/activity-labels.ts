@@ -78,6 +78,17 @@ export const ACTION_META: Record<
       return note ? `pidió cambios: "${note}"` : 'pidió cambios'
     },
   },
+  versioned: {
+    icon: History,
+    tone: 'text-violet-500',
+    verb: (m) => {
+      const reason = typeof m.reason === 'string' ? m.reason : ''
+      if (reason === 'brief_updated') return 'guardó una versión del brief'
+      if (reason === 'title_updated') return 'guardó una versión del título'
+      if (reason === 'discarded') return 'guardó una versión al descartar'
+      return 'guardó una versión de la idea'
+    },
+  },
 }
 
 /** Fallback icon for unknown/legacy actions. */

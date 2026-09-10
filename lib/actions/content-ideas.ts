@@ -7,6 +7,7 @@ import type {
   ClientAsset, ContentIdeaActivity,
 } from '@/lib/supabase/types'
 import { logIdeaActivity, getIdeaActivity } from '@/lib/utils/idea-activity'
+import { snapshotIdeaBeforeUpdate } from '@/lib/utils/idea-versions'
 import { computeIdeaProgress, type IdeaProgress } from '@/lib/utils/idea-progress'
 import { stageToStatus, type PipelineStageKey } from '@/lib/utils/pipeline-stages'
 import { getIdeaVideos } from './idea-videos'
@@ -292,6 +293,8 @@ export async function updateIdeaBrief(
   }
   if (Object.keys(allowed).length === 0) return { success: true }
 
+  const versionId = await snapshotIdeaBeforeUpdate(supabase, ideaId, 'brief_updated')
+
   const { error } = await supabase.from('content_ideas').update(allowed).eq('id', ideaId)
   if (error) return { error: error.message }
 
@@ -306,6 +309,12 @@ export async function updateIdeaBrief(
     }
   }
 
+  await logIdeaActivity(supabase, {
+    ideaId,
+    action: 'versioned',
+    metadata: { versionId, reason: 'brief_updated', fields: Object.keys(allowed) },
+  })
+
   revalidatePath('/planning')
   revalidatePath(`/produccion/idea/${ideaId}`)
   return { success: true }
@@ -315,8 +324,14 @@ export async function updateIdeaBrief(
 export async function updateIdeaTitle(ideaId: string, title: string) {
   const supabase = await createClient()
   const clean = title.trim() || 'Sin título'
+  const versionId = await snapshotIdeaBeforeUpdate(supabase, ideaId, 'title_updated')
   const { error } = await supabase.from('content_ideas').update({ title: clean }).eq('id', ideaId)
   if (error) return { error: error.message }
+  await logIdeaActivity(supabase, {
+    ideaId,
+    action: 'versioned',
+    metadata: { versionId, reason: 'title_updated', fields: ['title'] },
+  })
   revalidatePath('/planning')
   revalidatePath(`/produccion/idea/${ideaId}`)
   return { success: true }

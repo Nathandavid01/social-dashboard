@@ -18,6 +18,7 @@ import { getIdeaActivity } from '@/lib/utils/idea-activity'
 import { isR2PublicConfigured } from '@/lib/integrations/r2'
 import { currentUserHas } from '@/lib/auth/server'
 import { IdeaActivityTimeline } from '@/components/produccion/idea-activity-timeline'
+import { IdeaVersionsHistory } from '@/components/produccion/idea-versions-history'
 import type { ContentIdea, ContentIdeaVideo, ClientAsset } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -105,6 +106,18 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
           </CardContent>
         </Card>
       </div>
+
+      {/* Version history — snapshots before overwrite */}
+      <Card className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300" style={{ animationDelay: '220ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <History className="h-4 w-4 text-violet-500" /> Historial de versiones
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <IdeaVersionsHistory ideaId={ideaId} />
+        </CardContent>
+      </Card>
 
       {/* Activity log — who did what, when */}
       {canSeeActivity && (

@@ -24,6 +24,12 @@ vi.mock('@/lib/utils/idea-activity', () => ({
   getIdeaActivity: (id: string) => getIdeaActivity(id),
 }))
 
+const snapshotIdeaBeforeUpdate = vi.fn<(...a: unknown[]) => Promise<string | null>>(async () => 'ver-1')
+vi.mock('@/lib/utils/idea-versions', () => ({
+  snapshotIdeaBeforeUpdate: (...a: unknown[]) => snapshotIdeaBeforeUpdate(...a),
+}))
+
+
 const computeIdeaProgress = vi.fn<(arg: unknown) => unknown>(() => ({
   stages: [], completed: 1, total: 7, percent: 14, missing: [],
 }))
@@ -89,6 +95,8 @@ beforeEach(() => {
   currentUserHas.mockReset()
   currentUserHas.mockResolvedValue(true)
   logIdeaActivity.mockClear()
+  snapshotIdeaBeforeUpdate.mockClear()
+  snapshotIdeaBeforeUpdate.mockResolvedValue('ver-1')
   getIdeaActivity.mockClear()
   getIdeaVideos.mockClear()
   getClientAssets.mockClear()
@@ -187,5 +195,23 @@ describe('updateIdeaBrief — editar el hook a mano limpia hook_source', () => {
     const res = await updateIdeaBrief('idea-1', { visual_brief: 'nuevo brief' })
     expect(res.success).toBe(true)
     expect(updateCalls).toEqual([{ visual_brief: 'nuevo brief' }])
+  })
+
+  it('guarda versión previa y registra actividad versioned antes de escribir', async () => {
+    const res = await updateIdeaBrief('idea-1', { hook: 'Otro hook' })
+    expect(res.success).toBe(true)
+    expect(snapshotIdeaBeforeUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      'idea-1',
+      'brief_updated',
+    )
+    expect(logIdeaActivity).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ideaId: 'idea-1',
+        action: 'versioned',
+        metadata: expect.objectContaining({ versionId: 'ver-1', reason: 'brief_updated' }),
+      }),
+    )
   })
 })

@@ -503,6 +503,8 @@ export type ContentIdeaActivityAction =
   | 'client_reviewed'
   | 'approved_by_client'
   | 'client_requested_changes'
+  // Snapshot saved before text/status overwrite (content_idea_versions).
+  | 'versioned'
 
 export interface ContentIdeaActivity {
   id: string
