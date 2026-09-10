@@ -36,7 +36,11 @@ describe('buildIdeaVersionSnapshot', () => {
   it('nullifica campos ausentes y rechaza filas vacías', () => {
     expect(buildIdeaVersionSnapshot(null)).toBeNull()
     expect(buildIdeaVersionSnapshot(undefined)).toBeNull()
-    expect(buildIdeaVersionSnapshot({}).title).toBeNull()
-    expect(buildIdeaVersionSnapshot({ title: 'X' }).hook).toBeNull()
+    const empty = buildIdeaVersionSnapshot({})
+    expect(empty).not.toBeNull()
+    expect(empty!.title).toBeNull()
+    const onlyTitle = buildIdeaVersionSnapshot({ title: 'X' })
+    expect(onlyTitle).not.toBeNull()
+    expect(onlyTitle!.hook).toBeNull()
   })
 })
