@@ -15,6 +15,9 @@ vi.mock('@/lib/actions/clients', () => ({
 
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 
+vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: () => true }))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
+
 import { ClientTable } from './client-table'
 
 const cliente = (over: Partial<Client> = {}): Client => ({
@@ -90,7 +93,7 @@ describe('ClientTable — borrar sigue estando, pero avisa', () => {
     render(<ClientTable clients={[cliente()]} />)
     await abrirMenu(user)
     await user.click(await screen.findByText('Eliminar'))
-    expect(await screen.findByText(/pausar/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Si solo quieres sacarlo del flujo/)).toBeInTheDocument()
   })
 
   it('no borra nada hasta confirmar', async () => {
@@ -101,3 +104,8 @@ describe('ClientTable — borrar sigue estando, pero avisa', () => {
     expect(deleteClient).not.toHaveBeenCalled()
   })
 })
+
+ it('muestra el botón directo en la lista sin abrir el menú', () => {
+   render(<ClientTable clients={[cliente()]} />)
+   expect(screen.getAllByRole('button', { name: 'Pausar cliente' }).length).toBeGreaterThan(0)
+ })

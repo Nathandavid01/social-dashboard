@@ -1,5 +1,6 @@
 'use client'
 
+import { ClientPauseButton } from './client-pause-button'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { deleteClient, pauseClient, activateClient } from '@/lib/actions/clients'
@@ -166,6 +167,7 @@ export function ClientTable({ clients }: ClientTableProps) {
                     <Link href={`/clients/${client.id}`} className="hover:text-primary transition-colors">
                       {client.name}
                     </Link>
+                    <div className="mt-2"><ClientPauseButton clientId={client.id} clientName={client.name} status={client.status} /></div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                     {client.industry || '—'}
@@ -235,6 +237,7 @@ export function ClientTable({ clients }: ClientTableProps) {
                     </span>
                   )}
                 </div>
+                <ClientPauseButton clientId={client.id} clientName={client.name} status={client.status} />
               </div>
               <ClientActions
                 client={client}

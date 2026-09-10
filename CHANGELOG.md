@@ -5,6 +5,7 @@
 - Descarga un PDF con las ideas, guiones y referencias para aprobación del cliente.
 - Crea una propuesta por enlace: el cliente aprueba o no aprueba cada idea y deja comentarios que puedes consultar desde On Site.
 - Cada propuesta conserva el contenido enviado; los enlaces duran 30 días y se pueden desactivar.
+- Botones visibles «Pausar cliente» y «Reactivar cliente» en la lista y el perfil; conservan el historial.
 
 ![Revisión de ideas del cliente](/changelog/v4.45-ideas-aprobacion.png)
 

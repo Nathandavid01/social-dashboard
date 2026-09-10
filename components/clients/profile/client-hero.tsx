@@ -1,3 +1,4 @@
+import { ClientPauseButton } from '../client-pause-button'
 import { StatusBadge } from '@/components/clients/status-badge'
 import { PlatformBadges } from '@/components/clients/platform-badges'
 import { ClientLogoUpload } from './client-logo-upload'
@@ -79,6 +80,8 @@ export function ClientHero({ client, lastPayment }: ClientHeroProps) {
             </div>
           )}
         </div>
+
+        <ClientPauseButton clientId={client.id} clientName={client.name} status={client.status} />
 
         {/* Mini stats — wraps cleanly on small screens */}
         <div className="grid w-full grid-cols-3 gap-2 md:w-auto md:flex md:flex-col md:items-end md:gap-2">
