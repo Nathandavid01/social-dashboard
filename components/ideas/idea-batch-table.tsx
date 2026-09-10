@@ -1,16 +1,19 @@
 'use client'
 
 import { ProposalPdfButton } from './proposal-pdf-button'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Loader2, Trash2, ExternalLink, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Save, Loader2, Trash2, ExternalLink } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SHOT_TYPES, shotTypeLabel } from '@/lib/onsite/shot-types'
 import {
   emptyIdeaRow, withTrailingBlank, countWritten, toPayload, type IdeaRow,
 } from '@/lib/ideas/batch-entry'
+import {
+  clearDraft, isDraftDirty, loadDraft, saveDraft,
+} from '@/lib/ideas/draft-storage'
 import { createIdeasBatch, discardWrittenIdea, type WrittenIdea } from '@/lib/actions/ideas-batch'
+import { createClient } from '@/lib/supabase/client'
 
 const CONTENT_TYPES = [
   { key: 'R', label: 'Reel' },
@@ -25,6 +28,9 @@ const CONTENT_TYPES = [
  * Una fila por idea y una vacía siempre al final: pulsar "añadir fila" por cada
  * idea era la fricción que hacía preferir el PDF. Enter en el último campo
  * salta a la siguiente fila.
+ *
+ * Borrador en localStorage por cliente (+ usuario si hay sesión) para no
+ * perder lo escrito al cambiar de pestaña o de cliente.
  */
 export function IdeaBatchTable({
   clientId,
@@ -37,11 +43,58 @@ export function IdeaBatchTable({
 }) {
   const router = useRouter()
   const { toast } = useToast()
+  const [userId, setUserId] = useState<string | null>(null)
   const [rows, setRows] = useState<IdeaRow[]>([emptyIdeaRow()])
+  const [draftReady, setDraftReady] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [borrando, setBorrando] = useState<string | null>(null)
+  const rowsRef = useRef(rows)
+  rowsRef.current = rows
 
   const escritas = useMemo(() => countWritten(rows), [rows])
+  const dirty = escritas > 0
+
+  // Resolver usuario (clave de borrador) y restaurar draft al montar / cambiar cliente.
+  useEffect(() => {
+    let cancelled = false
+    setDraftReady(false)
+    ;(async () => {
+      let uid: string | null = null
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        uid = user?.id ?? null
+      } catch {
+        uid = null
+      }
+      if (cancelled) return
+      setUserId(uid)
+      const restored = loadDraft(clientId, uid)
+      setRows(restored ?? [emptyIdeaRow()])
+      setDraftReady(true)
+    })()
+    return () => { cancelled = true }
+  }, [clientId])
+
+  // Autosave cuando hay filas escritas (debounce corto).
+  useEffect(() => {
+    if (!draftReady) return
+    const t = window.setTimeout(() => {
+      saveDraft(clientId, rows, userId)
+    }, 250)
+    return () => window.clearTimeout(t)
+  }, [rows, clientId, userId, draftReady])
+
+  // Aviso al cerrar/recargar si hay borrador sucio.
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!isDraftDirty(rowsRef.current)) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [])
 
   function set(i: number, patch: Partial<IdeaRow>) {
     setRows((rs) => {
@@ -61,6 +114,7 @@ export function IdeaBatchTable({
       return
     }
     toast({ title: `${res.created} idea${res.created === 1 ? '' : 's'} guardada${res.created === 1 ? '' : 's'}` })
+    clearDraft(clientId, userId)
     setRows([emptyIdeaRow()])
     router.refresh()
   }
@@ -83,6 +137,7 @@ export function IdeaBatchTable({
           <h2 className="min-w-0 truncate text-[13px] font-semibold">Escribir ideas · {clientName}</h2>
           <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
             {escritas} escrita{escritas === 1 ? '' : 's'}
+            {dirty && draftReady ? ' · borrador local' : ''}
           </span>
         </div>
 

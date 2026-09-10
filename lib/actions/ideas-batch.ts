@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import type { IdeaRowPayload } from '@/lib/ideas/batch-entry'
+import { snapshotIdeaBeforeUpdate } from '@/lib/utils/idea-versions'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 /**
  * Guardar un lote de ideas escritas a mano — lo que antes era el PDF.
@@ -108,11 +110,18 @@ export async function discardWrittenIdea(ideaId: string): Promise<{ ok?: true; e
   }
 
   const supabase = await createClient()
+  const versionId = await snapshotIdeaBeforeUpdate(supabase, ideaId, 'discarded')
   const { error } = await supabase
     .from('content_ideas')
     .update({ status: 'descartada' })
     .eq('id', ideaId)
   if (error) return { error: error.message }
+
+  await logIdeaActivity(supabase, {
+    ideaId,
+    action: 'versioned',
+    metadata: { versionId, reason: 'discarded', fields: ['status'] },
+  })
 
   revalidatePath('/escribir-ideas')
   revalidatePath('/onsite')
