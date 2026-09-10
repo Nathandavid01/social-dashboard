@@ -2297,3 +2297,8 @@ Tanda de mejoras para que la app se sienta más fácil y confiable de usar:
 - Se quitaron del menú: **Alertas, Operaciones, Captions, Metricool**.
 - Columna de **plataformas** con iconos de marca.
 - Se quitó el atajo **⌘P** del buscador.
+## v4.75
+
+**Verificación automática del software cada seis minutos.**
+- Ejecuta typecheck, pruebas unitarias, merge gate y revisión de diferencias.
+- Evita ejecuciones simultáneas y guarda el resultado para detectar discrepancias.
