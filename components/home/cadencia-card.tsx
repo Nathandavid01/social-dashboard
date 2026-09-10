@@ -177,7 +177,7 @@ export function CadenciaCard({ data }: { data: CadenciaData }) {
   const weekPct = percent(data.week.published, data.week.planned)
 
   return (
-    <Card>
+    <Card id="cadencia-hoy">
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <CardTitle className="flex min-w-0 items-center gap-2 text-base">
@@ -212,6 +212,18 @@ export function CadenciaCard({ data }: { data: CadenciaData }) {
 
         {/* Day selector */}
         <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground">Revisa quién publica cada día</p>
+            {selectedDay !== data.todayDate && (
+              <button
+                type="button"
+                onClick={() => setSelectedDay(data.todayDate)}
+                className="shrink-0 text-[11px] font-semibold text-primary hover:underline"
+              >
+                Volver a hoy
+              </button>
+            )}
+          </div>
           <div className="flex items-stretch gap-1.5 overflow-x-auto pb-1">
             {data.days.map((day) => {
               const isSel = day.date === selectedDay

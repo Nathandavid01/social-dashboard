@@ -241,6 +241,7 @@ export default async function HomePage() {
       {/* Quick links */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9">
         {[
+          { href: '/home#cadencia-hoy', label: 'Publicaciones de hoy', sub: 'Clientes que toca publicar hoy', color: 'bg-primary/10 text-primary' },
           { href: '/operations', label: 'Operaciones', sub: 'Ver todas las tareas', color: 'bg-blue-500/10 text-blue-500' },
           { href: '/published', label: 'Publicados', sub: 'Ver todo el contenido', color: 'bg-green-500/10 text-green-500' },
           { href: '/clients', label: 'Clientes', sub: `${activeClients ?? 0} clientes activos`, color: 'bg-orange-500/10 text-orange-500' },

@@ -82,6 +82,14 @@ describe('CadenciaCard', () => {
     expect(screen.getByText('Studio')).toBeInTheDocument()
   })
 
+  it('permite volver a la lista de clientes de hoy', () => {
+    render(<CadenciaCard data={DATA} />)
+    fireEvent.click(screen.getByRole('button', { name: /Sáb/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a hoy' }))
+    expect(screen.getByText(/Jueves · por cliente/i)).toBeInTheDocument()
+    expect(screen.getByText('Café')).toBeInTheDocument()
+  })
+
   it('shows an empty state for a day with no posts', () => {
     render(<CadenciaCard data={DATA} />)
     fireEvent.click(screen.getByRole('button', { name: /Lun/ }))
