@@ -13,6 +13,7 @@ vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ from: (ta
   b.or = (filter: string) => { state.filter = filter; return b }
   b.update = (patch: Record<string, unknown>) => { state.patch = patch; return b }
   b.single = async () => ({ data: table === 'recording_sessions' ? state.session : state.idea, error: null })
+  b.maybeSingle = async () => ({ data: { id: 'i1' }, error: null })
   b.then = (resolve: (value: unknown) => unknown) => resolve({ data: table === 'recording_sessions' ? [{ id: state.next }] : [], error: null })
   return b
 } }) }))

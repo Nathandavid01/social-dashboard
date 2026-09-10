@@ -1,4 +1,10 @@
-## v4.71
+# Changelog
+
+Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
+
+> Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
+
+## v4.74 — 2026-09-10
 
 **Las ideas se comparten con On Site y el cliente puede revisarlas por enlace.**
 - Las ideas pendientes del cliente aparecen automáticamente en su próxima grabación, y las ediciones de On Site se reflejan en Escribir ideas.
@@ -7,13 +13,7 @@
 - Cada propuesta conserva el contenido enviado; los enlaces duran 30 días y se pueden desactivar.
 - Botones visibles «Pausar cliente» y «Reactivar cliente» en la lista y el perfil; conservan el historial.
 
-![Revisión de ideas del cliente](/changelog/v4.45-ideas-aprobacion.png)
-
-# Changelog
-
-Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
-
-> Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
+![Vista previa simulada de la revisión del cliente](/changelog/v4.45-ideas-aprobacion.png)
 
 ## v4.70 — 2026-09-08
 
