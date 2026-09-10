@@ -2302,3 +2302,8 @@ Tanda de mejoras para que la app se sienta más fácil y confiable de usar:
 **Verificación automática del software cada seis minutos.**
 - Ejecuta typecheck, pruebas unitarias, merge gate y revisión de diferencias.
 - Evita ejecuciones simultáneas y guarda el resultado para detectar discrepancias.
+## v4.76
+
+**Cada idea explica qué quiere lograr.**
+- El objetivo aparece en la propuesta, el PDF para el cliente y la página de aprobación.
+- La etapa del embudo también se conserva cuando está disponible.
