@@ -95,11 +95,11 @@ const RBAC: Record<UserRole, RolePerms> = {
   // Owner — full control, including billing, contracts, role assignment.
   owner: ALL,
 
-  // Supervisor — manage team/content; can edit contracts; billing remains owner-only.
+  // Supervisor — manage team/content; can edit contracts and billing.
   supervisor: [
     'operations.overview',
     'clients.read', 'clients.create', 'clients.edit', 'clients.brand.edit',
-    'clients.billing.read', 'clients.contract.read', 'clients.contract.edit', 'clients.assets.upload',
+    'clients.billing.read', 'clients.billing.edit', 'clients.contract.read', 'clients.contract.edit', 'clients.assets.upload',
     'clients.sms.send',
     'tasks.read.all', 'tasks.create', 'tasks.edit', 'tasks.delete',
     'ideas.read', 'ideas.edit',
@@ -217,7 +217,7 @@ export const ROLE_LABEL: Record<UserRole, string> = {
 
 export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   owner:       'Acceso completo, incluyendo facturación, contratos y asignación de roles.',
-  supervisor:  'Gestión de equipo y contenido. Edita contratos; ve facturación pero no la edita.',
+  supervisor:  'Gestión de equipo y contenido. Edita contratos y facturación.',
   editor:      'Pipeline y Revisión: baja el crudo asignado y entrega el corte. No aprueba ni publica.',
   video:       'Grabación e ideas. No entra a Entregas.',
   disenador:   'Ideas y Entregas: sube piezas, sin escribir el copy.',

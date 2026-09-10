@@ -89,3 +89,11 @@ describe('operations.overview', () => {
     }
   })
 })
+
+describe('supervisor billing', () => {
+  it('supervisor can edit billing and contracts', () => {
+    expect(hasPermission('supervisor', 'clients.billing.edit')).toBe(true)
+    expect(hasPermission('supervisor', 'clients.contract.edit')).toBe(true)
+    expect(hasPermission('editor', 'clients.billing.edit')).toBe(false)
+  })
+})
