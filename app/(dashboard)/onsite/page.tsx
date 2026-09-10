@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ClientProposalPanel } from '@/components/ideas/client-proposal-panel'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
@@ -22,13 +23,14 @@ export default async function OnsitePage({
   await requirePermission('recording.read')
 
   const { s: sessionId } = await searchParams
-  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId] = await Promise.all([
+  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId, canShare] = await Promise.all([
     getOnsiteSessions(),
     currentUserHas('recording.brief'),
     currentUserHas('recording.create'),
     currentUserHas('recording.complete'),
     currentUserHas('video.upload'),
     getEffectiveUserId(),
+    currentUserHas('ideas.share'),
   ])
 
   if (error) {
@@ -92,11 +94,12 @@ export default async function OnsitePage({
           <a href={`/onsite?s=${encodeURIComponent(activa.id)}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium">Volver A Cargar La Sesión</a>
         </section>
       ) : (
+        <>
         <OnsiteStudio
           sessions={lista}
           active={activa}
           shots={shots ?? []}
-          addable={ideas ?? []}
+          addable={(ideas ?? []).filter(idea => !(shots ?? []).some(shot => shot.id === idea.id))}
           canBrief={canBrief}
           canAddIdeas={canAddIdeas}
           canRecord={canRecord}
@@ -104,6 +107,8 @@ export default async function OnsitePage({
           today={today}
           currentUserId={currentUserId}
         />
+        {canShare && <ClientProposalPanel key={activa.id} sessionId={activa.id} />}
+        </>
       )}
     </div>
   )

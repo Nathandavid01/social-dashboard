@@ -67,3 +67,13 @@ Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 - [ ] Carátula del crudo siempre visible en /revision (contexto video+idea+comments). PR #128 la puso en pipeline; verificar/extender a revisión.
 - [ ] Listado ORDENADO de la cola por editor en /banco (hoy se enseña el conteo, no el orden 1..n).
 - [ ] Screenshot real en public/changelog/ para v4.0 (regla de changelog visual).
+
+
+## Ideas compartidas y aprobación del cliente (v4.71, local)
+- [x] Compartir pendientes por cliente con su próxima sesión de On Site, conservando la idea original.
+- [x] PDF para el cliente, propuestas inmutables, enlace de 30 días revocable y respuestas por idea.
+- [x] Pruebas unitarias/de interacción y TypeScript; revisión visual del PDF y portal de ejemplo en móvil/escritorio.
+- [ ] Aplicar `supabase/migrations/0080_idea_client_proposals.sql` en el entorno de destino.
+- [ ] Publicar mediante PR y checks exigidos por `docs/MERGE_RULES.md`. Conciliar la versión con los cambios aún no publicados del checkout principal.
+- [ ] QA integrada autenticada: crear enlace real, responder desde navegador sin sesión, comprobar comentarios en On Site, revocar y comprobar denegación. No se ha creado ni enviado un enlace real al cliente.
+- [ ] Confirmar en producción las 19 ideas de Miti Miti en la sesión del cliente. Los datos de producción no fueron modificados.

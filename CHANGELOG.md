@@ -1,3 +1,13 @@
+## v4.71
+
+**Las ideas se comparten con On Site y el cliente puede revisarlas por enlace.**
+- Las ideas pendientes del cliente aparecen automáticamente en su próxima grabación, y las ediciones de On Site se reflejan en Escribir ideas.
+- Descarga un PDF con las ideas, guiones y referencias para aprobación del cliente.
+- Crea una propuesta por enlace: el cliente aprueba o no aprueba cada idea y deja comentarios que puedes consultar desde On Site.
+- Cada propuesta conserva el contenido enviado; los enlaces duran 30 días y se pueden desactivar.
+
+![Revisión de ideas del cliente](/changelog/v4.45-ideas-aprobacion.png)
+
 # Changelog
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.

@@ -56,6 +56,7 @@ export interface WrittenIdea {
   id: string
   title: string
   hook: string | null
+  visualBrief?: string | null
   contentType: string
   shotType: string | null
   referenceUrl: string | null
@@ -76,11 +77,11 @@ export async function getWrittenIdeas(
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('content_ideas')
-    .select('id, title, hook, content_type, shot_type, reference_url, status, created_at')
+    .select('id, title, hook, visual_brief, content_type, shot_type, reference_url, status, created_at')
     .eq('client_id', clientId)
     .in('status', ['idea', 'asignada'])
     .order('created_at', { ascending: false })
-    .limit(60)
+
   if (error) return { error: error.message }
 
   return {
@@ -88,6 +89,7 @@ export async function getWrittenIdeas(
       id: i.id,
       title: i.title ?? 'Sin título',
       hook: i.hook,
+      visualBrief: i.visual_brief,
       contentType: i.content_type,
       shotType: (i.shot_type as string | null) ?? null,
       referenceUrl: (i.reference_url as string | null) ?? null,

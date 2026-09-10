@@ -28,6 +28,7 @@ export type Permission =
   // Content & video
   | 'ideas.read'
   | 'ideas.edit'
+  | 'ideas.share'
   | 'video_reviews.read'
   | 'video_reviews.write'
   | 'video.upload'
@@ -102,7 +103,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'clients.billing.read', 'clients.contract.read', 'clients.contract.edit', 'clients.assets.upload',
     'clients.sms.send',
     'tasks.read.all', 'tasks.create', 'tasks.edit', 'tasks.delete',
-    'ideas.read', 'ideas.edit',
+    'ideas.read', 'ideas.edit', 'ideas.share',
     'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
