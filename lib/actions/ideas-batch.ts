@@ -55,8 +55,6 @@ export async function createIdeasBatch(input: {
 export interface WrittenIdea {
   id: string
   title: string
-  objective: string | null
-  funnelStage: string | null
   hook: string | null
   visualBrief?: string | null
   contentType: string
@@ -79,7 +77,7 @@ export async function getWrittenIdeas(
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('content_ideas')
-    .select('id, title, objective, funnel_stage, hook, visual_brief, content_type, shot_type, reference_url, status, created_at')
+    .select('id, title, hook, visual_brief, content_type, shot_type, reference_url, status, created_at')
     .eq('client_id', clientId)
     .in('status', ['idea', 'asignada'])
     .order('created_at', { ascending: false })
@@ -90,8 +88,6 @@ export async function getWrittenIdeas(
     ideas: (data ?? []).map((i) => ({
       id: i.id,
       title: i.title ?? 'Sin título',
-      objective: i.objective,
-      funnelStage: i.funnel_stage,
       hook: i.hook,
       visualBrief: i.visual_brief,
       contentType: i.content_type,
