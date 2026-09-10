@@ -1,3 +1,19 @@
+## v4.73
+
+**Clientes Solo Por Selección**
+- Quitamos El Campo De Texto En Editores Por Cliente.
+- Elige Un Cliente De La Lista Para Ver Y Asignar Sus Editores.
+
+![Selector De Clientes](/changelog/v4.73-clientes.png)
+
+## v4.72
+
+**Una Sola Sección Seleccionada**
+- Asignaciones Y Cadencia Ya No Resaltan Clientes Al Mismo Tiempo.
+- La Selección Única Funciona En El Menú De Escritorio Y Móvil.
+
+![Menú Corregido](/changelog/v4.72-menu.png)
+
 # Changelog
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
