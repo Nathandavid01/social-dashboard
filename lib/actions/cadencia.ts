@@ -22,6 +22,7 @@ const EXCLUDED_CLIENT_NAMES = ['primer round oficial']
 interface ClientRow {
   id: string
   name: string
+  industry: string | null
   posting_time: string | null
   posting_days: number[] | null
   platforms: SocialPlatform[] | null
@@ -74,7 +75,7 @@ async function sweepWeekUncached(weekStart: string, weekEnd: string): Promise<Ca
 
   const { data } = await supabase
     .from('clients')
-    .select('id, name, posting_time, posting_days, platforms, metricool_blog_id')
+    .select('id, name, industry, posting_time, posting_days, platforms, metricool_blog_id')
     .eq('status', 'active')
     .not('metricool_blog_id', 'is', null)
     .order('name', { ascending: true })
@@ -109,6 +110,7 @@ async function fetchClientWeek(
   const input: CadenciaClientInput = {
     clientId: c.id,
     clientName: c.name,
+    industry: c.industry,
     platforms: c.platforms ?? [],
     postingTime: c.posting_time,
     postingDays: c.posting_days ?? [],

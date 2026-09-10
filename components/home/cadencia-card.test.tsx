@@ -82,6 +82,14 @@ describe('CadenciaCard', () => {
     expect(screen.getByText('Studio')).toBeInTheDocument()
   })
 
+  it('permite volver a la lista de clientes de hoy', () => {
+    render(<CadenciaCard data={DATA} />)
+    fireEvent.click(screen.getByRole('button', { name: /Sáb/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a hoy' }))
+    expect(screen.getByText(/Jueves · por cliente/i)).toBeInTheDocument()
+    expect(screen.getByText('Café')).toBeInTheDocument()
+  })
+
   it('shows an empty state for a day with no posts', () => {
     render(<CadenciaCard data={DATA} />)
     fireEvent.click(screen.getByRole('button', { name: /Lun/ }))
@@ -98,6 +106,19 @@ describe('CadenciaCard', () => {
     render(<CadenciaCard data={data} />)
     const link = screen.getByRole('link', { name: /en vivo/i })
     expect(link).toHaveAttribute('href', 'https://instagram.com/p/abc')
+  })
+
+  it('identifica AM o PM y sugiere AM para restaurantes sin hora', () => {
+    const data = buildCadencia([
+      client({ clientId: 'am', clientName: 'Café AM', postingDays: [4], postingTime: '10:00' }),
+      client({ clientId: 'pm', clientName: 'Café PM', postingDays: [4], postingTime: '18:00' }),
+      client({ clientId: 'restaurant', clientName: 'Restaurante', industry: 'Restaurante', postingDays: [4] }),
+    ], WEEK, TODAY, 8 * 60)
+    render(<CadenciaCard data={data} />)
+    const drill = screen.getByTestId('cadencia-drilldown')
+    expect(within(drill).getByText(/10:00 · AM/)).toBeInTheDocument()
+    expect(within(drill).getByText(/18:00 · PM/)).toBeInTheDocument()
+    expect(within(drill).getByText('AM sugerido')).toBeInTheDocument()
   })
 
   it('flags a failed publish reported by Metricool', () => {

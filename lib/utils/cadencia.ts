@@ -27,6 +27,7 @@ export type CadenciaStatus = 'publicado' | 'pendiente' | 'atrasado'
 export interface CadenciaClientInput {
   clientId: string
   clientName: string
+  industry?: string | null
   platforms: SocialPlatform[]
   postingTime: string | null // "HH:MM" local, or null
   postingDays: number[] // getDay() indices (0=Sun..6=Sat) the client is configured to post
@@ -86,6 +87,7 @@ export interface RingStats {
 export interface CadenciaClientRow {
   clientId: string
   clientName: string
+  industry?: string | null
   platforms: SocialPlatform[]
   postingTime: string | null
   dots: CadenciaStatus[] // one per post/slot for the day, in stable order
@@ -256,6 +258,7 @@ export function buildCadencia(
       byDay[date].push({
         clientId: c.clientId,
         clientName: c.clientName,
+        industry: c.industry,
         platforms: c.platforms ?? [],
         postingTime: c.postingTime,
         dots: cell.dots,

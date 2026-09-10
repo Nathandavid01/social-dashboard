@@ -17,13 +17,21 @@ interface Props {
   onSuccess: () => void
 }
 
+function todayISO(): string {
+  const now = new Date()
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
 export function SpecialRequestModal({ clients, profiles, onClose, onSuccess }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     clientId: '',
     contentType: 'R' as ProductionContentType,
-    publishDate: '',
+    // Extra requests are often needed today. This does not alter the client's
+    // recurring posting cadence; it only dates the one-off task.
+    publishDate: todayISO(),
     assignedToId: '',
     priority: 'media' as ProductionPriority,
     notes: '',
@@ -113,7 +121,16 @@ export function SpecialRequestModal({ clients, profiles, onClose, onSuccess }: P
           </div>
 
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Fecha de publicación *</label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-xs font-medium text-muted-foreground">Fecha de publicación *</label>
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, publishDate: todayISO() }))}
+                className="text-[11px] font-semibold text-primary hover:underline"
+              >
+                Usar hoy
+              </button>
+            </div>
             <input
               type="date"
               required
@@ -122,6 +139,9 @@ export function SpecialRequestModal({ clients, profiles, onClose, onSuccess }: P
               onChange={e => setForm(f => ({ ...f, publishDate: e.target.value }))}
               className="mt-1 w-full text-sm rounded-lg border border-border bg-card px-3 py-2"
             />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Se añadirá como publicación especial y no cambia los días habituales del cliente.
+            </p>
           </div>
 
           <div>
