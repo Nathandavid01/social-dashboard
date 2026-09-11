@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.77 — 2026-09-11
+
+**On Site vuelve a cargar, se puede exportar ideas y se ven los objetivos.**
+- On Site ya no se queda en «Volver A Cargar La Sesión» cuando faltan columnas nuevas en la base: el call sheet carga igual.
+- Quien tiene permiso de leer o editar ideas (supervisor, editor, videógrafo, etc.) puede exportar / proponer ideas; ya no queda limitado a owner.
+- El objetivo de cada idea aparece en el lote, el call sheet PDF y la propuesta al cliente cuando está disponible.
+
+![Vista previa On Site estable](/changelog/v4.48-onsite-carga.png)
+
 ## v4.74 — 2026-09-10
 
 **Las ideas se comparten con On Site y el cliente puede revisarlas por enlace.**

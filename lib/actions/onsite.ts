@@ -147,10 +147,20 @@ export async function getOnsiteShots(
       : query.eq('recording_session_id', sessionId)
     return query.neq('status', 'descartada').order('created_at', { ascending: true }).order('id')
   }
-  const withNotes = 'id, title, objective, funnel_stage, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status'
-  const withoutNotes = 'id, title, objective, funnel_stage, hook, visual_brief, rationale, shot_type, reference_url, status'
-  const first = await load(withNotes)
-  const loaded = first.error ? await load(withoutNotes) : first
+  // objective/funnel_stage viven en idea_lab_feedback; en content_ideas llegan
+  // con la migración 0082. Si aún no están, caemos a selects sin esas columnas
+  // para que On Site no quede en el callejón de «Volver A Cargar».
+  const fieldSets = [
+    'id, title, objective, funnel_stage, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status',
+    'id, title, objective, funnel_stage, hook, visual_brief, rationale, shot_type, reference_url, status',
+    'id, title, hook, visual_brief, shooting_notes, rationale, shot_type, reference_url, status',
+    'id, title, hook, visual_brief, rationale, shot_type, reference_url, status',
+  ]
+  let loaded = await load(fieldSets[0])
+  for (const fields of fieldSets.slice(1)) {
+    if (!loaded.error) break
+    loaded = await load(fields)
+  }
   if (loaded.error) return { error: loaded.error.message }
 
   return {
@@ -389,12 +399,12 @@ export async function addIdeaToSession(input: {
 
   const { data: labIdea } = await supabase
     .from('idea_lab_feedback')
-    .select('title, hook, visual_brief, caption_angle, hashtags_suggestion, rationale, content_type')
+    .select('title, hook, visual_brief, caption_angle, hashtags_suggestion, rationale, content_type, objective, funnel_stage')
     .eq('id', input.ideaId)
     .single()
   if (!labIdea) return { error: 'Idea del Lab no encontrada' }
 
-  const { error } = await supabase.from('content_ideas').insert({
+  const baseRow = {
     client_id: session.client_id,
     content_type: labIdea.content_type ?? 'R',
     title: labIdea.title ?? 'Sin título',
@@ -407,7 +417,16 @@ export async function addIdeaToSession(input: {
     recording_session_id: input.sessionId,
     shot_type: input.shotType || null,
     created_by: user?.id ?? null,
-  })
+  }
+  const withGoals = {
+    ...baseRow,
+    objective: (labIdea as { objective?: string | null }).objective ?? null,
+    funnel_stage: (labIdea as { funnel_stage?: string | null }).funnel_stage ?? null,
+  }
+  let { error } = await supabase.from('content_ideas').insert(withGoals)
+  if (error && /objective|funnel_stage/i.test(error.message)) {
+    ;({ error } = await supabase.from('content_ideas').insert(baseRow))
+  }
   if (error) return { error: error.message }
 
   revalidatePath('/onsite')
@@ -480,6 +499,8 @@ export async function generateOnsiteIdeas(input: {
           content_type: i.content_type,
           rationale: i.rationale ?? null,
           virality_score: clampVirality(i.virality_score),
+          objective: i.objective ?? null,
+          funnel_stage: i.funnel_stage ?? null,
         })))
       }
     } catch (err) {
@@ -503,19 +524,25 @@ export async function generateOnsiteIdeas(input: {
   }
 
   if (plan.create.length > 0) {
-    const { error } = await supabase.from('content_ideas').insert(
-      plan.create.map((i) => ({
-        client_id: session.client_id,
-        content_type: i.content_type || 'R',
-        title: i.title?.trim() || 'Sin título',
-        hook: i.hook?.trim() || null,
-        visual_brief: i.visual_brief?.trim() || null,
-        rationale: i.rationale?.trim() || null,
-        status: 'idea',
-        recording_session_id: input.sessionId,
-        created_by: user?.id ?? null,
-      })),
-    )
+    const rowsWithGoals = plan.create.map((i) => ({
+      client_id: session.client_id,
+      content_type: i.content_type || 'R',
+      title: i.title?.trim() || 'Sin título',
+      hook: i.hook?.trim() || null,
+      visual_brief: i.visual_brief?.trim() || null,
+      rationale: i.rationale?.trim() || null,
+      objective: i.objective?.trim() || null,
+      funnel_stage: i.funnel_stage?.trim() || null,
+      status: 'idea',
+      recording_session_id: input.sessionId,
+      created_by: user?.id ?? null,
+    }))
+    let { error } = await supabase.from('content_ideas').insert(rowsWithGoals)
+    if (error && /objective|funnel_stage/i.test(error.message)) {
+      ;({ error } = await supabase.from('content_ideas').insert(
+        rowsWithGoals.map(({ objective: _o, funnel_stage: _f, ...rest }) => rest),
+      ))
+    }
     if (error) return { error: error.message, created }
     created += plan.create.length
   }

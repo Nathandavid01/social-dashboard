@@ -240,6 +240,11 @@ export function IdeaBatchTable({
               <li key={i.id} className="flex items-center gap-2 py-2">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[12px]">{i.title}</span>
+                  {i.objective && (
+                    <span className="block truncate text-[11px] text-amber-700/90">
+                      Objetivo: {i.objective}{i.funnelStage ? ` · ${i.funnelStage}` : ''}
+                    </span>
+                  )}
                   {i.hook && <span className="block truncate text-[11px] text-muted-foreground">{i.hook}</span>}
                 </span>
                 {i.shotType && (

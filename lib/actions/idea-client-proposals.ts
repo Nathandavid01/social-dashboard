@@ -9,7 +9,7 @@ import { proposalSnapshot, validateDecision, type ProposalIdea } from '@/lib/ide
 
 const hash = (token: string) => createHash('sha256').update(token).digest('hex')
 async function visibleSession(sessionId: string) {
-  await requirePermission('ideas.share')
+  await requirePermission('ideas.read')
   const db = await createClient()
   const { data, error } = await db.from('recording_sessions')
     .select('id, client_id, session_date, client:clients(name)').eq('id', sessionId).single()

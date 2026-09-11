@@ -146,6 +146,13 @@ export function OnsiteCallsheetPdf({
                     </span>
                   ) : null}
                 </div>
+                {s.objective ? (
+                  <p className="mt-1 text-sm text-amber-900">
+                    <span className="font-medium">Objetivo: </span>
+                    {s.objective}
+                    {s.funnelStage ? ` · ${s.funnelStage}` : ''}
+                  </p>
+                ) : null}
                 {s.hook ? <p className="mt-1 text-sm italic text-neutral-800">&ldquo;{s.hook}&rdquo;</p> : null}
                 {s.visualBrief ? (
                   <p className="mt-2 text-sm text-neutral-800">
