@@ -16,6 +16,7 @@ const session = {
   clientName: 'Karen',
   location: 'San Juan',
   status: 'scheduled',
+    confirmation_status: 'unconfirmed',
   perWeek: 3,
   perMonth: 12,
   slotTarget: 18,
