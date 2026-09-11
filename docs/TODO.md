@@ -4,6 +4,7 @@ Tracked work not yet done. Each is implemented **test-first (TDD)** when unblock
 (see CLAUDE.md). Check off + reference the commit when completed.
 
 ## Migraciones por aplicar en prod (Supabase SQL Editor)
+- [ ] **`0082_content_idea_objectives.sql`** — columnas `content_ideas.objective` / `funnel_stage`. Sin ellas On Site degrada seguro (lee sin esas columnas); con ellas el objetivo viaja al PDF y a la propuesta.
 Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelknmfudcvrzz` → SQL Editor.
 Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 - [ ] **`0060_assignment_changed_by.sql`** — columnas `clients.assignment_changed_by/at`. **URGENTE**: sin ellas, `/clients/asignaciones` (desplegada 2026-08-15) falla al leer Y al guardar.

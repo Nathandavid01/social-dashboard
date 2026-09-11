@@ -416,6 +416,10 @@ export interface ContentIdea {
   client_id: string
   content_type: ContentIdeaType
   title: string
+  /** Objetivo de marketing (Awareness/Engagement/Conversion). Migración 0082. */
+  objective?: string | null
+  /** Etapa del embudo (TOFU/MOFU/BOFU). Migración 0082. */
+  funnel_stage?: string | null
   hook: string | null
   /** 'ai' cuando el hook lo escribió el análisis de video (v3.40, video_topic);
    *  null cuando lo escribió una persona o no se ha tocado. Se limpia a null

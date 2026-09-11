@@ -11,6 +11,8 @@ export type BriefGenerated = {
   content_type: string
   rationale?: string | null
   virality_score?: number | null
+  objective?: string | null
+  funnel_stage?: string | null
 }
 
 /**

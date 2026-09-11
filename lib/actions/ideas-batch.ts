@@ -57,6 +57,8 @@ export async function createIdeasBatch(input: {
 export interface WrittenIdea {
   id: string
   title: string
+  objective?: string | null
+  funnelStage?: string | null
   hook: string | null
   visualBrief?: string | null
   contentType: string
@@ -77,26 +79,32 @@ export async function getWrittenIdeas(
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('content_ideas')
-    .select('id, title, hook, visual_brief, content_type, shot_type, reference_url, status, created_at')
-    .eq('client_id', clientId)
-    .in('status', ['idea', 'asignada'])
-    .order('created_at', { ascending: false })
-
-  if (error) return { error: error.message }
+  const withGoals = 'id, title, objective, funnel_stage, hook, visual_brief, content_type, shot_type, reference_url, status, created_at'
+  const withoutGoals = 'id, title, hook, visual_brief, content_type, shot_type, reference_url, status, created_at'
+  const load = (fields: string) =>
+    supabase
+      .from('content_ideas')
+      .select(fields)
+      .eq('client_id', clientId)
+      .in('status', ['idea', 'asignada'])
+      .order('created_at', { ascending: false })
+  const first = await load(withGoals)
+  const loaded = first.error ? await load(withoutGoals) : first
+  if (loaded.error) return { error: loaded.error.message }
 
   return {
-    ideas: (data ?? []).map((i) => ({
-      id: i.id,
-      title: i.title ?? 'Sin título',
-      hook: i.hook,
-      visualBrief: i.visual_brief,
-      contentType: i.content_type,
+    ideas: ((loaded.data ?? []) as unknown as Array<Record<string, unknown>>).map((i) => ({
+      id: i.id as string,
+      title: ((i.title as string | null) ?? 'Sin título'),
+      objective: ((i.objective as string | null | undefined) ?? null),
+      funnelStage: ((i.funnel_stage as string | null | undefined) ?? null),
+      hook: i.hook as string | null,
+      visualBrief: i.visual_brief as string | null,
+      contentType: i.content_type as string,
       shotType: (i.shot_type as string | null) ?? null,
       referenceUrl: (i.reference_url as string | null) ?? null,
-      status: i.status,
-      createdAt: i.created_at,
+      status: i.status as string,
+      createdAt: i.created_at as string,
     })),
   }
 }

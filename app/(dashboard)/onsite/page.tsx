@@ -23,14 +23,16 @@ export default async function OnsitePage({
   await requirePermission('recording.read')
 
   const { s: sessionId } = await searchParams
-  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId, canShare] = await Promise.all([
+  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId, canExportIdeas] = await Promise.all([
     getOnsiteSessions(),
     currentUserHas('recording.brief'),
     currentUserHas('recording.create'),
     currentUserHas('recording.complete'),
     currentUserHas('video.upload'),
     getEffectiveUserId(),
-    currentUserHas('ideas.share'),
+    // Export / propuesta PDF: ideas.read (supervisor, editor, video, copy…).
+    // ideas.share era owner/supervisor-only y bloqueaba a quien sí puede leer ideas.
+    currentUserHas('ideas.read'),
   ])
 
   if (error) {
@@ -48,9 +50,11 @@ export default async function OnsitePage({
   const [shotResult, ideaResult] = activa
     ? await Promise.all([getOnsiteShots(activa.id), getAddableIdeas(activa.id)])
     : [{ shots: [], error: undefined }, { ideas: [], error: undefined }]
-  const loadError = shotResult.error || ideaResult.error
+  // Solo las tomas bloquean la sesión. Fallar al listar ideas añadibles no
+  // debe dejar a la crew en «Volver A Cargar» con el call sheet vacío.
+  const loadError = shotResult.error
   const shots = shotResult.shots
-  const ideas = ideaResult.ideas
+  const ideas = ideaResult.error ? [] : ideaResult.ideas
 
   return (
     <div className="space-y-4">
@@ -90,7 +94,7 @@ export default async function OnsitePage({
       ) : loadError ? (
         <section role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
           <h2 className="font-semibold">No Se Pudo Cargar La Sesión Completa</h2>
-          <p className="mt-2 text-sm">No se pudieron consultar las tomas o las ideas. Esto no significa que la sesión esté vacía.</p>
+          <p className="mt-2 text-sm">No se pudieron consultar las tomas de esta sesión. Esto no significa que la sesión esté vacía.</p>
           <a href={`/onsite?s=${encodeURIComponent(activa.id)}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium">Volver A Cargar La Sesión</a>
         </section>
       ) : (
@@ -107,7 +111,7 @@ export default async function OnsitePage({
           today={today}
           currentUserId={currentUserId}
         />
-        {canShare && <ClientProposalPanel key={activa.id} sessionId={activa.id} />}
+        {canExportIdeas && <ClientProposalPanel key={activa.id} sessionId={activa.id} />}
         </>
       )}
     </div>
