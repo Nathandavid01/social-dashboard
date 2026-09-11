@@ -7,7 +7,7 @@ import { Save, Loader2, Trash2, ExternalLink } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SHOT_TYPES, shotTypeLabel } from '@/lib/onsite/shot-types'
 import {
-  emptyIdeaRow, withTrailingBlank, countWritten, toPayload, type IdeaRow,
+  emptyIdeaRow, withTrailingBlank, countWritten, toPayload, FUNNEL_STAGES, type IdeaRow,
 } from '@/lib/ideas/batch-entry'
 import {
   clearDraft, isDraftDirty, loadDraft, saveDraft,
@@ -142,10 +142,12 @@ export function IdeaBatchTable({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-sm">
+          <table className="w-full min-w-[1100px] text-sm">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-wide text-muted-foreground">
                 <th className="pb-1.5 pr-2 font-medium">Título</th>
+                <th className="pb-1.5 pr-2 font-medium">Objetivo</th>
+                <th className="pb-1.5 pr-2 font-medium">Embudo</th>
                 <th className="pb-1.5 pr-2 font-medium">¿De qué es?</th>
                 <th className="pb-1.5 pr-2 font-medium">Formato</th>
                 <th className="pb-1.5 pr-2 font-medium">Toma</th>
@@ -163,6 +165,26 @@ export function IdeaBatchTable({
                       aria-label={`Título de la idea ${i + 1}`}
                       className="h-8 w-full min-w-[160px] rounded-md border bg-background px-2 text-[12px] outline-none focus:border-primary/50"
                     />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <input
+                      value={r.objective}
+                      onChange={(e) => set(i, { objective: e.target.value })}
+                      placeholder="Qué lograr…"
+                      aria-label={`Objetivo de la idea ${i + 1}`}
+                      className="h-8 w-full min-w-[140px] rounded-md border bg-background px-2 text-[12px] outline-none focus:border-primary/50"
+                    />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <select
+                      value={r.funnelStage}
+                      onChange={(e) => set(i, { funnelStage: e.target.value })}
+                      aria-label={`Etapa de embudo de la idea ${i + 1}`}
+                      className="h-8 rounded-md border bg-background px-1.5 text-[11px] outline-none"
+                    >
+                      <option value="">—</option>
+                      {FUNNEL_STAGES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+                    </select>
                   </td>
                   <td className="py-1 pr-2">
                     <input

@@ -148,7 +148,14 @@ export function OnsiteChecklist({
             <ul className="max-h-72 space-y-1 overflow-y-auto">
               {addable.map((i) => (
                 <li key={`${i.source}:${i.id}`} className="flex items-center gap-2 rounded-lg border bg-background px-2.5 py-1.5">
-                  <span className="min-w-0 flex-1 truncate text-[12px]">{i.title}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[12px]">{i.title}</span>
+                    {i.objective && (
+                      <span className="block truncate text-[11px] text-amber-700/90">
+                        Objetivo: {i.objective}{i.funnelStage ? ` · ${i.funnelStage}` : ''}
+                      </span>
+                    )}
+                  </span>
                   {i.source === 'lab' && (
                     <span className="shrink-0 rounded-full border border-purple-500/30 bg-purple-500/10 px-1.5 text-[9px] font-semibold text-purple-500">
                       Lab
@@ -229,6 +236,11 @@ export function OnsiteChecklist({
                       <span className={cn('block truncate text-[13px]', s.recorded && 'line-through')}>
                         {s.title}
                       </span>
+                      {s.objective && (
+                        <span className="block truncate text-[11px] text-amber-700/90">
+                          Objetivo: {s.objective}{s.funnelStage ? ` · ${s.funnelStage}` : ''}
+                        </span>
+                      )}
                       {s.hook && <span className="block truncate text-[11px] text-muted-foreground">{s.hook}</span>}
                     </span>
 

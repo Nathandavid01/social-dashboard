@@ -302,3 +302,22 @@ it('explica cómo preparar una sesión próxima sin cliente vinculado', () => {
   expect(screen.getByText('Vincula El Cliente Para Preparar La Grabación')).toBeInTheDocument()
   expect(screen.queryByText('Este cliente no tiene /mes')).not.toBeInTheDocument()
 })
+
+describe('OnsiteStudio — objetivos', () => {
+  it('muestra Objetivo en la tarjeta de idea cuando está presente', () => {
+    render(
+      <OnsiteStudio
+        sessions={[session()]}
+        active={session()}
+        shots={[shot({ objective: 'Aumentar reservas', funnelStage: 'BOFU' })]}
+        addable={[]}
+        canBrief
+        canRecord
+        canUpload
+        today="2026-08-20"
+        currentUserId="u1"
+      />,
+    )
+    expect(screen.getByText(/Objetivo: Aumentar reservas · BOFU/)).toBeInTheDocument()
+  })
+})

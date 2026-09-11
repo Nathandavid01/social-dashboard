@@ -299,6 +299,8 @@ export interface AddableIdea {
   id: string
   title: string
   hook: string | null
+  objective?: string | null
+  funnelStage?: string | null
   /** 'pipeline' = ya es una content_idea; 'lab' = idea aprobada del Idea Lab. */
   source: 'pipeline' | 'lab'
 }
@@ -328,7 +330,7 @@ export async function getAddableIdeas(
   const [{ data: pipeline, error: pipelineError }, { data: lab, error: labError }] = await Promise.all([
     supabase
       .from('content_ideas')
-      .select('id, title, hook')
+      .select('id, title, hook, objective, funnel_stage')
       .eq('client_id', session.client_id)
       .is('recording_session_id', null)
       .in('status', ['idea', 'asignada'])
@@ -336,7 +338,7 @@ export async function getAddableIdeas(
       .limit(50),
     supabase
       .from('idea_lab_feedback')
-      .select('id, title, hook')
+      .select('id, title, hook, objective, funnel_stage')
       .eq('client_id', session.client_id)
       .eq('verdict', 'approved')
       .order('created_at', { ascending: false })
@@ -347,10 +349,20 @@ export async function getAddableIdeas(
   return {
     ideas: [
       ...(pipeline ?? []).map((i) => ({
-        id: i.id, title: i.title?.trim() || i.hook?.trim() || 'Sin título', hook: i.hook, source: 'pipeline' as const,
+        id: i.id,
+        title: i.title?.trim() || i.hook?.trim() || 'Sin título',
+        hook: i.hook,
+        objective: (i as { objective?: string | null }).objective?.trim() || null,
+        funnelStage: (i as { funnel_stage?: string | null }).funnel_stage?.trim() || null,
+        source: 'pipeline' as const,
       })),
       ...(lab ?? []).map((i) => ({
-        id: i.id, title: i.title?.trim() || i.hook?.trim() || 'Sin título', hook: i.hook, source: 'lab' as const,
+        id: i.id,
+        title: i.title?.trim() || i.hook?.trim() || 'Sin título',
+        hook: i.hook,
+        objective: (i as { objective?: string | null }).objective?.trim() || null,
+        funnelStage: (i as { funnel_stage?: string | null }).funnel_stage?.trim() || null,
+        source: 'lab' as const,
       })),
     ],
   }

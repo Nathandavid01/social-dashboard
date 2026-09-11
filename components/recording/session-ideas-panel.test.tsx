@@ -138,3 +138,24 @@ describe('SessionIdeasPanel — editar desde nombre del cliente', () => {
     expect(onEdit).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('SessionIdeasPanel — objetivos', () => {
+  it('muestra Objetivo cuando la idea lo trae', () => {
+    render(
+      <SessionIdeasPanel
+        open
+        onClose={() => {}}
+        session={session()}
+        clientIdeas={[idea({
+          title: 'Promo septiembre',
+          objective: 'Conversion',
+          funnel_stage: 'BOFU',
+          hook: 'Reserva ya',
+        })]}
+        onIdeasChange={() => {}}
+        onEdit={() => {}}
+      />,
+    )
+    expect(screen.getByText(/Objetivo: Conversion · BOFU/)).toBeInTheDocument()
+  })
+})

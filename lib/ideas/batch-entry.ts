@@ -8,8 +8,18 @@ import type { ShotTypeKey } from '@/lib/onsite/shot-types'
  * no repartida por la interfaz, para que no discrepen.
  */
 
+export const FUNNEL_STAGES = [
+  { key: 'TOFU', label: 'TOFU' },
+  { key: 'MOFU', label: 'MOFU' },
+  { key: 'BOFU', label: 'BOFU' },
+] as const
+
+export type FunnelStageKey = (typeof FUNNEL_STAGES)[number]['key']
+
 export interface IdeaRow {
   title: string
+  objective: string
+  funnelStage: string
   hook: string
   contentType: string
   shotType: string
@@ -18,6 +28,8 @@ export interface IdeaRow {
 
 export const emptyIdeaRow = (): IdeaRow => ({
   title: '',
+  objective: '',
+  funnelStage: '',
   hook: '',
   contentType: 'R',
   shotType: '',
@@ -26,6 +38,8 @@ export const emptyIdeaRow = (): IdeaRow => ({
 
 export interface IdeaRowPayload {
   title: string
+  objective: string | null
+  funnelStage: string | null
   hook: string | null
   contentType: string
   shotType: ShotTypeKey | null
@@ -55,6 +69,8 @@ export function toPayload(rows: IdeaRow[]): IdeaRowPayload[] {
     const title = r.title.trim() || r.hook.trim()
     return {
       title,
+      objective: r.objective.trim() || null,
+      funnelStage: r.funnelStage.trim() || null,
       hook: r.hook.trim() || null,
       contentType: r.contentType || 'R',
       shotType: (r.shotType || null) as ShotTypeKey | null,
@@ -64,11 +80,26 @@ export function toPayload(rows: IdeaRow[]): IdeaRowPayload[] {
 }
 
 /**
+ * ¿La fila tiene algo tecleado (aunque aún no cuente como idea guardable)?
+ * Sirve para no borrar objetivo/embudo/toma mientras el escritor aún no puso título.
+ */
+export function rowHasDraftContent(r: IdeaRow): boolean {
+  return (
+    rowIsWritten(r) ||
+    r.objective.trim().length > 0 ||
+    r.funnelStage.trim().length > 0 ||
+    r.shotType.trim().length > 0 ||
+    r.referenceUrl.trim().length > 0 ||
+    (r.contentType.trim().length > 0 && r.contentType !== 'R')
+  )
+}
+
+/**
  * Mantiene exactamente UNA fila vacía al final. Sin esto hay que pulsar
  * "añadir fila" por cada idea, que es la friccion que hacía preferir el
  * documento.
  */
 export function withTrailingBlank(rows: IdeaRow[]): IdeaRow[] {
-  const written = rows.filter(rowIsWritten)
-  return [...written, emptyIdeaRow()]
+  const kept = rows.filter(rowHasDraftContent)
+  return [...kept, emptyIdeaRow()]
 }

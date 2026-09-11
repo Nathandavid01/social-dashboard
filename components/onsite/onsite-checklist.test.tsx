@@ -62,3 +62,23 @@ describe('OnsiteChecklist — huecos = 50% más que el mes', () => {
     expect(screen.getByText(/no tiene frecuencia en el perfil/)).toBeInTheDocument()
   })
 })
+
+describe('OnsiteChecklist — objetivos', () => {
+  it('muestra Objetivo en filas cuando la toma lo trae', () => {
+    render(
+      <OnsiteChecklist
+        sessionId="s1"
+        initialShots={[shot({
+          id: '1',
+          title: 'Hook A',
+          objective: 'Aumentar reservas',
+          funnelStage: 'BOFU',
+          shotType: 'sony',
+        })]}
+        addable={[]}
+        slotTarget={2}
+      />,
+    )
+    expect(screen.getByText(/Objetivo: Aumentar reservas · BOFU/)).toBeInTheDocument()
+  })
+})

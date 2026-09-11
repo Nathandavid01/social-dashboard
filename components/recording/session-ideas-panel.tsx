@@ -220,6 +220,11 @@ function IdeaRow({
             {idea.title}
           </p>
         </div>
+        {idea.objective && (
+          <p className="text-xs text-amber-700/90 mt-0.5 line-clamp-1">
+            Objetivo: {idea.objective}{idea.funnel_stage ? ` · ${idea.funnel_stage}` : ''}
+          </p>
+        )}
         {idea.hook && (
           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">"{idea.hook}"</p>
         )}

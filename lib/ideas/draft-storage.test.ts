@@ -102,3 +102,25 @@ describe('saveDraft / loadDraft / clearDraft', () => {
     expect(loadDraft('c1', null, storage)).toBeNull()
   })
 })
+
+describe('normalizeIdeaRow / borradores viejos', () => {
+  it('acepta filas guardadas antes de objective/funnelStage', () => {
+    const raw = JSON.stringify({
+      clientId: 'c1',
+      rows: [{
+        title: 'Tour',
+        hook: 'x',
+        contentType: 'R',
+        shotType: '',
+        referenceUrl: '',
+      }],
+      savedAt: '2026-01-01T00:00:00.000Z',
+    })
+    const rows = parseDraft(raw, 'c1')
+    expect(rows?.[0]).toMatchObject({
+      title: 'Tour',
+      objective: '',
+      funnelStage: '',
+    })
+  })
+})
