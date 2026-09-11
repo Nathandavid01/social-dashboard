@@ -10,15 +10,17 @@ import { CalendarDays, User, Users, Palette, Video, Globe } from 'lucide-react'
 import { MetricoolBlogEditor } from '../metricool-blog-editor'
 import { ClientOnboardingCard } from '../../client-onboarding-card'
 import { clientOnboardingStatus } from '@/lib/utils/client-onboarding'
-import type { Client } from '@/lib/supabase/types'
+import type { Client, ClientSuggestion } from '@/lib/supabase/types'
 import type { ClientPipeline } from '@/lib/utils/content-pipeline'
+import { ClientSuggestionsPanel } from '../client-suggestions-panel'
 
 interface Props {
   client: Client
   pipeline: ClientPipeline | null
+  suggestions?: ClientSuggestion[]
 }
 
-export function OverviewTab({ client, pipeline }: Props) {
+export function OverviewTab({ client, pipeline, suggestions = [] }: Props) {
   const hasVideos =
     !!pipeline && pipeline.ideas + pipeline.porGrabar + pipeline.porEditar + pipeline.porPublicar > 0
   const onboarding = clientOnboardingStatus({
@@ -118,6 +120,8 @@ export function OverviewTab({ client, pipeline }: Props) {
           <ColorSwatches colors={client.brand_colors} />
         </CardContent>
       </Card>
+
+      <ClientSuggestionsPanel clientId={client.id} initial={suggestions} />
     </div>
   )
 }
