@@ -28,7 +28,7 @@ const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart
 function session(over: Record<string, any> = {}): any {
   return {
     id: 's1', session_date: todayStr, title: 'Grabación Nora', client_id: 'c1', videographer_id: 'v1',
-    status: 'scheduled', start_time: null, end_time: null, location: null, notes: null,
+    status: 'scheduled', confirmation_status: 'unconfirmed', start_time: null, end_time: null, location: null, notes: null,
     address: null, lat: null, lng: null, created_by: null, created_at: todayStr, updated_at: todayStr,
     client: { id: 'c1', name: 'Nora Fitness' }, videographer: { id: 'v1', full_name: 'María R.' },
     ...over,
@@ -342,3 +342,21 @@ describe('lista — click para editar (SessionCard)', () => {
     expect(more.className).not.toMatch(/opacity-0/)
   })
 })
+
+describe('confirmation filters and badge', () => {
+  it('muestra chips Confirmadas / Sin confirmar / Incompletas', () => {
+    render(<RecordingCalendarClient initialSessions={[session()]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    expect(screen.getByRole('button', { name: /Confirmadas/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Sin confirmar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Incompletas/i })).toBeInTheDocument()
+  })
+
+  it('en lista muestra badge Sin confirmar en la tarjeta', () => {
+    render(<RecordingCalendarClient initialSessions={[session({ start_time: '09:00' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: /Lista/i }))
+    const badges = screen.getAllByText('Sin confirmar')
+    expect(badges.some((el) => el.className.includes('rounded-full'))).toBe(true)
+    expect(screen.getByRole('button', { name: /Más acciones/i })).toBeInTheDocument()
+  })
+})
+
