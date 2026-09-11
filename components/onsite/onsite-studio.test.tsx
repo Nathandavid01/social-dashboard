@@ -46,6 +46,7 @@ const session = (over: Partial<OnsiteSession> = {}): OnsiteSession => ({
   clientName: 'Blue Chiropractic',
   location: 'Oficina',
   status: 'scheduled',
+    confirmation_status: 'unconfirmed',
   perWeek: 3,
   perMonth: 13,
   slotTarget: 20,
