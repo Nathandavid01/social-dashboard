@@ -315,7 +315,14 @@ export function OnsiteStudio({
               </li>
             ) : addable.map((i) => (
               <li key={`${i.source}:${i.id}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                <span className="min-w-0 flex-1 truncate text-[12px]">{i.title}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[12px]">{i.title}</span>
+                  {i.objective && (
+                    <span className="block truncate text-[11px] text-amber-500/90">
+                      Objetivo: {i.objective}{i.funnelStage ? ` · ${i.funnelStage}` : ''}
+                    </span>
+                  )}
+                </span>
                 <button
                   type="button"
                   onClick={() => void añadir(i)}
@@ -482,6 +489,11 @@ function IdeaCard({
                 />
               ) : (
                 <h3 className="mt-1.5 text-[18px] font-semibold leading-snug tracking-tight">{titulo || 'Sin título'}</h3>
+              )}
+              {shot.objective && (
+                <p className="mt-1 truncate text-[12px] text-amber-500/90">
+                  Objetivo: {shot.objective}{shot.funnelStage ? ` · ${shot.funnelStage}` : ''}
+                </p>
               )}
             </div>
             <button

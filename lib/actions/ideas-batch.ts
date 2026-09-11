@@ -36,6 +36,8 @@ export async function createIdeasBatch(input: {
       client_id: input.clientId,
       content_type: r.contentType,
       title: r.title,
+      objective: r.objective,
+      funnel_stage: r.funnelStage,
       hook: r.hook,
       shot_type: r.shotType,
       reference_url: r.referenceUrl,

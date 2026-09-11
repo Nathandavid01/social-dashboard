@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  rowIsWritten, countWritten, toPayload, withTrailingBlank, emptyIdeaRow, type IdeaRow,
+  rowIsWritten, rowHasDraftContent, countWritten, toPayload, withTrailingBlank, emptyIdeaRow, type IdeaRow,
 } from './batch-entry'
 
 const row = (over: Partial<IdeaRow> = {}): IdeaRow => ({ ...emptyIdeaRow(), ...over })
@@ -20,6 +20,9 @@ describe('rowIsWritten', () => {
   })
   it('poner tipo de toma sin escribir nada no crea una idea', () => {
     expect(rowIsWritten(row({ shotType: 'dji' }))).toBe(false)
+  })
+  it('poner solo objetivo/embudo sin título ni hook no crea una idea', () => {
+    expect(rowIsWritten(row({ objective: 'Conversion', funnelStage: 'BOFU' }))).toBe(false)
   })
 })
 
@@ -41,8 +44,26 @@ describe('toPayload', () => {
   })
 
   it('recorta y convierte los vacíos en null', () => {
-    const [p] = toPayload([row({ title: '  Tour  ', hook: '', referenceUrl: '  ', shotType: '' })])
-    expect(p).toEqual({ title: 'Tour', hook: null, contentType: 'R', shotType: null, referenceUrl: null })
+    const [p] = toPayload([row({ title: '  Tour  ', hook: '', referenceUrl: '  ', shotType: '', objective: '', funnelStage: '' })])
+    expect(p).toEqual({
+      title: 'Tour',
+      objective: null,
+      funnelStage: null,
+      hook: null,
+      contentType: 'R',
+      shotType: null,
+      referenceUrl: null,
+    })
+  })
+
+  it('incluye objective y funnel_stage cuando el escritor los rellena', () => {
+    const [p] = toPayload([row({
+      title: 'Tour',
+      objective: '  Aumentar reservas  ',
+      funnelStage: 'BOFU',
+    })])
+    expect(p.objective).toBe('Aumentar reservas')
+    expect(p.funnelStage).toBe('BOFU')
   })
 
   it('conserva tipo de contenido y de toma', () => {
@@ -70,5 +91,15 @@ describe('withTrailingBlank', () => {
 
   it('una tabla vacía queda con una sola fila para escribir', () => {
     expect(withTrailingBlank([])).toHaveLength(1)
+  })
+})
+
+describe('rowHasDraftContent / withTrailingBlank con objetivo', () => {
+  it('conserva una fila que solo tiene objetivo mientras se escribe', () => {
+    const out = withTrailingBlank([row({ objective: 'Conversion' })])
+    expect(out).toHaveLength(2)
+    expect(out[0].objective).toBe('Conversion')
+    expect(rowIsWritten(out[0])).toBe(false)
+    expect(rowHasDraftContent(out[0])).toBe(true)
   })
 })

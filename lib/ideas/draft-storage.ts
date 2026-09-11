@@ -20,7 +20,7 @@ export interface IdeaBatchDraft {
   savedAt: string
 }
 
-function isIdeaRow(v: unknown): v is IdeaRow {
+function isIdeaRowShape(v: unknown): v is Record<string, unknown> {
   if (!v || typeof v !== 'object') return false
   const r = v as Record<string, unknown>
   return (
@@ -30,6 +30,20 @@ function isIdeaRow(v: unknown): v is IdeaRow {
     typeof r.shotType === 'string' &&
     typeof r.referenceUrl === 'string'
   )
+}
+
+/** Normaliza borradores viejos (sin objective/funnelStage) al modelo actual. */
+export function normalizeIdeaRow(v: unknown): IdeaRow | null {
+  if (!isIdeaRowShape(v)) return null
+  return {
+    title: v.title as string,
+    hook: v.hook as string,
+    contentType: v.contentType as string,
+    shotType: v.shotType as string,
+    referenceUrl: v.referenceUrl as string,
+    objective: typeof v.objective === 'string' ? v.objective : '',
+    funnelStage: typeof v.funnelStage === 'string' ? v.funnelStage : '',
+  }
 }
 
 /** ¿Hay filas escritas que se perderían al salir? */
@@ -47,7 +61,7 @@ export function parseDraft(raw: string | null | undefined, clientId: string): Id
     const parsed = JSON.parse(raw) as Partial<IdeaBatchDraft>
     if (parsed.clientId !== clientId) return null
     if (!Array.isArray(parsed.rows)) return null
-    const rows = parsed.rows.filter(isIdeaRow)
+    const rows = parsed.rows.map(normalizeIdeaRow).filter((r): r is IdeaRow => r != null)
     if (!isDraftDirty(rows)) return null
     return withTrailingBlank(rows)
   } catch {

@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.78 — 2026-09-11
+
+**Objetivos visibles al escribir ideas y en On Site.**
+- En Escribir ideas se puede ver y editar el objetivo y la etapa de embudo de cada fila del lote.
+- Las filas de On Site, el call sheet y el panel de ideas de sesión muestran el objetivo cuando existe.
+- Las lecturas de ideas escritas y tomas On Site siguen incluyendo `objective` y `funnel_stage`.
+
 ## v4.77 — 2026-09-11
 
 **On Site vuelve a cargar, se puede exportar ideas y se ven los objetivos.**
