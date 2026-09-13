@@ -1,6 +1,17 @@
 import Link from 'next/link'
 import { CalendarDays } from 'lucide-react'
 import { getAssignedRecordings } from '@/lib/actions/assigned-recordings'
+import { Badge } from '@/components/ui/badge'
+import {
+  confirmationStatusLabel,
+  effectiveConfirmationStatus,
+} from '@/lib/utils/recording-confirmation'
+import { cn } from '@/lib/utils'
+
+const confirmationChipClass = {
+  confirmed: 'text-emerald-600 border-emerald-500/30 bg-emerald-500/10',
+  unconfirmed: 'text-amber-600 border-amber-500/30 bg-amber-500/10',
+} as const
 
 export async function AssignedRecordings({ memberId }: { memberId?: string }) {
   const result = await getAssignedRecordings(memberId)
@@ -12,11 +23,24 @@ export async function AssignedRecordings({ memberId }: { memberId?: string }) {
     </div>
     <p className="mb-3 text-xs text-muted-foreground">Próximas 30 sesiones · Hora de Puerto Rico · Consulta aquí tu próxima grabación.</p>
     {result.error ? <p role="alert">{result.error}</p> : !result.sessions.length ? <p className="text-sm text-muted-foreground">No hay grabaciones próximas asignadas.</p> :
-      <ul className="grid gap-3 sm:grid-cols-2">{result.sessions.map(s => <li key={s.id} className="min-w-0 rounded-lg border border-sky-500/20 bg-background p-3">
-        <Link className="block break-words font-semibold hover:underline" href={`/onsite?s=${s.id}`}>{s.title}</Link>
+      <ul className="grid gap-3 sm:grid-cols-2">{result.sessions.map(s => {
+        const confirmation = effectiveConfirmationStatus(s)
+        const label = confirmationStatusLabel(confirmation)
+        return <li key={s.id} className="min-w-0 rounded-lg border border-sky-500/20 bg-background p-3">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <Link className="block min-w-0 flex-1 break-words font-semibold hover:underline" href={`/onsite?s=${s.id}`}>{s.title}</Link>
+          <Badge
+            variant="outline"
+            className={cn('shrink-0 text-[10px]', confirmationChipClass[confirmation])}
+            aria-label={`Grabación ${label}`}
+          >
+            {label}
+          </Badge>
+        </div>
         <p className="mt-1 text-sm">{new Date(s.session_date+'T12:00:00Z').toLocaleDateString('es-PR',{day:'numeric',month:'short',weekday:'short'})} · {s.start_time?.slice(0,5) || 'Hora Por Confirmar'}</p>
         <p className="mt-1 break-words text-xs text-muted-foreground">{s.location || s.location_address || 'Lugar Por Confirmar'}</p>
         <Link className="mt-3 inline-block text-xs font-medium text-sky-600 dark:text-sky-400" href={`/onsite?s=${s.id}`}>Ver Ideas Y Preparar Grabación →</Link>
-      </li>)}</ul>}
+      </li>
+      })}</ul>}
   </section>
 }

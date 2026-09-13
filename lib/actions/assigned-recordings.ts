@@ -13,7 +13,7 @@ export async function getAssignedRecordings(memberId?: string) {
   const { data: profile } = await db.from('profiles').select('status,approval_status').eq('id', user.id).single()
   if (!profile || profile.status === 'inactive' || ['pending', 'rejected'].includes(profile.approval_status)) return null
   const { data, error } = await db.from('recording_sessions')
-    .select('id,title,session_date,start_time,end_time,location,location_address,status,videographer_id')
+    .select('id,title,session_date,start_time,end_time,location,location_address,status,videographer_id,client_id,confirmation_status')
     .eq('videographer_id', memberId || effectiveId)
     .gte('session_date', todayISOInTimeZone('America/Puerto_Rico'))
     .not('status', 'in', '(completed,cancelled)')
