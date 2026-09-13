@@ -27,7 +27,12 @@ export function MobileNav({ videoReviewCount = 0 }: MobileNavProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Menú"
+          className="relative z-40 shrink-0 lg:hidden"
+        >
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>

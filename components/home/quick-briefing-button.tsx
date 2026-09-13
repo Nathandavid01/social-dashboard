@@ -13,7 +13,12 @@ export function QuickBriefingButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" className="gap-2" onClick={handleClick}>
+    <Button
+      variant="outline"
+      size="sm"
+      className="h-8 shrink-0 gap-1.5 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm"
+      onClick={handleClick}
+    >
       <Bot className="h-3.5 w-3.5" />
       Resumen AI
     </Button>

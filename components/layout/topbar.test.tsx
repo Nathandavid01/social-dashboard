@@ -49,4 +49,11 @@ describe('Topbar', () => {
     render(<Topbar currentUser={null} />)
     expect(screen.queryByTestId('presence-bar')).not.toBeInTheDocument()
   })
+
+  it('keeps the sandwich menu slot shrink-safe and respects PWA safe-area insets', () => {
+    render(<Topbar currentUser={mockUser} />)
+    const header = screen.getByTestId('app-topbar')
+    expect(header.className).toMatch(/pt-\[env\(safe-area-inset-top\)\]/)
+    expect(screen.getByTestId('mobile-nav').parentElement?.className).toMatch(/shrink-0/)
+  })
 })

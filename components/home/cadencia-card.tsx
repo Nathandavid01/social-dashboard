@@ -240,7 +240,7 @@ export function CadenciaCard({ data }: { data: CadenciaData }) {
               </button>
             )}
           </div>
-          <div className="flex items-stretch gap-1.5 overflow-x-auto pb-1">
+          <div className="flex w-full items-stretch gap-0.5 overflow-x-auto pb-0.5 sm:gap-1.5">
             {data.days.map((day) => {
               const isSel = day.date === selectedDay
               const dotClass = day.planned === 0
@@ -256,7 +256,7 @@ export function CadenciaCard({ data }: { data: CadenciaData }) {
                   type="button"
                   onClick={() => setSelectedDay(day.date)}
                   className={cn(
-                    'flex flex-1 min-w-[44px] flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors',
+                    'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-md px-1 py-1.5 text-[11px] font-medium transition-colors sm:min-w-[44px] sm:gap-1 sm:rounded-lg sm:px-2 sm:py-2 sm:text-xs',
                     isSel
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:bg-muted/50',
