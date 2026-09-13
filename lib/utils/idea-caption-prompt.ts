@@ -1,3 +1,5 @@
+import { buildPrimerRoundCaptionPromptInstructions } from '@/lib/primer-round/caption-template'
+
 /**
  * Pure builder for the idea-caption prompt. Kept out of the `'use server'`
  * action file so it can be unit-tested without mocking Supabase/Anthropic
@@ -73,12 +75,28 @@ export interface IdeaCaptionPromptInput {
    * en vez de repetir el prompt normal sin más presión.
    */
   forceDistinctAngle?: boolean
+  /**
+   * When true (Primer Round Oficial client), lock the @primerroundoficial
+   * caption skeleton Eric approved — hosts as names, fixed hashtags, no @ in caption.
+   */
+  primerRoundLockedTemplate?: boolean
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
 
 /** Build the full prompt sent to the model for a single idea's caption. */
 export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
+  if (input.primerRoundLockedTemplate) {
+    return buildPrimerRoundCaptionPromptInstructions({
+      title: input.title,
+      hook: input.hook,
+      burnedOverlay: input.videoAnalysis?.burnedCaptionsText,
+      videoTranscript: input.videoTranscript,
+      // Guest/role comes from overlay line 1 when available; else the model infers.
+      guestHint: null,
+    })
+  }
+
   const { title, hook, visualBrief, captionAngle, hashtags, examples } = input
   const c = input.client ?? {}
 

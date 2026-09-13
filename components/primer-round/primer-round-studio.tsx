@@ -28,6 +28,11 @@ import {
   type PrimerRoundStudioIdea,
 } from '@/lib/actions/primer-round'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
+import {
+  PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON,
+  PRIMER_ROUND_HASHTAGS,
+  PRIMER_ROUND_CAPTION_HOSTS,
+} from '@/lib/primer-round/caption-template'
 import { useRouter } from 'next/navigation'
 
 const LANE_META = [
@@ -134,8 +139,10 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
-          Crear: caption de IG debajo del Reel. Verificar: texto overlay en pantalla + ese caption.
-          Auto-agenda {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
+          Crear: caption de IG debajo del Reel (plantilla bloqueada @primerroundoficial). Verificar: overlay
+          lower-third (3–4 líneas) + ese caption. Hosts en caption como nombres ({PRIMER_ROUND_CAPTION_HOSTS});
+          collabs Metricool-only. Auto-agenda{' '}
+          {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
         </p>
       </header>
 
@@ -224,12 +231,23 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
             <>
               <p className="truncate text-sm font-medium">{selected.title}</p>
 
-              <div className="space-y-1.5 rounded-lg border bg-muted/20 p-3">
+              <div className="space-y-1.5 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-caption-panel">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Caption debajo del Reel (crear)
+                  Caption debajo del Reel (crear · plantilla AI bloqueada)
                 </p>
+                <details className="rounded-md border bg-background/60 px-2 py-1.5" data-testid="primer-round-caption-template">
+                  <summary className="cursor-pointer text-[11px] font-medium text-muted-foreground">
+                    Ver plantilla @primerroundoficial ({PRIMER_ROUND_HASHTAGS})
+                  </summary>
+                  <pre className="mt-1.5 whitespace-pre-wrap text-[11px] leading-relaxed text-foreground/90">
+{PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON}
+                  </pre>
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    Overlay verify: lower-third blanco · 3–4 líneas · L1 rol+nombre · resto pregunta/cita · sin #/@.
+                  </p>
+                </details>
                 <pre className="whitespace-pre-wrap text-xs leading-relaxed">
-                  {caption?.trim() || '— Sin caption aún. Genera el de abajo al estilo @primerroundoficial.'}
+                  {caption?.trim() || '— Sin caption aún. Genera con la plantilla bloqueada.'}
                 </pre>
                 <Button size="sm" onClick={runGenerate} disabled={pending}>
                   {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}

@@ -8,7 +8,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 **Estudio Primer Round: caption IG, verificación y Metricool con collabs.**
 - Nueva ruta `/primer-round` (menú Trabajo) dedicada a Primer Round Oficial.
-- Crear caption de IG debajo del Reel; verificar ortografía del overlay en pantalla y del caption; agendar Reel a Metricool con collabs `@denniseyperez` + `@rafaellenin`.
+- Plantilla AI bloqueada al estilo `@primerroundoficial`: hook → “[Invitado] hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.” → `#magic973 #puertorico #primerround` (hosts como nombres; collabs solo en Metricool).
+- Verificar overlay lower-third (3–4 líneas, L1 rol+nombre) + caption; agendar Reel con collabs `@denniseyperez` + `@rafaellenin`.
 - Auto-agenda con kill switch `PRIMER_ROUND_AUTOPOST=false` y override manual.
 
 ![Estudio Primer Round](/changelog/v4.78-primer-round.png)

@@ -6,6 +6,12 @@
  * Auto Metricool upload is blocked until both verifications pass (or Eric overrides).
  */
 
+import {
+  checkPrimerRoundCaptionStructure,
+  checkPrimerRoundOverlayStructure,
+  mergeOrthoIssues,
+} from './caption-template'
+
 export interface OrthoIssue {
   quote: string
   problem: string
@@ -47,10 +53,12 @@ export function overlayFromBurnedCaptions(input: {
   if (!text && issues.length === 0) {
     return { ok: false, text: '', issues: [], missing: true, source: 'empty' }
   }
+  const structural = text ? checkPrimerRoundOverlayStructure(text) : []
+  const merged = mergeOrthoIssues(issues, structural)
   return {
-    ok: issues.length === 0,
+    ok: merged.length === 0,
     text,
-    issues,
+    issues: merged,
     missing: false,
     source: 'video_analysis',
   }
@@ -65,10 +73,12 @@ export function captionSurfaceFromText(
     return { ok: false, text: '', issues: [], missing: true, source: 'empty' }
   }
   const scoped = issues.map((i) => ({ ...i, surface: 'caption' as const }))
+  const structural = checkPrimerRoundCaptionStructure(text)
+  const merged = mergeOrthoIssues(scoped, structural)
   return {
-    ok: scoped.length === 0,
+    ok: merged.length === 0,
     text,
-    issues: scoped,
+    issues: merged,
     missing: false,
     source: 'caption_field',
   }
@@ -111,6 +121,22 @@ export function buildDualOrthoPrompt(overlayText: string, captionText: string): 
 Verifica ortografía, tildes, puntuación y que el texto en pantalla sea correcto.
 El español puertorriqueño, anglicismos y slang deliberado NO son errores.
 NO inventes palabras. NO reescribas el estilo. NO generes texto overlay nuevo.
+
+EXPECTATIVAS OVERLAY (lower-third blanco @primerroundoficial):
+- 3 a 4 líneas cortas.
+- Línea 1: rol + nombre del invitado (ej. "Exfiscal Zulma Fúster").
+- Líneas siguientes: pregunta o cita.
+- SIN hashtags ni @handles en overlay.
+- Marca si falta tilde, ¿/¡, o si una línea es demasiado larga.
+
+EXPECTATIVAS CAPTION (Metricool text, plantilla bloqueada):
+1) Hook/pregunta
+2) línea en blanco
+3) "[Invitado] hoy en Primer Round junto a Dennise Pérez y Rafael Lenín." (nombres, NO @)
+4) opcional YouTube Magic Tv
+5) línea en blanco
+6) exactamente: #magic973 #puertorico #primerround
+- Collabs SOLO en Metricool — flag si el caption tiene @denniseyperez / @rafaellenin.
 
 TEXTO OVERLAY / BURN-IN (en pantalla — verificar que sea correcto):
 """
@@ -158,18 +184,28 @@ export function parseDualOrthoLlm(raw: string, overlayText: string, captionText:
       }))
     const overlayIssues = allIssues.filter((i) => i.surface === 'overlay')
     const captionIssues = allIssues.filter((i) => i.surface === 'caption')
+    const overlayTextTrim = (overlayText ?? '').trim()
+    const captionTextTrim = (captionText ?? '').trim()
+    const overlayMerged = mergeOrthoIssues(
+      overlayIssues,
+      overlayTextTrim ? checkPrimerRoundOverlayStructure(overlayTextTrim) : [],
+    )
+    const captionMerged = mergeOrthoIssues(
+      captionIssues,
+      captionTextTrim ? checkPrimerRoundCaptionStructure(captionTextTrim) : [],
+    )
     const overlay: SurfaceOrtho = {
-      text: (overlayText ?? '').trim(),
-      issues: overlayIssues,
-      missing: !(overlayText ?? '').trim(),
-      ok: parsed.overlay_ok === true && overlayIssues.length === 0 && !!(overlayText ?? '').trim(),
+      text: overlayTextTrim,
+      issues: overlayMerged,
+      missing: !overlayTextTrim,
+      ok: parsed.overlay_ok === true && overlayMerged.length === 0 && !!overlayTextTrim,
       source: 'llm',
     }
     const caption: SurfaceOrtho = {
-      text: (captionText ?? '').trim(),
-      issues: captionIssues,
-      missing: !(captionText ?? '').trim(),
-      ok: parsed.caption_ok === true && captionIssues.length === 0 && !!(captionText ?? '').trim(),
+      text: captionTextTrim,
+      issues: captionMerged,
+      missing: !captionTextTrim,
+      ok: parsed.caption_ok === true && captionMerged.length === 0 && !!captionTextTrim,
       source: 'llm',
     }
     return buildPrimerRoundOrthoGate({ overlay, caption })

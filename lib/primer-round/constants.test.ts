@@ -15,6 +15,7 @@ import {
   parseDualOrthoLlm,
 } from './orthography'
 import { studioLaneFor, groupStudioIdeas, primerRoundCtas } from './studio'
+import { buildPrimerRoundCaption } from './caption-template'
 
 describe('Primer Round constants', () => {
   it('locks client + blog + host collabs', () => {
@@ -32,28 +33,28 @@ describe('Primer Round constants', () => {
   })
 
   it('autopost defaults on; kill switch is PRIMER_ROUND_AUTOPOST=false', () => {
-    expect(primerRoundAutopostEnabled({})).toBe(true)
-    expect(primerRoundAutopostEnabled({ PRIMER_ROUND_AUTOPOST: 'false' })).toBe(false)
+    expect(primerRoundAutopostEnabled({} as unknown as NodeJS.ProcessEnv)).toBe(true)
+    expect(primerRoundAutopostEnabled({ PRIMER_ROUND_AUTOPOST: 'false' } as unknown as NodeJS.ProcessEnv)).toBe(false)
   })
 })
 
 describe('collabs', () => {
   it('defaults to Denisse + Lenin handles', () => {
-    expect(resolvePrimerRoundCollaborators({})).toEqual([
+    expect(resolvePrimerRoundCollaborators({} as unknown as NodeJS.ProcessEnv)).toEqual([
       { username: 'denniseyperez', deleted: false },
       { username: 'rafaellenin', deleted: false },
     ])
   })
 
   it('allows env override without inventing extras', () => {
-    expect(resolvePrimerRoundCollaborators({ PRIMER_ROUND_COLLAB_USERNAMES: '@a, b' })).toEqual([
+    expect(resolvePrimerRoundCollaborators({ PRIMER_ROUND_COLLAB_USERNAMES: '@a, b' } as unknown as NodeJS.ProcessEnv)).toEqual([
       { username: 'a', deleted: false },
       { username: 'b', deleted: false },
     ])
   })
 
   it('labels known hosts', () => {
-    const labels = primerRoundCollabLabels({})
+    const labels = primerRoundCollabLabels({} as unknown as NodeJS.ProcessEnv)
     expect(labels[0]).toMatchObject({ username: 'denniseyperez', label: 'Dennise Pérez' })
     expect(labels[1]).toMatchObject({ username: 'rafaellenin' })
   })
@@ -61,8 +62,16 @@ describe('collabs', () => {
 
 describe('dual orthography gate (overlay + caption)', () => {
   it('requires both overlay and bottom caption to pass', () => {
-    const overlay = overlayFromBurnedCaptions({ text: 'Hoy en Primer Round', issues: [] })
-    const caption = captionSurfaceFromText('Escucha Primer Round en Magic 97.3')
+    const overlay = overlayFromBurnedCaptions({ text: [
+      'Exfiscal Zulma Fúster',
+      '¿Qué impacto tendrá',
+      'el caso de Elvia Cabrera',
+      'en el caso de Anthonieska?',
+    ].join('\n'), issues: [] })
+    const caption = captionSurfaceFromText(buildPrimerRoundCaption({
+      hook: '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
+      guest: 'Exfiscal Zulma Fúster',
+    }))
     const gate = buildPrimerRoundOrthoGate({ overlay, caption })
     expect(gate.ok).toBe(true)
     expect(canAutoSchedulePrimerRound({
@@ -72,10 +81,13 @@ describe('dual orthography gate (overlay + caption)', () => {
 
   it('blocks when overlay has typos even if caption is clean', () => {
     const overlay = overlayFromBurnedCaptions({
-      text: 'aserca',
+      text: ['aserca', 'de la noticia', 'del dia'].join('\n'),
       issues: [{ quote: 'aserca', problem: 'ortografía', suggestion: 'acerca' }],
     })
-    const caption = captionSurfaceFromText('Caption limpio')
+    const caption = captionSurfaceFromText(buildPrimerRoundCaption({
+      hook: '¿Hook limpio?',
+      guest: 'Invitado Demo',
+    }))
     const gate = buildPrimerRoundOrthoGate({ overlay, caption })
     expect(gate.ok).toBe(false)
     expect(canAutoSchedulePrimerRound({
@@ -84,7 +96,12 @@ describe('dual orthography gate (overlay + caption)', () => {
   })
 
   it('blocks when caption is missing', () => {
-    const overlay = overlayFromBurnedCaptions({ text: 'OK', issues: [] })
+    const overlay = overlayFromBurnedCaptions({ text: [
+      'Exfiscal Zulma Fúster',
+      '¿Qué impacto tendrá',
+      'el caso de Elvia Cabrera',
+      'en el caso de Anthonieska?',
+    ].join('\n'), issues: [] })
     const caption = captionSurfaceFromText('')
     const gate = buildPrimerRoundOrthoGate({ overlay, caption })
     expect(canAutoSchedulePrimerRound({
@@ -102,10 +119,20 @@ describe('dual orthography gate (overlay + caption)', () => {
   })
 
   it('parses dual LLM JSON', () => {
+    const overlay = [
+      'Exfiscal Zulma Fúster',
+      '¿Qué impacto tendrá',
+      'el caso de Elvia Cabrera',
+      'en el caso de Anthonieska?',
+    ].join('\n')
+    const caption = buildPrimerRoundCaption({
+      hook: '¿Hook?',
+      guest: 'Invitado',
+    })
     const gate = parseDualOrthoLlm(
       '{"overlay_ok":true,"caption_ok":true,"issues":[]}',
-      'Hoy',
-      'Escucha el show',
+      overlay,
+      caption,
     )
     expect(gate.ok).toBe(true)
   })
