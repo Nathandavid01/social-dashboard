@@ -31,18 +31,31 @@ vi.mock('@/lib/actions/primer-round', () => ({
       ready: [],
     },
   })),
+  createPrimerRoundUploadIdea: vi.fn(),
+  runPrimerRoundUploadPipeline: vi.fn(),
   generatePrimerRoundCaption: vi.fn(),
   verifyPrimerRoundOrtho: vi.fn(),
   schedulePrimerRoundReel: vi.fn(),
 }))
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
+vi.mock('@/lib/actions/entregas-r2', () => ({
+  getEntregasUploadUrl: vi.fn(),
+  registerEntregasVideo: vi.fn(),
+}))
+vi.mock('@/lib/utils/video-postupload-client', () => ({
+  processUploadedVideo: vi.fn(),
+}))
+vi.mock('@/lib/actions/pipeline-submit', () => ({
+  reportUploadFailure: vi.fn(),
+}))
 
 describe('PrimerRoundPage', () => {
-  it('renders the Spanish studio shell', async () => {
+  it('renders the Spanish upload shell', async () => {
     const ui = await PrimerRoundPage()
     render(ui)
-    expect(screen.getByText(/Estudio Primer Round/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Primer Round/i })).toBeInTheDocument()
     expect(screen.getByText('@denniseyperez')).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-cta')).toBeInTheDocument()
   })
 })

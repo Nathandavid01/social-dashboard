@@ -14,7 +14,7 @@ import {
   canAutoSchedulePrimerRound,
   parseDualOrthoLlm,
 } from './orthography'
-import { studioLaneFor, groupStudioIdeas, primerRoundCtas } from './studio'
+import { studioLaneFor, groupStudioIdeas, primerRoundCtas, assertPrimerRoundMp4 } from './studio'
 import { buildPrimerRoundCaption } from './caption-template'
 
 describe('Primer Round constants', () => {
@@ -155,5 +155,16 @@ describe('studio lanes', () => {
     expect(g.ideas).toHaveLength(1)
     expect(g.bank).toHaveLength(1)
     expect(primerRoundCtas('cid').ideas).toContain('c=cid')
+  })
+})
+
+describe('assertPrimerRoundMp4', () => {
+  it('accepts mp4', () => {
+    expect(assertPrimerRoundMp4({ fileName: 'clip.mp4', contentType: 'video/mp4' })).toBeNull()
+  })
+
+  it('rejects non-video and non-mp4 names', () => {
+    expect(assertPrimerRoundMp4({ fileName: 'x.html', contentType: 'text/html' })).toMatch(/no permitido/i)
+    expect(assertPrimerRoundMp4({ fileName: 'clip.mov', contentType: 'video/quicktime' })).toMatch(/mp4/i)
   })
 })

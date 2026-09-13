@@ -1,7 +1,10 @@
 /**
  * Bucket Primer Round ideas into the studio lanes:
  * bank (crudos) / ideas / in-edit / review.
+ * Also: upload CTA helpers for the simplified /primer-round UI.
  */
+
+import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 
 export type StudioLane = 'ideas' | 'bank' | 'editing' | 'review' | 'ready' | 'other'
 
@@ -54,4 +57,21 @@ export function primerRoundCtas(clientId: string) {
     recording: '/recording-calendar',
     client: `/clients/${clientId}`,
   } as const
+}
+
+/** Client + server: only mp4 (or video/* named .mp4) for the Primer Round CTA. */
+export function assertPrimerRoundMp4(input: {
+  fileName?: string | null
+  contentType?: string | null
+}): string | null {
+  const name = (input.fileName ?? '').trim().toLowerCase()
+  const type = (input.contentType ?? '').trim().toLowerCase()
+  if (type && !isAllowedVideoUploadType(type)) {
+    return 'Tipo de archivo no permitido. Sube un video (mp4).'
+  }
+  if (name && !name.endsWith('.mp4') && type !== 'video/mp4') {
+    return 'Solo se acepta video mp4.'
+  }
+  if (!name && !type) return 'Falta el archivo de video.'
+  return null
 }
