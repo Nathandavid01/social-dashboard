@@ -159,10 +159,10 @@ export default async function HomePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{greeting}{firstName ? `, ${firstName}` : ', equipo NMedia'} 👋</h1>
-          <p className="text-sm text-muted-foreground mt-0.5 capitalize">{dayName}</p>
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{greeting}{firstName ? `, ${firstName}` : ', equipo NMedia'} 👋</h1>
+          <p className="mt-0.5 text-xs capitalize text-muted-foreground sm:text-sm">{dayName}</p>
         </div>
         <QuickBriefingButton />
       </div>
