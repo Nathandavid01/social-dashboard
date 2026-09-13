@@ -27,7 +27,7 @@ export async function getAssignedRecordings(memberId?: string): Promise<Assigned
   const overview = !viewingOther && await currentUserHas('operations.overview')
 
   const select =
-    'id,title,session_date,start_time,end_time,location,location_address,status,videographer_id,client_id,confirmation_status,videographer:profiles!recording_sessions_videographer_id_fkey(id, full_name)'
+    'id,title,session_date,start_time,end_time,location,location_address,status,videographer_id,client_id,confirmation_status,videographer_confirmed_at,client_confirmed_at,videographer:profiles!recording_sessions_videographer_id_fkey(id, full_name)'
   const today = todayISOInTimeZone('America/Puerto_Rico')
   const base = db.from('recording_sessions').select(select)
 
