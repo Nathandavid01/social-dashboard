@@ -146,7 +146,10 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         </p>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        data-testid="primer-round-lane-ctas"
+        className="grid grid-cols-2 gap-2 lg:grid-cols-4"
+      >
         {LANE_META.map((lane) => {
           const Icon = lane.icon
           const items = studio.lanes[lane.key]
@@ -155,15 +158,18 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
             <Link
               key={lane.key}
               href={href}
-              className="rounded-xl border bg-card/60 p-3 transition hover:border-primary/40 hover:bg-card"
+              className="flex items-center justify-between gap-2 rounded-lg border bg-card/60 px-2.5 py-1.5 transition hover:border-primary/40 hover:bg-card"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon className="h-4 w-4 text-amber-600" /> {lane.label}
+              <span className="flex min-w-0 items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+                <span className="min-w-0">
+                  <span className="block truncate text-xs font-medium leading-tight">{lane.label}</span>
+                  <span className="block truncate text-[10px] leading-tight text-muted-foreground">
+                    {lane.hint}
+                  </span>
                 </span>
-                <span className="tabular-nums text-lg font-semibold">{items.length}</span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">{lane.hint} → flujo existente</p>
+              </span>
+              <span className="shrink-0 tabular-nums text-sm font-semibold leading-none">{items.length}</span>
             </Link>
           )
         })}
