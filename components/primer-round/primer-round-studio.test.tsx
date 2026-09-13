@@ -74,4 +74,32 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getAllByText(/Dennise Pérez y Rafael Lenín/).length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: /Agendar Reel en Metricool/i })).toBeInTheDocument()
   })
+
+  it('renders compact top lane CTAs (dense height/padding)', () => {
+    const payload = {
+      ...studio,
+      lanes: {
+        ...studio.lanes,
+        ideas: studio.ready,
+        bank: studio.ready,
+        editing: studio.ready,
+        review: studio.ready,
+        ready: studio.ready,
+      },
+    }
+    render(<PrimerRoundStudio studio={payload} />)
+    const lanes = screen.getByTestId('primer-round-lane-ctas')
+    expect(lanes.className).toMatch(/gap-2/)
+    expect(lanes.className).toMatch(/grid-cols-2/)
+    const links = lanes.querySelectorAll('a')
+    expect(links.length).toBe(4)
+    for (const link of links) {
+      expect(link.className).toMatch(/py-1\.5/)
+      expect(link.className).toMatch(/px-2\.5/)
+      expect(link.className).toMatch(/rounded-lg/)
+      expect(link.className).not.toMatch(/p-3/)
+    }
+    expect(screen.getByRole('link', { name: /Ideas/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Banco/i })).toBeInTheDocument()
+  })
 })
