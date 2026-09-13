@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.79 — 2026-09-13
+
+**Primer Round: solo Upload video; la IA hace el resto.**
+- `/primer-round` quita las tarjetas Ideas/Banco/En edición/Revisión.
+- CTA principal: **Upload video** (mp4). Al subir: caption IG (plantilla bloqueada), verificación de overlay y agenda Metricool Reel al blog `5476146` con collabs `@denniseyperez` + `@rafaellenin`.
+- Override manual si la ortografía bloquea; kill switch `PRIMER_ROUND_AUTOPOST` sin cambios.
+
+![Primer Round upload](/changelog/v4.79-primer-round-upload.png)
+
 ## v4.78 — 2026-09-13
 
 **Estudio Primer Round: caption IG, verificación y Metricool con collabs.**

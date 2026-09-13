@@ -8,11 +8,23 @@ vi.mock('@/lib/actions/primer-round', async () => {
   const actual = await vi.importActual<typeof import('@/lib/actions/primer-round')>('@/lib/actions/primer-round')
   return {
     ...actual,
+    createPrimerRoundUploadIdea: vi.fn(),
+    runPrimerRoundUploadPipeline: vi.fn(),
     generatePrimerRoundCaption: vi.fn(),
     verifyPrimerRoundOrtho: vi.fn(),
     schedulePrimerRoundReel: vi.fn(),
   }
 })
+vi.mock('@/lib/actions/entregas-r2', () => ({
+  getEntregasUploadUrl: vi.fn(),
+  registerEntregasVideo: vi.fn(),
+}))
+vi.mock('@/lib/utils/video-postupload-client', () => ({
+  processUploadedVideo: vi.fn(),
+}))
+vi.mock('@/lib/actions/pipeline-submit', () => ({
+  reportUploadFailure: vi.fn(),
+}))
 
 const studio: PrimerRoundStudioPayload = {
   client: {
@@ -38,40 +50,23 @@ const studio: PrimerRoundStudioPayload = {
     client: '/clients/x',
   },
   lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
-  ready: [
-    {
-      id: 'idea-1',
-      title: 'Entrevista del día',
-      status: 'producida',
-      approval_status: 'approved',
-      caption: null,
-      contentType: 'R',
-      publishDate: '2026-09-14',
-      overlayText: 'Hoy en Primer Round',
-      overlayIssues: 0,
-      analysisStatus: 'done',
-      hasEditedVideo: true,
-    },
-  ],
+  ready: [],
 }
 
 describe('PrimerRoundStudio', () => {
-  it('shows Spanish studio chrome, collabs, and ortho panel affordances', () => {
-    // ready is also in lanes for counts
-    const payload = {
-      ...studio,
-      lanes: { ...studio.lanes, ready: studio.ready },
-    }
-    render(<PrimerRoundStudio studio={payload} />)
-    expect(screen.getByText(/Estudio Primer Round/i)).toBeInTheDocument()
+  it('shows minimal Spanish chrome with Upload video CTA and collabs (no lane cards)', () => {
+    render(<PrimerRoundStudio studio={studio} />)
+    expect(screen.getByRole('heading', { name: /Primer Round/i })).toBeInTheDocument()
     expect(screen.getByText('@denniseyperez')).toBeInTheDocument()
     expect(screen.getByText('@rafaellenin')).toBeInTheDocument()
-    expect(screen.getByText(/Listos para publicar/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Crear caption IG/i })).toBeInTheDocument()
-    expect(screen.getByTestId('primer-round-ortho-panel')).toBeInTheDocument()
-    expect(screen.getByTestId('primer-round-caption-template')).toBeInTheDocument()
-    expect(screen.getByText(/plantilla AI bloqueada/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/Dennise Pérez y Rafael Lenín/).length).toBeGreaterThan(0)
-    expect(screen.getByRole('button', { name: /Agendar Reel en Metricool/i })).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
+    expect(screen.getByText(/Solo mp4/i)).toBeInTheDocument()
+    expect(screen.queryByText(/^Ideas$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Banco$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/En edición/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Revisión$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Listos para publicar/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Crear caption IG/i })).not.toBeInTheDocument()
   })
 })

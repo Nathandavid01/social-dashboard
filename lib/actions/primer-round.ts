@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
+import { currentUserHas, getEffectiveUserId, requirePermission } from '@/lib/auth/server'
+import { ideaTitleFromUpload } from '@/lib/pipeline/banco-direct-upload'
+import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { runIdeaPost } from '@/lib/actions/idea-posting-run'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
@@ -330,4 +332,151 @@ export async function schedulePrimerRoundReel(input: {
   revalidatePath('/pipeline')
   revalidatePath('/entregas')
   return result
+}
+
+/** Create a Primer Round idea row so the browser can attach an edited mp4. */
+export async function createPrimerRoundUploadIdea(input: {
+  title?: string | null
+  fileName?: string | null
+}): Promise<{ ideaId?: string; title?: string; error?: string }> {
+  try {
+    await requirePrimerRoundAccess()
+    await requirePermission('video.upload')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const title = ideaTitleFromUpload(input.title, [{ name: input.fileName ?? '' }])
+  if (!title) return { error: 'Ponle un título al video (o sube un archivo con nombre)' }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const { data, error } = await supabase
+    .from('content_ideas')
+    .insert({
+      client_id: PRIMER_ROUND_CLIENT_ID,
+      content_type: 'R',
+      title,
+      status: 'producida',
+      approval_status: 'submitted' satisfies IdeaApprovalStatus,
+      submitted_at: new Date().toISOString(),
+      created_by: user?.id ?? null,
+    })
+    .select('id, title')
+    .single()
+
+  if (error || !data) return { error: error?.message ?? 'No se pudo crear la idea' }
+
+  revalidatePath('/primer-round')
+  return { ideaId: data.id as string, title: (data.title as string) || title }
+}
+
+/**
+ * One-shot AI pipeline after mp4 upload:
+ * 1) caption IG (locked primerroundoficial template)
+ * 2) approve for Metricool
+ * 3) verify overlay + caption
+ * 4) schedule Reel with collabs (unless ortho blocks and no override)
+ */
+export async function runPrimerRoundUploadPipeline(input: {
+  ideaId: string
+  videoId?: string | null
+  overrideOrtho?: boolean
+}): Promise<{
+  ok?: true
+  caption?: string | null
+  gate?: PrimerRoundOrthoGate
+  skipped?: string
+  error?: string
+  metricoolPostId?: number | null
+}> {
+  try {
+    await requirePrimerRoundAccess()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const ideaId = input.ideaId?.trim()
+  if (!ideaId) return { error: 'Falta la idea' }
+
+  const supabase = await createClient()
+  const { data: idea } = await supabase
+    .from('content_ideas')
+    .select('id, client_id, approval_status')
+    .eq('id', ideaId)
+    .maybeSingle()
+  if (!idea || idea.client_id !== PRIMER_ROUND_CLIENT_ID) {
+    return { error: 'La idea no pertenece a Primer Round' }
+  }
+
+  const captionRes = await generatePrimerRoundCaption(ideaId)
+  if (captionRes.error) return { error: captionRes.error, caption: captionRes.caption }
+
+  const { data: afterCaption } = await supabase
+    .from('content_ideas')
+    .select('generated_caption, caption_draft')
+    .eq('id', ideaId)
+    .maybeSingle()
+  const draft =
+    ((afterCaption?.generated_caption as string | null) ||
+      (afterCaption?.caption_draft as string | null) ||
+      captionRes.caption ||
+      '')?.trim() || null
+  if (draft && !(afterCaption?.generated_caption as string | null)?.trim()) {
+    await supabase.from('content_ideas').update({ generated_caption: draft }).eq('id', ideaId)
+  }
+
+  const userId = await getEffectiveUserId()
+  const videoId = input.videoId?.trim() || null
+  if (idea.approval_status !== 'approved') {
+    const { error: approveErr } = await supabase
+      .from('content_ideas')
+      .update({
+        approval_status: 'approved' satisfies IdeaApprovalStatus,
+        approved_by: userId,
+        approved_at: new Date().toISOString(),
+        approved_video_id: videoId,
+      })
+      .eq('id', ideaId)
+    if (approveErr) return { error: approveErr.message, caption: draft }
+  } else if (videoId) {
+    await supabase
+      .from('content_ideas')
+      .update({ approved_video_id: videoId })
+      .eq('id', ideaId)
+      .is('approved_video_id', null)
+  }
+
+  const schedule = await schedulePrimerRoundReel({
+    ideaId,
+    overrideOrtho: !!input.overrideOrtho,
+  })
+
+  const verified = await verifyPrimerRoundOrtho(ideaId)
+
+  if (schedule.error) {
+    return {
+      error: schedule.error,
+      caption: draft,
+      gate: verified.gate,
+    }
+  }
+  if (schedule.skipped) {
+    return {
+      skipped: schedule.skipped,
+      caption: draft,
+      gate: verified.gate,
+    }
+  }
+
+  revalidatePath('/primer-round')
+  return {
+    ok: true,
+    caption: draft,
+    gate: verified.gate,
+    metricoolPostId: schedule.metricoolPostId ?? null,
+  }
 }

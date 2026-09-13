@@ -1,18 +1,13 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
-import Link from 'next/link'
+import { useRef, useState, useTransition } from 'react'
 import {
-  Clapperboard,
-  Film,
-  Lightbulb,
-  PencilLine,
-  ClipboardCheck,
-  Send,
+  Upload,
+  Users,
+  Loader2,
   CheckCircle2,
   AlertTriangle,
-  Loader2,
-  Users,
+  Send,
   Sparkles,
   ShieldCheck,
 } from 'lucide-react'
@@ -21,91 +16,204 @@ import { Badge } from '@/components/ui/badge'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { cn } from '@/lib/utils'
 import {
-  generatePrimerRoundCaption,
-  verifyPrimerRoundOrtho,
-  schedulePrimerRoundReel,
+  createPrimerRoundUploadIdea,
+  runPrimerRoundUploadPipeline,
   type PrimerRoundStudioPayload,
-  type PrimerRoundStudioIdea,
 } from '@/lib/actions/primer-round'
+import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
+import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
-import {
-  PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON,
-  PRIMER_ROUND_HASHTAGS,
-  PRIMER_ROUND_CAPTION_HOSTS,
-} from '@/lib/primer-round/caption-template'
+import { assertPrimerRoundMp4 } from '@/lib/primer-round/studio'
+import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
 import { useRouter } from 'next/navigation'
 
-const LANE_META = [
-  { key: 'ideas' as const, label: 'Ideas', icon: Lightbulb, hrefKey: 'ideas' as const, hint: 'Escribir / refinar' },
-  { key: 'bank' as const, label: 'Banco', icon: Film, hrefKey: 'bank' as const, hint: 'Crudos listos' },
-  { key: 'editing' as const, label: 'En edición', icon: PencilLine, hrefKey: 'editing' as const, hint: 'Corte en curso' },
-  { key: 'review' as const, label: 'Revisión', icon: ClipboardCheck, hrefKey: 'review' as const, hint: 'Por aprobar' },
-]
+type PipelineStage =
+  | 'idle'
+  | 'creando'
+  | 'subiendo'
+  | 'analizando'
+  | 'caption'
+  | 'verificando'
+  | 'agendando'
+  | 'listo'
+  | 'bloqueado'
+  | 'error'
+
+function putWithProgress(url: string, file: File, onProgress: (pct: number) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', url)
+    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve()
+      void reportUploadFailure(
+        `${file.name} (${file.size}b) → HTTP ${xhr.status} :: ${(xhr.responseText || '').slice(0, 300)}`,
+      )
+      reject(new Error(`La subida falló (${xhr.status})`))
+    }
+    xhr.onerror = () => {
+      void reportUploadFailure(
+        `${file.name} (${file.size}b) → onerror, sin status (CORS, red o subida interrumpida)`,
+      )
+      reject(
+        new Error(
+          'Se cortó la subida. Revisa tu conexión e inténtalo otra vez; ' +
+            'si se repite, abre la consola del navegador (pestaña Red) para ver el error real.',
+        ),
+      )
+    }
+    xhr.ontimeout = () => {
+      void reportUploadFailure(`${file.name} (${file.size}b) → timeout`)
+      reject(new Error('La subida tardó demasiado'))
+    }
+    xhr.send(file)
+  })
+}
+
+const STAGE_LABEL: Record<PipelineStage, string> = {
+  idle: 'Listo para subir',
+  creando: 'Creando pieza…',
+  subiendo: 'Subiendo video…',
+  analizando: 'IA leyendo overlay…',
+  caption: 'IA creando caption IG…',
+  verificando: 'IA verificando ortografía…',
+  agendando: 'Agendando Reel en Metricool…',
+  listo: 'Listo',
+  bloqueado: 'Verificación pendiente',
+  error: 'Error',
+}
 
 export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload }) {
   const router = useRouter()
-  const [selectedId, setSelectedId] = useState<string | null>(studio.ready[0]?.id ?? null)
-  const selected = useMemo(
-    () => studio.ready.find((i) => i.id === selectedId) ?? studio.ready[0] ?? null,
-    [studio.ready, selectedId],
-  )
-  const [caption, setCaption] = useState<string | null>(selected?.caption ?? null)
-  const [gate, setGate] = useState<PrimerRoundOrthoGate | null>(null)
-  const [overrideOrtho, setOverrideOrtho] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [stage, setStage] = useState<PipelineStage>('idle')
+  const [pct, setPct] = useState(0)
   const [message, setMessage] = useState<string | null>(null)
+  const [caption, setCaption] = useState<string | null>(null)
+  const [gate, setGate] = useState<PrimerRoundOrthoGate | null>(null)
+  const [ideaId, setIdeaId] = useState<string | null>(null)
+  const [videoId, setVideoId] = useState<string | null>(null)
+  const [overrideOrtho, setOverrideOrtho] = useState(false)
+  const [fileLabel, setFileLabel] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  function pick(idea: PrimerRoundStudioIdea) {
-    setSelectedId(idea.id)
-    setCaption(idea.caption)
+  async function runPipeline(id: string, vid: string | null, override: boolean) {
+    setStage('caption')
+    setMessage('IA generando caption (plantilla @primerroundoficial)…')
+    const res = await runPrimerRoundUploadPipeline({
+      ideaId: id,
+      videoId: vid,
+      overrideOrtho: override,
+    })
+    if (res.caption) setCaption(res.caption)
+    if (res.gate) setGate(res.gate)
+
+    if (res.error) {
+      setStage('error')
+      setMessage(res.error)
+      return
+    }
+    if (res.skipped) {
+      setStage('bloqueado')
+      setMessage(res.skipped)
+      return
+    }
+    setStage('listo')
+    setMessage(
+      `Agendado en Metricool${res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''} con collabs.`,
+    )
+    router.refresh()
+  }
+
+  function onPickFile(file: File | null) {
+    if (!file) return
+    const guard = assertPrimerRoundMp4({ fileName: file.name, contentType: file.type || 'video/mp4' })
+    if (guard) {
+      setStage('error')
+      setMessage(guard)
+      return
+    }
+
+    setFileLabel(file.name)
+    setCaption(null)
     setGate(null)
-    setMessage(null)
     setOverrideOrtho(false)
-  }
-
-  function runGenerate() {
-    if (!selected) return
     setMessage(null)
+    setIdeaId(null)
+    setVideoId(null)
+    setPct(0)
+
     startTransition(async () => {
-      const res = await generatePrimerRoundCaption(selected.id)
-      if (res.error) {
-        setMessage(res.error)
-        return
+      try {
+        setStage('creando')
+        const created = await createPrimerRoundUploadIdea({
+          fileName: file.name,
+          title: null,
+        })
+        if (created.error || !created.ideaId) {
+          setStage('error')
+          setMessage(created.error ?? 'No se pudo crear la pieza')
+          return
+        }
+        setIdeaId(created.ideaId)
+
+        setStage('subiendo')
+        const slot = await getEntregasUploadUrl({
+          ideaId: created.ideaId,
+          fileName: file.name,
+          contentType: file.type || 'video/mp4',
+        })
+        if (slot.error || !slot.url || !slot.key) {
+          setStage('error')
+          setMessage(slot.error ?? 'No se pudo preparar la subida')
+          return
+        }
+        await putWithProgress(slot.url, file, setPct)
+
+        const reg = await registerEntregasVideo({
+          ideaId: created.ideaId,
+          key: slot.key,
+          name: file.name,
+          sizeBytes: file.size,
+          mimeType: file.type || 'video/mp4',
+        })
+        if (reg.error || !reg.id) {
+          setStage('error')
+          setMessage(reg.error ?? 'No se pudo registrar el video')
+          return
+        }
+        setVideoId(reg.id)
+
+        setStage('analizando')
+        setMessage('IA analizando texto en pantalla…')
+        try {
+          await processUploadedVideo(reg.id, file)
+        } catch {
+          // Analysis is best-effort; verify will surface missing overlay.
+        }
+
+        setStage('verificando')
+        await runPipeline(created.ideaId, reg.id, false)
+      } catch (err) {
+        setStage('error')
+        setMessage(err instanceof Error ? err.message : 'Error inesperado')
       }
-      setCaption(res.caption ?? null)
-      setGate(null)
-      setMessage('Caption de IG creado (debajo del Reel).')
-      router.refresh()
     })
   }
 
-  function runVerify() {
-    if (!selected) return
-    setMessage(null)
+  function retryWithOverride() {
+    if (!ideaId) return
     startTransition(async () => {
-      const res = await verifyPrimerRoundOrtho(selected.id)
-      if (res.gate) setGate(res.gate)
-      if (res.error) setMessage(res.error)
-      else setMessage(res.gate?.ok ? 'Verificación OK: overlay + caption.' : 'Hay problemas de ortografía.')
+      setStage('agendando')
+      await runPipeline(ideaId, videoId, true)
     })
   }
 
-  function runSchedule() {
-    if (!selected) return
-    setMessage(null)
-    startTransition(async () => {
-      const res = await schedulePrimerRoundReel({
-        ideaId: selected.id,
-        overrideOrtho,
-      })
-      if (res.error) setMessage(res.error)
-      else if (res.skipped) setMessage(res.skipped)
-      else {
-        setMessage(`Agendado en Metricool${res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''}.`)
-        router.refresh()
-      }
-    })
-  }
+  const busy = pending || (stage !== 'idle' && stage !== 'listo' && stage !== 'bloqueado' && stage !== 'error')
 
   return (
     <div className="space-y-5">
@@ -119,11 +227,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           <div className="flex min-w-0 items-center gap-3">
             <ClientLogo name={studio.client.name} logoUrl={studio.client.logoUrl} className="h-10 w-10 text-[11px]" />
             <div className="min-w-0">
-              <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
-                Estudio Primer Round
-              </h1>
+              <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">Primer Round</h1>
               <p className="truncate text-xs text-muted-foreground">
-                @{studio.client.igHandle} · blog {studio.client.blogId} · videos → Metricool Reel
+                @{studio.client.igHandle} · blog {studio.client.blogId}
               </p>
             </div>
           </div>
@@ -139,203 +245,137 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
-          Crear: caption de IG debajo del Reel (plantilla bloqueada @primerroundoficial). Verificar: overlay
-          lower-third (3–4 líneas) + ese caption. Hosts en caption como nombres ({PRIMER_ROUND_CAPTION_HOSTS});
-          collabs Metricool-only. Auto-agenda{' '}
+          Sube el mp4: la IA crea el caption (plantilla bloqueada, hosts {PRIMER_ROUND_CAPTION_HOSTS}),
+          verifica el overlay y agenda el Reel en Metricool con collabs. Auto-agenda{' '}
           {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
         </p>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {LANE_META.map((lane) => {
-          const Icon = lane.icon
-          const items = studio.lanes[lane.key]
-          const href = studio.ctas[lane.hrefKey]
-          return (
-            <Link
-              key={lane.key}
-              href={href}
-              className="rounded-xl border bg-card/60 p-3 transition hover:border-primary/40 hover:bg-card"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon className="h-4 w-4 text-amber-600" /> {lane.label}
-                </span>
-                <span className="tabular-nums text-lg font-semibold">{items.length}</span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">{lane.hint} → flujo existente</p>
-            </Link>
-          )
-        })}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <div className="space-y-2 rounded-xl border bg-card p-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold">
-              <Clapperboard className="h-4 w-4" /> Listos para publicar
-            </h2>
-            <Badge variant="outline" className="tabular-nums">{studio.ready.length}</Badge>
-          </div>
-          {studio.ready.length === 0 ? (
-            <p className="rounded-lg border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
-              No hay videos aprobados pendientes de Metricool.
-            </p>
-          ) : (
-            <ul className="max-h-80 space-y-1.5 overflow-y-auto">
-              {studio.ready.map((idea) => (
-                <li key={idea.id}>
-                  <button
-                    type="button"
-                    onClick={() => pick(idea)}
-                    className={cn(
-                      'w-full rounded-lg border px-3 py-2 text-left text-sm transition',
-                      selected?.id === idea.id ? 'border-amber-500/50 bg-amber-500/10' : 'hover:bg-muted/40',
-                    )}
-                  >
-                    <span className="block truncate font-medium">{idea.title}</span>
-                    <span className="mt-0.5 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
-                      <span>{idea.caption ? 'Con caption' : 'Sin caption IG'}</span>
-                      <span>
-                        Overlay:{' '}
-                        {idea.overlayText
-                          ? idea.overlayIssues > 0
-                            ? `${idea.overlayIssues} aviso(s)`
-                            : 'OK'
-                          : 'sin análisis'}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Button asChild size="sm" variant="outline">
-              <Link href={studio.ctas.review}>Ir a Revisión</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link href={studio.ctas.pipeline}>Ir a Pipeline</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link href={studio.ctas.onsite}>On Site</Link>
-            </Button>
-          </div>
+      <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 sm:p-6" data-testid="primer-round-upload-panel">
+        <div className="text-center space-y-1">
+          <h2 className="text-sm font-semibold">Subir video</h2>
+          <p className="text-xs text-muted-foreground">Solo mp4. La IA hace el resto.</p>
         </div>
 
-        <div className="space-y-3 rounded-xl border bg-card p-3 sm:p-4">
-          <h2 className="text-sm font-semibold">Caption IG + verificación + agenda</h2>
-          {!selected ? (
-            <p className="text-xs text-muted-foreground">Selecciona un video listo.</p>
-          ) : (
-            <>
-              <p className="truncate text-sm font-medium">{selected.title}</p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="video/mp4,.mp4"
+          className="sr-only"
+          data-testid="primer-round-upload-input"
+          disabled={busy}
+          onChange={(e) => {
+            const f = e.target.files?.[0] ?? null
+            e.target.value = ''
+            onPickFile(f)
+          }}
+        />
 
-              <div className="space-y-1.5 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-caption-panel">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Caption debajo del Reel (crear · plantilla AI bloqueada)
-                </p>
-                <details className="rounded-md border bg-background/60 px-2 py-1.5" data-testid="primer-round-caption-template">
-                  <summary className="cursor-pointer text-[11px] font-medium text-muted-foreground">
-                    Ver plantilla @primerroundoficial ({PRIMER_ROUND_HASHTAGS})
-                  </summary>
-                  <pre className="mt-1.5 whitespace-pre-wrap text-[11px] leading-relaxed text-foreground/90">
-{PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON}
-                  </pre>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    Overlay verify: lower-third blanco · 3–4 líneas · L1 rol+nombre · resto pregunta/cita · sin #/@.
-                  </p>
-                </details>
-                <pre className="whitespace-pre-wrap text-xs leading-relaxed">
-                  {caption?.trim() || '— Sin caption aún. Genera con la plantilla bloqueada.'}
-                </pre>
-                <Button size="sm" onClick={runGenerate} disabled={pending}>
-                  {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1.5 h-3.5 w-3.5" />}
-                  Crear caption IG
-                </Button>
+        <Button
+          size="lg"
+          className="w-full gap-2"
+          disabled={busy}
+          data-testid="primer-round-upload-cta"
+          onClick={() => inputRef.current?.click()}
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          Upload video
+        </Button>
+
+        {(stage !== 'idle' || fileLabel) && (
+          <div className="space-y-2 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-pipeline-status">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span className="font-medium">{STAGE_LABEL[stage]}</span>
+              {fileLabel && <span className="truncate text-muted-foreground">{fileLabel}</span>}
+            </div>
+            {stage === 'subiendo' && (
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-full bg-amber-500 transition-all" style={{ width: `${pct}%` }} />
               </div>
-
-              <div className="space-y-2 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-ortho-panel">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Verificar overlay + caption
+            )}
+            {caption && (
+              <div className="space-y-1" data-testid="primer-round-caption-panel">
+                <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Sparkles className="h-3 w-3" /> Caption IG
                 </p>
-                {gate ? (
-                  <div className="space-y-2 text-xs">
-                    <OrthoRow
-                      ok={gate.overlay.ok && !gate.overlay.missing}
-                      label="Texto overlay (en pantalla)"
-                      detail={
-                        gate.overlay.missing
-                          ? 'Sin texto overlay / análisis'
-                          : gate.overlay.ok
-                            ? 'Sin errores'
-                            : `${gate.overlay.issues.length} a corregir`
-                      }
-                    />
-                    <OrthoRow
-                      ok={gate.caption.ok && !gate.caption.missing}
-                      label="Caption de IG (abajo)"
-                      detail={
-                        gate.caption.missing
-                          ? 'Falta caption'
-                          : gate.caption.ok
-                            ? 'Sin errores'
-                            : `${gate.caption.issues.length} a corregir`
-                      }
-                    />
-                    {[...gate.overlay.issues, ...gate.caption.issues].length > 0 && (
-                      <ul className="space-y-1 rounded-md border border-amber-500/20 bg-amber-500/5 p-2">
-                        {[...gate.overlay.issues, ...gate.caption.issues].map((issue, idx) => (
-                          <li key={`${issue.surface}-${idx}`}>
-                            <span className="font-medium">[{issue.surface}]</span> «{issue.quote}» — {issue.problem}
-                            {issue.suggestion ? ` → ${issue.suggestion}` : ''}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Corre la verificación antes de agendar. Se revisa el burn-in y el caption de abajo.
-                  </p>
+                <pre className="whitespace-pre-wrap text-xs leading-relaxed">{caption}</pre>
+              </div>
+            )}
+            {gate && (
+              <div className="space-y-2" data-testid="primer-round-ortho-panel">
+                <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <ShieldCheck className="h-3 w-3" /> Verificación
+                </p>
+                <OrthoRow
+                  ok={gate.overlay.ok && !gate.overlay.missing}
+                  label="Texto overlay (en pantalla)"
+                  detail={
+                    gate.overlay.missing
+                      ? 'Sin texto overlay / análisis'
+                      : gate.overlay.ok
+                        ? 'Sin errores'
+                        : `${gate.overlay.issues.length} a corregir`
+                  }
+                />
+                <OrthoRow
+                  ok={gate.caption.ok && !gate.caption.missing}
+                  label="Caption de IG (abajo)"
+                  detail={
+                    gate.caption.missing
+                      ? 'Falta caption'
+                      : gate.caption.ok
+                        ? 'Sin errores'
+                        : `${gate.caption.issues.length} a corregir`
+                  }
+                />
+                {[...gate.overlay.issues, ...gate.caption.issues].length > 0 && (
+                  <ul className="space-y-1 rounded-md border border-amber-500/20 bg-amber-500/5 p-2 text-xs">
+                    {[...gate.overlay.issues, ...gate.caption.issues].map((issue, idx) => (
+                      <li key={`${issue.surface}-${idx}`}>
+                        <span className="font-medium">[{issue.surface}]</span> «{issue.quote}» — {issue.problem}
+                        {issue.suggestion ? ` → ${issue.suggestion}` : ''}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button size="sm" variant="secondary" onClick={runVerify} disabled={pending}>
-                    {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}
-                    Verificar ortografía
-                  </Button>
-                  <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={overrideOrtho}
-                      onChange={(e) => setOverrideOrtho(e.target.checked)}
-                    />
-                    Override Eric (publicar igual)
-                  </label>
-                </div>
               </div>
+            )}
+          </div>
+        )}
 
-              <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
-                  Metricool Reel · collabs
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Se agenda en @{studio.client.igHandle} con{' '}
-                  {studio.collabs.map((c) => `@${c.username}`).join(' + ')}.
-                </p>
-                <Button size="sm" onClick={runSchedule} disabled={pending || (!gate?.ok && !overrideOrtho)}>
-                  {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
-                  Agendar Reel en Metricool
-                </Button>
-              </div>
-            </>
-          )}
-          {message && (
-            <p className="rounded-lg border bg-muted/30 px-3 py-2 text-xs" role="status">
-              {message}
-            </p>
-          )}
-        </div>
+        {stage === 'bloqueado' && (
+          <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={overrideOrtho}
+                onChange={(e) => setOverrideOrtho(e.target.checked)}
+              />
+              Override Eric (publicar igual)
+            </label>
+            <Button
+              size="sm"
+              className="w-full"
+              disabled={pending || !overrideOrtho}
+              onClick={retryWithOverride}
+            >
+              {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
+              Agendar de todos modos
+            </Button>
+          </div>
+        )}
+
+        {message && (
+          <p
+            className={cn(
+              'rounded-lg border px-3 py-2 text-xs',
+              stage === 'error' ? 'border-destructive/30 bg-destructive/5 text-destructive' : 'bg-muted/30',
+            )}
+            role="status"
+          >
+            {message}
+          </p>
+        )}
       </section>
     </div>
   )
@@ -343,7 +383,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
 function OrthoRow({ ok, label, detail }: { ok: boolean; label: string; detail: string }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
       <span className="flex items-center gap-1.5 font-medium">
         {ok ? (
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
