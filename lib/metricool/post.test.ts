@@ -128,6 +128,28 @@ describe('createDraftPost', () => {
   })
 })
 
+
+  it('attaches Instagram collaborators on Reel format data', async () => {
+    const spy = captureFetch()
+    await createDraftPost('hola', '5476146', ['instagram'], undefined, '2026-06-15T10:00:00', {
+      autoPublish: true,
+      contentType: 'R',
+      instagramCollaborators: [
+        { username: 'denniseyperez', deleted: false },
+        { username: 'rafaellenin', deleted: false },
+      ],
+    })
+    const b = body(spy)
+    expect(b.instagramData).toEqual({
+      type: 'REEL',
+      showReelOnFeed: true,
+      collaborators: [
+        { username: 'denniseyperez', deleted: false },
+        { username: 'rafaellenin', deleted: false },
+      ],
+    })
+  })
+
 describe('postFormatData', () => {
   it('maps a Reel (R) to REEL on IG (+showReelOnFeed) and FB', () => {
     expect(postFormatData('R', ['instagram', 'facebook', 'tiktok'])).toEqual({

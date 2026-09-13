@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.78 — 2026-09-13
+
+**Estudio Primer Round: caption IG, verificación y Metricool con collabs.**
+- Nueva ruta `/primer-round` (menú Trabajo) dedicada a Primer Round Oficial.
+- Crear caption de IG debajo del Reel; verificar ortografía del overlay en pantalla y del caption; agendar Reel a Metricool con collabs `@denniseyperez` + `@rafaellenin`.
+- Auto-agenda con kill switch `PRIMER_ROUND_AUTOPOST=false` y override manual.
+
+![Estudio Primer Round](/changelog/v4.78-primer-round.png)
+
 ## v4.77 — 2026-09-11
 
 **On Site vuelve a cargar, se puede exportar ideas y se ven los objetivos.**

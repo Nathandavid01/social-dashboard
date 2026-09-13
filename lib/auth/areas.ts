@@ -65,6 +65,8 @@ export const AREAS: Area[] = [
 
   // ── 3. Banco (paso 2), corte, copy ──
   { href: '/pipeline',           label: 'Pipeline',        permission: 'pipeline.read',      group: 'Trabajo' },
+  // Estudio dedicado Primer Round (caption IG + verify overlay/caption + Metricool collabs).
+  { href: '/primer-round',       label: 'Primer Round',    permission: 'pipeline.read',      group: 'Trabajo' },
   { href: '/banco',              label: 'Banco de Video',  permission: 'video_bank.read',    group: 'Trabajo' },
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
@@ -149,7 +151,11 @@ export function effectiveAreaHrefs(
 ): Set<string> {
   if (role === 'owner') return new Set(AREAS.map((a) => a.href))
   if (areaAccess == null) {
-    return new Set(AREAS.filter((a) => !a.permission || hasPermission(role, a.permission)).map((a) => a.href))
+    const hrefs = new Set(AREAS.filter((a) => !a.permission || hasPermission(role, a.permission)).map((a) => a.href))
+    // Primer Round is gated pipeline.read in AREAS (editors), but videographers
+    // with recording.read also need the studio — same family as Pipeline/On Site.
+    if (hasPermission(role, 'recording.read')) hrefs.add('/primer-round')
+    return hrefs
   }
   const granted = new Set(AREAS.map((a) => a.href))
   const reachable = new Set(areaAccess.filter((h) => granted.has(h)))

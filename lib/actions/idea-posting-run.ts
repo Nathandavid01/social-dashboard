@@ -15,6 +15,8 @@ import {
 import { automaticPublishSchedule } from '@/lib/utils/automatic-publish-schedule'
 import { validateScheduleOverride } from '@/lib/utils/publish-override'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
+import { isPrimerRoundClientId, primerRoundAutopostEnabled } from '@/lib/primer-round/constants'
+import { resolvePrimerRoundCollaborators } from '@/lib/primer-round/collabs'
 
 export type PostResult = { ok?: true; error?: string; skipped?: string; metricoolPostId?: number | null }
 
@@ -35,7 +37,8 @@ export async function runIdeaPost(
   scheduleOverride?: string | null,
   opts?: { videoFileId?: string | null; watchedOn?: VideoWatchBoard | null; manualScheduling?: boolean },
 ): Promise<PostResult> {
-  if (!opts?.manualScheduling) return { skipped: 'El equipo debe pulsar Agendar En Metricool después de completar la revisión.' }
+  // Manual-scheduling gate is applied after the idea load so Primer Round can
+  // auto-post with collabs when PRIMER_ROUND_AUTOPOST is enabled (default).
   // Before any DB work: a bad override must not burn the posting claim.
   let overrideIso: string | null = null
   if (scheduleOverride) {
@@ -47,11 +50,23 @@ export async function runIdeaPost(
   const { data: idea } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, content_type, generated_caption, status, approval_status, approved_video_id, published_at, publish_date, metricool_post_id, posted_at, client:clients(metricool_blog_id, platforms, default_platforms, posting_time)',
+      'id, title, content_type, generated_caption, status, approval_status, approved_video_id, published_at, publish_date, metricool_post_id, posted_at, client_id, client:clients(id, metricool_blog_id, platforms, default_platforms, posting_time)',
     )
     .eq('id', ideaId)
     .single()
   if (!idea) return { error: 'Idea no encontrada' }
+
+  const clientId =
+    (idea as { client_id?: string | null }).client_id ??
+    ((idea.client ?? {}) as { id?: string | null }).id ??
+    null
+  const isPrimerRound = isPrimerRoundClientId(clientId)
+  if (!opts?.manualScheduling) {
+    if (!(isPrimerRound && primerRoundAutopostEnabled())) {
+      return { skipped: 'El equipo debe pulsar Agendar En Metricool después de completar la revisión.' }
+    }
+  }
+  const instagramCollaborators = isPrimerRound ? resolvePrimerRoundCollaborators() : undefined
 
   // All live edited files for THIS idea. Pick in JS so a leftover pipeline
   // cut from last week cannot beat this week's Entregas file just because
@@ -80,6 +95,7 @@ export async function runIdeaPost(
   const edited = choice.video
 
   const client = (idea.client ?? {}) as {
+    id?: string | null
     metricool_blog_id?: string | null
     platforms?: string[] | null
     default_platforms?: string[] | null
@@ -184,7 +200,12 @@ export async function runIdeaPost(
       platforms,
       undefined,
       scheduledFor,
-      { mediaUrls: [pub.url], autoPublish: true, contentType: (idea.content_type as string | null) ?? null },
+      {
+        mediaUrls: [pub.url],
+        autoPublish: true,
+        contentType: (idea.content_type as string | null) ?? null,
+        ...(instagramCollaborators ? { instagramCollaborators } : {}),
+      },
     )
     const postId = res.data?.id ?? null
     const uuid = res.data?.uuid ?? null

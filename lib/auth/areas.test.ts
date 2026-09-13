@@ -169,3 +169,18 @@ it('supervisors retain the video bank with restricted areas',()=>{
  expect(effectiveAreaHrefs('supervisor',['/revision'])).toContain('/banco')
  expect(effectiveAreaHrefs('editor',['/revision'])).not.toContain('/banco')
 })
+
+
+describe("Primer Round area", () => {
+  it("is registered under Trabajo with pipeline.read", () => {
+    const area = AREAS.find((a) => a.href === "/primer-round")
+    expect(area?.label).toBe("Primer Round")
+    expect(area?.permission).toBe("pipeline.read")
+    expect(area?.group).toBe("Trabajo")
+  })
+
+  it("is reachable for video (recording.read) even though area permission is pipeline.read", () => {
+    expect(effectiveAreaHrefs("video", null).has("/primer-round")).toBe(true)
+    expect(effectiveAreaHrefs("editor", null).has("/primer-round")).toBe(true)
+  })
+})
