@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const requirePermission = vi.fn(async (_perm: string) => undefined)
+const currentUserHas = vi.fn(async (_perm: string) => false)
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: (perm: string) => requirePermission(perm),
+  currentUserHas: (perm: string) => currentUserHas(perm),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
@@ -10,13 +12,15 @@ let notificationFails = false
 let writeFails = false
 let notification: Record<string, unknown> | null = null
 let previousVideographer: string | null = null
+let priorVideoAt: string | null = null
+let priorClientAt: string | null = null
 let insertPayload: Record<string, unknown> | null = null
 let updatePayload: Record<string, unknown> | null = null
 let userId: string | null = 'admin-1'
 
 function makeSupabase() {
   const builder: Record<string, unknown> = {}
-  builder.single = vi.fn(async () => ({ data: { id: 's1', videographer_id: previousVideographer, title: 'Grabación', session_date: '2026-09-09' }, error: null }))
+  builder.single = vi.fn(async () => ({ data: { id: 's1', videographer_id: previousVideographer, title: 'Grabación', session_date: '2026-09-09', videographer_confirmed_at: priorVideoAt, client_confirmed_at: priorClientAt }, error: null }))
   builder.select = vi.fn(() => builder)
   builder.eq = vi.fn(() => builder)
   builder.order = vi.fn(() => builder)
@@ -40,7 +44,14 @@ function makeSupabase() {
 let supabase = makeSupabase()
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => supabase }))
 
-import { createRecordingSession, updateRecordingSession } from './recording-sessions'
+import {
+  createRecordingSession,
+  updateRecordingSession,
+  confirmRecordingClient,
+  confirmRecordingVideographer,
+  unconfirmRecordingClient,
+  unconfirmRecordingVideographer,
+} from './recording-sessions'
 
 const baseCreate = {
   session_date: '2026-08-23',
@@ -56,8 +67,11 @@ beforeEach(() => {
   notificationFails = false
   writeFails = false
   previousVideographer = null
+  priorVideoAt = null
+  priorClientAt = null
   updatePayload = null
   userId = 'admin-1'
+  currentUserHas.mockReset().mockResolvedValue(false)
   supabase = makeSupabase()
 })
 
@@ -158,4 +172,63 @@ it('does not notify if the assignment fails to save', async () => {
  const result=await updateRecordingSession('s1',{videographer_id:'v2'})
  expect(result.error).toBe('write failed')
  expect(notification).toBeNull()
+})
+
+
+describe('dual-party confirm / unconfirm', () => {
+  it('denies without recording.create or operations.overview', async () => {
+    const res = await confirmRecordingClient('s1')
+    expect(res.error).toMatch(/acceso denegado|autorizado/i)
+    expect(updatePayload).toBeNull()
+  })
+
+  it('confirmRecordingClient sets client timestamp and keeps unconfirmed alone', async () => {
+    currentUserHas.mockImplementation(async (p) => p === 'recording.create')
+    const res = await confirmRecordingClient('s1')
+    expect(res).toMatchObject({ success: true, confirmation_status: 'unconfirmed' })
+    expect(typeof (res as { client_confirmed_at?: string }).client_confirmed_at).toBe('string')
+    expect(updatePayload).toEqual(expect.objectContaining({
+      confirmation_status: 'unconfirmed',
+      client_confirmed_at: expect.any(String),
+    }))
+  })
+
+  it('both sides set confirmation_status confirmed', async () => {
+    currentUserHas.mockImplementation(async (p) => p === 'operations.overview')
+    priorVideoAt = '2026-09-13T10:00:00Z'
+    const res = await confirmRecordingClient('s1')
+    expect(res).toMatchObject({ success: true, confirmation_status: 'confirmed' })
+    expect(updatePayload).toEqual(expect.objectContaining({ confirmation_status: 'confirmed' }))
+  })
+
+  it('confirmRecordingVideographer sets videographer timestamp', async () => {
+    currentUserHas.mockImplementation(async (p) => p === 'recording.create')
+    priorClientAt = '2026-09-13T10:00:00Z'
+    const res = await confirmRecordingVideographer('s1')
+    expect(res).toMatchObject({ success: true, confirmation_status: 'confirmed' })
+    expect(updatePayload).toEqual(expect.objectContaining({
+      confirmation_status: 'confirmed',
+      videographer_confirmed_at: expect.any(String),
+    }))
+  })
+
+  it('unconfirm clears side and demotes confirmation_status', async () => {
+    currentUserHas.mockImplementation(async (p) => p === 'recording.create')
+    priorVideoAt = '2026-09-13T10:00:00Z'
+    priorClientAt = '2026-09-13T11:00:00Z'
+    const res = await unconfirmRecordingClient('s1')
+    expect(res).toMatchObject({ success: true, confirmation_status: 'unconfirmed', client_confirmed_at: null })
+    expect(updatePayload).toEqual(expect.objectContaining({
+      client_confirmed_at: null,
+      confirmation_status: 'unconfirmed',
+    }))
+  })
+
+  it('unconfirmRecordingVideographer clears video side', async () => {
+    currentUserHas.mockImplementation(async (p) => p === 'recording.create')
+    priorVideoAt = '2026-09-13T10:00:00Z'
+    priorClientAt = '2026-09-13T11:00:00Z'
+    const res = await unconfirmRecordingVideographer('s1')
+    expect(res).toMatchObject({ success: true, confirmation_status: 'unconfirmed', videographer_confirmed_at: null })
+  })
 })

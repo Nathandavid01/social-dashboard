@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { AlertTriangle, CalendarDays } from 'lucide-react'
 import { getAssignedRecordings } from '@/lib/actions/assigned-recordings'
+import { currentUserHas } from '@/lib/auth/server'
 import { Badge } from '@/components/ui/badge'
+import { RecordingConfirmButtons } from '@/components/recording/recording-confirm-buttons'
 import {
   confirmationChip,
   confirmationStatusLabel,
@@ -31,6 +33,9 @@ export async function AssignedRecordings({ memberId }: { memberId?: string }) {
   const result = await getAssignedRecordings(memberId)
   if (!result) return null
   const { overview } = result
+  const canConfirm =
+    (await currentUserHas('recording.create')) ||
+    (await currentUserHas('operations.overview'))
   const calendarHref = overview
     ? '/recording-calendar'
     : `/recording-calendar?videographer=${result.memberId}`
@@ -157,6 +162,13 @@ export async function AssignedRecordings({ memberId }: { memberId?: string }) {
                 >
                   Ver Ideas Y Preparar Grabación →
                 </Link>
+                {canConfirm ? (
+                  <RecordingConfirmButtons
+                    sessionId={s.id}
+                    clientConfirmedAt={s.client_confirmed_at}
+                    videographerConfirmedAt={s.videographer_confirmed_at}
+                  />
+                ) : null}
               </li>
             )
           })}
