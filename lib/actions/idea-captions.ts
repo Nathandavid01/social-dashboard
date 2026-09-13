@@ -18,6 +18,7 @@ import { transcribeVideoFromUrl } from '@/lib/integrations/whisper'
 import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
+import { isPrimerRoundClientId } from '@/lib/primer-round/constants'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -193,6 +194,8 @@ export async function generateIdeaCaption(
   const hermanosLlenos = hermanosRaw.filter((h) => filled(h.caption)).slice(0, MAX_HERMANOS)
   const hermanos = prepararHermanos(hermanosLlenos)
 
+  const primerRoundLockedTemplate = isPrimerRoundClientId(clientId)
+
   const sharedPrompt: IdeaCaptionPromptInput = {
     title: idea.title as string,
     hook: idea.hook,
@@ -200,11 +203,12 @@ export async function generateIdeaCaption(
     captionAngle: idea.caption_angle,
     hashtags: idea.hashtags_suggestion,
     platforms,
-    examples,
-    approvedExamples,
-    avoidExamples: ratings.avoid,
-    hermanos,
-    teamCorrections,
+    // Locked @primerroundoficial skeleton — do not dilute with generic Metricool style examples.
+    examples: primerRoundLockedTemplate ? [] : examples,
+    approvedExamples: primerRoundLockedTemplate ? [] : approvedExamples,
+    avoidExamples: primerRoundLockedTemplate ? [] : ratings.avoid,
+    hermanos: primerRoundLockedTemplate ? [] : hermanos,
+    teamCorrections: primerRoundLockedTemplate ? [] : teamCorrections,
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
     videoTranscript,
@@ -222,6 +226,7 @@ export async function generateIdeaCaption(
       defaultCta: client.default_cta,
       captionNotes: client.caption_notes,
     },
+    primerRoundLockedTemplate,
   }
 
   try {
@@ -233,7 +238,11 @@ export async function generateIdeaCaption(
     // hermano del lote (mismo gancho, mismo CTA + hashtags solapados),
     // regenera UNA sola vez con la instrucción reforzada. Si vuelve a
     // chocar se acepta igual — nunca bucles, nunca gasto infinito de API.
-    let anguloChocado = hermanosLlenos.some((h) => sonDemasiadoParecidos(stored, h.caption))
+    // Locked Primer Round format is intentionally repetitive (same hosts/hashtags) —
+    // skip sibling-collision retries that would fight the template.
+    let anguloChocado =
+      !primerRoundLockedTemplate &&
+      hermanosLlenos.some((h) => sonDemasiadoParecidos(stored, h.caption))
     let regenerado = false
     if (anguloChocado) {
       regenerado = true

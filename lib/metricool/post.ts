@@ -48,20 +48,31 @@ const CONTENT_TYPE_TO_FORMAT: Record<string, 'REEL' | 'STORY' | 'POST'> = {
   C: 'POST',
 }
 
+export type InstagramCollaborator = { username: string; deleted?: boolean }
+
 export function postFormatData(
   contentType: string | null | undefined,
   platforms: string[],
+  opts?: { instagramCollaborators?: InstagramCollaborator[] },
 ): Record<string, unknown> {
   const format = contentType ? CONTENT_TYPE_TO_FORMAT[contentType] : undefined
-  if (!format) return {}
   const networks = new Set(platforms.map((p) => p.toLowerCase()))
   const data: Record<string, unknown> = {}
-  if (networks.has('instagram')) {
+  const collabs = (opts?.instagramCollaborators ?? [])
+    .map((c) => ({ username: c.username.trim().replace(/^@/, ''), deleted: c.deleted === true }))
+    .filter((c) => c.username.length > 0)
+  if (networks.has('instagram') && (format || collabs.length > 0)) {
     // Instagram only publishes single videos as Reels via the API; showReelOnFeed
-    // surfaces the Reel on the grid too.
-    data.instagramData = format === 'REEL' ? { type: 'REEL', showReelOnFeed: true } : { type: format }
+    // surfaces the Reel on the grid too. Collaborators = IG collab tags on the Reel.
+    const base = format
+      ? (format === 'REEL' ? { type: 'REEL', showReelOnFeed: true } : { type: format })
+      : {}
+    data.instagramData = {
+      ...base,
+      ...(collabs.length > 0 ? { collaborators: collabs.map((c) => ({ username: c.username, deleted: false })) } : {}),
+    }
   }
-  if (networks.has('facebook')) data.facebookData = { type: format }
+  if (format && networks.has('facebook')) data.facebookData = { type: format }
   return data
 }
 
@@ -80,6 +91,8 @@ export async function createDraftPost(
     /** Idea content_type (R/P/C/S). Drives the per-network publish format so the
      *  post matches the planned type (Reel/Story/Post/Carousel) on the network. */
     contentType?: string | null
+    /** Instagram Reel collaborators (e.g. Primer Round hosts). */
+    instagramCollaborators?: InstagramCollaborator[]
   },
 ): Promise<MetricoolDraftResponse> {
   const config = getServerConfig()
@@ -90,7 +103,9 @@ export async function createDraftPost(
   const networks = (platforms && platforms.length > 0 ? platforms : ['instagram', 'facebook', 'tiktok'])
     .map((p) => p.toLowerCase())
   const providers = networks.map((network) => ({ network }))
-  const formatData = postFormatData(opts?.contentType, networks)
+  const formatData = postFormatData(opts?.contentType, networks, {
+    instagramCollaborators: opts?.instagramCollaborators,
+  })
 
   // Metricool wants a naive local datetime + a timezone (it publishes at that
   // wall-clock in `timezone`). Pass a planned naive datetime ("YYYY-MM-DDTHH:MM")
