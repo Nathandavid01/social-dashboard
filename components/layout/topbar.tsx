@@ -20,15 +20,29 @@ export function Topbar({
   currentUser,
 }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur px-4 lg:px-6">
-      <MobileNav videoReviewCount={videoReviewCount} />
-      {currentUser && <PresenceBar currentUser={currentUser} />}
-      <div className="flex-1" />
-      <div className="flex items-center gap-2">
+    <header
+      data-testid="app-topbar"
+      className="sticky top-0 z-40 shrink-0 overflow-visible border-b border-border bg-background/95 backdrop-blur pt-[env(safe-area-inset-top)]"
+    >
+      {/* Inner row keeps a full 56px tap strip below the PWA/notch safe area. */}
+      <div className="flex h-14 items-center gap-2 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] lg:gap-4 lg:pl-6 lg:pr-6">
+        {/* Sandwich/hamburger must never flex-shrink under presence / actions on narrow PWA viewports. */}
+        <div className="relative z-40 shrink-0">
+          <MobileNav videoReviewCount={videoReviewCount} />
+        </div>
+        {/* Presence is secondary on phones — hide below sm so it cannot crowd the menu. */}
         {currentUser && (
-          <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} />
+          <div className="hidden min-w-0 sm:block">
+            <PresenceBar currentUser={currentUser} />
+          </div>
         )}
-        <UserMenu />
+        <div className="min-w-0 flex-1" />
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {currentUser && (
+            <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} />
+          )}
+          <UserMenu />
+        </div>
       </div>
     </header>
   )

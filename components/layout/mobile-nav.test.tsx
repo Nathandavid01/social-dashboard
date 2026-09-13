@@ -10,10 +10,16 @@ vi.mock('@/lib/context/auth-context', () => ({
 beforeEach(() => cleanup())
 
 describe('MobileNav', () => {
+  it('exposes an always-visible Menú trigger on mobile', () => {
+    render(<MobileNav />)
+    const trigger = screen.getByRole('button', { name: /menú/i })
+    expect(trigger).toBeInTheDocument()
+    expect(trigger.className).toMatch(/shrink-0/)
+  })
+
   it('gives the nav sheet an accessible title for screen readers', () => {
     render(<MobileNav />)
-    // Sheet content (and its title) only mounts once opened.
-    fireEvent.click(screen.getByRole('button'))
+    fireEvent.click(screen.getByRole('button', { name: /menú/i }))
     expect(screen.getByText('Navegación')).toBeInTheDocument()
   })
 })

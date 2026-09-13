@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.79 — 2026-09-13
+
+**PWA responsive: el menú sandwich se ve en móvil y Cadencia más compacta.**
+- El topbar respeta `safe-area-inset` (notch / status bar) y el botón hamburguesa ya no se encoge detrás de Presence.
+- Presence se oculta bajo `sm` para dejar espacio al menú en teléfonos.
+- «Resumen AI» y las pastillas de día de Cadencia caben en viewports estrechos sin recortar Dom.
+
 ## v4.78 — 2026-09-13
 
 **Estudio Primer Round: caption IG, verificación y Metricool con collabs.**
