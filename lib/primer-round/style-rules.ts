@@ -9,6 +9,7 @@ export const PRIMER_ROUND_STYLE_RULES_LIMIT = 8
 export const PRIMER_ROUND_GFX_STYLE_RULES = [
   'Reel gráfico / promo (GFX), no un clip del programa: no lo escribas como corte de entrevista.',
   'El gancho es la frase principal del overlay (ej. LA NOTICIA NO ESPERA), no juntas todas las preguntas de pantalla.',
+  'No repitas el gancho en la línea 3. Si el hook es LA NOTICIA NO ESPERA, la siguiente oración empieza por el horario.',
   'En este tipo de Reel no pongas “Episodio completo en YouTube”.',
   'El caption dice cuándo sale al aire (hoy / mañana / el lunes a las 5:43am). Domingo publicado hoy = mañana a las 5:43am.',
 ]

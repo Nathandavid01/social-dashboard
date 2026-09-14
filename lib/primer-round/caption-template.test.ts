@@ -4,6 +4,7 @@ import {
   buildPrimerRoundCaptionPromptInstructions,
   checkPrimerRoundCaptionStructure,
   checkPrimerRoundOverlayStructure,
+  normalizePrimerRoundCaption,
   PRIMER_ROUND_HASHTAGS,
   PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON,
 } from './caption-template'
@@ -83,8 +84,47 @@ describe('Primer Round locked caption template', () => {
       guest: 'LA NOTICIA NO ESPERA',
       airCopy: { when: 'mañana', phrase: 'mañana a las 5:43am' },
     })
-    expect(caption).toContain('mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín')
+    expect(caption).toBe(
+      [
+        'LA NOTICIA NO ESPERA',
+        '',
+        'mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+        '',
+        PRIMER_ROUND_HASHTAGS,
+      ].join('\n'),
+    )
+    expect(caption).not.toMatch(/LA NOTICIA NO ESPERA mañana/)
     expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
+    expect(p).toMatch(/NO empieces la línea 3 con la misma frase/i)
+    expect(p).not.toMatch(/LA NOTICIA NO ESPERA mañana a las 5:43am/)
+  })
+})
+
+describe('normalizePrimerRoundCaption', () => {
+  it('strips a repeated LA NOTICIA NO ESPERA before the air line', () => {
+    const stale = [
+      'LA NOTICIA NO ESPERA',
+      '',
+      'LA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+      '',
+      PRIMER_ROUND_HASHTAGS,
+    ].join('\n')
+    const next = normalizePrimerRoundCaption(stale, {
+      when: 'mañana',
+      phrase: 'mañana a las 5:43am',
+    })
+    expect(next).toBe(
+      [
+        'LA NOTICIA NO ESPERA',
+        '',
+        'mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+        '',
+        PRIMER_ROUND_HASHTAGS,
+      ].join('\n'),
+    )
+    expect(checkPrimerRoundCaptionStructure(stale).some((i) => /no repitas el gancho/i.test(i.problem))).toBe(
+      true,
+    )
   })
 })
 

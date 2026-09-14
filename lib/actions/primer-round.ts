@@ -32,7 +32,7 @@ import {
   type StudioIdeaRef,
 } from '@/lib/primer-round/studio'
 import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
-import { applyPrimerRoundAirPhrase } from '@/lib/primer-round/air-time'
+import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { entregasR2Bucket, entregasR2Client } from '@/lib/integrations/entregas-r2'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
@@ -188,7 +188,7 @@ export async function getPrimerRoundStudio(): Promise<
     const captionRaw =
       ((raw.generated_caption as string | null) || (raw.caption_draft as string | null) || null)?.trim() ||
       null
-    const caption = captionRaw ? applyPrimerRoundAirPhrase(captionRaw) : null
+    const caption = captionRaw ? normalizePrimerRoundCaption(captionRaw) : null
     if (caption && captionRaw && caption !== captionRaw) {
       airRewrites.push({ id: raw.id as string, caption })
     }
@@ -672,7 +672,7 @@ export async function acceptPrimerRoundPiece(input: {
     return { error: 'El video de esta pieza ya no está disponible' }
   }
 
-  const caption = applyPrimerRoundAirPhrase(
+  const caption = normalizePrimerRoundCaption(
     ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim(),
   )
   if (!caption) return { error: 'Falta el caption. Dale feedback a la IA o espera a que lo genere.' }

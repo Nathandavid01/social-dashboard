@@ -20,7 +20,7 @@ import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { isPrimerRoundClientId } from '@/lib/primer-round/constants'
 import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
-import { applyPrimerRoundAirPhrase } from '@/lib/primer-round/air-time'
+import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -237,7 +237,7 @@ export async function generateIdeaCaption(
     const caption = await generateCaptionText(buildIdeaCaptionPrompt(sharedPrompt))
     if (!caption?.trim()) return { error: 'La IA no devolvió caption' }
     let stored = primerRoundLockedTemplate
-      ? applyPrimerRoundAirPhrase(caption.trim())
+      ? normalizePrimerRoundCaption(caption.trim())
       : caption.trim()
 
     // Pieza 2, red de seguridad: si el caption choca obviamente con un
