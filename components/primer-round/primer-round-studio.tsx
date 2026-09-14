@@ -20,7 +20,7 @@ import {
   runPrimerRoundUploadPipeline,
   type PrimerRoundStudioPayload,
 } from '@/lib/actions/primer-round'
-import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
+import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
@@ -45,7 +45,7 @@ function putWithProgress(
   file: File,
   contentType: string,
   onProgress: (pct: number) => void,
-): Promise<void> {
+): Promise<{ key: string }> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open('PUT', url)
@@ -54,7 +54,16 @@ function putWithProgress(
       if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
     }
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) return resolve()
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const body = JSON.parse(xhr.responseText) as { key?: string }
+          if (body.key) return resolve({ key: body.key })
+        } catch {
+          /* fall through */
+        }
+        void reportUploadFailure(`${file.name} (${file.size}b) → HTTP ${xhr.status} sin key`)
+        return reject(new Error('No se pudo guardar el video'))
+      }
       void reportUploadFailure(
         `${file.name} (${file.size}b) → HTTP ${xhr.status} :: ${(xhr.responseText || '').slice(0, 300)}`,
       )
@@ -179,21 +188,16 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setIdeaId(created.ideaId)
 
         setStage('subiendo')
-        const slot = await getEntregasUploadUrl({
-          ideaId: created.ideaId,
-          fileName: file.name,
+        const uploaded = await putWithProgress(
+          `/api/entregas-upload?ideaId=${encodeURIComponent(created.ideaId)}&fileName=${encodeURIComponent(file.name)}`,
+          file,
           contentType,
-        })
-        if (slot.error || !slot.url || !slot.key) {
-          setStage('error')
-          setMessage(slot.error ?? 'No se pudo preparar la subida')
-          return
-        }
-        await putWithProgress(slot.url, file, contentType, setPct)
+          setPct,
+        )
 
         const reg = await registerEntregasVideo({
           ideaId: created.ideaId,
-          key: slot.key,
+          key: uploaded.key,
           name: file.name,
           sizeBytes: file.size,
           mimeType: contentType,

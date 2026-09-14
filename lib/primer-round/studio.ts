@@ -72,7 +72,8 @@ export function primerRoundUploadContentType(input: {
   const name = (input.fileName ?? '').trim().toLowerCase()
   if (name.endsWith('.mov')) return 'video/quicktime'
   if (name.endsWith('.webm')) return 'video/webm'
-  return 'video/mp4'
+  if (name.endsWith('.mp4')) return 'video/mp4'
+  return type || 'video/mp4'
 }
 
 /** Client + server: mp4 or mov for the Primer Round CTA. */

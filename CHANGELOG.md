@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.82 — 2026-09-13
+
+**Primer Round: el .mov ya no se corta al subir.**
+- La película se envía por el dashboard (mismo origen), no por el enlace directo a R2 que el navegador bloqueaba.
+- Ves el video, la IA lo lee y arma el caption igual que antes.
+
 ## v4.81 — 2026-09-13
 
 **Primer Round acepta películas .mov: las ves, la IA lee los textos y arma el caption.**

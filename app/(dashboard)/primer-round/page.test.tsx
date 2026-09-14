@@ -40,7 +40,6 @@ vi.mock('@/lib/actions/primer-round', () => ({
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
 vi.mock('@/lib/actions/entregas-r2', () => ({
-  getEntregasUploadUrl: vi.fn(),
   registerEntregasVideo: vi.fn(),
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({

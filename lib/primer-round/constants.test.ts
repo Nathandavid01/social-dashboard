@@ -180,5 +180,6 @@ describe('primerRoundUploadContentType', () => {
     expect(primerRoundUploadContentType({ fileName: 'pelicula.mov', contentType: '' })).toBe('video/quicktime')
     expect(primerRoundUploadContentType({ fileName: 'clip.mp4', contentType: '' })).toBe('video/mp4')
     expect(primerRoundUploadContentType({ fileName: 'x.mov', contentType: 'video/quicktime' })).toBe('video/quicktime')
+    expect(primerRoundUploadContentType({ fileName: 'evil.html', contentType: 'text/html' })).toBe('text/html')
   })
 })
