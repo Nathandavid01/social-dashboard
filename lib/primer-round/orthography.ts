@@ -132,7 +132,7 @@ EXPECTATIVAS OVERLAY (lower-third blanco @primerroundoficial):
 EXPECTATIVAS CAPTION (Metricool text, plantilla bloqueada):
 1) Hook/pregunta
 2) línea en blanco
-3) "[Invitado] hoy en Primer Round junto a Dennise Pérez y Rafael Lenín." (nombres, NO @)
+3) "[Invitado] mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez." o, sin invitado, esa oración sola (nombres, NO @)
 4) opcional YouTube Magic Tv
 5) línea en blanco
 6) exactamente: #magic973 #puertorico #primerround

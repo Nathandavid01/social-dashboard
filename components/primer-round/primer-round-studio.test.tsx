@@ -65,7 +65,7 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
     expect(screen.getByText(/mp4 o mov\. La IA lee el video/i)).toBeInTheDocument()
-    expect(screen.getByText(/Al aire lun–vie 5:43am/i)).toBeInTheDocument()
+    expect(screen.getByText(/Al aire lun–vie 5:43 AM/i)).toBeInTheDocument()
     expect(screen.getByText(/Si publicas ahora:/i)).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-input')).toHaveAttribute(
       'accept',
@@ -124,7 +124,7 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
     expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
     expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent(
-      /LA NOTICIA NO ESPERA (?:hoy|mañana|el lunes) a las 5:43am en Primer Round/,
+      /(?:Hoy|Mañana|El lunes) desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez/,
     )
     expect(screen.getByTestId('primer-round-style-rules')).toHaveTextContent(
       /El gancho es LA NOTICIA NO ESPERA/i,
