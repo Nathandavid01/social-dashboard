@@ -99,6 +99,8 @@ export async function generateIdeaCaption(
      * cuáles son los hermanos: ninguno" y NO dispara el auto-fetch.
      */
     hermanos?: { titulo: string; caption: string }[]
+    /** When set, only this file (and its analysis) is used — never a leftover sibling. */
+    videoId?: string | null
   },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
@@ -126,30 +128,41 @@ export async function generateIdeaCaption(
     if (existing) return { ok: true, caption: displayCaptionDraft(existing) }
   }
 
+  const pinnedVideoId = opts?.videoId?.trim() || null
   const { data: vids } = await supabase
     .from('content_idea_videos')
     .select('id, kind, status, drive_file_id, storage_provider')
     .eq('idea_id', ideaId)
     .neq('status', 'archived')
-  const hasVideo = hasCaptionableVideo(vids)
+  const scopedVids = pinnedVideoId
+    ? (vids ?? []).filter((v) => v.id === pinnedVideoId)
+    : (vids ?? [])
+  if (pinnedVideoId && scopedVids.length === 0) {
+    return { error: 'Este video no es el que acabas de subir. No se trabaja el archivo anterior.' }
+  }
+  const hasVideo = hasCaptionableVideo(scopedVids)
   if (!hasVideo) return { error: 'Sube un video antes de generar el caption.' }
 
   // QC IA: el análisis visual más reciente de un video editado de esta idea.
   // Best-effort — sin tabla (migración pendiente) o sin fila, el caption sale igual.
   // Leído ANTES del check de "listo": si la IA ya vio el video, el hook
   // ("¿De qué es este video?") deja de ser obligatorio (decisión de Eric).
-  const { data: analysis } = await supabase
+  // If videoId is pinned, only that file's analysis is used (never leftover GFX).
+  let analysisQuery = supabase
     .from('content_idea_video_analysis')
     .select('findings, visual_summary, status')
-    .eq('idea_id', ideaId)
     .eq('status', 'done')
+  analysisQuery = pinnedVideoId
+    ? analysisQuery.eq('video_id', pinnedVideoId)
+    : analysisQuery.eq('idea_id', ideaId)
+  const { data: analysis } = await analysisQuery
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle()
     .then((r) => r, () => ({ data: null }))
 
   const hasVisualAnalysis = !!analysis?.visual_summary
-  const source = pickCaptionSourceVideo((vids ?? []) as Parameters<typeof pickCaptionSourceVideo>[0])
+  const source = pickCaptionSourceVideo(scopedVids as Parameters<typeof pickCaptionSourceVideo>[0])
   const videoUrl = await listenUrlForCaptionVideo(source)
   const videoTranscript = videoUrl ? await transcribeVideoFromUrl(videoUrl) : null
 
