@@ -1,6 +1,6 @@
 # TODO — pending requests
 
-- [ ] **Publicar biblioteca completa del editor (v4.88)** — Cambio preparado en `codex/nanas-editor-library`. Verificado localmente como Richard Jimenez: 63 videos de Nanas, 63 controles de descarga y 2 trabajos activos; móvil 390 px sin desbordamiento. TypeScript pasa. Suite: 3297 pasan, 2 fallos previos en `components/entregas/entregas-board.test.tsx` (filtro de cliente, reproducidos en el checkout original), 3 omitidos. Falta resolver el bloqueo de pruebas para release, PR/revisión/CI y verificar la publicación. El B-roll incompleto de la auditoría sigue necesitando el archivo original.
+- [ ] **Publicar biblioteca completa del editor (v4.89)** — Cambio preparado en `codex/nanas-editor-library`. Verificado localmente como Richard Jimenez: 63 videos de Nanas, 63 controles de descarga y 2 trabajos activos; móvil 390 px sin desbordamiento. Tras integrar main: 3311 pruebas pasan, 3 omitidas; TypeScript y merge-gate pasan. Pendiente PR/revisión/CI y verificar la publicación. El B-roll incompleto de la auditoría sigue necesitando el archivo original.
 
 Tracked work not yet done. Each is implemented **test-first (TDD)** when unblocked
 (see CLAUDE.md). Check off + reference the commit when completed.
