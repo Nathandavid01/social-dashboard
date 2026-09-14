@@ -25,7 +25,7 @@ import {
 } from '@/lib/actions/primer-round'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
-import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
+import { isUploadAbortError, uploadEntregasFileFast } from '@/lib/utils/entregas-fast-upload'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
 import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer-round/studio'
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
@@ -49,81 +49,6 @@ type PipelineStage =
   | 'listo'
   | 'bloqueado'
   | 'error'
-
-function isAbortError(err: unknown): boolean {
-  return (
-    (err instanceof DOMException && err.name === 'AbortError') ||
-    (err instanceof Error && err.name === 'AbortError')
-  )
-}
-
-function putWithProgress(
-  url: string,
-  file: File,
-  contentType: string,
-  onProgress: (pct: number) => void,
-  signal?: AbortSignal,
-): Promise<{ key: string }> {
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(new DOMException('Aborted', 'AbortError'))
-      return
-    }
-    const xhr = new XMLHttpRequest()
-    const abortXhr = () => xhr.abort()
-    if (signal) signal.addEventListener('abort', abortXhr)
-    xhr.open('PUT', url)
-    xhr.setRequestHeader('Content-Type', contentType)
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
-    }
-    xhr.onload = () => {
-      if (signal?.aborted) {
-        reject(new DOMException('Aborted', 'AbortError'))
-        return
-      }
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const body = JSON.parse(xhr.responseText) as { key?: string }
-          if (body.key) return resolve({ key: body.key })
-        } catch {
-          /* fall through */
-        }
-        void reportUploadFailure(`${file.name} (${file.size}b) → HTTP ${xhr.status} sin key`)
-        return reject(new Error('No se pudo guardar el video'))
-      }
-      void reportUploadFailure(
-        `${file.name} (${file.size}b) → HTTP ${xhr.status} :: ${(xhr.responseText || '').slice(0, 300)}`,
-      )
-      reject(new Error(`La subida falló (${xhr.status})`))
-    }
-    xhr.onerror = () => {
-      if (signal?.aborted) {
-        reject(new DOMException('Aborted', 'AbortError'))
-        return
-      }
-      void reportUploadFailure(
-        `${file.name} (${file.size}b) → onerror, sin status (CORS, red o subida interrumpida)`,
-      )
-      reject(
-        new Error(
-          'Se cortó la subida. Revisa tu conexión e inténtalo otra vez; ' +
-            'si se repite, abre la consola del navegador (pestaña Red) para ver el error real.',
-        ),
-      )
-    }
-    xhr.onabort = () => reject(new DOMException('Aborted', 'AbortError'))
-    xhr.ontimeout = () => {
-      if (signal?.aborted) {
-        reject(new DOMException('Aborted', 'AbortError'))
-        return
-      }
-      void reportUploadFailure(`${file.name} (${file.size}b) → timeout`)
-      reject(new Error('La subida tardó demasiado'))
-    }
-    xhr.send(file)
-  })
-}
 
 const STAGE_LABEL: Record<PipelineStage, string> = {
   idle: 'Listo para subir',
@@ -265,13 +190,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setIdeaId(created.ideaId)
 
         setStage('subiendo')
-        const uploaded = await putWithProgress(
-          `/api/entregas-upload?ideaId=${encodeURIComponent(created.ideaId)}&fileName=${encodeURIComponent(file.name)}`,
+        const uploaded = await uploadEntregasFileFast({
+          ideaId: created.ideaId,
           file,
           contentType,
-          setPct,
-          abortRef.current?.signal,
-        )
+          signal: abortRef.current?.signal,
+          onProgress: setPct,
+        })
         if (cancelledRef.current) return
 
         const reg = await registerEntregasVideo({
@@ -304,7 +229,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setStage('verificando')
         await runPipeline(created.ideaId, reg.id)
       } catch (err) {
-        if (cancelledRef.current || isAbortError(err)) return
+        if (cancelledRef.current || isUploadAbortError(err)) return
         setStage('error')
         setMessage(err instanceof Error ? err.message : 'Error inesperado')
       }
@@ -420,7 +345,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 sm:p-6" data-testid="primer-round-upload-panel">
         <div className="text-center space-y-1">
           <h2 className="text-sm font-semibold">Subir video</h2>
-          <p className="text-xs text-muted-foreground">mp4 o mov. La IA lee el video; tú aceptas o le das feedback.</p>
+          <p className="text-xs text-muted-foreground">
+            mp4 o mov, del tamaño que sea. Va directo a Entregas. Tú aceptas o le das feedback.
+          </p>
         </div>
 
         <input
