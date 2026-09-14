@@ -12,8 +12,10 @@ El nuevo archivo sustituye el reproductor anterior desde que se selecciona, perm
 - 81 pruebas relacionadas aprobadas: componente, página, reglas de Primer Round, registro R2 y procesamiento posterior al upload.
 - `npx tsc --noEmit`: aprobado, también después de ampliar las pruebas.
 - `npm run merge-gate`: aprobado (relaciones estáticas, guardas y dry-run del inventario R2).
-- Suite completa: **3305 aprobadas, 2 fallidas y 3 omitidas**, en 427 archivos; 86.31 segundos.
-- Los dos fallos se reproducen por separado en `components/entregas/entregas-board.test.tsx`: el filtro no encuentra la opción `Lumen`. Afectan los casos de seleccionar cliente y limpiar el filtro; ese archivo y su componente no se modificaron en esta corrección. Pendiente de diagnóstico separado. La suite general no está verde.
+- Ejecución inicial: **3305 aprobadas, 2 fallidas y 3 omitidas**, en 427 archivos; 86.31 segundos.
+- Diagnóstico de los dos fallos de Entregas: `twoClients` se construía al cargar el archivo, antes de que `beforeEach` fijara la fecha. Se movió esa preparación a `beforeEach`; no se modificó el componente de Entregas. Sus 66 pruebas pasan.
+- Revalidación de publicación sobre `github/main`, con las mismas exclusiones de CI: **3304 aprobadas, 0 fallidas y 3 omitidas**, en 426 archivos. Se excluyen las pruebas `*.live.test.ts`, igual que en CI.
+- Revisión independiente: sin hallazgos funcionales; se corrigió la documentación para reflejar el diagnóstico de las fechas.
 
 Comandos reproducibles:
 
