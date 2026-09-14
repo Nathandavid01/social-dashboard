@@ -82,6 +82,8 @@ export function buildPrimerRoundCaptionPromptInstructions(ctx: {
   burnedOverlay?: string | null
   videoTranscript?: string | null
   visualSummary?: string | null
+  feedback?: string | null
+  previousCaption?: string | null
 }): string {
   const hintGuest =
     (ctx.guestHint ?? '').trim() ||
@@ -116,12 +118,19 @@ CONTEXTO DEL VIDEO:
 ${(ctx.visualSummary ?? '').trim() ? `- Qué se ve:\n${ctx.visualSummary!.trim()}` : ''}
 ${(ctx.burnedOverlay ?? '').trim() ? `- Overlay / textos en pantalla:\n${ctx.burnedOverlay!.trim()}` : ''}
 ${(ctx.videoTranscript ?? '').trim() ? `- Audio (apoyo):\n${ctx.videoTranscript!.trim().slice(0, 1200)}` : ''}
+${(ctx.feedback ?? '').trim()
+  ? `
+FEEDBACK DE ERIC (aplica estos cambios; mantén el FORMATO OBLIGATORIO):
+${ctx.feedback!.trim()}
+${(ctx.previousCaption ?? '').trim() ? `CAPTION ANTERIOR (mejóralo, no lo copies tal cual):\n${ctx.previousCaption!.trim()}` : ''}`
+  : ''}
 
 REGLAS:
 - Español puertorriqueño correcto (tildes, ¿?).
 - No emojis salvo que el hook ya los traiga.
 - El hook y el invitado salen del overlay, de lo que se VE y del audio. No uses solo el nombre del archivo.
 - No inventes datos que no consten en el contexto.
+- Si hay FEEDBACK DE ERIC, aplícalo sin romper la plantilla.
 - Devuelve SOLO el caption, sin comillas ni explicación.`
 }
 

@@ -13,6 +13,8 @@ vi.mock('@/lib/actions/primer-round', async () => {
     generatePrimerRoundCaption: vi.fn(),
     verifyPrimerRoundOrtho: vi.fn(),
     schedulePrimerRoundReel: vi.fn(),
+    revisePrimerRoundCaption: vi.fn(),
+    acceptPrimerRoundPiece: vi.fn(),
   }
 })
 vi.mock('@/lib/actions/entregas-r2', () => ({
@@ -50,6 +52,7 @@ const studio: PrimerRoundStudioPayload = {
   },
   lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
   ready: [],
+  pending: null,
 }
 
 describe('PrimerRoundStudio', () => {
@@ -87,5 +90,34 @@ describe('PrimerRoundStudio', () => {
     expect(preview).toHaveAttribute('src', 'blob:mov-preview')
     unmount()
     expect(revoke).toHaveBeenCalledWith('blob:mov-preview')
+  })
+
+  it('tras un refresh muestra el video pendiente hasta aceptar o dar feedback', () => {
+    render(
+      <PrimerRoundStudio
+        studio={{
+          ...studio,
+          pending: {
+            ideaId: 'idea-1',
+            videoId: 'vid-1',
+            fileName: 'Primer_Round_Reel_GFX_H264.mov',
+            previewUrl: 'https://r2.example/signed.mov',
+            caption:
+              '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
+            overlayText: 'LA NOTICIA NO ESPERA',
+            visualSummary: 'Estudio de radio',
+          },
+        }}
+      />,
+    )
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute(
+      'src',
+      'https://r2.example/signed.mov',
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(/se queda aquí/i)
+    expect(screen.getByTestId('primer-round-feedback')).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
+    expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
+    expect(screen.getByText(/LA NOTICIA NO ESPERA hoy en Primer Round/i)).toBeInTheDocument()
   })
 })

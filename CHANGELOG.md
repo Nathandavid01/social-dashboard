@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.83 — 2026-09-13
+
+**Primer Round: el video se queda hasta que Eric acepta o da feedback.**
+- Tras subir, la IA arma el caption y **no publica**. El `.mov` vuelve a aparecer al refrescar.
+- Caja de feedback: la IA reescribe el caption con tus instrucciones y mantiene la plantilla.
+- **Aceptar y publicar** manda el Reel a Instagram, Facebook y TikTok (collabs solo en IG).
+- La pieza no entra a `/revision`; aceptar exige `posting.publish` (owner/supervisor).
+
 ## v4.82 — 2026-09-13
 
 **Primer Round: el .mov ya no se corta al subir.**

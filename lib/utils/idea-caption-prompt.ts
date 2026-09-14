@@ -93,6 +93,8 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       burnedOverlay: input.videoAnalysis?.burnedCaptionsText,
       visualSummary: input.videoAnalysis?.visualSummary,
       videoTranscript: input.videoTranscript,
+      feedback: input.feedback,
+      previousCaption: input.previousCaption,
       // Guest/role comes from overlay line 1 when available; else the model infers.
       guestHint: null,
     })

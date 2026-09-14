@@ -137,4 +137,18 @@ describe('buildIdeaCaptionPrompt primerRoundLockedTemplate', () => {
     expect(p).not.toContain('CAPTIONS DE REFERENCIA')
     expect(p).not.toContain('estilo genérico')
   })
+
+  it('passes Eric feedback into the locked Primer Round prompt', () => {
+    const p = buildIdeaCaptionPrompt({
+      title: 'Caso del día',
+      examples: [],
+      primerRoundLockedTemplate: true,
+      previousCaption: '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
+      feedback: 'El gancho debe ser LA NOTICIA NO ESPERA, no las tres preguntas',
+    })
+    expect(p).toContain('FEEDBACK DE ERIC')
+    expect(p).toContain('El gancho debe ser LA NOTICIA NO ESPERA')
+    expect(p).toContain('CAPTION ANTERIOR')
+    expect(p).toContain('¿Quién responde?')
+  })
 })

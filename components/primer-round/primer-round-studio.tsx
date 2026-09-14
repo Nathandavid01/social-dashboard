@@ -16,7 +16,9 @@ import { Badge } from '@/components/ui/badge'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { cn } from '@/lib/utils'
 import {
+  acceptPrimerRoundPiece,
   createPrimerRoundUploadIdea,
+  revisePrimerRoundCaption,
   runPrimerRoundUploadPipeline,
   type PrimerRoundStudioPayload,
 } from '@/lib/actions/primer-round'
@@ -35,6 +37,7 @@ type PipelineStage =
   | 'analizando'
   | 'caption'
   | 'verificando'
+  | 'revision'
   | 'agendando'
   | 'listo'
   | 'bloqueado'
@@ -95,7 +98,8 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
   analizando: 'IA leyendo overlay…',
   caption: 'IA creando caption IG…',
   verificando: 'IA verificando ortografía…',
-  agendando: 'Agendando Reel en Metricool…',
+  revision: 'Pendiente de tu OK',
+  agendando: 'Publicando en Instagram, Facebook y TikTok…',
   listo: 'Listo',
   bloqueado: 'Verificación pendiente',
   error: 'Error',
@@ -114,40 +118,57 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [overrideOrtho, setOverrideOrtho] = useState(false)
   const [fileLabel, setFileLabel] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [overlayText, setOverlayText] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState('')
   const [pending, startTransition] = useTransition()
 
   useEffect(() => {
+    const piece = studio.pending
+    if (!piece || ideaId) return
+    setIdeaId(piece.ideaId)
+    setVideoId(piece.videoId)
+    setFileLabel(piece.fileName)
+    setCaption(piece.caption)
+    setOverlayText(piece.overlayText)
+    setPreviewUrl((prev) => {
+      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
+      return piece.previewUrl
+    })
+    setStage('revision')
+    setMessage('El video se queda aquí hasta que lo aceptes o le des feedback a la IA.')
+  }, [studio.pending, ideaId])
+
+  useEffect(() => {
     return () => {
-      if (previewUrl && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(previewUrl)
+      if (previewUrl?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(previewUrl)
+      }
     }
   }, [previewUrl])
 
-  async function runPipeline(id: string, vid: string | null, override: boolean) {
+  async function runPipeline(id: string, vid: string | null) {
     setStage('caption')
     setMessage('IA generando caption (plantilla @primerroundoficial)…')
     const res = await runPrimerRoundUploadPipeline({
       ideaId: id,
       videoId: vid,
-      overrideOrtho: override,
     })
     if (res.caption) setCaption(res.caption)
-    if (res.gate) setGate(res.gate)
+    if (res.gate) {
+      setGate(res.gate)
+      if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
+    }
 
-    if (res.error) {
+    if (res.error && !res.pending) {
       setStage('error')
       setMessage(res.error)
       return
     }
-    if (res.skipped) {
-      setStage('bloqueado')
-      setMessage(res.skipped)
-      return
-    }
-    setStage('listo')
+    setStage('revision')
     setMessage(
-      `Agendado en Metricool${res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''} con collabs.`,
+      res.error ??
+        'El video se queda aquí hasta que lo aceptes o le des feedback a la IA.',
     )
-    router.refresh()
   }
 
   function onPickFile(file: File | null) {
@@ -167,6 +188,8 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setFileLabel(file.name)
     setCaption(null)
     setGate(null)
+    setOverlayText(null)
+    setFeedback('')
     setOverrideOrtho(false)
     setMessage(null)
     setIdeaId(null)
@@ -221,7 +244,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         }
 
         setStage('verificando')
-        await runPipeline(created.ideaId, reg.id, false)
+        await runPipeline(created.ideaId, reg.id)
       } catch (err) {
         setStage('error')
         setMessage(err instanceof Error ? err.message : 'Error inesperado')
@@ -229,15 +252,65 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     })
   }
 
-  function retryWithOverride() {
-    if (!ideaId) return
+  function applyFeedback() {
+    if (!ideaId || !feedback.trim()) return
     startTransition(async () => {
-      setStage('agendando')
-      await runPipeline(ideaId, videoId, true)
+      setStage('caption')
+      setMessage('IA aplicando tu feedback…')
+      const res = await revisePrimerRoundCaption({
+        ideaId,
+        feedback: feedback.trim(),
+        previousCaption: caption,
+      })
+      if (res.caption) setCaption(res.caption)
+      if (res.gate) {
+        setGate(res.gate)
+        if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
+      }
+      if (res.error && !res.caption) {
+        setStage('error')
+        setMessage(res.error)
+        return
+      }
+      setFeedback('')
+      setStage('revision')
+      setMessage(res.error ?? 'Caption actualizado. Acepta o sigue dando feedback.')
     })
   }
 
-  const busy = pending || (stage !== 'idle' && stage !== 'listo' && stage !== 'bloqueado' && stage !== 'error')
+  function acceptPiece() {
+    if (!ideaId) return
+    startTransition(async () => {
+      setStage('agendando')
+      const res = await acceptPrimerRoundPiece({
+        ideaId,
+        videoId,
+        overrideOrtho,
+      })
+      if (res.caption) setCaption(res.caption)
+      if (res.gate) setGate(res.gate)
+      if (res.error) {
+        setStage('error')
+        setMessage(res.error)
+        return
+      }
+      if (res.skipped) {
+        setStage('bloqueado')
+        setMessage(res.skipped)
+        return
+      }
+      setStage('listo')
+      setMessage(
+        `Publicado en Instagram, Facebook y TikTok${
+          res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''
+        } (collabs en IG).`,
+      )
+      router.refresh()
+    })
+  }
+
+  const waiting = stage === 'idle' || stage === 'listo' || stage === 'bloqueado' || stage === 'error' || stage === 'revision'
+  const busy = pending || !waiting
 
   return (
     <div className="space-y-5">
@@ -269,16 +342,17 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
-          Sube el mp4 o mov: ves la película, la IA lee los textos en pantalla, crea el caption
-          (plantilla bloqueada, hosts {PRIMER_ROUND_CAPTION_HOSTS}) y agenda el Reel en Metricool con
-          collabs. Auto-agenda {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
+          Sube el mp4 o mov: ves la película, la IA lee los textos y arma el caption
+          (hosts {PRIMER_ROUND_CAPTION_HOSTS}). El video se queda aquí hasta que lo aceptes
+          o le des feedback. Al aceptar, se publica en Instagram, Facebook y TikTok
+          (collabs IG).
         </p>
       </header>
 
       <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 sm:p-6" data-testid="primer-round-upload-panel">
         <div className="text-center space-y-1">
           <h2 className="text-sm font-semibold">Subir video</h2>
-          <p className="text-xs text-muted-foreground">mp4 o mov. La IA lee el video y hace el resto.</p>
+          <p className="text-xs text-muted-foreground">mp4 o mov. La IA lee el video; tú aceptas o le das feedback.</p>
         </div>
 
         <input
@@ -335,6 +409,19 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
                 <pre className="whitespace-pre-wrap text-xs leading-relaxed">{caption}</pre>
               </div>
             )}
+            {!gate && overlayText && (
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Texto overlay (en pantalla)
+                </p>
+                <pre
+                  data-testid="primer-round-overlay-text"
+                  className="whitespace-pre-wrap rounded-md border bg-background/60 p-2 text-xs leading-relaxed"
+                >
+                  {overlayText}
+                </pre>
+              </div>
+            )}
             {gate && (
               <div className="space-y-2" data-testid="primer-round-ortho-panel">
                 <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -351,12 +438,12 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
                         : `${gate.overlay.issues.length} a corregir`
                   }
                 />
-                {gate.overlay.text && (
+                {(gate.overlay.text || overlayText) && (
                   <pre
                     data-testid="primer-round-overlay-text"
                     className="whitespace-pre-wrap rounded-md border bg-background/60 p-2 text-xs leading-relaxed"
                   >
-                    {gate.overlay.text}
+                    {gate.overlay.text || overlayText}
                   </pre>
                 )}
                 <OrthoRow
@@ -385,24 +472,60 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         )}
 
-        {stage === 'bloqueado' && (
-          <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={overrideOrtho}
-                onChange={(e) => setOverrideOrtho(e.target.checked)}
+        {(stage === 'revision' || stage === 'bloqueado') && ideaId && (
+          <div className="space-y-3 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-review-panel">
+            <label className="block space-y-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Feedback para la IA
+              </span>
+              <textarea
+                data-testid="primer-round-feedback"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                rows={3}
+                disabled={pending}
+                placeholder="Ej. el gancho es LA NOTICIA NO ESPERA, no las tres preguntas"
+                className="w-full resize-y rounded-md border bg-background px-3 py-2 text-xs"
               />
-              Override Eric (publicar igual)
             </label>
             <Button
               size="sm"
+              variant="outline"
               className="w-full"
-              disabled={pending || !overrideOrtho}
-              onClick={retryWithOverride}
+              disabled={pending || !feedback.trim()}
+              data-testid="primer-round-feedback-cta"
+              onClick={applyFeedback}
             >
-              {pending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
-              Agendar de todos modos
+              {pending ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Aplicar feedback
+            </Button>
+            {stage === 'bloqueado' && (
+              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={overrideOrtho}
+                  onChange={(e) => setOverrideOrtho(e.target.checked)}
+                />
+                Override Eric (publicar igual)
+              </label>
+            )}
+            <Button
+              size="sm"
+              className="w-full"
+              disabled={pending || (stage === 'bloqueado' && !overrideOrtho)}
+              data-testid="primer-round-accept-cta"
+              onClick={acceptPiece}
+            >
+              {pending ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Aceptar y publicar
             </Button>
           </div>
         )}

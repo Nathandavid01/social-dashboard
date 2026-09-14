@@ -14,7 +14,15 @@ import {
   canAutoSchedulePrimerRound,
   parseDualOrthoLlm,
 } from './orthography'
-import { studioLaneFor, groupStudioIdeas, primerRoundCtas, assertPrimerRoundMp4, primerRoundUploadContentType } from './studio'
+import {
+  studioLaneFor,
+  groupStudioIdeas,
+  primerRoundCtas,
+  assertPrimerRoundMp4,
+  primerRoundUploadContentType,
+  pickPendingPrimerRoundPiece,
+  primerRoundSoonScheduleIso,
+} from './studio'
 import { buildPrimerRoundCaption } from './caption-template'
 
 describe('Primer Round constants', () => {
@@ -135,6 +143,44 @@ describe('dual orthography gate (overlay + caption)', () => {
       caption,
     )
     expect(gate.ok).toBe(true)
+  })
+})
+
+describe('pickPendingPrimerRoundPiece', () => {
+  it('keeps the latest unpublished studio video and ignores posted / empty leftovers', () => {
+    const picked = pickPendingPrimerRoundPiece([
+      { id: 'empty', status: 'producida', hasEditedVideo: false, editedUploadedAt: '2026-09-14T00:38:00Z' },
+      { id: 'posted', status: 'producida', hasEditedVideo: true, metricool_post_id: 99, editedUploadedAt: '2026-09-14T00:50:00Z' },
+      { id: 'old', status: 'producida', hasEditedVideo: true, editedUploadedAt: '2026-09-14T00:40:00Z' },
+      { id: 'latest', status: 'producida', hasEditedVideo: true, editedUploadedAt: '2026-09-14T00:45:00Z' },
+    ])
+    expect(picked?.id).toBe('latest')
+  })
+
+  it('prefers a studio-marked upload over a leftover pipeline idea', () => {
+    const picked = pickPendingPrimerRoundPiece([
+      { id: 'pipeline', status: 'approved', hasEditedVideo: true, studioUpload: false, editedUploadedAt: '2026-09-14T01:00:00Z' },
+      { id: 'studio', status: 'pending', hasEditedVideo: true, studioUpload: true, editedUploadedAt: '2026-09-14T00:45:00Z' },
+    ])
+    expect(picked?.id).toBe('studio')
+  })
+
+  it('returns null when there is no unpublished edited video', () => {
+    expect(
+      pickPendingPrimerRoundPiece([
+        { id: 'gone', status: 'descartada', hasEditedVideo: true },
+        { id: 'sent', status: 'producida', hasEditedVideo: true, metricool_post_id: 1 },
+      ]),
+    ).toBeNull()
+  })
+})
+
+describe('primerRoundSoonScheduleIso', () => {
+  it('is a naive PR datetime at least 5 minutes ahead', () => {
+    const now = Date.parse('2026-09-14T16:00:00-04:00')
+    const iso = primerRoundSoonScheduleIso(now)
+    expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    expect(iso).toBe('2026-09-14T16:06')
   })
 })
 
