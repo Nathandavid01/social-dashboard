@@ -4,7 +4,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 const requirePermission = vi.fn(async (_perm: string) => undefined)
 const getEffectiveRole = vi.fn(async (): Promise<'editor' | 'owner' | 'supervisor'> => 'editor')
 const getEffectiveUserId = vi.fn(async () => 'ed-maria')
-const getIdeacionPipeline = vi.fn(async () => [] as IdeaWithPipeline[])
+const getIdeacionPipeline = vi.fn(async (_filter?: unknown) => [] as IdeaWithPipeline[])
 
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: (perm: string) => requirePermission(perm),
@@ -12,7 +12,7 @@ vi.mock('@/lib/auth/server', () => ({
   getEffectiveUserId: () => getEffectiveUserId(),
 }))
 vi.mock('@/lib/actions/content-ideas', () => ({
-  getIdeacionPipeline: () => getIdeacionPipeline(),
+  getIdeacionPipeline: (filter: unknown) => getIdeacionPipeline(filter),
 }))
 
 import { getEditorPipelineHistory, getEditorVideoBank } from './pipeline-bank'
@@ -87,7 +87,7 @@ describe('getEditorVideoBank', () => {
     expect(res.rows?.map((r) => r.editorId).sort()).toEqual(['ed-diego', 'ed-maria'])
   })
 
-  it('el editor solo recibe 2 clips activos; el tercero espera sin archivo', async () => {
+  it('el editor recibe 2 clips activos y puede consultar el material del tercero en espera', async () => {
     getIdeacionPipeline.mockResolvedValue([
       idea('uno', 'ed-maria'),
       { ...idea('dos', 'ed-maria'), created_at: '2026-08-02' },
@@ -96,7 +96,8 @@ describe('getEditorVideoBank', () => {
     const res = await getEditorVideoBank()
     const clips = res.rows?.[0].clients[0].clips ?? []
     expect(clips.filter((c) => c.queue === 'active')).toHaveLength(2)
-    expect(clips.find((c) => c.ideaId === 'tres')).toMatchObject({ queue: 'waiting', files: [] })
+    expect(clips.find((c) => c.ideaId === 'tres')?.queue).toBe('waiting')
+    expect(clips.find((c) => c.ideaId === 'tres')?.files).toHaveLength(1)
   })
 })
 
@@ -126,4 +127,11 @@ describe('getEditorPipelineHistory', () => {
     expect(res.items?.map((i) => i.ideaId)).toEqual(['mia'])
     expect(res.items?.some((i) => i.ideaId === 'otra')).toBe(false)
   })
+})
+
+
+it('consulta todas las páginas para mostrar crudos de ideas antiguas', async () => {
+  getIdeacionPipeline.mockImplementation(async (filter) => (filter as {complete?: boolean})?.complete ? [idea('antigua', 'ed-maria')] as IdeaWithPipeline[] : [])
+  const res = await getEditorVideoBank()
+  expect(res.rows?.flatMap(r => r.clients.flatMap(c => c.clips)).map(c => c.ideaId)).toContain('antigua')
 })

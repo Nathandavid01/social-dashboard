@@ -1,5 +1,7 @@
 # TODO — pending requests
 
+- [ ] **Publicar biblioteca completa del editor (v4.89)** — Cambio preparado en `codex/nanas-editor-library`. Verificado localmente como Richard Jimenez: 63 videos de Nanas, 63 controles de descarga y 2 trabajos activos; móvil 390 px sin desbordamiento. Tras integrar main: 3311 pruebas pasan, 3 omitidas; TypeScript y merge-gate pasan. Pendiente PR/revisión/CI y verificar la publicación. El B-roll incompleto de la auditoría sigue necesitando el archivo original.
+
 Tracked work not yet done. Each is implemented **test-first (TDD)** when unblocked
 (see CLAUDE.md). Check off + reference the commit when completed.
 

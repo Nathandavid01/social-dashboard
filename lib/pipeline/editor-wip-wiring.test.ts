@@ -66,12 +66,12 @@ describe('prepareIdeasForEditorBank con límite dinámico', () => {
     expect(videoIds).not.toContain(foreign.videos![0].id)
   })
 
-  it('REGRESIÓN: lo que espera turno llega SIN archivos (sin ids de video bajables)', () => {
+  it('REGRESIÓN: lo que espera turno conserva archivos consultables sin ampliar el WIP', () => {
     const ideas = [mine(), mine(), mine()]
     const out = prepareIdeasForEditorBank(ideas, { role: 'editor', userId: 'e1' })
     const waiting = out.filter((i) => i.bankQueue === 'waiting')
     expect(waiting).toHaveLength(1)
-    expect(waiting[0].videos).toEqual([])
+    expect(waiting[0].videos).toHaveLength(1)
   })
 })
 
