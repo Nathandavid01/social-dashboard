@@ -26,7 +26,6 @@ import {
 } from '@/lib/primer-round/orthography'
 import {
   groupStudioIdeas,
-  pickPendingPrimerRoundPiece,
   primerRoundCtas,
   primerRoundSoonScheduleIso,
   type StudioIdeaRef,
@@ -34,9 +33,6 @@ import {
 import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
 import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
-import { entregasR2Bucket, entregasR2Client } from '@/lib/integrations/entregas-r2'
-import { GetObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 
 async function requirePrimerRoundAccess(): Promise<void> {
@@ -119,12 +115,6 @@ export async function getPrimerRoundStudio(): Promise<
     string,
     { status: 'pending' | 'done' | 'error'; findings: VideoAnalysisFindings | null; visualSummary: string | null }
   >()
-  const editedByIdea = new Map<
-    string,
-    { id: string; name: string | null; key: string | null; uploadedAt: string | null; provider: string | null }
-  >()
-  const studioMarked = new Set<string>()
-
   if (ideaIds.length > 0) {
     const { data: edited } = await supabase
       .from('content_idea_videos')
@@ -135,20 +125,6 @@ export async function getPrimerRoundStudio(): Promise<
 
     const videoIds = (edited ?? []).map((v) => v.id)
     const videoToIdea = new Map((edited ?? []).map((v) => [v.id, v.idea_id as string]))
-
-    for (const row of edited ?? []) {
-      const prev = editedByIdea.get(row.idea_id as string)
-      const uploadedAt = (row.uploaded_at as string | null) ?? ''
-      if (!prev || uploadedAt > (prev.uploadedAt ?? '')) {
-        editedByIdea.set(row.idea_id as string, {
-          id: row.id as string,
-          name: (row.name as string | null) ?? null,
-          key: (row.drive_file_id as string | null) ?? null,
-          uploadedAt: (row.uploaded_at as string | null) ?? null,
-          provider: (row.storage_provider as string | null) ?? null,
-        })
-      }
-    }
 
     if (videoIds.length > 0) {
       const { data: analyses } = await supabase
@@ -167,19 +143,8 @@ export async function getPrimerRoundStudio(): Promise<
       }
     }
 
-    const { data: marks } = await supabase
-      .from('content_idea_activity')
-      .select('content_idea_id, metadata')
-      .in('content_idea_id', ideaIds)
-      .eq('action', 'video_uploaded')
-
-    for (const row of marks ?? []) {
-      const source = (row.metadata as { source?: string } | null)?.source
-      if (source === 'primer-round-studio') studioMarked.add(row.content_idea_id as string)
-    }
   }
 
-  const airRewrites: Array<{ id: string; caption: string }> = []
   const ideas: PrimerRoundStudioIdea[] = (ideasRaw ?? []).map((raw) => {
     const videos = (raw.videos ?? []) as Array<{ kind: string; status: string }>
     const live = videos.filter((v) => v.status !== 'archived' && v.status !== 'failed')
@@ -189,9 +154,6 @@ export async function getPrimerRoundStudio(): Promise<
       ((raw.generated_caption as string | null) || (raw.caption_draft as string | null) || null)?.trim() ||
       null
     const caption = captionRaw ? normalizePrimerRoundCaption(captionRaw) : null
-    if (caption && captionRaw && caption !== captionRaw) {
-      airRewrites.push({ id: raw.id as string, caption })
-    }
     return {
       id: raw.id,
       title: (raw.title as string | null)?.trim() || (raw.hook as string | null)?.trim() || 'Sin título',
@@ -211,38 +173,6 @@ export async function getPrimerRoundStudio(): Promise<
 
   const lanes = groupStudioIdeas(ideas)
 
-  const pendingCandidates = ideas.map((idea) => {
-    const edited = editedByIdea.get(idea.id)
-    return {
-      ...idea,
-      hasEditedVideo: !!edited && edited.provider === 'entregas-r2',
-      studioUpload: studioMarked.has(idea.id),
-      editedUploadedAt: edited?.uploadedAt ?? null,
-    }
-  })
-  const pendingIdea = pickPendingPrimerRoundPiece(pendingCandidates)
-  const pendingEdited = pendingIdea ? editedByIdea.get(pendingIdea.id) : null
-  let pending: PrimerRoundPendingPiece | null = null
-  if (pendingIdea && pendingEdited) {
-    const analysis = analysisByIdea.get(pendingIdea.id)
-    pending = {
-      ideaId: pendingIdea.id,
-      videoId: pendingEdited.id,
-      fileName: pendingEdited.name || pendingIdea.title,
-      previewUrl: await signPrimerRoundPreview(pendingEdited.key),
-      caption: pendingIdea.caption,
-      overlayText: analysis?.findings?.burned_captions?.text?.trim() || pendingIdea.overlayText,
-      visualSummary: analysis?.visualSummary?.trim() || null,
-    }
-    const rewrite = airRewrites.find((row) => row.id === pendingIdea.id)
-    if (rewrite) {
-      await supabase
-        .from('content_ideas')
-        .update({ caption_draft: rewrite.caption, generated_caption: rewrite.caption })
-        .eq('id', pendingIdea.id)
-    }
-  }
-
   return {
     studio: {
       client: {
@@ -257,28 +187,9 @@ export async function getPrimerRoundStudio(): Promise<
       ctas: primerRoundCtas(PRIMER_ROUND_CLIENT_ID),
       lanes,
       ready: lanes.ready,
-      pending,
+      pending: null,
       styleRules: await loadPrimerRoundStyleRules(supabase),
     },
-  }
-}
-
-async function signPrimerRoundPreview(key: string | null): Promise<string | null> {
-  if (!key) return null
-  const client = entregasR2Client()
-  if (!client) return null
-  try {
-    return await getSignedUrl(
-      client,
-      new GetObjectCommand({
-        Bucket: entregasR2Bucket(),
-        Key: key,
-        ResponseContentDisposition: 'inline',
-      }),
-      { expiresIn: 60 * 60 },
-    )
-  } catch {
-    return null
   }
 }
 
@@ -494,7 +405,6 @@ export async function createPrimerRoundUploadIdea(input: {
     metadata: { source: 'primer-round-studio' },
   })
 
-  revalidatePath('/primer-round')
   return { ideaId: data.id as string, title: (data.title as string) || title }
 }
 
@@ -552,7 +462,6 @@ export async function runPrimerRoundUploadPipeline(input: {
   }
 
   const verified = await verifyPrimerRoundOrtho(ideaId)
-  revalidatePath('/primer-round')
   return {
     ok: true,
     pending: true,
@@ -609,7 +518,6 @@ export async function revisePrimerRoundCaption(input: {
 
   const styleRules = await loadPrimerRoundStyleRules(supabase)
   const verified = await verifyPrimerRoundOrtho(ideaId)
-  revalidatePath('/primer-round')
   return {
     caption: captionRes.caption,
     gate: verified.gate,

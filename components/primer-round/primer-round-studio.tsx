@@ -30,8 +30,6 @@ import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
 import { primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
 import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
-import { useRouter } from 'next/navigation'
-
 type PipelineStage =
   | 'idle'
   | 'creando'
@@ -108,7 +106,6 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
 }
 
 export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload }) {
-  const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const hasPickedFile = useRef(false)
   const [stage, setStage] = useState<PipelineStage>('idle')
@@ -126,21 +123,26 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [styleRules, setStyleRules] = useState<string[]>(studio.styleRules ?? [])
   const [pending, startTransition] = useTransition()
 
-  useEffect(() => {
-    const piece = studio.pending
-    if (!piece || ideaId || hasPickedFile.current) return
-    setIdeaId(piece.ideaId)
-    setVideoId(piece.videoId)
-    setFileLabel(piece.fileName)
-    setCaption(piece.caption ? normalizePrimerRoundCaption(piece.caption) : piece.caption)
-    setOverlayText(piece.overlayText)
+  function resetToBlank() {
+    hasPickedFile.current = true
+    setStage('idle')
+    setPct(0)
+    setMessage(null)
+    setCaption(null)
+    setGate(null)
+    setIdeaId(null)
+    setVideoId(null)
+    setOverrideOrtho(false)
+    setFileLabel(null)
+    setOverlayText(null)
+    setFeedback('')
     setPreviewUrl((prev) => {
-      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
-      return piece.previewUrl
+      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(prev)
+      }
+      return null
     })
-    setStage('revision')
-    setMessage('El video se queda aquí hasta que lo aceptes o le des feedback a la IA.')
-  }, [studio.pending, ideaId])
+  }
 
   useEffect(() => {
     return () => {
@@ -169,10 +171,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       return
     }
     setStage('revision')
-    setMessage(
-      res.error ??
-        'El video se queda aquí hasta que lo aceptes o le des feedback a la IA.',
-    )
+    setMessage(res.error ?? 'Revisa el caption. Acepta o enseña el estilo.')
   }
 
   function onPickFile(file: File | null) {
@@ -185,9 +184,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       return
     }
 
-    // A stale server pending piece must never replace this local upload.
     hasPickedFile.current = true
-    setPreviewUrl(URL.createObjectURL(file))
+    setPreviewUrl((prev) => {
+      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(prev)
+      }
+      return URL.createObjectURL(file)
+    })
     setFileLabel(file.name)
     setCaption(null)
     setGate(null)
@@ -303,13 +306,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setMessage(res.skipped)
         return
       }
+      resetToBlank()
       setStage('listo')
       setMessage(
         `Publicado en Instagram, Facebook y TikTok${
           res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''
         } (collabs en IG).`,
       )
-      router.refresh()
     })
   }
 
@@ -347,8 +350,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
           Sube el mp4 o mov: ves la película, la IA lee los textos y arma el caption
-          (hosts {PRIMER_ROUND_CAPTION_HOSTS}). El video se queda aquí hasta que lo aceptes
-          o le des feedback. Al aceptar, se publica en Instagram, Facebook y TikTok
+          (hosts {PRIMER_ROUND_CAPTION_HOSTS}). Al aceptar, se publica en Instagram, Facebook y TikTok
           (collabs IG). Al aire lun–vie {PRIMER_ROUND_AIR_CLOCK}. Si publicas ahora:{' '}
           {primerRoundNextAirCopy().phraseStart ?? primerRoundNextAirCopy().phrase}.
         </p>
@@ -379,7 +381,10 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           className="w-full gap-2"
           disabled={busy}
           data-testid="primer-round-upload-cta"
-          onClick={() => inputRef.current?.click()}
+          onClick={() => {
+            resetToBlank()
+            inputRef.current?.click()
+          }}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           Upload video

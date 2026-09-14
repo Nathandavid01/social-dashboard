@@ -128,7 +128,7 @@ describe('PrimerRoundStudio', () => {
     expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
   })
 
-  it('tras un refresh muestra el video pendiente hasta aceptar o dar feedback', () => {
+  it('al entrar no muestra el video ni el caption de una pieza anterior', () => {
     render(
       <PrimerRoundStudio
         studio={{
@@ -139,7 +139,7 @@ describe('PrimerRoundStudio', () => {
             fileName: 'Primer_Round_Reel_GFX_H264.mov',
             previewUrl: 'https://r2.example/signed.mov',
             caption:
-              '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
+              '¿Quién responde?\n\nMañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.\n\n#magic973 #puertorico #primerround',
             overlayText: 'LA NOTICIA NO ESPERA',
             visualSummary: 'Estudio de radio',
           },
@@ -147,21 +147,11 @@ describe('PrimerRoundStudio', () => {
         }}
       />,
     )
-    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute(
-      'src',
-      'https://r2.example/signed.mov',
-    )
-    expect(screen.getByRole('status')).toHaveTextContent(/se queda aquí/i)
-    expect(screen.getByTestId('primer-round-feedback')).toBeInTheDocument()
-    expect(screen.getByText(/Se guarda para Primer Round y este tipo de video/i)).toBeInTheDocument()
-    expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
-    expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
-    expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent(
-      /(?:Hoy|Mañana|El lunes) desde las 5:43 AM junto a @rafaellenin y @denniseyperez/,
-    )
-    expect(screen.getByTestId('primer-round-style-rules')).toHaveTextContent(
-      /El gancho es LA NOTICIA NO ESPERA/i,
-    )
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-feedback')).not.toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-cta')).toBeInTheDocument()
   })
 })
 
@@ -208,10 +198,9 @@ describe('PrimerRoundStudio upload lifecycle', () => {
 
   it.each(['new.mp4', 'new.mov'])('completes %s and retains the new preview through stale refreshes', async (name) => {
     const { rerender } = render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
-    const oldPlayer = screen.getByTestId('primer-round-video-preview')
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
     const file = await pick(name)
     const player = screen.getByTestId('primer-round-video-preview')
-    expect(player).not.toBe(oldPlayer)
     expect(player).toHaveAttribute('src', 'blob:first-new-video')
     expect(screen.getByTestId('primer-round-upload-cta')).toBeDisabled()
     expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
@@ -272,13 +261,25 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:second-new-video')
   })
 
-  it('leaves the existing video intact when file selection is cancelled or invalid', () => {
+  it('click Upload wipes the previous caption and video before the next file', async () => {
+    render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
+    await pick()
+    await act(async () => requests[0].onload())
+    await waitFor(() => expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent('Nuevo contenido'))
+    fireEvent.click(screen.getByTestId('primer-round-upload-cta'))
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
+    expect(createPrimerRoundUploadIdea).toHaveBeenCalledTimes(1)
+  })
+
+  it('leaves the landing empty when file selection is cancelled or invalid', () => {
     render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
     const input = screen.getByTestId('primer-round-upload-input')
     fireEvent.change(input, { target: { files: [] } })
-    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', oldPending.previewUrl)
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
     fireEvent.change(input, { target: { files: [new File(['bad'], 'bad.txt', { type: 'text/plain' })] } })
-    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', oldPending.previewUrl)
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
     expect(createPrimerRoundUploadIdea).not.toHaveBeenCalled()
     expect(URL.createObjectURL).not.toHaveBeenCalled()
   })
