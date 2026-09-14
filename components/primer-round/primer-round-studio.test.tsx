@@ -124,7 +124,7 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
     expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
     expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent(
-      /(?:Hoy|Mañana|El lunes) desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez/,
+      /(?:Hoy|Mañana|El lunes) desde las 5:43 AM junto a @rafaellenin y @denniseyperez/,
     )
     expect(screen.getByTestId('primer-round-style-rules')).toHaveTextContent(
       /El gancho es LA NOTICIA NO ESPERA/i,

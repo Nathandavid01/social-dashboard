@@ -4,14 +4,13 @@
  * Bottom IG caption (Metricool `text`):
  *   1) Hook question or topic line
  *   2) blank line
- *   3) Facebook: "Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez."
- *      With guest: "[Invitado] mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez."
+ *   3) Facebook: "Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez."
+ *      With guest: "[Invitado] mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez."
  *   4) optional: "Episodio completo en nuestro canal de YouTube: Magic Tv"
  *   5) blank line
  *   6) #magic973 #puertorico #primerround
  *
- * Hosts as **names** in the caption — never @handles.
- * Collabs (`denniseyperez`, `rafaellenin`) stay Metricool-only.
+ * Hosts tagged with @ in the caption. Collabs also go to Metricool IG.
  *
  * Overlay (white lower-third burn-in): 3–4 short lines;
  * line 1 = role+name; rest = question/quote. No hashtags in overlay.
@@ -25,8 +24,8 @@ import {
   type PrimerRoundAirCopy,
 } from './air-time'
 
-/** Hosts as they appear on Facebook (names, not @handles). */
-export const PRIMER_ROUND_CAPTION_HOSTS = 'Rafael Lenín López y Dennise Pérez'
+/** Hosts tagged in the caption (Rafael first, then Dennise). */
+export const PRIMER_ROUND_CAPTION_HOSTS = '@rafaellenin y @denniseyperez'
 
 /** Old + Facebook live line: "hoy en Primer Round junto a…" or "Mañana desde las 5:43 AM junto a…" */
 export const PRIMER_ROUND_LIVE_LINE =
@@ -35,7 +34,7 @@ export const PRIMER_ROUND_LIVE_LINE =
 export const PRIMER_ROUND_ATTRIBUTION_PHRASE =
   `hoy en Primer Round junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
 
-/** Facebook line 3. Sunday → "Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez." */
+/** Facebook line 3. Sunday → "Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez." */
 export function primerRoundLiveAttribution(
   air: PrimerRoundAirCopy = primerRoundNextAirCopy(),
   startOfLine = true,
@@ -51,8 +50,6 @@ export const PRIMER_ROUND_HASHTAGS = '#magic973 #puertorico #primerround'
 
 /** Handles that must NOT appear with @ in the bottom caption. */
 export const PRIMER_ROUND_CAPTION_FORBIDDEN_HANDLES = [
-  'denniseyperez',
-  'rafaellenin',
   'primerroundoficial',
 ] as const
 
@@ -126,9 +123,9 @@ FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 3) Si hay un invitado (persona + rol) distinto del gancho: "[Invitado] ${liveAttribution}"
    Si es GFX/promo sin invitado: SOLO "${liveAttribution}"
    NO empieces la línea 3 con la misma frase de la línea 1.
-   - Hosts SIEMPRE como nombres, en este orden: Rafael Lenín López y Dennise Pérez.
-   - NUNCA pongas @denniseyperez, @rafaellenin ni @primerroundoficial en el caption.
-   - Las collabs de Instagram van SOLO en Metricool (fuera de este texto).
+   - Hosts SIEMPRE tagueados, en este orden: @rafaellenin y @denniseyperez.
+   - NUNCA pongas @primerroundoficial en el caption.
+   - Las collabs de Instagram también van en Metricool.
    - Horario al aire: lunes a viernes 5:43 AM (Puerto Rico). Frase de Facebook: "${liveAttribution}"
 4) En Reels gráficos / promo (GFX, no clip del programa): NO pongas la línea de YouTube.
 5) Línea en blanco.
@@ -255,7 +252,7 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
 
   const lower = text.toLowerCase()
   const hasAttribution =
-    /(?:hoy|mañana|el lunes) desde las 5:43 ?am junto a rafael lenín lópez y dennise pérez/.test(lower)
+    /(?:hoy|mañana|el lunes) desde las 5:43 ?am junto a @rafaellenin y @denniseyperez/.test(lower)
   if (!hasAttribution) {
     issues.push({
       quote: text.slice(0, 80),
@@ -279,10 +276,10 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
         surface: 'caption',
       })
     }
-    if (!text.includes('Dennise Pérez') || !text.includes('Rafael Lenín')) {
+    if (!/@rafaellenin\b/i.test(text) || !/@denniseyperez\b/i.test(text)) {
       issues.push({
         quote: 'hosts',
-        problem: 'los hosts deben ir como nombres (Rafael Lenín López y Dennise Pérez), no handles',
+        problem: 'taguea a @rafaellenin y @denniseyperez',
         suggestion: PRIMER_ROUND_CAPTION_HOSTS,
         surface: 'caption',
       })
@@ -294,8 +291,8 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
     if (re.test(text)) {
       issues.push({
         quote: `@${handle}`,
-        problem: 'no pongas @handles en el caption (collabs solo en Metricool)',
-        suggestion: 'usa nombres en la línea de atribución',
+        problem: 'no pongas @primerroundoficial en el caption',
+        suggestion: 'taguea a @rafaellenin y @denniseyperez',
         surface: 'caption',
       })
     }

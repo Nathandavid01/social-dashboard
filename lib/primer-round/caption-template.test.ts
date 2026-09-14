@@ -22,7 +22,7 @@ describe('Primer Round locked caption template', () => {
       [
         '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
         '',
-        'Exfiscal Zulma Fúster hoy desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
+        'Exfiscal Zulma Fúster hoy desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
@@ -40,23 +40,23 @@ describe('Primer Round locked caption template', () => {
     expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
   })
 
-  it('flags @handles and wrong hashtags in caption', () => {
+  it('flags the page @handle and wrong hashtags in caption', () => {
     const bad = [
       'Hook',
       '',
-      'Guest hoy en Primer Round junto a @denniseyperez y @rafaellenin.',
+      'Guest hoy en Primer Round junto a @primerroundoficial.',
       '',
       '#otro #tag',
     ].join('\n')
     const issues = checkPrimerRoundCaptionStructure(bad)
-    expect(issues.some((i) => /@handles/i.test(i.problem) || i.quote.includes('@'))).toBe(true)
+    expect(issues.some((i) => i.quote.includes('@primerroundoficial'))).toBe(true)
     expect(issues.some((i) => /hashtag/i.test(i.problem))).toBe(true)
   })
 
-  it('exposes the UI skeleton with hosts as names', () => {
-    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain('Rafael Lenín López y Dennise Pérez')
+  it('exposes the UI skeleton with hosts tagged', () => {
+    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain('@rafaellenin y @denniseyperez')
     expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain(PRIMER_ROUND_HASHTAGS)
-    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).not.toContain('@denniseyperez')
+    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).not.toContain('@primerroundoficial')
   })
 
   it('prompt instructions lock the format', () => {
@@ -67,8 +67,8 @@ describe('Primer Round locked caption template', () => {
     })
     expect(p).toContain('FORMATO OBLIGATORIO')
     expect(p).toContain(PRIMER_ROUND_HASHTAGS)
-    expect(p).toContain('Rafael Lenín López y Dennise Pérez')
-    expect(p).toMatch(/NUNCA pongas @denniseyperez/i)
+    expect(p).toContain('@rafaellenin y @denniseyperez')
+    expect(p).toMatch(/NUNCA pongas @primerroundoficial/i)
   })
 
   it('Sunday uses the Facebook air line on GFX Reels', () => {
@@ -76,7 +76,7 @@ describe('Primer Round locked caption template', () => {
       title: 'GFX',
       airNowMs: Date.parse('2026-09-14T01:40:00Z'),
     })
-    expect(p).toContain('Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.')
+    expect(p).toContain('Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.')
     expect(p).toContain('LA NOTICIA NO ESPERA')
     expect(p).toContain('GFX/promo')
     const caption = buildPrimerRoundCaption({
@@ -88,7 +88,7 @@ describe('Primer Round locked caption template', () => {
       [
         'LA NOTICIA NO ESPERA',
         '',
-        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
+        'Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
@@ -117,7 +117,7 @@ describe('normalizePrimerRoundCaption', () => {
       [
         'LA NOTICIA NO ESPERA',
         '',
-        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
+        'Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
@@ -140,7 +140,7 @@ describe('normalizePrimerRoundCaption', () => {
       [
         '¿Quién responde?',
         '',
-        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
+        'Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),

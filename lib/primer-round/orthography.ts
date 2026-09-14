@@ -132,11 +132,11 @@ EXPECTATIVAS OVERLAY (lower-third blanco @primerroundoficial):
 EXPECTATIVAS CAPTION (Metricool text, plantilla bloqueada):
 1) Hook/pregunta
 2) línea en blanco
-3) "[Invitado] mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez." o, sin invitado, esa oración sola (nombres, NO @)
+3) "[Invitado] mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez." o, sin invitado, esa oración sola (taguea a los hosts)
 4) opcional YouTube Magic Tv
 5) línea en blanco
 6) exactamente: #magic973 #puertorico #primerround
-- Collabs SOLO en Metricool — flag si el caption tiene @denniseyperez / @rafaellenin.
+- Flag si falta @rafaellenin / @denniseyperez, o si aparece @primerroundoficial.
 
 TEXTO OVERLAY / BURN-IN (en pantalla — verificar que sea correcto):
 """
