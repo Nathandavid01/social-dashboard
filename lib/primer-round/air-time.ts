@@ -1,15 +1,29 @@
-/** Show clock — overlay: lunes a viernes 5:43am–9:15am, Puerto Rico. */
+/** Show clock — overlay: lunes a viernes 5:43 AM–9:15 AM, Puerto Rico. */
 export const PRIMER_ROUND_AIR_TZ = 'America/Puerto_Rico'
 export const PRIMER_ROUND_AIR_HOUR = 5
 export const PRIMER_ROUND_AIR_MINUTE = 43
-export const PRIMER_ROUND_AIR_CLOCK = '5:43am'
+/** Facebook clock: "desde las 5:43 AM". */
+export const PRIMER_ROUND_AIR_CLOCK = '5:43 AM'
 
 export type PrimerRoundAirWhen = 'hoy' | 'mañana' | 'el lunes'
 
 export type PrimerRoundAirCopy = {
   when: PrimerRoundAirWhen
-  /** "mañana a las 5:43am" */
+  /** "mañana desde las 5:43 AM" */
   phrase: string
+  /** "Mañana desde las 5:43 AM" — starts the sentence on Facebook. */
+  phraseStart?: string
+}
+
+export function primerRoundTitleWhen(when: PrimerRoundAirWhen): string {
+  if (when === 'el lunes') return 'El lunes'
+  if (when === 'mañana') return 'Mañana'
+  return 'Hoy'
+}
+
+export function primerRoundAirPhrase(when: PrimerRoundAirWhen, startOfLine = false): string {
+  const lead = startOfLine ? primerRoundTitleWhen(when) : when
+  return `${lead} desde las ${PRIMER_ROUND_AIR_CLOCK}`
 }
 
 function prWall(nowMs: number): { weekday: number; minutes: number } {
@@ -29,7 +43,7 @@ function prWall(nowMs: number): { weekday: number; minutes: number } {
 
 /**
  * Next time Primer Round is on air from `now` (Puerto Rico).
- * Sunday → "mañana a las 5:43am". Weekday before 5:43am → "hoy a las 5:43am".
+ * Sunday → "Mañana desde las 5:43 AM". Weekday before 5:43 AM → "Hoy desde las 5:43 AM".
  */
 export function primerRoundNextAirCopy(nowMs = Date.now()): PrimerRoundAirCopy {
   const { weekday, minutes } = prWall(nowMs)
@@ -40,16 +54,20 @@ export function primerRoundNextAirCopy(nowMs = Date.now()): PrimerRoundAirCopy {
     : weekday === 0 || (weekday >= 1 && weekday <= 4)
       ? 'mañana'
       : 'el lunes'
-  const phrase = `${when} a las ${PRIMER_ROUND_AIR_CLOCK}`
-  return { when, phrase }
+  return {
+    when,
+    phrase: primerRoundAirPhrase(when, false),
+    phraseStart: primerRoundAirPhrase(when, true),
+  }
 }
 
-/** "hoy en Primer Round" / stale air phrases → the next live air time. */
+/** Old and Facebook when-phrases before "junto a". */
 const ATTRIBUTION_WHEN =
-  /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am)(?= en Primer Round junto a)/gi
+  /(?:hoy|mañana|el lunes)(?: a las 5:43am| desde las 5:43 ?AM)?(?: en Primer Round)?(?= junto a)/gi
 
 /**
- * Force the live air phrase. Sunday posted today → "mañana a las 5:43am".
+ * Force the live Facebook air phrase.
+ * Sunday posted today → "Mañana desde las 5:43 AM".
  */
 export function applyPrimerRoundAirPhrase(
   caption: string,

@@ -350,7 +350,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           (hosts {PRIMER_ROUND_CAPTION_HOSTS}). El video se queda aquí hasta que lo aceptes
           o le des feedback. Al aceptar, se publica en Instagram, Facebook y TikTok
           (collabs IG). Al aire lun–vie {PRIMER_ROUND_AIR_CLOCK}. Si publicas ahora:{' '}
-          {primerRoundNextAirCopy().phrase}.
+          {primerRoundNextAirCopy().phraseStart ?? primerRoundNextAirCopy().phrase}.
         </p>
       </header>
 

@@ -11,7 +11,7 @@ export const PRIMER_ROUND_GFX_STYLE_RULES = [
   'El gancho es la frase principal del overlay (ej. LA NOTICIA NO ESPERA), no juntas todas las preguntas de pantalla.',
   'No repitas el gancho en la línea 3. Si el hook es LA NOTICIA NO ESPERA, la siguiente oración empieza por el horario.',
   'En este tipo de Reel no pongas “Episodio completo en YouTube”.',
-  'El caption dice cuándo sale al aire (hoy / mañana / el lunes a las 5:43am). Domingo publicado hoy = mañana a las 5:43am.',
+  'Frase de Facebook: “Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.” Hoy / el lunes según el aire. Domingo publicado hoy = Mañana.',
 ]
 
 /** Newest-first notes → unique short rules. Splits caption_notes bullets. */

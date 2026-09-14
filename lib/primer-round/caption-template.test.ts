@@ -16,13 +16,13 @@ describe('Primer Round locked caption template', () => {
     const caption = buildPrimerRoundCaption({
       hook: '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
       guest: 'Exfiscal Zulma Fúster',
-      airCopy: { when: 'hoy', phrase: 'hoy a las 5:43am' },
+      airCopy: { when: 'hoy', phrase: 'hoy desde las 5:43 AM' },
     })
     expect(caption).toBe(
       [
         '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
         '',
-        'Exfiscal Zulma Fúster hoy a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+        'Exfiscal Zulma Fúster hoy desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
@@ -54,7 +54,7 @@ describe('Primer Round locked caption template', () => {
   })
 
   it('exposes the UI skeleton with hosts as names', () => {
-    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain('Dennise Pérez y Rafael Lenín')
+    expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain('Rafael Lenín López y Dennise Pérez')
     expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).toContain(PRIMER_ROUND_HASHTAGS)
     expect(PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON).not.toContain('@denniseyperez')
   })
@@ -67,36 +67,36 @@ describe('Primer Round locked caption template', () => {
     })
     expect(p).toContain('FORMATO OBLIGATORIO')
     expect(p).toContain(PRIMER_ROUND_HASHTAGS)
-    expect(p).toContain('Dennise Pérez y Rafael Lenín')
+    expect(p).toContain('Rafael Lenín López y Dennise Pérez')
     expect(p).toMatch(/NUNCA pongas @denniseyperez/i)
   })
 
-  it('Sunday forces mañana a las 5:43am on GFX Reels', () => {
+  it('Sunday uses the Facebook air line on GFX Reels', () => {
     const p = buildPrimerRoundCaptionPromptInstructions({
       title: 'GFX',
       airNowMs: Date.parse('2026-09-14T01:40:00Z'),
     })
-    expect(p).toContain('mañana a las 5:43am')
+    expect(p).toContain('Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.')
     expect(p).toContain('LA NOTICIA NO ESPERA')
     expect(p).toContain('GFX/promo')
     const caption = buildPrimerRoundCaption({
       hook: 'LA NOTICIA NO ESPERA',
       guest: 'LA NOTICIA NO ESPERA',
-      airCopy: { when: 'mañana', phrase: 'mañana a las 5:43am' },
+      airCopy: { when: 'mañana', phrase: 'mañana desde las 5:43 AM' },
     })
     expect(caption).toBe(
       [
         'LA NOTICIA NO ESPERA',
         '',
-        'mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
     )
-    expect(caption).not.toMatch(/LA NOTICIA NO ESPERA mañana/)
+    expect(caption).not.toMatch(/LA NOTICIA NO ESPERA [Mm]añana/)
     expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
     expect(p).toMatch(/NO empieces la línea 3 con la misma frase/i)
-    expect(p).not.toMatch(/LA NOTICIA NO ESPERA mañana a las 5:43am/)
+    expect(p).not.toMatch(/LA NOTICIA NO ESPERA Mañana desde las 5:43 AM/)
   })
 })
 
@@ -111,19 +111,39 @@ describe('normalizePrimerRoundCaption', () => {
     ].join('\n')
     const next = normalizePrimerRoundCaption(stale, {
       when: 'mañana',
-      phrase: 'mañana a las 5:43am',
+      phrase: 'mañana desde las 5:43 AM',
     })
     expect(next).toBe(
       [
         'LA NOTICIA NO ESPERA',
         '',
-        'mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
     )
-    expect(checkPrimerRoundCaptionStructure(stale).some((i) => /no repitas el gancho/i.test(i.problem))).toBe(
+    expect(checkPrimerRoundCaptionStructure(stale).some((i) => /horario de aire|no repitas el gancho/i.test(i.problem))).toBe(
       true,
+    )
+    expect(
+      normalizePrimerRoundCaption(
+        [
+          '¿Quién responde?',
+          '',
+          'LA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.',
+          '',
+          PRIMER_ROUND_HASHTAGS,
+        ].join('\n'),
+        { when: 'mañana', phrase: 'mañana desde las 5:43 AM' },
+      ),
+    ).toBe(
+      [
+        '¿Quién responde?',
+        '',
+        'Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez.',
+        '',
+        PRIMER_ROUND_HASHTAGS,
+      ].join('\n'),
     )
   })
 })

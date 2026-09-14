@@ -4,7 +4,8 @@
  * Bottom IG caption (Metricool `text`):
  *   1) Hook question or topic line
  *   2) blank line
- *   3) "[Guest] hoy en Primer Round junto a Dennise Pérez y Rafael Lenín."
+ *   3) Facebook: "Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez."
+ *      With guest: "[Invitado] mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez."
  *   4) optional: "Episodio completo en nuestro canal de YouTube: Magic Tv"
  *   5) blank line
  *   6) #magic973 #puertorico #primerround
@@ -18,17 +19,29 @@
 
 import type { OrthoIssue } from './orthography'
 import { formatPrimerRoundStyleRulesBlock } from './style-rules'
-import { applyPrimerRoundAirPhrase, primerRoundNextAirCopy, type PrimerRoundAirCopy } from './air-time'
+import {
+  primerRoundAirPhrase,
+  primerRoundNextAirCopy,
+  type PrimerRoundAirCopy,
+} from './air-time'
 
-/** Hosts as they appear in the caption line (names, not @handles). */
-export const PRIMER_ROUND_CAPTION_HOSTS = 'Dennise Pérez y Rafael Lenín'
+/** Hosts as they appear on Facebook (names, not @handles). */
+export const PRIMER_ROUND_CAPTION_HOSTS = 'Rafael Lenín López y Dennise Pérez'
+
+/** Old + Facebook live line: "hoy en Primer Round junto a…" or "Mañana desde las 5:43 AM junto a…" */
+export const PRIMER_ROUND_LIVE_LINE =
+  /(?:hoy|mañana|el lunes)(?: a las 5:43am| desde las 5:43 ?AM)?(?: en Primer Round)? junto a/i
 
 export const PRIMER_ROUND_ATTRIBUTION_PHRASE =
   `hoy en Primer Round junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
 
-/** Line 3 suffix with the next air time (Sunday → "mañana a las 5:43am"). */
-export function primerRoundLiveAttribution(air: PrimerRoundAirCopy = primerRoundNextAirCopy()): string {
-  return `${air.phrase} en Primer Round junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
+/** Facebook line 3. Sunday → "Mañana desde las 5:43 AM junto a Rafael Lenín López y Dennise Pérez." */
+export function primerRoundLiveAttribution(
+  air: PrimerRoundAirCopy = primerRoundNextAirCopy(),
+  startOfLine = true,
+): string {
+  const lead = primerRoundAirPhrase(air.when, startOfLine)
+  return `${lead} junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
 }
 
 export const PRIMER_ROUND_YOUTUBE_LINE =
@@ -67,11 +80,10 @@ export function buildPrimerRoundCaption(opts: {
 }): string {
   const hook = opts.hook.trim()
   const guest = opts.guest.trim()
-  const attribution = primerRoundLiveAttribution(opts.airCopy ?? primerRoundNextAirCopy())
-  const line3 =
-    guest && !sameCaptionLead(guest, hook)
-      ? `${guest} ${attribution}`.replace(/\s+/g, ' ').trim()
-      : attribution
+  const air = opts.airCopy ?? primerRoundNextAirCopy()
+  const hasGuest = Boolean(guest && !sameCaptionLead(guest, hook))
+  const attribution = primerRoundLiveAttribution(air, !hasGuest)
+  const line3 = hasGuest ? `${guest} ${attribution}`.replace(/\s+/g, ' ').trim() : attribution
   const lines = [hook, '', line3]
   if (opts.includeYoutube) {
     lines.push(PRIMER_ROUND_YOUTUBE_LINE)
@@ -114,10 +126,10 @@ FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 3) Si hay un invitado (persona + rol) distinto del gancho: "[Invitado] ${liveAttribution}"
    Si es GFX/promo sin invitado: SOLO "${liveAttribution}"
    NO empieces la línea 3 con la misma frase de la línea 1.
-   - Hosts SIEMPRE como nombres: Dennise Pérez y Rafael Lenín.
+   - Hosts SIEMPRE como nombres, en este orden: Rafael Lenín López y Dennise Pérez.
    - NUNCA pongas @denniseyperez, @rafaellenin ni @primerroundoficial en el caption.
    - Las collabs de Instagram van SOLO en Metricool (fuera de este texto).
-   - Horario al aire: lunes a viernes 5:43am (Puerto Rico). HOY la línea 3 lleva: "${air.phrase}".
+   - Horario al aire: lunes a viernes 5:43 AM (Puerto Rico). Frase de Facebook: "${liveAttribution}"
 4) En Reels gráficos / promo (GFX, no clip del programa): NO pongas la línea de YouTube.
 5) Línea en blanco.
 6) Exactamente estos hashtags (y solo estos): ${PRIMER_ROUND_HASHTAGS}
@@ -151,7 +163,7 @@ REGLAS:
 - El hook sale de la FRASE PRINCIPAL del overlay (ej. LA NOTICIA NO ESPERA), no de una lista de todas las preguntas.
 - NO repitas el gancho en la línea 3. Si el hook es LA NOTICIA NO ESPERA, la siguiente oración empieza por el horario, no otra vez por LA NOTICIA NO ESPERA.
 - Este tipo de video es GFX/promo, no un clip del programa.
-- La línea 3 DEBE llevar el horario de aire de ahora: ${air.phrase} (si es domingo y se publica hoy → mañana a las 5:43am).
+- La línea 3 DEBE ser la frase de Facebook: ${liveAttribution} (domingo publicado hoy → Mañana desde las 5:43 AM).
 - No inventes datos que no consten en el contexto.
 - Si hay FEEDBACK DE ERIC, aplícalo sin romper la plantilla.
 - Devuelve SOLO el caption, sin comillas ni explicación.`
@@ -197,11 +209,7 @@ export function stripRepeatedPrimerRoundHook(caption: string): string {
   const hook = lines.find((line) => line.trim())?.trim() ?? ''
   if (!hook) return caption
   const hookBare = hook.replace(/[¿?¡!.,;:]+$/g, '').trim()
-  const attrIdx = lines.findIndex((line) =>
-    /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en Primer Round junto a/i.test(
-      line,
-    ),
-  )
+  const attrIdx = lines.findIndex((line) => PRIMER_ROUND_LIVE_LINE.test(line))
   if (attrIdx < 0) return caption
   const line = lines[attrIdx].trim()
   const repeated = new RegExp(`^${escapeRegExp(hookBare)}\\s+`, 'i')
@@ -209,13 +217,33 @@ export function stripRepeatedPrimerRoundHook(caption: string): string {
   return lines.join('\n')
 }
 
-/** Live air phrase, then no repeated hook. */
+/** Facebook live line (hosts + desde las 5:43 AM), then no repeated hook. */
+export function rewritePrimerRoundLiveLine(
+  caption: string,
+  air: PrimerRoundAirCopy = primerRoundNextAirCopy(),
+): string {
+  return caption
+    .split('\n')
+    .map((raw) => {
+      const match = raw.match(
+        /^(.*?)((?:hoy|mañana|el lunes)(?: a las 5:43am| desde las 5:43 ?AM)?(?: en Primer Round)? junto a .+)$/i,
+      )
+      if (!match) return raw
+      const prefix = match[1].trim()
+      const guest = looksLikeGuestName(prefix) ? prefix : ''
+      const live = primerRoundLiveAttribution(air, !guest)
+      return guest ? `${guest} ${live}` : live
+    })
+    .join('\n')
+}
+
 export function normalizePrimerRoundCaption(
   caption: string,
   air?: PrimerRoundAirCopy,
 ): string {
-  return stripRepeatedPrimerRoundHook(
-    applyPrimerRoundAirPhrase(caption, air ?? primerRoundNextAirCopy()),
+  return rewritePrimerRoundLiveLine(
+    stripRepeatedPrimerRoundHook(caption),
+    air ?? primerRoundNextAirCopy(),
   )
 }
 
@@ -227,7 +255,7 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
 
   const lower = text.toLowerCase()
   const hasAttribution =
-    /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en primer round junto a/.test(lower)
+    /(?:hoy|mañana|el lunes) desde las 5:43 ?am junto a rafael lenín lópez y dennise pérez/.test(lower)
   if (!hasAttribution) {
     issues.push({
       quote: text.slice(0, 80),
@@ -241,11 +269,7 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
       text
         .split(/\n/)
         .map((line) => line.trim())
-        .find((line) =>
-          /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en primer round junto a/i.test(
-            line,
-          ),
-        ) ?? ''
+        .find((line) => PRIMER_ROUND_LIVE_LINE.test(line)) ?? ''
     const hookBare = hook.replace(/[¿?¡!.,;:]+$/g, '').trim()
     if (hookBare && new RegExp(`^${escapeRegExp(hookBare)}\\s+`, 'i').test(attrLine)) {
       issues.push({
@@ -258,7 +282,7 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
     if (!text.includes('Dennise Pérez') || !text.includes('Rafael Lenín')) {
       issues.push({
         quote: 'hosts',
-        problem: 'los hosts deben ir como nombres (Dennise Pérez y Rafael Lenín), no handles',
+        problem: 'los hosts deben ir como nombres (Rafael Lenín López y Dennise Pérez), no handles',
         suggestion: PRIMER_ROUND_CAPTION_HOSTS,
         surface: 'caption',
       })
