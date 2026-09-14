@@ -361,10 +361,14 @@ describe('EntregasBoard — planned sessions (empty slots)', () => {
 })
 
 describe('EntregasBoard — client dropdown filter (replaces chip row)', () => {
-  const twoClients = [
-    idea({ id: '1', client_id: 'c1' }),
-    idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null } }),
-  ] as IdeaWithPipeline[]
+  let twoClients: IdeaWithPipeline[]
+  beforeEach(() => {
+    // Build date-dependent fixtures after the parent hook freezes the clock.
+    twoClients = [
+      idea({ id: '1', client_id: 'c1' }),
+      idea({ id: '2', client_id: 'c2', client: { id: 'c2', name: 'Lumen', industry: null } }),
+    ] as IdeaWithPipeline[]
+  })
 
   it('renders a compact "Todos los clientes" dropdown trigger, closed by default', () => {
     render(<EntregasBoard stages={['edited','approval','copy','publication']} ideas={twoClients} />)
