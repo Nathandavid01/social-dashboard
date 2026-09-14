@@ -5,9 +5,7 @@ import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission, currentUserHas, getEffectiveRole, getEffectiveUserId } from '@/lib/auth/server'
-import { canDownloadIdeaVideo, editorWipIdeaIds } from '@/lib/pipeline/editor-video-bank'
-import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
-import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
+import { canDownloadIdeaVideo } from '@/lib/pipeline/editor-video-bank'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
@@ -203,17 +201,6 @@ export async function authorizeIdeaVideoAccess(videoId: string): Promise<
 
   const role = await getEffectiveRole()
   const userId = await getEffectiveUserId()
-  let inEditorWip: boolean | undefined
-  if ((role === 'editor' || role === 'team_member') && userId) {
-    if (!idea?.id) {
-      inEditorWip = false
-    } else {
-      const pipeline = await getIdeacionPipeline({ limit: 400 })
-      // WIP dinámico: el tope real de este editor (sube con su % de aprobación).
-      const limit = editorWipLimitFor(editorApprovalStats(pipeline, userId))
-      inEditorWip = editorWipIdeaIds(pipeline, userId, undefined, limit).has(idea.id)
-    }
-  }
 
   const allowed = canDownloadIdeaVideo({
     role,
@@ -221,7 +208,6 @@ export async function authorizeIdeaVideoAccess(videoId: string): Promise<
     ideaAssigneeId: idea?.production_task?.assigned_to_id ?? null,
     clientAssigneeId: idea?.client?.assigned_to ?? null,
     uploadedBy: video.uploaded_by,
-    inEditorWip,
   }, video.kind as string | undefined)
   if (!allowed) return { error: 'No autorizado' }
   return {

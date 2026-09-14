@@ -40,7 +40,7 @@ vi.mock('@/lib/auth/server', () => ({
   getEffectiveRole: () => mocks.role(),
   getEffectiveUserId: () => mocks.userId(),
 }))
-vi.mock('@/lib/actions/content-ideas', () => ({ getIdeacionPipeline: () => mocks.ideas() }))
+vi.mock('@/lib/actions/content-ideas', () => ({ getIdeacionPipeline: (filter: unknown) => mocks.ideas(filter) }))
 vi.mock('@/lib/utils/content-pipeline', () => ({ getPipelineTotals: () => mocks.pipelineTotals() }))
 vi.mock('@/lib/actions/client-pictures', () => ({ getMetricoolPicturesByBlogId: vi.fn(async () => ({})) }))
 vi.mock('@/lib/utils/workflow-progress', () => ({ getWorkflowSettings: vi.fn(async () => ({ pipeline_step_assignees: {} })) }))
@@ -105,4 +105,13 @@ describe('PipelinePage access scope', () => {
     expect(Object.keys(result.props.clientRunway).sort()).toEqual(['c1', 'c2'])
     expect(result.props.canSeeAll).toBe(true)
   })
+})
+
+
+it('incluye material recién subido a ideas antiguas fuera de las primeras 400', async () => {
+  const old = { ...idea('antigua', 'c1', 'ed-1'), created_at: '2026-01-01', videos: [{ id: 'recent-upload', kind: 'raw', status: 'uploaded', drive_file_id: 'old/recent.mp4' }] }
+  mocks.ideas.mockImplementation(async (filter) => filter?.complete ? [old] : [])
+  const result = await PipelinePage()
+  expect(result.props.ideas.map((i: IdeaWithPipeline) => i.id)).toContain('antigua')
+  expect(result.props.ideas[0].videos[0].id).toBe('recent-upload')
 })

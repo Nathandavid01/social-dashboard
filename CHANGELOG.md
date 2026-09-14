@@ -1,3 +1,11 @@
+## v4.88 — Biblioteca Completa Para Edición
+
+**El editor puede consultar todos los crudos de sus clientes asignados.**
+
+- Los videos en espera siguen disponibles para consulta y descarga desde Edición.
+- El límite de trabajos activos mantiene el orden de la cola sin ocultar material.
+- Las cargas nuevas vinculadas a ideas antiguas también aparecen en la biblioteca.
+
 # Changelog
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
