@@ -11,8 +11,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - El límite de trabajos activos mantiene el orden de la cola sin ocultar material.
 - Las rutas nuevas vinculadas a ideas antiguas también aparecen en la biblioteca.
 
-![Biblioteca completa del editor](/changelog/v4.96-biblioteca-editor.png)
-
 ## v4.95 — 2026-09-18
 
 **La cadencia de cada cliente se edita en un solo sitio y se ve igual en todas partes.**
