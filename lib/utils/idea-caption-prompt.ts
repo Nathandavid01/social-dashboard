@@ -80,6 +80,8 @@ export interface IdeaCaptionPromptInput {
    * caption skeleton Eric approved — hosts as names, fixed hashtags, no @ in caption.
    */
   primerRoundLockedTemplate?: boolean
+  /** Standing Primer Round Reel style Eric already taught (this client + format). */
+  styleRules?: string[] | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -95,6 +97,7 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       videoTranscript: input.videoTranscript,
       feedback: input.feedback,
       previousCaption: input.previousCaption,
+      styleRules: input.styleRules,
       // Guest/role comes from overlay line 1 when available; else the model infers.
       guestHint: null,
     })

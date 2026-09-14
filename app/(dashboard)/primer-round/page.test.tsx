@@ -30,6 +30,7 @@ vi.mock('@/lib/actions/primer-round', () => ({
       lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
       ready: [],
       pending: null,
+      styleRules: [],
     },
   })),
   createPrimerRoundUploadIdea: vi.fn(),

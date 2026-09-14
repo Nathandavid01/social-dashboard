@@ -53,6 +53,7 @@ const studio: PrimerRoundStudioPayload = {
   lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
   ready: [],
   pending: null,
+  styleRules: [],
 }
 
 describe('PrimerRoundStudio', () => {
@@ -64,6 +65,8 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
     expect(screen.getByText(/mp4 o mov\. La IA lee el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/Al aire lun–vie 5:43am/i)).toBeInTheDocument()
+    expect(screen.getByText(/Si publicas ahora:/i)).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-input')).toHaveAttribute(
       'accept',
       expect.stringMatching(/\.mov/i),
@@ -107,6 +110,7 @@ describe('PrimerRoundStudio', () => {
             overlayText: 'LA NOTICIA NO ESPERA',
             visualSummary: 'Estudio de radio',
           },
+          styleRules: ['El gancho es LA NOTICIA NO ESPERA, no las tres preguntas'],
         }}
       />,
     )
@@ -116,8 +120,14 @@ describe('PrimerRoundStudio', () => {
     )
     expect(screen.getByRole('status')).toHaveTextContent(/se queda aquí/i)
     expect(screen.getByTestId('primer-round-feedback')).toBeInTheDocument()
+    expect(screen.getByText(/Se guarda para Primer Round y este tipo de video/i)).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
     expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
-    expect(screen.getByText(/LA NOTICIA NO ESPERA hoy en Primer Round/i)).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent(
+      /LA NOTICIA NO ESPERA (?:hoy|mañana|el lunes) a las 5:43am en Primer Round/,
+    )
+    expect(screen.getByTestId('primer-round-style-rules')).toHaveTextContent(
+      /El gancho es LA NOTICIA NO ESPERA/i,
+    )
   })
 })

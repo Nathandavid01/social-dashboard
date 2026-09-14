@@ -28,6 +28,7 @@ import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
 import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer-round/studio'
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
+import { applyPrimerRoundAirPhrase, primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
 import { useRouter } from 'next/navigation'
 
 type PipelineStage =
@@ -120,6 +121,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [overlayText, setOverlayText] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [styleRules, setStyleRules] = useState<string[]>(studio.styleRules ?? [])
   const [pending, startTransition] = useTransition()
 
   useEffect(() => {
@@ -128,7 +130,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setIdeaId(piece.ideaId)
     setVideoId(piece.videoId)
     setFileLabel(piece.fileName)
-    setCaption(piece.caption)
+    setCaption(piece.caption ? applyPrimerRoundAirPhrase(piece.caption) : piece.caption)
     setOverlayText(piece.overlayText)
     setPreviewUrl((prev) => {
       if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
@@ -153,7 +155,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       ideaId: id,
       videoId: vid,
     })
-    if (res.caption) setCaption(res.caption)
+    if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
     if (res.gate) {
       setGate(res.gate)
       if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
@@ -262,11 +264,12 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         feedback: feedback.trim(),
         previousCaption: caption,
       })
-      if (res.caption) setCaption(res.caption)
+      if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
       if (res.gate) {
         setGate(res.gate)
         if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
       }
+      if (res.styleRules) setStyleRules(res.styleRules)
       if (res.error && !res.caption) {
         setStage('error')
         setMessage(res.error)
@@ -274,7 +277,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       }
       setFeedback('')
       setStage('revision')
-      setMessage(res.error ?? 'Caption actualizado. Acepta o sigue dando feedback.')
+      setMessage(res.error ?? 'Estilo guardado para los Reels de Primer Round. Acepta o sigue enseñando.')
     })
   }
 
@@ -287,7 +290,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         videoId,
         overrideOrtho,
       })
-      if (res.caption) setCaption(res.caption)
+      if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
       if (res.gate) setGate(res.gate)
       if (res.error) {
         setStage('error')
@@ -345,7 +348,8 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           Sube el mp4 o mov: ves la película, la IA lee los textos y arma el caption
           (hosts {PRIMER_ROUND_CAPTION_HOSTS}). El video se queda aquí hasta que lo aceptes
           o le des feedback. Al aceptar, se publica en Instagram, Facebook y TikTok
-          (collabs IG).
+          (collabs IG). Al aire lun–vie {PRIMER_ROUND_AIR_CLOCK}. Si publicas ahora:{' '}
+          {primerRoundNextAirCopy().phrase}.
         </p>
       </header>
 
@@ -474,17 +478,32 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
         {(stage === 'revision' || stage === 'bloqueado') && ideaId && (
           <div className="space-y-3 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-review-panel">
+            {styleRules.length > 0 && (
+              <div className="space-y-1" data-testid="primer-round-style-rules">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Estilo ya enseñado (Primer Round · Reels)
+                </p>
+                <ul className="space-y-1 rounded-md border bg-background/60 p-2 text-xs">
+                  {styleRules.map((rule) => (
+                    <li key={rule}>• {rule}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <label className="block space-y-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Feedback para la IA
+                Enseña el estilo de estos Reels
               </span>
+              <p className="text-[11px] text-muted-foreground">
+                Se guarda para Primer Round y este tipo de video. El próximo Reel lo usa, no solo este.
+              </p>
               <textarea
                 data-testid="primer-round-feedback"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                rows={3}
+                rows={5}
                 disabled={pending}
-                placeholder="Ej. el gancho es LA NOTICIA NO ESPERA, no las tres preguntas"
+                placeholder="Cómo deben sonar estos Reels: gancho, invitado, qué no inventar, tono…"
                 className="w-full resize-y rounded-md border bg-background px-3 py-2 text-xs"
               />
             </label>
@@ -501,7 +520,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
               ) : (
                 <Sparkles className="mr-1.5 h-3.5 w-3.5" />
               )}
-              Aplicar feedback
+              Guardar estilo y reescribir
             </Button>
             {stage === 'bloqueado' && (
               <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

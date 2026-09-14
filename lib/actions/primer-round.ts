@@ -31,6 +31,8 @@ import {
   primerRoundSoonScheduleIso,
   type StudioIdeaRef,
 } from '@/lib/primer-round/studio'
+import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
+import { applyPrimerRoundAirPhrase } from '@/lib/primer-round/air-time'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { entregasR2Bucket, entregasR2Client } from '@/lib/integrations/entregas-r2'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
@@ -76,6 +78,8 @@ export type PrimerRoundStudioPayload = {
   lanes: ReturnType<typeof groupStudioIdeas<PrimerRoundStudioIdea>>
   ready: PrimerRoundStudioIdea[]
   pending: PrimerRoundPendingPiece | null
+  /** Style Eric already taught for Primer Round Reels (this client + this format). */
+  styleRules: string[]
 }
 
 export async function getPrimerRoundStudio(): Promise<
@@ -175,14 +179,19 @@ export async function getPrimerRoundStudio(): Promise<
     }
   }
 
+  const airRewrites: Array<{ id: string; caption: string }> = []
   const ideas: PrimerRoundStudioIdea[] = (ideasRaw ?? []).map((raw) => {
     const videos = (raw.videos ?? []) as Array<{ kind: string; status: string }>
     const live = videos.filter((v) => v.status !== 'archived' && v.status !== 'failed')
     const analysis = analysisByIdea.get(raw.id)
     const burned = analysis?.findings?.burned_captions
-    const caption =
+    const captionRaw =
       ((raw.generated_caption as string | null) || (raw.caption_draft as string | null) || null)?.trim() ||
       null
+    const caption = captionRaw ? applyPrimerRoundAirPhrase(captionRaw) : null
+    if (caption && captionRaw && caption !== captionRaw) {
+      airRewrites.push({ id: raw.id as string, caption })
+    }
     return {
       id: raw.id,
       title: (raw.title as string | null)?.trim() || (raw.hook as string | null)?.trim() || 'Sin título',
@@ -225,6 +234,13 @@ export async function getPrimerRoundStudio(): Promise<
       overlayText: analysis?.findings?.burned_captions?.text?.trim() || pendingIdea.overlayText,
       visualSummary: analysis?.visualSummary?.trim() || null,
     }
+    const rewrite = airRewrites.find((row) => row.id === pendingIdea.id)
+    if (rewrite) {
+      await supabase
+        .from('content_ideas')
+        .update({ caption_draft: rewrite.caption, generated_caption: rewrite.caption })
+        .eq('id', pendingIdea.id)
+    }
   }
 
   return {
@@ -242,6 +258,7 @@ export async function getPrimerRoundStudio(): Promise<
       lanes,
       ready: lanes.ready,
       pending,
+      styleRules: await loadPrimerRoundStyleRules(supabase),
     },
   }
 }
@@ -550,7 +567,7 @@ export async function revisePrimerRoundCaption(input: {
   ideaId: string
   feedback: string
   previousCaption?: string | null
-}): Promise<{ caption?: string; gate?: PrimerRoundOrthoGate; error?: string }> {
+}): Promise<{ caption?: string; gate?: PrimerRoundOrthoGate; styleRules?: string[]; error?: string }> {
   try {
     await requirePrimerRoundAccess()
   } catch (err) {
@@ -577,9 +594,30 @@ export async function revisePrimerRoundCaption(input: {
       .eq('client_id', PRIMER_ROUND_CLIENT_ID)
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const snapshot = (input.previousCaption ?? captionRes.caption ?? 'Reel Primer Round').trim()
+  const { error: rememberErr } = await supabase.from('caption_feedback').insert({
+    client_id: PRIMER_ROUND_CLIENT_ID,
+    idea_id: ideaId,
+    caption_text: snapshot.slice(0, 2000),
+    rating: -1,
+    note: feedback,
+    rated_by: user?.id ?? null,
+  })
+
+  const styleRules = await loadPrimerRoundStyleRules(supabase)
   const verified = await verifyPrimerRoundOrtho(ideaId)
   revalidatePath('/primer-round')
-  return { caption: captionRes.caption, gate: verified.gate, error: verified.error }
+  return {
+    caption: captionRes.caption,
+    gate: verified.gate,
+    styleRules,
+    error: rememberErr
+      ? `Caption listo, pero no se guardó el estilo: ${rememberErr.message}`
+      : verified.error,
+  }
 }
 
 /**
@@ -634,8 +672,9 @@ export async function acceptPrimerRoundPiece(input: {
     return { error: 'El video de esta pieza ya no está disponible' }
   }
 
-  const caption =
-    ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim()
+  const caption = applyPrimerRoundAirPhrase(
+    ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim(),
+  )
   if (!caption) return { error: 'Falta el caption. Dale feedback a la IA o espera a que lo genere.' }
 
   const userId = await getEffectiveUserId()

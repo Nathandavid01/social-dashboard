@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.84 — 2026-09-13
+
+**Primer Round: estilo de Reel gráfico + horario de aire.**
+- El feedback se guarda para este cliente y este tipo de video (GFX/promo, no clip).
+- El caption dice cuándo sale al aire: domingo publicado hoy → **mañana a las 5:43am**.
+- Si la IA o un caption viejo dicen “hoy”, se reescribe al próximo aire antes de mostrarlo o publicarlo.
+
 ## v4.83 — 2026-09-13
 
 **Primer Round: el video se queda hasta que Eric acepta o da feedback.**
