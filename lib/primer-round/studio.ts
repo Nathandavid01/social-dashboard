@@ -59,18 +59,36 @@ export function primerRoundCtas(clientId: string) {
   } as const
 }
 
-/** Client + server: only mp4 (or video/* named .mp4) for the Primer Round CTA. */
+const PRIMER_ROUND_EXTS = ['.mp4', '.mov'] as const
+const PRIMER_ROUND_TYPES = new Set(['video/mp4', 'video/quicktime'])
+
+/** Same MIME for picker, PUT, presign and register (Safari often sends an empty type). */
+export function primerRoundUploadContentType(input: {
+  fileName?: string | null
+  contentType?: string | null
+}): string {
+  const type = (input.contentType ?? '').trim().toLowerCase().split(';')[0]!
+  if (type.startsWith('video/') && type.length > 'video/'.length) return type
+  const name = (input.fileName ?? '').trim().toLowerCase()
+  if (name.endsWith('.mov')) return 'video/quicktime'
+  if (name.endsWith('.webm')) return 'video/webm'
+  return 'video/mp4'
+}
+
+/** Client + server: mp4 or mov for the Primer Round CTA. */
 export function assertPrimerRoundMp4(input: {
   fileName?: string | null
   contentType?: string | null
 }): string | null {
   const name = (input.fileName ?? '').trim().toLowerCase()
-  const type = (input.contentType ?? '').trim().toLowerCase()
+  const type = (input.contentType ?? '').trim().toLowerCase().split(';')[0]!
   if (type && !isAllowedVideoUploadType(type)) {
-    return 'Tipo de archivo no permitido. Sube un video (mp4).'
+    return 'Tipo de archivo no permitido. Sube un video (mp4 o mov).'
   }
-  if (name && !name.endsWith('.mp4') && type !== 'video/mp4') {
-    return 'Solo se acepta video mp4.'
+  const extOk = PRIMER_ROUND_EXTS.some((ext) => name.endsWith(ext))
+  const typeOk = PRIMER_ROUND_TYPES.has(type)
+  if (name && !extOk && !typeOk) {
+    return 'Solo se acepta video mp4 o mov.'
   }
   if (!name && !type) return 'Falta el archivo de video.'
   return null

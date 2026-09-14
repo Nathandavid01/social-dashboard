@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { PrimerRoundStudio } from './primer-round-studio'
 import type { PrimerRoundStudioPayload } from '@/lib/actions/primer-round'
 
@@ -20,7 +20,7 @@ vi.mock('@/lib/actions/entregas-r2', () => ({
   registerEntregasVideo: vi.fn(),
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
-  processUploadedVideo: vi.fn(),
+  processUploadedVideo: vi.fn(async () => ({ analyzed: true })),
 }))
 vi.mock('@/lib/actions/pipeline-submit', () => ({
   reportUploadFailure: vi.fn(),
@@ -61,12 +61,32 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByText('@rafaellenin')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
-    expect(screen.getByText(/Solo mp4/i)).toBeInTheDocument()
+    expect(screen.getByText(/mp4 o mov\. La IA lee el video/i)).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-input')).toHaveAttribute(
+      'accept',
+      expect.stringMatching(/\.mov/i),
+    )
     expect(screen.queryByText(/^Ideas$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/^Banco$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/En edición/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/^Revisión$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Listos para publicar/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Crear caption IG/i })).not.toBeInTheDocument()
+  })
+
+  it('muestra el .mov en un reproductor local al elegirlo', () => {
+    const create = vi.fn(() => 'blob:mov-preview')
+    const revoke = vi.fn()
+    URL.createObjectURL = create
+    URL.revokeObjectURL = revoke
+    const { unmount } = render(<PrimerRoundStudio studio={studio} />)
+    fireEvent.change(screen.getByTestId('primer-round-upload-input'), {
+      target: { files: [new File(['x'], 'entrevista.mov', { type: 'video/quicktime' })] },
+    })
+    const preview = screen.getByTestId('primer-round-video-preview')
+    expect(preview.tagName).toBe('VIDEO')
+    expect(preview).toHaveAttribute('src', 'blob:mov-preview')
+    unmount()
+    expect(revoke).toHaveBeenCalledWith('blob:mov-preview')
   })
 })

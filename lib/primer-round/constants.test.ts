@@ -14,7 +14,7 @@ import {
   canAutoSchedulePrimerRound,
   parseDualOrthoLlm,
 } from './orthography'
-import { studioLaneFor, groupStudioIdeas, primerRoundCtas, assertPrimerRoundMp4 } from './studio'
+import { studioLaneFor, groupStudioIdeas, primerRoundCtas, assertPrimerRoundMp4, primerRoundUploadContentType } from './studio'
 import { buildPrimerRoundCaption } from './caption-template'
 
 describe('Primer Round constants', () => {
@@ -163,8 +163,22 @@ describe('assertPrimerRoundMp4', () => {
     expect(assertPrimerRoundMp4({ fileName: 'clip.mp4', contentType: 'video/mp4' })).toBeNull()
   })
 
-  it('rejects non-video and non-mp4 names', () => {
+  it('accepts mov / quicktime (películas de Final Cut / iPhone)', () => {
+    expect(assertPrimerRoundMp4({ fileName: 'entrevista.mov', contentType: 'video/quicktime' })).toBeNull()
+    expect(assertPrimerRoundMp4({ fileName: 'ENTREVISTA.MOV', contentType: '' })).toBeNull()
+    expect(assertPrimerRoundMp4({ fileName: 'clip.mov', contentType: 'video/quicktime' })).toBeNull()
+  })
+
+  it('rejects non-video and other containers', () => {
     expect(assertPrimerRoundMp4({ fileName: 'x.html', contentType: 'text/html' })).toMatch(/no permitido/i)
-    expect(assertPrimerRoundMp4({ fileName: 'clip.mov', contentType: 'video/quicktime' })).toMatch(/mp4/i)
+    expect(assertPrimerRoundMp4({ fileName: 'clip.avi', contentType: 'video/x-msvideo' })).toMatch(/mp4|mov/i)
+  })
+})
+
+describe('primerRoundUploadContentType', () => {
+  it('maps a nameless .mov to video/quicktime (Safari a veces manda type vacío)', () => {
+    expect(primerRoundUploadContentType({ fileName: 'pelicula.mov', contentType: '' })).toBe('video/quicktime')
+    expect(primerRoundUploadContentType({ fileName: 'clip.mp4', contentType: '' })).toBe('video/mp4')
+    expect(primerRoundUploadContentType({ fileName: 'x.mov', contentType: 'video/quicktime' })).toBe('video/quicktime')
   })
 })

@@ -72,7 +72,7 @@ export async function processUploadedVideo(
   videoId: string,
   file: File,
   deps?: ProcessUploadedVideoDeps,
-): Promise<void> {
+): Promise<{ analyzed: boolean }> {
   const extract = deps?.extract ?? extractVideoFrames
   const post = deps?.post ?? fetch
   const getUploadUrls = deps?.getUploadUrls ?? getThumbUploadUrls
@@ -86,17 +86,18 @@ export async function processUploadedVideo(
     ;({ frames, timestamps, fingerprints } = await extract(file))
   } catch {
     // Silencioso: el navegador no pudo decodificar el video — ni análisis ni thumbs.
-    return
+    return { analyzed: false }
   }
-  if (frames.length === 0) return
+  if (frames.length === 0) return { analyzed: false }
 
   const cuts = fingerprints ? detectSceneCuts(fingerprints) : []
 
   // Ambos son independientes: uno puede fallar sin tumbar al otro.
-  await Promise.allSettled([
+  const [analysisResult] = await Promise.allSettled([
     analyze(videoId, frames, timestamps, post, cuts),
     uploadThumbs(videoId, frames, { getUploadUrls, register, putThumb }),
   ])
+  return { analyzed: analysisResult.status === 'fulfilled' }
 }
 
 /**

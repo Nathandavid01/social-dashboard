@@ -334,7 +334,7 @@ export async function schedulePrimerRoundReel(input: {
   return result
 }
 
-/** Create a Primer Round idea row so the browser can attach an edited mp4. */
+/** Create a Primer Round idea row so the browser can attach an edited mp4/mov. */
 export async function createPrimerRoundUploadIdea(input: {
   title?: string | null
   fileName?: string | null
@@ -375,7 +375,7 @@ export async function createPrimerRoundUploadIdea(input: {
 }
 
 /**
- * One-shot AI pipeline after mp4 upload:
+ * One-shot AI pipeline after mp4/mov upload:
  * 1) caption IG (locked primerroundoficial template)
  * 2) approve for Metricool
  * 3) verify overlay + caption

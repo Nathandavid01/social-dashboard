@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.81 — 2026-09-13
+
+**Primer Round acepta películas .mov: las ves, la IA lee los textos y arma el caption.**
+- En `/primer-round` puedes subir **mp4 o mov** (Final Cut / iPhone), no solo mp4.
+- El video se reproduce en la página mientras la IA lee los textos en pantalla y de qué va la pieza.
+- El caption de @primerroundoficial sale del overlay + lo que se ve + el audio.
+- Si el navegador no puede leer el .mov, se detiene: no se agenda a ciegas.
+
 ## v4.80 — 2026-09-13
 
 **Primer Round: solo Upload video; la IA hace el resto.**

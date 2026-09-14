@@ -31,7 +31,7 @@ function makeDeps(overrides: Partial<{
 describe('processUploadedVideo', () => {
   it('extrae UNA vez y hace ambos: postea análisis y sube+registra 5 thumbnails', async () => {
     const deps = makeDeps()
-    await processUploadedVideo('vid-1', file, deps)
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: true })
 
     expect(deps.extract).toHaveBeenCalledTimes(1)
     expect(deps.extract).toHaveBeenCalledWith(file)
@@ -55,34 +55,34 @@ describe('processUploadedVideo', () => {
 
   it('la extracción falla → no postea, no sube thumbnails, y NO lanza', async () => {
     const deps = makeDeps({ extract: vi.fn().mockRejectedValue(new Error('codec')) })
-    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: false })
     expect(deps.post).not.toHaveBeenCalled()
     expect(deps.getUploadUrls).not.toHaveBeenCalled()
   })
 
   it('el análisis falla pero los thumbnails siguen subiéndose', async () => {
     const deps = makeDeps({ post: vi.fn().mockRejectedValue(new Error('red')) })
-    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: true })
     expect(deps.register).toHaveBeenCalledWith('vid-1', ['k0', 'k1', 'k2', 'k3', 'k4'])
   })
 
   it('los thumbnails fallan pero el análisis sigue posteándose', async () => {
     const deps = makeDeps({ getUploadUrls: vi.fn().mockRejectedValue(new Error('r2 caído')) })
-    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: true })
     expect(deps.post).toHaveBeenCalled()
     expect(deps.register).not.toHaveBeenCalled()
   })
 
   it('getUploadUrls devuelve {error} → no registra, no lanza', async () => {
     const deps = makeDeps({ getUploadUrls: vi.fn().mockResolvedValue({ error: 'sin config' }) })
-    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: true })
     expect(deps.register).not.toHaveBeenCalled()
     expect(deps.post).toHaveBeenCalled()
   })
 
   it('0 frames extraídos → no postea ni sube nada', async () => {
     const deps = makeDeps({ extract: vi.fn().mockResolvedValue({ frames: [], timestamps: [] }) })
-    await processUploadedVideo('vid-1', file, deps)
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: false })
     expect(deps.post).not.toHaveBeenCalled()
     expect(deps.getUploadUrls).not.toHaveBeenCalled()
   })
@@ -104,7 +104,7 @@ describe('processUploadedVideo', () => {
 
   it('registerVideoThumbs falla (p.ej. columna no existe) → no lanza', async () => {
     const deps = makeDeps({ register: vi.fn().mockResolvedValue({ error: 'columna no existe' }) })
-    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toBeUndefined()
+    await expect(processUploadedVideo('vid-1', file, deps)).resolves.toEqual({ analyzed: true })
   })
 
   it('el PUT por defecto verifica res.ok — si R2 rechaza (403/5xx) sin lanzar, NO registra las keys', async () => {
@@ -129,7 +129,7 @@ describe('processUploadedVideo', () => {
     try {
       await expect(
         processUploadedVideo('vid-1', file, { extract, getUploadUrls, register, post }),
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual({ analyzed: true })
       expect(register).not.toHaveBeenCalled()
     } finally {
       global.fetch = originalFetch

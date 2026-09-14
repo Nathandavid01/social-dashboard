@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import {
   Upload,
   Users,
@@ -24,7 +24,7 @@ import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entre
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
-import { assertPrimerRoundMp4 } from '@/lib/primer-round/studio'
+import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer-round/studio'
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
 import { useRouter } from 'next/navigation'
 
@@ -40,11 +40,16 @@ type PipelineStage =
   | 'bloqueado'
   | 'error'
 
-function putWithProgress(url: string, file: File, onProgress: (pct: number) => void): Promise<void> {
+function putWithProgress(
+  url: string,
+  file: File,
+  contentType: string,
+  onProgress: (pct: number) => void,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open('PUT', url)
-    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
+    xhr.setRequestHeader('Content-Type', contentType)
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
     }
@@ -99,7 +104,14 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [videoId, setVideoId] = useState<string | null>(null)
   const [overrideOrtho, setOverrideOrtho] = useState(false)
   const [fileLabel, setFileLabel] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
 
   async function runPipeline(id: string, vid: string | null, override: boolean) {
     setStage('caption')
@@ -131,13 +143,18 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
   function onPickFile(file: File | null) {
     if (!file) return
-    const guard = assertPrimerRoundMp4({ fileName: file.name, contentType: file.type || 'video/mp4' })
+    const contentType = primerRoundUploadContentType({ fileName: file.name, contentType: file.type })
+    const guard = assertPrimerRoundMp4({ fileName: file.name, contentType })
     if (guard) {
       setStage('error')
       setMessage(guard)
       return
     }
 
+    setPreviewUrl((prev) => {
+      if (prev && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
     setFileLabel(file.name)
     setCaption(null)
     setGate(null)
@@ -165,21 +182,21 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         const slot = await getEntregasUploadUrl({
           ideaId: created.ideaId,
           fileName: file.name,
-          contentType: file.type || 'video/mp4',
+          contentType,
         })
         if (slot.error || !slot.url || !slot.key) {
           setStage('error')
           setMessage(slot.error ?? 'No se pudo preparar la subida')
           return
         }
-        await putWithProgress(slot.url, file, setPct)
+        await putWithProgress(slot.url, file, contentType, setPct)
 
         const reg = await registerEntregasVideo({
           ideaId: created.ideaId,
           key: slot.key,
           name: file.name,
           sizeBytes: file.size,
-          mimeType: file.type || 'video/mp4',
+          mimeType: contentType,
         })
         if (reg.error || !reg.id) {
           setStage('error')
@@ -189,11 +206,14 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setVideoId(reg.id)
 
         setStage('analizando')
-        setMessage('IA analizando texto en pantalla…')
-        try {
-          await processUploadedVideo(reg.id, file)
-        } catch {
-          // Analysis is best-effort; verify will surface missing overlay.
+        setMessage('IA leyendo textos en pantalla y de qué va el video…')
+        const processed = await processUploadedVideo(reg.id, file)
+        if (!processed.analyzed) {
+          setStage('error')
+          setMessage(
+            'El navegador no pudo leer este video para analizarlo. Prueba Safari o exporta a mp4 (H.264). No se agenda a ciegas.',
+          )
+          return
         }
 
         setStage('verificando')
@@ -245,22 +265,22 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
-          Sube el mp4: la IA crea el caption (plantilla bloqueada, hosts {PRIMER_ROUND_CAPTION_HOSTS}),
-          verifica el overlay y agenda el Reel en Metricool con collabs. Auto-agenda{' '}
-          {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
+          Sube el mp4 o mov: ves la película, la IA lee los textos en pantalla, crea el caption
+          (plantilla bloqueada, hosts {PRIMER_ROUND_CAPTION_HOSTS}) y agenda el Reel en Metricool con
+          collabs. Auto-agenda {studio.autopostEnabled ? 'activa' : 'apagada (PRIMER_ROUND_AUTOPOST=false)'}.
         </p>
       </header>
 
       <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 sm:p-6" data-testid="primer-round-upload-panel">
         <div className="text-center space-y-1">
           <h2 className="text-sm font-semibold">Subir video</h2>
-          <p className="text-xs text-muted-foreground">Solo mp4. La IA hace el resto.</p>
+          <p className="text-xs text-muted-foreground">mp4 o mov. La IA lee el video y hace el resto.</p>
         </div>
 
         <input
           ref={inputRef}
           type="file"
-          accept="video/mp4,.mp4"
+          accept="video/mp4,video/quicktime,.mp4,.mov"
           className="sr-only"
           data-testid="primer-round-upload-input"
           disabled={busy}
@@ -281,6 +301,16 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           Upload video
         </Button>
+
+        {previewUrl && (
+          <video
+            data-testid="primer-round-video-preview"
+            src={previewUrl}
+            controls
+            playsInline
+            className="aspect-[9/16] w-full max-h-[28rem] rounded-lg bg-black object-contain"
+          />
+        )}
 
         {(stage !== 'idle' || fileLabel) && (
           <div className="space-y-2 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-pipeline-status">
@@ -317,6 +347,14 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
                         : `${gate.overlay.issues.length} a corregir`
                   }
                 />
+                {gate.overlay.text && (
+                  <pre
+                    data-testid="primer-round-overlay-text"
+                    className="whitespace-pre-wrap rounded-md border bg-background/60 p-2 text-xs leading-relaxed"
+                  >
+                    {gate.overlay.text}
+                  </pre>
+                )}
                 <OrthoRow
                   ok={gate.caption.ok && !gate.caption.missing}
                   label="Caption de IG (abajo)"

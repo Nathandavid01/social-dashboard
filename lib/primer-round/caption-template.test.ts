@@ -128,10 +128,12 @@ describe('buildIdeaCaptionPrompt primerRoundLockedTemplate', () => {
       primerRoundLockedTemplate: true,
       videoAnalysis: {
         burnedCaptionsText: 'Exfiscal Zulma Fúster\n¿Qué impacto tendrá\nel caso?',
+        visualSummary: 'Estudio de radio, invitados frente a micrófonos Magic 97.3',
       },
     })
     expect(p).toContain('FORMATO OBLIGATORIO')
     expect(p).toContain(PRIMER_ROUND_HASHTAGS)
+    expect(p).toContain('Estudio de radio, invitados frente a micrófonos Magic 97.3')
     expect(p).not.toContain('CAPTIONS DE REFERENCIA')
     expect(p).not.toContain('estilo genérico')
   })
