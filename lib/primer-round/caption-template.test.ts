@@ -128,11 +128,27 @@ describe('buildIdeaCaptionPrompt primerRoundLockedTemplate', () => {
       primerRoundLockedTemplate: true,
       videoAnalysis: {
         burnedCaptionsText: 'Exfiscal Zulma Fúster\n¿Qué impacto tendrá\nel caso?',
+        visualSummary: 'Estudio de radio, invitados frente a micrófonos Magic 97.3',
       },
     })
     expect(p).toContain('FORMATO OBLIGATORIO')
     expect(p).toContain(PRIMER_ROUND_HASHTAGS)
+    expect(p).toContain('Estudio de radio, invitados frente a micrófonos Magic 97.3')
     expect(p).not.toContain('CAPTIONS DE REFERENCIA')
     expect(p).not.toContain('estilo genérico')
+  })
+
+  it('passes Eric feedback into the locked Primer Round prompt', () => {
+    const p = buildIdeaCaptionPrompt({
+      title: 'Caso del día',
+      examples: [],
+      primerRoundLockedTemplate: true,
+      previousCaption: '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
+      feedback: 'El gancho debe ser LA NOTICIA NO ESPERA, no las tres preguntas',
+    })
+    expect(p).toContain('FEEDBACK DE ERIC')
+    expect(p).toContain('El gancho debe ser LA NOTICIA NO ESPERA')
+    expect(p).toContain('CAPTION ANTERIOR')
+    expect(p).toContain('¿Quién responde?')
   })
 })

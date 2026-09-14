@@ -24,7 +24,17 @@ import {
   parseDualOrthoLlm,
   type PrimerRoundOrthoGate,
 } from '@/lib/primer-round/orthography'
-import { groupStudioIdeas, primerRoundCtas, type StudioIdeaRef } from '@/lib/primer-round/studio'
+import {
+  groupStudioIdeas,
+  pickPendingPrimerRoundPiece,
+  primerRoundCtas,
+  primerRoundSoonScheduleIso,
+  type StudioIdeaRef,
+} from '@/lib/primer-round/studio'
+import { logIdeaActivity } from '@/lib/utils/idea-activity'
+import { entregasR2Bucket, entregasR2Client } from '@/lib/integrations/entregas-r2'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 
 async function requirePrimerRoundAccess(): Promise<void> {
@@ -42,6 +52,16 @@ export type PrimerRoundStudioIdea = StudioIdeaRef & {
   analysisStatus: 'pending' | 'done' | 'error' | null
 }
 
+export type PrimerRoundPendingPiece = {
+  ideaId: string
+  videoId: string
+  fileName: string
+  previewUrl: string | null
+  caption: string | null
+  overlayText: string | null
+  visualSummary: string | null
+}
+
 export type PrimerRoundStudioPayload = {
   client: {
     id: string
@@ -55,6 +75,7 @@ export type PrimerRoundStudioPayload = {
   ctas: ReturnType<typeof primerRoundCtas>
   lanes: ReturnType<typeof groupStudioIdeas<PrimerRoundStudioIdea>>
   ready: PrimerRoundStudioIdea[]
+  pending: PrimerRoundPendingPiece | null
 }
 
 export async function getPrimerRoundStudio(): Promise<
@@ -92,13 +113,18 @@ export async function getPrimerRoundStudio(): Promise<
   const ideaIds = (ideasRaw ?? []).map((i) => i.id)
   const analysisByIdea = new Map<
     string,
-    { status: 'pending' | 'done' | 'error'; findings: VideoAnalysisFindings | null }
+    { status: 'pending' | 'done' | 'error'; findings: VideoAnalysisFindings | null; visualSummary: string | null }
   >()
+  const editedByIdea = new Map<
+    string,
+    { id: string; name: string | null; key: string | null; uploadedAt: string | null; provider: string | null }
+  >()
+  const studioMarked = new Set<string>()
 
   if (ideaIds.length > 0) {
     const { data: edited } = await supabase
       .from('content_idea_videos')
-      .select('id, idea_id')
+      .select('id, idea_id, name, drive_file_id, storage_provider, uploaded_at')
       .in('idea_id', ideaIds)
       .eq('kind', 'edited')
       .not('status', 'in', '(archived,failed)')
@@ -106,10 +132,24 @@ export async function getPrimerRoundStudio(): Promise<
     const videoIds = (edited ?? []).map((v) => v.id)
     const videoToIdea = new Map((edited ?? []).map((v) => [v.id, v.idea_id as string]))
 
+    for (const row of edited ?? []) {
+      const prev = editedByIdea.get(row.idea_id as string)
+      const uploadedAt = (row.uploaded_at as string | null) ?? ''
+      if (!prev || uploadedAt > (prev.uploadedAt ?? '')) {
+        editedByIdea.set(row.idea_id as string, {
+          id: row.id as string,
+          name: (row.name as string | null) ?? null,
+          key: (row.drive_file_id as string | null) ?? null,
+          uploadedAt: (row.uploaded_at as string | null) ?? null,
+          provider: (row.storage_provider as string | null) ?? null,
+        })
+      }
+    }
+
     if (videoIds.length > 0) {
       const { data: analyses } = await supabase
         .from('content_idea_video_analysis')
-        .select('video_id, status, findings')
+        .select('video_id, status, findings, visual_summary')
         .in('video_id', videoIds)
 
       for (const row of analyses ?? []) {
@@ -118,8 +158,20 @@ export async function getPrimerRoundStudio(): Promise<
         analysisByIdea.set(ideaId, {
           status: row.status as 'pending' | 'done' | 'error',
           findings: (row.findings as VideoAnalysisFindings | null) ?? null,
+          visualSummary: (row.visual_summary as string | null) ?? null,
         })
       }
+    }
+
+    const { data: marks } = await supabase
+      .from('content_idea_activity')
+      .select('content_idea_id, metadata')
+      .in('content_idea_id', ideaIds)
+      .eq('action', 'video_uploaded')
+
+    for (const row of marks ?? []) {
+      const source = (row.metadata as { source?: string } | null)?.source
+      if (source === 'primer-round-studio') studioMarked.add(row.content_idea_id as string)
     }
   }
 
@@ -150,6 +202,31 @@ export async function getPrimerRoundStudio(): Promise<
 
   const lanes = groupStudioIdeas(ideas)
 
+  const pendingCandidates = ideas.map((idea) => {
+    const edited = editedByIdea.get(idea.id)
+    return {
+      ...idea,
+      hasEditedVideo: !!edited && edited.provider === 'entregas-r2',
+      studioUpload: studioMarked.has(idea.id),
+      editedUploadedAt: edited?.uploadedAt ?? null,
+    }
+  })
+  const pendingIdea = pickPendingPrimerRoundPiece(pendingCandidates)
+  const pendingEdited = pendingIdea ? editedByIdea.get(pendingIdea.id) : null
+  let pending: PrimerRoundPendingPiece | null = null
+  if (pendingIdea && pendingEdited) {
+    const analysis = analysisByIdea.get(pendingIdea.id)
+    pending = {
+      ideaId: pendingIdea.id,
+      videoId: pendingEdited.id,
+      fileName: pendingEdited.name || pendingIdea.title,
+      previewUrl: await signPrimerRoundPreview(pendingEdited.key),
+      caption: pendingIdea.caption,
+      overlayText: analysis?.findings?.burned_captions?.text?.trim() || pendingIdea.overlayText,
+      visualSummary: analysis?.visualSummary?.trim() || null,
+    }
+  }
+
   return {
     studio: {
       client: {
@@ -164,13 +241,34 @@ export async function getPrimerRoundStudio(): Promise<
       ctas: primerRoundCtas(PRIMER_ROUND_CLIENT_ID),
       lanes,
       ready: lanes.ready,
+      pending,
     },
+  }
+}
+
+async function signPrimerRoundPreview(key: string | null): Promise<string | null> {
+  if (!key) return null
+  const client = entregasR2Client()
+  if (!client) return null
+  try {
+    return await getSignedUrl(
+      client,
+      new GetObjectCommand({
+        Bucket: entregasR2Bucket(),
+        Key: key,
+        ResponseContentDisposition: 'inline',
+      }),
+      { expiresIn: 60 * 60 },
+    )
+  } catch {
+    return null
   }
 }
 
 /** CREATE: bottom IG caption only (reuses generateIdeaCaption → caption_draft). */
 export async function generatePrimerRoundCaption(
   ideaId: string,
+  opts?: { feedback?: string | null; previousCaption?: string | null },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePrimerRoundAccess()
@@ -188,7 +286,10 @@ export async function generatePrimerRoundCaption(
     return { error: 'La idea no pertenece a Primer Round' }
   }
 
-  return generateIdeaCaption(ideaId)
+  return generateIdeaCaption(ideaId, {
+    feedback: opts?.feedback ?? null,
+    previousCaption: opts?.previousCaption ?? null,
+  })
 }
 
 /** VERIFY: overlay (from video analysis) + bottom caption via LLM. */
@@ -276,6 +377,7 @@ export async function verifyPrimerRoundOrtho(
 export async function schedulePrimerRoundReel(input: {
   ideaId: string
   overrideOrtho?: boolean
+  scheduleOverride?: string | null
 }): Promise<{ ok?: true; skipped?: string; error?: string; metricoolPostId?: number | null }> {
   try {
     await requirePrimerRoundAccess()
@@ -323,7 +425,7 @@ export async function schedulePrimerRoundReel(input: {
   const userId = await getEffectiveUserId()
   // Primer Round path: runIdeaPost allows auto when client matches + kill switch off;
   // pass manualScheduling true from this explicit studio action so the team CTA always works.
-  const result = await runIdeaPost(supabase, input.ideaId, userId, null, {
+  const result = await runIdeaPost(supabase, input.ideaId, userId, input.scheduleOverride ?? null, {
     manualScheduling: true,
     watchedOn: 'pipeline',
   })
@@ -334,7 +436,7 @@ export async function schedulePrimerRoundReel(input: {
   return result
 }
 
-/** Create a Primer Round idea row so the browser can attach an edited mp4. */
+/** Create a Primer Round idea row so the browser can attach an edited mp4/mov. */
 export async function createPrimerRoundUploadIdea(input: {
   title?: string | null
   fileName?: string | null
@@ -361,8 +463,7 @@ export async function createPrimerRoundUploadIdea(input: {
       content_type: 'R',
       title,
       status: 'producida',
-      approval_status: 'submitted' satisfies IdeaApprovalStatus,
-      submitted_at: new Date().toISOString(),
+      approval_status: 'pending' satisfies IdeaApprovalStatus,
       created_by: user?.id ?? null,
     })
     .select('id, title')
@@ -370,16 +471,19 @@ export async function createPrimerRoundUploadIdea(input: {
 
   if (error || !data) return { error: error?.message ?? 'No se pudo crear la idea' }
 
+  await logIdeaActivity(supabase, {
+    ideaId: data.id as string,
+    action: 'video_uploaded',
+    metadata: { source: 'primer-round-studio' },
+  })
+
   revalidatePath('/primer-round')
   return { ideaId: data.id as string, title: (data.title as string) || title }
 }
 
 /**
- * One-shot AI pipeline after mp4 upload:
- * 1) caption IG (locked primerroundoficial template)
- * 2) approve for Metricool
- * 3) verify overlay + caption
- * 4) schedule Reel with collabs (unless ortho blocks and no override)
+ * After mp4/mov upload: caption + overlay verify, then STOP.
+ * The video stays on /primer-round until Eric accepts or gives feedback.
  */
 export async function runPrimerRoundUploadPipeline(input: {
   ideaId: string
@@ -387,6 +491,7 @@ export async function runPrimerRoundUploadPipeline(input: {
   overrideOrtho?: boolean
 }): Promise<{
   ok?: true
+  pending?: true
   caption?: string | null
   gate?: PrimerRoundOrthoGate
   skipped?: string
@@ -429,53 +534,162 @@ export async function runPrimerRoundUploadPipeline(input: {
     await supabase.from('content_ideas').update({ generated_caption: draft }).eq('id', ideaId)
   }
 
-  const userId = await getEffectiveUserId()
-  const videoId = input.videoId?.trim() || null
-  if (idea.approval_status !== 'approved') {
-    const { error: approveErr } = await supabase
-      .from('content_ideas')
-      .update({
-        approval_status: 'approved' satisfies IdeaApprovalStatus,
-        approved_by: userId,
-        approved_at: new Date().toISOString(),
-        approved_video_id: videoId,
-      })
-      .eq('id', ideaId)
-    if (approveErr) return { error: approveErr.message, caption: draft }
-  } else if (videoId) {
+  const verified = await verifyPrimerRoundOrtho(ideaId)
+  revalidatePath('/primer-round')
+  return {
+    ok: true,
+    pending: true,
+    caption: draft,
+    gate: verified.gate,
+    error: verified.error,
+  }
+}
+
+/** Revise the locked caption with Eric's feedback. Video stays pending. */
+export async function revisePrimerRoundCaption(input: {
+  ideaId: string
+  feedback: string
+  previousCaption?: string | null
+}): Promise<{ caption?: string; gate?: PrimerRoundOrthoGate; error?: string }> {
+  try {
+    await requirePrimerRoundAccess()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const ideaId = input.ideaId?.trim()
+  const feedback = input.feedback.trim()
+  if (!ideaId) return { error: 'Falta la idea' }
+  if (!feedback) return { error: 'Escribe el feedback para la IA' }
+
+  const captionRes = await generatePrimerRoundCaption(ideaId, {
+    feedback,
+    previousCaption: input.previousCaption ?? null,
+  })
+  if (captionRes.error) return { error: captionRes.error, caption: captionRes.caption }
+
+  const supabase = await createClient()
+  if (captionRes.caption?.trim()) {
     await supabase
       .from('content_ideas')
-      .update({ approved_video_id: videoId })
+      .update({ generated_caption: captionRes.caption.trim() })
       .eq('id', ideaId)
-      .is('approved_video_id', null)
+      .eq('client_id', PRIMER_ROUND_CLIENT_ID)
   }
+
+  const verified = await verifyPrimerRoundOrtho(ideaId)
+  revalidatePath('/primer-round')
+  return { caption: captionRes.caption, gate: verified.gate, error: verified.error }
+}
+
+/**
+ * Eric accepts the pending movie: write review_verified for THIS video,
+ * then schedule IG + Facebook + TikTok (IG collabs).
+ */
+export async function acceptPrimerRoundPiece(input: {
+  ideaId: string
+  videoId?: string | null
+  overrideOrtho?: boolean
+}): Promise<{
+  ok?: true
+  caption?: string | null
+  gate?: PrimerRoundOrthoGate
+  skipped?: string
+  error?: string
+  metricoolPostId?: number | null
+}> {
+  try {
+    await requirePrimerRoundAccess()
+    await requirePermission('posting.publish')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const ideaId = input.ideaId?.trim()
+  if (!ideaId) return { error: 'Falta la idea' }
+
+  const supabase = await createClient()
+  const { data: idea } = await supabase
+    .from('content_ideas')
+    .select('id, client_id, generated_caption, caption_draft, approval_status')
+    .eq('id', ideaId)
+    .maybeSingle()
+  if (!idea || idea.client_id !== PRIMER_ROUND_CLIENT_ID) {
+    return { error: 'La idea no pertenece a Primer Round' }
+  }
+
+  const { data: video } = await supabase
+    .from('content_idea_videos')
+    .select('id')
+    .eq('idea_id', ideaId)
+    .eq('kind', 'edited')
+    .eq('storage_provider', 'entregas-r2')
+    .not('status', 'in', '(archived,failed)')
+    .order('uploaded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const videoId = input.videoId?.trim() || (video?.id as string | undefined) || null
+  if (!videoId || !video || video.id !== videoId) {
+    return { error: 'El video de esta pieza ya no está disponible' }
+  }
+
+  const caption =
+    ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim()
+  if (!caption) return { error: 'Falta el caption. Dale feedback a la IA o espera a que lo genere.' }
+
+  const userId = await getEffectiveUserId()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const soon = primerRoundSoonScheduleIso()
+  const publishDate = soon.slice(0, 10)
+
+  const { error: verifyErr } = await supabase.from('content_idea_activity').insert({
+    content_idea_id: ideaId,
+    client_id: PRIMER_ROUND_CLIENT_ID,
+    user_id: user?.id ?? userId,
+    action: 'review_verified',
+    metadata: {
+      videoFileId: videoId,
+      captionsVerified: true,
+      videoVerified: true,
+      source: 'primer-round-studio',
+    },
+  })
+  if (verifyErr) return { error: 'No se pudo guardar la aceptación. El video sigue aquí; inténtalo otra vez.' }
+
+  const { error: approveErr } = await supabase
+    .from('content_ideas')
+    .update({
+      approval_status: 'approved' satisfies IdeaApprovalStatus,
+      approved_by: userId,
+      approved_at: new Date().toISOString(),
+      approved_video_id: videoId,
+      publish_date: publishDate,
+      generated_caption: caption,
+    })
+    .eq('id', ideaId)
+    .eq('client_id', PRIMER_ROUND_CLIENT_ID)
+  if (approveErr) return { error: approveErr.message, caption }
 
   const schedule = await schedulePrimerRoundReel({
     ideaId,
     overrideOrtho: !!input.overrideOrtho,
+    scheduleOverride: soon,
   })
-
   const verified = await verifyPrimerRoundOrtho(ideaId)
-
   if (schedule.error) {
-    return {
-      error: schedule.error,
-      caption: draft,
-      gate: verified.gate,
-    }
+    return { error: schedule.error, caption, gate: verified.gate }
   }
   if (schedule.skipped) {
-    return {
-      skipped: schedule.skipped,
-      caption: draft,
-      gate: verified.gate,
-    }
+    return { skipped: schedule.skipped, caption, gate: verified.gate }
   }
 
   revalidatePath('/primer-round')
   return {
     ok: true,
-    caption: draft,
+    caption,
     gate: verified.gate,
     metricoolPostId: schedule.metricoolPostId ?? null,
   }

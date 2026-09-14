@@ -29,6 +29,7 @@ vi.mock('@/lib/actions/primer-round', () => ({
       },
       lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
       ready: [],
+      pending: null,
     },
   })),
   createPrimerRoundUploadIdea: vi.fn(),
@@ -36,11 +37,12 @@ vi.mock('@/lib/actions/primer-round', () => ({
   generatePrimerRoundCaption: vi.fn(),
   verifyPrimerRoundOrtho: vi.fn(),
   schedulePrimerRoundReel: vi.fn(),
+  revisePrimerRoundCaption: vi.fn(),
+  acceptPrimerRoundPiece: vi.fn(),
 }))
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
 vi.mock('@/lib/actions/entregas-r2', () => ({
-  getEntregasUploadUrl: vi.fn(),
   registerEntregasVideo: vi.fn(),
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({

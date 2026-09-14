@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { PrimerRoundStudio } from './primer-round-studio'
 import type { PrimerRoundStudioPayload } from '@/lib/actions/primer-round'
 
@@ -13,14 +13,15 @@ vi.mock('@/lib/actions/primer-round', async () => {
     generatePrimerRoundCaption: vi.fn(),
     verifyPrimerRoundOrtho: vi.fn(),
     schedulePrimerRoundReel: vi.fn(),
+    revisePrimerRoundCaption: vi.fn(),
+    acceptPrimerRoundPiece: vi.fn(),
   }
 })
 vi.mock('@/lib/actions/entregas-r2', () => ({
-  getEntregasUploadUrl: vi.fn(),
   registerEntregasVideo: vi.fn(),
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
-  processUploadedVideo: vi.fn(),
+  processUploadedVideo: vi.fn(async () => ({ analyzed: true })),
 }))
 vi.mock('@/lib/actions/pipeline-submit', () => ({
   reportUploadFailure: vi.fn(),
@@ -51,6 +52,7 @@ const studio: PrimerRoundStudioPayload = {
   },
   lanes: { ideas: [], bank: [], editing: [], review: [], ready: [], other: [] },
   ready: [],
+  pending: null,
 }
 
 describe('PrimerRoundStudio', () => {
@@ -61,12 +63,61 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByText('@rafaellenin')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
-    expect(screen.getByText(/Solo mp4/i)).toBeInTheDocument()
+    expect(screen.getByText(/mp4 o mov\. La IA lee el video/i)).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-upload-input')).toHaveAttribute(
+      'accept',
+      expect.stringMatching(/\.mov/i),
+    )
     expect(screen.queryByText(/^Ideas$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/^Banco$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/En edición/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/^Revisión$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Listos para publicar/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Crear caption IG/i })).not.toBeInTheDocument()
+  })
+
+  it('muestra el .mov en un reproductor local al elegirlo', () => {
+    const create = vi.fn(() => 'blob:mov-preview')
+    const revoke = vi.fn()
+    URL.createObjectURL = create
+    URL.revokeObjectURL = revoke
+    const { unmount } = render(<PrimerRoundStudio studio={studio} />)
+    fireEvent.change(screen.getByTestId('primer-round-upload-input'), {
+      target: { files: [new File(['x'], 'entrevista.mov', { type: 'video/quicktime' })] },
+    })
+    const preview = screen.getByTestId('primer-round-video-preview')
+    expect(preview.tagName).toBe('VIDEO')
+    expect(preview).toHaveAttribute('src', 'blob:mov-preview')
+    unmount()
+    expect(revoke).toHaveBeenCalledWith('blob:mov-preview')
+  })
+
+  it('tras un refresh muestra el video pendiente hasta aceptar o dar feedback', () => {
+    render(
+      <PrimerRoundStudio
+        studio={{
+          ...studio,
+          pending: {
+            ideaId: 'idea-1',
+            videoId: 'vid-1',
+            fileName: 'Primer_Round_Reel_GFX_H264.mov',
+            previewUrl: 'https://r2.example/signed.mov',
+            caption:
+              '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
+            overlayText: 'LA NOTICIA NO ESPERA',
+            visualSummary: 'Estudio de radio',
+          },
+        }}
+      />,
+    )
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute(
+      'src',
+      'https://r2.example/signed.mov',
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(/se queda aquí/i)
+    expect(screen.getByTestId('primer-round-feedback')).toBeInTheDocument()
+    expect(screen.getByTestId('primer-round-accept-cta')).toHaveTextContent(/Aceptar y publicar/i)
+    expect(screen.getByTestId('primer-round-overlay-text')).toHaveTextContent('LA NOTICIA NO ESPERA')
+    expect(screen.getByText(/LA NOTICIA NO ESPERA hoy en Primer Round/i)).toBeInTheDocument()
   })
 })

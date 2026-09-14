@@ -14,7 +14,15 @@ import {
   canAutoSchedulePrimerRound,
   parseDualOrthoLlm,
 } from './orthography'
-import { studioLaneFor, groupStudioIdeas, primerRoundCtas, assertPrimerRoundMp4 } from './studio'
+import {
+  studioLaneFor,
+  groupStudioIdeas,
+  primerRoundCtas,
+  assertPrimerRoundMp4,
+  primerRoundUploadContentType,
+  pickPendingPrimerRoundPiece,
+  primerRoundSoonScheduleIso,
+} from './studio'
 import { buildPrimerRoundCaption } from './caption-template'
 
 describe('Primer Round constants', () => {
@@ -138,6 +146,44 @@ describe('dual orthography gate (overlay + caption)', () => {
   })
 })
 
+describe('pickPendingPrimerRoundPiece', () => {
+  it('keeps the latest unpublished studio video and ignores posted / empty leftovers', () => {
+    const picked = pickPendingPrimerRoundPiece([
+      { id: 'empty', status: 'producida', hasEditedVideo: false, editedUploadedAt: '2026-09-14T00:38:00Z' },
+      { id: 'posted', status: 'producida', hasEditedVideo: true, metricool_post_id: 99, editedUploadedAt: '2026-09-14T00:50:00Z' },
+      { id: 'old', status: 'producida', hasEditedVideo: true, editedUploadedAt: '2026-09-14T00:40:00Z' },
+      { id: 'latest', status: 'producida', hasEditedVideo: true, editedUploadedAt: '2026-09-14T00:45:00Z' },
+    ])
+    expect(picked?.id).toBe('latest')
+  })
+
+  it('prefers a studio-marked upload over a leftover pipeline idea', () => {
+    const picked = pickPendingPrimerRoundPiece([
+      { id: 'pipeline', status: 'approved', hasEditedVideo: true, studioUpload: false, editedUploadedAt: '2026-09-14T01:00:00Z' },
+      { id: 'studio', status: 'pending', hasEditedVideo: true, studioUpload: true, editedUploadedAt: '2026-09-14T00:45:00Z' },
+    ])
+    expect(picked?.id).toBe('studio')
+  })
+
+  it('returns null when there is no unpublished edited video', () => {
+    expect(
+      pickPendingPrimerRoundPiece([
+        { id: 'gone', status: 'descartada', hasEditedVideo: true },
+        { id: 'sent', status: 'producida', hasEditedVideo: true, metricool_post_id: 1 },
+      ]),
+    ).toBeNull()
+  })
+})
+
+describe('primerRoundSoonScheduleIso', () => {
+  it('is a naive PR datetime at least 5 minutes ahead', () => {
+    const now = Date.parse('2026-09-14T16:00:00-04:00')
+    const iso = primerRoundSoonScheduleIso(now)
+    expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    expect(iso).toBe('2026-09-14T16:06')
+  })
+})
+
 describe('studio lanes', () => {
   it('maps statuses to lanes', () => {
     expect(studioLaneFor({ id: '1', title: 'a', status: 'idea', approval_status: 'pending' })).toBe('ideas')
@@ -163,8 +209,23 @@ describe('assertPrimerRoundMp4', () => {
     expect(assertPrimerRoundMp4({ fileName: 'clip.mp4', contentType: 'video/mp4' })).toBeNull()
   })
 
-  it('rejects non-video and non-mp4 names', () => {
+  it('accepts mov / quicktime (películas de Final Cut / iPhone)', () => {
+    expect(assertPrimerRoundMp4({ fileName: 'entrevista.mov', contentType: 'video/quicktime' })).toBeNull()
+    expect(assertPrimerRoundMp4({ fileName: 'ENTREVISTA.MOV', contentType: '' })).toBeNull()
+    expect(assertPrimerRoundMp4({ fileName: 'clip.mov', contentType: 'video/quicktime' })).toBeNull()
+  })
+
+  it('rejects non-video and other containers', () => {
     expect(assertPrimerRoundMp4({ fileName: 'x.html', contentType: 'text/html' })).toMatch(/no permitido/i)
-    expect(assertPrimerRoundMp4({ fileName: 'clip.mov', contentType: 'video/quicktime' })).toMatch(/mp4/i)
+    expect(assertPrimerRoundMp4({ fileName: 'clip.avi', contentType: 'video/x-msvideo' })).toMatch(/mp4|mov/i)
+  })
+})
+
+describe('primerRoundUploadContentType', () => {
+  it('maps a nameless .mov to video/quicktime (Safari a veces manda type vacío)', () => {
+    expect(primerRoundUploadContentType({ fileName: 'pelicula.mov', contentType: '' })).toBe('video/quicktime')
+    expect(primerRoundUploadContentType({ fileName: 'clip.mp4', contentType: '' })).toBe('video/mp4')
+    expect(primerRoundUploadContentType({ fileName: 'x.mov', contentType: 'video/quicktime' })).toBe('video/quicktime')
+    expect(primerRoundUploadContentType({ fileName: 'evil.html', contentType: 'text/html' })).toBe('text/html')
   })
 })
