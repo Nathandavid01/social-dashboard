@@ -17,12 +17,19 @@
  */
 
 import type { OrthoIssue } from './orthography'
+import { formatPrimerRoundStyleRulesBlock } from './style-rules'
+import { primerRoundNextAirCopy, type PrimerRoundAirCopy } from './air-time'
 
 /** Hosts as they appear in the caption line (names, not @handles). */
 export const PRIMER_ROUND_CAPTION_HOSTS = 'Dennise Pérez y Rafael Lenín'
 
 export const PRIMER_ROUND_ATTRIBUTION_PHRASE =
   `hoy en Primer Round junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
+
+/** Line 3 suffix with the next air time (Sunday → "mañana a las 5:43am"). */
+export function primerRoundLiveAttribution(air: PrimerRoundAirCopy = primerRoundNextAirCopy()): string {
+  return `${air.phrase} en Primer Round junto a ${PRIMER_ROUND_CAPTION_HOSTS}.`
+}
 
 export const PRIMER_ROUND_YOUTUBE_LINE =
   'Episodio completo en nuestro canal de YouTube: Magic Tv'
@@ -46,7 +53,7 @@ export const PRIMER_ROUND_OVERLAY_MAX_LINES = 4
 export const PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON = [
   '¿Hook o pregunta del tema?',
   '',
-  `[Invitado/a] ${PRIMER_ROUND_ATTRIBUTION_PHRASE}`,
+  `[Invitado/a] ${primerRoundLiveAttribution()}`,
   PRIMER_ROUND_YOUTUBE_LINE + '  ← opcional',
   '',
   PRIMER_ROUND_HASHTAGS,
@@ -56,13 +63,15 @@ export function buildPrimerRoundCaption(opts: {
   hook: string
   guest: string
   includeYoutube?: boolean
+  airCopy?: PrimerRoundAirCopy | null
 }): string {
   const hook = opts.hook.trim()
   const guest = opts.guest.trim()
+  const attribution = primerRoundLiveAttribution(opts.airCopy ?? primerRoundNextAirCopy())
   const lines = [
     hook,
     '',
-    `${guest} ${PRIMER_ROUND_ATTRIBUTION_PHRASE}`.replace(/\s+/g, ' ').trim(),
+    `${guest} ${attribution}`.replace(/\s+/g, ' ').trim(),
   ]
   if (opts.includeYoutube) {
     lines.push(PRIMER_ROUND_YOUTUBE_LINE)
@@ -84,11 +93,16 @@ export function buildPrimerRoundCaptionPromptInstructions(ctx: {
   visualSummary?: string | null
   feedback?: string | null
   previousCaption?: string | null
+  styleRules?: string[] | null
+  airCopy?: PrimerRoundAirCopy | null
+  airNowMs?: number
 }): string {
   const hintGuest =
     (ctx.guestHint ?? '').trim() ||
     firstOverlayLine(ctx.burnedOverlay) ||
     '(deduce el nombre + rol del invitado del título, overlay, lo que se ve o el audio)'
+  const air = ctx.airCopy ?? primerRoundNextAirCopy(ctx.airNowMs)
+  const liveAttribution = primerRoundLiveAttribution(air)
 
   return `Eres el copywriter de @primerroundoficial (Magic 97.3 / Primer Round).
 Eric BLOQUEÓ este formato: no inventes otro estilo. Devuelve SOLO el caption final.
@@ -96,20 +110,23 @@ Eric BLOQUEÓ este formato: no inventes otro estilo. Devuelve SOLO el caption fi
 FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 1) Una sola línea: pregunta gancho o tema (puede empezar con ¿…?).
 2) Línea en blanco.
-3) Exactamente: "[Invitado con rol si aplica] hoy en Primer Round junto a Dennise Pérez y Rafael Lenín."
+3) Exactamente: "[Invitado o frase del GFX] ${liveAttribution}"
    - Hosts SIEMPRE como nombres: Dennise Pérez y Rafael Lenín.
    - NUNCA pongas @denniseyperez, @rafaellenin ni @primerroundoficial en el caption.
    - Las collabs de Instagram van SOLO en Metricool (fuera de este texto).
-4) Opcional: "Episodio completo en nuestro canal de YouTube: Magic Tv"
+   - Horario al aire: lunes a viernes 5:43am (Puerto Rico). HOY la línea 3 lleva: "${air.phrase}".
+4) En Reels gráficos / promo (GFX, no clip del programa): NO pongas la línea de YouTube.
 5) Línea en blanco.
 6) Exactamente estos hashtags (y solo estos): ${PRIMER_ROUND_HASHTAGS}
 
-EJEMPLO DE ORO:
-¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?
+EJEMPLO DE ORO (Reel gráfico, no clip):
+LA NOTICIA NO ESPERA
 
-Exfiscal Zulma Fúster hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.
+LA NOTICIA NO ESPERA ${liveAttribution}
 
 ${PRIMER_ROUND_HASHTAGS}
+
+${formatPrimerRoundStyleRulesBlock(ctx.styleRules ?? [])}
 
 CONTEXTO DEL VIDEO:
 - Título: ${ctx.title}
@@ -128,7 +145,9 @@ ${(ctx.previousCaption ?? '').trim() ? `CAPTION ANTERIOR (mejóralo, no lo copie
 REGLAS:
 - Español puertorriqueño correcto (tildes, ¿?).
 - No emojis salvo que el hook ya los traiga.
-- El hook y el invitado salen del overlay, de lo que se VE y del audio. No uses solo el nombre del archivo.
+- El hook sale de la FRASE PRINCIPAL del overlay (ej. LA NOTICIA NO ESPERA), no de una lista de todas las preguntas.
+- Este tipo de video es GFX/promo, no un clip del programa.
+- La línea 3 DEBE llevar el horario de aire de ahora: ${air.phrase} (si es domingo y se publica hoy → mañana a las 5:43am).
 - No inventes datos que no consten en el contexto.
 - Si hay FEEDBACK DE ERIC, aplícalo sin romper la plantilla.
 - Devuelve SOLO el caption, sin comillas ni explicación.`
@@ -149,11 +168,13 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
   if (!text) return issues
 
   const lower = text.toLowerCase()
-  if (!lower.includes('hoy en primer round junto a')) {
+  const hasAttribution =
+    /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en primer round junto a/.test(lower)
+  if (!hasAttribution) {
     issues.push({
       quote: text.slice(0, 80),
-      problem: 'falta la línea de atribución de Primer Round',
-      suggestion: `… ${PRIMER_ROUND_ATTRIBUTION_PHRASE}`,
+      problem: 'falta la línea de atribución de Primer Round (con el horario de aire)',
+      suggestion: `… ${primerRoundLiveAttribution()}`,
       surface: 'caption',
     })
   } else {

@@ -5,7 +5,6 @@ import {
   checkPrimerRoundCaptionStructure,
   checkPrimerRoundOverlayStructure,
   PRIMER_ROUND_HASHTAGS,
-  PRIMER_ROUND_ATTRIBUTION_PHRASE,
   PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON,
 } from './caption-template'
 import { captionSurfaceFromText, overlayFromBurnedCaptions } from './orthography'
@@ -16,12 +15,13 @@ describe('Primer Round locked caption template', () => {
     const caption = buildPrimerRoundCaption({
       hook: '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
       guest: 'Exfiscal Zulma Fúster',
+      airCopy: { when: 'hoy', phrase: 'hoy a las 5:43am' },
     })
     expect(caption).toBe(
       [
         '¿Qué impacto tendrá el caso de Elvia Cabrera en el caso de Anthonieska?',
         '',
-        `Exfiscal Zulma Fúster ${PRIMER_ROUND_ATTRIBUTION_PHRASE}`,
+        'Exfiscal Zulma Fúster hoy a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín.',
         '',
         PRIMER_ROUND_HASHTAGS,
       ].join('\n'),
@@ -68,6 +68,23 @@ describe('Primer Round locked caption template', () => {
     expect(p).toContain(PRIMER_ROUND_HASHTAGS)
     expect(p).toContain('Dennise Pérez y Rafael Lenín')
     expect(p).toMatch(/NUNCA pongas @denniseyperez/i)
+  })
+
+  it('Sunday forces mañana a las 5:43am on GFX Reels', () => {
+    const p = buildPrimerRoundCaptionPromptInstructions({
+      title: 'GFX',
+      airNowMs: Date.parse('2026-09-14T01:40:00Z'),
+    })
+    expect(p).toContain('mañana a las 5:43am')
+    expect(p).toContain('LA NOTICIA NO ESPERA')
+    expect(p).toContain('GFX/promo')
+    const caption = buildPrimerRoundCaption({
+      hook: 'LA NOTICIA NO ESPERA',
+      guest: 'LA NOTICIA NO ESPERA',
+      airCopy: { when: 'mañana', phrase: 'mañana a las 5:43am' },
+    })
+    expect(caption).toContain('mañana a las 5:43am en Primer Round junto a Dennise Pérez y Rafael Lenín')
+    expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
   })
 })
 
@@ -145,10 +162,13 @@ describe('buildIdeaCaptionPrompt primerRoundLockedTemplate', () => {
       primerRoundLockedTemplate: true,
       previousCaption: '¿Quién responde?\n\nLA NOTICIA NO ESPERA hoy en Primer Round junto a Dennise Pérez y Rafael Lenín.\n\n#magic973 #puertorico #primerround',
       feedback: 'El gancho debe ser LA NOTICIA NO ESPERA, no las tres preguntas',
+      styleRules: ['El gancho sale del overlay, no de las tres preguntas'],
     })
     expect(p).toContain('FEEDBACK DE ERIC')
     expect(p).toContain('El gancho debe ser LA NOTICIA NO ESPERA')
     expect(p).toContain('CAPTION ANTERIOR')
     expect(p).toContain('¿Quién responde?')
+    expect(p).toContain('ESTILO DE LOS REELS DE PRIMER ROUND')
+    expect(p).toContain('El gancho sale del overlay, no de las tres preguntas')
   })
 })

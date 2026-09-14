@@ -19,6 +19,8 @@ import { listenUrlForCaptionVideo } from '@/lib/integrations/caption-listen-url'
 import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { isPrimerRoundClientId } from '@/lib/primer-round/constants'
+import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
+import { applyPrimerRoundAirPhrase } from '@/lib/primer-round/air-time'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -195,6 +197,7 @@ export async function generateIdeaCaption(
   const hermanos = prepararHermanos(hermanosLlenos)
 
   const primerRoundLockedTemplate = isPrimerRoundClientId(clientId)
+  const styleRules = primerRoundLockedTemplate ? await loadPrimerRoundStyleRules(supabase) : []
 
   const sharedPrompt: IdeaCaptionPromptInput = {
     title: idea.title as string,
@@ -227,12 +230,15 @@ export async function generateIdeaCaption(
       captionNotes: client.caption_notes,
     },
     primerRoundLockedTemplate,
+    styleRules,
   }
 
   try {
     const caption = await generateCaptionText(buildIdeaCaptionPrompt(sharedPrompt))
     if (!caption?.trim()) return { error: 'La IA no devolvió caption' }
-    let stored = caption.trim()
+    let stored = primerRoundLockedTemplate
+      ? applyPrimerRoundAirPhrase(caption.trim())
+      : caption.trim()
 
     // Pieza 2, red de seguridad: si el caption choca obviamente con un
     // hermano del lote (mismo gancho, mismo CTA + hashtags solapados),
