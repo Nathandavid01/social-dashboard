@@ -194,6 +194,7 @@ export interface Task {
 }
 
 export type RecordingSessionStatus = 'scheduled' | 'completed' | 'cancelled'
+export type RecordingConfirmationStatus = 'unconfirmed' | 'confirmed'
 
 export interface RecordingSession {
   id: string
@@ -209,6 +210,15 @@ export interface RecordingSession {
   start_time: string | null
   end_time: string | null
   status: RecordingSessionStatus
+  /** Explicit videographer confirm timestamp. Migración 0083. */
+  videographer_confirmed_at?: string | null
+  /** Explicit client confirm timestamp. Migración 0083. */
+  client_confirmed_at?: string | null
+  /**
+   * Denormalized cache: Confirmada iff BOTH confirmed_at timestamps are set.
+   * Do not treat field-complete (client+videógrafo+hora) as Confirmada.
+   */
+  confirmation_status?: RecordingConfirmationStatus
   /** Quién selló “Llegué” en On Site. Migración 0069. */
   arrived_at?: string | null
   arrived_by?: string | null
