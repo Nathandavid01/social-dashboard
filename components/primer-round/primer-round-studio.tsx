@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import {
   Upload,
   Users,
@@ -30,6 +30,12 @@ import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
 import { primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
 import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
+import {
+  clearPrimerRoundLivePreview,
+  getPrimerRoundLivePreview,
+  livePreviewKey,
+  setPrimerRoundLivePreview,
+} from '@/lib/primer-round/live-preview'
 type PipelineStage =
   | 'idle'
   | 'creando'
@@ -116,8 +122,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [ideaId, setIdeaId] = useState<string | null>(null)
   const [videoId, setVideoId] = useState<string | null>(null)
   const [overrideOrtho, setOverrideOrtho] = useState(false)
-  const [fileLabel, setFileLabel] = useState<string | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [fileLabel, setFileLabel] = useState<string | null>(() => getPrimerRoundLivePreview()?.file.name ?? null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(() => getPrimerRoundLivePreview()?.url ?? null)
+  const [previewKey, setPreviewKey] = useState(() => livePreviewKey(getPrimerRoundLivePreview()))
   const [overlayText, setOverlayText] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
   const [styleRules, setStyleRules] = useState<string[]>(studio.styleRules ?? [])
@@ -125,6 +132,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
   function resetToBlank() {
     hasPickedFile.current = true
+    clearPrimerRoundLivePreview()
     setStage('idle')
     setPct(0)
     setMessage(null)
@@ -136,21 +144,16 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setFileLabel(null)
     setOverlayText(null)
     setFeedback('')
-    setPreviewUrl((prev) => {
-      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
-        URL.revokeObjectURL(prev)
-      }
-      return null
-    })
+    setPreviewUrl(null)
+    setPreviewKey('empty')
   }
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
-        URL.revokeObjectURL(previewUrl)
-      }
-    }
-  }, [previewUrl])
+  function showPickedFile(file: File) {
+    const live = setPrimerRoundLivePreview(file)
+    setPreviewUrl(live.url)
+    setPreviewKey(livePreviewKey(live))
+    setFileLabel(file.name)
+  }
 
   async function runPipeline(id: string, vid: string | null) {
     setStage('caption')
@@ -185,13 +188,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     }
 
     hasPickedFile.current = true
-    setPreviewUrl((prev) => {
-      if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
-        URL.revokeObjectURL(prev)
-      }
-      return URL.createObjectURL(file)
-    })
-    setFileLabel(file.name)
+    showPickedFile(file)
     setCaption(null)
     setGate(null)
     setOverlayText(null)
@@ -392,7 +389,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
         {previewUrl && (
           <video
-            key={previewUrl}
+            key={previewKey}
             data-testid="primer-round-video-preview"
             src={previewUrl}
             controls
