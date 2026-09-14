@@ -196,6 +196,47 @@ describe('generateIdeaCaption — sin video no hay caption', () => {
     expect(res.error).toMatch(/video/i)
     expect(h.updates).toHaveLength(0)
   })
+
+  it('con videoId clavado no usa un leftover de otra fila', async () => {
+    h.videos = [
+      {
+        id: '77f8ae28-2b1a-4ee2-80a8-6d4ff144cf36',
+        kind: 'edited',
+        status: 'uploaded',
+        drive_file_id: 'entregas/leftover-gfx.mov',
+        storage_provider: 'entregas-r2',
+      },
+      {
+        id: 'new-video',
+        kind: 'edited',
+        status: 'uploaded',
+        drive_file_id: 'entregas/new.mp4',
+        storage_provider: 'entregas-r2',
+      },
+    ]
+    const res = await generateIdeaCaption('i1', { videoId: 'new-video' })
+    expect(res.ok).toBe(true)
+    expect(listenUrlForCaptionVideo).toHaveBeenCalledWith(expect.objectContaining({ id: 'new-video' }))
+    expect(listenUrlForCaptionVideo).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: '77f8ae28-2b1a-4ee2-80a8-6d4ff144cf36' }),
+    )
+  })
+
+  it('se niega si el videoId no está en esta idea', async () => {
+    h.videos = [
+      {
+        id: 'new-video',
+        kind: 'edited',
+        status: 'uploaded',
+        drive_file_id: 'entregas/new.mp4',
+        storage_provider: 'entregas-r2',
+      },
+    ]
+    const res = await generateIdeaCaption('i1', { videoId: '77f8ae28-2b1a-4ee2-80a8-6d4ff144cf36' })
+    expect(res.error).toMatch(/no es el que acabas de subir/i)
+    expect(h.updates).toHaveLength(0)
+    expect(generateCaptionText).not.toHaveBeenCalled()
+  })
 })
 
 describe('generateIdeaCaption — el análisis visual reemplaza el hook', () => {

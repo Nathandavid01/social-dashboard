@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.91 — 2026-09-14
+
+**Primer Round: Detener la subida y no tocar el video viejo.**
+- Mientras sube (o la IA lee el archivo), **Detener** corta el PUT y deja la página vacía.
+- Caption, verificación y publicar usan solo el archivo de esta subida. El GFX que ya estaba no se trabaja.
+
 ## v4.90 — 2026-09-14
 
 **Primer Round: el reproductor muestra el archivo que acabas de elegir.**

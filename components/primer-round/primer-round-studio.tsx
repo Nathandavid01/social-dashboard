@@ -10,6 +10,7 @@ import {
   Send,
   Sparkles,
   ShieldCheck,
+  Square,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -49,20 +50,38 @@ type PipelineStage =
   | 'bloqueado'
   | 'error'
 
+function isAbortError(err: unknown): boolean {
+  return (
+    (err instanceof DOMException && err.name === 'AbortError') ||
+    (err instanceof Error && err.name === 'AbortError')
+  )
+}
+
 function putWithProgress(
   url: string,
   file: File,
   contentType: string,
   onProgress: (pct: number) => void,
+  signal?: AbortSignal,
 ): Promise<{ key: string }> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'))
+      return
+    }
     const xhr = new XMLHttpRequest()
+    const abortXhr = () => xhr.abort()
+    if (signal) signal.addEventListener('abort', abortXhr)
     xhr.open('PUT', url)
     xhr.setRequestHeader('Content-Type', contentType)
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
     }
     xhr.onload = () => {
+      if (signal?.aborted) {
+        reject(new DOMException('Aborted', 'AbortError'))
+        return
+      }
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const body = JSON.parse(xhr.responseText) as { key?: string }
@@ -79,6 +98,10 @@ function putWithProgress(
       reject(new Error(`La subida falló (${xhr.status})`))
     }
     xhr.onerror = () => {
+      if (signal?.aborted) {
+        reject(new DOMException('Aborted', 'AbortError'))
+        return
+      }
       void reportUploadFailure(
         `${file.name} (${file.size}b) → onerror, sin status (CORS, red o subida interrumpida)`,
       )
@@ -89,7 +112,12 @@ function putWithProgress(
         ),
       )
     }
+    xhr.onabort = () => reject(new DOMException('Aborted', 'AbortError'))
     xhr.ontimeout = () => {
+      if (signal?.aborted) {
+        reject(new DOMException('Aborted', 'AbortError'))
+        return
+      }
       void reportUploadFailure(`${file.name} (${file.size}b) → timeout`)
       reject(new Error('La subida tardó demasiado'))
     }
@@ -114,6 +142,8 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
 export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const hasPickedFile = useRef(false)
+  const cancelledRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
   const [stage, setStage] = useState<PipelineStage>('idle')
   const [pct, setPct] = useState(0)
   const [message, setMessage] = useState<string | null>(null)
@@ -132,6 +162,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
   function resetToBlank() {
     hasPickedFile.current = true
+    cancelledRef.current = true
     clearPrimerRoundLivePreview()
     setStage('idle')
     setPct(0)
@@ -155,13 +186,29 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setFileLabel(file.name)
   }
 
+  function stopUpload() {
+    cancelledRef.current = true
+    abortRef.current?.abort()
+    abortRef.current = null
+    resetToBlank()
+    setStage('idle')
+    setMessage(null)
+  }
+
   async function runPipeline(id: string, vid: string | null) {
+    if (cancelledRef.current) return
+    if (!vid) {
+      setStage('error')
+      setMessage('Falta el video de esta subida. No se usa otro archivo.')
+      return
+    }
     setStage('caption')
     setMessage('IA generando caption (plantilla @primerroundoficial)…')
     const res = await runPrimerRoundUploadPipeline({
       ideaId: id,
       videoId: vid,
     })
+    if (cancelledRef.current) return
     if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
     if (res.gate) {
       setGate(res.gate)
@@ -188,6 +235,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     }
 
     hasPickedFile.current = true
+    cancelledRef.current = false
+    abortRef.current?.abort()
+    abortRef.current = new AbortController()
     showPickedFile(file)
     setCaption(null)
     setGate(null)
@@ -206,6 +256,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           fileName: file.name,
           title: null,
         })
+        if (cancelledRef.current) return
         if (created.error || !created.ideaId) {
           setStage('error')
           setMessage(created.error ?? 'No se pudo crear la pieza')
@@ -219,7 +270,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           file,
           contentType,
           setPct,
+          abortRef.current?.signal,
         )
+        if (cancelledRef.current) return
 
         const reg = await registerEntregasVideo({
           ideaId: created.ideaId,
@@ -228,6 +281,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           sizeBytes: file.size,
           mimeType: contentType,
         })
+        if (cancelledRef.current) return
         if (reg.error || !reg.id) {
           setStage('error')
           setMessage(reg.error ?? 'No se pudo registrar el video')
@@ -238,6 +292,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setStage('analizando')
         setMessage('IA leyendo textos en pantalla y de qué va el video…')
         const processed = await processUploadedVideo(reg.id, file)
+        if (cancelledRef.current) return
         if (!processed.analyzed) {
           setStage('error')
           setMessage(
@@ -249,6 +304,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         setStage('verificando')
         await runPipeline(created.ideaId, reg.id)
       } catch (err) {
+        if (cancelledRef.current || isAbortError(err)) return
         setStage('error')
         setMessage(err instanceof Error ? err.message : 'Error inesperado')
       }
@@ -256,15 +312,17 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   }
 
   function applyFeedback() {
-    if (!ideaId || !feedback.trim()) return
+    if (!ideaId || !videoId || !feedback.trim()) return
     startTransition(async () => {
       setStage('caption')
       setMessage('IA aplicando tu feedback…')
       const res = await revisePrimerRoundCaption({
         ideaId,
+        videoId,
         feedback: feedback.trim(),
         previousCaption: caption,
       })
+      if (cancelledRef.current) return
       if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
       if (res.gate) {
         setGate(res.gate)
@@ -283,7 +341,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   }
 
   function acceptPiece() {
-    if (!ideaId) return
+    if (!ideaId || !videoId) return
     startTransition(async () => {
       setStage('agendando')
       const res = await acceptPrimerRoundPiece({
@@ -315,6 +373,12 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
   const waiting = stage === 'idle' || stage === 'listo' || stage === 'bloqueado' || stage === 'error' || stage === 'revision'
   const busy = pending || !waiting
+  const canStop =
+    stage === 'creando' ||
+    stage === 'subiendo' ||
+    stage === 'analizando' ||
+    stage === 'caption' ||
+    stage === 'verificando'
 
   return (
     <div className="space-y-5">
@@ -386,6 +450,19 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           Upload video
         </Button>
+
+        {canStop && (
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-full gap-2"
+            data-testid="primer-round-stop-cta"
+            onClick={stopUpload}
+          >
+            <Square className="h-3.5 w-3.5 fill-current" />
+            Detener
+          </Button>
+        )}
 
         {previewUrl && (
           <video

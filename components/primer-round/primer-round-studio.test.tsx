@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { PrimerRoundStudio } from './primer-round-studio'
 import { clearPrimerRoundLivePreview } from '@/lib/primer-round/live-preview'
-import { createPrimerRoundUploadIdea, runPrimerRoundUploadPipeline, acceptPrimerRoundPiece } from '@/lib/actions/primer-round'
+import { createPrimerRoundUploadIdea, runPrimerRoundUploadPipeline, acceptPrimerRoundPiece, revisePrimerRoundCaption } from '@/lib/actions/primer-round'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import type { PrimerRoundStudioPayload } from '@/lib/actions/primer-round'
@@ -173,9 +173,13 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     onload = () => {}
     onerror = () => {}
     ontimeout = () => {}
+    onabort = () => {}
     open = vi.fn()
     setRequestHeader = vi.fn()
     send = vi.fn(() => requests.push(this))
+    abort = vi.fn(() => {
+      this.onabort()
+    })
   }
   const oldPending = {
     ideaId: 'old-idea', videoId: 'old-video', fileName: 'old.mp4',
@@ -195,6 +199,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     vi.mocked(registerEntregasVideo).mockResolvedValue({ id: 'new-video' })
     vi.mocked(processUploadedVideo).mockResolvedValue({ analyzed: true })
     vi.mocked(runPrimerRoundUploadPipeline).mockResolvedValue({ pending: true, caption: 'Nuevo contenido' })
+    vi.mocked(revisePrimerRoundCaption).mockResolvedValue({ caption: 'Caption con feedback' })
   })
   afterEach(() => vi.unstubAllGlobals())
 
@@ -280,6 +285,45 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
     expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
     expect(createPrimerRoundUploadIdea).toHaveBeenCalledTimes(1)
+  })
+
+  it('Detener a mitad de la subida aborta el PUT y deja la página vacía', async () => {
+    render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
+    expect(screen.queryByTestId('primer-round-stop-cta')).not.toBeInTheDocument()
+    await pick()
+    expect(screen.getByTestId('primer-round-stop-cta')).toBeEnabled()
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:first-new-video')
+    await act(async () => fireEvent.click(screen.getByTestId('primer-round-stop-cta')))
+    expect(requests[0].abort).toHaveBeenCalled()
+    expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('primer-round-stop-cta')).not.toBeInTheDocument()
+    expect(registerEntregasVideo).not.toHaveBeenCalled()
+    expect(runPrimerRoundUploadPipeline).not.toHaveBeenCalled()
+    expect(acceptPrimerRoundPiece).not.toHaveBeenCalled()
+    await act(async () => requests[0].onload())
+    expect(registerEntregasVideo).not.toHaveBeenCalled()
+    expect(runPrimerRoundUploadPipeline).not.toHaveBeenCalled()
+    expect(screen.queryByText(/Old overlay|Old caption/i)).not.toBeInTheDocument()
+  })
+
+  it('feedback y accept clavan el video nuevo, nunca el leftover', async () => {
+    render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
+    await pick()
+    await act(async () => requests[0].onload())
+    await waitFor(() => expect(screen.getByTestId('primer-round-accept-cta')).toBeEnabled())
+    fireEvent.change(screen.getByTestId('primer-round-feedback'), { target: { value: 'Más corto' } })
+    await act(async () => fireEvent.click(screen.getByTestId('primer-round-feedback-cta')))
+    expect(revisePrimerRoundCaption).toHaveBeenCalledWith({
+      ideaId: 'new-idea',
+      videoId: 'new-video',
+      feedback: 'Más corto',
+      previousCaption: 'Nuevo contenido',
+    })
+    expect(revisePrimerRoundCaption).not.toHaveBeenCalledWith(
+      expect.objectContaining({ ideaId: 'old-idea', videoId: 'old-video' }),
+    )
   })
 
   it('leaves the landing empty when file selection is cancelled or invalid', () => {

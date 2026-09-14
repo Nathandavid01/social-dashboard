@@ -32,6 +32,7 @@ import {
 } from '@/lib/primer-round/studio'
 import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
 import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
+import { assertPrimerRoundPinnedVideo } from '@/lib/primer-round/pinned-video'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import type { VideoAnalysisFindings } from '@/lib/llm/video-analysis-core'
 
@@ -193,10 +194,35 @@ export async function getPrimerRoundStudio(): Promise<
   }
 }
 
+async function loadPinnedPrimerRoundVideo(
+  ideaId: string,
+  videoId?: string | null,
+): Promise<{ videoId?: string; error?: string }> {
+  const pinMissing = assertPrimerRoundPinnedVideo({ requestedVideoId: videoId })
+  if (pinMissing) return { error: pinMissing }
+
+  const supabase = await createClient()
+  const { data: video } = await supabase
+    .from('content_idea_videos')
+    .select('id')
+    .eq('id', videoId!.trim())
+    .eq('idea_id', ideaId)
+    .eq('kind', 'edited')
+    .not('status', 'in', '(archived,failed)')
+    .maybeSingle()
+
+  const pinErr = assertPrimerRoundPinnedVideo({
+    requestedVideoId: videoId,
+    ideaVideoId: (video?.id as string | undefined) ?? null,
+  })
+  if (pinErr) return { error: pinErr }
+  return { videoId: video!.id as string }
+}
+
 /** CREATE: bottom IG caption only (reuses generateIdeaCaption → caption_draft). */
 export async function generatePrimerRoundCaption(
   ideaId: string,
-  opts?: { feedback?: string | null; previousCaption?: string | null },
+  opts?: { feedback?: string | null; previousCaption?: string | null; videoId?: string | null },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
     await requirePrimerRoundAccess()
@@ -214,15 +240,20 @@ export async function generatePrimerRoundCaption(
     return { error: 'La idea no pertenece a Primer Round' }
   }
 
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, opts?.videoId)
+  if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
+
   return generateIdeaCaption(ideaId, {
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
+    videoId: pinned.videoId,
   })
 }
 
 /** VERIFY: overlay (from video analysis) + bottom caption via LLM. */
 export async function verifyPrimerRoundOrtho(
   ideaId: string,
+  videoId?: string | null,
 ): Promise<{ gate?: PrimerRoundOrthoGate; error?: string }> {
   try {
     await requirePrimerRoundAccess()
@@ -246,29 +277,20 @@ export async function verifyPrimerRoundOrtho(
   const captionText =
     ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim()
 
-  const { data: video } = await supabase
-    .from('content_idea_videos')
-    .select('id')
-    .eq('idea_id', ideaId)
-    .eq('kind', 'edited')
-    .not('status', 'in', '(archived,failed)')
-    .order('uploaded_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, videoId)
+  if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
 
   let overlayText = ''
   let analysisIssues: Array<{ quote?: string; problem?: string; suggestion?: string; t?: string }> = []
-  if (video) {
-    const { data: analysis } = await supabase
-      .from('content_idea_video_analysis')
-      .select('findings, status')
-      .eq('video_id', video.id)
-      .maybeSingle()
-    const findings = analysis?.findings as VideoAnalysisFindings | null
-    if (findings?.burned_captions) {
-      overlayText = findings.burned_captions.text ?? ''
-      analysisIssues = findings.burned_captions.issues ?? []
-    }
+  const { data: analysis } = await supabase
+    .from('content_idea_video_analysis')
+    .select('findings, status')
+    .eq('video_id', pinned.videoId)
+    .maybeSingle()
+  const findings = analysis?.findings as VideoAnalysisFindings | null
+  if (findings?.burned_captions) {
+    overlayText = findings.burned_captions.text ?? ''
+    analysisIssues = findings.burned_captions.issues ?? []
   }
 
   // Prefer analysis issues for overlay when present; still run dual LLM for caption.
@@ -304,6 +326,7 @@ export async function verifyPrimerRoundOrtho(
  */
 export async function schedulePrimerRoundReel(input: {
   ideaId: string
+  videoId?: string | null
   overrideOrtho?: boolean
   scheduleOverride?: string | null
 }): Promise<{ ok?: true; skipped?: string; error?: string; metricoolPostId?: number | null }> {
@@ -318,7 +341,10 @@ export async function schedulePrimerRoundReel(input: {
     return { error: 'Configura los handles de colaboración (PRIMER_ROUND_COLLAB_USERNAMES)' }
   }
 
-  const verified = await verifyPrimerRoundOrtho(input.ideaId)
+  const pinned = await loadPinnedPrimerRoundVideo(input.ideaId, input.videoId)
+  if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
+
+  const verified = await verifyPrimerRoundOrtho(input.ideaId, pinned.videoId)
   if (!verified.gate && verified.error) return { error: verified.error }
   if (!verified.gate) return { error: 'No se pudo verificar ortografía' }
 
@@ -356,6 +382,7 @@ export async function schedulePrimerRoundReel(input: {
   const result = await runIdeaPost(supabase, input.ideaId, userId, input.scheduleOverride ?? null, {
     manualScheduling: true,
     watchedOn: 'pipeline',
+    videoFileId: pinned.videoId,
   })
 
   revalidatePath('/primer-round')
@@ -444,7 +471,10 @@ export async function runPrimerRoundUploadPipeline(input: {
     return { error: 'La idea no pertenece a Primer Round' }
   }
 
-  const captionRes = await generatePrimerRoundCaption(ideaId)
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, input.videoId)
+  if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
+
+  const captionRes = await generatePrimerRoundCaption(ideaId, { videoId: pinned.videoId })
   if (captionRes.error) return { error: captionRes.error, caption: captionRes.caption }
 
   const { data: afterCaption } = await supabase
@@ -461,7 +491,7 @@ export async function runPrimerRoundUploadPipeline(input: {
     await supabase.from('content_ideas').update({ generated_caption: draft }).eq('id', ideaId)
   }
 
-  const verified = await verifyPrimerRoundOrtho(ideaId)
+  const verified = await verifyPrimerRoundOrtho(ideaId, pinned.videoId)
   return {
     ok: true,
     pending: true,
@@ -474,6 +504,7 @@ export async function runPrimerRoundUploadPipeline(input: {
 /** Revise the locked caption with Eric's feedback. Video stays pending. */
 export async function revisePrimerRoundCaption(input: {
   ideaId: string
+  videoId?: string | null
   feedback: string
   previousCaption?: string | null
 }): Promise<{ caption?: string; gate?: PrimerRoundOrthoGate; styleRules?: string[]; error?: string }> {
@@ -488,7 +519,11 @@ export async function revisePrimerRoundCaption(input: {
   if (!ideaId) return { error: 'Falta la idea' }
   if (!feedback) return { error: 'Escribe el feedback para la IA' }
 
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, input.videoId)
+  if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
+
   const captionRes = await generatePrimerRoundCaption(ideaId, {
+    videoId: pinned.videoId,
     feedback,
     previousCaption: input.previousCaption ?? null,
   })
@@ -517,7 +552,7 @@ export async function revisePrimerRoundCaption(input: {
   })
 
   const styleRules = await loadPrimerRoundStyleRules(supabase)
-  const verified = await verifyPrimerRoundOrtho(ideaId)
+  const verified = await verifyPrimerRoundOrtho(ideaId, pinned.videoId)
   return {
     caption: captionRes.caption,
     gate: verified.gate,
@@ -564,21 +599,11 @@ export async function acceptPrimerRoundPiece(input: {
     return { error: 'La idea no pertenece a Primer Round' }
   }
 
-  const { data: video } = await supabase
-    .from('content_idea_videos')
-    .select('id')
-    .eq('idea_id', ideaId)
-    .eq('kind', 'edited')
-    .eq('storage_provider', 'entregas-r2')
-    .not('status', 'in', '(archived,failed)')
-    .order('uploaded_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  const videoId = input.videoId?.trim() || (video?.id as string | undefined) || null
-  if (!videoId || !video || video.id !== videoId) {
-    return { error: 'El video de esta pieza ya no está disponible' }
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, input.videoId)
+  if (pinned.error || !pinned.videoId) {
+    return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
   }
+  const videoId = pinned.videoId
 
   const caption = normalizePrimerRoundCaption(
     ((idea.generated_caption as string | null) || (idea.caption_draft as string | null) || '').trim(),
@@ -622,10 +647,11 @@ export async function acceptPrimerRoundPiece(input: {
 
   const schedule = await schedulePrimerRoundReel({
     ideaId,
+    videoId,
     overrideOrtho: !!input.overrideOrtho,
     scheduleOverride: soon,
   })
-  const verified = await verifyPrimerRoundOrtho(ideaId)
+  const verified = await verifyPrimerRoundOrtho(ideaId, videoId)
   if (schedule.error) {
     return { error: schedule.error, caption, gate: verified.gate }
   }
