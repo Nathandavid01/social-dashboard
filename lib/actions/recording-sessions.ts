@@ -4,7 +4,8 @@ import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import type { RecordingSession } from '@/lib/supabase/types'
+import type { RecordingConfirmationStatus, RecordingSession } from '@/lib/supabase/types'
+import { resolveConfirmationStatus } from '@/lib/utils/recording-confirmation'
 
 async function notifyAssignment(userId: string, sessionId: string, title: string, date: string) {
   try {
@@ -92,6 +93,7 @@ export async function createRecordingSession(values: {
   location_address?: string | null
   start_time?: string | null
   end_time?: string | null
+  confirmation_status?: RecordingConfirmationStatus
 }) {
   try {
     await requireSessionWrite(values, 'create')
@@ -103,10 +105,20 @@ export async function createRecordingSession(values: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  const confirmation_status = resolveConfirmationStatus(
+    {
+      client_id: values.client_id,
+      videographer_id: values.videographer_id,
+      start_time: values.start_time,
+    },
+    values.confirmation_status,
+  )
+
   const sessionId = randomUUID()
   const { error } = await supabase.from('recording_sessions').insert({
     id: sessionId,
     ...values,
+    confirmation_status,
     created_by: user.id,
   })
   if (error) return { error: error.message }
@@ -132,6 +144,7 @@ export async function updateRecordingSession(id: string, values: Partial<{
   start_time: string | null
   end_time: string | null
   status: string
+  confirmation_status: RecordingConfirmationStatus
 }>) {
   try {
     await requireSessionWrite(values, 'update')
@@ -140,11 +153,23 @@ export async function updateRecordingSession(id: string, values: Partial<{
   }
 
   const supabase = await createClient()
-  const prior = values.videographer_id ? await supabase.from('recording_sessions')
-    .select('videographer_id,title,session_date').eq('id', id).single() : null
+  const needsPrior = Boolean(values.videographer_id) || values.confirmation_status === undefined
+  const prior = needsPrior ? await supabase.from('recording_sessions')
+    .select('videographer_id,title,session_date,client_id,start_time').eq('id', id).single() : null
   if (prior?.error) return { error: prior.error.message }
   if (values.videographer_id && !prior?.data) return { error: 'Sesión No Encontrada' }
-  const { error } = await supabase.from('recording_sessions').update(values).eq('id', id)
+
+  const confirmation_status = resolveConfirmationStatus(
+    {
+      client_id: values.client_id !== undefined ? values.client_id : prior?.data?.client_id,
+      videographer_id: values.videographer_id !== undefined ? values.videographer_id : prior?.data?.videographer_id,
+      start_time: values.start_time !== undefined ? values.start_time : prior?.data?.start_time,
+    },
+    values.confirmation_status,
+  )
+
+  const payload = { ...values, confirmation_status }
+  const { error } = await supabase.from('recording_sessions').update(payload).eq('id', id)
   if (error) return { error: error.message }
   const warning = values.videographer_id && values.videographer_id !== prior?.data?.videographer_id
     ? await notifyAssignment(values.videographer_id, id, values.title ?? prior?.data?.title ?? 'Grabación', values.session_date ?? prior?.data?.session_date ?? '') : undefined

@@ -5,7 +5,7 @@ import { RecordingMap } from './recording-map'
 import { RecordingPending } from './recording-pending'
 import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { useState, useMemo, useTransition, useEffect } from 'react'
-import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
+import type { Client, Profile, RecordingSession, ContentIdea, RecordingConfirmationStatus } from '@/lib/supabase/types'
 import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -72,6 +72,11 @@ import {
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { friendlyError } from '@/lib/utils/error-message'
+import {
+  isRecordingSessionComplete,
+  isRecordingSessionIncomplete,
+  resolveConfirmationStatus,
+} from '@/lib/utils/recording-confirmation'
 import { videographerConflictsInRange } from '@/lib/utils/videographer-conflicts'
 import { GOOGLE_CALENDAR_HOME_URL, sessionsToIcs } from '@/lib/utils/google-calendar'
 
@@ -149,6 +154,13 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   cancelled: { label: 'Cancelada', color: 'text-muted-foreground', bg: 'bg-muted/50 border-border' },
 }
 
+const confirmationConfig: Record<RecordingConfirmationStatus, { label: string; color: string; bg: string }> = {
+  confirmed: { label: 'Confirmada', color: 'text-emerald-600', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+  unconfirmed: { label: 'Sin confirmar', color: 'text-amber-600', bg: 'bg-amber-500/10 border-amber-500/20' },
+}
+
+type ConfirmationFilter = 'all' | 'confirmed' | 'unconfirmed' | 'incomplete'
+
 // ── Add/Edit Session Dialog ──────────────────────────────────────────────────
 
 interface SessionDialogProps {
@@ -206,7 +218,12 @@ export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, de
         warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
-        onSaved({ ...editing, ...values, client, videographer })
+        const confirmation_status = resolveConfirmationStatus({
+          client_id: values.client_id,
+          videographer_id: values.videographer_id ?? editing.videographer_id,
+          start_time: values.start_time,
+        })
+        onSaved({ ...editing, ...values, confirmation_status, client, videographer })
       } else {
         const result = await createRecordingSession(values)
         if (result.error) { toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' }); return }
@@ -214,9 +231,15 @@ export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, de
         warning = result.warning
         const client = clients.find((c) => c.id === values.client_id) ?? null
         const videographer = teamMembers.find((m) => m.id === values.videographer_id) ?? null
+        const confirmation_status = resolveConfirmationStatus({
+          client_id: values.client_id,
+          videographer_id: values.videographer_id,
+          start_time: values.start_time,
+        })
         onSaved({
           id: result.id!,
           status: 'scheduled',
+          confirmation_status,
           created_by: '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -336,6 +359,7 @@ function SessionCard({
   session,
   onEdit,
   onStatusChange,
+  onConfirmationChange,
   onDelete,
   onOpenIdeas,
   ideaCount,
@@ -344,12 +368,15 @@ function SessionCard({
   session: ExtendedSession
   onEdit: () => void
   onStatusChange: (status: string) => void
+  onConfirmationChange: (status: RecordingConfirmationStatus) => void
   onDelete: () => void
   onOpenIdeas: () => void
   ideaCount: number
   editorName: string
 }) {
   const sc = statusConfig[session.status] ?? statusConfig.scheduled
+  const confirmation = session.confirmation_status ?? 'unconfirmed'
+  const cc = confirmationConfig[confirmation]
 
   return (
     <div
@@ -370,6 +397,7 @@ function SessionCard({
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <p className="text-sm font-medium">{clientDisplayName(session.title)}</p>
           <Badge variant="outline" className={cn('text-[10px]', sc.bg, sc.color)}>{sc.label}</Badge>
+          <Badge variant="outline" className={cn('text-[10px]', cc.bg, cc.color)}>{cc.label}</Badge>
         </div>
         <p className="mb-2 text-xs font-medium text-violet-500">Editor · {editorName}</p>
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
@@ -451,6 +479,16 @@ function SessionCard({
             <DropdownMenuItem onClick={onOpenIdeas}>
               <BookOpen className="mr-2 h-4 w-4" /> Ideas / Checklist
             </DropdownMenuItem>
+            {confirmation !== 'confirmed' && (
+              <DropdownMenuItem onClick={() => onConfirmationChange('confirmed')}>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> Confirmar
+              </DropdownMenuItem>
+            )}
+            {confirmation === 'confirmed' && (
+              <DropdownMenuItem onClick={() => onConfirmationChange('unconfirmed')}>
+                <X className="mr-2 h-4 w-4 text-amber-500" /> Unconfirmar
+              </DropdownMenuItem>
+            )}
             {session.status !== 'completed' && (
               <DropdownMenuItem onClick={() => onStatusChange('completed')}>
                 <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> Marcar Completada
@@ -491,6 +529,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const currentUserId = useCurrentUserId()
   const [filterVideographer, setFilterVideographer] = useState(initialVideographer ?? (canAssign ? 'all' : currentUserId ?? 'all'))
   const [filterClient, setFilterClient] = useState('all')
+  const [filterConfirmation, setFilterConfirmation] = useState<ConfirmationFilter>('all')
   const [isPending, startTransition] = useTransition()
   const [showAdd, setShowAdd] = useState(false)
   const [addDate, setAddDate] = useState<string | undefined>()
@@ -517,6 +556,13 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     let result = sessions
     if (filterVideographer !== 'all') result = result.filter((s) => s.videographer_id === filterVideographer)
     if (filterClient !== 'all') result = result.filter((s) => s.client_id === filterClient)
+    if (filterConfirmation === 'confirmed') {
+      result = result.filter((s) => (s.confirmation_status ?? 'unconfirmed') === 'confirmed')
+    } else if (filterConfirmation === 'unconfirmed') {
+      result = result.filter((s) => (s.confirmation_status ?? 'unconfirmed') === 'unconfirmed')
+    } else if (filterConfirmation === 'incomplete') {
+      result = result.filter((s) => isRecordingSessionIncomplete(s))
+    }
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter((s) =>
@@ -527,7 +573,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
       )
     }
     return result
-  }, [sessions, filterVideographer, filterClient, search])
+  }, [sessions, filterVideographer, filterClient, filterConfirmation, search])
 
   function editorFor(session: ExtendedSession) {
     if (!session.client_id) return 'Vincula El Cliente'
@@ -584,6 +630,30 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     })
   }
 
+  function handleConfirmationChange(id: string, next: RecordingConfirmationStatus) {
+    const session = sessions.find((s) => s.id === id)
+    if (!session) return
+    if (next === 'confirmed' && !isRecordingSessionComplete(session)) {
+      toast({
+        title: 'Faltan datos',
+        description: 'Para confirmar hace falta cliente, videógrafo y hora de inicio.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setSessions((prev) => prev.map((s) => s.id === id ? { ...s, confirmation_status: next } : s))
+    startTransition(async () => {
+      const result = await updateRecordingSession(id, { confirmation_status: next })
+      if (result.error) {
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+        setSessions((prev) => prev.map((s) => s.id === id ? { ...s, confirmation_status: session.confirmation_status ?? 'unconfirmed' } : s))
+        return
+      }
+      toast({ title: next === 'confirmed' ? 'Sesión confirmada' : 'Sesión sin confirmar' })
+    })
+  }
+
+
   function handleAvailabilityPick(sessionId: string, videographerId: string) {
     const nextId = videographerId === 'none' ? null : videographerId
     const videographer = nextId ? teamMembers.find((m) => m.id === nextId) ?? null : null
@@ -613,7 +683,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     URL.revokeObjectURL(url)
   }
 
-  const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all'
+  const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all' || filterConfirmation !== 'all'
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card p-4 text-foreground sm:p-6">
@@ -712,10 +782,35 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </SelectContent>
         </Select>
         {hasFilters && (
-          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setSearch(''); setFilterVideographer('all'); setFilterClient('all') }}>
+          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setSearch(''); setFilterVideographer('all'); setFilterClient('all'); setFilterConfirmation('all') }}>
             <X className="h-3.5 w-3.5 mr-1" /> Limpiar
           </Button>
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5" aria-label="Filtro de confirmación">
+        {([
+          { key: 'all' as const, label: 'Todas', count: sessions.length, dot: '' },
+          { key: 'confirmed' as const, label: 'Confirmadas', count: sessions.filter((s) => (s.confirmation_status ?? 'unconfirmed') === 'confirmed').length, dot: 'bg-emerald-500' },
+          { key: 'unconfirmed' as const, label: 'Sin confirmar', count: sessions.filter((s) => (s.confirmation_status ?? 'unconfirmed') === 'unconfirmed').length, dot: 'bg-amber-500' },
+          { key: 'incomplete' as const, label: 'Incompletas', count: sessions.filter((s) => isRecordingSessionIncomplete(s)).length, dot: 'bg-rose-500' },
+        ]).map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setFilterConfirmation(f.key)}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
+              filterConfirmation === f.key
+                ? 'border-border bg-muted text-foreground'
+                : 'border-transparent text-muted-foreground hover:bg-muted/60',
+            )}
+          >
+            {f.dot && <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden />}
+            {f.label}
+            <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+          </button>
+        ))}
       </div>
 
       {conflicts.length > 0 && (
@@ -866,6 +961,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                           session={session}
                           onEdit={() => { setEditing(session); setShowAdd(true) }}
                           onStatusChange={(status) => handleStatusChange(session.id, status)}
+                          onConfirmationChange={(status) => handleConfirmationChange(session.id, status)}
                           onDelete={() => handleDelete(session.id)}
                           onOpenIdeas={() => setIdeasSession(session)}
                           ideaCount={sessionIdeaCount}

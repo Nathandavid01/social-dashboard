@@ -16,7 +16,7 @@ let userId: string | null = 'admin-1'
 
 function makeSupabase() {
   const builder: Record<string, unknown> = {}
-  builder.single = vi.fn(async () => ({ data: { id: 's1', videographer_id: previousVideographer, title: 'Grabación', session_date: '2026-09-09' }, error: null }))
+  builder.single = vi.fn(async () => ({ data: { id: 's1', videographer_id: previousVideographer, title: 'Grabación', session_date: '2026-09-09', client_id: 'c1', start_time: null }, error: null }))
   builder.select = vi.fn(() => builder)
   builder.eq = vi.fn(() => builder)
   builder.order = vi.fn(() => builder)
@@ -103,7 +103,7 @@ describe('updateRecordingSession — gates', () => {
     expect(res).toMatchObject({ success: true })
     expect(requirePermission).toHaveBeenCalledWith('recording.create')
     expect(requirePermission).not.toHaveBeenCalledWith('recording.brief')
-    expect(updatePayload).toEqual({ status: 'completed' })
+    expect(updatePayload).toEqual({ status: 'completed', confirmation_status: 'unconfirmed' })
   })
 
   it('sin recording.create no actualiza', async () => {
@@ -158,4 +158,48 @@ it('does not notify if the assignment fails to save', async () => {
  const result=await updateRecordingSession('s1',{videographer_id:'v2'})
  expect(result.error).toBe('write failed')
  expect(notification).toBeNull()
+})
+
+describe('create/update — confirmation_status', () => {
+  it('auto-confirma al crear con cliente, videógrafo y hora', async () => {
+    const res = await createRecordingSession({
+      ...baseCreate,
+      videographer_id: 'v1',
+      start_time: '10:00',
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(insertPayload).toEqual(expect.objectContaining({ confirmation_status: 'confirmed' }))
+  })
+
+  it('queda sin confirmar si falta la hora al crear', async () => {
+    const res = await createRecordingSession({
+      ...baseCreate,
+      videographer_id: 'v1',
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(insertPayload).toEqual(expect.objectContaining({ confirmation_status: 'unconfirmed' }))
+  })
+
+  it('Confirmar explícito escribe confirmed', async () => {
+    const res = await updateRecordingSession('s1', { confirmation_status: 'confirmed' })
+    expect(res).toMatchObject({ success: true })
+    expect(updatePayload).toEqual(expect.objectContaining({ confirmation_status: 'confirmed' }))
+  })
+
+  it('Unconfirmar explícito escribe unconfirmed', async () => {
+    const res = await updateRecordingSession('s1', { confirmation_status: 'unconfirmed' })
+    expect(res).toMatchObject({ success: true })
+    expect(updatePayload).toEqual(expect.objectContaining({ confirmation_status: 'unconfirmed' }))
+  })
+
+  it('al completar la hora con cliente y videógrafo, auto-confirma', async () => {
+    previousVideographer = 'v1'
+    supabase = makeSupabase()
+    const res = await updateRecordingSession('s1', { start_time: '09:30', videographer_id: 'v1' })
+    expect(res).toMatchObject({ success: true })
+    expect(updatePayload).toEqual(expect.objectContaining({
+      start_time: '09:30',
+      confirmation_status: 'confirmed',
+    }))
+  })
 })

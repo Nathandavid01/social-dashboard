@@ -194,6 +194,7 @@ export interface Task {
 }
 
 export type RecordingSessionStatus = 'scheduled' | 'completed' | 'cancelled'
+export type RecordingConfirmationStatus = 'unconfirmed' | 'confirmed'
 
 export interface RecordingSession {
   id: string
@@ -209,6 +210,8 @@ export interface RecordingSession {
   start_time: string | null
   end_time: string | null
   status: RecordingSessionStatus
+  /** Confirmada cuando hay cliente + videógrafo + hora, o vía Confirmar. Migración 0082. */
+  confirmation_status: RecordingConfirmationStatus
   /** Quién selló “Llegué” en On Site. Migración 0069. */
   arrived_at?: string | null
   arrived_by?: string | null
