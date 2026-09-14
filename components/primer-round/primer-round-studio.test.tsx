@@ -5,6 +5,7 @@ import { clearPrimerRoundLivePreview } from '@/lib/primer-round/live-preview'
 import { createPrimerRoundUploadIdea, runPrimerRoundUploadPipeline, acceptPrimerRoundPiece, revisePrimerRoundCaption } from '@/lib/actions/primer-round'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
+import { uploadEntregasFileFast } from '@/lib/utils/entregas-fast-upload'
 import type { PrimerRoundStudioPayload } from '@/lib/actions/primer-round'
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
@@ -27,9 +28,12 @@ vi.mock('@/lib/actions/entregas-r2', () => ({
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn(async () => ({ analyzed: true })),
 }))
-vi.mock('@/lib/actions/pipeline-submit', () => ({
-  reportUploadFailure: vi.fn(),
-}))
+vi.mock('@/lib/utils/entregas-fast-upload', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/utils/entregas-fast-upload')>(
+    '@/lib/utils/entregas-fast-upload',
+  )
+  return { ...actual, uploadEntregasFileFast: vi.fn() }
+})
 
 const studio: PrimerRoundStudioPayload = {
   client: {
@@ -72,7 +76,7 @@ describe('PrimerRoundStudio', () => {
     expect(screen.getByText('@rafaellenin')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-panel')).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-cta')).toHaveTextContent(/Upload video/i)
-    expect(screen.getByText(/mp4 o mov\. La IA lee el video/i)).toBeInTheDocument()
+    expect(screen.getByText(/mp4 o mov, del tamaño que sea/i)).toBeInTheDocument()
     expect(screen.getByText(/Al aire lun–vie 5:43 AM/i)).toBeInTheDocument()
     expect(screen.getByText(/Si publicas ahora:/i)).toBeInTheDocument()
     expect(screen.getByTestId('primer-round-upload-input')).toHaveAttribute(
@@ -163,24 +167,13 @@ describe('PrimerRoundStudio', () => {
   })
 })
 
-// Exercise the actual upload handler with controlled network/server boundaries.
+// Exercise the actual upload handler with a deferred Entregas PUT (no Vercel proxy).
 describe('PrimerRoundStudio upload lifecycle', () => {
-  let requests: UploadRequest[]
-  class UploadRequest {
-    upload = { onprogress: null as null | ((event: { lengthComputable: boolean; loaded: number; total: number }) => void) }
-    status = 200
-    responseText = '{"key":"new-key"}'
-    onload = () => {}
-    onerror = () => {}
-    ontimeout = () => {}
-    onabort = () => {}
-    open = vi.fn()
-    setRequestHeader = vi.fn()
-    send = vi.fn(() => requests.push(this))
-    abort = vi.fn(() => {
-      this.onabort()
-    })
+  type UploadSlot = {
+    resolve: (value: { key: string }) => void
+    reject: (err: unknown) => void
   }
+  let slots: UploadSlot[]
   const oldPending = {
     ideaId: 'old-idea', videoId: 'old-video', fileName: 'old.mp4',
     previewUrl: 'https://r2.example/old.mp4', caption: 'Old caption',
@@ -189,8 +182,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
   beforeEach(() => {
     clearPrimerRoundLivePreview()
     vi.clearAllMocks()
-    requests = []
-    vi.stubGlobal('XMLHttpRequest', UploadRequest)
+    slots = []
     URL.createObjectURL = vi.fn()
       .mockReturnValueOnce('blob:first-new-video')
       .mockReturnValueOnce('blob:second-new-video')
@@ -200,14 +192,27 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     vi.mocked(processUploadedVideo).mockResolvedValue({ analyzed: true })
     vi.mocked(runPrimerRoundUploadPipeline).mockResolvedValue({ pending: true, caption: 'Nuevo contenido' })
     vi.mocked(revisePrimerRoundCaption).mockResolvedValue({ caption: 'Caption con feedback' })
+    vi.mocked(uploadEntregasFileFast).mockImplementation(async (opts) => {
+      opts.onProgress?.(10)
+      return new Promise<{ key: string }>((resolve, reject) => {
+        const slot: UploadSlot = { resolve, reject }
+        slots.push(slot)
+        opts.signal?.addEventListener('abort', () => {
+          reject(new DOMException('Aborted', 'AbortError'))
+        })
+      })
+    })
   })
-  afterEach(() => vi.unstubAllGlobals())
 
   async function pick(name = 'new.mp4') {
     const file = new File(['new-video-content'], name, { type: name.endsWith('.mov') ? 'video/quicktime' : 'video/mp4' })
     fireEvent.change(screen.getByTestId('primer-round-upload-input'), { target: { files: [file] } })
-    await waitFor(() => expect(requests.length).toBeGreaterThan(0))
+    await waitFor(() => expect(uploadEntregasFileFast).toHaveBeenCalled())
     return file
+  }
+
+  async function finishUpload(key = 'new-key') {
+    await act(async () => slots[slots.length - 1]?.resolve({ key }))
   }
 
   it.each(['new.mp4', 'new.mov'])('completes %s and retains the new preview through stale refreshes', async (name) => {
@@ -219,10 +224,16 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(screen.getByTestId('primer-round-upload-cta')).toBeDisabled()
     expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
     expect(screen.queryByText('Old overlay')).not.toBeInTheDocument()
-    expect(requests[0].send).toHaveBeenCalledWith(file)
-    act(() => requests[0].upload.onprogress?.({ lengthComputable: true, loaded: 7, total: 10 }))
-    expect(screen.getByTestId('primer-round-pipeline-status').querySelector('[style]')).toHaveStyle({ width: '70%' })
-    await act(async () => requests[0].onload())
+    expect(uploadEntregasFileFast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ideaId: 'new-idea',
+        file,
+        contentType: name.endsWith('.mov') ? 'video/quicktime' : 'video/mp4',
+      }),
+    )
+    expect(vi.mocked(uploadEntregasFileFast).mock.calls[0]?.[0].file).toBe(file)
+    expect(screen.getByTestId('primer-round-pipeline-status').querySelector('[style]')).toHaveStyle({ width: '10%' })
+    await finishUpload()
     await waitFor(() => expect(screen.getByTestId('primer-round-accept-cta')).toBeEnabled())
     expect(registerEntregasVideo).toHaveBeenCalledWith(expect.objectContaining({ ideaId: 'new-idea', key: 'new-key', name }))
     expect(processUploadedVideo).toHaveBeenCalledWith('new-video', file)
@@ -238,7 +249,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(acceptPrimerRoundPiece).toHaveBeenCalledWith({ ideaId: 'new-idea', videoId: 'new-video', overrideOrtho: false })
   })
 
-  it.each(['http', 'network', 'timeout', 'missing-key', 'register', 'analysis', 'caption'] as const)(
+  it.each(['http', 'network', 'timeout', '413', 'register', 'analysis', 'caption'] as const)(
     'keeps the new video and blocks acceptance after %s failure', async (failure) => {
       if (failure === 'register') vi.mocked(registerEntregasVideo).mockResolvedValue({ error: 'Register failed' })
       if (failure === 'analysis') vi.mocked(processUploadedVideo).mockResolvedValue({ analyzed: false })
@@ -246,11 +257,11 @@ describe('PrimerRoundStudio upload lifecycle', () => {
       render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
       await pick()
       await act(async () => {
-        if (failure === 'http') requests[0].status = 500
-        if (failure === 'missing-key') requests[0].responseText = '{}'
-        if (failure === 'network') requests[0].onerror()
-        else if (failure === 'timeout') requests[0].ontimeout()
-        else requests[0].onload()
+        if (failure === 'http') slots[0].reject(new Error('HTTP 500'))
+        else if (failure === 'network') slots[0].reject(new Error('Error de red durante la subida'))
+        else if (failure === 'timeout') slots[0].reject(new Error('La subida tardó demasiado'))
+        else if (failure === '413') slots[0].reject(new Error('El video no cabe por el servidor. Se sube directo a Entregas, sin tope de 4.5 MB.'))
+        else slots[0].resolve({ key: 'new-key' })
       })
       await waitFor(() => expect(screen.getByTestId('primer-round-pipeline-status')).toHaveTextContent('Error'))
       expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:first-new-video')
@@ -263,14 +274,14 @@ describe('PrimerRoundStudio upload lifecycle', () => {
   it('allows selecting the same filename again and releases only replaced object URLs', async () => {
     const { unmount } = render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
     await pick()
-    await act(async () => requests[0].onload())
+    await finishUpload()
     await waitFor(() => expect(screen.getByTestId('primer-round-upload-cta')).toBeEnabled())
     await pick()
     expect(screen.getByTestId('primer-round-upload-input')).toHaveValue('')
     expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:second-new-video')
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:first-new-video')
     expect(URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:second-new-video')
-    await act(async () => requests[1].onload())
+    await finishUpload('second-key')
     unmount()
     expect(URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:second-new-video')
   })
@@ -278,7 +289,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
   it('click Upload wipes the previous caption and video before the next file', async () => {
     render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
     await pick()
-    await act(async () => requests[0].onload())
+    await finishUpload()
     await waitFor(() => expect(screen.getByTestId('primer-round-caption-panel')).toHaveTextContent('Nuevo contenido'))
     fireEvent.click(screen.getByTestId('primer-round-upload-cta'))
     expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
@@ -293,8 +304,9 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     await pick()
     expect(screen.getByTestId('primer-round-stop-cta')).toBeEnabled()
     expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:first-new-video')
+    const signal = vi.mocked(uploadEntregasFileFast).mock.calls[0]?.[0].signal
     await act(async () => fireEvent.click(screen.getByTestId('primer-round-stop-cta')))
-    expect(requests[0].abort).toHaveBeenCalled()
+    expect(signal?.aborted).toBe(true)
     expect(screen.queryByTestId('primer-round-video-preview')).not.toBeInTheDocument()
     expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
     expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
@@ -302,7 +314,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(registerEntregasVideo).not.toHaveBeenCalled()
     expect(runPrimerRoundUploadPipeline).not.toHaveBeenCalled()
     expect(acceptPrimerRoundPiece).not.toHaveBeenCalled()
-    await act(async () => requests[0].onload())
+    await act(async () => slots[0]?.resolve({ key: 'late-key' }))
     expect(registerEntregasVideo).not.toHaveBeenCalled()
     expect(runPrimerRoundUploadPipeline).not.toHaveBeenCalled()
     expect(screen.queryByText(/Old overlay|Old caption/i)).not.toBeInTheDocument()
@@ -311,7 +323,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
   it('feedback y accept clavan el video nuevo, nunca el leftover', async () => {
     render(<PrimerRoundStudio studio={{ ...studio, pending: oldPending }} />)
     await pick()
-    await act(async () => requests[0].onload())
+    await finishUpload()
     await waitFor(() => expect(screen.getByTestId('primer-round-accept-cta')).toBeEnabled())
     fireEvent.change(screen.getByTestId('primer-round-feedback'), { target: { value: 'Más corto' } })
     await act(async () => fireEvent.click(screen.getByTestId('primer-round-feedback-cta')))

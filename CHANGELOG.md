@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.92 — 2026-09-14
+
+**Primer Round: sube el video entero, rápido, sin el error 413.**
+- El archivo va directo a Entregas (si es grande, en partes en paralelo). Ya no pasa por Vercel, que cortaba a ~4.5 MB.
+- **Detener** sigue cortando la subida.
+
 ## v4.91 — 2026-09-14
 
 **Primer Round: Detener la subida y no tocar el video viejo.**
