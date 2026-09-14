@@ -110,6 +110,7 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
 export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload }) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
+  const hasPickedFile = useRef(false)
   const [stage, setStage] = useState<PipelineStage>('idle')
   const [pct, setPct] = useState(0)
   const [message, setMessage] = useState<string | null>(null)
@@ -127,7 +128,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
   useEffect(() => {
     const piece = studio.pending
-    if (!piece || ideaId) return
+    if (!piece || ideaId || hasPickedFile.current) return
     setIdeaId(piece.ideaId)
     setVideoId(piece.videoId)
     setFileLabel(piece.fileName)
@@ -184,10 +185,9 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       return
     }
 
-    setPreviewUrl((prev) => {
-      if (prev && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
-      return URL.createObjectURL(file)
-    })
+    // A stale server pending piece must never replace this local upload.
+    hasPickedFile.current = true
+    setPreviewUrl(URL.createObjectURL(file))
     setFileLabel(file.name)
     setCaption(null)
     setGate(null)
@@ -387,6 +387,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
 
         {previewUrl && (
           <video
+            key={previewUrl}
             data-testid="primer-round-video-preview"
             src={previewUrl}
             controls

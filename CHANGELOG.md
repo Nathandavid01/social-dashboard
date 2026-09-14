@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.88 — 2026-09-14
+
+**Primer Round muestra el video nuevo al subirlo.**
+- Al elegir otro archivo, el reproductor y el nombre cambian inmediatamente.
+- El video y el caption anteriores ya no reaparecen durante la subida o si esta falla.
+
+![Vista previa del cambio de video](/changelog/v4.88-primer-round-upload-preview.png)
+
 ## v4.87 — 2026-09-13
 
 **Primer Round: taguea a Rafael y Dennise.**

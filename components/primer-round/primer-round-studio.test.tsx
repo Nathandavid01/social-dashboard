@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { PrimerRoundStudio } from './primer-round-studio'
+import { createPrimerRoundUploadIdea } from '@/lib/actions/primer-round'
 import type { PrimerRoundStudioPayload } from '@/lib/actions/primer-round'
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
@@ -93,6 +94,36 @@ describe('PrimerRoundStudio', () => {
     expect(preview).toHaveAttribute('src', 'blob:mov-preview')
     unmount()
     expect(revoke).toHaveBeenCalledWith('blob:mov-preview')
+  })
+
+  it('keeps the newly selected video when an older pending piece exists', async () => {
+    let finishCreation!: (result: { error: string }) => void
+    vi.mocked(createPrimerRoundUploadIdea).mockReturnValueOnce(new Promise((resolve) => {
+      finishCreation = resolve
+    }))
+    URL.createObjectURL = vi.fn(() => 'blob:new-video')
+    URL.revokeObjectURL = vi.fn()
+    const pendingStudio = {
+      ...studio,
+      pending: {
+        ideaId: 'old-idea', videoId: 'old-video', fileName: 'old.mp4',
+        previewUrl: 'https://r2.example/old.mp4', caption: 'Old caption',
+        overlayText: 'Old overlay', visualSummary: null,
+      },
+    }
+    const { rerender } = render(<PrimerRoundStudio studio={pendingStudio} />)
+    fireEvent.change(screen.getByTestId('primer-round-upload-input'), {
+      target: { files: [new File(['new'], 'new.mp4', { type: 'video/mp4' })] },
+    })
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:new-video')
+    expect(screen.getByTestId('primer-round-pipeline-status')).toHaveTextContent('new.mp4')
+    expect(screen.queryByTestId('primer-round-caption-panel')).not.toBeInTheDocument()
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:new-video')
+    rerender(<PrimerRoundStudio studio={{ ...pendingStudio, pending: { ...pendingStudio.pending } }} />)
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:new-video')
+    await act(async () => finishCreation({ error: 'Upload failed' }))
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:new-video')
+    expect(screen.queryByTestId('primer-round-accept-cta')).not.toBeInTheDocument()
   })
 
   it('tras un refresh muestra el video pendiente hasta aceptar o dar feedback', () => {
