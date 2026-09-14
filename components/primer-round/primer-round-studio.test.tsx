@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { PrimerRoundStudio } from './primer-round-studio'
+import { clearPrimerRoundLivePreview } from '@/lib/primer-round/live-preview'
 import { createPrimerRoundUploadIdea, runPrimerRoundUploadPipeline, acceptPrimerRoundPiece } from '@/lib/actions/primer-round'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
@@ -60,6 +61,10 @@ const studio: PrimerRoundStudioPayload = {
 }
 
 describe('PrimerRoundStudio', () => {
+  beforeEach(() => {
+    clearPrimerRoundLivePreview()
+  })
+
   it('shows minimal Spanish chrome with Upload video CTA and collabs (no lane cards)', () => {
     render(<PrimerRoundStudio studio={studio} />)
     expect(screen.getByRole('heading', { name: /Primer Round/i })).toBeInTheDocument()
@@ -95,7 +100,10 @@ describe('PrimerRoundStudio', () => {
     expect(preview.tagName).toBe('VIDEO')
     expect(preview).toHaveAttribute('src', 'blob:mov-preview')
     unmount()
-    expect(revoke).toHaveBeenCalledWith('blob:mov-preview')
+    const { unmount: unmountAgain } = render(<PrimerRoundStudio studio={studio} />)
+    expect(screen.getByTestId('primer-round-video-preview')).toHaveAttribute('src', 'blob:mov-preview')
+    unmountAgain()
+    expect(revoke).not.toHaveBeenCalledWith('blob:mov-preview')
   })
 
   it('keeps the newly selected video when an older pending piece exists', async () => {
@@ -175,6 +183,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     overlayText: 'Old overlay', visualSummary: null,
   }
   beforeEach(() => {
+    clearPrimerRoundLivePreview()
     vi.clearAllMocks()
     requests = []
     vi.stubGlobal('XMLHttpRequest', UploadRequest)
@@ -258,7 +267,7 @@ describe('PrimerRoundStudio upload lifecycle', () => {
     expect(URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:second-new-video')
     await act(async () => requests[1].onload())
     unmount()
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:second-new-video')
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:second-new-video')
   })
 
   it('click Upload wipes the previous caption and video before the next file', async () => {
