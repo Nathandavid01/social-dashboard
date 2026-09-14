@@ -11,6 +11,7 @@ import {
   prepareIdeasForEditorBank,
   listBankAdmins,
 } from './editor-video-bank'
+import { buildVideoBank } from './video-bank'
 
 function raw(over: Partial<ContentIdeaVideo> = {}): ContentIdeaVideo {
   return {
@@ -148,7 +149,7 @@ describe('canDownloadOrPreviewRaw', () => {
     })).toBe(false)
   })
 
-  it('el editor no baja un crudo fuera de su WIP de 2', () => {
+  it('el editor puede consultar sus crudos aunque estén fuera del WIP', () => {
     expect(canDownloadOrPreviewRaw({
       role: 'editor',
       userId: 'ed-maria',
@@ -156,7 +157,7 @@ describe('canDownloadOrPreviewRaw', () => {
       clientAssigneeId: null,
       uploadedBy: 'vid-1',
       inEditorWip: false,
-    })).toBe(false)
+    })).toBe(true)
     expect(canDownloadOrPreviewRaw({
       role: 'editor',
       userId: 'ed-maria',
@@ -433,12 +434,12 @@ describe('editor WIP (máximo 2)', () => {
     expect(Array.from(editorWipIdeaIds(after, 'ed-maria'))).toEqual(['b', 'c'])
   })
 
-  it('prepareIdeasForEditorBank quita los ids de archivo de lo que está en espera', () => {
+  it('prepareIdeasForEditorBank conserva los archivos en espera sin ampliar el WIP', () => {
     const prepared = prepareIdeasForEditorBank(queued, { role: 'editor', userId: 'ed-maria' })
     const byId = Object.fromEntries(prepared.map((i) => [i.id, i]))
     expect(byId.a.videos).toHaveLength(1)
     expect(byId.b.videos).toHaveLength(1)
-    expect(byId.c.videos).toEqual([])
+    expect(byId.c.videos).toHaveLength(1)
     expect(byId.c.bankQueue).toBe('waiting')
   })
 
@@ -450,12 +451,12 @@ describe('editor WIP (máximo 2)', () => {
     expect(rows[0].clients[0].clips.every((c) => c.queue === 'active')).toBe(true)
   })
 
-  it('en el banco del editor, los extras salen en espera sin archivos', () => {
+  it('en el banco del editor, los extras siguen en espera y conservan sus archivos', () => {
     const prepared = prepareIdeasForEditorBank(queued, { role: 'editor', userId: 'ed-maria' })
     const rows = groupEditorVideoBank(prepared)
     const clips = rows[0].clients[0].clips
     expect(clips.filter((c) => c.queue === 'active')).toHaveLength(2)
-    expect(clips.find((c) => c.ideaId === 'c')).toMatchObject({ queue: 'waiting', files: [] })
+    expect(clips.find((c) => c.ideaId === 'c')).toMatchObject({ queue: 'waiting', files: [expect.objectContaining({ id: 'vc' })] })
   })
 })
 
@@ -470,5 +471,28 @@ describe('listBankAdmins', () => {
     expect(admins.map((a) => a.id)).toEqual(['o1', 's1'])
     expect(admins[0]).toMatchObject({ name: 'Eric', email: 'eric@nate.media', role: 'owner', roleLabel: 'Owner' })
     expect(admins[1]).toMatchObject({ name: 'Ana', role: 'supervisor', roleLabel: 'Supervisor' })
+  })
+})
+
+
+describe('biblioteca completa del cliente asignado', () => {
+  it('muestra los 63 crudos entre 14 ideas sin dar acceso a otro cliente ni ampliar los dos espacios', () => {
+    const assigned = Array.from({ length: 14 }, (_, i) => idea({
+      id: `nanas-${i}`, created_at: `2026-07-${String(i + 1).padStart(2, '0')}`,
+      assignee: null,
+      client: { id: 'nanas', name: 'Nanas Playhouse', industry: null, assigned_to: 'ed-maria' } as IdeaWithPipeline['client'],
+      videos: Array.from({ length: i === 0 ? 50 : 1 }, (_, j) => raw({ id: `v-${i}-${j}`, idea_id: `nanas-${i}` })),
+    }))
+    const unrelated = idea({ id: 'otro', assignee: null,
+      client: { id: 'otro', name: 'Otro cliente', industry: null, assigned_to: 'ed-otro' } as IdeaWithPipeline['client'],
+      videos: [raw({ id: 'private-other' })],
+    })
+    const prepared = prepareIdeasForEditorBank([...assigned, unrelated], { role: 'editor', userId: 'ed-maria' })
+    const library = buildVideoBank(prepared)
+    expect(library.rails.map(r => r.clientId)).toEqual(['nanas'])
+    expect(library.rails[0].videos).toHaveLength(63)
+    expect(prepared.filter(i => i.bankQueue === 'active')).toHaveLength(2)
+    expect(prepared.filter(i => i.bankQueue === 'waiting')).toHaveLength(12)
+    expect(canDownloadOrPreviewRaw({ role: 'editor', userId: 'ed-maria', clientAssigneeId: 'ed-otro', inEditorWip: false })).toBe(false)
   })
 })

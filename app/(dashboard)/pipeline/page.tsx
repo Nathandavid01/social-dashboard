@@ -29,7 +29,7 @@ export default async function PipelinePage() {
   const supabase = await createClient()
 
   let [ideasRaw, { data: activeClientsRaw, error: clientsError }, metricoolPics, workflowSettings, { data: teamProfiles }, role, userId, pipelineTotals] = await Promise.all([
-    getIdeacionPipeline({ limit: 400 }),
+    getIdeacionPipeline({ complete: true }),
     supabase
       .from('clients')
       .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, posting_timezone, metricool_blog_id')
@@ -92,7 +92,7 @@ export default async function PipelinePage() {
         ),
       )
       // Releer para que el reparto se vea en esta misma carga.
-      ideasRaw = await getIdeacionPipeline({ limit: 400 })
+      ideasRaw = await getIdeacionPipeline({ complete: true })
     }
   }
 

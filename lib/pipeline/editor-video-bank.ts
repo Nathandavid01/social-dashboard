@@ -143,16 +143,14 @@ export function canAccessEditorBank(access: EditorBankAccess): boolean {
 export function canDownloadOrPreviewRaw(access: EditorBankAccess): boolean {
   if (access.userId && access.uploadedBy && access.uploadedBy === access.userId) return true
   if (!canAccessEditorBank(access)) return false
-  if ((access.role === 'editor' || access.role === 'team_member') && access.inEditorWip === false) {
-    return false
-  }
+  // El WIP ordena el trabajo activo; no limita la consulta del material asignado.
   return true
 }
 
 /**
  * Descarga/preview por tipo de archivo: el b-roll es un pool GLOBAL — cualquier
  * rol autenticado del equipo lo puede bajar para reusar en cualquier edición.
- * El raw sigue scoped a la asignación + WIP (canDownloadOrPreviewRaw).
+ * El raw sigue limitado a la asignación (canDownloadOrPreviewRaw).
  */
 export function canDownloadIdeaVideo(access: EditorBankAccess, kind: string | undefined): boolean {
   if (kind === 'broll') return !!access.role
@@ -259,7 +257,7 @@ export function editorWipIdeaIds(
   return new Set(picked.map((i) => i.id))
 }
 
-/** Filtro de asignación + tope de 2: los extras llegan sin ids de archivo. */
+/** Conserva el material asignado y marca el WIP sin ocultar la biblioteca. */
 export function prepareIdeasForEditorBank(
   ideas: IdeaWithPipeline[],
   viewer: { role: UserRole | null; userId: string | null },
@@ -273,7 +271,7 @@ export function prepareIdeasForEditorBank(
   return assigned.map((idea) => {
     if (active.has(idea.id)) return { ...idea, bankQueue: 'active' as const }
     if (isRawReadyWork(idea)) {
-      return { ...idea, videos: [], bankQueue: 'waiting' as const }
+      return { ...idea, bankQueue: 'waiting' as const }
     }
     return idea
   })
@@ -392,7 +390,7 @@ export function groupEditorVideoBank(
     }
 
     const waiting = idea.bankQueue === 'waiting'
-    const files = waiting ? [] : sourceFiles(idea.videos)
+    const files = sourceFiles(idea.videos)
     if (files.length === 0 && !waiting) continue
 
     const uploaderId = idea.videos.find((v) => v.uploaded_by)?.uploaded_by ?? null

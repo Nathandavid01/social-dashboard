@@ -20,7 +20,7 @@ export async function getEditorVideoBank(): Promise<{ rows?: EditorBankRow[]; er
   const [role, userId, ideas] = await Promise.all([
     getEffectiveRole(),
     getEffectiveUserId(),
-    getIdeacionPipeline({ limit: 400 }),
+    getIdeacionPipeline({ complete: true }),
   ])
 
   const visible = prepareIdeasForEditorBank(ideas, { role, userId })

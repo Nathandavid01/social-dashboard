@@ -508,3 +508,15 @@ describe('registerR2Video — idea promotion', () => {
     expect(ideaUpdate?.filterIn).toEqual({ column: 'status', values: ['idea', 'asignada', 'grabada'] })
   })
 })
+
+
+describe('consulta del material asignado fuera del trabajo activo', () => {
+  it('permite preview y descarga del crudo asignado aunque la cola activa esté vacía', async () => {
+    videoKind = 'raw'
+    videoUploadedBy = 'videographer-other'
+    assignedEditorId = 'user-1'
+    pipelineIdeas.length = 0
+    expect(await getR2PreviewUrl('vid-1')).toMatchObject({ url: 'https://signed.example/presigned' })
+    expect(await getR2DownloadUrl('vid-1')).toMatchObject({ url: 'https://signed.example/presigned' })
+  })
+})
