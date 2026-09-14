@@ -23,6 +23,7 @@ describe('collectPrimerRoundStyleRules', () => {
     expect(PRIMER_ROUND_GFX_STYLE_RULES.some((r) => /GFX/i.test(r))).toBe(true)
     expect(PRIMER_ROUND_GFX_STYLE_RULES.some((r) => /5:43am/i.test(r))).toBe(true)
     expect(PRIMER_ROUND_GFX_STYLE_RULES.some((r) => /clip/i.test(r))).toBe(true)
+    expect(PRIMER_ROUND_GFX_STYLE_RULES.some((r) => /no repitas el gancho/i.test(r))).toBe(true)
   })
 })
 

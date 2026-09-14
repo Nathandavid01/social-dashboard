@@ -18,7 +18,7 @@
 
 import type { OrthoIssue } from './orthography'
 import { formatPrimerRoundStyleRulesBlock } from './style-rules'
-import { primerRoundNextAirCopy, type PrimerRoundAirCopy } from './air-time'
+import { applyPrimerRoundAirPhrase, primerRoundNextAirCopy, type PrimerRoundAirCopy } from './air-time'
 
 /** Hosts as they appear in the caption line (names, not @handles). */
 export const PRIMER_ROUND_CAPTION_HOSTS = 'Dennise Pérez y Rafael Lenín'
@@ -68,11 +68,11 @@ export function buildPrimerRoundCaption(opts: {
   const hook = opts.hook.trim()
   const guest = opts.guest.trim()
   const attribution = primerRoundLiveAttribution(opts.airCopy ?? primerRoundNextAirCopy())
-  const lines = [
-    hook,
-    '',
-    `${guest} ${attribution}`.replace(/\s+/g, ' ').trim(),
-  ]
+  const line3 =
+    guest && !sameCaptionLead(guest, hook)
+      ? `${guest} ${attribution}`.replace(/\s+/g, ' ').trim()
+      : attribution
+  const lines = [hook, '', line3]
   if (opts.includeYoutube) {
     lines.push(PRIMER_ROUND_YOUTUBE_LINE)
   }
@@ -97,10 +97,11 @@ export function buildPrimerRoundCaptionPromptInstructions(ctx: {
   airCopy?: PrimerRoundAirCopy | null
   airNowMs?: number
 }): string {
+  const overlayFirst = firstOverlayLine(ctx.burnedOverlay)
   const hintGuest =
     (ctx.guestHint ?? '').trim() ||
-    firstOverlayLine(ctx.burnedOverlay) ||
-    '(deduce el nombre + rol del invitado del título, overlay, lo que se ve o el audio)'
+    (looksLikeGuestName(overlayFirst) ? overlayFirst : '') ||
+    '(GFX sin invitado: la línea 3 es SOLO el horario + hosts. NO copies el gancho otra vez.)'
   const air = ctx.airCopy ?? primerRoundNextAirCopy(ctx.airNowMs)
   const liveAttribution = primerRoundLiveAttribution(air)
 
@@ -110,7 +111,9 @@ Eric BLOQUEÓ este formato: no inventes otro estilo. Devuelve SOLO el caption fi
 FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 1) Una sola línea: pregunta gancho o tema (puede empezar con ¿…?).
 2) Línea en blanco.
-3) Exactamente: "[Invitado o frase del GFX] ${liveAttribution}"
+3) Si hay un invitado (persona + rol) distinto del gancho: "[Invitado] ${liveAttribution}"
+   Si es GFX/promo sin invitado: SOLO "${liveAttribution}"
+   NO empieces la línea 3 con la misma frase de la línea 1.
    - Hosts SIEMPRE como nombres: Dennise Pérez y Rafael Lenín.
    - NUNCA pongas @denniseyperez, @rafaellenin ni @primerroundoficial en el caption.
    - Las collabs de Instagram van SOLO en Metricool (fuera de este texto).
@@ -119,10 +122,10 @@ FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 5) Línea en blanco.
 6) Exactamente estos hashtags (y solo estos): ${PRIMER_ROUND_HASHTAGS}
 
-EJEMPLO DE ORO (Reel gráfico, no clip):
+EJEMPLO DE ORO (Reel gráfico, no clip — el gancho NO se repite):
 LA NOTICIA NO ESPERA
 
-LA NOTICIA NO ESPERA ${liveAttribution}
+${liveAttribution}
 
 ${PRIMER_ROUND_HASHTAGS}
 
@@ -146,6 +149,7 @@ REGLAS:
 - Español puertorriqueño correcto (tildes, ¿?).
 - No emojis salvo que el hook ya los traiga.
 - El hook sale de la FRASE PRINCIPAL del overlay (ej. LA NOTICIA NO ESPERA), no de una lista de todas las preguntas.
+- NO repitas el gancho en la línea 3. Si el hook es LA NOTICIA NO ESPERA, la siguiente oración empieza por el horario, no otra vez por LA NOTICIA NO ESPERA.
 - Este tipo de video es GFX/promo, no un clip del programa.
 - La línea 3 DEBE llevar el horario de aire de ahora: ${air.phrase} (si es domingo y se publica hoy → mañana a las 5:43am).
 - No inventes datos que no consten en el contexto.
@@ -159,6 +163,60 @@ function firstOverlayLine(overlay?: string | null): string {
     .map((l) => l.trim())
     .find((l) => l.length > 0)
   return line ?? ''
+}
+
+function foldCaptionLead(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[¿?¡!.,;:]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function sameCaptionLead(a: string, b: string): boolean {
+  const left = foldCaptionLead(a)
+  const right = foldCaptionLead(b)
+  return !!left && left === right
+}
+
+/** All-caps slogans are hooks, not guest names. "Exfiscal Zulma Fúster" is a guest. */
+function looksLikeGuestName(line: string): boolean {
+  const text = line.trim()
+  if (!text || /^(¿|¡)/.test(text)) return false
+  if (text === text.toUpperCase() && /[A-ZÁÉÍÓÚÑ]/.test(text)) return false
+  return /[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+/.test(text)
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** Drop "LA NOTICIA NO ESPERA …" when line 3 repeats the hook. */
+export function stripRepeatedPrimerRoundHook(caption: string): string {
+  const lines = caption.split('\n')
+  const hook = lines.find((line) => line.trim())?.trim() ?? ''
+  if (!hook) return caption
+  const hookBare = hook.replace(/[¿?¡!.,;:]+$/g, '').trim()
+  const attrIdx = lines.findIndex((line) =>
+    /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en Primer Round junto a/i.test(
+      line,
+    ),
+  )
+  if (attrIdx < 0) return caption
+  const line = lines[attrIdx].trim()
+  const repeated = new RegExp(`^${escapeRegExp(hookBare)}\\s+`, 'i')
+  if (repeated.test(line)) lines[attrIdx] = line.replace(repeated, '')
+  return lines.join('\n')
+}
+
+/** Live air phrase, then no repeated hook. */
+export function normalizePrimerRoundCaption(
+  caption: string,
+  air?: PrimerRoundAirCopy,
+): string {
+  return stripRepeatedPrimerRoundHook(
+    applyPrimerRoundAirPhrase(caption, air ?? primerRoundNextAirCopy()),
+  )
 }
 
 /** Structural checks for the bottom IG caption (deterministic, no LLM). */
@@ -178,6 +236,25 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
       surface: 'caption',
     })
   } else {
+    const hook = text.split(/\n/).map((line) => line.trim()).find(Boolean) ?? ''
+    const attrLine =
+      text
+        .split(/\n/)
+        .map((line) => line.trim())
+        .find((line) =>
+          /(?:hoy(?: a las 5:43am)?|mañana a las 5:43am|el lunes a las 5:43am) en primer round junto a/i.test(
+            line,
+          ),
+        ) ?? ''
+    const hookBare = hook.replace(/[¿?¡!.,;:]+$/g, '').trim()
+    if (hookBare && new RegExp(`^${escapeRegExp(hookBare)}\\s+`, 'i').test(attrLine)) {
+      issues.push({
+        quote: attrLine.slice(0, 80),
+        problem: 'no repitas el gancho en la línea siguiente',
+        suggestion: primerRoundLiveAttribution(),
+        surface: 'caption',
+      })
+    }
     if (!text.includes('Dennise Pérez') || !text.includes('Rafael Lenín')) {
       issues.push({
         quote: 'hosts',

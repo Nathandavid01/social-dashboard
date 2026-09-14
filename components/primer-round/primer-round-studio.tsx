@@ -28,7 +28,8 @@ import { reportUploadFailure } from '@/lib/actions/pipeline-submit'
 import type { PrimerRoundOrthoGate } from '@/lib/primer-round/orthography'
 import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer-round/studio'
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
-import { applyPrimerRoundAirPhrase, primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
+import { primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
+import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
 import { useRouter } from 'next/navigation'
 
 type PipelineStage =
@@ -130,7 +131,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setIdeaId(piece.ideaId)
     setVideoId(piece.videoId)
     setFileLabel(piece.fileName)
-    setCaption(piece.caption ? applyPrimerRoundAirPhrase(piece.caption) : piece.caption)
+    setCaption(piece.caption ? normalizePrimerRoundCaption(piece.caption) : piece.caption)
     setOverlayText(piece.overlayText)
     setPreviewUrl((prev) => {
       if (prev?.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(prev)
@@ -155,7 +156,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       ideaId: id,
       videoId: vid,
     })
-    if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
+    if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
     if (res.gate) {
       setGate(res.gate)
       if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
@@ -264,7 +265,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         feedback: feedback.trim(),
         previousCaption: caption,
       })
-      if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
+      if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
       if (res.gate) {
         setGate(res.gate)
         if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
@@ -290,7 +291,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         videoId,
         overrideOrtho,
       })
-      if (res.caption) setCaption(applyPrimerRoundAirPhrase(res.caption))
+      if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
       if (res.gate) setGate(res.gate)
       if (res.error) {
         setStage('error')
