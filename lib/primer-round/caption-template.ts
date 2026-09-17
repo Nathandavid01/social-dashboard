@@ -27,6 +27,15 @@ import {
 /** Hosts tagged in the caption (Rafael first, then Dennise). */
 export const PRIMER_ROUND_CAPTION_HOSTS = '@rafaellenin y @denniseyperez'
 
+/** LIVE clip vs GFX/promo. GFX uses air-time + @handles; LIVE uses full names. */
+export type PrimerRoundPieceKind = 'live' | 'gfx'
+
+export const PRIMER_ROUND_LIVE_CLIP_HOSTS = 'Rafael Lenín López y Dennise Pérez'
+
+/** Clip en vivo del programa — not the Sunday GFX air line. */
+export const PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION =
+  `Hoy en Primer Round junto a ${PRIMER_ROUND_LIVE_CLIP_HOSTS}.`
+
 /** Old + Facebook live line: "hoy en Primer Round junto a…" or "Mañana desde las 5:43 AM junto a…" */
 export const PRIMER_ROUND_LIVE_LINE =
   /(?:hoy|mañana|el lunes)(?: a las 5:43am| desde las 5:43 ?AM)?(?: en Primer Round)? junto a/i
@@ -74,12 +83,15 @@ export function buildPrimerRoundCaption(opts: {
   guest: string
   includeYoutube?: boolean
   airCopy?: PrimerRoundAirCopy | null
+  pieceKind?: PrimerRoundPieceKind
 }): string {
   const hook = opts.hook.trim()
   const guest = opts.guest.trim()
-  const air = opts.airCopy ?? primerRoundNextAirCopy()
   const hasGuest = Boolean(guest && !sameCaptionLead(guest, hook))
-  const attribution = primerRoundLiveAttribution(air, !hasGuest)
+  const attribution =
+    opts.pieceKind === 'live'
+      ? PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION
+      : primerRoundLiveAttribution(opts.airCopy ?? primerRoundNextAirCopy(), !hasGuest)
   const line3 = hasGuest ? `${guest} ${attribution}`.replace(/\s+/g, ' ').trim() : attribution
   const lines = [hook, '', line3]
   if (opts.includeYoutube) {
@@ -105,14 +117,59 @@ export function buildPrimerRoundCaptionPromptInstructions(ctx: {
   styleRules?: string[] | null
   airCopy?: PrimerRoundAirCopy | null
   airNowMs?: number
+  pieceKind?: PrimerRoundPieceKind
 }): string {
   const overlayFirst = firstOverlayLine(ctx.burnedOverlay)
+  const isLiveClip = ctx.pieceKind === 'live'
   const hintGuest =
     (ctx.guestHint ?? '').trim() ||
     (looksLikeGuestName(overlayFirst) ? overlayFirst : '') ||
-    '(GFX sin invitado: la línea 3 es SOLO el horario + hosts. NO copies el gancho otra vez.)'
+    (isLiveClip
+      ? '(clip en vivo: línea 3 = Hoy en Primer Round junto a los hosts, nombres completos)'
+      : '(GFX sin invitado: la línea 3 es SOLO el horario + hosts. NO copies el gancho otra vez.)')
   const air = ctx.airCopy ?? primerRoundNextAirCopy(ctx.airNowMs)
-  const liveAttribution = primerRoundLiveAttribution(air)
+  const liveAttribution = isLiveClip
+    ? PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION
+    : primerRoundLiveAttribution(air)
+
+  const line3Rules = isLiveClip
+    ? `3) Línea 3 EXACTA (clip en vivo del programa): "${PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION}"
+   Si hay un invitado distinto del gancho: "[Invitado] ${PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION}"
+   - Hosts con NOMBRES COMPLETOS (no @handles) en el caption: ${PRIMER_ROUND_LIVE_CLIP_HOSTS}.
+   - NUNCA pongas @primerroundoficial en el caption.
+   - Las collabs de Instagram (@rafaellenin y @denniseyperez) van en Metricool, no hace falta repetir @ en esta línea.
+   - NO uses el horario "Mañana desde las 5:43 AM" — eso es solo para GFX/promo.`
+    : `3) Si hay un invitado (persona + rol) distinto del gancho: "[Invitado] ${liveAttribution}"
+   Si es GFX/promo sin invitado: SOLO "${liveAttribution}"
+   NO empieces la línea 3 con la misma frase de la línea 1.
+   - Hosts SIEMPRE tagueados, en este orden: @rafaellenin y @denniseyperez.
+   - NUNCA pongas @primerroundoficial en el caption.
+   - Las collabs de Instagram también van en Metricool.
+   - Horario al aire: lunes a viernes 5:43 AM (Puerto Rico). Frase de Facebook: "${liveAttribution}"`
+
+  const youtubeRule = isLiveClip
+    ? '4) Clip en vivo: puedes incluir la línea de YouTube si el overlay/audio lo pide.'
+    : '4) En Reels gráficos / promo (GFX, no clip del programa): NO pongas la línea de YouTube.'
+
+  const gold = isLiveClip
+    ? `EJEMPLO DE ORO (clip en vivo del programa):
+El tema de hoy
+
+${PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION}
+
+${PRIMER_ROUND_HASHTAGS}`
+    : `EJEMPLO DE ORO (Reel gráfico, no clip — el gancho NO se repite):
+LA NOTICIA NO ESPERA
+
+${liveAttribution}
+
+${PRIMER_ROUND_HASHTAGS}`
+
+  const kindRules = isLiveClip
+    ? `- Este tipo de video es un CLIP EN VIVO del programa, no un GFX/promo.
+- La línea 3 DEBE ser: ${PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION}`
+    : `- Este tipo de video es GFX/promo, no un clip del programa.
+- La línea 3 DEBE ser la frase de Facebook: ${liveAttribution} (domingo publicado hoy → Mañana desde las 5:43 AM).`
 
   return `Eres el copywriter de @primerroundoficial (Magic 97.3 / Primer Round).
 Eric BLOQUEÓ este formato: no inventes otro estilo. Devuelve SOLO el caption final.
@@ -120,23 +177,12 @@ Eric BLOQUEÓ este formato: no inventes otro estilo. Devuelve SOLO el caption fi
 FORMATO OBLIGATORIO (Metricool text — caption debajo del Reel):
 1) Una sola línea: pregunta gancho o tema (puede empezar con ¿…?).
 2) Línea en blanco.
-3) Si hay un invitado (persona + rol) distinto del gancho: "[Invitado] ${liveAttribution}"
-   Si es GFX/promo sin invitado: SOLO "${liveAttribution}"
-   NO empieces la línea 3 con la misma frase de la línea 1.
-   - Hosts SIEMPRE tagueados, en este orden: @rafaellenin y @denniseyperez.
-   - NUNCA pongas @primerroundoficial en el caption.
-   - Las collabs de Instagram también van en Metricool.
-   - Horario al aire: lunes a viernes 5:43 AM (Puerto Rico). Frase de Facebook: "${liveAttribution}"
-4) En Reels gráficos / promo (GFX, no clip del programa): NO pongas la línea de YouTube.
+${line3Rules}
+${youtubeRule}
 5) Línea en blanco.
 6) Exactamente estos hashtags (y solo estos): ${PRIMER_ROUND_HASHTAGS}
 
-EJEMPLO DE ORO (Reel gráfico, no clip — el gancho NO se repite):
-LA NOTICIA NO ESPERA
-
-${liveAttribution}
-
-${PRIMER_ROUND_HASHTAGS}
+${gold}
 
 ${formatPrimerRoundStyleRulesBlock(ctx.styleRules ?? [])}
 
@@ -158,9 +204,9 @@ REGLAS:
 - Español puertorriqueño correcto (tildes, ¿?).
 - No emojis salvo que el hook ya los traiga.
 - El hook sale de la FRASE PRINCIPAL del overlay (ej. LA NOTICIA NO ESPERA), no de una lista de todas las preguntas.
-- NO repitas el gancho en la línea 3. Si el hook es LA NOTICIA NO ESPERA, la siguiente oración empieza por el horario, no otra vez por LA NOTICIA NO ESPERA.
-- Este tipo de video es GFX/promo, no un clip del programa.
-- La línea 3 DEBE ser la frase de Facebook: ${liveAttribution} (domingo publicado hoy → Mañana desde las 5:43 AM).
+- NO repitas el gancho en la línea 3.
+${kindRules}
+- NUNCA inventes palabras dichas. Solo cita audio si hay transcripción; si no hay, no inventes diálogo.
 - No inventes datos que no consten en el contexto.
 - Si hay FEEDBACK DE ERIC, aplícalo sin romper la plantilla.
 - Devuelve SOLO el caption, sin comillas ni explicación.`
@@ -234,30 +280,59 @@ export function rewritePrimerRoundLiveLine(
     .join('\n')
 }
 
+/** Clip en vivo: force the locked "Hoy en Primer Round junto a Rafael… y Dennise…" line. */
+export function rewritePrimerRoundLiveClipLine(caption: string): string {
+  return caption
+    .split('\n')
+    .map((raw) => {
+      const match = raw.match(
+        /^(.*?)((?:hoy|mañana|el lunes)(?: a las 5:43am| desde las 5:43 ?AM)?(?: en Primer Round)? junto a .+)$/i,
+      )
+      if (!match) return raw
+      const prefix = match[1].trim()
+      const guest = looksLikeGuestName(prefix) ? prefix : ''
+      return guest
+        ? `${guest} ${PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION}`.replace(/\s+/g, ' ').trim()
+        : PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION
+    })
+    .join('\n')
+}
+
 export function normalizePrimerRoundCaption(
   caption: string,
   air?: PrimerRoundAirCopy,
+  pieceKind: PrimerRoundPieceKind = 'gfx',
 ): string {
-  return rewritePrimerRoundLiveLine(
-    stripRepeatedPrimerRoundHook(caption),
-    air ?? primerRoundNextAirCopy(),
-  )
+  const stripped = stripRepeatedPrimerRoundHook(caption)
+  if (pieceKind === 'live') return rewritePrimerRoundLiveClipLine(stripped)
+  return rewritePrimerRoundLiveLine(stripped, air ?? primerRoundNextAirCopy())
 }
 
 /** Structural checks for the bottom IG caption (deterministic, no LLM). */
-export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] {
+export function checkPrimerRoundCaptionStructure(
+  caption: string,
+  pieceKind: PrimerRoundPieceKind = 'gfx',
+): OrthoIssue[] {
   const text = caption.trim()
   const issues: OrthoIssue[] = []
   if (!text) return issues
 
   const lower = text.toLowerCase()
-  const hasAttribution =
+  const hasLiveClipAttribution = /hoy en primer round junto a rafael lenín lópez y dennise pérez/.test(
+    lower,
+  )
+  const hasGfxAttribution =
     /(?:hoy|mañana|el lunes) desde las 5:43 ?am junto a @rafaellenin y @denniseyperez/.test(lower)
+  const hasAttribution = pieceKind === 'live' ? hasLiveClipAttribution : hasGfxAttribution
   if (!hasAttribution) {
     issues.push({
       quote: text.slice(0, 80),
-      problem: 'falta la línea de atribución de Primer Round (con el horario de aire)',
-      suggestion: `… ${primerRoundLiveAttribution()}`,
+      problem:
+        pieceKind === 'live'
+          ? 'falta la línea de clip en vivo de Primer Round'
+          : 'falta la línea de atribución de Primer Round (con el horario de aire)',
+      suggestion:
+        pieceKind === 'live' ? PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION : `… ${primerRoundLiveAttribution()}`,
       surface: 'caption',
     })
   } else {
@@ -272,11 +347,12 @@ export function checkPrimerRoundCaptionStructure(caption: string): OrthoIssue[] 
       issues.push({
         quote: attrLine.slice(0, 80),
         problem: 'no repitas el gancho en la línea siguiente',
-        suggestion: primerRoundLiveAttribution(),
+        suggestion:
+          pieceKind === 'live' ? PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION : primerRoundLiveAttribution(),
         surface: 'caption',
       })
     }
-    if (!/@rafaellenin\b/i.test(text) || !/@denniseyperez\b/i.test(text)) {
+    if (pieceKind !== 'live' && (!/@rafaellenin\b/i.test(text) || !/@denniseyperez\b/i.test(text))) {
       issues.push({
         quote: 'hosts',
         problem: 'taguea a @rafaellenin y @denniseyperez',

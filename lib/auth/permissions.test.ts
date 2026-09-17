@@ -80,6 +80,20 @@ describe('captions.use / captions.edit (AI captions on the video card)', () => {
   })
 })
 
+describe('metricool.draft (estudio editor: borrador, no live)', () => {
+  it('owner, supervisor y editor pueden crear el borrador', () => {
+    for (const role of ['owner', 'supervisor', 'editor'] as const) {
+      expect(hasPermission(role, 'metricool.draft')).toBe(true)
+    }
+  })
+
+  it('copy, video, diseñador y legacy no empujan a Metricool', () => {
+    for (const role of ['copy', 'video', 'disenador', 'team_member', null] as const) {
+      expect(hasPermission(role, 'metricool.draft')).toBe(false)
+    }
+  })
+})
+
 describe('operations.overview', () => {
   it('limits the team overview to owner and supervisor', () => {
     expect(hasPermission('owner', 'operations.overview')).toBe(true)

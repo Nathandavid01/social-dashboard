@@ -8,6 +8,10 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(buildIdeaCaptionPrompt(base)).toContain('Cómo limpiar tu sofá')
   })
 
+  it('never invents spoken words when there is no transcript', () => {
+    expect(buildIdeaCaptionPrompt(base)).toMatch(/Nunca inventes diálogo ni palabras dichas/)
+  })
+
   it('injects brand voice + language constraints when present', () => {
     const p = buildIdeaCaptionPrompt({
       ...base,

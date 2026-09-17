@@ -7,6 +7,7 @@ import {
   normalizePrimerRoundCaption,
   PRIMER_ROUND_HASHTAGS,
   PRIMER_ROUND_CAPTION_TEMPLATE_SKELETON,
+  PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION,
 } from './caption-template'
 import { captionSurfaceFromText, overlayFromBurnedCaptions } from './orthography'
 import { buildIdeaCaptionPrompt } from '@/lib/utils/idea-caption-prompt'
@@ -97,6 +98,50 @@ describe('Primer Round locked caption template', () => {
     expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
     expect(p).toMatch(/NO empieces la línea 3 con la misma frase/i)
     expect(p).not.toMatch(/LA NOTICIA NO ESPERA Mañana desde las 5:43 AM/)
+  })
+
+  it('LIVE clip captions use full host names, not the GFX air line', () => {
+    const caption = buildPrimerRoundCaption({
+      hook: 'El tema de hoy',
+      guest: '',
+      pieceKind: 'live',
+    })
+    expect(caption).toContain(PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION)
+    expect(caption).toContain('Rafael Lenín López y Dennise Pérez')
+    expect(caption).not.toMatch(/desde las 5:43/)
+    expect(checkPrimerRoundCaptionStructure(caption, 'live')).toEqual([])
+    const p = buildPrimerRoundCaptionPromptInstructions({
+      title: 'Clip',
+      pieceKind: 'live',
+    })
+    expect(p).toContain(PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION)
+    expect(p).toMatch(/CLIP EN VIVO/i)
+    expect(p).toMatch(/NUNCA inventes palabras dichas/)
+    expect(p).not.toMatch(/Este tipo de video es GFX\/promo/)
+  })
+
+  it('does not rewrite a LIVE clip line into the GFX air phrase', () => {
+    const live = [
+      'El tema de hoy',
+      '',
+      PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION,
+      '',
+      PRIMER_ROUND_HASHTAGS,
+    ].join('\n')
+    expect(normalizePrimerRoundCaption(live, undefined, 'live')).toBe(live)
+    expect(
+      normalizePrimerRoundCaption(
+        [
+          'El tema de hoy',
+          '',
+          'Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
+          '',
+          PRIMER_ROUND_HASHTAGS,
+        ].join('\n'),
+        undefined,
+        'live',
+      ),
+    ).toContain(PRIMER_ROUND_LIVE_CLIP_ATTRIBUTION)
   })
 })
 

@@ -20,7 +20,10 @@ import { pickCaptionSourceVideo } from '@/lib/utils/video-caption-source'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { isPrimerRoundClientId } from '@/lib/primer-round/constants'
 import { loadPrimerRoundStyleRules } from '@/lib/primer-round/style-rules'
-import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
+import {
+  normalizePrimerRoundCaption,
+  type PrimerRoundPieceKind,
+} from '@/lib/primer-round/caption-template'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -101,6 +104,8 @@ export async function generateIdeaCaption(
     hermanos?: { titulo: string; caption: string }[]
     /** When set, only this file (and its analysis) is used — never a leftover sibling. */
     videoId?: string | null
+    /** Primer Round: LIVE clip vs GFX/promo caption skeleton. */
+    pieceKind?: PrimerRoundPieceKind | null
   },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
@@ -211,6 +216,7 @@ export async function generateIdeaCaption(
 
   const primerRoundLockedTemplate = isPrimerRoundClientId(clientId)
   const styleRules = primerRoundLockedTemplate ? await loadPrimerRoundStyleRules(supabase) : []
+  const pieceKind: PrimerRoundPieceKind = opts?.pieceKind === 'live' ? 'live' : 'gfx'
 
   const sharedPrompt: IdeaCaptionPromptInput = {
     title: idea.title as string,
@@ -244,13 +250,14 @@ export async function generateIdeaCaption(
     },
     primerRoundLockedTemplate,
     styleRules,
+    primerRoundPieceKind: pieceKind,
   }
 
   try {
     const caption = await generateCaptionText(buildIdeaCaptionPrompt(sharedPrompt))
     if (!caption?.trim()) return { error: 'La IA no devolvió caption' }
     let stored = primerRoundLockedTemplate
-      ? normalizePrimerRoundCaption(caption.trim())
+      ? normalizePrimerRoundCaption(caption.trim(), undefined, pieceKind)
       : caption.trim()
 
     // Pieza 2, red de seguridad: si el caption choca obviamente con un

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio · Borrador Metricool · v4.93</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0a0a0a;color:#fafafa;font:14px/1.45 system-ui,sans-serif}
+  main{max-width:1080px;margin:auto;padding:32px 20px}
+  h1{font-size:24px;margin:8px 0 6px}
+  p,small{color:#a3a3a3}
+  .states{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .card{background:#171717;border:1px solid #303030;border-radius:12px;padding:24px;min-width:0}
+  h2{font-size:16px;margin:0 0 8px}
+  button{width:100%;border:0;border-radius:8px;padding:14px;background:#facc15;color:#111;font-weight:600}
+  button.ghost{background:transparent;border:1px solid #404040;color:#fafafa;margin-top:8px}
+  button:disabled{opacity:.55}
+  select,textarea,.field{width:100%;background:#0f0f0f;border:1px solid #303030;border-radius:8px;color:#fafafa;padding:10px 12px;font:13px system-ui}
+  textarea{min-height:120px;white-space:pre-wrap}
+  .row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+  .badge{font-size:11px;border:1px solid #404040;border-radius:999px;padding:3px 8px;color:#d4d4d4}
+  .gold{color:#facc15}
+  .ok{color:#34d399}
+  .status{border:1px solid #303030;border-radius:8px;padding:12px;font-size:12px;margin-top:12px}
+  .video{margin:12px auto;background:#000;aspect-ratio:9/16;max-height:220px;display:grid;place-content:center;border-radius:8px;text-align:center;color:#737373}
+  label.opt{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:6px 0}
+  .muted{color:#a3a3a3;font-size:12px}
+  @media(max-width:750px){.states{grid-template-columns:1fr}main{padding:20px 16px}}
+</style>
+<main>
+  <small>Vista de ejemplo · v4.93</small>
+  <h1>Estudio</h1>
+  <p>El editor sube el video. La IA lo lee y arma el caption. Se crea un <strong class="gold">borrador en Metricool</strong> — no se publica en vivo.</p>
+  <div class="states">
+    <section class="card">
+      <div class="row">
+        <small>1 · Subir</small>
+        <span class="badge">máx. 500 MB</span>
+      </div>
+      <h2>Subir video</h2>
+      <p class="muted">Cliente Primer Round. mp4 o mov. Va directo a Entregas (no pasa por Vercel ~4.5 MB).</p>
+      <label class="muted">Cliente</label>
+      <select disabled><option>Primer Round Oficial</option></select>
+      <p class="muted" style="margin:12px 0 6px">Tipo de pieza</p>
+      <label class="opt"><input type="radio" checked disabled> GFX / promo — «Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez»</label>
+      <label class="opt"><input type="radio" disabled> Clip en vivo — «Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez»</label>
+      <p class="muted" style="margin:12px 0 6px">Collabs Instagram</p>
+      <label class="opt"><input type="checkbox" checked disabled> @denniseyperez (Dennise Pérez)</label>
+      <label class="opt"><input type="checkbox" checked disabled> @rafaellenin (Rafael Lenín López)</label>
+      <button style="margin-top:16px">Subir video</button>
+    </section>
+    <section class="card">
+      <div class="row">
+        <small class="gold">2 · Caption listo</small>
+        <span class="badge">Revisa el caption</span>
+      </div>
+      <h2>Subir video</h2>
+      <div class="video">▷ clip-vivo.mp4</div>
+      <div class="status">
+        <div class="row"><span>Revisa el caption</span><span class="muted">clip-vivo.mp4</span></div>
+        <p class="muted">IA leyó overlay y audio. No inventó palabras dichas.</p>
+        <p class="muted" style="margin:8px 0 4px">Caption</p>
+        <textarea readonly>El tema de hoy
+
+Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.
+
+#magic973 #puertorico #primerround</textarea>
+      </div>
+      <button style="margin-top:12px">Crear borrador en Metricool</button>
+      <p class="ok" style="margin-top:12px;font-size:13px">Borrador #88 — no se publicó en vivo. Eric aprueba después.</p>
+    </section>
+  </div>
+</main>
+</html>

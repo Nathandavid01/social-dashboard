@@ -26,6 +26,12 @@ describe('navItems source', () => {
     expect(hrefs).toContain('/home')
     expect(hrefs).toContain('/clients')
     expect(hrefs).toContain('/settings/users')
+    expect(hrefs).toContain('/estudio')
+  })
+
+  it('shows Estudio to editors and hides it from copy', () => {
+    expect(visibleNavItems('editor').some((n) => n.href === '/estudio')).toBe(true)
+    expect(visibleNavItems('copy').some((n) => n.href === '/estudio')).toBe(false)
   })
 
   it('el menú de proceso empieza por generar ideas (con Gráficas), grabar, luego Pipeline', () => {

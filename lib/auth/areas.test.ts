@@ -171,6 +171,23 @@ it('supervisors retain the video bank with restricted areas',()=>{
 })
 
 
+describe('Estudio editor area', () => {
+  it('is registered under Trabajo with metricool.draft', () => {
+    const area = AREAS.find((a) => a.href === '/estudio')
+    expect(area?.label).toBe('Estudio')
+    expect(area?.permission).toBe('metricool.draft')
+    expect(area?.group).toBe('Trabajo')
+  })
+
+  it('is reachable for editor and admin, not copy or video', () => {
+    expect(effectiveAreaHrefs('editor', null).has('/estudio')).toBe(true)
+    expect(effectiveAreaHrefs('owner', null).has('/estudio')).toBe(true)
+    expect(effectiveAreaHrefs('supervisor', null).has('/estudio')).toBe(true)
+    expect(effectiveAreaHrefs('copy', null).has('/estudio')).toBe(false)
+    expect(effectiveAreaHrefs('video', null).has('/estudio')).toBe(false)
+  })
+})
+
 describe("Primer Round area", () => {
   it("is registered under Trabajo with pipeline.read", () => {
     const area = AREAS.find((a) => a.href === "/primer-round")

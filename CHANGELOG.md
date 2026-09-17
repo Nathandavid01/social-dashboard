@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.93 — 2026-09-17
+
+**Estudio para editores: sube el video, la IA arma el caption y se crea un borrador en Metricool (no se publica).**
+- Nueva pantalla **Estudio** (`/estudio`) en el menú Trabajo. Editores, supervisores y owners.
+- Flujo: elegir cliente → subir mp4/mov (hasta **500 MB**, directo a Entregas) → la IA lee el video → caption editable → **Crear borrador en Metricool**. Nunca se publica en vivo.
+- Primer Round: collabs `@rafaellenin` y `@denniseyperez` ya marcados. Clip en vivo («Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez») o GFX/promo («Mañana desde las 5:43 AM junto a @hosts»).
+- El caption no inventa palabras dichas. Vercel sigue cortando el body a ~4.5 MB; este flujo no pasa por ahí.
+
+![Estudio editor: upload, caption y borrador Metricool](/changelog/v4.93-estudio-editor.png)
+
 ## v4.92 — 2026-09-14
 
 **Primer Round: sube el video entero, rápido, sin el error 413.**
