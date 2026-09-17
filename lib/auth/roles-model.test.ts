@@ -12,6 +12,7 @@ describe('modelo de roles', () => {
     const h = effectiveAreaHrefs('editor', null)
     expect(h.has('/pipeline')).toBe(true)
     expect(h.has('/revision')).toBe(true)
+    expect(h.has('/subir-video')).toBe(true)
     // Copy y publicación viven en /entregas: no es su trabajo.
     expect(h.has('/entregas')).toBe(false)
     expect(h.has('/produccion')).toBe(false)
@@ -61,6 +62,8 @@ describe('modelo de roles', () => {
   it('quién sube y quién escribe el copy', () => {
     expect(hasPermission('editor', 'video.upload')).toBe(true)
     expect(hasPermission('editor', 'captions.edit')).toBe(true)
+    expect(hasPermission('editor', 'metricool.draft')).toBe(true)
+    expect(hasPermission('editor', 'posting.publish')).toBe(false)
     // El diseñador entrega piezas pero el copy lo escribe otro.
     expect(hasPermission('disenador', 'video.upload')).toBe(true)
     expect(hasPermission('disenador', 'captions.edit')).toBe(false)

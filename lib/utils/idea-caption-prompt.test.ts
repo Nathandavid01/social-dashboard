@@ -8,6 +8,20 @@ describe('buildIdeaCaptionPrompt', () => {
     expect(buildIdeaCaptionPrompt(base)).toContain('Cómo limpiar tu sofá')
   })
 
+  it('never invents spoken words', () => {
+    expect(buildIdeaCaptionPrompt(base)).toMatch(/NUNCA inventes diálogo/i)
+  })
+
+  it('Primer Round live template uses the names line', () => {
+    const p = buildIdeaCaptionPrompt({
+      ...base,
+      primerRoundLockedTemplate: true,
+      primerRoundPieceKind: 'live',
+    })
+    expect(p).toContain('Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.')
+    expect(p).toMatch(/NUNCA inventes diálogo/i)
+  })
+
   it('injects brand voice + language constraints when present', () => {
     const p = buildIdeaCaptionPrompt({
       ...base,

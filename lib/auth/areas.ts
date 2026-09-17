@@ -67,6 +67,8 @@ export const AREAS: Area[] = [
   { href: '/pipeline',           label: 'Pipeline',        permission: 'pipeline.read',      group: 'Trabajo' },
   // Estudio dedicado Primer Round (caption IG + verify overlay/caption + Metricool collabs).
   { href: '/primer-round',       label: 'Primer Round',    permission: 'pipeline.read',      group: 'Trabajo' },
+  // Estudio del editor: subir video → IA → caption → borrador Metricool (no se publica solo).
+  { href: '/subir-video',        label: 'Subir video',     permission: 'metricool.draft',    group: 'Trabajo' },
   { href: '/banco',              label: 'Banco de Video',  permission: 'video_bank.read',    group: 'Trabajo' },
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },

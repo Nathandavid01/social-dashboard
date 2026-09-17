@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subir video · v4.93</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0a0a0a;color:#fafafa;font:14px/1.45 system-ui,sans-serif}
+  main{max-width:1040px;margin:auto;padding:32px 20px}
+  h1{font-size:24px;margin:8px 0 4px}
+  p,small{color:#a3a3a3}
+  .states{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .card{background:#171717;border:1px solid #303030;border-radius:12px;padding:20px;min-width:0}
+  h2{font-size:16px;margin:0 0 4px}
+  label{display:block;font-size:12px;margin:12px 0 6px;color:#e5e5e5}
+  select,textarea,.field{width:100%;border:1px solid #303030;background:#0a0a0a;color:#fafafa;border-radius:8px;padding:10px 12px;font:13px system-ui}
+  button{width:100%;border:0;border-radius:8px;padding:14px;background:#d4af37;color:#111;font-weight:600;margin-top:12px}
+  button.ghost{background:transparent;border:1px solid #303030;color:#fafafa}
+  button:disabled{opacity:.5}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .badge{border:1px solid #404040;border-radius:999px;padding:2px 8px;font:11px ui-monospace,monospace}
+  .gold{color:#d4af37}
+  .check{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  .video{margin:16px auto 0;background:#000;aspect-ratio:9/16;max-height:220px;display:grid;place-content:center;border-radius:8px;text-align:center}
+  .status{border:1px solid #303030;border-radius:8px;padding:12px;font-size:12px;margin-top:12px}
+  .ok{color:#34d399}
+  @media(max-width:700px){.states{grid-template-columns:1fr}main{padding:20px 16px}}
+</style>
+<main>
+  <small>Vista de ejemplo · v4.93</small>
+  <h1>Subir video</h1>
+  <p>El editor sube el corte (hasta 500 MB). La IA lo lee, arma el caption y se manda a Metricool como <strong class="gold">borrador</strong> — no se publica solo.</p>
+  <div class="states">
+    <section class="card">
+      <small>1 · Listo para subir</small>
+      <h2>Cliente y archivo</h2>
+      <label>Cliente</label>
+      <select><option>Primer Round Oficial</option><option>Otro Cliente</option></select>
+      <label>Tipo de pieza (Primer Round)</label>
+      <select><option>Detectar (IA)</option><option>Clip LIVE</option><option>GFX / promo</option></select>
+      <div class="check"><input type="checkbox" checked> Colaboradores de Instagram</div>
+      <div class="row" style="margin-top:8px">
+        <span class="badge">@rafaellenin</span>
+        <span class="badge">@denniseyperez</span>
+      </div>
+      <p style="margin:12px 0 0;font-size:12px">mp4 o mov, máx. 500 MB. Directo a Entregas.</p>
+      <button>Upload video</button>
+    </section>
+    <section class="card">
+      <small class="gold">2 · Caption listo, borrador pendiente</small>
+      <h2>Revisa y envía</h2>
+      <div class="video">▷ clip-estudio.mp4</div>
+      <div class="status">Revisa el caption. Luego se envía como borrador a Metricool — no se publica solo.</div>
+      <label>Caption</label>
+      <textarea rows="6">¿Qué pasó esta mañana en el estudio?
+
+Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.
+
+#magic973 #puertorico #primerround</textarea>
+      <button>Enviar borrador a Metricool</button>
+      <p class="ok" style="font-size:12px;margin-top:10px">Borrador creado en Metricool #88. No está en vivo: hay que aceptarlo en Metricool.</p>
+    </section>
+  </div>
+</main>
+</html>
