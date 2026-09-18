@@ -101,6 +101,8 @@ export async function generateIdeaCaption(
     hermanos?: { titulo: string; caption: string }[]
     /** When set, only this file (and its analysis) is used — never a leftover sibling. */
     videoId?: string | null
+    /** Primer Round: clip LIVE vs GFX/promo. Default gfx when omitted. */
+    primerRoundKind?: 'live' | 'gfx' | null
   },
 ): Promise<{ ok?: true; caption?: string; error?: string }> {
   try {
@@ -244,13 +246,14 @@ export async function generateIdeaCaption(
     },
     primerRoundLockedTemplate,
     styleRules,
+    primerRoundPieceKind: primerRoundLockedTemplate ? (opts?.primerRoundKind ?? 'gfx') : null,
   }
 
   try {
     const caption = await generateCaptionText(buildIdeaCaptionPrompt(sharedPrompt))
     if (!caption?.trim()) return { error: 'La IA no devolvió caption' }
     let stored = primerRoundLockedTemplate
-      ? normalizePrimerRoundCaption(caption.trim())
+      ? normalizePrimerRoundCaption(caption.trim(), undefined, opts?.primerRoundKind ?? 'gfx')
       : caption.trim()
 
     // Pieza 2, red de seguridad: si el caption choca obviamente con un

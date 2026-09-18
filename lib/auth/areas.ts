@@ -65,7 +65,7 @@ export const AREAS: Area[] = [
 
   // ── 3. Banco (paso 2), corte, copy ──
   { href: '/pipeline',           label: 'Pipeline',        permission: 'pipeline.read',      group: 'Trabajo' },
-  // Estudio dedicado Primer Round (caption IG + verify overlay/caption + Metricool collabs).
+  // Estudio dedicado Primer Round: upload → IA caption → borrador Metricool (collabs IG).
   { href: '/primer-round',       label: 'Primer Round',    permission: 'pipeline.read',      group: 'Trabajo' },
   { href: '/banco',              label: 'Banco de Video',  permission: 'video_bank.read',    group: 'Trabajo' },
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },

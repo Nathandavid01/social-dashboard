@@ -171,6 +171,15 @@ it('supervisors retain the video bank with restricted areas',()=>{
 })
 
 
+describe("Subir video is not a product area", () => {
+  it("does not appear in Trabajo — Primer Round is the upload screen", () => {
+    expect(AREAS.find((a) => a.href === "/subir-video")).toBeUndefined()
+    expect(AREAS.find((a) => a.label === "Subir video")).toBeUndefined()
+    expect(effectiveAreaHrefs("editor", null).has("/subir-video")).toBe(false)
+    expect(effectiveAreaHrefs("owner", null).has("/subir-video")).toBe(false)
+  })
+})
+
 describe("Primer Round area", () => {
   it("is registered under Trabajo with pipeline.read", () => {
     const area = AREAS.find((a) => a.href === "/primer-round")
