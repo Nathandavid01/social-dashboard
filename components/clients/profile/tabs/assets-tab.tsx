@@ -20,9 +20,12 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Upload, Trash2, Image as ImageIcon, FileText, Palette, Type, Shield, FileSignature, FolderOpen, Loader2 } from 'lucide-react'
+import { Upload, Trash2, Image as ImageIcon, FileText, Palette, Type, Shield, FileSignature, FolderOpen, Loader2, Video } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 import { uploadClientAsset, deleteClientAsset } from '@/lib/actions/client-profile'
+import { deleteClientBankAsset } from '@/lib/actions/client-asset-bank'
+import { putBankFile } from '@/components/clients/put-bank-file'
+import { isBankAssetKind } from '@/lib/utils/client-asset-bank'
 import { cn } from '@/lib/utils'
 import type { ClientAsset, ClientAssetKind } from '@/lib/supabase/types'
 
@@ -33,6 +36,8 @@ interface Props {
 
 const KIND_META: Record<ClientAssetKind, { label: string; icon: typeof ImageIcon; tone: string }> = {
   logo:         { label: 'Logos',          icon: ImageIcon,     tone: 'text-purple-500 bg-purple-500/10' },
+  broll:        { label: 'B-roll',         icon: Video,         tone: 'text-teal-500 bg-teal-500/10' },
+  photo:        { label: 'Fotos',          icon: ImageIcon,     tone: 'text-amber-500 bg-amber-500/10' },
   color_guide:  { label: 'Color guides',   icon: Palette,       tone: 'text-pink-500 bg-pink-500/10' },
   font:         { label: 'Tipografías',    icon: Type,          tone: 'text-blue-500 bg-blue-500/10' },
   legal:        { label: 'Legales',        icon: Shield,        tone: 'text-yellow-500 bg-yellow-500/10' },
@@ -52,7 +57,7 @@ export function AssetsTab({ clientId, assets }: Props) {
 
   const filtered = filter === 'all' ? assets : assets.filter((a) => a.kind === filter)
 
-  const kinds: (ClientAssetKind | 'all')[] = ['all', 'logo', 'color_guide', 'font', 'legal', 'contract', 'other']
+  const kinds: (ClientAssetKind | 'all')[] = ['all', 'logo', 'broll', 'photo', 'other', 'color_guide', 'font', 'legal', 'contract']
 
   return (
     <div className="space-y-4">
@@ -140,7 +145,9 @@ function AssetCard({ asset, clientId, index }: { asset: ClientAsset; clientId: s
               onClick={() => {
                 if (!confirm(`¿Eliminar "${asset.name}"?`)) return
                 startDelete(async () => {
-                  const res = await deleteClientAsset(asset.id, clientId)
+                  const res = isBankAssetKind(asset.kind)
+                    ? await deleteClientBankAsset(asset.id, clientId)
+                    : await deleteClientAsset(asset.id, clientId)
                   if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
                   else toast({ title: 'Asset eliminado' })
                 })
@@ -170,14 +177,22 @@ function UploadAssetDialog({ clientId }: { clientId: string }) {
   function submit() {
     if (!file) return
     startTransition(async () => {
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('kind', kind)
-      if (name) fd.append('name', name)
-      const res = await uploadClientAsset(clientId, fd)
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      let error: string | undefined
+      if (isBankAssetKind(kind)) {
+        const renamed = name.trim() && name.trim() !== file.name
+          ? new File([file], name.trim(), { type: file.type })
+          : file
+        error = (await putBankFile({ clientId, kind, file: renamed })).error
+      } else {
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('kind', kind)
+        if (name) fd.append('name', name)
+        error = (await uploadClientAsset(clientId, fd)).error
+      }
+      if (error) toast({ title: 'Error', description: error, variant: 'destructive' })
       else {
-        toast({ title: 'Asset subido' })
+        toast({ title: 'Archivo en el banco' })
         setOpen(false)
         setFile(null)
         setName('')
@@ -189,12 +204,12 @@ function UploadAssetDialog({ clientId }: { clientId: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="transition-transform hover:scale-105">
-          <Upload className="mr-1.5 h-3.5 w-3.5" /> Subir asset
+          <Upload className="mr-1.5 h-3.5 w-3.5" /> Subir al banco
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Subir asset</DialogTitle>
+          <DialogTitle>Subir al banco</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3 py-2">
           <div
@@ -240,11 +255,13 @@ function UploadAssetDialog({ clientId }: { clientId: string }) {
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="logo">Logo</SelectItem>
+                  <SelectItem value="broll">B-roll</SelectItem>
+                  <SelectItem value="photo">Foto</SelectItem>
+                  <SelectItem value="other">Otro</SelectItem>
                   <SelectItem value="color_guide">Color guide</SelectItem>
                   <SelectItem value="font">Tipografía</SelectItem>
                   <SelectItem value="legal">Documento legal</SelectItem>
                   <SelectItem value="contract">Contrato / addendum</SelectItem>
-                  <SelectItem value="other">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>

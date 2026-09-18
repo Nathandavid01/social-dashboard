@@ -66,7 +66,7 @@ export function computeIdeaProgress(input: {
     { key: 'idea', label: 'Idea', done: filled(idea.hook) },
     { key: 'material', label: 'Material', done: rawN >= 1, count: { current: rawN, total: MIN.raw } },
     { key: 'edited', label: 'Editado', done: editedN >= 1, count: { current: editedN, total: MIN.edited } },
-    { key: 'assets', label: 'Assets', done: assetCount >= 1, count: { current: assetCount, total: 1 } },
+    { key: 'assets', label: 'Banco', done: assetCount >= 1, count: { current: assetCount, total: 1 } },
     {
       key: 'approval',
       label: 'Aprobación',

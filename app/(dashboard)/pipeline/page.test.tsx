@@ -43,6 +43,9 @@ vi.mock('@/lib/auth/server', () => ({
 vi.mock('@/lib/actions/content-ideas', () => ({ getIdeacionPipeline: () => mocks.ideas() }))
 vi.mock('@/lib/utils/content-pipeline', () => ({ getPipelineTotals: () => mocks.pipelineTotals() }))
 vi.mock('@/lib/actions/client-pictures', () => ({ getMetricoolPicturesByBlogId: vi.fn(async () => ({})) }))
+vi.mock('@/lib/actions/client-asset-bank', () => ({
+  listClientBankAssetsByClientIds: vi.fn(async () => ({ byClient: {} })),
+}))
 vi.mock('@/lib/utils/workflow-progress', () => ({ getWorkflowSettings: vi.fn(async () => ({ pipeline_step_assignees: {} })) }))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({

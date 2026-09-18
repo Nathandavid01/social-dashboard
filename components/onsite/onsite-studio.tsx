@@ -27,6 +27,8 @@ import {
 import { ProposalPdfButton } from '@/components/ideas/proposal-pdf-button'
 import { IdeaVideoLoader } from '@/components/recording/idea-video-loader'
 import { OnsiteCallsheetPdf } from '@/components/onsite/onsite-callsheet-pdf'
+import { ClientAssetBankPanel } from '@/components/onsite/client-asset-bank-panel'
+import type { ClientBankFile } from '@/lib/utils/client-asset-bank'
 
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
@@ -45,6 +47,8 @@ export function OnsiteStudio({
   canAddIdeas = false,
   canRecord,
   canUpload,
+  canUploadBank = false,
+  bankAssets = [],
   today,
   currentUserId,
 }: {
@@ -57,6 +61,8 @@ export function OnsiteStudio({
   canAddIdeas?: boolean
   canRecord: boolean
   canUpload: boolean
+  canUploadBank?: boolean
+  bankAssets?: ClientBankFile[]
   today: string
   currentUserId: string | null
 }) {
@@ -306,6 +312,15 @@ export function OnsiteStudio({
             </div>
           </div>
         </header>
+
+        {active.clientId && (
+          <ClientAssetBankPanel
+            clientId={active.clientId}
+            clientName={active.clientName}
+            assets={bankAssets}
+            canUpload={canUploadBank}
+          />
+        )}
 
         {añadiendo && (canBrief || canAddIdeas) && (
           <ul className="max-h-48 space-y-1 overflow-y-auto rounded-2xl border bg-card p-2">

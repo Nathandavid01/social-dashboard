@@ -26,7 +26,7 @@ const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] 
   { key: 'brand',    label: 'Marca',      icon: Palette },
   { key: 'contract', label: 'Contrato',   icon: FileSignature },
   { key: 'billing',  label: 'Pagos',      icon: DollarSign },
-  { key: 'assets',   label: 'Assets',     icon: FolderOpen },
+  { key: 'assets',   label: 'Banco',      icon: FolderOpen },
   { key: 'tasks',    label: 'Tareas',     icon: CheckSquare },
   { key: 'content',  label: 'Contenido',  icon: Sparkles },
   { key: 'captions', label: 'Captions',   icon: MessageSquareText },

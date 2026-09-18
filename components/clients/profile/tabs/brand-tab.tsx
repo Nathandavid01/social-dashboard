@@ -84,7 +84,7 @@ export function BrandTab({ client }: Props) {
           </div>
           <p className="text-[11px] text-muted-foreground">
             Las Gráficas IA usan estos colores y tipografías. El archivo de la fuente (.ttf/.otf) se sube en la
-            pestaña Assets como &ldquo;Tipografía&rdquo;.
+            pestaña Banco como &ldquo;Tipografía&rdquo;.
           </p>
           <Button onClick={saveColors} disabled={isPending} size="sm" className="w-full">
             {isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-2 h-3.5 w-3.5" />}

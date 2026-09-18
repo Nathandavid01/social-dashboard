@@ -1,9 +1,12 @@
-import { Download, ImageIcon, Palette, Type, Shield, FileSignature, FolderOpen } from 'lucide-react'
+import { Download, ImageIcon, Palette, Type, Shield, FileSignature, FolderOpen, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClientAsset, ClientAssetKind } from '@/lib/supabase/types'
+import { isBankAssetKind } from '@/lib/utils/client-asset-bank'
 
 const KIND_META: Record<ClientAssetKind, { label: string; icon: typeof ImageIcon; tone: string }> = {
   logo:        { label: 'Logo',        icon: ImageIcon,     tone: 'text-purple-500 bg-purple-500/10' },
+  broll:       { label: 'B-roll',      icon: Video,         tone: 'text-teal-500 bg-teal-500/10' },
+  photo:       { label: 'Foto',        icon: ImageIcon,     tone: 'text-amber-500 bg-amber-500/10' },
   color_guide: { label: 'Color guide', icon: Palette,       tone: 'text-pink-500 bg-pink-500/10' },
   font:        { label: 'Tipografía',  icon: Type,          tone: 'text-blue-500 bg-blue-500/10' },
   legal:       { label: 'Legal',       icon: Shield,        tone: 'text-yellow-500 bg-yellow-500/10' },
@@ -19,13 +22,12 @@ function formatBytes(n: number | null): string {
 }
 
 export function ClientAssetsDownload({ assets }: { assets: ClientAsset[] }) {
-  // Only brand-kit assets are useful to editors; skip contracts/legal here.
-  const editable = assets.filter((a) => a.kind === 'logo' || a.kind === 'color_guide' || a.kind === 'font' || a.kind === 'other')
+  const editable = assets.filter((a) => isBankAssetKind(a.kind) || a.kind === 'color_guide' || a.kind === 'font')
 
   if (editable.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Este cliente aún no tiene assets de marca cargados. Súbelos en el perfil del cliente → pestaña Assets.
+        Este cliente aún no tiene archivos en su banco. Súbelos en On Site o en el perfil → pestaña Banco.
       </p>
     )
   }
