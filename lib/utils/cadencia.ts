@@ -16,6 +16,7 @@
 // the drilldown, but don't move the rings.
 
 import type { SocialPlatform } from '@/lib/supabase/types'
+import { resolveSlotTime } from './posting-schedule'
 
 export type CadenciaStatus = 'publicado' | 'pendiente' | 'atrasado'
 
@@ -31,6 +32,9 @@ export interface CadenciaClientInput {
   platforms: SocialPlatform[]
   postingTime: string | null // "HH:MM" local, or null
   postingDays: number[] // getDay() indices (0=Sun..6=Sat) the client is configured to post
+  postingSchedule?: Record<string, string> | null
+  /** Minutes since midnight in this client's zone; overrides the global nowMinutes. */
+  nowMinutes?: number
   publishedDates: string[]
   errorDates: string[]
   pendingDates: string[]
@@ -176,6 +180,7 @@ interface Cell {
   fulfilled: boolean // expected AND at least one published
   // ring contribution (only expected days count toward adherence)
   ringStatus: CadenciaStatus | null
+  slotTime: string | null
 }
 
 /** Classify one (client, date) cell. */
@@ -184,7 +189,8 @@ function classifyCell(c: CadenciaClientInput, date: string, today: string, nowMi
   const err = countOn(c.errorDates, date)
   const pend = countOn(c.pendingDates, date)
   const expected = c.postingDays.includes(weekdayOf(date))
-  const past = isPast(date, today, c.postingTime, nowMinutes)
+  const slotTime = resolveSlotTime(weekdayOf(date), c.postingTime, c.postingSchedule)
+  const past = isPast(date, today, slotTime, c.nowMinutes ?? nowMinutes)
 
   const dots: CadenciaStatus[] = []
   for (let i = 0; i < pub; i++) dots.push('publicado')
@@ -207,7 +213,7 @@ function classifyCell(c: CadenciaClientInput, date: string, today: string, nowMi
     else ringStatus = 'pendiente'
   }
 
-  return { dots, published: pub, failed: err, expected, fulfilled: expected && pub > 0, ringStatus }
+  return { dots, published: pub, failed: err, expected, fulfilled: expected && pub > 0, ringStatus, slotTime }
 }
 
 function accumulate(stats: RingStats, status: CadenciaStatus): void {
@@ -260,7 +266,7 @@ export function buildCadencia(
         clientName: c.clientName,
         industry: c.industry,
         platforms: c.platforms ?? [],
-        postingTime: c.postingTime,
+        postingTime: cell.slotTime,
         dots: cell.dots,
         published: cell.published,
         planned: cell.expected ? 1 : 0,

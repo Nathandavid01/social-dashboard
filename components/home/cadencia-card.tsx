@@ -40,11 +40,7 @@ function tintFor(id: string): string {
 function periodFor(row: CadenciaClientRow): { label: string; suggested: boolean } {
   const minutes = postingTimeToMinutes(row.postingTime)
   if (minutes !== null) return { label: minutes < 12 * 60 ? 'AM' : 'PM', suggested: false }
-  const industry = (row.industry ?? '').toLowerCase()
-  if (/restaurante|restaurant|comida|cafeter[ií]a|bar|panader[ií]a|food/.test(industry)) {
-    return { label: 'AM sugerido', suggested: true }
-  }
-  return { label: 'Sin hora', suggested: true }
+  return { label: 'Sin hora', suggested: false }
 }
 
 const plural = (n: number, sing: string, plu: string) => `${n} ${n === 1 ? sing : plu}`

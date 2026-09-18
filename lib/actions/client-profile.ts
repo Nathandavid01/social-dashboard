@@ -12,6 +12,7 @@ import {
 } from '@/lib/validations/client-profile.schema'
 import type { ClientAsset, ClientAssetKind, ClientPayment } from '@/lib/supabase/types'
 import { syncSchedulesToPostingDays } from '@/lib/actions/sync-posting-cadence'
+import { revalidateClientCadence } from '@/lib/actions/client-cadence'
 
 /**
  * The fields in `clients` are gated by different permissions:
@@ -76,8 +77,16 @@ export async function updateClientProfile(clientId: string, input: ClientProfile
     await syncSchedulesToPostingDays(supabase, clientId, patch.posting_days)
   }
 
-  revalidatePath(`/clients/${clientId}`)
-  revalidatePath('/clients')
+  const touchesCadence =
+    Array.isArray(patch.posting_days) ||
+    'posting_time' in patch ||
+    'posting_schedule' in patch ||
+    'posting_timezone' in patch
+  if (touchesCadence) await revalidateClientCadence(clientId)
+  else {
+    revalidatePath(`/clients/${clientId}`)
+    revalidatePath('/clients')
+  }
   return { ok: true }
 }
 

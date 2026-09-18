@@ -14,6 +14,14 @@ import {
   type CadenciaClientInput,
 } from '@/lib/utils/cadencia'
 import type { SocialPlatform } from '@/lib/supabase/types'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
+import {
+  AGENCY_TIMEZONE,
+  effectiveTimezone,
+  isMissingTimezoneColumn,
+  minutesSinceMidnightInTz,
+  readClientCadence,
+} from '@/lib/utils/client-cadence'
 
 // Clients to keep out of the cadence overview (Nathan's call). Matched on the
 // trimmed, lowercased client name.
@@ -25,6 +33,8 @@ interface ClientRow {
   industry: string | null
   posting_time: string | null
   posting_days: number[] | null
+  posting_schedule?: Record<string, string> | null
+  posting_timezone?: string | null
   platforms: SocialPlatform[] | null
   metricool_blog_id: string | null
 }
@@ -39,9 +49,9 @@ interface ClientRow {
  */
 export async function getCadenciaData(): Promise<CadenciaData> {
   const now = new Date()
-  const days = weekDaysMon(now)
-  const today = toLocalDate(now)
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const today = todayISOInTimeZone(AGENCY_TIMEZONE, now)
+  const days = weekDaysMon(localDateFromIso(today))
+  const nowMinutes = minutesSinceMidnightInTz(AGENCY_TIMEZONE, now)
 
   try {
     await requirePermission('cadence.read')
@@ -62,7 +72,7 @@ function sweepWeek(weekStart: string, weekEnd: string): Promise<CadenciaClientIn
   // Bump the version segment whenever the cached shape changes, to evict stale entries.
   // tags: revalidatePath no limpia un unstable_cache. Sin la etiqueta, pausar un
   // cliente lo dejaba en la cadencia del dia hasta 10 minutos mas.
-  return unstable_cache(() => sweepWeekUncached(weekStart, weekEnd), ['cadencia-sweep', 'v2', weekStart], {
+  return unstable_cache(() => sweepWeekUncached(weekStart, weekEnd), ['cadencia-sweep', 'v3', weekStart], {
     revalidate: 600,
     tags: [CADENCIA_TAG],
   })()
@@ -73,12 +83,21 @@ async function sweepWeekUncached(weekStart: string, weekEnd: string): Promise<Ca
   const base = getServerConfig()
   if (!supabase || !base) return []
 
-  const { data } = await supabase
+  let { data, error } = await supabase
     .from('clients')
-    .select('id, name, industry, posting_time, posting_days, platforms, metricool_blog_id')
+    .select('id, name, industry, posting_time, posting_days, posting_schedule, posting_timezone, platforms, metricool_blog_id')
     .eq('status', 'active')
     .not('metricool_blog_id', 'is', null)
     .order('name', { ascending: true })
+  if (error && isMissingTimezoneColumn(error)) {
+    const retry = await supabase
+      .from('clients')
+      .select('id, name, industry, posting_time, posting_days, posting_schedule, platforms, metricool_blog_id')
+      .eq('status', 'active')
+      .not('metricool_blog_id', 'is', null)
+      .order('name', { ascending: true })
+    data = (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null }))
+  }
 
   const rows = ((data ?? []) as ClientRow[]).filter(
     (c) => !EXCLUDED_CLIENT_NAMES.includes(c.name.trim().toLowerCase()),
@@ -107,13 +126,16 @@ async function fetchClientWeek(
   weekStart: string,
   weekEnd: string,
 ): Promise<CadenciaClientInput> {
+  const cadence = readClientCadence(c)
   const input: CadenciaClientInput = {
     clientId: c.id,
     clientName: c.name,
     industry: c.industry,
     platforms: c.platforms ?? [],
-    postingTime: c.posting_time,
-    postingDays: c.posting_days ?? [],
+    postingTime: cadence.postingTime,
+    postingDays: cadence.postingDays,
+    postingSchedule: cadence.postingSchedule,
+    nowMinutes: minutesSinceMidnightInTz(effectiveTimezone(cadence)),
     publishedDates: [],
     errorDates: [],
     pendingDates: [],
@@ -143,10 +165,7 @@ async function fetchClientWeek(
   return input
 }
 
-/** YYYY-MM-DD in local time (matches the publish dates we compare against). */
-function toLocalDate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+function localDateFromIso(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, (m ?? 1) - 1, d ?? 1)
 }

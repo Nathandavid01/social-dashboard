@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { currentUserHas, requirePermission } from '@/lib/auth/server'
 import type { ProductionContentType, ProductionPriority, ProductionTask, ProductionTaskStatus } from '@/lib/supabase/types'
 import { postingDaysFromIsoWeekdays } from '@/lib/utils/posting-days-sot'
+import { revalidateClientCadence } from '@/lib/actions/client-cadence'
 
 // ── Schedules ────────────────────────────────────────────────────────────────
 
@@ -46,8 +47,7 @@ export async function upsertProductionSchedules(
 
   if (schedules.length === 0) {
     await supabase.from('clients').update({ posting_days: [], updated_at: new Date().toISOString() }).eq('id', clientId)
-    revalidatePath('/produccion')
-    revalidatePath(`/clients/${clientId}`)
+    await revalidateClientCadence(clientId)
     return { error: null }
   }
 
@@ -69,8 +69,7 @@ export async function upsertProductionSchedules(
     await supabase.from('clients').update({ posting_days: postingDays, updated_at: new Date().toISOString() }).eq('id', clientId)
   }
 
-  revalidatePath('/produccion')
-  revalidatePath(`/clients/${clientId}`)
+  await revalidateClientCadence(clientId)
   return { error: error?.message ?? null }
 }
 

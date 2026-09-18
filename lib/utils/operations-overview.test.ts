@@ -24,6 +24,12 @@ describe('operations overview',()=>{
   expect(buildOperationsOverview([idea()],[{...client,metricool_blog_id:null}],[],today).ready).toHaveLength(0)
   expect(build([idea({approved_video_id:'gone'})]).ready).toHaveLength(0)
  })
+ it('uses the per-day posting_schedule instead of the default posting_time',()=>{
+  const withOverride={...client,posting_time:'18:00',posting_schedule:{'2':'09:00'}}
+  const r=buildOperationsOverview([idea()],[withOverride],[{id:'e',full_name:'Alexa',role:'editor',status:'active'}],today,Date.parse(today+'T14:00:00Z'))
+  expect(r.ready).toHaveLength(0)
+  expect(r.blocked[0].state).toMatch(/pasó|hora/i)
+ })
 })
 describe('editor responsibility',()=>{
  const assignedClient={...client,assigned_to:'e'}

@@ -1,8 +1,9 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { requirePermission } from '@/lib/auth/server'
+import { revalidateClientCadence } from '@/lib/actions/client-cadence'
+import { syncSchedulesToPostingDays } from '@/lib/actions/sync-posting-cadence'
 
 /**
  * Set a client's posting cadence (days of week) from the planning view.
@@ -32,8 +33,7 @@ export async function setClientPostingDays(
 
   if (error) return { error: error.message }
 
-  revalidatePath('/planning')
-  revalidatePath('/home')
-  revalidatePath(`/clients/${clientId}`)
+  await syncSchedulesToPostingDays(admin, clientId, clean)
+  await revalidateClientCadence(clientId)
   return { ok: true }
 }

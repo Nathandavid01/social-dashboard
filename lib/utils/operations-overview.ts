@@ -4,8 +4,10 @@ import { editorWipIdeaIds } from '@/lib/pipeline/editor-video-bank'
 import { ideaHasEntregasEditedVideo } from './entregas-delivery'
 import { resolveVideoForPublish } from './idea-posting-core'
 import { automaticPublishSchedule } from './automatic-publish-schedule'
+import { readClientCadence } from './client-cadence'
+import { resolveSlotTime } from './posting-schedule'
 
-export interface OverviewClient { assigned_to?:string|null; id:string; name:string; posting_days:number[]|null; metricool_blog_id:string|null; posting_time?:string|null }
+export interface OverviewClient { assigned_to?:string|null; id:string; name:string; posting_days:number[]|null; metricool_blog_id:string|null; posting_time?:string|null; posting_schedule?:Record<string,string>|null }
 export interface OverviewEditor { id:string; full_name:string|null; role:string; status:string }
 export interface OverviewItem { id:string; title:string; client:string; owner:string; date:string|null; state:string; href:string; done:boolean; missing?:boolean; checks:{label:string;done:boolean}[] }
 export interface OperationsOverview { date:string; today:OverviewItem[]; overdue:OverviewItem[]; reviews:OverviewItem[]; corrections:OverviewItem[]; ready:OverviewItem[]; blocked:OverviewItem[]; uploads:OverviewItem[]; editors:{id:string;name:string;used:number;limit:number;free:number}[] }
@@ -27,7 +29,10 @@ export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:Overvi
   const choice=resolveVideoForPublish(i.videos.filter(v=>v.status!=='failed'),{ideaId:i.id,approvedVideoId})
   const sealed=!!choice.video&&!choice.skipped
   const raw=i.videos.some(v=>v.kind==='raw'&&v.status!=='archived'&&v.status!=='failed')
-  const schedule=automaticPublishSchedule(i.publish_date,c.posting_time,now)
+  const cadence=readClientCadence(c)
+  const publishWeekday=i.publish_date?new Date(i.publish_date+'T12:00:00').getDay():null
+  const slotTime=publishWeekday==null?cadence.postingTime:resolveSlotTime(publishWeekday,cadence.postingTime,cadence.postingSchedule)
+  const schedule=automaticPublishSchedule(i.publish_date,slotTime,now)
   const ready=edited&&approved&&reviewVerified&&copy&&sealed&&!!c.metricool_blog_id?.trim()&&schedule.ok&&!sent&&!published
   const needsReview=edited&&i.approval_status==='submitted'&&!published&&!sent
   const correction=edited&&i.approval_status==='revision_needed'&&!published&&!sent
@@ -42,7 +47,7 @@ export function buildOperationsOverview(ideas:IdeaWithPipeline[], clients:Overvi
  }
  const weekday=new Date(today+'T12:00:00Z').getUTCDay()
  for(const c of clients){
-  if(c.posting_days?.includes(weekday)&&!active.some(i=>i.client_id===c.id&&i.publish_date===today)){
+  if(readClientCadence(c).postingDays.includes(weekday)&&!active.some(i=>i.client_id===c.id&&i.publish_date===today)){
    result.today.push({id:'missing-'+c.id,title:'Falta Preparar El Video De Hoy',client:c.name,owner:clientOwner(c),date:today,state:'Sin Video Fechado',href:`/clients/${c.id}`,done:false,missing:true,checks:[]})
   }
  }

@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import { hasPermission } from './permissions'
 
+describe('cadence.edit', () => {
+  it('owner, supervisor, editor y team_member pueden editar la cadencia', () => {
+    for (const role of ['owner', 'supervisor', 'editor', 'team_member'] as const) {
+      expect(hasPermission(role, 'cadence.edit')).toBe(true)
+    }
+  })
+
+  it('copy, video y diseñador no editan la cadencia', () => {
+    expect(hasPermission('copy', 'cadence.edit')).toBe(false)
+    expect(hasPermission('video', 'cadence.edit')).toBe(false)
+    expect(hasPermission('disenador', 'cadence.edit')).toBe(false)
+  })
+})
+
 describe('view_as.editor', () => {
   it('owner (wildcard) y supervisor pueden; el editor no', () => {
     expect(hasPermission('owner', 'view_as.editor')).toBe(true)

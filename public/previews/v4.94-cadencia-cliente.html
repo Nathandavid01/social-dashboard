@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v4.94 — Cadencia por cliente</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --gold2:#c8a34a; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:720px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .grid { display:grid; gap:12px; }
+    @media (min-width:720px) { .grid { grid-template-columns:1.2fr .8fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px; }
+    .freq { font-size:13px; color:var(--muted); margin:0 0 12px; }
+    .freq strong { color:var(--fg); font-variant-numeric:tabular-nums; }
+    .days { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+    .day { text-align:center; font-size:11px; font-weight:600; padding:8px 0; border-radius:8px; border:1px solid var(--border); color:var(--muted); }
+    .day.on { background:var(--gold); color:#111; border-color:var(--gold); }
+    .row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:12px; font-size:13px; }
+    .pill { border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-variant-numeric:tabular-nums; font-size:13px; }
+    .sum { margin-top:14px; font-size:12px; color:var(--gold2); }
+    .chip { display:flex; justify-content:space-between; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+    .chip:last-child { border-bottom:0; }
+    .muted { color:var(--muted); }
+    .cal { font-size:12px; }
+    .slot { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+    .slot:last-child { border-bottom:0; }
+    .tag { color:var(--gold); font-size:11px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Una cadencia. Todas las pantallas.</h1>
+    <p class="sub">Días, hora, hora por día y zona horaria se guardan en el cliente. Pipeline, el perfil, el calendario y Mi Día leen el mismo valor. Nada se inventa.</p>
+    <div class="grid">
+      <div class="card">
+        <p class="label">Perfil del cliente · Cadencia de publicación</p>
+        <p class="freq"><strong>3</strong> publicaciones / semana</p>
+        <div class="days">
+          <div class="day on">Lun</div>
+          <div class="day">Mar</div>
+          <div class="day on">Mié</div>
+          <div class="day">Jue</div>
+          <div class="day on">Vie</div>
+          <div class="day">Sáb</div>
+          <div class="day">Dom</div>
+        </div>
+        <div class="row"><span class="muted">Hora preferida</span><span class="pill">14:00</span></div>
+        <div class="row"><span class="muted">Zona horaria</span><span class="pill">Puerto Rico (AST)</span></div>
+        <div class="chip"><span>Lunes</span><span>14:00</span></div>
+        <div class="chip"><span>Miércoles</span><span>18:30</span></div>
+        <div class="chip"><span>Viernes</span><span>14:00</span></div>
+        <p class="sum">3/sem · Lun · Mié · Vie · 14:00 · Puerto Rico</p>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <p class="label">Pipeline · mismo valor</p>
+          <p class="cal">Arasibo · 3/sem · Lun · Mié · Vie · 14:00 · Puerto Rico</p>
+        </div>
+        <div class="card">
+          <p class="label">Calendario · huecos de cadencia</p>
+          <div class="slot"><span>Lun 14</span><span class="tag">Cadencia · 14:00</span></div>
+          <div class="slot"><span>Mié 16</span><span class="tag">Cadencia · 18:30</span></div>
+          <div class="slot"><span>Vie 18</span><span class="tag">Cadencia · 14:00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

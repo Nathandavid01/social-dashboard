@@ -158,6 +158,8 @@ export interface Client {
   posting_days: number[]
   posting_time: string | null
   posting_schedule: Record<string, string>
+  /** IANA timezone for posting cadence. Null until a person sets it. */
+  posting_timezone?: string | null
   video_threshold: number
   weekly_post_quota: number | null
   contract_url: string | null
@@ -253,7 +255,7 @@ export interface ContentEvent {
 /** A unified, read-only event shown on the content calendar (aggregated from
  * multiple sources: manual posting events, idea recording/publish dates, and
  * recording sessions). */
-export type CalendarItemType = 'grabacion' | 'publicacion' | 'posting' | 'sesion'
+export type CalendarItemType = 'grabacion' | 'publicacion' | 'posting' | 'sesion' | 'cadencia'
 
 export interface CalendarItem {
   id: string
