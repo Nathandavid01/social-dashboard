@@ -12,6 +12,7 @@ import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import type { BankAdmin, EditorBankClip, EditorBankFile, EditorBankRow } from '@/lib/pipeline/editor-video-bank'
 import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import type { ClientBankFile } from '@/lib/utils/client-asset-bank'
 import { approvalTone } from '@/lib/pipeline/approval-tone'
 import { EditorWorkPackage } from './editor-work-package'
 import { GlobalBrollSection } from './global-broll-section'
@@ -31,6 +32,7 @@ export function EditorVideoBank({
   teamMembers = [],
   clientRunway = {},
   globalBroll = [],
+  clientBank = {},
 }: {
   rows: EditorBankRow[]
   admins?: BankAdmin[]
@@ -39,6 +41,7 @@ export function EditorVideoBank({
   teamMembers?: TeamMember[]
   clientRunway?: Record<string, Runway>
   globalBroll?: GlobalBrollGroup[]
+  clientBank?: Record<string, ClientBankFile[]>
 }) {
   const canOpenProfile = useHasPermission('team.read')
   const teamPace = teamMedianDays(paces)
@@ -50,7 +53,7 @@ export function EditorVideoBank({
         <SectionHeader id="editor-spaces-title" title="Espacios de edición" description="El tope de videos activos sube con el % de aprobación de cada editor (2 → 3 → 4). Los espacios libres dejan claro quién puede tomar el próximo crudo." />
         {rows.length === 0 ? <EmptyState text="No hay crudos listos. Cuando On Site suba material, aparecerá aquí." /> : (
           <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} />)}
+            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} clientBank={clientBank} />)}
           </div>
         )}
       </section>
@@ -70,7 +73,7 @@ function EmptyState({ text }: { text: string }) {
   return <div className="rounded-xl border border-dashed border-white/10 px-5 py-12 text-center text-sm text-slate-500">{text}</div>
 }
 
-function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [] }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[] }) {
+function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [], clientBank = {} }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[]; clientBank?: Record<string, ClientBankFile[]> }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, row.wipLimit)
   const waiting = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'waiting')
@@ -100,7 +103,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
       <div className="grid grid-cols-2 gap-2 px-3.5 pb-3">
         {Array.from({ length: row.wipLimit }).map((_, index) => {
           const work = active[index]
-          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} /> : (
+          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} bank={clientBank[work.client.clientId] ?? []} /> : (
             <div key={`free-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-white/10 bg-black/10 px-3 text-center"><div><p className="text-[11px] font-medium text-slate-300">Espacio libre</p><p className="mt-1 text-[9px] text-slate-500">Puede tomar un video del banco</p><span className="mt-2 inline-block text-[10px] font-semibold text-[#c8a34a]">Disponible</span></div></div>
           )
         })}
@@ -111,7 +114,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
   )
 }
 
-function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [] }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"] }) {
+function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [] }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[] }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const file = clip.files[0]
   const elapsed = daysSince(clip.recordedAt)
@@ -126,7 +129,7 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, brol
         <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-slate-300">{clip.title}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[9px] text-slate-500"><span className="rounded bg-[#c8a34a]/15 px-1 py-0.5 font-semibold uppercase text-[#d6b55f]">Te toca</span>{elapsed != null && <span>Día {elapsed}{estimate != null ? ` de ~${Math.max(1, Math.round(estimate))}` : ''}</span>}</div>
         {clip.shootingNotes && <p className="mt-1 text-[9px] text-slate-500">Anotaciones · {clip.shootingNotes}</p>}
-        <EditorWorkPackage clip={clip} broll={broll} />
+        <EditorWorkPackage clip={clip} broll={broll} bank={bank} />
         {file && <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1"><span className="max-w-[8rem] truncate text-[9px] text-slate-500">{file.name}</span><BankFileActions file={file} compact /></div>}
       </div>
     </article>

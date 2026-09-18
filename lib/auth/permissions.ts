@@ -52,6 +52,8 @@ export type Permission =
   | 'graphics.cost.read'
   | 'metricool.read'
   | 'metricool.write'
+  /** Enviar un borrador a Metricool (nunca auto-publish). Editores y admins. */
+  | 'metricool.draft'
   // Insights
   | 'performance.read'
   | 'efficiency.read'
@@ -111,7 +113,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
     'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
     'graphics.generate', 'graphics.cost.read',
-    'metricool.read', 'metricool.write',
+    'metricool.read', 'metricool.write', 'metricool.draft',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
     'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'video_bank.read', 'planning.act', 'planning.assign', 'planning.move',
@@ -134,6 +136,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'captions.use', 'captions.edit',
     'revision.read', 'pipeline.read', 'planning.act',
     'cadence.edit',
+    'metricool.draft',
     'presence.read',
     'alerts.read',
     'profile.avatar',

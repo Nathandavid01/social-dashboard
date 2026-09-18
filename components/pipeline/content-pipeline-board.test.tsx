@@ -4,6 +4,10 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 const moveBatch = vi.fn<(...a: unknown[]) => Promise<{ success?: boolean; error?: string }>>(async () => ({ success: true }))
 vi.mock('@/lib/actions/content-ideas', () => ({ moveBatch: (...a: unknown[]) => moveBatch(...a) }))
+vi.mock('@/lib/actions/client-asset-bank', () => ({
+  getClientAssetDownloadUrl: vi.fn(),
+  listClientBankAssetsByClientIds: vi.fn(),
+}))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 // Reactive fake so the overlay-in-URL flow (open pushes, back/Escape closes,
 // reload reopens) can actually be exercised, not a no-op push spy.

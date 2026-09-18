@@ -27,6 +27,7 @@ const NON_AREA_ROUTES = new Set<string>([
   '/home',       // mandatory landing
   '/changelog',  // release notes, everyone
   '/account',    // personal account (e.g. /account/security)
+  '/subir-video', // redirect to /primer-round — not a product area, not in nav
 ])
 
 /** Top-level route hrefs that have their own page.tsx. */

@@ -11,6 +11,9 @@ vi.mock('@/lib/actions/onsite', () => ({
   getOnsiteShots: async () => h.shots,
   getAddableIdeas: async () => h.ideas,
 }))
+vi.mock('@/lib/actions/client-asset-bank', () => ({
+  listClientBankAssets: async () => ({ assets: [] }),
+}))
 vi.mock('@/lib/onsite/slot-count', () => ({ pickOnsiteSession: () => ({ id: 's' }) }))
 vi.mock('@/components/onsite/onsite-studio', () => ({ OnsiteStudio: () => <div>Call Sheet</div> }))
 vi.mock('@/components/onsite/supervisor-process-steps', () => ({ SupervisorProcessSteps: () => null }))

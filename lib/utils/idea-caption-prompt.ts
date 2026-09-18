@@ -1,4 +1,7 @@
-import { buildPrimerRoundCaptionPromptInstructions } from '@/lib/primer-round/caption-template'
+import {
+  buildPrimerRoundCaptionPromptInstructions,
+  type PrimerRoundPieceKind,
+} from '@/lib/primer-round/caption-template'
 
 /**
  * Pure builder for the idea-caption prompt. Kept out of the `'use server'`
@@ -82,6 +85,8 @@ export interface IdeaCaptionPromptInput {
   primerRoundLockedTemplate?: boolean
   /** Standing Primer Round Reel style Eric already taught (this client + format). */
   styleRules?: string[] | null
+  /** live clip vs GFX/promo. Ignored unless primerRoundLockedTemplate. */
+  primerRoundPieceKind?: PrimerRoundPieceKind | null
 }
 
 const filled = (s?: string | null): boolean => !!s && s.trim().length > 0
@@ -98,6 +103,7 @@ export function buildIdeaCaptionPrompt(input: IdeaCaptionPromptInput): string {
       feedback: input.feedback,
       previousCaption: input.previousCaption,
       styleRules: input.styleRules,
+      kind: input.primerRoundPieceKind ?? 'gfx',
       // Guest/role comes from overlay line 1 when available; else the model infers.
       guestHint: null,
     })
@@ -288,5 +294,6 @@ ${heardBullet}${seenBullet}${correctionsBullet}${approvedBullet}${avoidBullet}${
 - Incluye un CTA claro
 - Termina con hashtags relevantes (usa los sugeridos si encajan)
 - No inventes años, fechas, nombres de eventos, precios, promociones ni ningún otro dato que no conste en el video, el hook, el brief, las RESTRICCIONES del cliente de arriba (CTA, reglas, hashtags) o los captions de referencia — si algo no consta, se omite
+- NUNCA inventes diálogo ni palabras dichas. Si no está en la transcripción, no lo pongas entre comillas ni como si alguien lo hubiera dicho
 - Devuelve SOLO el caption, sin explicaciones ni comillas.`
 }

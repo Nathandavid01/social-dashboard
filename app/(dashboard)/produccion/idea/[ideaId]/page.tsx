@@ -98,7 +98,7 @@ export default async function IdeaWorkspacePage({ params }: { params: Promise<{ 
         <Card id="stage-assets" className="scroll-mt-20 animate-in fade-in slide-in-from-bottom-1 duration-300 lg:col-span-2" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Palette className="h-4 w-4 text-pink-500" /> Assets del cliente
+              <Palette className="h-4 w-4 text-pink-500" /> Banco del cliente
             </CardTitle>
           </CardHeader>
           <CardContent>

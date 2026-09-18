@@ -40,6 +40,7 @@ vi.mock('@/lib/actions/primer-round', () => ({
   schedulePrimerRoundReel: vi.fn(),
   revisePrimerRoundCaption: vi.fn(),
   acceptPrimerRoundPiece: vi.fn(),
+  pushPrimerRoundDraft: vi.fn(),
 }))
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))

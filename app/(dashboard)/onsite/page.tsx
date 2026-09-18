@@ -3,6 +3,7 @@ import { ClientProposalPanel } from '@/components/ideas/client-proposal-panel'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
+import { listClientBankAssets } from '@/lib/actions/client-asset-bank'
 import { pickOnsiteSession } from '@/lib/onsite/slot-count'
 import { OnsiteStudio } from '@/components/onsite/onsite-studio'
 import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
@@ -23,12 +24,13 @@ export default async function OnsitePage({
   await requirePermission('recording.read')
 
   const { s: sessionId } = await searchParams
-  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, currentUserId, canExportIdeas] = await Promise.all([
+  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, canUploadBank, currentUserId, canExportIdeas] = await Promise.all([
     getOnsiteSessions(),
     currentUserHas('recording.brief'),
     currentUserHas('recording.create'),
     currentUserHas('recording.complete'),
     currentUserHas('video.upload'),
+    currentUserHas('clients.assets.upload'),
     getEffectiveUserId(),
     // Export / propuesta PDF: ideas.read (supervisor, editor, video, copy…).
     // ideas.share era owner/supervisor-only y bloqueaba a quien sí puede leer ideas.
@@ -47,9 +49,13 @@ export default async function OnsitePage({
   const today = todayISOInTimeZone('America/Puerto_Rico')
   const activa = pickOnsiteSession(lista, sessionId, today)
 
-  const [shotResult, ideaResult] = activa
-    ? await Promise.all([getOnsiteShots(activa.id), getAddableIdeas(activa.id)])
-    : [{ shots: [], error: undefined }, { ideas: [], error: undefined }]
+  const [shotResult, ideaResult, bankResult] = activa
+    ? await Promise.all([
+        getOnsiteShots(activa.id),
+        getAddableIdeas(activa.id),
+        activa.clientId ? listClientBankAssets(activa.clientId) : Promise.resolve({ assets: [] }),
+      ])
+    : [{ shots: [], error: undefined }, { ideas: [], error: undefined }, { assets: [] }]
   // Solo las tomas bloquean la sesión. Fallar al listar ideas añadibles no
   // debe dejar a la crew en «Volver A Cargar» con el call sheet vacío.
   const loadError = shotResult.error
@@ -108,6 +114,8 @@ export default async function OnsitePage({
           canAddIdeas={canAddIdeas}
           canRecord={canRecord}
           canUpload={canUpload}
+          canUploadBank={canUploadBank}
+          bankAssets={bankResult.assets ?? []}
           today={today}
           currentUserId={currentUserId}
         />

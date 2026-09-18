@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Film, ImageIcon, Palette, Type, FolderOpen, Download } from 'lucide-react'
+import { Film, ImageIcon, Palette, Type, FolderOpen, Download, Video } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn, platformColors, platformLabels } from '@/lib/utils'
 import { VideoPipelineTable } from './video-pipeline-table'
@@ -8,10 +8,12 @@ import type { ClientVideoPipeline } from '@/lib/actions/video-pipeline'
 import type { ClientAsset, ClientAssetKind, SocialPlatform } from '@/lib/supabase/types'
 
 // Only brand-kit assets are shown on the pipeline (skip contracts/legal).
-const SHARED_ASSET_KINDS: ClientAssetKind[] = ['logo', 'color_guide', 'font', 'other']
+const SHARED_ASSET_KINDS: ClientAssetKind[] = ['logo', 'broll', 'photo', 'color_guide', 'font', 'other']
 
 const ASSET_META: Record<ClientAssetKind, { label: string; icon: typeof ImageIcon; tone: string }> = {
   logo:        { label: 'Logo',        icon: ImageIcon,  tone: 'text-purple-500 bg-purple-500/10' },
+  broll:       { label: 'B-roll',      icon: Video,      tone: 'text-teal-500 bg-teal-500/10' },
+  photo:       { label: 'Foto',        icon: ImageIcon,  tone: 'text-amber-500 bg-amber-500/10' },
   color_guide: { label: 'Color guide', icon: Palette,    tone: 'text-pink-500 bg-pink-500/10' },
   font:        { label: 'Tipografía',  icon: Type,       tone: 'text-blue-500 bg-blue-500/10' },
   legal:       { label: 'Legal',       icon: FolderOpen, tone: 'text-yellow-500 bg-yellow-500/10' },
@@ -73,7 +75,7 @@ export function ClientVideoSection({ pipeline }: { pipeline: ClientVideoPipeline
         {sharedAssets.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 border-t bg-muted/30 px-3.5 py-2.5">
             <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Assets compartidos
+              Banco del cliente
             </span>
             {sharedAssets.map((a) => (
               <SharedAssetChip key={a.id} asset={a} />

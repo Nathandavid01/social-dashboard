@@ -22,6 +22,7 @@ import { NewVideoDialog } from './new-video-dialog'
 import { EditorVideoBank } from './editor-video-bank'
 import { groupEditorVideoBank, isIdeaApproved, type BankAdmin } from '@/lib/pipeline/editor-video-bank'
 import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
+import type { ClientBankFile } from '@/lib/utils/client-asset-bank'
 import { buildEditorPace } from '@/lib/pipeline/editor-pace'
 import { buildVideoBank } from '@/lib/pipeline/video-bank'
 import type { PlannedSession } from '@/lib/utils/planned-sessions'
@@ -77,6 +78,8 @@ export function ContentPipelineBoard(props: {
   approvalRates?: Record<string, number | null>
   /** Pool global de b-roll (todos los clientes) — visible para todo editor. */
   globalBroll?: GlobalBrollGroup[]
+  /** Banco permanente por cliente (logo, foto, b-roll, otro). */
+  clientBank?: Record<string, ClientBankFile[]>
   /** Solo owner/supervisor reciben navegación, filtros y datos del pipeline global. */
   canSeeAll?: boolean
 }) {
@@ -101,6 +104,7 @@ function ContentPipelineBoardInner({
   wipLimits = {},
   approvalRates = {},
   globalBroll = [],
+  clientBank = {},
   canSeeAll = true,
 }: {
   ideas: Idea[]
@@ -115,6 +119,7 @@ function ContentPipelineBoardInner({
   wipLimits?: Record<string, number>
   approvalRates?: Record<string, number | null>
   globalBroll?: GlobalBrollGroup[]
+  clientBank?: Record<string, ClientBankFile[]>
   canSeeAll?: boolean
 }) {
   const [clientFilter, setClientFilter] = useState<string | null>(null)
@@ -495,6 +500,7 @@ function ContentPipelineBoardInner({
           teamMembers={teamMembers}
           clientRunway={clientRunway}
           globalBroll={globalBroll}
+          clientBank={clientBank}
         />
       ) : (
       <div

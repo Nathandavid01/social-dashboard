@@ -4,7 +4,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v4.94 — 2026-09-18
+## v4.95 — 2026-09-18
 
 **La cadencia de cada cliente se edita en un solo sitio y se ve igual en todas partes.**
 - En el perfil (Resumen y Calendario) y en Pipeline puedes fijar días, hora, hora por día y zona horaria.
@@ -13,6 +13,25 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - El widget Cadencia ya no sugiere «AM» por industria. Solo muestra la hora que alguien configuró.
 
 ![Editor de cadencia por cliente](/changelog/v4.94-cadencia-cliente.png)
+
+## v4.94 — 2026-09-18
+
+**Cada cliente tiene un banco permanente de logos, fotos, B-roll y otros archivos.**
+- En On Site (`/onsite`) subes al banco del cliente, aparte de los crudos de cada toma.
+- En Pipeline (`/pipeline`), al abrir Material Y Entregar, ves el banco completo de ese cliente para bajarlo al edit.
+- Categorías: Logo, B-roll, Foto, Otro. No se publica solo. No toca los crudos del pipeline.
+- El perfil del cliente ahora llama **Banco** a esa pestaña.
+
+![Banco del cliente en On Site](/changelog/v4.93-banco-cliente.png)
+
+## v4.93 — 2026-09-17
+
+**En Primer Round subes el video, la IA arma el caption y se manda a Metricool como borrador.**
+- En **Primer Round** (`/primer-round`): sube mp4/mov de hasta **500 MB**. No hay pantalla aparte de “Subir video”.
+- El archivo va directo a Entregas (no pasa por Vercel, que corta a ~4.5 MB).
+- La IA lee el video, escribe el caption bloqueado (sin inventar diálogo) y tú lo envías a Metricool como **borrador** — no se publica solo.
+- Clip LIVE: «Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez». GFX/promo: horario 5:43 AM + @rafaellenin y @denniseyperez. Collabs IG: rafaellenin + denniseyperez.
+
 
 ## v4.92 — 2026-09-14
 

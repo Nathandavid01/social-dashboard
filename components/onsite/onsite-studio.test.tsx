@@ -36,6 +36,10 @@ vi.mock('@/components/recording/idea-video-loader', () => ({
   IdeaVideoLoader: ({ ideaTitle }: { ideaTitle?: string }) => <div>Subida {ideaTitle}</div>,
 }))
 
+vi.mock('@/components/onsite/client-asset-bank-panel', () => ({
+  ClientAssetBankPanel: () => <div>Banco del cliente</div>,
+}))
+
 import { OnsiteStudio } from './onsite-studio'
 
 const session = (over: Partial<OnsiteSession> = {}): OnsiteSession => ({

@@ -3,6 +3,7 @@ import { canSeeAllEditorBanks, editorWipIdeaIds, listBankAdmins, prepareIdeasFor
 import { planAutoAssign } from '@/lib/pipeline/auto-assign'
 import { editorApprovalStats, editorWipLimitFor } from '@/lib/pipeline/editor-wip'
 import { buildGlobalBroll } from '@/lib/pipeline/global-broll'
+import { listClientBankAssetsByClientIds } from '@/lib/actions/client-asset-bank'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { createClient } from '@/lib/supabase/server'
@@ -167,6 +168,9 @@ export default async function PipelinePage() {
     }),
   )
 
+  const bankListed = await listClientBankAssetsByClientIds(activeClients.map((c) => c.id))
+  const clientBank = bankListed.byClient ?? {}
+
   return (
     <ContentPipelineBoard
       ideas={ideas}
@@ -180,6 +184,7 @@ export default async function PipelinePage() {
       wipLimits={wipLimits}
       approvalRates={approvalRates}
       globalBroll={globalBroll}
+      clientBank={clientBank}
       bankAdmins={canSeeAll ? listBankAdmins(teamProfiles ?? []) : []}
       canSeeAll={canSeeAll}
     />
