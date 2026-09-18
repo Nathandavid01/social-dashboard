@@ -23,7 +23,7 @@ import {
   primerRoundNextAirCopy,
   type PrimerRoundAirCopy,
 } from './air-time'
-import type { PrimerRoundPieceKind } from '@/lib/editor-upload/piece-kind'
+import type { PrimerRoundPieceKind } from './piece-kind'
 
 export type { PrimerRoundPieceKind }
 

@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Subir video · v4.93</title>
+<title>Primer Round · borrador Metricool · v4.93</title>
 <style>
   *{box-sizing:border-box}
   body{margin:0;background:#0a0a0a;color:#fafafa;font:14px/1.45 system-ui,sans-serif}
@@ -14,13 +14,11 @@
   h2{font-size:16px;margin:0 0 4px}
   label{display:block;font-size:12px;margin:12px 0 6px;color:#e5e5e5}
   select,textarea,.field{width:100%;border:1px solid #303030;background:#0a0a0a;color:#fafafa;border-radius:8px;padding:10px 12px;font:13px system-ui}
-  button{width:100%;border:0;border-radius:8px;padding:14px;background:#d4af37;color:#111;font-weight:600;margin-top:12px}
-  button.ghost{background:transparent;border:1px solid #303030;color:#fafafa}
+  button{width:100%;border:0;border-radius:8px;padding:14px;background:#f59e0b;color:#111;font-weight:600;margin-top:12px}
   button:disabled{opacity:.5}
   .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .badge{border:1px solid #404040;border-radius:999px;padding:2px 8px;font:11px ui-monospace,monospace}
-  .gold{color:#d4af37}
-  .check{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  .gold{color:#f59e0b}
   .video{margin:16px auto 0;background:#000;aspect-ratio:9/16;max-height:220px;display:grid;place-content:center;border-radius:8px;text-align:center}
   .status{border:1px solid #303030;border-radius:8px;padding:12px;font-size:12px;margin-top:12px}
   .ok{color:#34d399}
@@ -28,21 +26,22 @@
 </style>
 <main>
   <small>Vista de ejemplo · v4.93</small>
-  <h1>Subir video</h1>
-  <p>El editor sube el corte (hasta 500 MB). La IA lo lee, arma el caption y se manda a Metricool como <strong class="gold">borrador</strong> — no se publica solo.</p>
+  <h1>Primer Round</h1>
+  <p>@primerroundoficial. El editor sube el corte (hasta 500 MB). La IA lo lee, arma el caption bloqueado y se manda a Metricool como <strong class="gold">borrador</strong> — no se publica solo.</p>
+  <div class="row" style="margin:12px 0 20px">
+    <span class="badge">@rafaellenin</span>
+    <span class="badge">@denniseyperez</span>
+  </div>
   <div class="states">
     <section class="card">
       <small>1 · Listo para subir</small>
-      <h2>Cliente y archivo</h2>
-      <label>Cliente</label>
-      <select><option>Primer Round Oficial</option><option>Otro Cliente</option></select>
-      <label>Tipo de pieza (Primer Round)</label>
-      <select><option>Detectar (IA)</option><option>Clip LIVE</option><option>GFX / promo</option></select>
-      <div class="check"><input type="checkbox" checked> Colaboradores de Instagram</div>
-      <div class="row" style="margin-top:8px">
-        <span class="badge">@rafaellenin</span>
-        <span class="badge">@denniseyperez</span>
-      </div>
+      <h2>Subir video</h2>
+      <label>Tipo de pieza</label>
+      <select>
+        <option>Detectar (IA)</option>
+        <option selected>Clip LIVE — «Hoy en Primer Round junto a…»</option>
+        <option>GFX / promo — horario 5:43 AM + @hosts</option>
+      </select>
       <p style="margin:12px 0 0;font-size:12px">mp4 o mov, máx. 500 MB. Directo a Entregas.</p>
       <button>Upload video</button>
     </section>
@@ -51,7 +50,7 @@
       <h2>Revisa y envía</h2>
       <div class="video">▷ clip-estudio.mp4</div>
       <div class="status">Revisa el caption. Luego se envía como borrador a Metricool — no se publica solo.</div>
-      <label>Caption</label>
+      <label>Caption IG</label>
       <textarea rows="6">¿Qué pasó esta mañana en el estudio?
 
 Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.

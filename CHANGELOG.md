@@ -6,13 +6,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v4.93 — 2026-09-17
 
-**Los editores suben el video, la IA arma el caption y se manda a Metricool como borrador.**
-- Nueva pantalla **Subir video** (menú Trabajo): elige cliente, sube mp4/mov de hasta **500 MB**.
+**En Primer Round subes el video, la IA arma el caption y se manda a Metricool como borrador.**
+- En **Primer Round** (`/primer-round`): sube mp4/mov de hasta **500 MB**. No hay pantalla aparte de “Subir video”.
 - El archivo va directo a Entregas (no pasa por Vercel, que corta a ~4.5 MB).
-- La IA lee el video, escribe el caption (sin inventar diálogo) y tú lo envías a Metricool como **borrador** — no se publica solo.
-- En Primer Round puedes marcar clip LIVE («Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez») o GFX/promo (horario 5:43 AM + @rafaellenin y @denniseyperez) y se taguean las collabs en Instagram.
-
-![Vista previa de Subir video](/changelog/v4.93-subir-video.png)
+- La IA lee el video, escribe el caption bloqueado (sin inventar diálogo) y tú lo envías a Metricool como **borrador** — no se publica solo.
+- Clip LIVE: «Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez». GFX/promo: horario 5:43 AM + @rafaellenin y @denniseyperez. Collabs IG: rafaellenin + denniseyperez.
 
 ## v4.92 — 2026-09-14
 

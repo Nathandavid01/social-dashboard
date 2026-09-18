@@ -1,5 +1,5 @@
 /**
- * Editor upload path: browser → R2 presign / multipart (`uploadEntregasFileFast`).
+ * Primer Round upload path: browser → R2 presign / multipart (`uploadEntregasFileFast`).
  * Bytes never go through Next/Vercel, so the ~4.5 MB serverless body cap does not apply.
  *
  * Hard platform caps still in play (document in the PR):
@@ -12,21 +12,21 @@
  * - Grok vision analyzes frames extracted in the browser, not the 500 MB file.
  */
 
-export const EDITOR_UPLOAD_MAX_BYTES = 500 * 1024 * 1024
+export const PRIMER_ROUND_UPLOAD_MAX_BYTES = 500 * 1024 * 1024
 
-export function formatEditorUploadBytes(n: number): string {
+export function formatPrimerRoundUploadBytes(n: number): string {
   if (n >= 1024 ** 3) return `${Math.round((n / 1024 ** 3) * 10) / 10} GB`
   if (n >= 1024 ** 2) return `${Math.round(n / 1024 ** 2)} MB`
   if (n >= 1024) return `${Math.round(n / 1024)} KB`
   return `${n} B`
 }
 
-export function assertEditorUploadSize(sizeBytes: number | null | undefined): string | null {
+export function assertPrimerRoundUploadSize(sizeBytes: number | null | undefined): string | null {
   if (sizeBytes == null || Number.isNaN(sizeBytes) || sizeBytes < 1) {
     return 'Falta el archivo de video.'
   }
-  if (sizeBytes > EDITOR_UPLOAD_MAX_BYTES) {
-    return `El video pesa demasiado (máx. ${formatEditorUploadBytes(EDITOR_UPLOAD_MAX_BYTES)}).`
+  if (sizeBytes > PRIMER_ROUND_UPLOAD_MAX_BYTES) {
+    return `El video pesa demasiado (máx. ${formatPrimerRoundUploadBytes(PRIMER_ROUND_UPLOAD_MAX_BYTES)}).`
   }
   return null
 }

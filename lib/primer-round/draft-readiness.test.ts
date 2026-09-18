@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { editorDraftReadiness } from './draft-readiness'
+import { primerRoundDraftReadiness } from './draft-readiness'
 
 const ok = {
   caption: 'Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.',
@@ -10,23 +10,23 @@ const ok = {
   postedAt: null,
 }
 
-describe('editorDraftReadiness', () => {
+describe('primerRoundDraftReadiness', () => {
   it('is ready without approval — drafts do not wait for posting.publish', () => {
-    expect(editorDraftReadiness(ok)).toEqual({ ready: true })
+    expect(primerRoundDraftReadiness(ok)).toEqual({ ready: true })
   })
 
   it('refuses a second Metricool post', () => {
-    expect(editorDraftReadiness({ ...ok, metricoolPostId: 9 }).ready).toBe(false)
-    const again = editorDraftReadiness({ ...ok, postedAt: '2026-09-17T12:00:00Z' })
+    expect(primerRoundDraftReadiness({ ...ok, metricoolPostId: 9 }).ready).toBe(false)
+    const again = primerRoundDraftReadiness({ ...ok, postedAt: '2026-09-17T12:00:00Z' })
     expect(again.ready).toBe(false)
     if (!again.ready) expect(again.reason).toMatch(/Ya hay un post/i)
   })
 
   it('requires caption, video, public URL and blog id', () => {
-    const caption = editorDraftReadiness({ ...ok, caption: '  ' })
-    const video = editorDraftReadiness({ ...ok, hasVideo: false })
-    const url = editorDraftReadiness({ ...ok, publicUrl: null })
-    const blog = editorDraftReadiness({ ...ok, blogId: '' })
+    const caption = primerRoundDraftReadiness({ ...ok, caption: '  ' })
+    const video = primerRoundDraftReadiness({ ...ok, hasVideo: false })
+    const url = primerRoundDraftReadiness({ ...ok, publicUrl: null })
+    const blog = primerRoundDraftReadiness({ ...ok, blogId: '' })
     expect(caption.ready).toBe(false)
     expect(video.ready).toBe(false)
     expect(url.ready).toBe(false)

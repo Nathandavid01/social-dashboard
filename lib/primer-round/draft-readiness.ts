@@ -3,7 +3,7 @@
  * Idempotency still blocks a second post for the same idea.
  */
 
-export type EditorDraftIdea = {
+export type PrimerRoundDraftIdea = {
   caption: string | null | undefined
   hasVideo: boolean
   publicUrl: string | null | undefined
@@ -13,9 +13,9 @@ export type EditorDraftIdea = {
   status?: string | null
 }
 
-export type EditorDraftReadiness = { ready: true } | { ready: false; reason: string }
+export type PrimerRoundDraftReadiness = { ready: true } | { ready: false; reason: string }
 
-export function editorDraftReadiness(idea: EditorDraftIdea): EditorDraftReadiness {
+export function primerRoundDraftReadiness(idea: PrimerRoundDraftIdea): PrimerRoundDraftReadiness {
   if (idea.metricoolPostId != null) {
     return { ready: false, reason: 'Ya hay un post en Metricool para este video' }
   }

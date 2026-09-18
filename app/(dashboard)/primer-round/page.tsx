@@ -5,8 +5,10 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * Primer Round — upload mp4; AI caption + overlay verify + Metricool Reel.
- * Permisos: pipeline.read O recording.read (misma familia que Pipeline / On Site).
+ * Primer Round — upload mp4/mov (hasta 500 MB vía Entregas/R2); IA caption
+ * (LIVE vs GFX) + overlay verify + borrador Metricool con collabs IG.
+ * Nunca auto-publish. Permisos de página: pipeline.read O recording.read.
+ * Enviar borrador: metricool.draft (editor + admins).
  */
 export default async function PrimerRoundPage() {
   const { studio, error } = await getPrimerRoundStudio()

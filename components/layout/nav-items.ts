@@ -27,7 +27,6 @@ import {
   PenLine,
   Palette,
   Mic2,
-  Upload,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -66,7 +65,6 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/entregas': PackageCheck,
   '/pipeline': KanbanSquare,
   '/primer-round': Mic2,
-  '/subir-video': Upload,
   '/video-reviews': Film,
   '/posting': Send,
   '/team': UserSquare2,

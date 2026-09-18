@@ -3,7 +3,7 @@ import { hasPermission } from './permissions'
 import { AREAS } from './areas'
 
 /**
- * Subir video (/subir-video): el editor sube, la IA arma el caption y se
+ * Primer Round (/primer-round): el editor sube, la IA arma el caption y se
  * manda un BORRADOR a Metricool. No es posting.publish (eso sigue siendo
  * owner/supervisor). Least privilege: no video, no diseñador, no copy.
  */
@@ -26,11 +26,11 @@ describe('metricool.draft', () => {
     expect(hasPermission('editor', 'metricool.write')).toBe(false)
   })
 
-  it('/subir-video está registrada como área de Trabajo con esa permission', () => {
-    const area = AREAS.find((a) => a.href === '/subir-video')
+  it('/primer-round es el área de Trabajo; metricool.draft no abre una pantalla aparte', () => {
+    const area = AREAS.find((a) => a.href === '/primer-round')
     expect(area).toBeDefined()
-    expect(area?.permission).toBe('metricool.draft')
+    expect(area?.label).toBe('Primer Round')
     expect(area?.group).toBe('Trabajo')
-    expect(area?.nav).not.toBe(false)
+    expect(AREAS.find((a) => a.href === '/subir-video')).toBeUndefined()
   })
 })

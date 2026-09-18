@@ -12,7 +12,8 @@ describe('modelo de roles', () => {
     const h = effectiveAreaHrefs('editor', null)
     expect(h.has('/pipeline')).toBe(true)
     expect(h.has('/revision')).toBe(true)
-    expect(h.has('/subir-video')).toBe(true)
+    expect(h.has('/primer-round')).toBe(true)
+    expect(h.has('/subir-video')).toBe(false)
     // Copy y publicación viven en /entregas: no es su trabajo.
     expect(h.has('/entregas')).toBe(false)
     expect(h.has('/produccion')).toBe(false)
