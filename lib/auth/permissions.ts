@@ -71,6 +71,8 @@ export type Permission =
   | 'planning.move'
   // Cadence (home posting-cadence widget, read-only)
   | 'cadence.read'
+  /** Edit per-client posting cadence (days, times, timezone). */
+  | 'cadence.edit'
   // Team & admin
   | 'team.read'
   | 'team.assign_roles'
@@ -116,7 +118,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
-    'cadence.read',
+    'cadence.read', 'cadence.edit',
     'team.read',
     'automation.read',
     'alerts.read', 'alerts.dismiss',
@@ -131,6 +133,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video.upload',
     'captions.use', 'captions.edit',
     'revision.read', 'pipeline.read', 'planning.act',
+    'cadence.edit',
     'presence.read',
     'alerts.read',
     'profile.avatar',
@@ -189,6 +192,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'posting.read', 'captions.use',
     'metricool.read',
     'planning.read',
+    'cadence.edit',
     'presence.read',
     'alerts.read',
     'profile.avatar',

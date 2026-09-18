@@ -26,6 +26,15 @@ describe('client-pipeline-publish', () => {
     expect(next?.whenLabel).toContain('20 jun')
   })
 
+  it('uses the per-day posting_schedule for the next queue label', () => {
+    const next = findNextQueuePublish(
+      [{ id: '2', title: 'Jueves', publish_date: '2026-06-18', metricool_post_id: null }],
+      { postingTime: '10:00', postingSchedule: { '4': '16:45' } },
+      Date.parse('2026-06-10'),
+    )
+    expect(next?.whenLabel).toContain('16:45')
+  })
+
   it('computes the next cadence slot for a new video', () => {
     const slot = findNextNewVideoSlot(
       2,

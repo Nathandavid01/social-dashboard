@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight, Plus, Video, Send, Camera, CalendarCheck } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Video, Send, Camera, CalendarCheck, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface WeeklyCalendarProps {
@@ -23,6 +23,7 @@ const TYPE_META: Record<CalendarItemType, { label: string; chip: string; dot: st
   publicacion: { label: 'Publicación', chip: 'bg-green-500/10 text-green-600 border-green-500/30',   dot: 'bg-green-500',  icon: CalendarCheck },
   posting:     { label: 'Posting',     chip: 'bg-blue-500/10 text-blue-600 border-blue-500/30',      dot: 'bg-blue-500',   icon: Send },
   sesion:      { label: 'Sesión',      chip: 'bg-purple-500/10 text-purple-600 border-purple-500/30', dot: 'bg-purple-500', icon: Video },
+  cadencia:    { label: 'Cadencia',    chip: 'bg-amber-500/10 text-amber-700 border-amber-500/30 dark:text-amber-400', dot: 'bg-amber-500', icon: Target },
 }
 const ALL_TYPES = Object.keys(TYPE_META) as CalendarItemType[]
 

@@ -12,7 +12,17 @@ const WEEKDAY_SHORT_ES = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] as 
 export interface ClientCadence {
   postingTime?: string | null
   postingDays?: number[]
+  postingSchedule?: Record<string, string> | null
+  timezone?: string | null
   metricoolBlogId?: string | null
+}
+
+export { pipelineCadenceFromClient } from './client-cadence'
+
+function timeForPublishDate(publishDate: string, cadence: ClientCadence): string | null {
+  const [y, m, d] = publishDate.split('-').map(Number)
+  if (!y || !m || !d) return cadence.postingTime ?? null
+  return resolveSlotTime(new Date(y, m - 1, d).getDay(), cadence.postingTime, cadence.postingSchedule)
 }
 
 export interface PublishSlotInfo {
@@ -76,7 +86,7 @@ export function findNextQueuePublish(
   const upcoming = dated.filter((v) => v.publish_date! >= today)
   const pick = upcoming[0] ?? dated[0]
   if (pick?.publish_date) {
-    const whenLabel = formatScheduledPublish(pick.publish_date, cadence.postingTime, nowMs)
+    const whenLabel = formatScheduledPublish(pick.publish_date, timeForPublishDate(pick.publish_date, cadence), nowMs)
     if (whenLabel) {
       return {
         title: videoTitle(pick),
@@ -91,7 +101,7 @@ export function findNextQueuePublish(
     return {
       title: videoTitle(inMetricool),
       whenLabel: inMetricool.publish_date
-        ? (formatScheduledPublish(inMetricool.publish_date, cadence.postingTime, nowMs) ?? 'Programado en Metricool')
+        ? (formatScheduledPublish(inMetricool.publish_date, timeForPublishDate(inMetricool.publish_date, cadence), nowMs) ?? 'Programado en Metricool')
         : 'Programado en Metricool',
       inMetricool: true,
     }
@@ -111,7 +121,7 @@ export function findNextNewVideoSlot(
   const slots = nextPostingDates(days, activeCount + 1, new Date(nowMs))
   const nextDate = slots[activeCount]
   if (!nextDate) return null
-  const whenLabel = formatScheduledPublish(nextDate, cadence.postingTime, nowMs)
+  const whenLabel = formatScheduledPublish(nextDate, timeForPublishDate(nextDate, cadence), nowMs)
   if (!whenLabel) return null
   return { title: null, whenLabel, inMetricool: false, isCadenceSlot: true }
 }

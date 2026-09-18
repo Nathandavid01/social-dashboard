@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PipelineCard } from '../pipeline-card'
-import { PostingDaysEditor } from '../posting-days-editor'
+import { ClientCadenceEditor } from '@/components/clients/cadence/client-cadence-editor'
 import { OwnerForm } from '../owner-form'
 import { LastMeetingEditor } from '../last-meeting-editor'
 import { ColorSwatches } from '../color-swatches'
@@ -61,12 +61,18 @@ export function OverviewTab({ client, pipeline }: Props) {
         </CardContent>
       </Card>
 
-      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
+      <Card className="animate-in fade-in duration-500 md:col-span-2" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="h-4 w-4" /> Días de posting</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="h-4 w-4" /> Cadencia de publicación</CardTitle>
         </CardHeader>
         <CardContent>
-          <PostingDaysEditor clientId={client.id} initial={client.posting_days ?? []} />
+          <ClientCadenceEditor
+            clientId={client.id}
+            initialDays={client.posting_days ?? []}
+            initialTime={client.posting_time}
+            initialSchedule={client.posting_schedule ?? {}}
+            initialTimezone={client.posting_timezone ?? null}
+          />
         </CardContent>
       </Card>
 

@@ -136,6 +136,19 @@ describe('buildCadencia — meta (posting_days) vs Metricool reality', () => {
     expect(d.today.pending).toBe(0)
   })
 
+  it('uses the per-day posting_schedule instead of inventing or using the default time', () => {
+    const c = client({
+      clientId: 'a',
+      clientName: 'A',
+      postingDays: [4],
+      postingTime: '18:00',
+      postingSchedule: { '4': '09:00' },
+    })
+    const d = buildCadencia([c], WEEK, TODAY, NOON)
+    expect(d.today.overdue).toBe(1)
+    expect(d.byDay[TODAY][0].postingTime).toBe('09:00')
+  })
+
   it('today expected, not published, time NOT yet passed → pending', () => {
     const c = client({ clientId: 'a', clientName: 'A', postingDays: [4], postingTime: '18:00' })
     const d = buildCadencia([c], WEEK, TODAY, NOON) // noon < 18:00

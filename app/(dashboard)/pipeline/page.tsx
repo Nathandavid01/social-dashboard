@@ -14,6 +14,7 @@ import { computeRunway } from '@/lib/utils/content-runway'
 import { resolveStepAssignee, type PipelineStepAssignees } from '@/lib/utils/pipeline-step-assignees'
 import { ContentPipelineBoard, type PlannedClient } from '@/components/pipeline/content-pipeline-board'
 import type { ClientCadence, BatchStageKey } from '@/lib/utils/content-batches'
+import { isMissingTimezoneColumn, pipelineCadenceFromClient } from '@/lib/utils/client-cadence'
 import type { SocialPlatform } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +31,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ limit: 400 }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, metricool_blog_id')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, posting_timezone, metricool_blog_id')
       .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
@@ -40,6 +41,16 @@ export default async function PipelinePage() {
     getEffectiveUserId(),
     getPipelineTotals(),
   ])
+
+  if (clientsError && isMissingTimezoneColumn(clientsError)) {
+    const retry = await supabase
+      .from('clients')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, metricool_blog_id')
+      .eq('status', 'active')
+      .order('name')
+    activeClientsRaw = (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null }))
+    clientsError = retry.error
+  }
 
   // WIP dinámico: cada editor gana espacios con volumen + % de aprobación.
   const editorProfiles = (teamProfiles ?? []).filter((p) => p.role === 'editor' || p.role === 'team_member')
@@ -115,11 +126,13 @@ export default async function PipelinePage() {
   const clientCadence: Record<string, ClientCadence> = Object.fromEntries(
     activeClients.map((c) => [
       c.id,
-      {
-        postingTime: c.posting_time ?? null,
-        postingDays: (c.posting_days ?? []) as number[],
-        metricoolBlogId: c.metricool_blog_id ?? null,
-      },
+      pipelineCadenceFromClient({
+        posting_days: (c.posting_days ?? []) as number[],
+        posting_time: c.posting_time ?? null,
+        posting_schedule: (c as { posting_schedule?: Record<string, string> | null }).posting_schedule ?? null,
+        posting_timezone: (c as { posting_timezone?: string | null }).posting_timezone ?? null,
+        metricool_blog_id: c.metricool_blog_id ?? null,
+      }),
     ]),
   )
   const profilesById = Object.fromEntries(

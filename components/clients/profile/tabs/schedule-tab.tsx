@@ -11,8 +11,7 @@ import {
   SLOT_STATUS_META,
   type ScheduleSlot,
 } from '@/lib/utils/posting-schedule'
-import { dayLabelsShort } from '@/lib/utils/posting-cadence'
-import { PostingTimeEditor } from '../posting-time-editor'
+import { ClientCadenceEditor } from '@/components/clients/cadence/client-cadence-editor'
 
 function startOfWeekMon(d: Date): Date {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
@@ -159,15 +158,17 @@ export async function ScheduleTab({ client }: { client: Client }) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4" /> Horas de publicación
+            <Clock className="h-4 w-4" /> Cadencia de publicación
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <PostingTimeEditor
+          <ClientCadenceEditor
             clientId={client.id}
-            postingDays={postingDays}
+            initialDays={postingDays}
             initialTime={client.posting_time}
             initialSchedule={client.posting_schedule ?? {}}
+            initialTimezone={client.posting_timezone ?? null}
+            compact
           />
         </CardContent>
       </Card>

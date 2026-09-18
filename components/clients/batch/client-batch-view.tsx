@@ -21,6 +21,10 @@ import { BatchSummaryBar } from './batch-summary-bar'
 import { BatchStepper } from './batch-stepper'
 import { BatchCaptionsButton } from './batch-captions-button'
 import { VideoWorkCard } from './video-work-card'
+import { pipelineCadenceFromClient } from '@/lib/utils/client-cadence'
+import { CadenceSummary } from '@/components/clients/cadence/cadence-summary'
+import { ClientCadenceEditor } from '@/components/clients/cadence/client-cadence-editor'
+import { RoleGate } from '@/components/auth/role-gate'
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
   active: { label: 'Activo', tone: 'bg-emerald-500/10 text-emerald-500' },
@@ -66,11 +70,14 @@ export function ClientBatchView({
   const videos = pipeline.videos as BatchVideo[]
   const clientForDialog = [{ id: client.id, name: client.name }]
   const clientCadence = useMemo(
-    () => ({
-      postingTime: client.posting_time ?? null,
-      postingDays: (client.posting_days ?? []) as number[],
-      metricoolBlogId: client.metricool_blog_id ?? null,
-    }),
+    () =>
+      pipelineCadenceFromClient({
+        posting_days: (client.posting_days ?? []) as number[],
+        posting_time: client.posting_time ?? null,
+        posting_schedule: client.posting_schedule ?? null,
+        posting_timezone: client.posting_timezone ?? null,
+        metricool_blog_id: client.metricool_blog_id ?? null,
+      }),
     [client],
   )
   const pipelineByClient = useMemo(() => {
@@ -186,9 +193,34 @@ export function ClientBatchView({
                   <PlatformBadges platforms={client.platforms} />
                 </>
               )}
+              <span className="text-muted-foreground/50">·</span>
+              <CadenceSummary
+                source={{
+                  posting_days: client.posting_days,
+                  posting_time: client.posting_time,
+                  posting_schedule: client.posting_schedule,
+                  posting_timezone: client.posting_timezone,
+                }}
+              />
             </div>
           </div>
         </div>
+
+        <RoleGate perm="cadence.edit">
+          <details className="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
+            <summary className="cursor-pointer text-xs font-medium text-muted-foreground">Editar cadencia</summary>
+            <div className="pt-3">
+              <ClientCadenceEditor
+                clientId={client.id}
+                initialDays={(client.posting_days ?? []) as number[]}
+                initialTime={client.posting_time}
+                initialSchedule={client.posting_schedule ?? {}}
+                initialTimezone={client.posting_timezone ?? null}
+                compact
+              />
+            </div>
+          </details>
+        </RoleGate>
 
         {/* editable batch summary: LOTE / cantidad / ENCARGADO */}
         {!singleVideoMode && (

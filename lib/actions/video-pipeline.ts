@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { isMissingTimezoneColumn } from '@/lib/utils/client-cadence'
 import type {
   Client,
   ClientAsset,
@@ -43,7 +44,7 @@ export interface ClientVideoPipeline {
     | 'posting_schedule'
     | 'default_platforms'
   > &
-    Partial<Pick<Client, 'assigned_to'>> & {
+    Partial<Pick<Client, 'assigned_to' | 'posting_timezone'>> & {
       assignee?: { id: string; full_name: string | null; avatar_url: string | null } | null
     }
   videos: PipelineVideo[]
@@ -67,11 +68,11 @@ function emptySlots(): PipelineVideoSlots {
 export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
   const supabase = await createClient()
 
-  const [clientsRes, ideasRes, assetsRes] = await Promise.all([
+  let [clientsRes, ideasRes, assetsRes] = await Promise.all([
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, posting_timezone, default_platforms',
       )
       .order('name', { ascending: true }),
     supabase
@@ -92,6 +93,18 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
       .order('uploaded_at', { ascending: false }),
   ])
 
+  if (clientsRes.error && isMissingTimezoneColumn(clientsRes.error)) {
+    const retry = await supabase
+      .from('clients')
+      .select(
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms',
+      )
+      .order('name', { ascending: true })
+    clientsRes = {
+      ...retry,
+      data: (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null })),
+    } as unknown as typeof clientsRes
+  }
   if (clientsRes.error) {
     console.warn('[video-pipeline] clients fetch failed:', clientsRes.error.message)
     return []
@@ -154,11 +167,11 @@ export async function getClientVideoPipeline(): Promise<ClientVideoPipeline[]> {
 export async function getClientVideoBatch(clientId: string): Promise<ClientVideoPipeline | null> {
   const supabase = await createClient()
 
-  const [clientRes, ideasRes, assetsRes] = await Promise.all([
+  let [clientRes, ideasRes, assetsRes] = await Promise.all([
     supabase
       .from('clients')
       .select(
-        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, posting_timezone, default_platforms, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
       )
       .eq('id', clientId)
       .maybeSingle(),
@@ -187,6 +200,19 @@ export async function getClientVideoBatch(clientId: string): Promise<ClientVideo
       .order('uploaded_at', { ascending: false }),
   ])
 
+  if (clientRes.error && isMissingTimezoneColumn(clientRes.error)) {
+    const retry = await supabase
+      .from('clients')
+      .select(
+        'id, name, industry, status, platforms, logo_url, logo_dark_url, brand_colors, metricool_blog_id, posting_days, posting_time, posting_schedule, default_platforms, assigned_to, assignee:profiles!clients_assigned_to_fkey(id, full_name, avatar_url)',
+      )
+      .eq('id', clientId)
+      .maybeSingle()
+    clientRes = {
+      ...retry,
+      data: retry.data ? { ...retry.data, posting_timezone: null } : retry.data,
+    } as unknown as typeof clientRes
+  }
   if (clientRes.error) {
     console.warn('[video-pipeline] client fetch failed:', clientRes.error.message)
     return null

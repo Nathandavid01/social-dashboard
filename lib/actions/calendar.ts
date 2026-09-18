@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { CalendarItem } from '@/lib/supabase/types'
+import { cadenceCalendarItems, isMissingTimezoneColumn } from '@/lib/utils/client-cadence'
 
 /**
  * Aggregate read-only calendar items across multiple sources within [startISO, endISO]:
@@ -92,6 +93,39 @@ export async function getCalendarItems(startISO: string, endISO: string): Promis
       assignee: ses.videographer ?? null,
       href: '/recording-calendar',
     })
+  }
+
+  let clientsRes = await supabase
+    .from('clients')
+    .select('id, name, posting_days, posting_time, posting_schedule, posting_timezone')
+    .eq('status', 'active')
+  if (clientsRes.error && isMissingTimezoneColumn(clientsRes.error)) {
+    const retry = await supabase
+      .from('clients')
+      .select('id, name, posting_days, posting_time, posting_schedule')
+      .eq('status', 'active')
+    clientsRes = {
+      ...retry,
+      data: (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null })),
+    } as unknown as typeof clientsRes
+  }
+  if (!clientsRes.error && clientsRes.data) {
+    const start = new Date(`${startDate}T00:00:00`)
+    const end = new Date(`${endDate}T23:59:59`)
+    items.push(
+      ...cadenceCalendarItems(
+        clientsRes.data.map((c) => ({
+          id: c.id,
+          name: c.name,
+          posting_days: (c.posting_days ?? []) as number[],
+          posting_time: c.posting_time ?? null,
+          posting_schedule: (c.posting_schedule ?? null) as Record<string, string> | null,
+          posting_timezone: (c as { posting_timezone?: string | null }).posting_timezone ?? null,
+        })),
+        start,
+        end,
+      ),
+    )
   }
 
   return items

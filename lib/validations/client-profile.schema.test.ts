@@ -34,6 +34,24 @@ describe('clientProfilePatchSchema — posting time + schedule', () => {
   })
 })
 
+describe('clientProfilePatchSchema — posting_timezone', () => {
+  it('accepts a known IANA zone', () => {
+    const r = clientProfilePatchSchema.safeParse({ posting_timezone: 'America/Puerto_Rico' })
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.posting_timezone).toBe('America/Puerto_Rico')
+  })
+
+  it('normalizes empty timezone to null (unset, not invented)', () => {
+    const r = clientProfilePatchSchema.safeParse({ posting_timezone: '' })
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.posting_timezone).toBeNull()
+  })
+
+  it('rejects an unknown timezone instead of storing a guess', () => {
+    expect(clientProfilePatchSchema.safeParse({ posting_timezone: 'Europe/Madrid' }).success).toBe(false)
+  })
+})
+
 describe('clientProfilePatchSchema — metricool_blog_id', () => {
   it('accepts a numeric blog id string', () => {
     const r = clientProfilePatchSchema.safeParse({ metricool_blog_id: '6170821' })

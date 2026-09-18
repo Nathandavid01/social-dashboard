@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.94 — 2026-09-18
+
+**La cadencia de cada cliente se edita en un solo sitio y se ve igual en todas partes.**
+- En el perfil (Resumen y Calendario) y en Pipeline puedes fijar días, hora, hora por día y zona horaria.
+- Pipeline, el perfil, el calendario de contenido y Mi Día leen esa misma cadencia en vivo: si la cambias, se actualiza en todos.
+- No se inventan horarios. Si un cliente no tiene días u hora, se ve «Sin cadencia» / «Sin hora».
+- El widget Cadencia ya no sugiere «AM» por industria. Solo muestra la hora que alguien configuró.
+
+![Editor de cadencia por cliente](/changelog/v4.94-cadencia-cliente.png)
+
 ## v4.92 — 2026-09-14
 
 **Primer Round: sube el video entero, rápido, sin el error 413.**

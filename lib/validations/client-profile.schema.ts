@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isCadenceTimezone } from '@/lib/utils/client-cadence'
 
 const hex = z
   .string()
@@ -74,6 +75,13 @@ export const clientProfilePatchSchema = z
     posting_days: z.array(z.number().int().min(0).max(6)).max(7).optional(),
     posting_time: timeMaybe,
     posting_schedule: postingScheduleSchema,
+    posting_timezone: z
+      .string()
+      .nullable()
+      .optional()
+      .or(z.literal(''))
+      .transform((v) => (v === '' ? null : v ?? null))
+      .refine((v) => v === null || v === undefined || isCadenceTimezone(v), 'Zona horaria no válida'),
     video_threshold: z.union([z.number().int().min(0).max(500), z.string()]).optional().transform((v) => {
       if (v === undefined || v === '') return undefined
       const n = typeof v === 'string' ? parseInt(v, 10) : v

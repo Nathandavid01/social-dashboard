@@ -7,6 +7,7 @@ import { ContractCountdown } from './contract-countdown'
 import { LastMeetingPill } from './last-meeting-pill'
 import { Mail, Phone, User } from 'lucide-react'
 import type { Client, ClientPayment } from '@/lib/supabase/types'
+import { CadenceSummary } from '@/components/clients/cadence/cadence-summary'
 
 interface ClientHeroProps {
   client: Client
@@ -57,6 +58,14 @@ export function ClientHero({ client, lastPayment }: ClientHeroProps) {
             {client.platforms?.length > 0 && (
               <PlatformBadges platforms={client.platforms} />
             )}
+            <CadenceSummary
+              source={{
+                posting_days: client.posting_days,
+                posting_time: client.posting_time,
+                posting_schedule: client.posting_schedule,
+                posting_timezone: client.posting_timezone,
+              }}
+            />
           </div>
 
           {/* Owner contact */}

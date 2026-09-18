@@ -19,6 +19,7 @@ import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pi
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
 import type { Runway, RunwayStatus } from '@/lib/utils/content-runway'
 import { formatDateShortES } from '@/lib/utils/deadlines'
+import { formatCadenceDaysEs } from '@/lib/utils/client-cadence'
 
 type TeamMember = { id: string; name: string }
 
@@ -209,7 +210,6 @@ function BankFileActions({ file, compact = false }: { file: EditorBankFile; comp
   return <Button size="sm" variant="ghost" className={compact ? 'h-7 w-7 p-0' : 'h-8 px-2 text-xs'} onClick={download} aria-label="Bajar">{isR2 ? <Download className="h-3 w-3" /> : <ExternalLink className="h-3 w-3" />}</Button>
 }
 
-const POSTING_DAY = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-function formatPostingDays(days: number[]): string { return days.map((day) => day === 0 ? 'Dom' : POSTING_DAY[day] ?? '').filter(Boolean).join(' · ') }
+function formatPostingDays(days: number[]): string { return formatCadenceDaysEs(days) }
 function formatDuration(seconds: number): string { const mins = Math.floor(seconds / 60); return `${mins}:${String(Math.round(seconds % 60)).padStart(2, '0')}` }
 function daysSince(value: string | null): number | null { if (!value) return null; const time = Date.parse(value); if (!Number.isFinite(time)) return null; return Math.max(1, Math.floor((Date.now() - time) / 86_400_000) + 1) }
