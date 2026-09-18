@@ -71,6 +71,17 @@ describe('Primer Round locked caption template', () => {
     expect(p).toMatch(/NUNCA pongas @primerroundoficial/i)
   })
 
+  it('LIVE clip prompt uses names, not the GFX air line', () => {
+    const p = buildPrimerRoundCaptionPromptInstructions({
+      title: 'Clip',
+      kind: 'live',
+    })
+    expect(p).toContain('Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.')
+    expect(p).toMatch(/clip LIVE/i)
+    expect(p).toMatch(/NUNCA inventes diálogo/i)
+    expect(p).not.toMatch(/Este tipo de video es GFX\/promo/)
+  })
+
   it('Sunday uses the Facebook air line on GFX Reels', () => {
     const p = buildPrimerRoundCaptionPromptInstructions({
       title: 'GFX',
@@ -97,6 +108,22 @@ describe('Primer Round locked caption template', () => {
     expect(checkPrimerRoundCaptionStructure(caption)).toEqual([])
     expect(p).toMatch(/NO empieces la línea 3 con la misma frase/i)
     expect(p).not.toMatch(/LA NOTICIA NO ESPERA Mañana desde las 5:43 AM/)
+  })
+})
+
+describe('normalizePrimerRoundCaption — live vs gfx', () => {
+  it('live kind keeps the names line and does not force 5:43 AM', () => {
+    const stale = [
+      '¿Qué pasó en el estudio?',
+      '',
+      'Mañana desde las 5:43 AM junto a @rafaellenin y @denniseyperez.',
+      '',
+      PRIMER_ROUND_HASHTAGS,
+    ].join('\n')
+    const next = normalizePrimerRoundCaption(stale, undefined, 'live')
+    expect(next).toContain('Hoy en Primer Round junto a Rafael Lenín López y Dennise Pérez.')
+    expect(next).not.toMatch(/5:43/)
+    expect(checkPrimerRoundCaptionStructure(next, 'live')).toEqual([])
   })
 })
 

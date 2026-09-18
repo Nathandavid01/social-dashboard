@@ -17,8 +17,8 @@ import { Badge } from '@/components/ui/badge'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { cn } from '@/lib/utils'
 import {
-  acceptPrimerRoundPiece,
   createPrimerRoundUploadIdea,
+  pushPrimerRoundDraft,
   revisePrimerRoundCaption,
   runPrimerRoundUploadPipeline,
   type PrimerRoundStudioPayload,
@@ -31,6 +31,12 @@ import { assertPrimerRoundMp4, primerRoundUploadContentType } from '@/lib/primer
 import { PRIMER_ROUND_CAPTION_HOSTS } from '@/lib/primer-round/caption-template'
 import { primerRoundNextAirCopy, PRIMER_ROUND_AIR_CLOCK } from '@/lib/primer-round/air-time'
 import { normalizePrimerRoundCaption } from '@/lib/primer-round/caption-template'
+import {
+  PRIMER_ROUND_UPLOAD_MAX_BYTES,
+  assertPrimerRoundUploadSize,
+  formatPrimerRoundUploadBytes,
+} from '@/lib/primer-round/upload-limits'
+import type { PrimerRoundPieceKind } from '@/lib/primer-round/piece-kind'
 import {
   clearPrimerRoundLivePreview,
   getPrimerRoundLivePreview,
@@ -45,10 +51,12 @@ type PipelineStage =
   | 'caption'
   | 'verificando'
   | 'revision'
-  | 'agendando'
+  | 'enviando'
   | 'listo'
   | 'bloqueado'
   | 'error'
+
+type KindChoice = 'auto' | PrimerRoundPieceKind
 
 const STAGE_LABEL: Record<PipelineStage, string> = {
   idle: 'Listo para subir',
@@ -58,8 +66,8 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
   caption: 'IA creando caption IG…',
   verificando: 'IA verificando ortografía…',
   revision: 'Pendiente de tu OK',
-  agendando: 'Publicando en Instagram, Facebook y TikTok…',
-  listo: 'Listo',
+  enviando: 'Creando borrador en Metricool…',
+  listo: 'Borrador en Metricool',
   bloqueado: 'Verificación pendiente',
   error: 'Error',
 }
@@ -83,7 +91,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
   const [overlayText, setOverlayText] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
   const [styleRules, setStyleRules] = useState<string[]>(studio.styleRules ?? [])
+  const [kindChoice, setKindChoice] = useState<KindChoice>('auto')
+  const [detectedKind, setDetectedKind] = useState<PrimerRoundPieceKind | null>(null)
+  const [metricoolPostId, setMetricoolPostId] = useState<number | null>(null)
   const [pending, startTransition] = useTransition()
+  const maxBytes = studio.maxBytes ?? PRIMER_ROUND_UPLOAD_MAX_BYTES
+  const canDraft = studio.canDraft !== false
+  const effectiveKind = detectedKind ?? (kindChoice === 'auto' ? null : kindChoice)
 
   function resetToBlank() {
     hasPickedFile.current = true
@@ -102,6 +116,8 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setFeedback('')
     setPreviewUrl(null)
     setPreviewKey('empty')
+    setDetectedKind(null)
+    setMetricoolPostId(null)
   }
 
   function showPickedFile(file: File) {
@@ -132,9 +148,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     const res = await runPrimerRoundUploadPipeline({
       ideaId: id,
       videoId: vid,
+      pieceKind: kindChoice,
     })
     if (cancelledRef.current) return
-    if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
+    if (res.pieceKind) setDetectedKind(res.pieceKind)
+    if (res.caption) {
+      setCaption(normalizePrimerRoundCaption(res.caption, undefined, res.pieceKind ?? 'gfx'))
+    }
     if (res.gate) {
       setGate(res.gate)
       if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
@@ -146,7 +166,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       return
     }
     setStage('revision')
-    setMessage(res.error ?? 'Revisa el caption. Acepta o enseña el estilo.')
+    setMessage(res.error ?? 'Revisa el caption. Luego se envía como borrador a Metricool — no se publica solo.')
   }
 
   function onPickFile(file: File | null) {
@@ -156,6 +176,12 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     if (guard) {
       setStage('error')
       setMessage(guard)
+      return
+    }
+    const sizeErr = assertPrimerRoundUploadSize(file.size)
+    if (sizeErr) {
+      setStage('error')
+      setMessage(sizeErr)
       return
     }
 
@@ -172,6 +198,8 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
     setMessage(null)
     setIdeaId(null)
     setVideoId(null)
+    setMetricoolPostId(null)
+    setDetectedKind(null)
     setPct(0)
 
     startTransition(async () => {
@@ -180,6 +208,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         const created = await createPrimerRoundUploadIdea({
           fileName: file.name,
           title: null,
+          sizeBytes: file.size,
         })
         if (cancelledRef.current) return
         if (created.error || !created.ideaId) {
@@ -246,9 +275,13 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         videoId,
         feedback: feedback.trim(),
         previousCaption: caption,
+        pieceKind: detectedKind ?? (kindChoice === 'auto' ? null : kindChoice),
       })
       if (cancelledRef.current) return
-      if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
+      if (res.pieceKind) setDetectedKind(res.pieceKind)
+      if (res.caption) {
+        setCaption(normalizePrimerRoundCaption(res.caption, undefined, res.pieceKind ?? 'gfx'))
+      }
       if (res.gate) {
         setGate(res.gate)
         if (res.gate.overlay.text) setOverlayText(res.gate.overlay.text)
@@ -261,37 +294,34 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
       }
       setFeedback('')
       setStage('revision')
-      setMessage(res.error ?? 'Estilo guardado para los Reels de Primer Round. Acepta o sigue enseñando.')
+      setMessage(res.error ?? 'Estilo guardado para los Reels de Primer Round. Revisa y envía el borrador.')
     })
   }
 
-  function acceptPiece() {
-    if (!ideaId || !videoId) return
+  function sendDraft() {
+    if (!ideaId || !videoId || !caption?.trim()) return
     startTransition(async () => {
-      setStage('agendando')
-      const res = await acceptPrimerRoundPiece({
+      setStage('enviando')
+      const res = await pushPrimerRoundDraft({
         ideaId,
         videoId,
-        overrideOrtho,
+        caption,
+        pieceKind: detectedKind ?? (kindChoice === 'auto' ? 'gfx' : kindChoice),
       })
-      if (res.caption) setCaption(normalizePrimerRoundCaption(res.caption))
-      if (res.gate) setGate(res.gate)
+      if (res.caption) {
+        setCaption(normalizePrimerRoundCaption(res.caption, undefined, detectedKind ?? 'gfx'))
+      }
       if (res.error) {
         setStage('error')
         setMessage(res.error)
         return
       }
-      if (res.skipped) {
-        setStage('bloqueado')
-        setMessage(res.skipped)
-        return
-      }
-      resetToBlank()
+      setMetricoolPostId(res.metricoolPostId ?? null)
       setStage('listo')
       setMessage(
-        `Publicado en Instagram, Facebook y TikTok${
+        `Borrador creado en Metricool${
           res.metricoolPostId != null ? ` #${res.metricoolPostId}` : ''
-        } (collabs en IG).`,
+        }. No está en vivo: hay que aceptarlo en Metricool.`,
       )
     })
   }
@@ -335,9 +365,10 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground">
-          Sube el mp4 o mov: ves la película, la IA lee los textos y arma el caption
-          (hosts {PRIMER_ROUND_CAPTION_HOSTS}). Al aceptar, se publica en Instagram, Facebook y TikTok
-          (collabs IG). Al aire lun–vie {PRIMER_ROUND_AIR_CLOCK}. Si publicas ahora:{' '}
+          Sube el mp4 o mov (máx. {formatPrimerRoundUploadBytes(maxBytes)}): ves la película, la IA
+          lee los textos y arma el caption (hosts {PRIMER_ROUND_CAPTION_HOSTS}). Luego se envía a
+          Metricool como <strong className="font-medium text-foreground">borrador</strong> con collabs
+          IG — nunca se publica solo. Al aire lun–vie {PRIMER_ROUND_AIR_CLOCK}. Si sales hoy:{' '}
           {primerRoundNextAirCopy().phraseStart ?? primerRoundNextAirCopy().phrase}.
         </p>
       </header>
@@ -346,9 +377,33 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
         <div className="text-center space-y-1">
           <h2 className="text-sm font-semibold">Subir video</h2>
           <p className="text-xs text-muted-foreground">
-            mp4 o mov, del tamaño que sea. Va directo a Entregas. Tú aceptas o le das feedback.
+            mp4 o mov, máx. {formatPrimerRoundUploadBytes(maxBytes)}. Va directo a Entregas (no pasa
+            por Vercel). Revisa el caption y envía el borrador a Metricool.
           </p>
         </div>
+
+        <label className="block space-y-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Tipo de pieza
+          </span>
+          <select
+            id="primer-round-kind"
+            data-testid="primer-round-kind"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={kindChoice}
+            disabled={busy}
+            onChange={(e) => setKindChoice(e.target.value as KindChoice)}
+          >
+            <option value="auto">Detectar (IA)</option>
+            <option value="live">Clip LIVE — «Hoy en Primer Round junto a…»</option>
+            <option value="gfx">GFX / promo — horario 5:43 AM + @hosts</option>
+          </select>
+          {effectiveKind && (
+            <p className="text-xs text-muted-foreground" data-testid="primer-round-kind-detected">
+              Usando plantilla {effectiveKind === 'live' ? 'LIVE (nombres)' : 'GFX (@handles)'}.
+            </p>
+          )}
+        </label>
 
         <input
           ref={inputRef}
@@ -484,7 +539,7 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
           </div>
         )}
 
-        {(stage === 'revision' || stage === 'bloqueado') && ideaId && (
+        {(stage === 'revision' || stage === 'bloqueado' || stage === 'listo') && ideaId && (
           <div className="space-y-3 rounded-lg border bg-muted/20 p-3" data-testid="primer-round-review-panel">
             {styleRules.length > 0 && (
               <div className="space-y-1" data-testid="primer-round-style-rules">
@@ -537,23 +592,39 @@ export function PrimerRoundStudio({ studio }: { studio: PrimerRoundStudioPayload
                   checked={overrideOrtho}
                   onChange={(e) => setOverrideOrtho(e.target.checked)}
                 />
-                Override Eric (publicar igual)
+                Override Eric (enviar el borrador igual)
               </label>
             )}
             <Button
               size="sm"
               className="w-full"
-              disabled={pending || (stage === 'bloqueado' && !overrideOrtho)}
-              data-testid="primer-round-accept-cta"
-              onClick={acceptPiece}
+              disabled={
+                pending ||
+                !canDraft ||
+                !caption?.trim() ||
+                stage === 'listo' ||
+                (stage === 'bloqueado' && !overrideOrtho)
+              }
+              data-testid="primer-round-draft-cta"
+              onClick={sendDraft}
             >
               {pending ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Send className="mr-1.5 h-3.5 w-3.5" />
               )}
-              Aceptar y publicar
+              Enviar borrador a Metricool
             </Button>
+            {metricoolPostId != null && (
+              <p className="text-center text-xs text-muted-foreground" data-testid="primer-round-draft-id">
+                Metricool #{metricoolPostId}
+              </p>
+            )}
+            {!canDraft && (
+              <p className="text-center text-[11px] text-muted-foreground">
+                Tu rol no puede enviar el borrador a Metricool.
+              </p>
+            )}
           </div>
         )}
 

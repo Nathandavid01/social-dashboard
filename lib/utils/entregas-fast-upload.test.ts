@@ -1,32 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MULTIPART_THRESHOLD_BYTES } from '@/lib/utils/upload-parts'
 
-const putBlob = vi.fn(async () => ({ etag: '"etag-1"' }))
-const getEntregasUploadUrl = vi.fn(async () => ({
+const putBlob = vi.fn(async (..._a: unknown[]) => ({ etag: '"etag-1"' }))
+const getEntregasUploadUrl = vi.fn(async (..._a: unknown[]) => ({
   url: 'https://entregas.example/put',
   key: 'entregas/new-idea/edited/small.mp4',
 }))
-const startMultipartUpload = vi.fn(async () => ({
+const startMultipartUpload = vi.fn(async (..._a: unknown[]) => ({
   uploadId: 'up-1',
   key: 'entregas/new-idea/edited/big.mp4',
 }))
-const presignUploadParts = vi.fn(async (input: { partNumbers: number[] }) => ({
-  urls: Object.fromEntries(input.partNumbers.map((n) => [n, `https://entregas.example/part-${n}`])),
-}))
-const completeMultipartUpload = vi.fn(async () => ({ ok: true }))
-const abortMultipartUpload = vi.fn(async () => ({ ok: true }))
+const presignUploadParts = vi.fn(async (...a: unknown[]) => {
+  const input = a[0] as { partNumbers: number[] }
+  return { urls: Object.fromEntries(input.partNumbers.map((n) => [n, `https://entregas.example/part-${n}`])) }
+})
+const completeMultipartUpload = vi.fn(async (..._a: unknown[]) => ({ ok: true }))
+const abortMultipartUpload = vi.fn(async (..._a: unknown[]) => ({ ok: true }))
 
 vi.mock('@/lib/actions/entregas-r2', () => ({
-  getEntregasUploadUrl: (...a: unknown[]) => getEntregasUploadUrl(...(a as [])),
+  getEntregasUploadUrl: (...a: unknown[]) => getEntregasUploadUrl(...a),
 }))
 vi.mock('@/lib/actions/multipart-upload', () => ({
-  startMultipartUpload: (...a: unknown[]) => startMultipartUpload(...(a as [])),
-  presignUploadParts: (...a: unknown[]) => presignUploadParts(...(a as [])),
-  completeMultipartUpload: (...a: unknown[]) => completeMultipartUpload(...(a as [])),
-  abortMultipartUpload: (...a: unknown[]) => abortMultipartUpload(...(a as [])),
+  startMultipartUpload: (...a: unknown[]) => startMultipartUpload(...a),
+  presignUploadParts: (...a: unknown[]) => presignUploadParts(...a),
+  completeMultipartUpload: (...a: unknown[]) => completeMultipartUpload(...a),
+  abortMultipartUpload: (...a: unknown[]) => abortMultipartUpload(...a),
 }))
 vi.mock('@/lib/utils/upload-http', () => ({
-  putBlob: (...a: unknown[]) => putBlob(...(a as [])),
+  putBlob: (...a: unknown[]) => putBlob(...a),
 }))
 
 import { ENTREGAS_FAST_CONCURRENCY, uploadEntregasFileFast } from './entregas-fast-upload'
@@ -123,9 +124,10 @@ describe('uploadEntregasFileFast', () => {
 
   it('Detener aborta el multipart en R2', async () => {
     const controller = new AbortController()
-    putBlob.mockImplementation(async (_url, _blob, _type, opts: { signal?: AbortSignal }) => {
+    putBlob.mockImplementation(async (...args: unknown[]) => {
       controller.abort()
-      if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+      const opts = args[3] as { signal?: AbortSignal } | undefined
+      if (opts?.signal?.aborted) throw new DOMException('Aborted', 'AbortError')
       return { etag: '"e"' }
     })
     const file = fileOfSize(MULTIPART_THRESHOLD_BYTES, 'big.mp4')

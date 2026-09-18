@@ -8,6 +8,11 @@ import type { IdeaApprovalStatus } from '@/lib/supabase/types'
 import { generateIdeaCaption } from '@/lib/actions/idea-captions'
 import { runIdeaPost } from '@/lib/actions/idea-posting-run'
 import { generateCaptionText, captionConfigError } from '@/lib/llm/caption-llm'
+import { createDraftPost } from '@/lib/metricool/post'
+import { checkVideoPlayable } from '@/lib/integrations/video-health'
+import { r2PublicUrl } from '@/lib/integrations/r2'
+import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
+import { resolvePlatforms } from '@/lib/utils/idea-posting-core'
 import {
   PRIMER_ROUND_CLIENT_ID,
   PRIMER_ROUND_BLOG_ID,
@@ -15,6 +20,15 @@ import {
   primerRoundAutopostEnabled,
 } from '@/lib/primer-round/constants'
 import { resolvePrimerRoundCollaborators, primerRoundCollabLabels } from '@/lib/primer-round/collabs'
+import {
+  PRIMER_ROUND_UPLOAD_MAX_BYTES,
+  assertPrimerRoundUploadSize,
+} from '@/lib/primer-round/upload-limits'
+import { primerRoundDraftReadiness } from '@/lib/primer-round/draft-readiness'
+import {
+  resolvePrimerRoundPieceKind,
+  type PrimerRoundPieceKind,
+} from '@/lib/primer-round/piece-kind'
 import {
   overlayFromBurnedCaptions,
   captionSurfaceFromText,
@@ -25,6 +39,7 @@ import {
   type PrimerRoundOrthoGate,
 } from '@/lib/primer-round/orthography'
 import {
+  assertPrimerRoundMp4,
   groupStudioIdeas,
   primerRoundCtas,
   primerRoundSoonScheduleIso,
@@ -77,6 +92,9 @@ export type PrimerRoundStudioPayload = {
   pending: PrimerRoundPendingPiece | null
   /** Style Eric already taught for Primer Round Reels (this client + this format). */
   styleRules: string[]
+  /** Editor/admin can send a Metricool draft (never auto-publish). */
+  canDraft?: boolean
+  maxBytes?: number
 }
 
 export async function getPrimerRoundStudio(): Promise<
@@ -190,6 +208,8 @@ export async function getPrimerRoundStudio(): Promise<
       ready: lanes.ready,
       pending: null,
       styleRules: await loadPrimerRoundStyleRules(supabase),
+      canDraft: await currentUserHas('metricool.draft'),
+      maxBytes: PRIMER_ROUND_UPLOAD_MAX_BYTES,
     },
   }
 }
@@ -197,14 +217,20 @@ export async function getPrimerRoundStudio(): Promise<
 async function loadPinnedPrimerRoundVideo(
   ideaId: string,
   videoId?: string | null,
-): Promise<{ videoId?: string; error?: string }> {
+): Promise<{
+  videoId?: string
+  key?: string
+  provider?: string | null
+  fileName?: string | null
+  error?: string
+}> {
   const pinMissing = assertPrimerRoundPinnedVideo({ requestedVideoId: videoId })
   if (pinMissing) return { error: pinMissing }
 
   const supabase = await createClient()
   const { data: video } = await supabase
     .from('content_idea_videos')
-    .select('id')
+    .select('id, drive_file_id, storage_provider, name')
     .eq('id', videoId!.trim())
     .eq('idea_id', ideaId)
     .eq('kind', 'edited')
@@ -216,14 +242,24 @@ async function loadPinnedPrimerRoundVideo(
     ideaVideoId: (video?.id as string | undefined) ?? null,
   })
   if (pinErr) return { error: pinErr }
-  return { videoId: video!.id as string }
+  return {
+    videoId: video!.id as string,
+    key: (video!.drive_file_id as string | null) ?? undefined,
+    provider: (video!.storage_provider as string | null) ?? null,
+    fileName: (video!.name as string | null) ?? null,
+  }
 }
 
 /** CREATE: bottom IG caption only (reuses generateIdeaCaption → caption_draft). */
 export async function generatePrimerRoundCaption(
   ideaId: string,
-  opts?: { feedback?: string | null; previousCaption?: string | null; videoId?: string | null },
-): Promise<{ ok?: true; caption?: string; error?: string }> {
+  opts?: {
+    feedback?: string | null
+    previousCaption?: string | null
+    videoId?: string | null
+    pieceKind?: 'auto' | PrimerRoundPieceKind | null
+  },
+): Promise<{ ok?: true; caption?: string; pieceKind?: PrimerRoundPieceKind; error?: string }> {
   try {
     await requirePrimerRoundAccess()
   } catch (err) {
@@ -243,11 +279,28 @@ export async function generatePrimerRoundCaption(
   const pinned = await loadPinnedPrimerRoundVideo(ideaId, opts?.videoId)
   if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
 
-  return generateIdeaCaption(ideaId, {
+  const { data: analysis } = await supabase
+    .from('content_idea_video_analysis')
+    .select('findings, visual_summary')
+    .eq('video_id', pinned.videoId)
+    .maybeSingle()
+  const findings = analysis?.findings as VideoAnalysisFindings | null
+  const pieceKind = resolvePrimerRoundPieceKind(opts?.pieceKind, {
+    visualSummary: (analysis?.visual_summary as string | null) ?? findings?.visual_summary ?? null,
+    burnedOverlay: findings?.burned_captions?.text ?? null,
+    fileName: pinned.fileName ?? null,
+  })
+
+  const captionRes = await generateIdeaCaption(ideaId, {
     feedback: opts?.feedback ?? null,
     previousCaption: opts?.previousCaption ?? null,
     videoId: pinned.videoId,
+    primerRoundKind: pieceKind,
   })
+  const caption = captionRes.caption
+    ? normalizePrimerRoundCaption(captionRes.caption, undefined, pieceKind)
+    : captionRes.caption
+  return { ...captionRes, caption, pieceKind }
 }
 
 /** VERIFY: overlay (from video analysis) + bottom caption via LLM. */
@@ -395,6 +448,7 @@ export async function schedulePrimerRoundReel(input: {
 export async function createPrimerRoundUploadIdea(input: {
   title?: string | null
   fileName?: string | null
+  sizeBytes?: number | null
 }): Promise<{ ideaId?: string; title?: string; error?: string }> {
   try {
     await requirePrimerRoundAccess()
@@ -402,6 +456,11 @@ export async function createPrimerRoundUploadIdea(input: {
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'No autorizado' }
   }
+
+  const sizeErr = assertPrimerRoundUploadSize(input.sizeBytes ?? 1)
+  if (input.sizeBytes != null && sizeErr) return { error: sizeErr }
+  const typeErr = assertPrimerRoundMp4({ fileName: input.fileName, contentType: null })
+  if (input.fileName && typeErr) return { error: typeErr }
 
   const title = ideaTitleFromUpload(input.title, [{ name: input.fileName ?? '' }])
   if (!title) return { error: 'Ponle un título al video (o sube un archivo con nombre)' }
@@ -443,10 +502,12 @@ export async function runPrimerRoundUploadPipeline(input: {
   ideaId: string
   videoId?: string | null
   overrideOrtho?: boolean
+  pieceKind?: 'auto' | PrimerRoundPieceKind | null
 }): Promise<{
   ok?: true
   pending?: true
   caption?: string | null
+  pieceKind?: PrimerRoundPieceKind
   gate?: PrimerRoundOrthoGate
   skipped?: string
   error?: string
@@ -474,19 +535,30 @@ export async function runPrimerRoundUploadPipeline(input: {
   const pinned = await loadPinnedPrimerRoundVideo(ideaId, input.videoId)
   if (pinned.error || !pinned.videoId) return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
 
-  const captionRes = await generatePrimerRoundCaption(ideaId, { videoId: pinned.videoId })
-  if (captionRes.error) return { error: captionRes.error, caption: captionRes.caption }
+  const captionRes = await generatePrimerRoundCaption(ideaId, {
+    videoId: pinned.videoId,
+    pieceKind: input.pieceKind,
+  })
+  if (captionRes.error) {
+    return {
+      error: captionRes.error,
+      caption: captionRes.caption,
+      pieceKind: captionRes.pieceKind,
+    }
+  }
 
   const { data: afterCaption } = await supabase
     .from('content_ideas')
     .select('generated_caption, caption_draft')
     .eq('id', ideaId)
     .maybeSingle()
-  const draft =
+  const pieceKind = captionRes.pieceKind ?? 'gfx'
+  const draftRaw =
     ((afterCaption?.generated_caption as string | null) ||
       (afterCaption?.caption_draft as string | null) ||
       captionRes.caption ||
       '')?.trim() || null
+  const draft = draftRaw ? normalizePrimerRoundCaption(draftRaw, undefined, pieceKind) : null
   if (draft && !(afterCaption?.generated_caption as string | null)?.trim()) {
     await supabase.from('content_ideas').update({ generated_caption: draft }).eq('id', ideaId)
   }
@@ -496,6 +568,7 @@ export async function runPrimerRoundUploadPipeline(input: {
     ok: true,
     pending: true,
     caption: draft,
+    pieceKind,
     gate: verified.gate,
     error: verified.error,
   }
@@ -507,7 +580,14 @@ export async function revisePrimerRoundCaption(input: {
   videoId?: string | null
   feedback: string
   previousCaption?: string | null
-}): Promise<{ caption?: string; gate?: PrimerRoundOrthoGate; styleRules?: string[]; error?: string }> {
+  pieceKind?: 'auto' | PrimerRoundPieceKind | null
+}): Promise<{
+  caption?: string
+  pieceKind?: PrimerRoundPieceKind
+  gate?: PrimerRoundOrthoGate
+  styleRules?: string[]
+  error?: string
+}> {
   try {
     await requirePrimerRoundAccess()
   } catch (err) {
@@ -526,8 +606,11 @@ export async function revisePrimerRoundCaption(input: {
     videoId: pinned.videoId,
     feedback,
     previousCaption: input.previousCaption ?? null,
+    pieceKind: input.pieceKind,
   })
-  if (captionRes.error) return { error: captionRes.error, caption: captionRes.caption }
+  if (captionRes.error) {
+    return { error: captionRes.error, caption: captionRes.caption, pieceKind: captionRes.pieceKind }
+  }
 
   const supabase = await createClient()
   if (captionRes.caption?.trim()) {
@@ -553,8 +636,13 @@ export async function revisePrimerRoundCaption(input: {
 
   const styleRules = await loadPrimerRoundStyleRules(supabase)
   const verified = await verifyPrimerRoundOrtho(ideaId, pinned.videoId)
+  const pieceKind = captionRes.pieceKind ?? 'gfx'
+  const caption = captionRes.caption
+    ? normalizePrimerRoundCaption(captionRes.caption, undefined, pieceKind)
+    : captionRes.caption
   return {
-    caption: captionRes.caption,
+    caption,
+    pieceKind,
     gate: verified.gate,
     styleRules,
     error: rememberErr
@@ -665,5 +753,154 @@ export async function acceptPrimerRoundPiece(input: {
     caption,
     gate: verified.gate,
     metricoolPostId: schedule.metricoolPostId ?? null,
+  }
+}
+
+/**
+ * Send the uploaded Primer Round clip to Metricool as a DRAFT.
+ * Never autoPublish. Collabs are always rafaellenin + denniseyperez.
+ */
+export async function pushPrimerRoundDraft(input: {
+  ideaId: string
+  videoId: string
+  caption?: string | null
+  pieceKind?: PrimerRoundPieceKind | null
+}): Promise<{ ok?: true; metricoolPostId?: number | null; caption?: string; error?: string }> {
+  try {
+    await requirePrimerRoundAccess()
+    await requirePermission('metricool.draft')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+
+  const ideaId = input.ideaId?.trim()
+  if (!ideaId) return { error: 'Falta la idea' }
+
+  const supabase = await createClient()
+  const { data: idea } = await supabase
+    .from('content_ideas')
+    .select(
+      'id, client_id, content_type, status, metricool_post_id, posted_at, generated_caption, caption_draft, client:clients(id, metricool_blog_id, platforms, default_platforms)',
+    )
+    .eq('id', ideaId)
+    .maybeSingle()
+  if (!idea || idea.client_id !== PRIMER_ROUND_CLIENT_ID) {
+    return { error: 'La idea no pertenece a Primer Round' }
+  }
+
+  const pinned = await loadPinnedPrimerRoundVideo(ideaId, input.videoId)
+  if (pinned.error || !pinned.videoId || !pinned.key) {
+    return { error: pinned.error ?? 'Falta el video de esta subida. No se usa otro archivo.' }
+  }
+
+  const pieceKind: PrimerRoundPieceKind = input.pieceKind === 'live' ? 'live' : 'gfx'
+  const caption = normalizePrimerRoundCaption(
+    (
+      input.caption?.trim() ||
+      (idea.generated_caption as string | null)?.trim() ||
+      (idea.caption_draft as string | null)?.trim() ||
+      ''
+    ),
+    undefined,
+    pieceKind,
+  )
+  if (!caption) return { error: 'Falta el caption. Dale feedback a la IA o espera a que lo genere.' }
+
+  const publicUrl =
+    pinned.provider === 'entregas-r2' ? entregasR2PublicUrl(pinned.key) : r2PublicUrl(pinned.key)
+
+  const rawClient = idea.client as
+    | {
+        metricool_blog_id?: string | null
+        platforms?: string[] | null
+        default_platforms?: string[] | null
+      }
+    | Array<{
+        metricool_blog_id?: string | null
+        platforms?: string[] | null
+        default_platforms?: string[] | null
+      }>
+    | null
+  const client = (Array.isArray(rawClient) ? rawClient[0] : rawClient) ?? {}
+  const blogId = client.metricool_blog_id?.trim() || PRIMER_ROUND_BLOG_ID
+
+  const ready = primerRoundDraftReadiness({
+    caption,
+    hasVideo: true,
+    publicUrl,
+    blogId,
+    metricoolPostId: (idea.metricool_post_id as number | null) ?? null,
+    postedAt: (idea.posted_at as string | null) ?? null,
+    status: idea.status as string | null,
+  })
+  if (!ready.ready) return { error: ready.reason }
+  if (!publicUrl) {
+    return { error: 'No se pudo obtener la URL pública del video (¿falta ENTREGAS_R2_PUBLIC_BASE_URL?)' }
+  }
+
+  const health = await checkVideoPlayable(publicUrl)
+  if (!health.ok) {
+    return { error: `El video no se puede reproducir desde su URL pública: ${health.reason}` }
+  }
+
+  const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+  const collabs = resolvePrimerRoundCollaborators()
+  if (collabs.length === 0) {
+    return { error: 'Configura los handles de colaboración (PRIMER_ROUND_COLLAB_USERNAMES)' }
+  }
+
+  try {
+    const res = await createDraftPost(caption, blogId, platforms, undefined, undefined, {
+      mediaUrls: [publicUrl],
+      // autoPublish omitted → Metricool draft:true. Never live from this screen.
+      contentType: (idea.content_type as string | null) ?? 'R',
+      instagramCollaborators: collabs,
+    })
+    const postId = res.data?.id ?? null
+    const uuid = res.data?.uuid ?? null
+    if (postId == null && !uuid) return { error: 'Metricool no devolvió un identificador de la publicación' }
+
+    const { error: updErr } = await supabase
+      .from('content_ideas')
+      .update({
+        generated_caption: caption,
+        caption_draft: caption,
+        metricool_post_id: postId,
+        metricool_uuid: uuid,
+        posting_error: null,
+      })
+      .eq('id', ideaId)
+      .eq('client_id', PRIMER_ROUND_CLIENT_ID)
+    if (updErr) {
+      return {
+        error: `Metricool creó el borrador ${postId ?? uuid}, pero no se pudo guardar en el dashboard. Verifícalo en Metricool antes de volver a enviar.`,
+        metricoolPostId: postId,
+        caption,
+      }
+    }
+
+    const userId = await getEffectiveUserId()
+    await logIdeaActivity(supabase, {
+      ideaId,
+      userId,
+      action: 'posted_to_metricool',
+      metadata: {
+        platforms,
+        autoPublish: false,
+        draft: true,
+        metricoolPostId: postId,
+        videoId: pinned.videoId,
+        collabs: collabs.map((c) => c.username),
+        source: 'primer-round-studio',
+        pieceKind,
+      },
+    })
+
+    revalidatePath('/primer-round')
+    revalidatePath('/pipeline')
+    revalidatePath('/revision')
+    return { ok: true, metricoolPostId: postId, caption }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Error al crear el borrador en Metricool' }
   }
 }
