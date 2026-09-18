@@ -50,7 +50,7 @@ export interface BrandFonts {
   secondary?: string | null
 }
 
-export type ClientAssetKind = 'logo' | 'color_guide' | 'font' | 'legal' | 'contract' | 'other'
+export type ClientAssetKind = 'logo' | 'color_guide' | 'font' | 'legal' | 'contract' | 'other' | 'photo' | 'broll'
 
 export interface ClientAsset {
   id: string

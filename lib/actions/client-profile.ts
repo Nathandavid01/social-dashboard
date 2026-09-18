@@ -216,6 +216,11 @@ export async function uploadClientAsset(
   clientId: string,
   formData: FormData,
 ): Promise<{ ok?: true; asset?: ClientAsset; error?: string }> {
+  try {
+    await requirePermission('clients.assets.upload')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
   const supabase = await createClient()
   const file = formData.get('file') as File | null
   const kind = (formData.get('kind') as ClientAssetKind | null) ?? 'other'

@@ -4,6 +4,7 @@ Tracked work not yet done. Each is implemented **test-first (TDD)** when unblock
 (see CLAUDE.md). Check off + reference the commit when completed.
 
 ## Migraciones por aplicar en prod (Supabase SQL Editor)
+- [ ] **`0083_client_asset_bank.sql`** — amplía `client_assets.kind` con `photo` y `broll`. Sin ella, subir Foto/B-roll al banco del cliente responde que falta una actualización. Los kinds viejos (logo, other, etc.) siguen igual.
 - [ ] **`0082_content_idea_objectives.sql`** — columnas `content_ideas.objective` / `funnel_stage`. Sin ellas On Site degrada seguro (lee sin esas columnas); con ellas el objetivo viaja al PDF y a la propuesta.
 Las features degradan seguro hasta aplicarlas (CLAUDE.md). Proyecto `bgqdtfhelknmfudcvrzz` → SQL Editor.
 Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).

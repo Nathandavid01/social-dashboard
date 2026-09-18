@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.93 — 2026-09-18
+
+**Cada cliente tiene un banco permanente de logos, fotos, B-roll y otros archivos.**
+- En On Site (`/onsite`) subes al banco del cliente, aparte de los crudos de cada toma.
+- En Pipeline (`/pipeline`), al abrir Material Y Entregar, ves el banco completo de ese cliente para bajarlo al edit.
+- Categorías: Logo, B-roll, Foto, Otro. No se publica solo. No toca los crudos del pipeline.
+- El perfil del cliente ahora llama **Banco** a esa pestaña.
+
+![Banco del cliente en On Site](/changelog/v4.93-banco-cliente.png)
+
 ## v4.92 — 2026-09-14
 
 **Primer Round: sube el video entero, rápido, sin el error 413.**

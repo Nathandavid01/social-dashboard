@@ -144,7 +144,7 @@ describe('ClientVideoSection — client header logo', () => {
 
     render(<ClientVideoSection pipeline={pipeline} />)
 
-    expect(screen.getByText('Assets compartidos')).toBeInTheDocument()
+    expect(screen.getByText('Banco del cliente')).toBeInTheDocument()
     expect(screen.getByText('Logo principal')).toBeInTheDocument()
   })
 })

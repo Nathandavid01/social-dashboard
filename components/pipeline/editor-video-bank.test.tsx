@@ -44,6 +44,7 @@ vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }
 const actionMocks = vi.hoisted(() => ({ reassignVideo: vi.fn() }))
 vi.mock('@/lib/actions/content-ideas', () => ({ reassignVideo: actionMocks.reassignVideo }))
 vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2DownloadUrl: vi.fn() }))
+vi.mock('@/lib/actions/client-asset-bank', () => ({ getClientAssetDownloadUrl: vi.fn(), listClientBankAssetsByClientIds: vi.fn() }))
 vi.mock('@/lib/actions/video-preview', () => ({ getVideoPreviewUrl: vi.fn() }))
 vi.mock('@/lib/actions/video-thumbs', () => ({
   getPipelineVideoThumbViewUrls: vi.fn(() => new Promise(() => {})),
