@@ -11,6 +11,7 @@ interface TopbarProps {
   notifications?: Notification[]
   unreadCount?: number
   currentUser: { id: string; full_name: string | null; avatar_url: string | null } | null
+  clientReviewToastEnabled?: boolean
 }
 
 export function Topbar({
@@ -18,6 +19,7 @@ export function Topbar({
   notifications = [],
   unreadCount = 0,
   currentUser,
+  clientReviewToastEnabled = true,
 }: TopbarProps) {
   return (
     <header
@@ -39,7 +41,7 @@ export function Topbar({
         <div className="min-w-0 flex-1" />
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {currentUser && (
-            <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} />
+            <NotificationBell userId={currentUser.id} initialNotifications={notifications} initialUnreadCount={unreadCount} clientReviewToastEnabled={clientReviewToastEnabled} />
           )}
           <UserMenu />
         </div>

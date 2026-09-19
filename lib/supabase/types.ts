@@ -9,6 +9,11 @@ export type TaskType = 'content_creation' | 'scheduling' | 'reporting' | 'client
 export type AlertSeverity = 'info' | 'warning' | 'error' | 'success'
 export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'cancelled'
 
+/** Display prefs for toasts/bell. Independent from nav. Missing keys = ON. */
+export interface NotificationPreferences {
+  client_review_toast?: boolean
+}
+
 export interface NavPreferences {
   /** Schema version of `order`. Bumped when the DEFAULT sidebar layout changes,
    * so a saved order from the OLD layout is discarded instead of pinning the user
@@ -34,6 +39,7 @@ export interface Profile {
    * configured; 0 = none today. Optional so the app works before it's applied. */
   daily_video_capacity?: number | null
   nav_preferences?: NavPreferences
+  notification_preferences?: NotificationPreferences
   created_at: string
   updated_at: string
 }
