@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition, type ReactNode } from 'react'
 import { Bot, Check, Loader2, X } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
-import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
+import { EnviarAlCliente, EnviarIdeaAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
 import { setManualPostedStatus, setStaffClientApproval } from '@/lib/actions/recibo'
@@ -136,13 +136,7 @@ export function ReciboBoard({
         </div>
       ) : (
         <>
-          <section className="rounded-2xl border border-border bg-card/70 px-4 py-3 shadow-sm">
-            <h2 className="mb-1 text-sm font-semibold">Enviar al cliente · esta semana</h2>
-            <p className="mb-2 text-xs text-muted-foreground">
-              Genera un enlace en <code className="rounded bg-muted px-1">/aprobacion</code>. Sin auto-post.
-            </p>
-            <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : ideas} />
-          </section>
+          <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : ideas} />
 
           <ul className="space-y-8">
             {byClient.map(({ client, ideas: clientIdeas }) => (
@@ -215,6 +209,7 @@ export function ReciboBoard({
                             </div>
 
                             <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
+                              {hasEdit ? <EnviarIdeaAlCliente idea={idea} /> : null}
                               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                                 ¿Aprueba el cliente?
                               </p>
