@@ -30,12 +30,15 @@ import {
 } from '@/lib/actions/notifications'
 import { useToast } from '@/lib/hooks/use-toast'
 import { shouldPulseBell, unreadCount, notificationDestination } from '@/lib/utils/notification-bell'
+import { shouldShowClientReviewToast } from '@/lib/utils/notification-preferences'
 import type { Notification, NotificationSeverity } from '@/lib/supabase/types'
 
 interface Props {
   initialNotifications: Notification[]
   initialUnreadCount: number
   userId: string
+  /** Default true. When false, skip toast for client approve/reject kinds only. */
+  clientReviewToastEnabled?: boolean
 }
 
 const severityIcon: Record<NotificationSeverity, typeof Info> = {
@@ -65,7 +68,7 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString('es-PR', { month: 'short', day: 'numeric' })
 }
 
-export function NotificationBell({ initialNotifications, initialUnreadCount, userId }: Props) {
+export function NotificationBell({ initialNotifications, initialUnreadCount, userId, clientReviewToastEnabled = true }: Props) {
   const [items, setItems] = useState<Notification[]>(initialNotifications)
   const [open, setOpen] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
@@ -97,7 +100,10 @@ export function NotificationBell({ initialNotifications, initialUnreadCount, use
           setItems((prev) => [n, ...prev.filter(p => p.id !== n.id)])
           setHighlightId(n.id)
           window.setTimeout(() => setHighlightId(null), 1500)
-          if (!openRef.current) {
+          if (
+            !openRef.current &&
+            shouldShowClientReviewToast({ kind: n.kind, enabled: clientReviewToastEnabled })
+          ) {
             toast({
               title: n.title,
               description: n.body ?? undefined,

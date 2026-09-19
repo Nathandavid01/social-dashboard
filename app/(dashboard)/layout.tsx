@@ -20,6 +20,7 @@ import { canStartViewAs } from '@/lib/auth/view-as-core'
 import { ViewAsBanner } from '@/components/auth/view-as-banner'
 import { resolveDashboardRedirect } from '@/lib/utils/approval-core'
 import type { Profile, UserRole } from '@/lib/supabase/types'
+import { isClientReviewToastEnabled } from '@/lib/utils/notification-preferences'
 
 export default async function DashboardLayout({
   children,
@@ -105,6 +106,7 @@ export default async function DashboardLayout({
             notifications={notifications}
             unreadCount={unreadCount}
             currentUser={currentUserForTopbar}
+            clientReviewToastEnabled={isClientReviewToastEnabled(profile?.notification_preferences)}
           />
           <main className="flex-1 overflow-y-auto">
             <ViewAsBanner />
