@@ -17,7 +17,7 @@ const STAGE_LABEL: Record<string, string> = {
   creando: 'Creando…',
   subiendo: 'Subiendo',
   registrando: 'Registrando…',
-  listo: 'Listo',
+  listo: 'Editado · Hecho',
   error: 'Error',
 }
 

@@ -68,6 +68,8 @@ export function ContentPipelineBoard(props: {
   clientLogos?: Record<string, string | null>
   /** brand_colors.primary por cliente (opcional; si falta, hash del id). */
   clientColors?: Record<string, string | null>
+  /** clients.edit_mode — badge AI en el banco. */
+  clientEditModes?: Record<string, 'ai' | 'human'>
   /** Estado de colchón por cliente, calculado en servidor contra su cadencia. */
   clientRunway?: Record<string, Runway>
   /** Owner y supervisor — sección fija en el Banco. */
@@ -99,6 +101,7 @@ function ContentPipelineBoardInner({
   teamMembers = [],
   clientLogos = {},
   clientColors = {},
+  clientEditModes = {},
   clientRunway = {},
   bankAdmins = [],
   wipLimits = {},
@@ -114,6 +117,8 @@ function ContentPipelineBoardInner({
   teamMembers?: { id: string; name: string }[]
   clientLogos?: Record<string, string | null>
   clientColors?: Record<string, string | null>
+  /** clients.edit_mode — badge AI en el banco. */
+  clientEditModes?: Record<string, 'ai' | 'human'>
   clientRunway?: Record<string, Runway>
   bankAdmins?: BankAdmin[]
   wipLimits?: Record<string, number>
@@ -321,7 +326,7 @@ function ContentPipelineBoardInner({
   const bankRows = useMemo(() => {
     const q = search.trim().toLowerCase()
     const names = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]))
-    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits, approvalRates }, names)
+    return groupEditorVideoBank(ideas, names, { logos: clientLogos, brandColors: clientColors, wipLimits, approvalRates, editModes: clientEditModes }, names)
       .filter((row) => {
         if (assigneeFilter === 'unassigned') return row.editorId == null
         if (assigneeFilter) return row.editorId === assigneeFilter
@@ -337,7 +342,7 @@ function ContentPipelineBoardInner({
         }),
       }))
       .filter((row) => row.clients.length > 0)
-  }, [ideas, teamMembers, clientLogos, clientColors, wipLimits, approvalRates, assigneeFilter, clientFilter, search])
+  }, [ideas, teamMembers, clientLogos, clientColors, clientEditModes, wipLimits, approvalRates, assigneeFilter, clientFilter, search])
 
   const visualVideoBank = useMemo(() => {
     const names = Object.fromEntries(teamMembers.map((member) => [member.id, member.name]))

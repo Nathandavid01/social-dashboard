@@ -65,6 +65,8 @@ export interface EditorBankClient {
   remainingInBank: number
   inRevision: number
   postingDays: number[]
+  /** ai | human — badge only; no auto-dispatch yet. */
+  editMode?: 'ai' | 'human'
   clips: EditorBankClip[]
 }
 
@@ -75,6 +77,8 @@ export interface EditorBankResolvedMarks {
   wipLimits?: Record<string, number>
   /** % de aprobación (0–100) por editor; sin entrada → null (sin historial). */
   approvalRates?: Record<string, number | null>
+  /** edit_mode por clientId — badge only. */
+  editModes?: Record<string, 'ai' | 'human'>
 }
 
 export interface EditorBankRow {
@@ -348,6 +352,9 @@ function emptyClient(
     postingDays: Array.isArray((idea.client as { posting_days?: number[] } | null)?.posting_days)
       ? ((idea.client as { posting_days?: number[] }).posting_days ?? [])
       : [],
+    editMode: resolved.editModes?.[clientId]
+      ?? ((idea.client as { edit_mode?: 'ai' | 'human' } | null)?.edit_mode)
+      ?? 'human',
     clips: [],
   }
 }

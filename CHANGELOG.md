@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.98 — 2026-09-19
+
+**Pipeline: Editado/Hecho al subir, enlace multi al cliente, y modo AI vs editor humano.**
+- Al subir y registrar el corte en Pipeline (`submitEditorDelivery` / Entregas R2), la idea pasa sola a `producida` + `submitted`. Tras el éxito se muestra el chip **Editado · Hecho** — sin un paso aparte de “marcar hecho”.
+- En Entregas, **Enviar al cliente**: eliges cliente, marcas videos editados y generas un solo `/aprobacion/{token}` con `crearEnlaceCliente` (permiso `captions.edit`). No publica solo.
+- Clientes: columna `edit_mode` (`ai` | `human`, default `human`) + selector en el perfil. Badge **AI** en el banco del Pipeline si aplica.
+- **Pendiente (auto-dispatch AI):** encolar edición cuando llega el crudo; saltar descarga/subida manual del editor; worker/cola de edición AI; notificar al staff al terminar el corte AI; respetar WIP del editor humano vs cola AI.
+
 ## v4.96 — 2026-09-19
 
 **El editor puede consultar todos los crudos de sus clientes asignados.**
