@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.0 — 2026-09-19
+
+**Recibo: ver y reproducir el video editado en cada tarjeta.**
+- Cada idea con corte en Entregas R2 muestra un `<video controls playsInline>` inline (URL firmada vía `getReciboIdeaPreviewUrl` → `getEntregaVideoEditado` + `getEntregasPreviewUrl`).
+- Si aún no hay editado: estado vacío **Sin video editado**. No toca crudos del Pipeline ni Metricool.
+
 ## v4.99 — 2026-09-19
 
 **Recibo (clientes AI) + marcas manuales + página de aprobación con logos.**
