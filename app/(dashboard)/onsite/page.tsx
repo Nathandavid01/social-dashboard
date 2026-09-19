@@ -3,18 +3,20 @@ import { ClientProposalPanel } from '@/components/ideas/client-proposal-panel'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
+import { getClients } from '@/lib/actions/clients'
 import { listClientBankAssets } from '@/lib/actions/client-asset-bank'
 import { pickOnsiteSession } from '@/lib/onsite/slot-count'
 import { OnsiteStudio } from '@/components/onsite/onsite-studio'
+import { SubirCrudoPanel } from '@/components/onsite/subir-crudo-panel'
 import { SupervisorProcessSteps } from '@/components/onsite/supervisor-process-steps'
-import { Camera, CalendarClock } from 'lucide-react'
+import { Camera } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * On Site — call sheet del día. El videógrafo ve qué grabar y sube;
- * producción (admin) arma y edita el brief.
+ * On Site — puerta de subida del crudo. El videógrafo sube primero;
+ * el call sheet, la llegada y el brief quedan abajo.
  */
 export default async function OnsitePage({
   searchParams,
@@ -24,7 +26,7 @@ export default async function OnsitePage({
   await requirePermission('recording.read')
 
   const { s: sessionId } = await searchParams
-  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, canUploadBank, currentUserId, canExportIdeas] = await Promise.all([
+  const [{ sessions, error }, canBrief, canAddIdeas, canRecord, canUpload, canUploadBank, currentUserId, canExportIdeas, clientsRaw] = await Promise.all([
     getOnsiteSessions(),
     currentUserHas('recording.brief'),
     currentUserHas('recording.create'),
@@ -35,6 +37,7 @@ export default async function OnsitePage({
     // Export / propuesta PDF: ideas.read (supervisor, editor, video, copy…).
     // ideas.share era owner/supervisor-only y bloqueaba a quien sí puede leer ideas.
     currentUserHas('ideas.read'),
+    getClients({ status: 'active' }).catch(() => []),
   ])
 
   if (error) {
@@ -61,6 +64,11 @@ export default async function OnsitePage({
   const loadError = shotResult.error
   const shots = shotResult.shots
   const ideas = ideaResult.error ? [] : ideaResult.ideas
+  const clients = (Array.isArray(clientsRaw) ? clientsRaw : [])
+    .map((c) => ({ id: String((c as { id?: string }).id ?? ''), name: String((c as { name?: string }).name ?? '') }))
+    .filter((c) => c.id && c.name)
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  const todaySession = activa?.date === today ? activa : undefined
 
   return (
     <div className="space-y-4">
@@ -76,8 +84,8 @@ export default async function OnsitePage({
             </h1>
             <p className="truncate text-xs text-muted-foreground">
               {canBrief
-                ? 'Llegada, call sheet y subida. Después, los editores.'
-                : 'Llegas, ves qué grabar, subes con el nombre de la idea.'}
+                ? 'Sube el crudo primero. Call sheet y llegada quedan abajo.'
+                : 'Sube el crudo. El call sheet queda abajo.'}
             </p>
           </div>
         </div>
@@ -89,38 +97,50 @@ export default async function OnsitePage({
         </Link>
       </header>
 
-      {lista.length === 0 || !activa ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border bg-card px-4 py-12 text-center">
-          <CalendarClock className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-          <p className="text-sm font-medium">No hay sesiones agendadas</p>
-          <p className="text-xs text-muted-foreground">
-            On Site trabaja sobre el calendario: agenda una sesión y aparecerá aquí.
-          </p>
-        </div>
-      ) : loadError ? (
+      <SubirCrudoPanel
+        clients={clients}
+        sessions={lista}
+        today={today}
+        canUpload={canUpload}
+        canCreateSession={canAddIdeas}
+        defaultClientId={activa?.clientId ?? null}
+        defaultSessionId={todaySession?.id ?? null}
+        existingIdeaId={todaySession ? (shots?.[0]?.id ?? null) : null}
+      />
+
+      {loadError && activa ? (
         <section role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
           <h2 className="font-semibold">No Se Pudo Cargar La Sesión Completa</h2>
           <p className="mt-2 text-sm">No se pudieron consultar las tomas de esta sesión. Esto no significa que la sesión esté vacía.</p>
           <a href={`/onsite?s=${encodeURIComponent(activa.id)}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium">Volver A Cargar La Sesión</a>
         </section>
+      ) : activa ? (
+        <details className="rounded-2xl border bg-card">
+          <summary className="min-h-11 cursor-pointer px-4 py-3 text-sm font-medium">
+            Call sheet y preparación
+          </summary>
+          <div className="space-y-4 border-t p-3 sm:p-4">
+            <OnsiteStudio
+              sessions={lista}
+              active={activa}
+              shots={shots ?? []}
+              addable={(ideas ?? []).filter(idea => !(shots ?? []).some(shot => shot.id === idea.id))}
+              canBrief={canBrief}
+              canAddIdeas={canAddIdeas}
+              canRecord={canRecord}
+              canUpload={canUpload}
+              canUploadBank={canUploadBank}
+              bankAssets={bankResult.assets ?? []}
+              today={today}
+              currentUserId={currentUserId}
+            />
+            {canExportIdeas && <ClientProposalPanel key={activa.id} sessionId={activa.id} />}
+          </div>
+        </details>
       ) : (
-        <>
-        <OnsiteStudio
-          sessions={lista}
-          active={activa}
-          shots={shots ?? []}
-          addable={(ideas ?? []).filter(idea => !(shots ?? []).some(shot => shot.id === idea.id))}
-          canBrief={canBrief}
-          canAddIdeas={canAddIdeas}
-          canRecord={canRecord}
-          canUpload={canUpload}
-          canUploadBank={canUploadBank}
-          bankAssets={bankResult.assets ?? []}
-          today={today}
-          currentUserId={currentUserId}
-        />
-        {canExportIdeas && <ClientProposalPanel key={activa.id} sessionId={activa.id} />}
-        </>
+        <p className="text-center text-xs text-muted-foreground">
+          No hay sesiones agendadas. Al subir se crea la de hoy, o ábrela en el calendario.
+        </p>
       )}
     </div>
   )

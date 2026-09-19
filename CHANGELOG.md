@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.6 — 2026-09-19
+
+**On Site: «Subir crudo» es la puerta principal.**
+- En `/onsite` el videógrafo ve un CTA grande **Subir crudo**: elige cliente → sesión de hoy (o se crea con la agenda existente) → suelta los videos.
+- Los archivos entran al Pipeline como **crudo**, no como editado ni B-roll. Tras subir: «en Pipeline» con enlace.
+- Call sheet, PDF, llegada y banco del cliente quedan abajo, sin bloquear la subida. El calendario no se toca.
+
+![Subir crudo en On Site](/changelog/v5.6-subir-crudo.jpg)
+
 ## v5.5 — 2026-09-19
 
 **Enviar al cliente más fácil (un toque) + Recibo responsive.**
