@@ -111,6 +111,7 @@ export const clientProfilePatchSchema = z
     default_cta: z.string().max(300).nullable().optional().or(z.literal('')).transform((v) => (v === '' ? null : v ?? null)),
     default_hashtags: z.string().max(1000).nullable().optional().or(z.literal('')).transform((v) => (v === '' ? null : v ?? null)),
     caption_notes: z.string().max(1000).nullable().optional().or(z.literal('')).transform((v) => (v === '' ? null : v ?? null)),
+    edit_mode: z.enum(['ai', 'human']).optional(),
     metricool_blog_id: z
       .string()
       .max(100)

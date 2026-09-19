@@ -32,7 +32,7 @@ export default async function PipelinePage() {
     getIdeacionPipeline({ complete: true }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, posting_timezone, metricool_blog_id')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, posting_timezone, metricool_blog_id, edit_mode')
       .eq('status', 'active')
       .order('name'),
     getMetricoolPicturesByBlogId(),
@@ -46,10 +46,20 @@ export default async function PipelinePage() {
   if (clientsError && isMissingTimezoneColumn(clientsError)) {
     const retry = await supabase
       .from('clients')
-      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, metricool_blog_id')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, metricool_blog_id, edit_mode')
       .eq('status', 'active')
       .order('name')
     activeClientsRaw = (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null }))
+    clientsError = retry.error
+  }
+
+  if (clientsError && /edit_mode/i.test(clientsError.message ?? '')) {
+    const retry = await supabase
+      .from('clients')
+      .select('id, name, logo_url, brand_colors, created_at, updated_at, platforms, status, posting_days, posting_time, posting_schedule, metricool_blog_id')
+      .eq('status', 'active')
+      .order('name')
+    activeClientsRaw = (retry.data ?? []).map((c) => ({ ...c, posting_timezone: null, edit_mode: 'human' as const }))
     clientsError = retry.error
   }
 
@@ -167,6 +177,12 @@ export default async function PipelinePage() {
       return [c.id, primary]
     }),
   )
+  const clientEditModes: Record<string, 'ai' | 'human'> = Object.fromEntries(
+    activeClients.map((c) => {
+      const mode = (c as { edit_mode?: string | null }).edit_mode
+      return [c.id, mode === 'ai' ? 'ai' : 'human']
+    }),
+  )
 
   const bankListed = await listClientBankAssetsByClientIds(activeClients.map((c) => c.id))
   const clientBank = bankListed.byClient ?? {}
@@ -180,6 +196,7 @@ export default async function PipelinePage() {
       teamMembers={teamMembers}
       clientLogos={clientLogos}
       clientColors={clientColors}
+      clientEditModes={clientEditModes}
       clientRunway={clientRunway}
       wipLimits={wipLimits}
       approvalRates={approvalRates}

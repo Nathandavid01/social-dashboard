@@ -2,6 +2,7 @@ export type UserRole = 'owner' | 'supervisor' | 'editor' | 'video' | 'disenador'
 export type UserStatus = 'active' | 'inactive'
 export type UserApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type ClientStatus = 'active' | 'paused' | 'onboarding'
+export type ClientEditMode = 'ai' | 'human'
 export type SocialPlatform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
 export type TaskType = 'content_creation' | 'scheduling' | 'reporting' | 'client_call' | 'review' | 'other'
@@ -160,6 +161,8 @@ export interface Client {
   posting_schedule: Record<string, string>
   /** IANA timezone for posting cadence. Null until a person sets it. */
   posting_timezone?: string | null
+  /** AI vs human editor. Migration 0085. Default human. */
+  edit_mode?: ClientEditMode
   video_threshold: number
   weekly_post_quota: number | null
   contract_url: string | null

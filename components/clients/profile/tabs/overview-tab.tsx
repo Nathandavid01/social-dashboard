@@ -5,8 +5,9 @@ import { OwnerForm } from '../owner-form'
 import { LastMeetingEditor } from '../last-meeting-editor'
 import { ColorSwatches } from '../color-swatches'
 import { VideoThresholdCard } from '../video-threshold-card'
+import { EditModeCard } from '../edit-mode-card'
 import { ClientRunwayWidget } from '@/components/runway/client-runway-widget'
-import { CalendarDays, User, Users, Palette, Video, Globe } from 'lucide-react'
+import { CalendarDays, User, Users, Palette, Video, Globe, Scissors } from 'lucide-react'
 import { MetricoolBlogEditor } from '../metricool-blog-editor'
 import { ClientOnboardingCard } from '../../client-onboarding-card'
 import { clientOnboardingStatus } from '@/lib/utils/client-onboarding'
@@ -89,6 +90,16 @@ export function OverviewTab({ client, pipeline }: Props) {
           />
         </CardContent>
       </Card>
+
+      <Card className="animate-in fade-in duration-500" style={{ animationDelay: '165ms', animationFillMode: 'backwards' }}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base"><Scissors className="h-4 w-4" /> Modo de edición</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EditModeCard clientId={client.id} initialMode={client.edit_mode ?? 'human'} />
+        </CardContent>
+      </Card>
+
 
       <Card className="animate-in fade-in duration-500" style={{ animationDelay: '180ms', animationFillMode: 'backwards' }}>
         <CardHeader className="pb-3">
