@@ -148,7 +148,7 @@ export function EnviarAlCliente({
   return (
     <div
       data-testid="enviar-al-cliente"
-      className={cn('space-y-3 rounded-2xl border border-border bg-card/80 p-4 shadow-sm', className)}
+      className={cn('space-y-3 rounded-2xl border border-border bg-card/80 p-3 shadow-sm sm:p-4', className)}
     >
       <div className="flex flex-wrap items-center gap-2">
         <Send className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -174,7 +174,7 @@ export function EnviarAlCliente({
                 aria-label="Cliente para enlace de aprobación"
                 value={clientId}
                 onChange={(e) => pickClient(e.target.value)}
-                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
+                className="h-12 w-full rounded-xl border border-border bg-background px-3 text-base sm:h-11 sm:text-sm"
               >
                 <option value="">¿A qué cliente?</option>
                 {clients.map((c) => (
@@ -224,7 +224,7 @@ export function EnviarAlCliente({
             type="button"
             disabled={!clientId || selected.size === 0 || busy}
             onClick={() => void generar()}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50 touch-manipulation"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
             {url ? `Regenerar enlace (${selected.size})` : `Copiar enlace para el cliente (${selected.size})`}
@@ -245,14 +245,14 @@ export function EnviarAlCliente({
             value={url}
             onFocus={(e) => e.currentTarget.select()}
             aria-label="Enlace de aprobación generado"
-            className="h-11 w-full select-all rounded-lg border border-border bg-background px-3 font-mono text-xs text-foreground"
+            className="h-12 w-full select-all rounded-lg border border-border bg-background px-3 font-mono text-sm text-foreground sm:h-11 sm:text-xs"
           />
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => void copiar()}
               aria-label="Copiar enlace de aprobación"
-              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 sm:flex-none"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 touch-manipulation"
             >
               {copied ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
               {copied ? 'Copiado' : 'Copiar otra vez'}
@@ -261,7 +261,7 @@ export function EnviarAlCliente({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-muted sm:flex-none"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-muted touch-manipulation"
             >
               <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               Abrir
@@ -322,7 +322,7 @@ export function EnviarIdeaAlCliente({
         disabled={busy}
         onClick={() => void enviar()}
         data-testid={`enviar-idea-${idea.id}`}
-        className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary hover:bg-primary/20 disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 text-xs font-semibold text-primary hover:bg-primary/20 disabled:opacity-50 touch-manipulation"
       >
         {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Send className="h-3.5 w-3.5" aria-hidden="true" />}
         Enviar al cliente

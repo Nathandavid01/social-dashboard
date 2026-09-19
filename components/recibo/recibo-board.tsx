@@ -106,19 +106,19 @@ export function ReciboBoard({
   )
 
   return (
-    <div className="space-y-6" data-testid="recibo-board">
-      <header className="flex flex-wrap items-start justify-between gap-3 px-1">
-        <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-            <Bot className="h-5 w-5 text-violet-400" aria-hidden="true" />
+    <div className="mx-auto w-full max-w-6xl space-y-5 sm:space-y-6" data-testid="recibo-board">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight sm:text-xl">
+            <Bot className="h-5 w-5 shrink-0 text-violet-400" aria-hidden="true" />
             Recibo
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Revisa cada corte en 9:16, lee el título y la idea, y marca si el cliente aprueba.
             Sin auto-post a Metricool.
           </p>
         </div>
-        <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-card/80 px-3.5 text-xs font-medium backdrop-blur">
+        <label className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-card/80 px-3.5 text-xs font-medium backdrop-blur sm:w-auto sm:justify-start">
           <input
             type="checkbox"
             checked={soloSemana}
@@ -166,7 +166,7 @@ export function ReciboBoard({
                     No hay videos editados en el filtro actual.
                   </p>
                 ) : (
-                  <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
                       const busy = isPending && pendingId === idea.id
                       const posted = idea.manual_posted_status
@@ -179,16 +179,16 @@ export function ReciboBoard({
                           data-testid={`recibo-idea-${idea.id}`}
                           className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/80 shadow-md shadow-black/20"
                         >
-                          <div className="bg-zinc-950 p-3 pb-2">
-                            <div className="mx-auto w-full max-w-[260px]">
+                          <div className="bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
+                            <div className="mx-auto w-full max-w-[min(100%,280px)]">
                               <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
                             </div>
                           </div>
 
-                          <div className="flex flex-1 flex-col gap-3 p-4">
+                          <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
                             <div className="min-w-0 space-y-1">
                               <div className="flex items-start justify-between gap-2">
-                                <h3 className="text-[15px] font-semibold leading-snug tracking-tight">
+                                <h3 className="break-words text-[15px] font-semibold leading-snug tracking-tight">
                                   {ideaTitle(idea)}
                                 </h3>
                                 {busy && (
@@ -238,7 +238,7 @@ export function ReciboBoard({
                               <p className="pt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                                 Publicación
                               </p>
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex gap-1.5">
                                 <ToggleBtn
                                   active={posted === 'posted'}
                                   disabled={busy}
@@ -300,7 +300,7 @@ function ToggleBtn({
       onClick={onClick}
       className={cn(
         'inline-flex items-center justify-center gap-1.5 rounded-xl border font-semibold transition',
-        large ? 'min-h-11 px-3 text-sm' : 'min-h-9 px-2.5 text-[11px]',
+        large ? 'min-h-11 w-full px-3 text-sm' : 'min-h-11 flex-1 px-2.5 text-[11px] sm:min-h-9 sm:flex-none',
         active && tone === 'ok' && 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200',
         active && tone === 'warn' && 'border-amber-500/60 bg-amber-500/20 text-amber-100',
         !active && 'border-border bg-background/80 text-muted-foreground hover:bg-muted/60',

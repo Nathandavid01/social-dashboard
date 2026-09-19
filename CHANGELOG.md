@@ -6,9 +6,10 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v5.5 — 2026-09-19
 
-**Enviar al cliente más fácil (un toque).**
+**Enviar al cliente más fácil (un toque) + Recibo responsive.**
 - Panel siempre abierto: auto-elige el único cliente, marca todos los videos, botón grande **Copiar enlace para el cliente**.
 - En cada tarjeta de Recibo: **Enviar al cliente** genera y copia el enlace de ese video. Sin auto-post Metricool.
+- Móvil: sin doble padding, 1 columna, video 9:16 a ancho útil, botones ≥44px (`touch-manipulation`), filtros y CTAs a ancho completo.
 
 ## v5.4 — 2026-09-19
 
