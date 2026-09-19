@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  canResolveSessionTarget,
   pickTodaySession,
   todaySessionCreateValues,
   todaySessionsForClient,
@@ -57,5 +58,20 @@ describe('todaySessionCreateValues', () => {
       clientName: '  ',
       today: '2026-09-19',
     }).title).toBe('Grabación')
+  })
+})
+
+describe('canResolveSessionTarget', () => {
+  it('con sesión elegida o auto, sí', () => {
+    expect(canResolveSessionTarget({ todaySessionCount: 2, sessionId: 's1', canCreateSession: false })).toBe(true)
+  })
+
+  it('sin sesiones de hoy, solo si puede crear', () => {
+    expect(canResolveSessionTarget({ todaySessionCount: 0, sessionId: '', canCreateSession: true })).toBe(true)
+    expect(canResolveSessionTarget({ todaySessionCount: 0, sessionId: '', canCreateSession: false })).toBe(false)
+  })
+
+  it('con varias de hoy y ninguna elegida, no crea otra', () => {
+    expect(canResolveSessionTarget({ todaySessionCount: 2, sessionId: '', canCreateSession: true })).toBe(false)
   })
 })

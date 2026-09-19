@@ -13,6 +13,7 @@ import { ideaTitleFromUpload } from '@/lib/pipeline/banco-direct-upload'
 import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 import { clientDisplayName } from '@/lib/utils/client-display-name'
 import {
+  canResolveSessionTarget,
   pickTodaySession,
   todaySessionCreateValues,
   todaySessionsForClient,
@@ -65,7 +66,15 @@ export function SubirCrudoPanel({
   const autoSession = pickTodaySession(todayForClient)
   const resolvedSessionId = sessionId || autoSession?.id || ''
   const clientName = clients.find((c) => c.id === clientId)?.name ?? ''
-  const canSubmit = !!clientId && files.length > 0 && !pending && (resolvedSessionId || canCreateSession)
+  const canSubmit =
+    !!clientId &&
+    files.length > 0 &&
+    !pending &&
+    canResolveSessionTarget({
+      todaySessionCount: todayForClient.length,
+      sessionId: resolvedSessionId,
+      canCreateSession,
+    })
 
   function takeFiles(list: FileList | File[] | null) {
     const next = Array.from(list ?? [])
@@ -93,6 +102,10 @@ export function SubirCrudoPanel({
     try {
       let targetSessionId = resolvedSessionId
       if (!targetSessionId) {
+        if (todayForClient.length > 0) {
+          setError('Elige la sesión de hoy')
+          return
+        }
         if (!canCreateSession) {
           setError('Agenda una sesión de hoy en el calendario')
           return
@@ -270,7 +283,9 @@ export function SubirCrudoPanel({
 
         {uploadedCount > 0 && (
           <p role="status" className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
-            {uploadedCount === 1 ? 'El archivo está en Pipeline' : `${uploadedCount} archivos están en Pipeline`}
+            {uploadedCount === 1
+              ? 'Subida en marcha · el archivo va al Pipeline'
+              : `${uploadedCount} subidas en marcha · van al Pipeline`}
             {' · '}
             <Link href="/pipeline" className="font-semibold underline-offset-2 hover:underline">
               Abrir Pipeline

@@ -116,7 +116,7 @@ describe('SubirCrudoPanel', () => {
     )
     expect(createRecordingSession).not.toHaveBeenCalled()
     expect(createContentIdeaManual).not.toHaveBeenCalled()
-    expect(screen.getByText(/en Pipeline/i)).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(/Pipeline/i)
   })
 
   it('si no hay sesión de hoy, la crea con la API existente y pega el crudo', async () => {
@@ -172,6 +172,23 @@ describe('SubirCrudoPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
     await waitFor(() => expect(toast).toHaveBeenCalled())
     expect(startUpload).not.toHaveBeenCalled()
+  })
+
+  it('con varias sesiones de hoy, obliga a elegir y no crea otra', async () => {
+    renderPanel({
+      sessions: [
+        session({ id: 's-a', title: 'Mañana', location: 'Arecibo' }),
+        session({ id: 's-b', title: 'Tarde', location: 'Hatillo' }),
+      ],
+      defaultClientId: 'c1',
+    })
+    pickFile()
+    expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('Sesión de hoy'), { target: { value: 's-b' } })
+    expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeEnabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
+    await waitFor(() => expect(startUpload).toHaveBeenCalled())
+    expect(createRecordingSession).not.toHaveBeenCalled()
   })
 
   it('sin permiso de subida no se muestra', () => {

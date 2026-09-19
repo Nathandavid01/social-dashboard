@@ -8,7 +8,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 **On Site: «Subir crudo» es la puerta principal.**
 - En `/onsite` el videógrafo ve un CTA grande **Subir crudo**: elige cliente → sesión de hoy (o se crea con la agenda existente) → suelta los videos.
-- Los archivos entran al Pipeline como **crudo**, no como editado ni B-roll. Tras subir: «en Pipeline» con enlace.
+- Los archivos entran al Pipeline como **crudo**, no como editado ni B-roll. Tras subir: aviso de subida en marcha + enlace a Pipeline.
+- Si el cliente tiene **varias sesiones hoy**, hay que elegir una — no se crea otra sesión duplicada.
 - Call sheet, PDF, llegada y banco del cliente quedan abajo, sin bloquear la subida. El calendario no se toca.
 
 ![Subir crudo en On Site](/changelog/v5.6-subir-crudo.jpg)
