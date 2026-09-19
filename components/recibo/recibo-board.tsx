@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition, type ReactNode } from 'react'
 import { Bot, Check, Loader2, X } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
-import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -12,12 +11,11 @@ import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
 import { cn } from '@/lib/utils'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
-import type { DiaKey } from '@/lib/entregas/dias'
 
 /**
  * Recibo — intake for clients with edit_mode='ai'.
- * Staff uploads already-edited videos to Entregas R2 (never overwrites Pipeline raw),
- * marks posted / client approval by hand, and can send "esta semana" via /aprobacion.
+ * Staff reviews available edited videos, marks posted / client approval by hand,
+ * and can send "esta semana" via /aprobacion.
  * No Metricool auto-post.
  */
 
@@ -39,7 +37,6 @@ export function ReciboBoard({
   const [soloSemana, setSoloSemana] = useState(true)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, start] = useTransition()
-  const diaHoy = (new Date().getDay()) as DiaKey
 
   const filtered = useMemo(() => {
     const base = ideas.filter((i) => i.status !== 'descartada')
@@ -103,7 +100,7 @@ export function ReciboBoard({
             Recibo
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Clientes en modo AI: sube el video ya editado a Entregas (no toca el crudo del Pipeline),
+            Clientes en modo AI: reproduce el video editado disponible en Entregas,
             marca a mano si se posteó y si el cliente aprobó, y manda el enlace de aprobación.
             Sin auto-post a Metricool.
           </p>
@@ -126,14 +123,6 @@ export function ReciboBoard({
         </div>
       ) : (
         <>
-          <section className="rounded-xl border border-border bg-card p-4">
-            <h2 className="mb-2 text-sm font-semibold">Subir video editado</h2>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Mismo flujo de Entregas R2. No sobrescribe footage crudo del Pipeline.
-            </p>
-            <EditorSubmitSlot clients={aiClients.map((c) => ({ id: c.id, name: c.name }))} dia={diaHoy} />
-          </section>
-
           <section className="rounded-xl border border-border bg-card/60 px-4 py-3">
             <h2 className="mb-2 text-sm font-semibold">Enviar al cliente · esta semana</h2>
             <p className="mb-2 text-xs text-muted-foreground">
@@ -168,7 +157,7 @@ export function ReciboBoard({
 
                 {clientIdeas.length === 0 ? (
                   <p className="px-4 py-6 text-center text-xs text-muted-foreground">
-                    Sube un corte editado arriba para empezar.
+                    No hay videos editados en el filtro actual.
                   </p>
                 ) : (
                   <ul className="divide-y divide-border">

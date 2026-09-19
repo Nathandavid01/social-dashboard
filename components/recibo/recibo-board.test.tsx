@@ -12,9 +12,6 @@ vi.mock('@/lib/actions/recibo', () => ({
   setStaffClientApproval: vi.fn(),
   getReciboIdeaPreviewUrl: vi.fn(async () => ({ url: 'https://signed.example/play.mp4' })),
 }))
-vi.mock('@/components/pipeline/editor-submit-slot', () => ({
-  EditorSubmitSlot: () => <div data-testid="submit-slot" />,
-}))
 vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarAlCliente: () => <div data-testid="enviar" />,
 }))
@@ -64,6 +61,8 @@ describe('ReciboBoard', () => {
     expect(screen.getByRole('button', { name: 'No se posteó' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Aprobado por el cliente' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'No aprobado' })).toBeInTheDocument()
+    expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByTestId('recibo-video-player')).toHaveAttribute(
         'src',
