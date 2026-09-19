@@ -232,3 +232,32 @@ describe('dual-party confirm / unconfirm', () => {
     expect(res).toMatchObject({ success: true, confirmation_status: 'unconfirmed', videographer_confirmed_at: null })
   })
 })
+
+
+describe('create — confirmation_status write-path (#166 follow-up)', () => {
+  it('writes unconfirmed even when client + videógrafo + hora are complete', async () => {
+    const res = await createRecordingSession({
+      ...baseCreate,
+      videographer_id: 'v1',
+      start_time: '10:00',
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(insertPayload).toEqual(expect.objectContaining({
+      confirmation_status: 'unconfirmed',
+      videographer_confirmed_at: null,
+      client_confirmed_at: null,
+      videographer_id: 'v1',
+      start_time: '10:00',
+    }))
+  })
+
+  it('writes unconfirmed when schedule is incomplete', async () => {
+    const res = await createRecordingSession(baseCreate)
+    expect(res).toMatchObject({ success: true })
+    expect(insertPayload).toEqual(expect.objectContaining({
+      confirmation_status: 'unconfirmed',
+      videographer_confirmed_at: null,
+      client_confirmed_at: null,
+    }))
+  })
+})
