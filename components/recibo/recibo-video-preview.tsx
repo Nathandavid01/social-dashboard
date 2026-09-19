@@ -3,17 +3,19 @@
 import { useEffect, useState } from 'react'
 import { Film, Loader2 } from 'lucide-react'
 import { getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
+import { cn } from '@/lib/utils'
 
 /**
- * Inline player for Recibo idea cards. Loads a presigned Entregas URL for the
- * edited file; empty state when nothing is uploaded yet.
+ * Inline 9:16 player for Recibo idea cards (house lock /aprobacion match).
  */
 export function ReciboVideoPreview({
   ideaId,
   hasEdited,
+  className,
 }: {
   ideaId: string
   hasEdited: boolean
+  className?: string
 }) {
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -41,16 +43,21 @@ export function ReciboVideoPreview({
     }
   }, [ideaId, hasEdited])
 
+  const frame = cn(
+    'aspect-[9/16] w-full overflow-hidden rounded-[1.25rem] bg-black',
+    className,
+  )
+
   if (!hasEdited) {
     return (
       <div
         data-testid="recibo-video-empty"
-        className="flex aspect-video max-h-[240px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/30 text-muted-foreground"
+        className={cn(frame, 'flex flex-col items-center justify-center gap-2 border border-dashed border-border bg-muted/40 text-muted-foreground')}
       >
-        <Film className="h-6 w-6 opacity-60" aria-hidden="true" />
+        <Film className="h-7 w-7 opacity-50" aria-hidden="true" />
         <p className="text-xs font-medium">Sin video editado</p>
-        <p className="px-4 text-center text-[10px] opacity-80">
-          El video editado aparecerá aquí cuando esté disponible.
+        <p className="px-5 text-center text-[10px] leading-snug opacity-80">
+          El corte aparecerá aquí cuando esté en Entregas.
         </p>
       </div>
     )
@@ -60,10 +67,10 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-loading"
-        className="flex aspect-video max-h-[240px] w-full items-center justify-center gap-2 rounded-md border border-border bg-black/80 text-xs text-muted-foreground"
+        className={cn(frame, 'flex items-center justify-center gap-2 text-xs text-muted-foreground')}
       >
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-        Cargando video…
+        Cargando…
       </div>
     )
   }
@@ -72,7 +79,7 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-error"
-        className="flex aspect-video max-h-[240px] w-full items-center justify-center rounded-md border border-border bg-muted/30 px-3 text-center text-xs text-amber-200"
+        className={cn(frame, 'flex items-center justify-center bg-muted/40 px-4 text-center text-xs text-amber-200')}
       >
         {error}
       </div>
@@ -82,15 +89,17 @@ export function ReciboVideoPreview({
   if (!url) return null
 
   return (
-    <video
-      data-testid="recibo-video-player"
-      src={url}
-      controls
-      playsInline
-      preload="metadata"
-      className="aspect-video max-h-[320px] w-full rounded-md border border-border bg-black object-contain"
-    >
-      Tu navegador no puede reproducir este video.
-    </video>
+    <div className={cn(frame, 'ring-1 ring-white/10 shadow-lg shadow-black/40')}>
+      <video
+        data-testid="recibo-video-player"
+        src={url}
+        controls
+        playsInline
+        preload="metadata"
+        className="h-full w-full object-contain"
+      >
+        Tu navegador no puede reproducir este video.
+      </video>
+    </div>
   )
 }
