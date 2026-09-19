@@ -147,6 +147,8 @@ export async function getEnlaceCliente(
 
 export interface RevisionPublica {
   clientName: string | null
+  /** Real clients.logo_url only — never invent. Null → initials placeholder. */
+  clientLogoUrl: string | null
   expiresAt: string
   videos: VideoDelEnlace[]
 }
@@ -179,6 +181,7 @@ export async function getRevisionPublica(token: string): Promise<RevisionPublica
   })
   return {
     clientName: (r.client_name as string | null) ?? null,
+    clientLogoUrl: (r.client_logo_url as string | null) ?? null,
     expiresAt: r.expires_at as string,
     videos,
   }

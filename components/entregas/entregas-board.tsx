@@ -34,6 +34,7 @@ import type { PlannedSession } from '@/lib/utils/planned-sessions'
 import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 import type { ReviewNote } from '@/lib/actions/review-notes-core'
 import { EnlaceClienteBoton } from './enlace-cliente-boton'
+import { EnviarAlCliente } from './enviar-al-cliente'
 import { marcaAprobacionCliente, type EstadoCliente } from '@/lib/entregas/marca-cliente'
 
 type Idea = IdeaWithPipeline
@@ -365,6 +366,10 @@ function EntregasBoardInner({
         <p aria-label="Resumen Del Tablero" className="ml-auto flex flex-wrap gap-x-2 text-[11px] tabular-nums text-muted-foreground">
           <span>{visible.length} Tarjetas</span><span>· {inPublication} En Publicación</span><span>· {sentToMetricool} Videos Enviados A Metricool</span>
         </p>
+      </div>
+
+      <div className="border-b border-border px-5 py-2">
+        <EnviarAlCliente ideas={ideas} />
       </div>
 
       {/* Columns — drag anywhere on the board to pan horizontally (grab cursor) */}

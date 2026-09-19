@@ -4,6 +4,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v4.99 — 2026-09-19
+
+**Recibo (clientes AI) + marcas manuales + página de aprobación con logos.**
+- Nueva ruta `/recibo` para clientes con `edit_mode='ai'`: sube el corte ya editado a Entregas R2 (no toca crudos del Pipeline), marca **Ya se posteó / No se posteó** y **Aprobado por el cliente / No aprobado** a mano.
+- Migraciones `0085_client_edit_mode` (si no estaba en main) y `0086_recibo_manual_flags` (`manual_posted_status`, `staff_client_approval`). Arecibo Lab queda en modo AI; `assigned_to` no se inventa.
+- `/aprobacion/[token]` con cabecera **NateLogo** + logo real del cliente (o iniciales si no hay).
+- «Enviar al cliente» (multi-select / esta semana) integrado desde Entregas/Recibo. Sin auto-post Metricool.
+
 ## v4.96 — 2026-09-19
 
 **El editor puede consultar todos los crudos de sus clientes asignados.**
