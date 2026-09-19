@@ -6,8 +6,9 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v5.4 — 2026-09-19
 
-**Recibo: preview del video en 9:16 (vertical).**
-- El player y los estados vacíos/carga/error usan `aspect-[9/16]` (como `/aprobacion`), `object-contain`, sin deformar. Misma idea 1080×1920 del house lock.
+**Recibo: revisión vertical profesional (9:16).**
+- Cada video en tarjeta tipo teléfono (`aspect-[9/16]`, `object-contain`), con **título**, **idea/hook** y botones claros **Aprobar / No aprobar** (+ publicación).
+- Layout en grid; sin auto-post Metricool.
 
 ## v5.2 — 2026-09-19
 

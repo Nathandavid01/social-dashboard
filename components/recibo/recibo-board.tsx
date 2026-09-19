@@ -14,8 +14,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
  * Recibo — intake for clients with edit_mode='ai'.
- * Staff reviews available edited videos, marks posted / client approval by hand,
- * and can send "esta semana" via /aprobacion.
+ * Vertical 9:16 review cards: title, idea/hook, approve/reject, posted flags.
  * No Metricool auto-post.
  */
 
@@ -24,6 +23,21 @@ function enEstaSemana(idea: IdeaWithPipeline, semana = 0): boolean {
   if (!fecha) return false
   const { desde, hasta } = rangoSemana(undefined, semana)
   return fecha >= desde && fecha <= hasta
+}
+
+function ideaTitle(idea: IdeaWithPipeline): string {
+  return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
+}
+
+function ideaBrief(idea: IdeaWithPipeline): string | null {
+  const hook = idea.hook?.trim()
+  const title = idea.title?.trim()
+  if (hook && hook !== title) return hook
+  const angle = idea.caption_angle?.trim()
+  if (angle) return angle
+  const objective = idea.objective?.trim()
+  if (objective) return objective
+  return null
 }
 
 export function ReciboBoard({
@@ -81,7 +95,7 @@ export function ReciboBoard({
     start(async () => {
       const res = await setStaffClientApproval({ ideaId, status })
       if (res.error) toast({ title: 'No se pudo guardar', description: res.error, variant: 'destructive' })
-      else toast({ title: status === 'approved' ? 'Aprobado por el cliente' : 'No aprobado' })
+      else toast({ title: status === 'approved' ? 'Aprobado' : 'No aprobado' })
       setPendingId(null)
     })
   }
@@ -92,20 +106,19 @@ export function ReciboBoard({
   )
 
   return (
-    <div className="space-y-4" data-testid="recibo-board">
+    <div className="space-y-6" data-testid="recibo-board">
       <header className="flex flex-wrap items-start justify-between gap-3 px-1">
         <div>
-          <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+          <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
             <Bot className="h-5 w-5 text-violet-400" aria-hidden="true" />
             Recibo
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Clientes en modo AI: reproduce el video editado disponible en Entregas,
-            marca a mano si se posteó y si el cliente aprobó, y manda el enlace de aprobación.
+            Revisa cada corte en 9:16, lee el título y la idea, y marca si el cliente aprueba.
             Sin auto-post a Metricool.
           </p>
         </div>
-        <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium">
+        <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-card/80 px-3.5 text-xs font-medium backdrop-blur">
           <input
             type="checkbox"
             checked={soloSemana}
@@ -117,32 +130,31 @@ export function ReciboBoard({
       </header>
 
       {aiClients.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
           No hay clientes con modo de edición <strong>AI</strong>. Actívalo en el perfil del cliente
           (Resumen → Modo de edición).
         </div>
       ) : (
         <>
-          <section className="rounded-xl border border-border bg-card/60 px-4 py-3">
-            <h2 className="mb-2 text-sm font-semibold">Enviar al cliente · esta semana</h2>
+          <section className="rounded-2xl border border-border bg-card/70 px-4 py-3 shadow-sm">
+            <h2 className="mb-1 text-sm font-semibold">Enviar al cliente · esta semana</h2>
             <p className="mb-2 text-xs text-muted-foreground">
-              Elige videos de esta semana y genera un enlace bonito en{' '}
-              <code className="rounded bg-muted px-1">/aprobacion</code>. Sin auto-post.
+              Genera un enlace en <code className="rounded bg-muted px-1">/aprobacion</code>. Sin auto-post.
             </p>
             <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : ideas} />
           </section>
 
-          <ul className="space-y-4">
+          <ul className="space-y-8">
             {byClient.map(({ client, ideas: clientIdeas }) => (
-              <li key={client.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-                  <ClientLogo name={client.name} logoUrl={client.logo_url} className="h-10 w-10" />
+              <li key={client.id} className="space-y-4">
+                <div className="flex items-center gap-3 px-1">
+                  <ClientLogo name={client.name} logoUrl={client.logo_url} className="h-11 w-11 ring-2 ring-border" />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="truncate font-semibold">{client.name}</span>
+                      <span className="truncate text-base font-semibold">{client.name}</span>
                       <span
                         data-testid="recibo-ai-badge"
-                        className="rounded bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300"
+                        className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300"
                       >
                         AI
                       </span>
@@ -156,36 +168,79 @@ export function ReciboBoard({
                 </div>
 
                 {clientIdeas.length === 0 ? (
-                  <p className="px-4 py-6 text-center text-xs text-muted-foreground">
+                  <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-xs text-muted-foreground">
                     No hay videos editados en el filtro actual.
                   </p>
                 ) : (
-                  <ul className="divide-y divide-border">
+                  <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
                       const busy = isPending && pendingId === idea.id
                       const posted = idea.manual_posted_status
                       const approval = idea.staff_client_approval
                       const hasEdit = ideaTieneEditadoEntregas(idea)
+                      const brief = ideaBrief(idea)
                       return (
-                        <li key={idea.id} className="space-y-3 px-4 py-3" data-testid={`recibo-idea-${idea.id}`}>
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium">
-                                {idea.title?.trim() || idea.hook?.trim() || 'Sin título'}
-                              </p>
-                              <p className="text-[11px] text-muted-foreground">
-                                {idea.publish_date ? `Publicación ${idea.publish_date}` : 'Sin fecha de publicación'}
-                                {hasEdit ? ' · Editado en Entregas' : ' · Sin archivo editado'}
-                              </p>
+                        <li
+                          key={idea.id}
+                          data-testid={`recibo-idea-${idea.id}`}
+                          className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/80 shadow-md shadow-black/20"
+                        >
+                          <div className="bg-zinc-950 p-3 pb-2">
+                            <div className="mx-auto w-full max-w-[260px]">
+                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
                             </div>
-                            {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
                           </div>
 
-                          <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
+                          <div className="flex flex-1 flex-col gap-3 p-4">
+                            <div className="min-w-0 space-y-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="text-[15px] font-semibold leading-snug tracking-tight">
+                                  {ideaTitle(idea)}
+                                </h3>
+                                {busy && (
+                                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />
+                                )}
+                              </div>
+                              {brief ? (
+                                <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                                  {brief}
+                                </p>
+                              ) : (
+                                <p className="text-sm italic text-muted-foreground/70">Sin idea / hook en el brief</p>
+                              )}
+                              <p className="text-[11px] text-muted-foreground/80">
+                                {idea.publish_date ? `Publicación ${idea.publish_date}` : 'Sin fecha de publicación'}
+                                {hasEdit ? ' · Editado' : ' · Sin archivo'}
+                              </p>
+                            </div>
 
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            <div className="space-y-1">
+                            <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
                               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                ¿Aprueba el cliente?
+                              </p>
+                              <div className="grid grid-cols-2 gap-2">
+                                <ToggleBtn
+                                  active={approval === 'approved'}
+                                  disabled={busy}
+                                  onClick={() => markApproval(idea.id, 'approved')}
+                                  tone="ok"
+                                  label="Aprobado por el cliente"
+                                  shortLabel="Aprobar"
+                                  icon={<Check className="h-4 w-4" aria-hidden="true" />}
+                                  large
+                                />
+                                <ToggleBtn
+                                  active={approval === 'rejected'}
+                                  disabled={busy}
+                                  onClick={() => markApproval(idea.id, 'rejected')}
+                                  tone="warn"
+                                  label="No aprobado"
+                                  shortLabel="No aprobar"
+                                  icon={<X className="h-4 w-4" aria-hidden="true" />}
+                                  large
+                                />
+                              </div>
+                              <p className="pt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                                 Publicación
                               </p>
                               <div className="flex flex-wrap gap-1.5">
@@ -203,29 +258,6 @@ export function ReciboBoard({
                                   onClick={() => markPosted(idea.id, 'not_posted')}
                                   tone="warn"
                                   label="No se posteó"
-                                  icon={<X className="h-3.5 w-3.5" aria-hidden="true" />}
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                Cliente
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                <ToggleBtn
-                                  active={approval === 'approved'}
-                                  disabled={busy}
-                                  onClick={() => markApproval(idea.id, 'approved')}
-                                  tone="ok"
-                                  label="Aprobado por el cliente"
-                                  icon={<Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                                />
-                                <ToggleBtn
-                                  active={approval === 'rejected'}
-                                  disabled={busy}
-                                  onClick={() => markApproval(idea.id, 'rejected')}
-                                  tone="warn"
-                                  label="No aprobado"
                                   icon={<X className="h-3.5 w-3.5" aria-hidden="true" />}
                                 />
                               </div>
@@ -250,32 +282,38 @@ function ToggleBtn({
   disabled,
   onClick,
   label,
+  shortLabel,
   icon,
   tone,
+  large,
 }: {
   active: boolean
   disabled?: boolean
   onClick: () => void
   label: string
+  shortLabel?: string
   icon: ReactNode
   tone: 'ok' | 'warn'
+  large?: boolean
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
       aria-pressed={active}
+      aria-label={label}
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-9 items-center gap-1 rounded-lg border px-2.5 text-[11px] font-semibold transition',
-        active && tone === 'ok' && 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300',
-        active && tone === 'warn' && 'border-amber-500/50 bg-amber-500/15 text-amber-200',
-        !active && 'border-border bg-background text-muted-foreground hover:bg-muted/50',
+        'inline-flex items-center justify-center gap-1.5 rounded-xl border font-semibold transition',
+        large ? 'min-h-11 px-3 text-sm' : 'min-h-9 px-2.5 text-[11px]',
+        active && tone === 'ok' && 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200',
+        active && tone === 'warn' && 'border-amber-500/60 bg-amber-500/20 text-amber-100',
+        !active && 'border-border bg-background/80 text-muted-foreground hover:bg-muted/60',
         disabled && 'opacity-50',
       )}
     >
       {icon}
-      {label}
+      {shortLabel ?? label}
     </button>
   )
 }
