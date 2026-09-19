@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.5 — 2026-09-19
+
+**Enviar al cliente más fácil (un toque) + Recibo responsive.**
+- Panel siempre abierto: auto-elige el único cliente, marca todos los videos, botón grande **Copiar enlace para el cliente**.
+- En cada tarjeta de Recibo: **Enviar al cliente** genera y copia el enlace de ese video. Sin auto-post Metricool.
+- Móvil: sin doble padding, 1 columna, video 9:16 a ancho útil, botones ≥44px (`touch-manipulation`), filtros y CTAs a ancho completo.
+
 ## v5.4 — 2026-09-19
 
 **Recibo: revisión vertical profesional (9:16).**

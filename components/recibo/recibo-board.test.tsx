@@ -14,6 +14,7 @@ vi.mock('@/lib/actions/recibo', () => ({
 }))
 vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarAlCliente: () => <div data-testid="enviar" />,
+  EnviarIdeaAlCliente: () => <button type="button">Enviar al cliente</button>,
 }))
 
 import { ReciboBoard } from './recibo-board'

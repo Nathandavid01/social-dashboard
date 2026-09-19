@@ -8,7 +8,7 @@ vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: (...a: unknown[]) => crearEnlaceCliente(...(a as [])),
 }))
 
-import { EnviarAlCliente } from './enviar-al-cliente'
+import { EnviarAlCliente, EnviarIdeaAlCliente } from './enviar-al-cliente'
 
 const edited = {
   kind: 'edited' as const,
@@ -45,27 +45,35 @@ beforeEach(() => {
 })
 
 describe('EnviarAlCliente', () => {
-  it('generates one approval link with the selected ideaIds and shows the full URL', async () => {
+  it('auto-selects the only client and all videos, then one-tap copies the link', async () => {
     render(<EnviarAlCliente ideas={ideas} />)
-    fireEvent.click(screen.getByText('Enviar al cliente'))
-    fireEvent.change(screen.getByLabelText('Cliente para enlace de aprobación'), { target: { value: 'c1' } })
-    const boxes = screen.getAllByRole('checkbox')
-    expect(boxes).toHaveLength(2)
-    fireEvent.click(boxes[0])
-    fireEvent.click(boxes[1])
-    fireEvent.click(screen.getByRole('button', { name: /Generar enlace \(2\)/ }))
+    expect(screen.getByTestId('enviar-cliente-unico')).toHaveTextContent('Acme')
+    await waitFor(() => {
+      expect(screen.getAllByRole('checkbox')).toHaveLength(2)
+    })
+    // all selected by default
+    expect(screen.getAllByRole('checkbox').every((c) => (c as HTMLInputElement).checked)).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: /Copiar enlace para el cliente \(2\)/ }))
     await waitFor(() =>
       expect(crearEnlaceCliente).toHaveBeenCalledWith({
         clientId: 'c1',
         ideaIds: expect.arrayContaining(['i1', 'i2']),
       }),
     )
-    const call = crearEnlaceCliente.mock.calls[0][0]
-    expect(call.ideaIds).toHaveLength(2)
     expect(await screen.findByTestId('enlace-aprobacion-result')).toBeInTheDocument()
-    const input = screen.getByLabelText('Enlace de aprobación generado') as HTMLInputElement
-    expect(input.value).toMatch(/\/aprobacion\/tok-multi$/)
-    expect(screen.getByRole('button', { name: /Copiar enlace/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Abrir/i })).toHaveAttribute('href', expect.stringContaining('/aprobacion/tok-multi'))
+    expect((screen.getByLabelText('Enlace de aprobación generado') as HTMLInputElement).value).toMatch(
+      /\/aprobacion\/tok-multi$/,
+    )
+  })
+})
+
+describe('EnviarIdeaAlCliente', () => {
+  it('generates a single-idea link in one click', async () => {
+    crearEnlaceCliente.mockResolvedValue({ token: 'tok-one' })
+    render(<EnviarIdeaAlCliente idea={ideas[0] as never} />)
+    fireEvent.click(screen.getByTestId('enviar-idea-i1'))
+    await waitFor(() =>
+      expect(crearEnlaceCliente).toHaveBeenCalledWith({ clientId: 'c1', ideaIds: ['i1'] }),
+    )
   })
 })
