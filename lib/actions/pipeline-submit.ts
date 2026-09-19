@@ -72,6 +72,7 @@ export async function createSubmittedIdea(input: {
   revalidatePath('/revision')
   revalidatePath('/entregas')
   revalidatePath('/pipeline')
+  revalidatePath('/recibo')
   return { idea: data as ContentIdea }
 }
 

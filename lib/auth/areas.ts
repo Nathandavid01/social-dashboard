@@ -70,6 +70,7 @@ export const AREAS: Area[] = [
   { href: '/banco',              label: 'Banco de Video',  permission: 'video_bank.read',    group: 'Trabajo' },
   { href: '/revision',           label: 'Revisión',        permission: 'revision.read',      group: 'Trabajo' },
   { href: '/entregas',           label: 'Entregas',        permission: 'entregas.read',      group: 'Trabajo' },
+  { href: '/recibo',             label: 'Recibo',          permission: 'entregas.read',      group: 'Trabajo' },
 
   { href: '/produccion',         label: 'Producción',      permission: 'production.read',    group: 'Desarrollo' },
   { href: '/video-reviews',      label: 'Video QC',        permission: 'video_reviews.read', group: 'Desarrollo' },

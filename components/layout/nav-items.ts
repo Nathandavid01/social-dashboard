@@ -1,5 +1,6 @@
 import {
   PackageCheck,
+  Inbox,
   Sun,
   Home,
   Users,
@@ -63,6 +64,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/graficas': Palette,
   '/revision': ClipboardCheck,
   '/entregas': PackageCheck,
+  '/recibo': Inbox,
   '/pipeline': KanbanSquare,
   '/primer-round': Mic2,
   '/video-reviews': Film,

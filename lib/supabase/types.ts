@@ -476,6 +476,10 @@ export interface ContentIdea {
   metricool_post_id: number | null
   metricool_uuid: string | null
   posted_at: string | null
+  /** Staff manual mark (Recibo). Migration 0086. Independent of Metricool posted_at. */
+  manual_posted_status?: 'posted' | 'not_posted' | null
+  /** Staff manual client approval (Recibo). Migration 0086. */
+  staff_client_approval?: 'approved' | 'rejected' | null
   posting_error: string | null
   posting_started_at: string | null
   created_by: string | null

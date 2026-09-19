@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, XCircle, Loader2, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { NateLogo } from '@/components/shared/nate-logo'
+import { ClientLogo } from '@/components/clients/client-logo'
 import { textoDecision, type DecisionCliente } from '@/lib/entregas/client-review'
 import { getRevisionPublica, votarRevisionPublica, type RevisionPublica, type VideoDelEnlace } from '@/lib/actions/entregas-client-review'
 
@@ -36,15 +38,28 @@ export function AprobacionCliente({
 
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-8 sm:py-12">
-      <header className="mb-4">
-        <h1 className="text-lg font-semibold tracking-tight">
-          {revision.clientName ?? 'Tus videos'}
-        </h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
+      <header className="mb-6 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <NateLogo size={48} className="rounded-2xl" />
+          <div className="flex min-w-0 flex-1 flex-col items-center text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Aprobación de videos
+            </p>
+            <h1 className="mt-1 truncate text-lg font-semibold tracking-tight sm:text-xl">
+              {revision.clientName ?? 'Tus videos'}
+            </h1>
+          </div>
+          <ClientLogo
+            name={revision.clientName}
+            logoUrl={revision.clientLogoUrl}
+            className="h-12 w-12 rounded-2xl text-sm"
+          />
+        </div>
+        <p className="text-center text-sm text-muted-foreground">
           Gracias por ser parte de Nate Media.
         </p>
         {total > 1 && (
-          <p className="mt-2 text-[13px] text-muted-foreground">
+          <p className="text-center text-[13px] text-muted-foreground">
             {pendientes === 0
               ? `Ya respondiste a ${total === 1 ? 'tu video' : `los ${total} videos`}.`
               : `${total} videos · te faltan ${pendientes} por responder`}
