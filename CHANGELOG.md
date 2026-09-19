@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.4 — 2026-09-19
+
+**Recibo: preview del video en 9:16 (vertical).**
+- El player y los estados vacíos/carga/error usan `aspect-[9/16]` (como `/aprobacion`), `object-contain`, sin deformar. Misma idea 1080×1920 del house lock.
+
 ## v5.2 — 2026-09-19
 
 **Recibo: revisión sin carga de videos desde la web.**

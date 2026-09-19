@@ -45,7 +45,7 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-empty"
-        className="flex aspect-video max-h-[240px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/30 text-muted-foreground"
+        className="flex mx-auto aspect-[9/16] w-full max-w-[220px] rounded-md border border-border flex-col items-center justify-center gap-2 border-dashed bg-muted/30 text-muted-foreground"
       >
         <Film className="h-6 w-6 opacity-60" aria-hidden="true" />
         <p className="text-xs font-medium">Sin video editado</p>
@@ -60,7 +60,7 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-loading"
-        className="flex aspect-video max-h-[240px] w-full items-center justify-center gap-2 rounded-md border border-border bg-black/80 text-xs text-muted-foreground"
+        className="flex mx-auto aspect-[9/16] w-full max-w-[220px] rounded-md border border-border items-center justify-center gap-2 bg-black/80 text-xs text-muted-foreground"
       >
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         Cargando video…
@@ -72,7 +72,7 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-error"
-        className="flex aspect-video max-h-[240px] w-full items-center justify-center rounded-md border border-border bg-muted/30 px-3 text-center text-xs text-amber-200"
+        className="flex mx-auto aspect-[9/16] w-full max-w-[220px] rounded-md border border-border items-center justify-center bg-muted/30 px-3 text-center text-xs text-amber-200"
       >
         {error}
       </div>
@@ -88,7 +88,7 @@ export function ReciboVideoPreview({
       controls
       playsInline
       preload="metadata"
-      className="aspect-video max-h-[320px] w-full rounded-md border border-border bg-black object-contain"
+      className="mx-auto aspect-[9/16] w-full max-w-[220px] rounded-md border border-border bg-black object-contain"
     >
       Tu navegador no puede reproducir este video.
     </video>
