@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
+import { getEntregaVideoEditado, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
 export type StaffClientApproval = 'approved' | 'rejected' | null
@@ -61,4 +62,20 @@ export async function setStaffClientApproval(input: {
   revalidatePath('/recibo')
   revalidatePath('/entregas')
   return { ok: true }
+}
+
+/**
+ * Presigned playback URL for the idea's current edited Entregas file.
+ * Usable as <video src>. Does not touch Pipeline raw.
+ */
+export async function getReciboIdeaPreviewUrl(
+  ideaId: string,
+): Promise<{ url?: string; error?: string }> {
+  if (!ideaId) return { error: 'Falta el video' }
+
+  const edited = await getEntregaVideoEditado(ideaId)
+  if (edited.error) return { error: edited.error }
+  if (!edited.id) return { error: 'Sin video editado' }
+
+  return getEntregasPreviewUrl(edited.id)
 }

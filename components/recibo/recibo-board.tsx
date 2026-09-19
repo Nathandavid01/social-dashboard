@@ -5,6 +5,7 @@ import { Bot, Check, Loader2, X } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { EditorSubmitSlot } from '@/components/pipeline/editor-submit-slot'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
+import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
 import { setManualPostedStatus, setStaffClientApproval } from '@/lib/actions/recibo'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
@@ -190,6 +191,8 @@ export function ReciboBoard({
                             </div>
                             {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
                           </div>
+
+                          <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
 
                           <div className="grid gap-2 sm:grid-cols-2">
                             <div className="space-y-1">
