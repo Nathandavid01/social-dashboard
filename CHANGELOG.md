@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.1 — 2026-09-19
+
+**Recibo: revisión sin carga de videos desde la web.**
+- Se retira de Recibo el formulario **Subir video editado**; los cortes editados se cargan desde terminal.
+- Recibo conserva la vista previa/reproducción, los toggles de publicación y aprobación, y **Enviar al cliente**.
+
 ## v5.0 — 2026-09-19
 
 **Recibo: ver y reproducir el video editado en cada tarjeta.**

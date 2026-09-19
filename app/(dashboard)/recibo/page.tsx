@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * Recibo — AI-client intake. Upload edited cuts to Entregas R2, manual
+ * Recibo — AI-client intake. Review edited cuts from Entregas R2, manual
  * posted/approval flags, send /aprobacion links. No Metricool auto-post.
  */
 export default async function ReciboPage() {

@@ -50,7 +50,7 @@ export function ReciboVideoPreview({
         <Film className="h-6 w-6 opacity-60" aria-hidden="true" />
         <p className="text-xs font-medium">Sin video editado</p>
         <p className="px-4 text-center text-[10px] opacity-80">
-          Sube el corte arriba para poder verlo y reproducirlo aquí.
+          El video editado aparecerá aquí cuando esté disponible.
         </p>
       </div>
     )
