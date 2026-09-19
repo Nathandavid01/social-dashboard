@@ -18,8 +18,10 @@ import {
 import {
   confirmationChip,
   confirmationStatusLabel,
+  effectiveConfirmationStatus,
   hasClientConfirmed,
   hasVideographerConfirmed,
+  isRecordingSessionIncomplete,
   type RecordingConfirmationChip,
 } from '@/lib/utils/recording-confirmation'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -236,6 +238,9 @@ export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, de
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           ...values,
+          confirmation_status: 'unconfirmed',
+          videographer_confirmed_at: null,
+          client_confirmed_at: null,
           client,
           videographer,
         } as ExtendedSession)
@@ -549,6 +554,8 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const currentUserId = useCurrentUserId()
   const [filterVideographer, setFilterVideographer] = useState(initialVideographer ?? (canAssign ? 'all' : currentUserId ?? 'all'))
   const [filterClient, setFilterClient] = useState('all')
+  type ConfirmationFilter = 'all' | 'confirmed' | 'unconfirmed' | 'incomplete'
+  const [filterConfirmation, setFilterConfirmation] = useState<ConfirmationFilter>('all')
   const [isPending, startTransition] = useTransition()
   const [showAdd, setShowAdd] = useState(false)
   const [addDate, setAddDate] = useState<string | undefined>()
@@ -575,6 +582,13 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     let result = sessions
     if (filterVideographer !== 'all') result = result.filter((s) => s.videographer_id === filterVideographer)
     if (filterClient !== 'all') result = result.filter((s) => s.client_id === filterClient)
+    if (filterConfirmation === 'confirmed') {
+      result = result.filter((s) => effectiveConfirmationStatus(s) === 'confirmed')
+    } else if (filterConfirmation === 'unconfirmed') {
+      result = result.filter((s) => effectiveConfirmationStatus(s) === 'unconfirmed')
+    } else if (filterConfirmation === 'incomplete') {
+      result = result.filter((s) => isRecordingSessionIncomplete(s))
+    }
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter((s) =>
@@ -585,7 +599,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
       )
     }
     return result
-  }, [sessions, filterVideographer, filterClient, search])
+  }, [sessions, filterVideographer, filterClient, filterConfirmation, search])
 
   function editorFor(session: ExtendedSession) {
     if (!session.client_id) return 'Vincula El Cliente'
@@ -724,7 +738,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     URL.revokeObjectURL(url)
   }
 
-  const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all'
+  const hasFilters = search.trim() !== '' || filterVideographer !== 'all' || filterClient !== 'all' || filterConfirmation !== 'all'
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card p-4 text-foreground sm:p-6">
@@ -823,10 +837,50 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </SelectContent>
         </Select>
         {hasFilters && (
-          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setSearch(''); setFilterVideographer('all'); setFilterClient('all') }}>
+          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setSearch(''); setFilterVideographer('all'); setFilterClient('all'); setFilterConfirmation('all') }}>
             <X className="h-3.5 w-3.5 mr-1" /> Limpiar
           </Button>
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5" aria-label="Filtro de confirmación">
+        {([
+          { key: 'all' as const, label: 'Todas', count: sessions.length, dot: '' },
+          {
+            key: 'confirmed' as const,
+            label: 'Confirmadas',
+            count: sessions.filter((s) => effectiveConfirmationStatus(s) === 'confirmed').length,
+            dot: 'bg-emerald-500',
+          },
+          {
+            key: 'unconfirmed' as const,
+            label: 'Sin confirmar',
+            count: sessions.filter((s) => effectiveConfirmationStatus(s) === 'unconfirmed').length,
+            dot: 'bg-amber-500',
+          },
+          {
+            key: 'incomplete' as const,
+            label: 'Incompletas',
+            count: sessions.filter((s) => isRecordingSessionIncomplete(s)).length,
+            dot: 'bg-rose-500',
+          },
+        ]).map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setFilterConfirmation(f.key)}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition',
+              filterConfirmation === f.key
+                ? 'border-border bg-muted text-foreground'
+                : 'border-transparent text-muted-foreground hover:bg-muted/60',
+            )}
+          >
+            {f.dot ? <span className={cn('h-1.5 w-1.5 rounded-full', f.dot)} aria-hidden /> : null}
+            {f.label}
+            <span className="tabular-nums text-muted-foreground/70">{f.count}</span>
+          </button>
+        ))}
       </div>
 
       {conflicts.length > 0 && (

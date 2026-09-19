@@ -347,3 +347,77 @@ describe('lista — click para editar (SessionCard)', () => {
     expect(more.className).not.toMatch(/opacity-0/)
   })
 })
+
+
+describe('confirmation filter chips (#166 follow-up)', () => {
+  it('shows Confirmadas / Sin confirmar / Incompletas chips', () => {
+    render(
+      <RecordingCalendarClient
+        initialSessions={[
+          session({
+            id: 's-confirmed',
+            confirmation_status: 'confirmed',
+            videographer_confirmed_at: '2026-09-13T10:00:00Z',
+            client_confirmed_at: '2026-09-13T11:00:00Z',
+            start_time: '09:00',
+          }),
+          session({
+            id: 's-open',
+            confirmation_status: 'unconfirmed',
+            videographer_confirmed_at: null,
+            client_confirmed_at: null,
+            start_time: '10:00',
+          }),
+          session({
+            id: 's-incomplete',
+            client_id: null,
+            client: null,
+            videographer_id: null,
+            videographer: null,
+            start_time: null,
+            confirmation_status: 'unconfirmed',
+          }),
+        ]}
+        clients={clients}
+        teamMembers={team}
+        clientIdeasMap={{}}
+      />,
+    )
+    const bar = screen.getByLabelText(/filtro de confirmación/i)
+    expect(bar).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /confirmadas/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sin confirmar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /incompletas/i })).toBeInTheDocument()
+  })
+
+  it('Confirmadas filter hides unconfirmed sessions', () => {
+    render(
+      <RecordingCalendarClient
+        initialSessions={[
+          session({
+            id: 's-confirmed',
+            title: 'Ya confirmada',
+            confirmation_status: 'confirmed',
+            videographer_confirmed_at: '2026-09-13T10:00:00Z',
+            client_confirmed_at: '2026-09-13T11:00:00Z',
+            start_time: '09:00',
+            client: { id: 'c1', name: 'Cliente Confirmado' },
+          }),
+          session({
+            id: 's-open',
+            title: 'Sin confirmar aún',
+            confirmation_status: 'unconfirmed',
+            client: { id: 'c1', name: 'Cliente Abierto' },
+            start_time: '10:00',
+          }),
+        ]}
+        clients={clients}
+        teamMembers={team}
+        clientIdeasMap={{}}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /confirmadas/i }))
+    expect(screen.getByText('Cliente Confirmado')).toBeInTheDocument()
+    expect(screen.queryByText('Cliente Abierto')).not.toBeInTheDocument()
+  })
+})

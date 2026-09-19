@@ -11,6 +11,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - El límite de trabajos activos mantiene el orden de la cola sin ocultar material.
 - Las rutas nuevas vinculadas a ideas antiguas también aparecen en la biblioteca.
 
+## v4.97 — 2026-09-19
+
+**Grabaciones: create escribe Sin confirmar; filtros Confirmadas / Incompletas en el calendario.**
+- Al crear una sesión, `confirmation_status` queda **unconfirmed** (no se auto-confirma por cliente + videógrafo + hora). Confirmada sigue siendo dual (#170).
+- El calendario filtra Confirmadas / Sin confirmar / Incompletas (agenda incompleta ≠ Sin confirmar).
+
 ## v4.95 — 2026-09-18
 
 **La cadencia de cada cliente se edita en un solo sitio y se ve igual en todas partes.**

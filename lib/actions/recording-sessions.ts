@@ -105,9 +105,14 @@ export async function createRecordingSession(values: {
   if (!user) return { error: 'Not authenticated' }
 
   const sessionId = randomUUID()
+  // Dual-party Confirmada (#170): never auto-confirm from schedule completeness.
+  // confirmation_status starts unconfirmed; only confirmRecording* actions promote it.
   const { error } = await supabase.from('recording_sessions').insert({
     id: sessionId,
     ...values,
+    confirmation_status: 'unconfirmed',
+    videographer_confirmed_at: null,
+    client_confirmed_at: null,
     created_by: user.id,
   })
   if (error) return { error: error.message }
