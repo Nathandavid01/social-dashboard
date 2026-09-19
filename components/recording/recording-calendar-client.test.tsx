@@ -10,12 +10,17 @@ vi.mock('@/lib/actions/recording-sessions', () => ({
   createRecordingSession: vi.fn(),
   updateRecordingSession,
   deleteRecordingSession: vi.fn(),
+  confirmRecordingClient: vi.fn(async () => ({ success: true, client_confirmed_at: '2026-09-13T12:00:00Z', confirmation_status: 'unconfirmed' })),
+  confirmRecordingVideographer: vi.fn(async () => ({ success: true, videographer_confirmed_at: '2026-09-13T12:00:00Z', confirmation_status: 'unconfirmed' })),
+  unconfirmRecordingClient: vi.fn(async () => ({ success: true, client_confirmed_at: null, confirmation_status: 'unconfirmed' })),
+  unconfirmRecordingVideographer: vi.fn(async () => ({ success: true, videographer_confirmed_at: null, confirmation_status: 'unconfirmed' })),
 }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('./gps-picker', () => ({ GpsPicker: () => null }))
 vi.mock('@/components/auth/role-gate', () => ({
   useCurrentUserId: () => null,
   useHasPermission: (perm: string) => perm === 'recording.brief' && canAssign.current,
+  useHasAnyPermission: (perms: string[]) => perms.includes('recording.create') || perms.includes('operations.overview'),
   RoleGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 

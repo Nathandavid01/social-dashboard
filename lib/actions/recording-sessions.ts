@@ -3,8 +3,9 @@
 import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { currentUserHas, requirePermission } from '@/lib/auth/server'
 import type { RecordingSession } from '@/lib/supabase/types'
+import { resolveConfirmationStatus } from '@/lib/utils/recording-confirmation'
 
 async function notifyAssignment(userId: string, sessionId: string, title: string, date: string) {
   try {
@@ -173,4 +174,118 @@ export async function deleteRecordingSession(id: string) {
   revalidatePath('/team/[memberId]', 'page')
   revalidatePath('/onsite')
   return { success: true }
+}
+
+async function requireRecordingConfirmPermission() {
+  if (await currentUserHas('recording.create')) return
+  if (await currentUserHas('operations.overview')) return
+  throw new Error('Acceso denegado (falta permiso: recording.create u operations.overview)')
+}
+
+function revalidateRecordingConfirmPaths() {
+  revalidatePath('/recording-calendar')
+  revalidatePath('/mi-dia')
+  revalidatePath('/account/profile')
+  revalidatePath('/team/[memberId]', 'page')
+  revalidatePath('/onsite')
+}
+
+type DualConfirmRow = {
+  videographer_confirmed_at: string | null
+  client_confirmed_at: string | null
+}
+
+async function loadDualConfirm(sessionId: string): Promise<
+  { row: DualConfirmRow } | { error: string }
+> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('recording_sessions')
+    .select('videographer_confirmed_at,client_confirmed_at')
+    .eq('id', sessionId)
+    .single()
+  if (error || !data) return { error: error?.message ?? 'Sesión no encontrada' }
+  return {
+    row: {
+      videographer_confirmed_at: data.videographer_confirmed_at ?? null,
+      client_confirmed_at: data.client_confirmed_at ?? null,
+    },
+  }
+}
+
+async function writeDualConfirm(
+  sessionId: string,
+  patch: Partial<DualConfirmRow> & { confirmation_status: 'confirmed' | 'unconfirmed' },
+) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('recording_sessions').update(patch).eq('id', sessionId)
+  if (error) return { error: error.message }
+  revalidateRecordingConfirmPaths()
+  return { success: true as const, ...patch }
+}
+
+/** Team marks client confirmation in the dashboard (not client portal). */
+export async function confirmRecordingClient(sessionId: string) {
+  try {
+    await requireRecordingConfirmPermission()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const loaded = await loadDualConfirm(sessionId)
+  if ('error' in loaded) return loaded
+  const client_confirmed_at = new Date().toISOString()
+  const confirmation_status = resolveConfirmationStatus({
+    videographer_confirmed_at: loaded.row.videographer_confirmed_at,
+    client_confirmed_at,
+  })
+  return writeDualConfirm(sessionId, { client_confirmed_at, confirmation_status })
+}
+
+/** Team marks videographer confirmation in the dashboard. */
+export async function confirmRecordingVideographer(sessionId: string) {
+  try {
+    await requireRecordingConfirmPermission()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const loaded = await loadDualConfirm(sessionId)
+  if ('error' in loaded) return loaded
+  const videographer_confirmed_at = new Date().toISOString()
+  const confirmation_status = resolveConfirmationStatus({
+    videographer_confirmed_at,
+    client_confirmed_at: loaded.row.client_confirmed_at,
+  })
+  return writeDualConfirm(sessionId, { videographer_confirmed_at, confirmation_status })
+}
+
+export async function unconfirmRecordingClient(sessionId: string) {
+  try {
+    await requireRecordingConfirmPermission()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const loaded = await loadDualConfirm(sessionId)
+  if ('error' in loaded) return loaded
+  const client_confirmed_at = null
+  const confirmation_status = resolveConfirmationStatus({
+    videographer_confirmed_at: loaded.row.videographer_confirmed_at,
+    client_confirmed_at,
+  })
+  return writeDualConfirm(sessionId, { client_confirmed_at, confirmation_status })
+}
+
+export async function unconfirmRecordingVideographer(sessionId: string) {
+  try {
+    await requireRecordingConfirmPermission()
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  const loaded = await loadDualConfirm(sessionId)
+  if ('error' in loaded) return loaded
+  const videographer_confirmed_at = null
+  const confirmation_status = resolveConfirmationStatus({
+    videographer_confirmed_at,
+    client_confirmed_at: loaded.row.client_confirmed_at,
+  })
+  return writeDualConfirm(sessionId, { videographer_confirmed_at, confirmation_status })
 }

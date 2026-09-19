@@ -6,7 +6,22 @@ import { RecordingPending } from './recording-pending'
 import { requiredForOnsite } from '@/lib/onsite/slot-count'
 import { useState, useMemo, useTransition, useEffect } from 'react'
 import type { Client, Profile, RecordingSession, ContentIdea } from '@/lib/supabase/types'
-import { createRecordingSession, updateRecordingSession, deleteRecordingSession } from '@/lib/actions/recording-sessions'
+import {
+  createRecordingSession,
+  updateRecordingSession,
+  deleteRecordingSession,
+  confirmRecordingClient,
+  confirmRecordingVideographer,
+  unconfirmRecordingClient,
+  unconfirmRecordingVideographer,
+} from '@/lib/actions/recording-sessions'
+import {
+  confirmationChip,
+  confirmationStatusLabel,
+  hasClientConfirmed,
+  hasVideographerConfirmed,
+  type RecordingConfirmationChip,
+} from '@/lib/utils/recording-confirmation'
 import { useToast } from '@/lib/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { userAccent } from '@/lib/utils/user-accent'
@@ -37,7 +52,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { SessionIdeasPanel } from '@/components/recording/session-ideas-panel'
-import { useHasPermission, useCurrentUserId } from '@/components/auth/role-gate'
+import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
 import {
   Camera,
   Plus,
@@ -332,12 +347,24 @@ export function SessionDialog({ open, onClose, onSaved, clients, teamMembers, de
 
 // ── Session Card (List View) ─────────────────────────────────────────────────
 
+const confirmationChipClass: Record<RecordingConfirmationChip, string> = {
+  confirmed: 'text-emerald-600 border-emerald-500/30 bg-emerald-500/10',
+  missing_videographer: 'text-amber-700 border-amber-500/40 bg-amber-500/10',
+  missing_client: 'text-amber-700 border-amber-500/40 bg-amber-500/10',
+  unconfirmed: 'text-amber-700 border-amber-500/40 bg-amber-500/10',
+}
+
 function SessionCard({
   session,
   onEdit,
   onStatusChange,
   onDelete,
   onOpenIdeas,
+  onConfirmClient,
+  onConfirmVideographer,
+  onUnconfirmClient,
+  onUnconfirmVideographer,
+  canConfirm,
   ideaCount,
   editorName,
 }: {
@@ -346,10 +373,19 @@ function SessionCard({
   onStatusChange: (status: string) => void
   onDelete: () => void
   onOpenIdeas: () => void
+  onConfirmClient: () => void
+  onConfirmVideographer: () => void
+  onUnconfirmClient: () => void
+  onUnconfirmVideographer: () => void
+  canConfirm: boolean
   ideaCount: number
   editorName: string
 }) {
   const sc = statusConfig[session.status] ?? statusConfig.scheduled
+  const chip = confirmationChip(session)
+  const chipLabel = confirmationStatusLabel(chip)
+  const clientOk = hasClientConfirmed(session)
+  const videoOk = hasVideographerConfirmed(session)
 
   return (
     <div
@@ -370,6 +406,7 @@ function SessionCard({
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <p className="text-sm font-medium">{clientDisplayName(session.title)}</p>
           <Badge variant="outline" className={cn('text-[10px]', sc.bg, sc.color)}>{sc.label}</Badge>
+          <Badge variant="outline" className={cn('text-[10px]', confirmationChipClass[chip])} aria-label={`Grabación ${chipLabel}`}>{chipLabel}</Badge>
         </div>
         <p className="mb-2 text-xs font-medium text-violet-500">Editor · {editorName}</p>
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
@@ -451,6 +488,26 @@ function SessionCard({
             <DropdownMenuItem onClick={onOpenIdeas}>
               <BookOpen className="mr-2 h-4 w-4" /> Ideas / Checklist
             </DropdownMenuItem>
+            {canConfirm && !clientOk && (
+              <DropdownMenuItem onClick={onConfirmClient}>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> Confirmar cliente
+              </DropdownMenuItem>
+            )}
+            {canConfirm && !videoOk && (
+              <DropdownMenuItem onClick={onConfirmVideographer}>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> Confirmar videógrafo
+              </DropdownMenuItem>
+            )}
+            {canConfirm && clientOk && (
+              <DropdownMenuItem onClick={onUnconfirmClient}>
+                <X className="mr-2 h-4 w-4 text-amber-500" /> Quitar conf. cliente
+              </DropdownMenuItem>
+            )}
+            {canConfirm && videoOk && (
+              <DropdownMenuItem onClick={onUnconfirmVideographer}>
+                <X className="mr-2 h-4 w-4 text-amber-500" /> Quitar conf. videógrafo
+              </DropdownMenuItem>
+            )}
             {session.status !== 'completed' && (
               <DropdownMenuItem onClick={() => onStatusChange('completed')}>
                 <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> Marcar Completada
@@ -475,6 +532,7 @@ function SessionCard({
 
 export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap, initialVideographer }: RecordingCalendarClientProps) {
   const canAssign = useHasPermission('recording.brief')
+  const canConfirm = useHasAnyPermission(['recording.create', 'operations.overview'])
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
   const [compact, setCompact] = useState(false)
   const [expandedDays, setExpandedDays] = useState<string[]>([])
@@ -581,6 +639,59 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
     setSessions((prev) => prev.map((s) => s.id === id ? { ...s, status: status as RecordingSession['status'] } : s))
     startTransition(async () => {
       await updateRecordingSession(id, { status })
+    })
+  }
+
+  function handleDualConfirm(
+    id: string,
+    side: 'client' | 'videographer',
+    next: 'confirm' | 'unconfirm',
+  ) {
+    const session = sessions.find((s) => s.id === id)
+    if (!session) return
+    const now = new Date().toISOString()
+    const optimistic =
+      side === 'client'
+        ? {
+            client_confirmed_at: next === 'confirm' ? now : null,
+            videographer_confirmed_at: session.videographer_confirmed_at ?? null,
+          }
+        : {
+            videographer_confirmed_at: next === 'confirm' ? now : null,
+            client_confirmed_at: session.client_confirmed_at ?? null,
+          }
+    const confirmation_status =
+      optimistic.client_confirmed_at && optimistic.videographer_confirmed_at
+        ? 'confirmed'
+        : 'unconfirmed'
+    setSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...optimistic, confirmation_status } : s)),
+    )
+    startTransition(async () => {
+      const action =
+        side === 'client'
+          ? next === 'confirm'
+            ? confirmRecordingClient
+            : unconfirmRecordingClient
+          : next === 'confirm'
+            ? confirmRecordingVideographer
+            : unconfirmRecordingVideographer
+      const result = await action(id)
+      if (result.error) {
+        toast({ title: 'Error', description: friendlyError(result.error), variant: 'destructive' })
+        setSessions((prev) => prev.map((s) => (s.id === id ? session : s)))
+        return
+      }
+      toast({
+        title:
+          confirmation_status === 'confirmed'
+            ? 'Sesión confirmada'
+            : next === 'confirm'
+              ? side === 'client'
+                ? 'Cliente confirmado'
+                : 'Videógrafo confirmado'
+              : 'Confirmación quitada',
+      })
     })
   }
 
@@ -868,6 +979,11 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
                           onStatusChange={(status) => handleStatusChange(session.id, status)}
                           onDelete={() => handleDelete(session.id)}
                           onOpenIdeas={() => setIdeasSession(session)}
+                          onConfirmClient={() => handleDualConfirm(session.id, 'client', 'confirm')}
+                          onConfirmVideographer={() => handleDualConfirm(session.id, 'videographer', 'confirm')}
+                          onUnconfirmClient={() => handleDualConfirm(session.id, 'client', 'unconfirm')}
+                          onUnconfirmVideographer={() => handleDualConfirm(session.id, 'videographer', 'unconfirm')}
+                          canConfirm={canConfirm}
                           ideaCount={sessionIdeaCount}
                           editorName={editorFor(session)}
                         />
