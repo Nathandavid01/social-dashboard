@@ -6,6 +6,7 @@ import { createPublicClient } from '@/lib/supabase/public'
 import { requirePermission } from '@/lib/auth/server'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 import { DIAS_DE_VIGENCIA, type DecisionCliente } from '@/lib/entregas/client-review'
+import { notifyStaffOfClientReview } from '@/lib/actions/review-notify'
 
 /**
  * El enlace de aprobación que se manda al cliente, para el flujo de Entregas.
@@ -223,8 +224,16 @@ export async function votarRevisionPublica(input: {
   })
   if (error) return { error: error.message }
 
-  const res = (data ?? {}) as { ok?: boolean; error?: string }
+  const res = (data ?? {}) as { ok?: boolean; error?: string; idea_id?: string; status?: string }
   if (!res.ok) return { error: MENSAJES[res.error ?? ''] ?? 'No se pudo registrar tu respuesta.' }
+
+  // Aviso al staff (campana + toast). Best-effort: nunca tumba el voto guardado.
+  if (res.idea_id && (input.decision === 'approved' || input.decision === 'rejected')) {
+    await notifyStaffOfClientReview(res.idea_id, input.decision, {
+      reviewerName: input.name,
+      commentBody: input.decision === 'rejected' ? input.comment : null,
+    })
+  }
 
   revalidatePath('/entregas')
   revalidatePath('/revision')
