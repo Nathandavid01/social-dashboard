@@ -77,6 +77,17 @@ export interface ClientPayment {
   created_at: string
 }
 
+export type ClientSuggestionSource = 'whatsapp' | 'mensaje' | 'otro'
+
+export interface ClientSuggestion {
+  id: string
+  client_id: string
+  body: string
+  source: ClientSuggestionSource
+  created_by: string | null
+  created_at: string
+}
+
 export type PaymentStatus = 'paid' | 'overdue' | 'pending' | 'no_contract'
 
 export type ContentIdeaVideoKind = 'raw' | 'broll' | 'edited'
