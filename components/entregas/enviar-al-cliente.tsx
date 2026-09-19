@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Link2, Copy, Check, Loader2 } from 'lucide-react'
+import { Link2, Copy, Check, Loader2, ExternalLink } from 'lucide-react'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { useToast } from '@/lib/hooks/use-toast'
 import { DIAS_DE_VIGENCIA } from '@/lib/entregas/client-review'
@@ -12,6 +12,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 /**
  * Staff picks which edited videos of a client go in ONE /aprobacion/{token}.
  * Reuses crearEnlaceCliente({ clientId, ideaIds }) — no auto-post.
+ * After generate: full URL stays visible + auto-copy.
  */
 export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
   const can = useHasPermission('captions.edit')
@@ -21,6 +22,7 @@ export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
   const [busy, setBusy] = useState(false)
   const [url, setUrl] = useState('')
   const [copied, setCopied] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   const clients = useMemo(() => {
     const map = new Map<string, string>()
@@ -61,6 +63,17 @@ export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
     setUrl('')
   }
 
+  async function copiarTexto(texto: string) {
+    try {
+      await navigator.clipboard.writeText(texto)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   async function generar() {
     if (!clientId || selected.size === 0 || busy) return
     setBusy(true)
@@ -72,8 +85,15 @@ export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
       }
       const next = `${window.location.origin}/aprobacion/${res.token}`
       setUrl(next)
+      setPanelOpen(true)
       const name = clients.find((c) => c.id === clientId)?.name ?? 'Cliente'
-      toast({ title: `Enlace de ${name}`, description: `${selected.size} video(s) · vence en ${DIAS_DE_VIGENCIA} días.` })
+      const copiedOk = await copiarTexto(next)
+      toast({
+        title: `Enlace de ${name}`,
+        description: copiedOk
+          ? `Copiado. ${selected.size} video(s) · vence en ${DIAS_DE_VIGENCIA} días.`
+          : `${next} · ${selected.size} video(s) · vence en ${DIAS_DE_VIGENCIA} días.`,
+      })
     } catch {
       toast({ title: 'Creación sin confirmar', description: 'Consulta el enlace antes de intentar otra vez.', variant: 'destructive' })
     } finally {
@@ -83,21 +103,25 @@ export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
 
   async function copiar() {
     if (!url) return
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-      toast({ title: 'Enlace copiado' })
-    } catch {
-      toast({ title: 'No se pudo copiar', description: 'Abre el enlace y cópialo desde la barra.', variant: 'destructive' })
-    }
+    const ok = await copiarTexto(url)
+    if (ok) toast({ title: 'Enlace copiado' })
+    else toast({ title: 'No se pudo copiar', description: 'Selecciona el enlace y cópialo a mano.', variant: 'destructive' })
   }
 
   return (
-    <details className="rounded-lg border border-border bg-card/50 px-3 py-2 text-xs">
+    <details
+      open={panelOpen || Boolean(url)}
+      onToggle={(e) => setPanelOpen((e.target as HTMLDetailsElement).open)}
+      className="rounded-lg border border-border bg-card/50 px-3 py-2 text-xs"
+    >
       <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 font-semibold text-foreground">
         <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
         Enviar al cliente
+        {url ? (
+          <span className="ml-auto rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+            Enlace listo
+          </span>
+        ) : null}
       </summary>
       <div className="mt-2 space-y-2 border-t border-border pt-2">
         <label className="block space-y-1">
@@ -152,27 +176,46 @@ export function EnviarAlCliente({ ideas }: { ideas: IdeaWithPipeline[] }) {
           Generar enlace ({selected.size})
         </button>
 
-        {url && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => void copiar()}
-              aria-label="Copiar enlace de aprobación"
-              className="flex items-center gap-1 rounded-md border px-2 py-1.5 text-[10px] font-medium hover:bg-muted"
-            >
-              {copied ? <Check className="h-3 w-3 text-emerald-600" aria-hidden="true" /> : <Copy className="h-3 w-3" aria-hidden="true" />}
-              Copiar enlace
-            </button>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="truncate text-[10px] text-muted-foreground underline-offset-2 hover:underline"
-            >
-              {url.replace(/^https?:\/\//, '')}
-            </a>
+        {url ? (
+          <div
+            data-testid="enlace-aprobacion-result"
+            className="space-y-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3"
+          >
+            <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+              Enlace listo — cópialo y mándalo al cliente
+            </p>
+            <label className="block space-y-1">
+              <span className="sr-only">Enlace de aprobación</span>
+              <input
+                readOnly
+                value={url}
+                onFocus={(e) => e.currentTarget.select()}
+                aria-label="Enlace de aprobación generado"
+                className="h-10 w-full select-all rounded-md border border-border bg-background px-2 font-mono text-[11px] text-foreground"
+              />
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => void copiar()}
+                aria-label="Copiar enlace de aprobación"
+                className="inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 text-[11px] font-semibold text-white hover:bg-emerald-700 sm:flex-none"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
+                {copied ? 'Copiado' : 'Copiar enlace'}
+              </button>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 text-[11px] font-medium hover:bg-muted sm:flex-none"
+              >
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                Abrir
+              </a>
+            </div>
           </div>
-        )}
+        ) : null}
       </div>
     </details>
   )

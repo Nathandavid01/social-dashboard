@@ -39,10 +39,13 @@ const ideas = [
 beforeEach(() => {
   crearEnlaceCliente.mockReset()
   crearEnlaceCliente.mockResolvedValue({ token: 'tok-multi' })
+  Object.assign(navigator, {
+    clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
+  })
 })
 
 describe('EnviarAlCliente', () => {
-  it('generates one approval link with the selected ideaIds', async () => {
+  it('generates one approval link with the selected ideaIds and shows the full URL', async () => {
     render(<EnviarAlCliente ideas={ideas} />)
     fireEvent.click(screen.getByText('Enviar al cliente'))
     fireEvent.change(screen.getByLabelText('Cliente para enlace de aprobación'), { target: { value: 'c1' } })
@@ -59,7 +62,10 @@ describe('EnviarAlCliente', () => {
     )
     const call = crearEnlaceCliente.mock.calls[0][0]
     expect(call.ideaIds).toHaveLength(2)
-    expect(await screen.findByRole('button', { name: /Copiar enlace/i })).toBeInTheDocument()
+    expect(await screen.findByTestId('enlace-aprobacion-result')).toBeInTheDocument()
+    const input = screen.getByLabelText('Enlace de aprobación generado') as HTMLInputElement
+    expect(input.value).toMatch(/\/aprobacion\/tok-multi$/)
+    expect(screen.getByRole('button', { name: /Copiar enlace/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Abrir/i })).toHaveAttribute('href', expect.stringContaining('/aprobacion/tok-multi'))
   })
-
 })

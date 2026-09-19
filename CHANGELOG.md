@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.2 — 2026-09-19
+
+**Enviar al cliente: el enlace de /aprobacion queda bien visible.**
+- Tras «Generar enlace», aparece una tarjeta con la URL completa (input seleccionable), botones **Copiar** y **Abrir**, y el panel se queda abierto.
+- Se copia al portapapeles automáticamente cuando la generación funciona. Sin auto-post a Metricool.
+
 ## v5.1 — 2026-09-19
 
 **Recibo: ver y reproducir el video editado en cada tarjeta.**
