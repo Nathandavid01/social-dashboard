@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.7 — Subir crudo</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0b0d0f; color: #f5f5f4; }
+    main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 15px; margin: 0; }
+    h2 { font-size: 22px; margin: 4px 0 0; }
+    p { color: #a8a29e; font-size: 13px; line-height: 1.45; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .muted { color: #78716c; font-size: 12px; }
+    .card { background: linear-gradient(180deg, #ca8a0426, #12161a); border: 1px solid #ca8a0466; border-radius: 16px; padding: 18px; }
+    label { display: block; font-size: 12px; color: #a8a29e; margin: 12px 0 6px; }
+    select, .drop { width: 100%; min-height: 44px; border-radius: 10px; border: 1px solid #44403c; background: #0b0d0f; color: #f5f5f4; padding: 0 12px; box-sizing: border-box; }
+    .drop { display: grid; place-items: center; padding: 18px; border-style: dashed; text-align: center; }
+    .btn { width: 100%; min-height: 44px; border: 0; border-radius: 10px; background: #ca8a04; color: #000; font-weight: 700; margin-top: 14px; }
+    .chip { float: right; border: 1px solid #22d3ee55; background: #22d3ee18; color: #67e8f9; border-radius: 999px; padding: 4px 10px; font-size: 11px; }
+    .ok { margin-top: 12px; border: 1px solid #10b98155; background: #10b98118; color: #6ee7b7; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+    .ok a { color: inherit; font-weight: 700; }
+    details { margin-top: 16px; border: 1px solid #292524; border-radius: 16px; background: #12161a; }
+    summary { min-height: 44px; display: flex; align-items: center; padding: 0 16px; cursor: pointer; }
+    .sheet { padding: 12px 16px 16px; border-top: 1px solid #292524; color: #a8a29e; font-size: 13px; }
+    .cal { border: 1px solid #44403c; background: transparent; color: #f5f5f4; border-radius: 8px; min-height: 36px; padding: 0 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">Vista de ejemplo · v5.7</p>
+    <header>
+      <div>
+        <h1>On Site</h1>
+        <p class="muted">Sube el crudo. El call sheet queda abajo.</p>
+      </div>
+      <button class="cal" type="button">Calendario de grabación</button>
+    </header>
+    <section class="card">
+      <span class="chip">Crudo</span>
+      <p class="muted" style="margin:0;letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:700;color:#ca8a04">Puerta principal</p>
+      <h2>Subir crudo</h2>
+      <p>Cliente → sesión de hoy → videos. Entran al Pipeline como crudo, no como editado ni B-roll.</p>
+      <label>Cliente</label>
+      <select aria-label="Cliente">
+        <option>Blue Chiropractic</option>
+      </select>
+      <label>Sesión de hoy</label>
+      <div class="drop" style="min-height:44px;padding:10px;border-style:solid">Blue Chiropractic · hoy</div>
+      <label>Archivos</label>
+      <div class="drop">Arrastra los videos o elige archivos<br><span class="muted">Toma patio.mp4</span></div>
+      <button class="btn" type="button">Subir crudo</button>
+      <p class="ok" role="status">El archivo está en Pipeline · <a href="/pipeline">Abrir Pipeline</a></p>
+    </section>
+    <details>
+      <summary>Call sheet y preparación</summary>
+      <div class="sheet">Llegada, PDF y tomas quedan aquí. No hay que sellar ni generar ideas para subir el crudo.</div>
+    </details>
+  </main>
+</body>
+</html>
