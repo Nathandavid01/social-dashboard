@@ -11,7 +11,8 @@ describe('votarRevisionPublica — no programa Metricool', () => {
 })
 
 describe('votarRevisionPublica — avisa al staff', () => {
-  it('llama notifyStaffOfClientReview tras un voto ok', () => {
+  it('sigue usando notifyStaffOfClientReview, filtrado por shouldNotifyClientVote', () => {
     expect(src).toMatch(/notifyStaffOfClientReview/)
+    expect(src).toMatch(/shouldNotifyClientVote/)
   })
 })

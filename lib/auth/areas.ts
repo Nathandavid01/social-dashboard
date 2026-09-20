@@ -80,6 +80,7 @@ export const AREAS: Area[] = [
 
   // ── Publicación: sacarlo a la calle y comprobar que salió ──
   { href: '/posting',            label: 'Posting',         permission: 'posting.read',       group: 'Publicación' },
+  { href: '/pool',               label: 'Panel',           permission: 'posting.read',       group: 'Publicación' },
   { href: '/published',          label: 'Publicados',      permission: 'metricool.read',     group: 'Publicación' },
   // Fuera del menú (v4.2): fusionada como tab "Verificación" dentro de /published;
   // la ruta redirige allá para no romper links viejos.
