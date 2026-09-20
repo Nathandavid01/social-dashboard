@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { CalendarItem } from '@/lib/supabase/types'
 import { cadenceCalendarItems, isMissingTimezoneColumn } from '@/lib/utils/client-cadence'
+import { publicacionCalendarState } from '@/lib/utils/client-pool-state'
 
 /**
  * Aggregate read-only calendar items across multiple sources within [startISO, endISO]:
@@ -29,6 +30,7 @@ export async function getCalendarItems(startISO: string, endISO: string): Promis
       .from('content_ideas')
       .select(`
         id, title, recording_date, publish_date, client_id,
+        metricool_post_id, posted_at, published_at, status, manual_posted_status,
         client:clients!content_ideas_client_id_fkey(id, name),
         production_task:production_tasks!content_ideas_production_task_id_fkey(
           assigned_to:profiles!production_tasks_assigned_to_id_fkey(id, full_name)
@@ -62,6 +64,8 @@ export async function getCalendarItems(startISO: string, endISO: string): Promis
   for (const i of ideas ?? []) {
     const idea = i as unknown as {
       id: string; title: string; recording_date: string | null; publish_date: string | null
+      metricool_post_id?: number | null; posted_at?: string | null
+      published_at?: string | null; status?: string | null; manual_posted_status?: string | null
       client?: { id: string; name: string } | null
       production_task?: { assigned_to?: { id: string; full_name: string | null } | null } | null
     }
@@ -77,7 +81,19 @@ export async function getCalendarItems(startISO: string, endISO: string): Promis
       items.push({ id: `grabacion:${idea.id}`, type: 'grabacion', date: atNoon(idea.recording_date), ...base })
     }
     if (idea.publish_date && idea.publish_date >= startDate && idea.publish_date <= endDate) {
-      items.push({ id: `publicacion:${idea.id}`, type: 'publicacion', date: atNoon(idea.publish_date), ...base })
+      items.push({
+        id: `publicacion:${idea.id}`,
+        type: 'publicacion',
+        date: atNoon(idea.publish_date),
+        publishState: publicacionCalendarState({
+          status: idea.status,
+          published_at: idea.published_at,
+          manual_posted_status: idea.manual_posted_status,
+          metricool_post_id: idea.metricool_post_id,
+          posted_at: idea.posted_at,
+        }),
+        ...base,
+      })
     }
   }
 

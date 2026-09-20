@@ -161,6 +161,11 @@ export function WeeklyCalendar({ initialItems, clients, profiles }: WeeklyCalend
 
 function CalendarItemChip({ item }: { item: CalendarItem }) {
   const meta = TYPE_META[item.type]
+  const publishLabel = item.publishState === 'agendado'
+    ? 'Agendado'
+    : item.publishState === 'publicado'
+      ? 'Publicado'
+      : null
   const body = (
     <div className={cn('rounded-md border px-1.5 py-1 text-[11px] leading-tight', meta.chip)}>
       <div className="flex items-center gap-1">
@@ -173,6 +178,9 @@ function CalendarItemChip({ item }: { item: CalendarItem }) {
           <span className="shrink-0" title={item.assignee.full_name ?? ''}>{initials(item.assignee.full_name)}</span>
         )}
       </div>
+      {publishLabel && (
+        <p className="mt-0.5 text-[10px] font-semibold">{publishLabel}</p>
+      )}
     </div>
   )
   return item.href ? <Link href={item.href} className="block hover:opacity-80">{body}</Link> : body
