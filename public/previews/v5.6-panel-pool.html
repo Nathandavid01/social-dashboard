@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.6 — Panel pool / Recibo / Metricool</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --amber:#fbbf24; --green:#6ee7b7; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:18px; }
+    .day { background:var(--card); border:1px solid var(--border); border-radius:10px; min-height:140px; padding:8px; }
+    .day b { font-size:11px; color:var(--muted); }
+    .thumb { height:88px; border-radius:8px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); margin:8px 0 4px; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; }
+    .ag { color:#082f49; background:var(--sky); }
+    .pub { color:#052e1f; background:var(--green); }
+    .ok { color:#422006; background:var(--amber); }
+    .from { font-size:10px; color:var(--sky); margin:4px 0 0; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; }
+    .row { display:flex; align-items:center; gap:10px; }
+    .logo { width:36px; height:36px; border-radius:8px; background:var(--gold); color:#111; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; }
+    .pool { display:flex; gap:10px; margin-top:12px; }
+    .tile { width:110px; }
+    .muted { color:var(--muted); font-size:12px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · pool Listo → Metricool</h1>
+    <p class="sub">Después de Recibo, si el cliente aprueba el video aparece aquí como <strong>Listo</strong> (sin aviso). Arrástralo a un día: se agenda en Metricool y queda <strong>Agendado</strong>. Cuando sale, <strong>Publicado</strong>. El calendario no muestra el pool sin fecha.</p>
+
+    <p class="label">Calendario de esta semana</p>
+    <div class="cal">
+      <div class="day"><b>Lun 21</b></div>
+      <div class="day"><b>Mar 22</b></div>
+      <div class="day">
+        <b>Mié 23</b>
+        <div class="thumb">carátula</div>
+        <div>Reel Arecibo</div>
+        <span class="chip ag">Agendado</span>
+        <p class="from">agendado desde aquí</p>
+      </div>
+      <div class="day"><b>Jue 24</b></div>
+      <div class="day">
+        <b>Vie 25</b>
+        <div class="thumb">carátula</div>
+        <div>Tip del viernes</div>
+        <span class="chip pub">Publicado</span>
+      </div>
+      <div class="day"><b>Sáb 26</b></div>
+      <div class="day"><b>Dom 27</b></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="logo">AL</div>
+        <div>
+          <strong>Arecibo Lab</strong>
+          <div class="muted">Cadencia esta semana: Mié, Vie</div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:14px">Pool · Listo</p>
+      <div class="pool">
+        <div class="tile">
+          <div class="thumb">carátula</div>
+          <div>Video listo</div>
+          <span class="chip ok">Listo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="logo">CH</div>
+        <div>
+          <strong>Cliente hueco</strong>
+          <div class="muted">Cadencia esta semana: Lun · pool vacío (escondido)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

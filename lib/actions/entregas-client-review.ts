@@ -7,6 +7,8 @@ import { requirePermission } from '@/lib/auth/server'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 import { DIAS_DE_VIGENCIA, type DecisionCliente } from '@/lib/entregas/client-review'
 import { notifyStaffOfClientReview } from '@/lib/actions/review-notify'
+import { shouldNotifyClientVote } from '@/lib/utils/client-pool-state'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * El enlace de aprobación que se manda al cliente, para el flujo de Entregas.
@@ -227,15 +229,37 @@ export async function votarRevisionPublica(input: {
   const res = (data ?? {}) as { ok?: boolean; error?: string; idea_id?: string; status?: string }
   if (!res.ok) return { error: MENSAJES[res.error ?? ''] ?? 'No se pudo registrar tu respuesta.' }
 
-  // Aviso al staff (campana + toast). Best-effort: nunca tumba el voto guardado.
+  // Aviso al staff (campana + toast). Recibo/AI + approved es silencioso:
+  // el video solo aparece en el pool Listo. Reject y Entregas humano sí avisan.
   if (res.idea_id && (input.decision === 'approved' || input.decision === 'rejected')) {
-    await notifyStaffOfClientReview(res.idea_id, input.decision, {
-      reviewerName: input.name,
-      commentBody: input.decision === 'rejected' ? input.comment : null,
-    })
+    const editMode = await editModeForIdea(res.idea_id)
+    if (shouldNotifyClientVote(input.decision, editMode)) {
+      await notifyStaffOfClientReview(res.idea_id, input.decision, {
+        reviewerName: input.name,
+        commentBody: input.decision === 'rejected' ? input.comment : null,
+      })
+    }
   }
 
   revalidatePath('/entregas')
   revalidatePath('/revision')
+  revalidatePath('/pool')
   return { ok: true }
+}
+
+/** Si no se puede leer el modo, se trata como humano: no silenciamos Entregas. */
+async function editModeForIdea(ideaId: string): Promise<'ai' | 'human' | null> {
+  try {
+    const admin = createAdminClient()
+    if (!admin) return null
+    const { data } = await admin
+      .from('content_ideas')
+      .select('client:clients(edit_mode)')
+      .eq('id', ideaId)
+      .maybeSingle()
+    const mode = (data?.client as { edit_mode?: 'ai' | 'human' | null } | null)?.edit_mode
+    return mode === 'ai' || mode === 'human' ? mode : null
+  } catch {
+    return null
+  }
 }

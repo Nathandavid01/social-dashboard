@@ -287,6 +287,8 @@ export interface CalendarItem {
   assignee: Pick<Profile, 'id' | 'full_name'> | null
   /** Optional deep-link (e.g. to the idea detail). */
   href: string | null
+  /** Derived from Metricool / published columns when type is publicacion. */
+  publishState?: 'agendado' | 'publicado' | null
 }
 
 export interface PerformanceMetric {
@@ -472,6 +474,10 @@ export interface ContentIdea {
   caption_generated_at: string | null
   published_at: string | null
   approval_status: IdeaApprovalStatus
+  /** Exact edited file sealed in Revisión. */
+  approved_video_id?: string | null
+  /** Client vote on /review (legacy). Independent of staff_client_approval. */
+  client_review_status?: 'pending' | 'approved' | 'rejected' | null
   approved_by: string | null
   approved_at: string | null
   submitted_at: string | null

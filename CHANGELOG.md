@@ -4,7 +4,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v5.6 — 2026-09-19
+## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**
 - En `/onsite` el videógrafo ve un CTA grande **Subir crudo**: elige cliente → sesión de hoy (o se crea con la agenda existente) → suelta los videos.
@@ -12,7 +12,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Si el cliente tiene **varias sesiones hoy**, hay que elegir una — no se crea otra sesión duplicada.
 - Call sheet, PDF, llegada y banco del cliente quedan abajo, sin bloquear la subida. El calendario no se toca.
 
-![Subir crudo en On Site](/changelog/v5.6-subir-crudo.jpg)
+![Subir crudo en On Site](/changelog/v5.7-subir-crudo.jpg)
+
+## v5.6 — 2026-09-20
+
+**Panel de clientes: pool Listo → arrastra al calendario → Metricool.**
+- Nueva ruta **Panel** (`/pool`): todos los clientes de esta semana, carátula de lo agendado/publicado, y un **pool** por cliente con videos **Listo** (el pool vacío se esconde).
+- Recibo / `/aprobacion`: si el cliente AI aprueba, el video entra al pool en silencio (sin campana). Un rechazo o un cliente de Entregas humano sí avisa.
+- Arrastra un Listo a un día: se agenda en **Metricool** con el `metricool_blog_id` del cliente y queda **Agendado** (“agendado desde aquí”). Al publicarse (o marcarse posteado) pasa a **Publicado**.
+- El calendario del panel solo muestra agendado y publicado. El calendario de contenido etiqueta esas publicaciones igual.
+
+![Panel pool](/changelog/v5.6-panel-pool.png)
 
 ## v5.5 — 2026-09-19
 

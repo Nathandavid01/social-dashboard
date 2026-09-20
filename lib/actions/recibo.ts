@@ -35,6 +35,7 @@ export async function setManualPostedStatus(input: {
   if (error) return { error: error.message }
   revalidatePath('/recibo')
   revalidatePath('/entregas')
+  revalidatePath('/pool')
   return { ok: true }
 }
 
@@ -61,6 +62,7 @@ export async function setStaffClientApproval(input: {
   if (error) return { error: error.message }
   revalidatePath('/recibo')
   revalidatePath('/entregas')
+  revalidatePath('/pool')
   return { ok: true }
 }
 
