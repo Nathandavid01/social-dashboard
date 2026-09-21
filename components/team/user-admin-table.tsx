@@ -27,6 +27,7 @@ import { ResetPasswordDialog } from '@/components/team/reset-password-dialog'
 import { CreateUserDialog } from '@/components/team/create-user-dialog'
 import { updateUserProfile, setUserStatus } from '@/lib/actions/users'
 import { normalizeAreaAccess } from '@/lib/auth/areas'
+import { canResetPassword } from '@/lib/auth/password-reset'
 import type { Profile, UserRole, UserStatus } from '@/lib/supabase/types'
 
 // Role filter chips. Mirrors the segmented control in the design; the three
@@ -59,9 +60,12 @@ function initials(name: string) {
 export function UserAdminTable({
   users,
   currentUserId,
+  currentRole = null,
 }: {
   users: Profile[]
   currentUserId: string
+  /** Rol real de quien mira la página. Null oculta la asignación de contraseñas. */
+  currentRole?: UserRole | null
 }) {
   const [query, setQuery] = useState('')
   const [segment, setSegment] = useState('all')
@@ -124,7 +128,7 @@ export function UserAdminTable({
       ) : (
         <div className="space-y-2">
           {filtered.map((u) => (
-            <UserCard key={u.id} user={u} isSelf={u.id === currentUserId} />
+            <UserCard key={u.id} user={u} isSelf={u.id === currentUserId} currentRole={currentRole} />
           ))}
         </div>
       )}
@@ -132,7 +136,15 @@ export function UserAdminTable({
   )
 }
 
-function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
+function UserCard({
+  user,
+  isSelf,
+  currentRole,
+}: {
+  user: Profile
+  isSelf: boolean
+  currentRole: UserRole | null
+}) {
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
@@ -191,7 +203,9 @@ function UserCard({ user, isSelf }: { user: Profile; isSelf: boolean }) {
         {areaGrant ? `Áreas (${areaGrant.length})` : 'Áreas'}
         <ChevronDown className={cn('ml-1 h-3.5 w-3.5 transition-transform', areasOpen && 'rotate-180')} />
       </Button>
-      <ResetPasswordDialog userId={user.id} userName={displayName} />
+      {canResetPassword({ actor: currentRole, targetRole: user.role, isSelf }).ok && (
+        <ResetPasswordDialog userId={user.id} userName={displayName} userEmail={user.email} />
+      )}
 
       <span
         className={cn(

@@ -4,6 +4,21 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.98 — 2026-09-21
+
+**Quien graba tiene historial: videos por idea, y las ideas que agregó en la grabación.**
+- En **Mi día**, el videógrafo ve **Tu historial de grabación**: cada video que subió, debajo de su idea, agrupado por sesión y cliente.
+- Una idea que esa persona creó dentro de la sesión sale marcada **Adicional**, aunque el video todavía no haya entrado.
+- En **Equipo**, el perfil de quien graba muestra el mismo historial para el administrador.
+
+## v5.97 — 2026-09-21
+
+**Un administrador asigna la contraseña desde Usuarios.**
+- En **Usuarios y permisos**, cada persona que te corresponda tiene **Nueva contraseña**.
+- El diálogo genera una clave, la puedes ver, regenerar y copiar. Después de asignarla **sigue en pantalla** hasta que pulses Listo: no se vuelve a mostrar.
+- La clave anterior deja de servir para entrar. Si esa persona tiene el dashboard abierto, cierra sesión desde el menú. Después puede cambiarla en Cuenta → Seguridad.
+- Un Supervisor puede hacerlo con el equipo de ejecución (editor, videógrafo, copy, diseñador). La contraseña de un Owner o de otro Supervisor solo la asigna un Owner. Nadie se asigna la suya desde aquí.
+
 ## v5.96 — 2026-09-21
 
 **Un video no se sube dos veces: si ya estaba, el dashboard lo dice y no lo repite.**

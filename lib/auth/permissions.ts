@@ -80,6 +80,8 @@ export type Permission =
   // Team & admin
   | 'team.read'
   | 'team.assign_roles'
+  /** Asignar una contraseña nueva a otra persona. La frontera owner/supervisor vive en canResetPassword. */
+  | 'team.reset_password'
   | 'automation.read'
   | 'automation.edit'
   | 'settings.edit'
@@ -122,6 +124,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
+    'team.reset_password',
     'cadence.read', 'cadence.edit',
     'team.read',
     'automation.read',
@@ -228,7 +231,7 @@ export const ROLE_LABEL: Record<UserRole, string> = {
 
 export const ROLE_DESCRIPTION: Record<UserRole, string> = {
   owner:       'Acceso completo, incluyendo facturación, contratos y asignación de roles.',
-  supervisor:  'Gestión de equipo y contenido. Edita contratos; ve facturación pero no la edita.',
+  supervisor:  'Gestión de equipo y contenido. Edita contratos; ve facturación pero no la edita. Asigna contraseñas del equipo de ejecución.',
   editor:      'Pipeline y Revisión: baja el crudo asignado y entrega el corte. No aprueba ni publica.',
   video:       'Grabación e ideas. No entra a Entregas.',
   disenador:   'Ideas y Entregas: sube piezas, sin escribir el copy.',
