@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 /**
@@ -31,6 +31,9 @@ vi.mock('@/lib/actions/video-dedupe', () => ({
   findDuplicateVideo: vi.fn(async () => null),
   rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
 }))
+vi.mock('@/lib/utils/video-fingerprint', () => ({
+  fingerprintFile: vi.fn(async () => 'v1-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'),
+}))
 
 // Real-shaped toast() return ({id, dismiss, update}) so the component's
 // `t.dismiss()` after the undo window doesn't blow up on a bare vi.fn().
@@ -58,6 +61,7 @@ import { IdeaVideoPanel } from '@/components/recording/idea-video-panel'
 import { registerR2Video, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { findDuplicateVideo } from '@/lib/actions/video-dedupe'
+import { useUploadStore } from '@/lib/stores/upload-store'
 
 function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
   return {
@@ -85,7 +89,7 @@ function makeVideo(kind: ContentIdeaVideoKind, i: number): ContentIdeaVideo {
 // analyze), each step its own microtask hop — one act(async () => {}) only
 // drains a single tick, so loop enough passes to settle the whole chain.
 async function flush() {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 40; i++) {
     // eslint-disable-next-line no-await-in-loop
     await act(async () => {
       await Promise.resolve()
@@ -98,6 +102,12 @@ beforeEach(() => {
   canManageVideos = true
   currentUserId = 'user-1'
   vi.clearAllMocks()
+  const store = useUploadStore.getState()
+  Object.keys(store.uploads).forEach((id) => {
+    store.cancelUpload(id)
+    store.dismissUpload(id)
+  })
+  useUploadStore.setState({ uploads: {} })
 })
 
 describe('IdeaVideoPanel — compact upload view', () => {
@@ -507,12 +517,12 @@ describe('IdeaVideoPanel — dispara QC IA en subida de editado', () => {
     await act(async () => {
       fireEvent.change(editedInput, { target: { files: [file] } })
     })
-    await flush()
-
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ title: expect.stringMatching(/ya estaba/i) }),
+      )
+    })
     expect(vi.mocked(registerR2Video)).not.toHaveBeenCalled()
-    expect(toastSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ title: expect.stringMatching(/ya estaba/i) }),
-    )
     expect(screen.getByRole('button', { name: 'Cerrar' })).toBeInTheDocument()
     expect(screen.getByText(/No se subió/)).toBeInTheDocument()
   })

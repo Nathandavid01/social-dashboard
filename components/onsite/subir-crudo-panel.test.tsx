@@ -6,6 +6,7 @@ import type { OnsiteSession } from '@/lib/actions/onsite'
 const refresh = vi.fn()
 const toast = vi.fn()
 const startUpload = vi.fn(() => 'up-1')
+const findDuplicateVideo = vi.fn(async (): Promise<import('@/lib/actions/video-dedupe').DuplicateVideo | null> => null)
 const createRecordingSession = vi.fn(async (_values?: unknown): Promise<{ id?: string; error?: string }> => ({ id: 's-new' }))
 const createContentIdeaManual = vi.fn(async (_input?: unknown): Promise<{ idea?: { id: string }; error?: string }> => ({ idea: { id: 'idea-new' } }))
 const addIdeaToSession = vi.fn(async (_input?: unknown): Promise<{ ok?: true; error?: string }> => ({ ok: true }))
@@ -20,6 +21,13 @@ vi.mock('@/lib/stores/upload-store', () => ({
 const getOnsiteUploadContext = vi.fn(async (_id?: string) => ({ context: undefined }))
 vi.mock('@/lib/actions/onsite-upload-context', () => ({
   getOnsiteUploadContext: (id: string) => getOnsiteUploadContext(id),
+}))
+vi.mock('@/lib/actions/video-dedupe', () => ({
+  findDuplicateVideo: () => findDuplicateVideo(),
+  rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
+}))
+vi.mock('@/lib/utils/video-fingerprint', () => ({
+  fingerprintFile: async () => 'v1-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 }))
 vi.mock('@/lib/actions/recording-sessions', () => ({
   createRecordingSession: (values: unknown) => createRecordingSession(values),
@@ -81,6 +89,7 @@ beforeEach(() => {
   refresh.mockClear()
   toast.mockClear()
   startUpload.mockClear()
+  findDuplicateVideo.mockReset().mockResolvedValue(null)
   createRecordingSession.mockReset().mockResolvedValue({ id: 's-new' })
   createContentIdeaManual.mockReset().mockResolvedValue({ idea: { id: 'idea-new' } })
   addIdeaToSession.mockReset().mockResolvedValue({ ok: true })
@@ -247,5 +256,26 @@ describe('SubirCrudoPanel', () => {
     })
     expect(screen.getByText('nuevo.MOV')).toBeInTheDocument()
     expect(screen.getByText(/Subiendo · Intro Patricia/)).toBeInTheDocument()
+  })
+
+  it('si el archivo ya estaba, no crea sesión ni idea vacía', async () => {
+    findDuplicateVideo.mockResolvedValueOnce({
+      videoId: 'vid-9',
+      kind: 'raw',
+      fileName: 'IMG_8841.MOV',
+      uploadedAt: '2026-08-28T15:00:00Z',
+      ideaId: 'idea-9',
+      ideaTitle: 'Intro clínica',
+      clientName: 'ARASIBO',
+      uploadedBy: 'Carlos',
+    })
+    renderPanel({ sessions: [] })
+    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: 'c1' } })
+    pickFile()
+    fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
+    await waitFor(() => expect(screen.getByText(/No se subió/)).toBeInTheDocument())
+    expect(createRecordingSession).not.toHaveBeenCalled()
+    expect(createContentIdeaManual).not.toHaveBeenCalled()
+    expect(startUpload).not.toHaveBeenCalled()
   })
 })
