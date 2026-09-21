@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.94 — 2026-09-21
+
+**En Pipeline se ve quién está cortando cada video.**
+- En `/pipeline`, cada crudo (espacio activo y banco) tiene **Empezar edición**: un toque y el equipo ve **En edición — {nombre}** y desde cuándo.
+- Si otra persona ya lo tomó, el botón queda desactivado y avisa: “Este video ya lo está editando…”. Quien lo reclamó (o un admin) puede **Soltar**.
+- No manda Slack ni correo. El tablero se actualiza al toque (y en vivo si hay Realtime).
+- No cambia On Site, Revisión ni Entregas: solo evita que dos editores corten el mismo crudo.
+
+![Quién edita en Pipeline](/changelog/v5.94-pipeline-en-edicion.png)
+
 ## v5.93 — 2026-09-21
 
 **Login solo con correo: la sesión se queda hasta que la cierres.**

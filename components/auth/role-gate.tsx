@@ -48,3 +48,9 @@ export function useCurrentUserId(): string | null {
   const { user } = useAuth()
   return user?.id ?? null
 }
+
+/** Id efectivo (vista como editor si aplica). Para “¿este claim es mío?”. */
+export function useEffectiveUserId(): string | null {
+  const { user, viewAsEditor } = useAuth()
+  return viewAsEditor?.id ?? user?.id ?? null
+}

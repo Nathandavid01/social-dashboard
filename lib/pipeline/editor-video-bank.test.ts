@@ -214,6 +214,21 @@ describe('groupEditorVideoBank', () => {
     expect(maria.clients[0].clips[0].shootingNotes).toBe('Toma 2, 35mm')
   })
 
+  it('lleva quién reclamó el corte (no el asignado) para el badge En edición', () => {
+    const rows = groupEditorVideoBank([
+      idea({
+        editing_started_by: 'ed-diego',
+        editing_started_at: '2026-09-21T15:00:00.000Z',
+        editingClaimer: { id: 'ed-diego', full_name: 'Diego V.' },
+      }),
+    ])
+    expect(rows[0].clients[0].clips[0].editingClaim).toEqual({
+      byId: 'ed-diego',
+      byName: 'Diego V.',
+      at: '2026-09-21T15:00:00.000Z',
+    })
+  })
+
   it('omite ideas sin crudo/b-roll y las descartadas', () => {
     const rows = groupEditorVideoBank([
       idea({ id: 'empty', videos: [] }),

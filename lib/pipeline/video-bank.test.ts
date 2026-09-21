@@ -109,6 +109,22 @@ describe('buildVideoBank', () => {
     expect([c.editorId, c.editorName, c.assignedVia]).toEqual([null, null, null])
   })
 
+  it('lleva el claim de edición aunque el asignado sea otra persona', () => {
+    const bank = buildVideoBank([
+      idea({ id: 'a' }),
+    ].map((row) => ({
+      ...row,
+      editing_started_by: 'ed-diego',
+      editing_started_at: '2026-09-21T15:00:00.000Z',
+      editingClaimer: { id: 'ed-diego', full_name: 'Diego V.' },
+    })), { now: NOW })
+    expect(bank.rails[0].videos[0].editingClaim).toEqual({
+      byId: 'ed-diego',
+      byName: 'Diego V.',
+      at: '2026-09-21T15:00:00.000Z',
+    })
+  })
+
   it('lleva el production_task_id para poder reasignar desde el video', () => {
     const bank = buildVideoBank([idea({ id: 'a', productionTaskId: 'pt-77' })], { now: NOW })
     expect(bank.rails[0].videos[0].productionTaskId).toBe('pt-77')

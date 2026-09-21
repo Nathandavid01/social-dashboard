@@ -41,8 +41,17 @@ function row(over: Partial<EditorBankRow> = {}): EditorBankRow {
 }
 
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
-const actionMocks = vi.hoisted(() => ({ reassignVideo: vi.fn() }))
+const actionMocks = vi.hoisted(() => ({
+  reassignVideo: vi.fn(),
+  claimPipelineEdit: vi.fn(),
+  releasePipelineEdit: vi.fn(),
+  userId: 'ed-diego',
+}))
 vi.mock('@/lib/actions/content-ideas', () => ({ reassignVideo: actionMocks.reassignVideo }))
+vi.mock('@/lib/actions/pipeline-claim', () => ({
+  claimPipelineEdit: (...a: unknown[]) => actionMocks.claimPipelineEdit(...a),
+  releasePipelineEdit: (...a: unknown[]) => actionMocks.releasePipelineEdit(...a),
+}))
 vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2DownloadUrl: vi.fn() }))
 vi.mock('@/lib/actions/client-asset-bank', () => ({ getClientAssetDownloadUrl: vi.fn(), listClientBankAssetsByClientIds: vi.fn() }))
 vi.mock('@/lib/actions/video-preview', () => ({ getVideoPreviewUrl: vi.fn() }))
@@ -51,6 +60,8 @@ vi.mock('@/lib/actions/video-thumbs', () => ({
 }))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
+  useEffectiveUserId: () => actionMocks.userId,
+  RoleGate: ({ children }: { children: unknown }) => children,
 }))
 
 describe('EditorVideoBank', () => {
@@ -379,5 +390,53 @@ describe('EditorVideoBank', () => {
     expect(screen.getByText('SP')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /subir logo/i })
     expect(link).toHaveAttribute('href', '/clients/c-speedy')
+  })
+
+  it('en el banco muestra En edición y avisa si ya está reclamado', async () => {
+    actionMocks.claimPipelineEdit.mockResolvedValue({
+      error: 'Este video ya lo está editando María R.',
+      claim: { byId: 'ed-maria', byName: 'María R.', at: '2026-09-21T15:00:00.000Z' },
+    })
+    const bank: VideoBank = {
+      totals: { videos: 1, clients: 1, unassigned: 0 },
+      rails: [{
+        clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
+        postingDays: [], videoCount: 1, editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea',
+        videos: [{
+          videoId: 'v1', ideaId: 'i1', productionTaskId: 'pt1', title: 'Baño y corte',
+          kind: 'raw', durationSec: 60, thumbKeys: [], hasCover: false,
+          recordedBy: null, uploadedAt: null, clientId: 'c1', clientName: 'Lucky Pet',
+          editorId: 'ed-maria', editorName: 'María R.', assignedVia: 'idea',
+          editingClaim: { byId: 'ed-maria', byName: 'María R.', at: '2026-09-21T15:00:00.000Z' },
+        }],
+      }],
+    }
+    render(<EditorVideoBank rows={[]} videoBank={bank} />)
+    expect(screen.getByTestId('editing-claim-i1')).toHaveTextContent(/en edición — maría/i)
+    expect(screen.getByRole('button', { name: /empezar edición/i })).toBeDisabled()
+  })
+
+  it('un tap reclama un crudo libre', async () => {
+    actionMocks.claimPipelineEdit.mockResolvedValue({
+      ok: true,
+      claim: { byId: 'ed-diego', byName: null, at: '2026-09-21T16:10:00.000Z' },
+    })
+    const bank: VideoBank = {
+      totals: { videos: 1, clients: 1, unassigned: 1 },
+      rails: [{
+        clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
+        postingDays: [], videoCount: 1, editorId: null, editorName: null, assignedVia: null,
+        videos: [{
+          videoId: 'v1', ideaId: 'i-free', productionTaskId: 'pt1', title: 'Crudo libre',
+          kind: 'raw', durationSec: 60, thumbKeys: [], hasCover: false,
+          recordedBy: null, uploadedAt: null, clientId: 'c1', clientName: 'Lucky Pet',
+          editorId: null, editorName: null, assignedVia: null,
+        }],
+      }],
+    }
+    render(<EditorVideoBank rows={[]} videoBank={bank} />)
+    fireEvent.click(screen.getByRole('button', { name: /empezar edición/i }))
+    await waitFor(() => expect(actionMocks.claimPipelineEdit).toHaveBeenCalledWith('i-free'))
+    expect(screen.getByTestId('editing-claim-i-free')).toHaveTextContent(/en edición — tú/i)
   })
 })

@@ -66,6 +66,8 @@ export type Permission =
   | 'revision.read'
   /** Paso 2: banco de crudos para que el editor baje y vea. */
   | 'pipeline.read'
+  /** Pipeline: reclamar / soltar “estoy editando este corte”. */
+  | 'pipeline.claim'
   /** Banco de Video global (/banco): biblioteca de crudos + calendario proyectado. Solo admins. */
   | 'video_bank.read'
   | 'planning.act'
@@ -116,7 +118,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'metricool.read', 'metricool.write', 'metricool.draft',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
-    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'video_bank.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'pipeline.claim', 'video_bank.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -134,7 +136,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read',
     'video.upload',
     'captions.use', 'captions.edit',
-    'revision.read', 'pipeline.read', 'planning.act',
+    'revision.read', 'pipeline.read', 'pipeline.claim', 'planning.act',
     'cadence.edit',
     'metricool.draft',
     'presence.read',
@@ -190,6 +192,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'ideas.read', 'ideas.edit',
     'video_reviews.read',
     'pipeline.read',
+    'pipeline.claim',
     'production.read', 'production.edit',
     'recording.read',
     'posting.read', 'captions.use',

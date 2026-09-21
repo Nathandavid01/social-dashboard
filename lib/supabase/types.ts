@@ -494,6 +494,9 @@ export interface ContentIdea {
   staff_client_approval?: 'approved' | 'rejected' | null
   posting_error: string | null
   posting_started_at: string | null
+  /** Quién está cortando ahora (Pipeline). Migración 0088. El candado es este id. */
+  editing_started_at?: string | null
+  editing_started_by?: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -513,6 +516,8 @@ export interface IdeaWithPipeline extends ContentIdea {
   assignee?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
   /** Pipeline banco: el servidor marca lo que está fuera del WIP de 2. */
   bankQueue?: 'active' | 'waiting'
+  /** Perfil de quien reclamó el corte (profiles por editing_started_by). */
+  editingClaimer?: (Pick<Profile, 'id' | 'full_name'> & { avatar_url?: string | null }) | null
   recording_session?: {
     status?: string
     location?: string | null

@@ -15,6 +15,8 @@ import type { GlobalBrollGroup } from '@/lib/pipeline/global-broll'
 import type { ClientBankFile } from '@/lib/utils/client-asset-bank'
 import { approvalTone } from '@/lib/pipeline/approval-tone'
 import { EditorWorkPackage } from './editor-work-package'
+import { EditingClaimControls } from './editing-claim-controls'
+import type { EditingClaim } from '@/lib/pipeline/editing-claim'
 import { GlobalBrollSection } from './global-broll-section'
 import { estimateDaysForEditor, teamMedianDays, type EditorPace } from '@/lib/pipeline/editor-pace'
 import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
@@ -46,6 +48,13 @@ export function EditorVideoBank({
   const canOpenProfile = useHasPermission('team.read')
   const teamPace = teamMedianDays(paces)
   const paceByEditor = useMemo(() => new Map(paces.map((pace) => [pace.editorId, pace])), [paces])
+  const [claimOverrides, setClaimOverrides] = useState<Record<string, EditingClaim>>({})
+  function claimOf(ideaId: string, fallback?: EditingClaim | null): EditingClaim | null {
+    return claimOverrides[ideaId] ?? fallback ?? null
+  }
+  function setClaim(ideaId: string, next: EditingClaim | null) {
+    setClaimOverrides((prev) => ({ ...prev, [ideaId]: next ?? { byId: null, byName: null, at: null } }))
+  }
 
   return (
     <div className="flex-1 space-y-8 overflow-y-auto bg-[#0b0d0f] p-3 text-foreground sm:p-5">
@@ -53,11 +62,11 @@ export function EditorVideoBank({
         <SectionHeader id="editor-spaces-title" title="Espacios de edición" description="El tope de videos activos sube con el % de aprobación de cada editor (2 → 3 → 4). Los espacios libres dejan claro quién puede tomar el próximo crudo." />
         {rows.length === 0 ? <EmptyState text="No hay crudos listos. Cuando On Site suba material, aparecerá aquí." /> : (
           <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} clientBank={clientBank} />)}
+            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} clientBank={clientBank} claimOf={claimOf} setClaim={setClaim} />)}
           </div>
         )}
       </section>
-      {videoBank && <VideoBankLibrary bank={videoBank} teamMembers={teamMembers} clientRunway={clientRunway} />}
+      {videoBank && <VideoBankLibrary bank={videoBank} teamMembers={teamMembers} clientRunway={clientRunway} claimOf={claimOf} setClaim={setClaim} />}
       <GlobalBrollSection groups={globalBroll} />
       {paces.length > 0 && <EditorPaceTable rows={rows} paces={paces} teamMembers={teamMembers} />}
       {admins.length > 0 && <AdminStrip admins={admins} />}
@@ -73,7 +82,7 @@ function EmptyState({ text }: { text: string }) {
   return <div className="rounded-xl border border-dashed border-white/10 px-5 py-12 text-center text-sm text-slate-500">{text}</div>
 }
 
-function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [], clientBank = {} }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[]; clientBank?: Record<string, ClientBankFile[]> }) {
+function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [], clientBank = {}, claimOf, setClaim }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[]; clientBank?: Record<string, ClientBankFile[]>; claimOf: (ideaId: string, fallback?: EditingClaim | null) => EditingClaim | null; setClaim: (ideaId: string, next: EditingClaim | null) => void }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, row.wipLimit)
   const waiting = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'waiting')
@@ -103,7 +112,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
       <div className="grid grid-cols-2 gap-2 px-3.5 pb-3">
         {Array.from({ length: row.wipLimit }).map((_, index) => {
           const work = active[index]
-          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} bank={clientBank[work.client.clientId] ?? []} /> : (
+          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} bank={clientBank[work.client.clientId] ?? []} claim={claimOf(work.clip.ideaId, work.clip.editingClaim)} onClaim={(next) => setClaim(work.clip.ideaId, next)} /> : (
             <div key={`free-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-white/10 bg-black/10 px-3 text-center"><div><p className="text-[11px] font-medium text-slate-300">Espacio libre</p><p className="mt-1 text-[9px] text-slate-500">Puede tomar un video del banco</p><span className="mt-2 inline-block text-[10px] font-semibold text-[#c8a34a]">Disponible</span></div></div>
           )
         })}
@@ -114,7 +123,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
   )
 }
 
-function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [] }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[] }) {
+function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [], claim, onClaim }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[]; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const file = clip.files[0]
   const elapsed = daysSince(clip.recordedAt)
@@ -128,6 +137,7 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, brol
         <div className="flex min-w-0 items-center gap-1.5">{showClientMark && <ClientLogo name={client.clientName} logoUrl={client.logoUrl} className="h-5 w-5 text-[7px]" />}<h3 className="min-w-0 flex-1 truncate text-[11px] font-semibold text-white">{client.clientName}</h3>{showClientMark && !client.logoUrl && canSetLogo && <Link href={`/clients/${client.clientId}`} className="shrink-0 text-[8px] text-[#c8a34a] underline underline-offset-2">Subir logo</Link>}</div>
         <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-slate-300">{clip.title}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[9px] text-slate-500"><span className="rounded bg-[#c8a34a]/15 px-1 py-0.5 font-semibold uppercase text-[#d6b55f]">Te toca</span>{client.editMode === 'ai' && <span data-testid="edit-mode-ai-badge" className="rounded bg-violet-500/20 px-1 py-0.5 font-semibold uppercase text-violet-300">AI</span>}{elapsed != null && <span>Día {elapsed}{estimate != null ? ` de ~${Math.max(1, Math.round(estimate))}` : ''}</span>}</div>
+        <EditingClaimControls ideaId={clip.ideaId} claim={claim} onOptimistic={onClaim} />
         {clip.shootingNotes && <p className="mt-1 text-[9px] text-slate-500">Anotaciones · {clip.shootingNotes}</p>}
         <EditorWorkPackage clip={clip} broll={broll} bank={bank} />
         {file && <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1"><span className="max-w-[8rem] truncate text-[9px] text-slate-500">{file.name}</span><BankFileActions file={file} compact /></div>}
@@ -136,14 +146,14 @@ function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, brol
   )
 }
 
-function VideoBankLibrary({ bank, teamMembers, clientRunway }: { bank: VideoBank; teamMembers: TeamMember[]; clientRunway: Record<string, Runway> }) {
+function VideoBankLibrary({ bank, teamMembers, clientRunway, claimOf, setClaim }: { bank: VideoBank; teamMembers: TeamMember[]; clientRunway: Record<string, Runway>; claimOf: (ideaId: string, fallback?: EditingClaim | null) => EditingClaim | null; setClaim: (ideaId: string, next: EditingClaim | null) => void }) {
   const [onlyUnassigned, setOnlyUnassigned] = useState(false)
   const rails = onlyUnassigned ? bank.rails.filter((rail) => !rail.editorId) : bank.rails
   return (
     <section aria-labelledby="raw-bank-title">
       <SectionHeader id="raw-bank-title" title="Banco de videos crudos" description="Cada crudo se ve como una carátula, agrupado por cliente y con el editor que lo tiene asignado." />
       <div className="mb-3 flex flex-wrap items-center gap-2"><button type="button" className="rounded-md border border-[#c8a34a]/40 bg-[#c8a34a]/10 px-2.5 py-1 text-[10px] font-medium text-[#d6b55f]">Por cliente</button><button type="button" aria-pressed={onlyUnassigned} onClick={() => setOnlyUnassigned((value) => !value)} className="rounded-md border border-white/10 px-2.5 py-1 text-[10px] text-slate-400 hover:text-white">Solo sin asignar {bank.totals.unassigned}</button><p className="ml-auto text-[10px] tabular-nums text-slate-500">{bank.totals.videos} crudos · {bank.totals.clients} clientes · {bank.totals.unassigned} sin editor</p></div>
-      <div className="space-y-6">{rails.map((rail) => <section key={rail.clientId} className="min-w-0"><header className="mb-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-2"><span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: rail.cardColor }} /><ClientLogo name={rail.clientName} logoUrl={rail.logoUrl} className="h-6 w-6 text-[8px]" /><h3 className="truncate text-xs font-semibold text-white">{rail.clientName}</h3><ClientRunwayBadge clientId={rail.clientId} runway={clientRunway[rail.clientId]} /><span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-400">{rail.videoCount} videos</span>{rail.postingDays.length > 0 && <span className="hidden text-[9px] text-[#c8a34a] sm:inline">Publica {formatPostingDays(rail.postingDays)}</span>}</div><p className="text-[9px] text-slate-500">{rail.editorName ? <>Le tocan a <span className="font-medium text-slate-300">{rail.editorName}</span></> : 'Sin editor asignado'}</p></header><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rail.videos.map((video) => <RawVideoCard key={video.videoId} video={video} teamMembers={teamMembers} color={rail.cardColor} />)}</div></section>)}</div>
+      <div className="space-y-6">{rails.map((rail) => <section key={rail.clientId} className="min-w-0"><header className="mb-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-2"><span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: rail.cardColor }} /><ClientLogo name={rail.clientName} logoUrl={rail.logoUrl} className="h-6 w-6 text-[8px]" /><h3 className="truncate text-xs font-semibold text-white">{rail.clientName}</h3><ClientRunwayBadge clientId={rail.clientId} runway={clientRunway[rail.clientId]} /><span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-400">{rail.videoCount} videos</span>{rail.postingDays.length > 0 && <span className="hidden text-[9px] text-[#c8a34a] sm:inline">Publica {formatPostingDays(rail.postingDays)}</span>}</div><p className="text-[9px] text-slate-500">{rail.editorName ? <>Le tocan a <span className="font-medium text-slate-300">{rail.editorName}</span></> : 'Sin editor asignado'}</p></header><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rail.videos.map((video) => <RawVideoCard key={video.videoId} video={video} teamMembers={teamMembers} color={rail.cardColor} claim={claimOf(video.ideaId, video.editingClaim)} onClaim={(next) => setClaim(video.ideaId, next)} />)}</div></section>)}</div>
     </section>
   )
 }
@@ -162,7 +172,7 @@ function ClientRunwayBadge({ clientId, runway }: { clientId: string; runway?: Ru
   return <span data-testid={`client-runway-${clientId}`} title="Colchón de la etapa más débil contra la meta de 4 semanas" className={`rounded-md border px-1.5 py-0.5 text-[9px] font-semibold ${tone.className}`}>{tone.label}{weeks}</span>
 }
 
-function RawVideoCard({ video, teamMembers, color }: { video: BankVideoTile; teamMembers: TeamMember[]; color: string }) {
+function RawVideoCard({ video, teamMembers, color, claim, onClaim }: { video: BankVideoTile; teamMembers: TeamMember[]; color: string; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void }) {
   const canAssign = useHasPermission('planning.assign')
   const { toast } = useToast()
   const [assigned, setAssigned] = useState(video.editorId ?? '')
@@ -176,7 +186,7 @@ function RawVideoCard({ video, teamMembers, color }: { video: BankVideoTile; tea
   return (
     <article data-testid={`raw-video-${video.videoId}`} className="min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#12161a]">
       <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-black" style={{ boxShadow: `inset 0 2px 0 ${color}` }}><VideoCover videoId={video.videoId} title={video.title} /><span className="absolute right-1.5 top-1.5 rounded bg-black/75 px-1 py-0.5 text-[8px] font-semibold uppercase text-slate-200">{video.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>{video.durationSec != null && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1 py-0.5 text-[9px] tabular-nums text-white">{formatDuration(video.durationSec)}</span>}</div>
-      <div className="p-2.5"><h4 className="truncate text-[11px] font-semibold text-white" title={video.title}>{video.title}</h4><p className="mt-0.5 truncate text-[9px] text-slate-500">{video.recordedBy ? `Grabó ${video.recordedBy}` : 'Sin camarógrafo'}{video.uploadedAt ? ` · ${formatDateShortES(video.uploadedAt)}` : ''}</p><div className="mt-2 flex items-center gap-1.5"><VideoTileActions videoId={video.videoId} />{canAssign && video.productionTaskId ? <select aria-label={`Asignar ${video.title}`} value={assigned} disabled={pending} onChange={(event) => changeEditor(event.target.value)} className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-[9px] text-slate-300 outline-none focus:border-[#c8a34a]/60"><option value="">Sin editor</option>{teamMembers.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select> : <span className="min-w-0 flex-1 truncate text-[9px] text-slate-500">{video.editorName ?? 'Sin editor'}</span>}</div></div>
+      <div className="p-2.5"><h4 className="truncate text-[11px] font-semibold text-white" title={video.title}>{video.title}</h4><p className="mt-0.5 truncate text-[9px] text-slate-500">{video.recordedBy ? `Grabó ${video.recordedBy}` : 'Sin camarógrafo'}{video.uploadedAt ? ` · ${formatDateShortES(video.uploadedAt)}` : ''}</p><EditingClaimControls ideaId={video.ideaId} claim={claim} onOptimistic={onClaim} /><div className="mt-2 flex items-center gap-1.5"><VideoTileActions videoId={video.videoId} />{canAssign && video.productionTaskId ? <select aria-label={`Asignar ${video.title}`} value={assigned} disabled={pending} onChange={(event) => changeEditor(event.target.value)} className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-[9px] text-slate-300 outline-none focus:border-[#c8a34a]/60"><option value="">Sin editor</option>{teamMembers.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select> : <span className="min-w-0 flex-1 truncate text-[9px] text-slate-500">{video.editorName ?? 'Sin editor'}</span>}</div></div>
     </article>
   )
 }

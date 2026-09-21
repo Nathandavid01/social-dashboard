@@ -102,7 +102,7 @@ export async function getIdeacionPipeline(filter?: {
     }
     data = result.data ?? []
   }
-  return (data ?? []).map((row) => {
+  const ideas = (data ?? []).map((row) => {
     const r = row as unknown as ContentIdea & {
       recording_session?: { status?: string; location?: string | null; location_address?: string | null } | null
       videos?: ContentIdeaVideo[] | null
@@ -118,6 +118,21 @@ export async function getIdeacionPipeline(filter?: {
       recording_session: r.recording_session ?? null,
     } as IdeaWithPipeline
   })
+  return attachEditingClaimerNames(supabase, ideas)
+}
+
+async function attachEditingClaimerNames(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ideas: IdeaWithPipeline[],
+): Promise<IdeaWithPipeline[]> {
+  const ids = [...new Set(ideas.map((idea) => idea.editing_started_by).filter((id): id is string => Boolean(id)))]
+  if (ids.length === 0) return ideas
+  const { data } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', ids)
+  const byId = Object.fromEntries((data ?? []).map((profile) => [profile.id, profile]))
+  return ideas.map((idea) => ({
+    ...idea,
+    editingClaimer: idea.editing_started_by ? byId[idea.editing_started_by] ?? null : null,
+  }))
 }
 
 /**

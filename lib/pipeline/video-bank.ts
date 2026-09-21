@@ -1,4 +1,5 @@
 import type { ContentIdeaVideo, IdeaWithPipeline } from '@/lib/supabase/types'
+import { editingClaimFromFields, type EditingClaim } from '@/lib/pipeline/editing-claim'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { clientAssigneeId, isIdeaApproved } from './editor-video-bank'
 import { isClientBrollLibrary } from './banco-direct-upload'
@@ -35,6 +36,7 @@ export interface BankVideoTile {
   editorId: string | null
   editorName: string | null
   assignedVia: AssignedVia
+  editingClaim?: EditingClaim
 }
 
 export interface BankClientRail {
@@ -108,6 +110,7 @@ function toTile(
   rail: BankClientRail,
   editor: { id: string | null; name: string | null; via: AssignedVia },
   recorderNames: Record<string, string>,
+  editorNames: Record<string, string>,
 ): BankVideoTile {
   const thumbKeys = (video.thumb_keys ?? []).filter(Boolean)
   return {
@@ -126,6 +129,11 @@ function toTile(
     editorId: editor.id,
     editorName: editor.name,
     assignedVia: editor.via,
+    editingClaim: editingClaimFromFields(
+      idea.editing_started_by,
+      idea.editing_started_at,
+      idea.editingClaimer?.full_name ?? editorNames[idea.editing_started_by ?? ''] ?? null,
+    ),
   }
 }
 
@@ -170,10 +178,10 @@ export function buildVideoBank(ideas: IdeaWithPipeline[], options: VideoBankOpti
 
     rail.brolls ??= []
     for (const video of pendingRaw) {
-      rail.videos.push(toTile(video, idea, rail, editor, recorderNames))
+      rail.videos.push(toTile(video, idea, rail, editor, recorderNames, editorNames))
     }
     for (const video of broll) {
-      rail.brolls.push(toTile(video, idea, rail, editor, recorderNames))
+      rail.brolls.push(toTile(video, idea, rail, editor, recorderNames, editorNames))
     }
     rail.videoCount = rail.videos.length + rail.brolls.length
   }
