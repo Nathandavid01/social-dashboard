@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.101 — Publicado se confirma con Metricool</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --green:#6ee7b7; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"DejaVu Sans",Arial,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+    .cal { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .day { background:#0d0d0d; border:1px solid var(--border); border-radius:10px; min-height:120px; padding:8px; }
+    .day b { font-size:11px; color:var(--muted); }
+    .thumb { height:72px; border-radius:8px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); margin:8px 0 4px; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; }
+    .ag { color:#082f49; background:var(--sky); }
+    .pub { color:#052e1f; background:var(--green); }
+    .note { font-size:12px; color:var(--muted); margin:10px 0 0; line-height:1.4; }
+    .gold { color:var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · Publicado desde <span class="gold">Metricool</span></h1>
+    <p class="sub">Un video agendado no espera a que alguien marque «Ya se posteó» en Recibo. Si Metricool ya tiene PUBLISHED, el Panel lo pasa a <strong>Publicado</strong>. No se inventan posts.</p>
+
+    <div class="grid">
+      <section class="card">
+        <p class="label">Antes · Agendado</p>
+        <div class="cal">
+          <div class="day"><b>Lun 21</b></div>
+          <div class="day">
+            <b>Mié 23</b>
+            <div class="thumb">carátula</div>
+            <div>Reel Arecibo</div>
+            <span class="chip ag">Agendado</span>
+          </div>
+          <div class="day"><b>Vie 25</b></div>
+        </div>
+        <p class="note">Metricool todavía no confirma PUBLISHED. Sigue Agendado.</p>
+      </section>
+      <section class="card">
+        <p class="label">Después · Metricool PUBLISHED</p>
+        <div class="cal">
+          <div class="day"><b>Lun 21</b></div>
+          <div class="day">
+            <b>Mié 23</b>
+            <div class="thumb">carátula</div>
+            <div>Reel Arecibo</div>
+            <span class="chip pub">Publicado</span>
+          </div>
+          <div class="day"><b>Vie 25</b></div>
+        </div>
+        <p class="note">Al abrir el Panel se lee Metricool. Publicado queda solo, sin «Ya se posteó».</p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
