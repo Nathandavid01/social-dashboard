@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.93 — 2026-09-21
+
+**Login solo con correo: la sesión se queda hasta que la cierres.**
+- En `/login` ya no aparece **Continuar con Google** ni el divisor “o con tu correo”. Entras con correo y contraseña.
+- Se quitó el checkbox “Mantener sesión iniciada”. La sesión **siempre** se guarda en este dispositivo.
+- Texto: *Tu sesión se mantiene en este dispositivo hasta que cierres sesión.* Cerrar sesión del menú sigue funcionando.
+- Un marcador viejo ya no convierte las cookies en “solo esta pestaña” al refrescar el token.
+
+![Login correo y sesión persistente](/changelog/v5.93-login-email.png)
+
 ## v5.92 — 2026-09-21
 
 **Panel en el teléfono: toca video, toca el día y Agendar.**
