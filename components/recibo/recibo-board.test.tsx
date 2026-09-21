@@ -17,14 +17,19 @@ vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarIdeaAlCliente: () => <button type="button">Enviar al cliente</button>,
 }))
 
+import { rangoSemana } from '@/lib/entregas/dias'
 import { ReciboBoard } from './recibo-board'
+
+// Default filter is «Solo esta semana». A fixed Saturday (2026-09-19) falls
+// out of the Monday-start week on 2026-09-21 and CI hides the cards.
+const { desde: estaSemana } = rangoSemana()
 
 const editedIdea = {
   id: 'i1',
   client_id: 'c1',
   title: 'Reel playa',
   status: 'producida',
-  publish_date: '2026-09-19',
+  publish_date: estaSemana,
   manual_posted_status: null,
   staff_client_approval: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },
@@ -36,7 +41,7 @@ const editedIdea = {
       storage_provider: 'entregas-r2',
       status: 'uploaded',
       drive_file_id: 'key',
-      uploaded_at: '2026-09-19T10:00:00Z',
+      uploaded_at: `${estaSemana}T10:00:00Z`,
     } as any,
   ],
 } as any
