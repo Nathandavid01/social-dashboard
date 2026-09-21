@@ -21,14 +21,14 @@ import { rangoSemana } from '@/lib/entregas/dias'
 import { ReciboBoard } from './recibo-board'
 
 /** Recibo defaults to "Solo esta semana"; a hardcoded date drifts out of the week. */
-const now = new Date()
+const publishThisWeek = rangoSemana().desde
 
 const editedIdea = {
   id: 'i1',
   client_id: 'c1',
   title: 'Reel playa',
   status: 'producida',
-  publish_date: rangoSemana(now).desde,
+  publish_date: publishThisWeek,
   manual_posted_status: null,
   staff_client_approval: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },

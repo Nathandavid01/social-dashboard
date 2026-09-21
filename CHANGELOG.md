@@ -14,6 +14,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ![Agendar en el teléfono](/changelog/v5.12-mobile-agendar.png)
 
+## v5.9 — 2026-09-21
+
+**El merge no pasa si la versión y el CHANGELOG no coinciden.**
+- Si hay dos bloques `## vX.Y` iguales, el merge-gate falla.
+- `lib/version.ts` tiene que coincidir con la **última** entrada del CHANGELOG.
+- Documentado en las reglas de merge (`docs/MERGE_RULES.md`).
+
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**
