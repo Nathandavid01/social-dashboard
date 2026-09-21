@@ -5,6 +5,7 @@ const h = vi.hoisted(() => ({
   idea: {} as Record<string, unknown>,
   videos: [] as Record<string, unknown>[],
   writes: [] as Record<string, unknown>[],
+  reviewStatus: null as string | null,
   filters: [] as Array<[string, unknown]>,
   claimed: [{ id: 'idea' }] as Array<{ id: string }>,
   recordFail: false,
@@ -50,6 +51,12 @@ vi.mock('@/lib/supabase/server', () => ({
           h.writes.push(payload)
           return q
         },
+        maybeSingle: async () => ({
+          data: table === 'entregas_client_review_items'
+            ? (h.reviewStatus ? { status: h.reviewStatus } : null)
+            : table === 'content_ideas' ? h.idea : null,
+          error: null,
+        }),
         single: async () => ({
           data: table === 'content_ideas' ? h.idea : null,
           error: null,
@@ -80,6 +87,7 @@ beforeEach(() => {
   vi.setSystemTime(new Date('2026-09-20T14:00:00Z'))
   h.perm = 'posting.publish'
   h.writes = []
+  h.reviewStatus = null
   h.filters = []
   h.claimed = [{ id: 'idea' }]
   h.recordFail = false
@@ -130,12 +138,35 @@ describe('schedulePoolIdea', () => {
     expect(h.post).not.toHaveBeenCalled()
   })
 
-  it('no agenda un cliente humano de Entregas (no salta Revisión)', async () => {
+  it('no agenda un cliente humano de Entregas sin CTA a Listo (no salta Revisión)', async () => {
     ;(h.idea.client as { edit_mode: string }).edit_mode = 'human'
+    h.idea.staff_pool_ready = false
+    h.idea.approval_status = 'approved'
     expect(await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })).toMatchObject({
-      error: expect.stringMatching(/Recibo|pool|AI/i),
+      error: expect.stringMatching(/Listo|Recibo|pool|Revisión/i),
     })
     expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('humano Listo (CTA + Revisión) sí agenda en Metricool', async () => {
+    ;(h.idea.client as { edit_mode: string }).edit_mode = 'human'
+    h.idea.staff_pool_ready = true
+    h.idea.approval_status = 'approved'
+    h.idea.staff_client_approval = 'approved'
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })
+    expect(res).toMatchObject({ ok: true, state: 'agendado' })
+    expect(h.post).toHaveBeenCalled()
+  })
+
+  it('humano Listo por voto de Entregas (/aprobacion) también agenda', async () => {
+    ;(h.idea.client as { edit_mode: string }).edit_mode = 'human'
+    h.idea.staff_pool_ready = true
+    h.idea.approval_status = 'approved'
+    h.idea.staff_client_approval = null
+    h.reviewStatus = 'approved'
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })
+    expect(res).toMatchObject({ ok: true, state: 'agendado' })
+    expect(h.post).toHaveBeenCalled()
   })
 
   it('no agenda un video que sigue en recibo', async () => {

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.14 — Puente Recibo humano → pool Listo</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --amber:#fbbf24; --green:#6ee7b7; --rose:#fca5a5; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+    .phone { height:220px; border-radius:12px; background:#050505; display:flex; align-items:center; justify-center; color:var(--muted); font-size:12px; margin-bottom:10px; }
+    h3 { margin:0 0 8px; font-size:15px; }
+    .btn { display:block; width:100%; text-align:center; border-radius:10px; padding:11px 10px; font-weight:700; font-size:13px; border:1px solid #b45309; background:#78350f; color:#fde68a; }
+    .gate { border:1px solid #92400e; background:#451a03; color:#fde68a; border-radius:10px; padding:10px; font-size:12px; }
+    .ok { border:1px solid #047857; background:#064e3b; color:var(--green); border-radius:10px; padding:10px; font-size:12px; font-weight:700; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; background:#78350f; color:#fde68a; }
+    .muted { color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recibo · puente humano → pool</h1>
+    <p class="sub">Un corte humano aprobado en Recibo/Entregas <strong>no</strong> entra solo al pool. Si ya pasó <strong>Revisión</strong>, el staff pulsa <strong>Enviar al pool · Listo</strong>. Sin Revisión no se puede saltar.</p>
+
+    <div class="grid">
+      <div class="card">
+        <p class="label">Antes · falta Revisión</p>
+        <div class="phone">9:16 · corte humano</div>
+        <h3>Reel terraza</h3>
+        <p class="muted">Cliente humano · aprobado por el cliente</p>
+        <p class="gate">Falta Revisión — no se puede saltar al pool</p>
+      </div>
+      <div class="card">
+        <p class="label">Después · CTA explícito</p>
+        <div class="phone">9:16 · corte humano</div>
+        <h3>Reel terraza</h3>
+        <p class="muted">Cliente humano · Revisión hecha · <span class="chip">Humano</span></p>
+        <div class="btn">Enviar al pool · Listo</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <p class="label">Pool</p>
+      <p class="ok">Listo en el pool — ya se puede arrastrar al calendario</p>
+    </div>
+  </div>
+</body>
+</html>
