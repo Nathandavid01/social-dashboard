@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.8 — 2026-09-21
+
+**Panel en el teléfono: toca video, toca el día y Agendar.**
+- En `/pool` ya no hace falta arrastrar. Eliges un video **Listo**, tocas la fecha del calendario y el botón **Agendar**.
+- Se agenda en Metricool igual que en escritorio (queda **Agendado** / “agendado desde aquí”).
+- En pantalla grande el arrastrar al día sigue igual. Sin Agendar no se publica.
+- Owner y supervisor agendan; copy solo mira.
+
+![Agendar en el teléfono](/changelog/v5.8-mobile-agendar.png)
+
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**

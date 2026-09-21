@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.8 — Panel móvil: toca fecha + Agendar</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --amber:#fbbf24; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 24px 16px 48px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0 0 22px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 22px; }
+    @media (min-width: 800px) { .grid { grid-template-columns: 360px 1fr; align-items: start; } }
+    .phone { width: 100%; max-width: 360px; margin: 0 auto; border: 1px solid var(--border); border-radius: 28px; background: #0d0d0d; padding: 16px 14px 14px; }
+    .label { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .cal { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 14px; }
+    .day { background: var(--card); border: 1px solid var(--border); border-radius: 10px; min-height: 72px; padding: 8px; font-size: 12px; }
+    .day b { font-size: 11px; color: var(--muted); }
+    .day.pick { border-color: var(--gold); background: #d4af3714; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--gold); color: #111; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+    .pool { display: flex; gap: 10px; margin-top: 10px; }
+    .tile { width: 110px; border: 1px solid var(--gold); background: #d4af3714; border-radius: 10px; padding: 6px; }
+    .thumb { height: 88px; border-radius: 8px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .chip { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 2px 8px; color: #422006; background: var(--amber); }
+    .hint { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .bar { margin-top: 12px; border: 1px solid var(--border); background: #161616; border-radius: 12px; padding: 10px; }
+    .bar p { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+    .btn { width: 100%; min-height: 44px; border: 0; border-radius: 10px; background: var(--gold); color: #111; font-weight: 700; }
+    .desk { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .desk .cal7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+    .desk .day { min-height: 88px; }
+    .muted { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · en el teléfono: toca y Agendar</h1>
+    <p class="sub">v5.8 — En pantallas chicas no hace falta arrastrar. Eliges el video <strong>Listo</strong>, tocas el día y <strong>Agendar</strong>. Se publica en Metricool igual que en escritorio. Arrastrar al calendario sigue en la computadora.</p>
+
+    <div class="grid">
+      <section>
+        <p class="label">Teléfono</p>
+        <div class="phone">
+          <p class="label">Calendario · agendado y publicado</p>
+          <div class="cal">
+            <div class="day"><b>Lun 21</b></div>
+            <div class="day"><b>Mar 22</b></div>
+            <div class="day"><b>Mié 23</b></div>
+            <div class="day"><b>Jue 24</b></div>
+            <div class="day pick"><b>Vie 25</b><div class="muted" style="margin-top:8px">Elegido</div></div>
+            <div class="day"><b>Sáb 26</b></div>
+          </div>
+          <div class="card">
+            <div class="row">
+              <div class="logo">AL</div>
+              <div>
+                <strong>Arecibo Lab</strong>
+                <div class="muted">Cadencia: Mié, Vie</div>
+              </div>
+            </div>
+            <p class="label" style="margin-top:12px">Pool · Listo</p>
+            <div class="pool">
+              <div class="tile">
+                <div class="hint">Elegido</div>
+                <div class="thumb">carátula</div>
+                <div>Video listo</div>
+                <span class="chip">Listo</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar">
+            <p>Video listo · Vie 25</p>
+            <button class="btn" type="button">Agendar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="desk">
+        <p class="label">Escritorio (sin cambios)</p>
+        <p class="muted">Arrastra un Listo al día. El botón Agendar no aparece aquí.</p>
+        <div class="cal7">
+          <div class="day"><b>Lun</b></div>
+          <div class="day"><b>Mar</b></div>
+          <div class="day"><b>Mié</b></div>
+          <div class="day"><b>Jue</b></div>
+          <div class="day"><b>Vie</b></div>
+          <div class="day"><b>Sáb</b></div>
+          <div class="day"><b>Dom</b></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

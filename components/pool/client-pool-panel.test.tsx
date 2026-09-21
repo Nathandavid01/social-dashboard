@@ -124,4 +124,33 @@ describe('ClientPoolPanelView', () => {
       expect(schedulePoolIdea).toHaveBeenCalledWith({ ideaId: 'l1', date: '2026-09-25' })
     })
   })
+
+  it('en móvil: toca video, toca fecha y Agendar llama a schedulePoolIdea', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    const user = userEvent.setup()
+    render(<ClientPoolPanelView data={panel()} canSchedule />)
+
+    const agendar = screen.getByRole('button', { name: 'Agendar' })
+    expect(agendar).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /Video listo/i }))
+    expect(agendar).toBeDisabled()
+    expect(schedulePoolIdea).not.toHaveBeenCalled()
+
+    await user.click(screen.getByTestId('pool-day-2026-09-25'))
+    expect(agendar).toBeEnabled()
+    expect(schedulePoolIdea).not.toHaveBeenCalled()
+
+    await user.click(agendar)
+    await waitFor(() => {
+      expect(schedulePoolIdea).toHaveBeenCalledWith({ ideaId: 'l1', date: '2026-09-25' })
+    })
+  })
+
+  it('Agendar no aparece si no puede agendar', () => {
+    render(<ClientPoolPanelView data={panel()} canSchedule={false} />)
+    expect(screen.queryByRole('button', { name: 'Agendar' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('pool-day-2026-09-25'))
+    expect(schedulePoolIdea).not.toHaveBeenCalled()
+  })
 })

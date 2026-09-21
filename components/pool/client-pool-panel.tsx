@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { CalendarDays, GripVertical, Layers } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { VideoCover } from '@/components/recording/video-cover'
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/lib/hooks/use-toast'
 import { schedulePoolIdea } from '@/lib/actions/client-pool'
 import { DIAS, diaDeFecha } from '@/lib/entregas/dias'
@@ -79,13 +80,22 @@ export function ClientPoolPanelView({
   const { toast } = useToast()
   const [panel, setPanel] = useState(data)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [, start] = useTransition()
   const days = useMemo(() => weekDays(panel.week), [panel.week])
+  const selectedVideo = useMemo(
+    () => panel.clients.flatMap((c) => c.pool).find((v) => v.id === selectedIdeaId) ?? null,
+    [panel.clients, selectedIdeaId],
+  )
+  const canTapSchedule = Boolean(canSchedule && selectedIdeaId && selectedDate && !pendingId)
 
   function onDropDate(date: string, ideaId: string) {
     if (!canSchedule || !ideaId) return
     const prev = panel
     setPendingId(ideaId)
+    setSelectedIdeaId(null)
+    setSelectedDate(null)
     setPanel((cur) => optimisticSchedule(cur, ideaId, date))
     start(async () => {
       const res = await schedulePoolIdea({ ideaId, date })
@@ -109,8 +119,13 @@ export function ClientPoolPanelView({
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Qué publicar esta semana, con carátula. El pool Listo sale de Recibo
-            cuando el cliente aprueba. Arrastra un video al calendario para
-            agendarlo en Metricool.
+            cuando el cliente aprueba.{' '}
+            <span className="md:hidden">
+              Toca un video Listo, un día y Agendar para publicarlo en Metricool.
+            </span>
+            <span className="hidden md:inline">
+              Arrastra un video al calendario para agendarlo en Metricool.
+            </span>
           </p>
         </div>
         <p className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
@@ -132,6 +147,10 @@ export function ClientPoolPanelView({
                 date={date}
                 items={items}
                 canSchedule={canSchedule}
+                selected={selectedDate === date}
+                onSelectDate={(next) =>
+                  setSelectedDate((cur) => (cur === next ? null : next))
+                }
                 onDrop={onDropDate}
               />
             )
@@ -183,6 +202,10 @@ export function ClientPoolPanelView({
                         video={v}
                         disabled={!canSchedule || pendingId === v.id}
                         canDrag={canSchedule}
+                        selected={selectedIdeaId === v.id}
+                        onSelect={() =>
+                          setSelectedIdeaId((cur) => (cur === v.id ? null : v.id))
+                        }
                       />
                     </li>
                   ))}
@@ -195,6 +218,30 @@ export function ClientPoolPanelView({
           <p className="text-sm text-muted-foreground">Nada que publicar esta semana y ningún pool Listo.</p>
         )}
       </section>
+
+      {canSchedule && (
+        <div
+          className="md:hidden sticky bottom-0 z-10 -mx-1 rounded-xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur"
+          data-testid="pool-mobile-schedule"
+        >
+          <p className="text-xs text-muted-foreground">
+            {selectedVideo && selectedDate
+              ? `${selectedVideo.title} · ${diaShort(selectedDate)} ${selectedDate.slice(8)}`
+              : 'Toca un video Listo y un día'}
+          </p>
+          <Button
+            type="button"
+            className="mt-2 min-h-11 w-full touch-manipulation"
+            disabled={!canTapSchedule}
+            onClick={() => {
+              if (!selectedIdeaId || !selectedDate) return
+              onDropDate(selectedDate, selectedIdeaId)
+            }}
+          >
+            Agendar
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -216,10 +263,14 @@ function PoolCard({
   video,
   disabled,
   canDrag,
+  selected,
+  onSelect,
 }: {
   video: PoolVideo
   disabled: boolean
   canDrag: boolean
+  selected: boolean
+  onSelect: () => void
 }) {
   return (
     <button
@@ -229,17 +280,24 @@ function PoolCard({
         e.dataTransfer.setData('text/plain', video.id)
         e.dataTransfer.effectAllowed = 'move'
       }}
+      onClick={() => {
+        if (!canDrag || disabled) return
+        onSelect()
+      }}
+      aria-pressed={selected}
       disabled={disabled}
       className={cn(
         'flex w-36 flex-col gap-1 rounded-lg border border-border bg-background p-2 text-left touch-manipulation',
         canDrag && 'cursor-grab active:cursor-grabbing',
+        selected && 'border-primary bg-primary/5 ring-1 ring-primary',
         disabled && 'opacity-60',
       )}
     >
       {canDrag && (
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
           <GripVertical className="h-3 w-3" aria-hidden="true" />
-          Arrastra al día
+          <span className="hidden md:inline">Arrastra al día</span>
+          <span className="md:hidden">{selected ? 'Elegido' : 'Toca para elegir'}</span>
         </div>
       )}
       <Caratula video={video} className="aspect-[9/16] w-full" />
@@ -253,17 +311,26 @@ function DayCell({
   date,
   items,
   canSchedule,
+  selected,
+  onSelectDate,
   onDrop,
 }: {
   date: string
   items: PoolVideo[]
   canSchedule: boolean
+  selected: boolean
+  onSelectDate: (date: string) => void
   onDrop: (date: string, ideaId: string) => void
 }) {
   const [over, setOver] = useState(false)
   return (
     <div
       data-testid={`pool-day-${date}`}
+      aria-pressed={canSchedule ? selected : undefined}
+      onClick={() => {
+        if (!canSchedule) return
+        onSelectDate(date)
+      }}
       onDragOver={(e) => {
         if (!canSchedule) return
         e.preventDefault()
@@ -278,7 +345,8 @@ function DayCell({
       }}
       className={cn(
         'min-h-32 rounded-lg border border-border bg-card p-2',
-        over && 'border-primary bg-primary/5',
+        canSchedule && 'cursor-pointer touch-manipulation',
+        (over || selected) && 'border-primary bg-primary/5',
       )}
     >
       <p className="text-[11px] font-semibold text-muted-foreground">
