@@ -131,8 +131,8 @@ export function ClientPoolPanelView({
             <span className="hidden md:inline">
               Arrastra un Listo: se crea un <strong>borrador</strong> en Metricool.
               Un Agendado a otro día cambia la fecha del post ya existente.
-            </span>
-          </p>
+            </span>{' '}
+            Publicado se confirma con Metricool; no hace falta marcar Ya se posteó.          </p>
         </div>
         <p className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
           {panel.week.desde} → {panel.week.hasta}
@@ -144,6 +144,9 @@ export function ClientPoolPanelView({
           <CalendarDays className="h-4 w-4" aria-hidden="true" />
           Calendario · agendado y publicado
         </h2>
+        <p className="text-xs text-muted-foreground">
+          Si Metricool ya tiene PUBLISHED, el video pasa a Publicado solo.
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-7">
           {days.map((date) => {
             const items = panel.calendar.filter((v) => v.publishDate === date)

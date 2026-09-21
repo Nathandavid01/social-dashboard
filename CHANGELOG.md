@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.101 — 2026-09-21
+
+**Publicado se confirma con Metricool, no solo con «Ya se posteó».**
+- En el **Panel** (`/pool`), al abrir la página se lee el estado real en **Metricool**.
+- Si un video **Agendado** ya salió (PUBLISHED en todas las redes), pasa solo a **Publicado**.
+- No crea posts nuevos. Si Metricool aún está pendiente o falló, se queda Agendado.
+- Recibo «Ya se posteó» sigue sirviendo para envíos sin Metricool.
+
+![Publicado desde Metricool](/changelog/v5.101-sync-publicado.png)
+
 ## v5.100 — 2026-09-21
 
 **Arrastra un Agendado a otro día: también cambia en Metricool.**
@@ -88,7 +98,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Un marcador viejo ya no convierte las cookies en “solo esta pestaña” al refrescar el token.
 
 ![Login correo y sesión persistente](/changelog/v5.93-login-email.png)
-
 ## v5.92 — 2026-09-21
 
 **Panel en el teléfono: toca video, toca el día y Agendar.**

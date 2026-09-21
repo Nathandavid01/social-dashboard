@@ -1,6 +1,7 @@
 import { requirePermission } from '@/lib/auth/server'
 import { canScheduleFromPool, getClientPoolPanel } from '@/lib/actions/client-pool'
 import { ClientPoolPanelView } from '@/components/pool/client-pool-panel'
+import { PoolPublicadoAutoSync } from '@/components/pool/pool-publicado-auto-sync'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -22,5 +23,10 @@ export default async function PoolPage() {
       </p>
     )
   }
-  return <ClientPoolPanelView data={panel.data} canSchedule={canSchedule} />
+  return (
+    <>
+      <PoolPublicadoAutoSync />
+      <ClientPoolPanelView data={panel.data} canSchedule={canSchedule} />
+    </>
+  )
 }

@@ -113,6 +113,12 @@ describe('ClientPoolPanelView', () => {
     expect(screen.getAllByTestId('caratula').length).toBeGreaterThan(0)
   })
 
+  it('explica que Publicado lo confirma Metricool, no solo Ya se posteó', () => {
+    render(<ClientPoolPanelView data={panel()} canSchedule />)
+    expect(screen.getByText(/Publicado se confirma con Metricool/i)).toBeInTheDocument()
+    expect(screen.getByText(/no hace falta marcar Ya se posteó/i)).toBeInTheDocument()
+  })
+
   it('esconde el pool vacío y no pinta Listo sin fecha en el calendario', () => {
     render(<ClientPoolPanelView data={panel()} canSchedule />)
     expect(screen.queryByText('Pool de Cliente hueco')).not.toBeInTheDocument()
