@@ -7,6 +7,7 @@
     "dev:local": "npm run check:local-env && next dev --port 3020",
     "dev:staging": "node scripts/dev-staging.mjs",
     "test:staging": "tsx scripts/test-staging.mjs",
+    "smoke:pool": "tsx scripts/smoke-pool.mjs",
     "predev": "node scripts/check-local-env.mjs",
     "prebuild": "npm run check:db-relationships",
     "build": "next build",

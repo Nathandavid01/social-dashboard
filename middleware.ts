@@ -4,8 +4,15 @@ import { areaForPath, canAccessPath } from '@/lib/auth/areas'
 import { SESSION_ONLY_COOKIE, applyCookiePersistence } from '@/lib/supabase/cookie-persistence'
 import { VIEW_AS_COOKIE, resolveEffectiveRole, canStartViewAs, isViewAsEditorId, viewAsTargetOk } from '@/lib/auth/view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
+import { isPublicHealthPath } from '@/lib/utils/pool-smoke'
 
 export async function middleware(request: NextRequest) {
+  // Public health must not create a Supabase client — missing env would 500.
+  if (isPublicHealthPath(request.nextUrl.pathname)) {
+    const response = NextResponse.next({ request })
+    response.headers.set('Cache-Control', 'no-store')
+    return response
+  }
   // Public client proposals use a capability validated in the server route.
   if (request.nextUrl.pathname.startsWith('/aprobar-ideas/')) {
     const response = NextResponse.next({ request })
@@ -81,6 +88,6 @@ export const config = {
     // middleware lo tocara, cada evento pasaría por getUser() y, sin sesión,
     // acabaría redirigido — los errores de la pantalla de login, que son
     // justo los que hay que ver, no llegarían nunca.
-    '/((?!_next/static|_next/image|favicon.ico|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|monitoring|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

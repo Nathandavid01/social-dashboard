@@ -21,3 +21,7 @@ jobs:
         run: npm test -- --exclude '**/.claude/**' --exclude '**/*.live.test.ts'
       - name: Typecheck
         run: npx tsc --noEmit
+      - name: Smoke /pool
+        env:
+          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}
+        run: npm run smoke:pool
