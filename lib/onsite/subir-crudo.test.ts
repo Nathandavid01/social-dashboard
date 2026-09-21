@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   canResolveSessionTarget,
   pickTodaySession,
+  pipelineDeepLink,
   todaySessionCreateValues,
   todaySessionsForClient,
 } from './subir-crudo'
@@ -73,5 +74,24 @@ describe('canResolveSessionTarget', () => {
 
   it('con varias de hoy y ninguna elegida, no crea otra', () => {
     expect(canResolveSessionTarget({ todaySessionCount: 2, sessionId: '', canCreateSession: true })).toBe(false)
+  })
+})
+
+describe('pipelineDeepLink', () => {
+  it('abre la idea y la sesión en Pipeline, no el tablero genérico', () => {
+    expect(pipelineDeepLink({
+      clientId: 'c1',
+      ideaId: 'idea-new',
+      sessionId: 's-new',
+    })).toBe('/pipeline?lote=c1&idea=idea-new&sesion=s-new')
+  })
+
+  it('con solo la idea, igual apunta a esa toma', () => {
+    expect(pipelineDeepLink({ ideaId: 'i1' })).toBe('/pipeline?idea=i1')
+  })
+
+  it('sin ids, cae al Pipeline genérico', () => {
+    expect(pipelineDeepLink({})).toBe('/pipeline')
+    expect(pipelineDeepLink({ clientId: '', ideaId: null, sessionId: '  ' })).toBe('/pipeline')
   })
 })

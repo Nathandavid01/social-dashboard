@@ -161,7 +161,24 @@ function ContentPipelineBoardInner({
   // reopens the same client at the same spot (deep link).
   const { searchParams, open: pushOverlay, close: closeOverlayRoute, markClosed } = useOverlayRoute()
   // Editors cannot reopen the admin-only Lotes overlay via a crafted query.
-  const openClientId = canSeeAll ? searchParams.get('lote') : null
+  // Subir crudo deep-links with ?idea=&sesion= (and usually ?lote=) so the
+  // videógrafo lands on that toma, not the generic board.
+  const ideaParam = searchParams.get('idea')
+  const sessionParam = searchParams.get('sesion')
+  const loteParam = searchParams.get('lote')
+  const ideaFromUrl = ideaParam ? ideas.find((i) => i.id === ideaParam) : undefined
+  const ideaFromSession = !ideaFromUrl && sessionParam
+    ? ideas.find((i) => i.recording_session_id === sessionParam)
+    : undefined
+  const resolvedClientId =
+    loteParam
+    || ideaFromUrl?.client_id
+    || ideaFromUrl?.client?.id
+    || ideaFromSession?.client_id
+    || ideaFromSession?.client?.id
+    || null
+  const openClientId = canSeeAll ? resolvedClientId : null
+  const focusIdeaId = ideaParam || ideaFromSession?.id || null
   const fromPlanned = searchParams.get('planificado') === '1'
   const publishDateParam = searchParams.get('fecha')
   const publishLabelParam = searchParams.get('etiqueta')
@@ -178,10 +195,12 @@ function ContentPipelineBoardInner({
       planificado: opts?.fromPlanned ? '1' : null,
       fecha: opts?.fromPlanned ? (opts.publishDate ?? null) : null,
       etiqueta: opts?.fromPlanned ? (opts.publishLabel ?? null) : null,
+      idea: null,
+      sesion: null,
     })
   }, [pushOverlay])
   const closeBatch = useCallback(() => {
-    closeOverlayRoute(['lote', 'planificado', 'fecha', 'etiqueta'])
+    closeOverlayRoute(['lote', 'planificado', 'fecha', 'etiqueta', 'idea', 'sesion'])
   }, [closeOverlayRoute])
 
   // The URL is the source of truth for "which client is open" — fetch
@@ -521,6 +540,7 @@ function ContentPipelineBoardInner({
           clientRunway={clientRunway}
           globalBroll={globalBroll}
           clientBank={clientBank}
+          focusIdeaId={focusIdeaId}
         />
       ) : (
       <div
@@ -573,6 +593,7 @@ function ContentPipelineBoardInner({
               members={batchData.members}
               singleVideoMode={openOptions?.fromPlanned}
               plannedPublishLabel={openOptions?.publishLabel ?? undefined}
+              focusIdeaId={focusIdeaId}
               onClose={closeBatch}
               onChanged={refetchBatch}
             />

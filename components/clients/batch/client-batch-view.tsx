@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, ChevronLeft, ChevronRight, LayoutGrid, MessageSquare, Plus, Users, X, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -50,6 +50,7 @@ export function ClientBatchView({
   members = [],
   singleVideoMode = false,
   plannedPublishLabel,
+  focusIdeaId = null,
   onClose,
   onChanged,
 }: {
@@ -60,6 +61,8 @@ export function ClientBatchView({
   /** Focus on one video's idea → caption → recording flow (from a planned card). */
   singleVideoMode?: boolean
   plannedPublishLabel?: string
+  /** Deep-link: open this idea instead of the first card in the lote. */
+  focusIdeaId?: string | null
   /** When set, the view is an in-place overlay — shows a close button. */
   onClose?: () => void
   /** Called after a create/upload so an overlay can refetch its data. */
@@ -95,7 +98,17 @@ export function ClientBatchView({
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'por_grabar' | 'grabado'>('all')
   // Single-video focus: work one video at a time, navigate between them.
-  const [sel, setSel] = useState(0)
+  const [sel, setSel] = useState(() => {
+    if (!focusIdeaId) return 0
+    const idx = videos.findIndex((v) => v.id === focusIdeaId)
+    return idx >= 0 ? idx : 0
+  })
+
+  useEffect(() => {
+    if (!focusIdeaId) return
+    const idx = videos.findIndex((v) => v.id === focusIdeaId)
+    if (idx >= 0) setSel(idx)
+  }, [focusIdeaId, videos])
   const shownVideos = useMemo(
     () => (statusFilter === 'all' ? videos : videos.filter((v) => cardStatus(v).key === statusFilter)),
     [videos, statusFilter],

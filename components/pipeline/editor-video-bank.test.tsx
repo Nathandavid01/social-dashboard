@@ -448,4 +448,27 @@ describe('EditorVideoBank', () => {
     await waitFor(() => expect(actionMocks.claimPipelineEdit).toHaveBeenCalledWith('i-free'))
     expect(screen.getByTestId('editing-claim-i-free')).toHaveTextContent(/en edición — tú/i)
   })
+
+  it('marca la idea del deep-link para que el crudo recién subido no se pierda en el banco', () => {
+    render(
+      <EditorVideoBank
+        focusIdeaId="i1"
+        rows={[row({
+          nowCount: 1,
+          clients: [{
+            clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
+            approvedCount: 0, remainingInBank: 0, inRevision: 0, postingDays: [],
+            clips: [
+              clip({ ideaId: 'i1', title: 'Crudo de hoy', yours: true, queue: 'active' }),
+              clip({ ideaId: 'i2', title: 'Otra toma', yours: true, queue: 'active' }),
+            ],
+          }],
+        })]}
+      />,
+    )
+    const focused = document.getElementById('pipeline-idea-i1')
+    expect(focused).toBeTruthy()
+    expect(focused).toHaveAttribute('data-pipeline-focus', 'true')
+    expect(document.getElementById('pipeline-idea-i2')).not.toHaveAttribute('data-pipeline-focus')
+  })
 })

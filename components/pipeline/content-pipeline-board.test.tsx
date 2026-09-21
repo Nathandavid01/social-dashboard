@@ -46,9 +46,10 @@ vi.mock('@/components/recording/video-cover', () => ({
   ),
 }))
 vi.mock('@/components/clients/batch/client-batch-view', () => ({
-  ClientBatchView: ({ onClose }: { onClose?: () => void }) => (
+  ClientBatchView: ({ onClose, focusIdeaId }: { onClose?: () => void; focusIdeaId?: string | null }) => (
     <div data-testid="batch-overlay">
       overlay
+      {focusIdeaId ? <span data-testid="focus-idea">{focusIdeaId}</span> : null}
       {onClose && <button onClick={onClose}>Cerrar</button>}
     </div>
   ),
@@ -115,6 +116,26 @@ describe('ContentPipelineBoard — editor bank (paso 2)', () => {
     render(<ContentPipelineBoard ideas={[]} canSeeAll={false} />)
     expect(screen.queryByRole('button', { name: /lotes/i })).not.toBeInTheDocument()
     expect(screen.queryByText('Asignado a')).not.toBeInTheDocument()
+  })
+
+  it('un editor con ?idea= ve esa toma marcada en el banco, sin abrir Lotes', async () => {
+    resetNav('idea=1')
+    render(
+      <ContentPipelineBoard
+        canSeeAll={false}
+        ideas={[
+          idea({
+            id: '1',
+            status: 'grabada',
+            title: 'Intro clínica',
+            assignee: { id: 'u1', full_name: 'María R.' },
+            videos: [{ ...editedVideo('raw-1'), kind: 'raw', storage_provider: 'r2', drive_file_id: 'ideas/i/raw/x' }],
+          }),
+        ]}
+      />,
+    )
+    expect(screen.queryByTestId('batch-overlay')).not.toBeInTheDocument()
+    expect(document.getElementById('pipeline-idea-1')).toHaveAttribute('data-pipeline-focus', 'true')
   })
 
   it('abre en el banco y agrupa por editor', () => {
@@ -376,6 +397,33 @@ describe('ContentPipelineBoard — flujo natural: el overlay vive en la URL', ()
     resetNav('lote=c9')
     renderLotes(<ContentPipelineBoard ideas={[idea({ client_id: 'c9', client: { id: 'c9', name: 'Acme', industry: null } })]} />)
     expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+    expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
+  })
+
+  it('?idea= y ?sesion= abren esa toma del lote, no el tablero genérico', async () => {
+    getClientBatchData.mockClear()
+    resetNav('lote=c9&idea=shot-1&sesion=s-hoy')
+    renderLotes(<ContentPipelineBoard ideas={[idea({
+      id: 'shot-1',
+      client_id: 'c9',
+      recording_session_id: 's-hoy',
+      client: { id: 'c9', name: 'Acme', industry: null },
+    })]} />)
+    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+    expect(screen.getByTestId('focus-idea')).toHaveTextContent('shot-1')
+    expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
+  })
+
+  it('solo ?idea= resuelve el cliente del lote', async () => {
+    getClientBatchData.mockClear()
+    resetNav('idea=shot-1')
+    renderLotes(<ContentPipelineBoard ideas={[idea({
+      id: 'shot-1',
+      client_id: 'c9',
+      client: { id: 'c9', name: 'Acme', industry: null },
+    })]} />)
+    expect(await screen.findByTestId('batch-overlay')).toBeInTheDocument()
+    expect(screen.getByTestId('focus-idea')).toHaveTextContent('shot-1')
     expect(getClientBatchData).toHaveBeenCalledWith('c9', undefined)
   })
 
