@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>v5.103 — Historial de grabación</title>
+<style>
+  :root { --gold-1: #FCE9A6; --gold-2: #E3B22B; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh; background: #0a0a0b; color: #fafafa; padding: 32px 16px;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 700; }
+  h1 span {
+    background: linear-gradient(90deg, var(--gold-1), var(--gold-2));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .lead { margin: 6px 0 16px; color: #a1a1aa; font-size: 13px; line-height: 1.45; }
+  .meta { font-size: 12px; color: #a1a1aa; margin-bottom: 12px; }
+  article { border: 1px solid #2a2a2e; background: #141416; border-radius: 12px; overflow: hidden; }
+  header { padding: 10px 12px; border-bottom: 1px solid #2a2a2e; }
+  header strong { display: block; font-size: 14px; }
+  header span { font-size: 11px; color: #a1a1aa; }
+  li { list-style: none; padding: 10px 12px; border-top: 1px solid #2a2a2e; }
+  li:first-child { border-top: 0; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  a { color: inherit; font-size: 14px; font-weight: 600; text-decoration: none; }
+  .badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: #1a1404; background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
+    border-radius: 999px; padding: 2px 8px;
+  }
+  .file { margin-top: 6px; font-size: 12px; color: #a1a1aa; display: flex; gap: 8px; }
+  .file b { color: #fafafa; font-weight: 600; }
+  .empty { margin-top: 6px; font-size: 11px; color: #a1a1aa; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v5.103 · <span>Historial de grabación</span></h1>
+    <p class="lead">Los videos que subió Carlos, agrupados por idea. Las ideas que creó en la grabación salen como adicionales.</p>
+    <p class="meta">2 videos · 1 adicional</p>
+    <article>
+      <header>
+        <strong>Nana's Playhouse</strong>
+        <span>12 sept 2026 · Mañana en el parque</span>
+      </header>
+      <ul>
+        <li>
+          <div class="row"><a>Hook del mes</a></div>
+          <p class="file"><b>Crudo</b> <span>primera.mp4</span></p>
+          <p class="file"><b>Crudo</b> <span>segunda.mp4</span></p>
+        </li>
+        <li>
+          <div class="row"><a>DJI_0991</a> <span class="badge">Adicional</span></div>
+          <p class="empty">Sin video todavía</p>
+        </li>
+      </ul>
+    </article>
+  </div>
+</body>
+</html>

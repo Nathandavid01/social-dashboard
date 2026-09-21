@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>v5.103 — Asignar contraseña</title>
+<style>
+  :root { --gold-1: #FCE9A6; --gold-2: #E3B22B; --gold-3: #D4A017; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh; background: #0a0a0b; color: #fafafa; padding: 40px 20px;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  h1 .gold {
+    background: linear-gradient(90deg, var(--gold-1), var(--gold-2), var(--gold-3));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .lead { margin: 8px 0 28px; color: #a1a1aa; font-size: 14px; max-width: 640px; }
+  .board { display: grid; gap: 20px; grid-template-columns: 1fr; max-width: 920px; }
+  @media (min-width: 800px) { .board { grid-template-columns: 1fr 1fr; } }
+  .card {
+    background: #141416; border: 1px solid #2a2a2e; border-radius: 16px; padding: 20px;
+  }
+  .eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #a1a1aa; margin-bottom: 10px; }
+  h2 { font-size: 18px; font-weight: 700; }
+  p.desc { margin: 6px 0 16px; font-size: 13px; color: #a1a1aa; line-height: 1.45; }
+  label { display: block; font-size: 12px; color: #a1a1aa; margin-bottom: 6px; }
+  .row { display: flex; gap: 6px; }
+  input {
+    flex: 1; height: 36px; border-radius: 8px; border: 1px solid #2a2a2e; background: #0e0e10;
+    color: #fafafa; padding: 0 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+  }
+  .icon {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid #2a2a2e; background: transparent;
+    color: #fafafa; display: grid; place-items: center; font-size: 14px;
+  }
+  .hint { margin-top: 10px; font-size: 12px; color: #a1a1aa; line-height: 1.4; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  button.ghost, button.gold {
+    height: 32px; border-radius: 8px; padding: 0 12px; font-size: 13px; font-weight: 600; cursor: default;
+  }
+  button.ghost { background: transparent; color: #fafafa; border: 1px solid #2a2a2e; }
+  button.gold { background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); color: #1a1404; border: 0; }
+  .ok {
+    margin-top: 12px; border: 1px solid rgba(16,185,129,.35); background: rgba(16,185,129,.12);
+    color: #6ee7b7; border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.4;
+  }
+  .person {
+    display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #2a2a2e;
+    border-radius: 12px; margin-bottom: 8px; background: #101012;
+  }
+  .av {
+    width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; border: 1px solid rgba(59,130,246,.4); color: #60a5fa; background: rgba(59,130,246,.1);
+  }
+  .who { min-width: 0; flex: 1; }
+  .who strong { display: block; font-size: 13px; }
+  .who span { display: block; font-size: 12px; color: #a1a1aa; overflow: hidden; text-overflow: ellipsis; }
+  .chip {
+    font-size: 12px; color: #a1a1aa; border: 1px solid #2a2a2e; border-radius: 8px; padding: 6px 8px; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <h1>v5.103 · <span class="gold">Asignar contraseña</span></h1>
+  <p class="lead">En Usuarios y permisos, un administrador pone la clave nueva sin salir del dashboard. Se copia antes de cerrar. La anterior deja de servir para entrar.</p>
+
+  <div class="board">
+    <section class="card">
+      <p class="eyebrow">Antes de guardar</p>
+      <div class="person">
+        <div class="av">AL</div>
+        <div class="who"><strong>Ana López</strong><span>ana@natemedia.com · Editora</span></div>
+        <span class="chip">Nueva contraseña</span>
+      </div>
+      <h2>Asignar contraseña</h2>
+      <p class="desc">Contraseña nueva para <strong>Ana López</strong> (ana@natemedia.com). Compártela por un canal privado. Al cerrar esta ventana no se vuelve a mostrar.</p>
+      <label for="pw">Nueva contraseña</label>
+      <div class="row">
+        <input id="pw" value="NmK7pQ2wX9!" readonly />
+        <span class="icon" aria-hidden="true">◉</span>
+        <span class="icon" aria-hidden="true">↻</span>
+        <span class="icon" aria-hidden="true">⧉</span>
+      </div>
+      <p class="hint">Mínimo 8 caracteres. La persona entra con esta contraseña y puede cambiarla en Cuenta → Seguridad.</p>
+      <div class="actions">
+        <button class="ghost">Cancelar</button>
+        <button class="gold">Asignar contraseña</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Después de guardar</p>
+      <h2>Asignar contraseña</h2>
+      <p class="desc">La clave sigue visible para copiarla. No se vuelve a mostrar al cerrar.</p>
+      <label for="pw2">Nueva contraseña</label>
+      <div class="row">
+        <input id="pw2" value="NmK7pQ2wX9!" readonly />
+        <span class="icon" aria-hidden="true">⧉</span>
+      </div>
+      <p class="ok">Contraseña asignada. La anterior ya no sirve para entrar. Si tiene el dashboard abierto, que cierre sesión desde el menú.</p>
+      <div class="actions">
+        <button class="gold">Listo</button>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

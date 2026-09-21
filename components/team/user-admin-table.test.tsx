@@ -56,4 +56,19 @@ describe('UserAdminTable', () => {
     fireEvent.change(screen.getByPlaceholderText(/buscar/i), { target: { value: 'zzzz' } })
     expect(screen.getByText(/no encontramos/i)).toBeInTheDocument()
   })
+
+  it('lets an owner assign a password to everyone except themselves', () => {
+    render(<UserAdminTable users={users} currentUserId="u1" currentRole="owner" />)
+    expect(screen.getAllByTestId('reset-password')).toHaveLength(2)
+  })
+
+  it('lets a supervisor assign a password only to execution roles', () => {
+    render(<UserAdminTable users={users} currentUserId="me" currentRole="supervisor" />)
+    expect(screen.getAllByTestId('reset-password')).toHaveLength(1)
+  })
+
+  it('hides password assignment from an editor', () => {
+    render(<UserAdminTable users={users} currentUserId="me" currentRole="editor" />)
+    expect(screen.queryByTestId('reset-password')).not.toBeInTheDocument()
+  })
 })

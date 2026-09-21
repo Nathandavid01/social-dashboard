@@ -8,6 +8,8 @@ import { RoleGate } from '@/components/auth/role-gate'
 import { redirect } from 'next/navigation'
 import { getMyDay } from '@/lib/actions/my-day'
 import { MyDayView } from '@/components/my-day/my-day-view'
+import { VideographerHistory } from '@/components/recording/videographer-history'
+import { getOwnRecordingHistory } from '@/lib/actions/videographer-history'
 import { getAssignedRecordings } from '@/lib/actions/assigned-recordings'
 import { effectiveConfirmationStatus } from '@/lib/utils/recording-confirmation'
 
@@ -49,12 +51,22 @@ export default async function MiDiaPage() {
     )
   }
 
-  const result = await getMyDay()
+  const [result, recordingHistory] = await Promise.all([getMyDay(), getOwnRecordingHistory()])
   if (!result) redirect('/login')
 
+  const history = recordingHistory ? (
+    <VideographerHistory
+      own
+      personName={result.firstName}
+      sessions={recordingHistory.sessions}
+      truncated={recordingHistory.truncated}
+      error={recordingHistory.error}
+    />
+  ) : null
+
   const day = prioritizeRecordings
-    ? <><AssignedRecordings /><PersonalTasks /><MyDayView day={result.day} firstName={result.firstName} /></>
-    : <><PersonalTasks /><AssignedRecordings /><MyDayView day={result.day} firstName={result.firstName} /></>
+    ? <><AssignedRecordings /><PersonalTasks /><MyDayView day={result.day} firstName={result.firstName} />{history}</>
+    : <><PersonalTasks /><AssignedRecordings /><MyDayView day={result.day} firstName={result.firstName} />{history}</>
   return (
     <div className="space-y-6">
       {gapCards}

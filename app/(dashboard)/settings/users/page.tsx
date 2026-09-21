@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, getCurrentRole, getViewAsEditor } from '@/lib/auth/server'
 import { UserAdminTable } from '@/components/team/user-admin-table'
 import { PendingApprovals } from '@/components/team/pending-approvals'
 import { getPendingApprovals } from '@/lib/actions/approvals'
@@ -8,8 +8,10 @@ import type { Profile } from '@/lib/supabase/types'
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsUsersPage() {
-  // Owner-only: managing accounts, roles and area access lives here.
+  // Owner y supervisor. La contraseña de un owner o supervisor solo la asigna un owner.
   await requirePermission('team.assign_roles')
+  const viewingAs = await getViewAsEditor()
+  const currentRole = viewingAs ? null : await getCurrentRole()
 
   const supabase = await createClient()
   const [{ data: { user } }, { data: profiles }, pendingApprovals] = await Promise.all([
@@ -26,11 +28,15 @@ export default async function SettingsUsersPage() {
       <div>
         <h1 className="text-xl font-bold tracking-tight">Usuarios y permisos</h1>
         <p className="text-sm text-muted-foreground">
-          Gestiona las cuentas de tu equipo: roles, áreas y acceso a cada sección.
+          Gestiona las cuentas de tu equipo: roles, áreas y acceso. Desde aquí un administrador asigna una contraseña nueva.
         </p>
       </div>
       {pendingApprovals.length > 0 && <PendingApprovals pending={pendingApprovals} />}
-      <UserAdminTable users={(profiles ?? []) as Profile[]} currentUserId={user?.id ?? ''} />
+      <UserAdminTable
+        users={(profiles ?? []) as Profile[]}
+        currentUserId={user?.id ?? ''}
+        currentRole={currentRole}
+      />
     </div>
   )
 }

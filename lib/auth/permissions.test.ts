@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { hasPermission } from './permissions'
 
+describe('team.reset_password', () => {
+  it('owner and supervisor can assign passwords; the rest cannot', () => {
+    expect(hasPermission('owner', 'team.reset_password')).toBe(true)
+    expect(hasPermission('supervisor', 'team.reset_password')).toBe(true)
+    for (const role of ['editor', 'video', 'copy', 'disenador', 'team_member'] as const) {
+      expect(hasPermission(role, 'team.reset_password')).toBe(false)
+    }
+    expect(hasPermission(null, 'team.reset_password')).toBe(false)
+  })
+})
+
 describe('cadence.edit', () => {
   it('owner, supervisor, editor y team_member pueden editar la cadencia', () => {
     for (const role of ['owner', 'supervisor', 'editor', 'team_member'] as const) {

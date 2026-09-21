@@ -6,6 +6,8 @@ import { requirePermission } from '@/lib/auth/server'
 import { MemberTaskBoard } from '@/components/team/member-task-board'
 import { MemberUploadHistory } from '@/components/team/member-upload-history'
 import { MemberPipelineHistory } from '@/components/team/member-pipeline-history'
+import { VideographerHistory } from '@/components/recording/videographer-history'
+import { getVideographerHistory } from '@/lib/actions/videographer-history'
 import { ClientIdeasRows } from '@/components/ideas/client-ideas-rows'
 import { getAssignedVideosForMember } from '@/lib/actions/content-ideas'
 import { getEditorPipelineHistory } from '@/lib/actions/pipeline-bank'
@@ -48,7 +50,9 @@ export default async function MemberPage({ params }: Props) {
 
   if (!profile) notFound()
 
-  const firstName = (profile as Profile).full_name?.split(' ')[0] ?? 'esta persona'
+  const member = profile as Profile
+  const recordingHistory = member.role === 'video' ? await getVideographerHistory(memberId) : null
+  const firstName = member.full_name?.split(' ')[0] ?? 'esta persona'
 
   return (
     <div className="space-y-6">
@@ -64,15 +68,25 @@ export default async function MemberPage({ params }: Props) {
       {profile?.role === 'editor' && <EditorClients memberId={memberId} />}
 
       <MemberTaskBoard
-        member={profile as Profile}
+        member={member}
         initialTasks={(tasks ?? []) as unknown as Task[]}
         clients={(clients ?? []) as Pick<Client, 'id' | 'name'>[]}
         teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
         assignedVideoCount={assignedVideos.length}
       />
 
+      {recordingHistory && (
+        <VideographerHistory
+          own={false}
+          personName={member.full_name}
+          sessions={recordingHistory.sessions}
+          truncated={recordingHistory.truncated}
+          error={recordingHistory.error}
+        />
+      )}
+
       <MemberPipelineHistory
-        editorName={(profile as Profile).full_name?.trim() || 'Editor'}
+        editorName={member.full_name?.trim() || 'Editor'}
         items={pipelineHistory.items ?? []}
       />
 

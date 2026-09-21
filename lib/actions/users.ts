@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { assertOwner } from '@/lib/auth/server'
+import { assertOwner, getCurrentRole, getViewAsEditor } from '@/lib/auth/server'
+import { hasPermission } from '@/lib/auth/permissions'
+import { canResetPassword } from '@/lib/auth/password-reset'
 import { validateNewUser } from '@/lib/utils/user-admin-core'
 import { validateNewPassword } from '@/lib/utils/password-core'
 import { AREAS } from '@/lib/auth/areas'
@@ -12,24 +14,59 @@ import type { UserRole, UserStatus } from '@/lib/supabase/types'
 type Result = { ok?: true; error?: string }
 
 /**
- * Owner-only: reset another user's password to a new (temporary) one. For when
- * someone forgets their password — they can't use the self-service change (that
- * needs them logged in), so an admin sets a new temp password to share. Uses the
- * service-role admin API. The user changes it again from their account.
+ * Owner o supervisor: asigna una contraseña nueva a otra persona. El supervisor
+ * no puede tocar owners ni supervisores. La propia se cambia en Cuenta →
+ * Seguridad. Auth no deja cerrar las sesiones ajenas con la llave de servicio:
+ * la clave anterior deja de servir para entrar, y una sesión ya abierta sigue
+ * hasta que esa persona salga o expire el acceso. La contraseña no se guarda
+ * en el dashboard: hay que copiarla antes de cerrar el diálogo.
  */
-export async function resetUserPassword(userId: string, password: string): Promise<Result> {
-  try {
-    await assertOwner()
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'No autorizado' }
+export async function resetUserPassword(
+  userId: string,
+  password: string,
+): Promise<Result> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const viewAs = await getViewAsEditor()
+  if (viewAs) return { error: 'Sal de «ver como» antes de asignar una contraseña.' }
+
+  const actor = await getCurrentRole()
+  if (!hasPermission(actor, 'team.reset_password')) {
+    return { error: 'Solo un Owner o un Supervisor puede asignar contraseñas.' }
   }
+
+  const id = userId.trim()
+  if (!id) return { error: 'No encontramos a esa persona.' }
+  if (user.id === id) {
+    return { error: 'Tu contraseña se cambia en Cuenta → Seguridad.' }
+  }
+
   const valid = validateNewPassword(password)
   if (!valid.ok) return { error: valid.error }
 
   const admin = createAdminClient()
   if (!admin) return { error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' }
 
-  const { error } = await admin.auth.admin.updateUserById(userId, { password })
+  const { data: target, error: readErr } = await admin
+    .from('profiles')
+    .select('id, role')
+    .eq('id', id)
+    .maybeSingle()
+  if (readErr) return { error: readErr.message }
+  if (!target) return { error: 'No encontramos a esa persona.' }
+
+  const allowed = canResetPassword({
+    actor,
+    targetRole: target.role as UserRole,
+    isSelf: false,
+  })
+  if (!allowed.ok) return { error: allowed.reason }
+
+  const { error } = await admin.auth.admin.updateUserById(id, { password })
   if (error) return { error: error.message }
 
   revalidatePath('/settings/users')
