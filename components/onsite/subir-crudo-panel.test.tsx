@@ -117,6 +117,22 @@ describe('SubirCrudoPanel', () => {
     expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeEnabled()
   })
 
+  it('obliga a elegir cliente: no hereda el de la sesión de hoy', () => {
+    renderPanel()
+    expect(screen.getByLabelText('Cliente')).toHaveValue('')
+    pickFile()
+    expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeDisabled()
+    expect(createRecordingSession).not.toHaveBeenCalled()
+  })
+
+  it('sin cliente no crea sesión aunque haya videos', () => {
+    renderPanel({ sessions: [] })
+    pickFile()
+    fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
+    expect(createRecordingSession).not.toHaveBeenCalled()
+    expect(startUpload).not.toHaveBeenCalled()
+  })
+
   it('elige la sesión de hoy sola y sube como crudo a esa toma', async () => {
     const file = (() => {
       renderPanel({ defaultClientId: 'c1', defaultSessionId: 's1', existingIdeaId: 'i1' })
@@ -134,6 +150,10 @@ describe('SubirCrudoPanel', () => {
     expect(createRecordingSession).not.toHaveBeenCalled()
     expect(createContentIdeaManual).not.toHaveBeenCalled()
     expect(screen.getByRole('status')).toHaveTextContent(/Pipeline/i)
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=i1&sesion=s1',
+    )
   })
 
   it('si no hay sesión de hoy, la crea con la API existente y pega el crudo', async () => {
@@ -170,7 +190,10 @@ describe('SubirCrudoPanel', () => {
         provider: 'r2',
       })),
     )
-    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute('href', '/pipeline')
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=idea-new&sesion=s-new',
+    )
   })
 
   it('rechaza un archivo que no es video', () => {
@@ -206,6 +229,10 @@ describe('SubirCrudoPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
     await waitFor(() => expect(startUpload).toHaveBeenCalled())
     expect(createRecordingSession).not.toHaveBeenCalled()
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=idea-new&sesion=s-b',
+    )
   })
 
   it('sin permiso de subida no se muestra', () => {

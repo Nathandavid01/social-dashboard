@@ -67,6 +67,28 @@ export function canReschedulePoolIdea(state: PoolPublishState): boolean {
   return state === 'agendado'
 }
 
+/** Badge “Revisar en Metricool”: only while still Agendado (not Publicado). */
+export function showRevisarEnMetricool(
+  state: PoolPublishState,
+  metricoolDraft: boolean | null | undefined,
+): boolean {
+  return state === 'agendado' && metricoolDraft === true
+}
+
+/** Newest posted_to_metricool row per idea wins (caller must order desc). */
+export function metricoolDraftByIdea(
+  rows: Array<{ content_idea_id?: string | null; metadata?: Record<string, unknown> | null }>,
+): Record<string, boolean> {
+  const out: Record<string, boolean> = {}
+  for (const row of rows) {
+    const id = row.content_idea_id
+    if (!id || id in out) continue
+    const meta = row.metadata ?? {}
+    out[id] = meta.draft === true || meta.autoPublish === false
+  }
+  return out
+}
+
 /** Aviso de /aprobacion: silencioso solo cuando Recibo/AI aprueba. */
 export function shouldNotifyClientVote(
   decision: 'approved' | 'rejected' | string,
@@ -127,6 +149,8 @@ export interface PoolIdeaInput {
   generated_caption?: string | null
   coverVideoId?: string | null
   coverUrl?: string | null
+  /** From posted_to_metricool activity: pool drag creates a Metricool draft. */
+  metricoolDraft?: boolean
 }
 
 export type PoolVideoState = Exclude<PoolPublishState, 'recibo'>
@@ -141,6 +165,7 @@ export interface PoolVideo {
   coverVideoId: string | null
   coverUrl: string | null
   scheduledFromHere: boolean
+  needsMetricoolReview: boolean
 }
 
 export interface PoolClientRow {
@@ -172,6 +197,7 @@ function toVideo(
     coverVideoId: row.coverVideoId ?? null,
     coverUrl: row.coverUrl ?? null,
     scheduledFromHere: state === 'agendado',
+    needsMetricoolReview: showRevisarEnMetricool(state, row.metricoolDraft),
   }
 }
 

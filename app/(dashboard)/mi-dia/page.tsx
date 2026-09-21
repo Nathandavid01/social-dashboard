@@ -2,6 +2,8 @@ import { PersonalTasks } from '@/components/team/personal-tasks'
 import { AssignedRecordings } from '@/components/recording/assigned-recordings'
 import { getOperationsOverview } from '@/lib/actions/operations-overview'
 import { OperationsOverviewView } from '@/components/my-day/operations-overview'
+import { RecordingGapCardsView } from '@/components/my-day/recording-gap-cards'
+import { getRecordingHoyGaps } from '@/lib/actions/recording-hoy-gaps'
 import { RoleGate } from '@/components/auth/role-gate'
 import { redirect } from 'next/navigation'
 import { getMyDay } from '@/lib/actions/my-day'
@@ -35,12 +37,18 @@ export default async function MiDiaPage() {
   if (overview?.error) return <div role="alert" className="rounded-xl border p-6"><h1 className="text-xl font-semibold">Mi Día · Resumen Sin Verificar</h1><p className="mt-3 text-muted-foreground">{overview.error}</p><a href="/mi-dia" className="mt-4 inline-block text-primary underline">Volver A Intentar</a></div>
 
   const prioritizeRecordings = await zeroConfirmedUpcoming()
+  const gapCards = <RecordingGapCardsView gaps={await getRecordingHoyGaps()} />
 
   if (overview?.data) {
     const body = prioritizeRecordings
       ? <><AssignedRecordings /><PersonalTasks /><OperationsOverviewView data={overview.data} /></>
       : <><PersonalTasks /><AssignedRecordings /><OperationsOverviewView data={overview.data} /></>
-    return <RoleGate perm="operations.overview">{body}</RoleGate>
+    return (
+      <div className="space-y-6">
+        {gapCards}
+        <RoleGate perm="operations.overview">{body}</RoleGate>
+      </div>
+    )
   }
 
   const [result, recordingHistory] = await Promise.all([getMyDay(), getOwnRecordingHistory()])
@@ -56,7 +64,13 @@ export default async function MiDiaPage() {
     />
   ) : null
 
-  return prioritizeRecordings
+  const day = prioritizeRecordings
     ? <><AssignedRecordings /><PersonalTasks /><MyDayView day={result.day} firstName={result.firstName} />{history}</>
     : <><PersonalTasks /><AssignedRecordings /><MyDayView day={result.day} firstName={result.firstName} />{history}</>
+  return (
+    <div className="space-y-6">
+      {gapCards}
+      {day}
+    </div>
+  )
 }

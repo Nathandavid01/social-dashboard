@@ -1,13 +1,14 @@
 import { requirePermission } from '@/lib/auth/server'
 import { canScheduleFromPool, getClientPoolPanel } from '@/lib/actions/client-pool'
 import { ClientPoolPanelView } from '@/components/pool/client-pool-panel'
+import { PoolPublicadoAutoSync } from '@/components/pool/pool-publicado-auto-sync'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
  * Panel clientes: pool Listo (Recibo AI aprobado) + calendario
- * agendado/publicado. El drag agenda en Metricool.
+ * agendado/publicado. El drag crea un borrador en Metricool.
  */
 export default async function PoolPage() {
   await requirePermission('posting.read')
@@ -22,5 +23,10 @@ export default async function PoolPage() {
       </p>
     )
   }
-  return <ClientPoolPanelView data={panel.data} canSchedule={canSchedule} />
+  return (
+    <>
+      <PoolPublicadoAutoSync />
+      <ClientPoolPanelView data={panel.data} canSchedule={canSchedule} />
+    </>
+  )
 }

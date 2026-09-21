@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { currentUserHas, requirePermission } from '@/lib/auth/server'
-import { createDraftPost } from '@/lib/metricool/post'
+import { createDraftPost, postFormatData, updateScheduledPost } from '@/lib/metricool/post'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
@@ -17,6 +17,7 @@ import {
   buildClientPoolPanel,
   canCreateMetricoolSchedule,
   canReschedulePoolIdea,
+  metricoolDraftByIdea,
   poolPublishState,
   type ClientPoolPanel,
   type PoolClientInput,
@@ -27,6 +28,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 export type SchedulePoolResult = {
   ok?: true
   state?: 'agendado'
+  draft?: true
   rescheduled?: boolean
   error?: string
 }
@@ -54,8 +56,9 @@ function coverVideoIdOf(videos: Array<{ id: string; kind?: string | null; status
 }
 
 /**
- * Drag Listo → fecha: agenda en Metricool (blog_id del cliente).
- * Agendado → otra fecha: solo mueve publish_date (sin segundo POST).
+ * Drag Listo → fecha: crea un BORRADOR en Metricool (blog_id del cliente).
+ * Nunca autoPublish en el primer envío: el live se confirma en Metricool.
+ * Agendado → otra fecha: PUT updateScheduledPost (no un segundo POST).
  */
 export async function schedulePoolIdea(input: {
   ideaId: string
@@ -73,7 +76,7 @@ export async function schedulePoolIdea(input: {
   const { data: idea, error: ideaErr } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, hook, content_type, generated_caption, status, published_at, publish_date, metricool_post_id, posted_at, manual_posted_status, staff_client_approval, client_review_status, approved_video_id, client_id, client:clients(id, edit_mode, metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
+      'id, title, hook, content_type, generated_caption, status, published_at, publish_date, metricool_post_id, metricool_uuid, posted_at, manual_posted_status, staff_client_approval, client_review_status, approved_video_id, client_id, client:clients(id, edit_mode, metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
     )
     .eq('id', input.ideaId)
     .single()
@@ -103,13 +106,13 @@ export async function schedulePoolIdea(input: {
 
   if (state === 'publicado') return { error: 'El video ya está publicado' }
   if (canReschedulePoolIdea(state)) {
-    const { error } = await supabase
-      .from('content_ideas')
-      .update({ publish_date: input.date })
-      .eq('id', input.ideaId)
-    if (error) return { error: error.message }
-    revalidatePoolPaths()
-    return { ok: true, state: 'agendado', rescheduled: true }
+    return rescheduleAgendadoIdea({
+      supabase,
+      idea: idea as Record<string, unknown>,
+      client,
+      ideaId: input.ideaId,
+      date: input.date,
+    })
   }
   if (!canCreateMetricoolSchedule(state, editMode)) {
     if (editMode !== 'ai') return { error: 'Solo el pool de Recibo (clientes AI) se agenda desde aquí' }
@@ -173,7 +176,7 @@ export async function schedulePoolIdea(input: {
       schedule.iso,
       {
         mediaUrls: [pubUrl],
-        autoPublish: true,
+        // autoPublish omitted → Metricool draft:true. Live is confirmed in Metricool.
         contentType: (idea.content_type as string | null) ?? null,
       },
     )
@@ -207,10 +210,12 @@ export async function schedulePoolIdea(input: {
         scheduledFor: schedule.iso,
         metricoolPostId: postId,
         platforms,
+        draft: true,
+        autoPublish: false,
       },
     })
     revalidatePoolPaths()
-    return { ok: true, state: 'agendado' }
+    return { ok: true, state: 'agendado', draft: true }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
     const definitelyNotCreated = err instanceof Error && 'definitelyNotCreated' in err && err.definitelyNotCreated === true
@@ -223,6 +228,125 @@ export async function schedulePoolIdea(input: {
     }
     await supabase.from('content_ideas').update({ posting_error: msg }).eq('id', input.ideaId)
     return { error: `No se pudo confirmar el resultado del envío. Debes verificarlo en Metricool antes de reenviar. ${msg}` }
+  }
+}
+
+type PoolClient = {
+  id?: string | null
+  metricool_blog_id?: string | null
+  platforms?: string[] | null
+  default_platforms?: string[] | null
+  posting_time?: string | null
+  posting_schedule?: Record<string, string> | null
+}
+
+async function resolvePoolMedia(supabase: Awaited<ReturnType<typeof createClient>>, ideaId: string, approvedVideoId: string | null): Promise<{ url?: string; error?: string }> {
+  const { data: editedRows, error: editedErr } = await supabase
+    .from('content_idea_videos')
+    .select('id, idea_id, drive_file_id, storage_provider, kind, status, uploaded_at')
+    .eq('idea_id', ideaId)
+    .eq('kind', 'edited')
+    .in('storage_provider', ['r2', 'entregas-r2'])
+    .neq('status', 'archived')
+  if (editedErr) return { error: `No se pudo leer el video editado: ${editedErr.message}` }
+
+  const choice = resolveVideoForPublish(editedRows ?? [], {
+    ideaId,
+    watchedOn: 'entregas',
+    approvedVideoId,
+  })
+  if (choice.skipped) return { error: choice.skipped }
+  if (!choice.video) return { error: 'Falta el video editado' }
+
+  const pubUrl = publicVideoUrl(choice.video)
+  if (!pubUrl) return { error: 'No se pudo obtener la URL pública del video editado' }
+  return { url: pubUrl }
+}
+
+async function rescheduleAgendadoIdea(input: {
+  supabase: Awaited<ReturnType<typeof createClient>>
+  idea: Record<string, unknown>
+  client: PoolClient
+  ideaId: string
+  date: string
+}): Promise<SchedulePoolResult> {
+  const postId = (input.idea.metricool_post_id as number | null) ?? null
+  if (postId == null) {
+    return { error: 'Este video no tiene un post en Metricool (falta metricool_post_id). No se reprogramó.' }
+  }
+
+  const blogId = input.client.metricool_blog_id?.trim()
+  if (!blogId) return { error: 'El cliente no tiene Metricool configurado (falta blog_id)' }
+
+  const dow = diaDeFecha(input.date)
+  const slotTime = dow == null
+    ? input.client.posting_time
+    : resolveSlotTime(dow, input.client.posting_time, input.client.posting_schedule)
+  const schedule = automaticPublishSchedule(input.date, slotTime)
+  if (!schedule.ok) return { error: schedule.error }
+
+  const media = await resolvePoolMedia(
+    input.supabase,
+    input.ideaId,
+    (input.idea.approved_video_id as string | null) ?? null,
+  )
+  if (media.error || !media.url) return { error: media.error ?? 'Falta el video editado' }
+
+  const platforms = resolvePlatforms(input.client.platforms, input.client.default_platforms)
+  const caption = captionForSchedule({
+    generated_caption: input.idea.generated_caption as string | null,
+    title: input.idea.title as string | null,
+    hook: input.idea.hook as string | null,
+  })
+  const formatData = postFormatData((input.idea.content_type as string | null) ?? null, platforms)
+
+  try {
+    const res = await updateScheduledPost(postId, blogId, {
+      id: postId,
+      uuid: (input.idea.metricool_uuid as string | null) ?? null,
+      text: caption,
+      draft: false,
+      autoPublish: true,
+      providers: platforms.map((network) => ({ network: network.toLowerCase() })),
+      publicationDate: {
+        dateTime: schedule.iso,
+        timezone: 'America/Puerto_Rico',
+      },
+      media: [media.url],
+      ...formatData,
+    })
+    const newId = res.data?.id ?? postId
+    const uuid = res.data?.uuid ?? (input.idea.metricool_uuid as string | null) ?? null
+
+    const { error } = await input.supabase
+      .from('content_ideas')
+      .update({
+        publish_date: input.date,
+        metricool_post_id: newId,
+        metricool_uuid: uuid,
+      })
+      .eq('id', input.ideaId)
+    if (error) {
+      return { error: `Metricool actualizó la publicación, pero no se pudo guardar en el dashboard.` }
+    }
+
+    await logIdeaActivity(input.supabase, {
+      ideaId: input.ideaId,
+      action: 'posted_to_metricool',
+      clientId: (input.idea.client_id as string | null) ?? input.client.id ?? null,
+      metadata: {
+        source: 'client_panel_reschedule',
+        scheduledFor: schedule.iso,
+        metricoolPostId: newId,
+        previousMetricoolPostId: postId,
+        platforms,
+      },
+    })
+    revalidatePoolPaths()
+    return { ok: true, state: 'agendado', rescheduled: true }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'No se pudo reprogramar en Metricool'
+    return { error: msg }
   }
 }
 
@@ -267,17 +391,29 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
   const ideas = (ideasRes.data ?? []) as Array<Record<string, unknown> & { id: string; videos?: unknown[] }>
   const ideaIds = ideas.map((i) => i.id)
   const reviewByIdea: Record<string, string> = {}
+  let draftByIdea: Record<string, boolean> = {}
   if (ideaIds.length > 0) {
-    const reviews = await supabase
-      .from('entregas_client_review_items')
-      .select('idea_id, status, decided_at')
-      .in('idea_id', ideaIds)
-      .order('decided_at', { ascending: false })
+    const [reviews, drafts] = await Promise.all([
+      supabase
+        .from('entregas_client_review_items')
+        .select('idea_id, status, decided_at')
+        .in('idea_id', ideaIds)
+        .order('decided_at', { ascending: false }),
+      supabase
+        .from('content_idea_activity')
+        .select('content_idea_id, metadata, created_at')
+        .eq('action', 'posted_to_metricool')
+        .in('content_idea_id', ideaIds)
+        .order('created_at', { ascending: false }),
+    ])
     for (const row of reviews.data ?? []) {
       const id = row.idea_id as string
       if (reviewByIdea[id]) continue
       reviewByIdea[id] = row.status as string
     }
+    draftByIdea = metricoolDraftByIdea(
+      (drafts.data ?? []) as Array<{ content_idea_id?: string | null; metadata?: Record<string, unknown> | null }>,
+    )
   }
 
   const clients: PoolClientInput[] = (clientsRes.data ?? []).map((c) => ({
@@ -309,6 +445,7 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
       generated_caption: (raw.generated_caption as string | null) ?? null,
       coverVideoId: coverVideoIdOf(videos ?? []),
       coverUrl: coverUrlForIdea({ videos } as IdeaWithPipeline),
+      metricoolDraft: draftByIdea[raw.id] === true,
     }
   })
 

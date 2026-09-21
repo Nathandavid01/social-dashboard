@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.97 — Huecos de grabación</title>
+  <style>
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #0b0d0f; color: #f5f5f4; }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 22px; margin: 0; }
+    h2 { font-size: 14px; margin: 4px 0 0; }
+    p { color: #a8a29e; font-size: 13px; line-height: 1.45; }
+    .muted { color: #78716c; font-size: 12px; }
+    .grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .card { background: #12161a; border: 1px solid #292524; border-radius: 16px; padding: 18px; }
+    .n { font-size: 32px; font-weight: 700; margin: 0; }
+    .item { display: block; border: 1px solid #292524; border-radius: 10px; padding: 10px 12px; margin-top: 10px; color: inherit; text-decoration: none; }
+    .warn { color: #fbbf24; font-size: 11px; }
+    .row { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+    .onsite { margin-top: 28px; background: linear-gradient(180deg, #ca8a0426, #12161a); border: 1px solid #ca8a0466; border-radius: 16px; padding: 18px; }
+    select { width: 100%; min-height: 44px; border-radius: 10px; border: 1px solid #44403c; background: #0b0d0f; color: #f5f5f4; padding: 0 12px; }
+    .btn { width: 100%; min-height: 44px; border: 0; border-radius: 10px; background: #ca8a04; color: #000; font-weight: 700; margin-top: 14px; opacity: .45; }
+    label { display: block; font-size: 12px; color: #a8a29e; margin: 12px 0 6px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">Vista de ejemplo · v5.97 · Mi día</p>
+    <h1>Huecos de grabación</h1>
+    <p>Primero lo que falta hoy. Sin auto-asignar videógrafo ni mandar recordatorios.</p>
+    <div class="grid">
+      <section class="card">
+        <p class="n">2</p>
+        <h2>Sin confirmar</h2>
+        <p>Falta cliente, videógrafo u hora</p>
+        <a class="item" href="/recording-calendar"><span class="row"><strong>Blue Chiropractic</strong><span class="muted">21 sep</span></span><span class="warn">Falta Hora</span></a>
+        <a class="item" href="/recording-calendar"><span class="row"><strong>Nanas</strong><span class="muted">22 sep</span></span><span class="warn">Falta Cliente, Videógrafo</span></a>
+      </section>
+      <section class="card">
+        <p class="n">1</p>
+        <h2>SIN VIDEO</h2>
+        <p>Sin videógrafo en los próximos 7 días</p>
+        <a class="item" href="/recording-calendar"><span class="row"><strong>Nanas</strong><span class="muted">22 sep</span></span></a>
+      </section>
+      <section class="card">
+        <p class="n">0</p>
+        <h2>Faltan ideas</h2>
+        <p>Menos ideas que la meta de posting</p>
+        <p>Sin hueco de ideas en las próximas sesiones</p>
+      </section>
+    </div>
+    <p class="muted">Badge de Grabación: 2 (accionables), no el total del mes.</p>
+
+    <section class="onsite">
+      <p class="muted" style="letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:700;color:#ca8a04;margin:0">On Site · puerta principal</p>
+      <h1 style="font-size:22px;margin-top:6px">Subir crudo</h1>
+      <p>El cliente no se hereda. Hay que elegirlo antes de subir.</p>
+      <label>Cliente</label>
+      <select aria-label="Cliente">
+        <option selected>Elige un cliente</option>
+        <option>Blue Chiropractic</option>
+        <option>El Truco de Guin</option>
+      </select>
+      <button class="btn" type="button" disabled>Subir crudo</button>
+    </section>
+  </main>
+</body>
+</html>

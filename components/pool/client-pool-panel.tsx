@@ -102,8 +102,13 @@ export function ClientPoolPanelView({
       if (res.error) {
         setPanel(prev)
         toast({ title: 'No se pudo agendar', description: res.error, variant: 'destructive' })
+      } else if (res.rescheduled) {
+        toast({ title: 'Fecha actualizada en Metricool', description: 'el post ya agendado cambió de día' })
       } else {
-        toast({ title: 'Agendado en Metricool', description: 'agendado desde aquí' })
+        toast({
+          title: 'Borrador en Metricool',
+          description: 'Revisar en Metricool — no se publica solo.',
+        })
       }
       setPendingId(null)
     })
@@ -121,12 +126,13 @@ export function ClientPoolPanelView({
             Qué publicar esta semana, con carátula. El pool Listo sale de Recibo
             cuando el cliente aprueba.{' '}
             <span className="md:hidden">
-              Toca un video Listo, un día y Agendar para publicarlo en Metricool.
+              Toca un video Listo, un día y Agendar: se crea un borrador en Metricool.
             </span>
             <span className="hidden md:inline">
-              Arrastra un video al calendario para agendarlo en Metricool.
-            </span>
-          </p>
+              Arrastra un Listo: se crea un <strong>borrador</strong> en Metricool.
+              Un Agendado a otro día cambia la fecha del post ya existente.
+            </span>{' '}
+            Publicado se confirma con Metricool; no hace falta marcar Ya se posteó.          </p>
         </div>
         <p className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
           {panel.week.desde} → {panel.week.hasta}
@@ -138,6 +144,9 @@ export function ClientPoolPanelView({
           <CalendarDays className="h-4 w-4" aria-hidden="true" />
           Calendario · agendado y publicado
         </h2>
+        <p className="text-xs text-muted-foreground">
+          Si Metricool ya tiene PUBLISHED, el video pasa a Publicado solo.
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-7">
           {days.map((date) => {
             const items = panel.calendar.filter((v) => v.publishDate === date)
@@ -184,7 +193,7 @@ export function ClientPoolPanelView({
                   <li key={v.id} className="w-28 shrink-0 space-y-1">
                     <Caratula video={v} className="aspect-[9/16] w-full" />
                     <p className="truncate text-xs font-medium">{v.title}</p>
-                    <StateBadge state={v.state} fromHere={v.scheduledFromHere} />
+                    <StateBadge state={v.state} fromHere={v.scheduledFromHere} review={v.needsMetricoolReview} />
                   </li>
                 ))}
               </ul>
@@ -246,13 +255,24 @@ export function ClientPoolPanelView({
   )
 }
 
-function StateBadge({ state, fromHere }: { state: PoolVideo['state']; fromHere?: boolean }) {
+function StateBadge({
+  state,
+  fromHere,
+  review,
+}: {
+  state: PoolVideo['state']
+  fromHere?: boolean
+  review?: boolean
+}) {
   return (
     <div className="space-y-0.5">
       <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold', STATE_CHIP[state])}>
         {STATE_LABEL[state]}
       </span>
-      {state === 'agendado' && fromHere && (
+      {review && (
+        <p className="text-[10px] text-amber-300/90">Revisar en Metricool</p>
+      )}
+      {state === 'agendado' && fromHere && !review && (
         <p className="text-[10px] text-sky-300/90">agendado desde aquí</p>
       )}
     </div>
@@ -302,8 +322,40 @@ function PoolCard({
       )}
       <Caratula video={video} className="aspect-[9/16] w-full" />
       <p className="truncate text-xs font-medium">{video.title}</p>
-      <StateBadge state={video.state} />
+      <StateBadge state={video.state} review={video.needsMetricoolReview} />
     </button>
+  )
+}
+
+function CalendarCard({
+  video,
+  canSchedule,
+}: {
+  video: PoolVideo
+  canSchedule: boolean
+}) {
+  const canDrag = canSchedule && video.state === 'agendado'
+  return (
+    <div
+      data-testid={video.state === 'agendado' ? `pool-agendado-${video.id}` : undefined}
+      draggable={canDrag}
+      onDragStart={(e) => {
+        if (!canDrag) return
+        e.dataTransfer.setData('text/plain', video.id)
+        e.dataTransfer.effectAllowed = 'move'
+      }}
+      className={cn('space-y-1', canDrag && 'cursor-grab active:cursor-grabbing')}
+    >
+      {canDrag && (
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <GripVertical className="h-3 w-3" aria-hidden="true" />
+          Arrastra a otro día
+        </div>
+      )}
+      <Caratula video={video} className="aspect-[9/16] w-full" />
+      <p className="truncate text-[11px] font-medium">{video.title}</p>
+      <StateBadge state={video.state} fromHere={video.scheduledFromHere} review={video.needsMetricoolReview} />
+    </div>
   )
 }
 
@@ -354,10 +406,8 @@ function DayCell({
       </p>
       <ul className="mt-2 space-y-2">
         {items.map((v) => (
-          <li key={v.id} className="space-y-1">
-            <Caratula video={v} className="aspect-[9/16] w-full" />
-            <p className="truncate text-[11px] font-medium">{v.title}</p>
-            <StateBadge state={v.state} fromHere={v.scheduledFromHere} />
+          <li key={v.id}>
+            <CalendarCard video={v} canSchedule={canSchedule} />
           </li>
         ))}
       </ul>
@@ -375,6 +425,7 @@ function optimisticSchedule(cur: ClientPoolPanel, ideaId: string, date: string):
     state: 'agendado',
     publishDate: date,
     scheduledFromHere: true,
+    needsMetricoolReview: true,
   }
   return {
     ...cur,

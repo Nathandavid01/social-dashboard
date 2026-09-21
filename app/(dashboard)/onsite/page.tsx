@@ -120,7 +120,7 @@ export default async function OnsitePage({
         today={today}
         canUpload={canUpload}
         canCreateSession={canAddIdeas}
-        defaultClientId={activa?.clientId ?? null}
+        defaultClientId={null}
         defaultSessionId={todaySession?.id ?? null}
         existingIdeaId={todaySession ? (shots?.[0]?.id ?? null) : null}
         uploadContext={uploadContext}

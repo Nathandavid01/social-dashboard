@@ -119,6 +119,19 @@ describe('ClientBatchView', () => {
     expect(screen.queryByText('brief:v-rec')).not.toBeInTheDocument()
   })
 
+  it('con focusIdeaId abre esa toma, no la primera del lote', () => {
+    cleanup()
+    render(
+      <ClientBatchView
+        pipeline={mkPipeline([selectedVideo, recordedVideo])}
+        focusIdeaId="v-rec"
+      />,
+    )
+    expect(screen.getByText('brief:v-rec')).toBeInTheDocument()
+    expect(screen.queryByText('brief:v-real')).not.toBeInTheDocument()
+    expect(screen.getByText(/Video 2 de 2/i)).toBeInTheDocument()
+  })
+
   it('navigates between videos one at a time', () => {
     expect(screen.getByText(/Video 1 de 2/i)).toBeInTheDocument()
     expect(screen.getByText('brief:v-real')).toBeInTheDocument()

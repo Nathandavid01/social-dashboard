@@ -23,6 +23,7 @@ import type { BankVideoTile, VideoBank } from '@/lib/pipeline/video-bank'
 import type { Runway, RunwayStatus } from '@/lib/utils/content-runway'
 import { formatDateShortES } from '@/lib/utils/deadlines'
 import { formatCadenceDaysEs } from '@/lib/utils/client-cadence'
+import { cn } from '@/lib/utils'
 
 type TeamMember = { id: string; name: string }
 
@@ -35,6 +36,7 @@ export function EditorVideoBank({
   clientRunway = {},
   globalBroll = [],
   clientBank = {},
+  focusIdeaId = null,
 }: {
   rows: EditorBankRow[]
   admins?: BankAdmin[]
@@ -44,6 +46,7 @@ export function EditorVideoBank({
   clientRunway?: Record<string, Runway>
   globalBroll?: GlobalBrollGroup[]
   clientBank?: Record<string, ClientBankFile[]>
+  focusIdeaId?: string | null
 }) {
   const canOpenProfile = useHasPermission('team.read')
   const teamPace = teamMedianDays(paces)
@@ -62,7 +65,7 @@ export function EditorVideoBank({
         <SectionHeader id="editor-spaces-title" title="Espacios de edición" description="El tope de videos activos sube con el % de aprobación de cada editor (2 → 3 → 4). Los espacios libres dejan claro quién puede tomar el próximo crudo." />
         {rows.length === 0 ? <EmptyState text="No hay crudos listos. Cuando On Site suba material, aparecerá aquí." /> : (
           <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} clientBank={clientBank} claimOf={claimOf} setClaim={setClaim} />)}
+            {rows.map((row) => <EditorWorkCard key={row.editorId ?? 'unassigned'} row={row} pace={row.editorId ? paceByEditor.get(row.editorId) : undefined} teamPace={teamPace} canOpenProfile={canOpenProfile} showClientMarks={!videoBank} globalBroll={globalBroll} clientBank={clientBank} claimOf={claimOf} setClaim={setClaim} focusIdeaId={focusIdeaId} />)}
           </div>
         )}
       </section>
@@ -82,7 +85,7 @@ function EmptyState({ text }: { text: string }) {
   return <div className="rounded-xl border border-dashed border-white/10 px-5 py-12 text-center text-sm text-slate-500">{text}</div>
 }
 
-function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [], clientBank = {}, claimOf, setClaim }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[]; clientBank?: Record<string, ClientBankFile[]>; claimOf: (ideaId: string, fallback?: EditingClaim | null) => EditingClaim | null; setClaim: (ideaId: string, next: EditingClaim | null) => void }) {
+function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, globalBroll = [], clientBank = {}, claimOf, setClaim, focusIdeaId = null }: { row: EditorBankRow; pace?: EditorPace; teamPace: number | null; canOpenProfile: boolean; showClientMarks: boolean; globalBroll?: GlobalBrollGroup[]; clientBank?: Record<string, ClientBankFile[]>; claimOf: (ideaId: string, fallback?: EditingClaim | null) => EditingClaim | null; setClaim: (ideaId: string, next: EditingClaim | null) => void; focusIdeaId?: string | null }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const active = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'active').slice(0, row.wipLimit)
   const waiting = row.clients.flatMap((client) => client.clips.map((clip) => ({ client, clip }))).filter(({ clip }) => clip.queue === 'waiting')
@@ -112,7 +115,7 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
       <div className="grid grid-cols-2 gap-2 px-3.5 pb-3">
         {Array.from({ length: row.wipLimit }).map((_, index) => {
           const work = active[index]
-          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} bank={clientBank[work.client.clientId] ?? []} claim={claimOf(work.clip.ideaId, work.clip.editingClaim)} onClaim={(next) => setClaim(work.clip.ideaId, next)} /> : (
+          return work ? <ActiveEditorSlot key={work.clip.ideaId} testId={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} client={work.client} clip={work.clip} estimate={estimate} showClientMark={showClientMarks} broll={globalBroll.find(g=>g.clientId===work.client.clientId)?.files} bank={clientBank[work.client.clientId] ?? []} claim={claimOf(work.clip.ideaId, work.clip.editingClaim)} onClaim={(next) => setClaim(work.clip.ideaId, next)} focused={focusIdeaId === work.clip.ideaId} /> : (
             <div key={`free-${index}`} data-testid={`editor-slot-${row.editorId ?? 'unassigned'}-${index}`} className="grid min-h-36 place-items-center rounded-lg border border-dashed border-white/10 bg-black/10 px-3 text-center"><div><p className="text-[11px] font-medium text-slate-300">Espacio libre</p><p className="mt-1 text-[9px] text-slate-500">Puede tomar un video del banco</p><span className="mt-2 inline-block text-[10px] font-semibold text-[#c8a34a]">Disponible</span></div></div>
           )
         })}
@@ -123,12 +126,12 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
   )
 }
 
-function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [], claim, onClaim }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[]; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void }) {
+function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [], claim, onClaim, focused = false }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[]; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void; focused?: boolean }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
   const file = clip.files[0]
   const elapsed = daysSince(clip.recordedAt)
   return (
-    <article data-testid={testId} className="group min-w-0 [&:has(details[open])]:col-span-2 overflow-hidden rounded-lg border border-white/10 bg-[#0d1013]" style={{ borderColor: `${client.cardColor}66` }}>
+    <article id={`pipeline-idea-${clip.ideaId}`} data-testid={testId} data-pipeline-focus={focused ? 'true' : undefined} className={cn('group min-w-0 [&:has(details[open])]:col-span-2 overflow-hidden rounded-lg border bg-[#0d1013]', focused ? 'border-[#c8a34a] ring-2 ring-[#c8a34a]/50' : 'border-white/10')} style={{ borderColor: focused ? undefined : `${client.cardColor}66` }}>
       <div data-testid="client-bank-card" className="relative min-h-24 overflow-hidden border-b border-white/10 bg-gradient-to-br from-slate-800 to-slate-950" style={{ borderColor: client.cardColor }}>
         {file ? <VideoCover videoId={file.id} title={clip.title} /> : null}
         <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1 py-0.5 text-[8px] uppercase text-slate-200">{file?.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>

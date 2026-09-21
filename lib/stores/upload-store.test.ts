@@ -31,7 +31,7 @@ vi.mock('@/lib/actions/video-dedupe', () => ({
   rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
 }))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
-  processUploadedVideo: vi.fn(async () => {}),
+  processUploadedVideo: vi.fn(async () => ({ analyzed: true })),
   generateVideoThumbs: vi.fn(async () => {}),
 }))
 
@@ -357,5 +357,60 @@ describe('upload-store — nunca se sube un video repetido', () => {
     const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
     const item = await waitForPhase(id, ['listo', 'error', 'duplicado'])
     expect(item.phase).toBe('listo')
+  })
+})
+
+describe('upload-store — el post-proceso (QC IA / carátula) no bloquea "listo"', () => {
+  it('un editado queda "listo" en cuanto se registra; el QC IA sigue en segundo plano', async () => {
+    const qc = deferred<{ analyzed: boolean }>()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(item.pct).toBe(100)
+    expect(item.postprocess).toBe('pendiente')
+    expect(vi.mocked(processUploadedVideo)).toHaveBeenCalledWith('video-1', file)
+
+    qc.resolve({ analyzed: true })
+    await new Promise((r) => setTimeout(r, 10))
+    expect(useUploadStore.getState().uploads[id].postprocess).toBe('listo')
+    expect(useUploadStore.getState().uploads[id].phase).toBe('listo')
+  })
+
+  it('si el QC IA falla, la subida sigue "listo" y el post-proceso marca error', async () => {
+    const qc = deferred<{ analyzed: boolean }>()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+
+    qc.reject(new Error('xAI caído'))
+    await new Promise((r) => setTimeout(r, 10))
+    const item = useUploadStore.getState().uploads[id]
+    expect(item.phase).toBe('listo')
+    expect(item.postprocess).toBe('error')
+  })
+
+  it('un crudo también queda "listo" antes de su carátula', async () => {
+    const thumbs = deferred()
+    vi.mocked(generateVideoThumbs).mockReturnValueOnce(thumbs.promise)
+    const file = smallFile()
+    const id = useUploadStore.getState().startUpload({ file, ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.postprocess).toBe('pendiente')
+    thumbs.resolve()
+    await new Promise((r) => setTimeout(r, 10))
+    expect(useUploadStore.getState().uploads[id].postprocess).toBe('listo')
+  })
+
+  it('hasActiveUploads es false mientras solo queda post-proceso pendiente (no hay que avisar al cerrar la pestaña)', async () => {
+    const qc = deferred<{ analyzed: boolean }>()
+    vi.mocked(processUploadedVideo).mockReturnValueOnce(qc.promise)
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'edited', provider: 'r2' })
+    await waitForPhase(id, ['listo', 'error'])
+    expect(useUploadStore.getState().hasActiveUploads()).toBe(false)
+    qc.resolve({ analyzed: true })
   })
 })

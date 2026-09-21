@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.98 — Subir crudo abre esa toma en Pipeline</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0b0d0f; color: #f5f5f4; }
+    main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 15px; margin: 0; }
+    h2 { font-size: 22px; margin: 4px 0 0; }
+    h3 { font-size: 13px; margin: 0 0 10px; letter-spacing: .12em; text-transform: uppercase; color: #a8a29e; }
+    p { color: #a8a29e; font-size: 13px; line-height: 1.45; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .muted { color: #78716c; font-size: 12px; }
+    .grid { display: grid; gap: 16px; }
+    @media (min-width: 800px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { background: linear-gradient(180deg, #ca8a0426, #12161a); border: 1px solid #ca8a0466; border-radius: 16px; padding: 18px; }
+    .chip { float: right; border: 1px solid #22d3ee55; background: #22d3ee18; color: #67e8f9; border-radius: 999px; padding: 4px 10px; font-size: 11px; }
+    .ok { margin-top: 12px; border: 1px solid #10b98155; background: #10b98118; color: #6ee7b7; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+    .ok a { color: inherit; font-weight: 700; }
+    .url { display: block; margin-top: 8px; font-size: 12px; color: #fde68a; word-break: break-all; }
+    .lote { background: #12161a; border: 1px solid #292524; border-radius: 16px; padding: 16px; }
+    .lote strong { color: #f5f5f4; }
+    .focus { margin-top: 12px; border: 2px solid #c8a34a; border-radius: 12px; padding: 12px; box-shadow: 0 0 0 3px #c8a34a55; }
+    .ghost { margin-top: 8px; border: 1px solid #292524; border-radius: 12px; padding: 10px; color: #78716c; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">Vista de ejemplo · v5.98</p>
+    <header>
+      <div>
+        <h1>On Site → Pipeline</h1>
+        <p class="muted">Después de subir el crudo, el enlace abre esa idea y esa sesión.</p>
+      </div>
+    </header>
+    <div class="grid">
+      <section>
+        <h3>Antes</h3>
+        <div class="card">
+          <span class="chip">Crudo</span>
+          <p class="muted" style="margin:0;letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:700;color:#ca8a04">Puerta principal</p>
+          <h2>Subir crudo</h2>
+          <p>Subida en marcha · van al Pipeline · <a href="/pipeline">Abrir Pipeline</a></p>
+          <p class="ok" role="status">2 subidas en marcha · van al Pipeline · <a href="/pipeline">Abrir Pipeline</a></p>
+          <span class="url">/pipeline</span>
+        </div>
+      </section>
+      <section>
+        <h3>Ahora</h3>
+        <div class="card">
+          <span class="chip">Crudo</span>
+          <p class="muted" style="margin:0;letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:700;color:#ca8a04">Puerta principal</p>
+          <h2>Subir crudo</h2>
+          <p>Blue Chiropractic · sesión de hoy · Toma patio.mp4</p>
+          <p class="ok" role="status">Subida en marcha · el archivo va al Pipeline · <a href="/pipeline?lote=c1&amp;idea=idea-new&amp;sesion=s-hoy">Abrir Pipeline</a></p>
+          <span class="url">/pipeline?lote=c1&amp;idea=idea-new&amp;sesion=s-hoy</span>
+        </div>
+      </section>
+    </div>
+    <section class="lote" style="margin-top:20px">
+      <h3>En Pipeline</h3>
+      <p>Owner / supervisor abre el lote de Blue Chiropractic en esa toma. El editor ve la misma idea marcada en el banco.</p>
+      <div class="focus">
+        <strong>Toma patio</strong>
+        <p style="margin:4px 0 0">Blue Chiropractic · sesión de hoy · crudo en marcha</p>
+      </div>
+      <div class="ghost">Otra toma del lote — no es la que acaba de subir</div>
+    </section>
+  </main>
+</body>
+</html>

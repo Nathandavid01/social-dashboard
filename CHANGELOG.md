@@ -4,20 +4,70 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.103 — 2026-09-21
+
+**Contraseña desde Usuarios, e historial de lo que graba cada persona.**
+- En **Usuarios y permisos**, **Nueva contraseña** genera una clave, se puede copiar y **sigue en pantalla** hasta Listo. Un Supervisor la asigna al equipo de ejecución. La de un Owner o de otro Supervisor solo la asigna un Owner.
+- La clave anterior deja de servir para entrar. Si esa persona tiene el dashboard abierto, cierra sesión desde el menú.
+- En **Mi día**, quien graba ve **Tu historial de grabación**: cada video que subió, debajo de su idea, agrupado por sesión y cliente. Una idea que creó en la sesión sale **Adicional**.
+- En **Equipo**, el perfil de quien graba muestra el mismo historial.
+
+## v5.102 — 2026-09-21
+
+**Al subir un video, «Listo» aparece en cuanto el archivo está guardado; la IA lo revisa detrás.**
+- Antes, al subir un corte final el editor veía «La IA está viendo el video…» durante minutos, aunque el archivo ya estaba en R2. Ahora ve **Listo** y debajo «la IA está viendo el video…» mientras el QC corre en segundo plano.
+- Con los crudos pasa lo mismo con la carátula: «Listo · generando carátula…».
+- Ya no sale el aviso de «¿seguro que quieres salir?» solo porque la IA siga analizando: el video ya está a salvo.
+- Si el análisis falla, el video sigue subido: «Listo · el análisis de IA falló; se reintenta solo».
+- Convive con la huella de duplicados (v5.96): Listo no espera al QC; un archivo ya subido sigue siendo «duplicado».
+
+## v5.101 — 2026-09-21
+
+**Publicado se confirma con Metricool, no solo con «Ya se posteó».**
+- En el **Panel** (`/pool`), al abrir la página se lee el estado real en **Metricool**.
+- Si un video **Agendado** ya salió (PUBLISHED en todas las redes), pasa solo a **Publicado**.
+- No crea posts nuevos. Si Metricool aún está pendiente o falló, se queda Agendado.
+- Recibo «Ya se posteó» sigue sirviendo para envíos sin Metricool.
+
+![Publicado desde Metricool](/changelog/v5.101-sync-publicado.png)
+
+## v5.100 — 2026-09-21
+
+**Arrastra un Agendado a otro día: también cambia en Metricool.**
+- En el Panel (`/pool`), un video **Agendado** se puede arrastrar a otra fecha.
+- Esa fecha se actualiza en **Metricool** (el post ya existente), no solo en el calendario del dashboard.
+- Si el video no tiene `metricool_post_id`, sale un error y no se inventa un post nuevo.
+- **Publicado** sigue bloqueado. Listo → primer agendado sigue siendo borrador (v5.99).
+
+![Reprogramar Agendado en Metricool](/changelog/v5.100-reschedule-metricool.png)
+
+## v5.99 — 2026-09-21
+
+**Panel: arrastrar Listo crea un borrador en Metricool, no publica solo.**
+- En `/pool`, al soltar un video **Listo** en un día, Metricool recibe un **borrador** (sin autoPublish). El claim `posting_started_at` sigue impidiendo un doble envío.
+- El calendario muestra la etiqueta **Revisar en Metricool**. El live no sale desde el panel: se confirma en Metricool después de revisar el caption y el video.
+- Reprogramar un Agendado a otra fecha sigue moviendo solo la fecha local, sin un segundo POST. La recuperación de Metricool sigue siendo solo para posts live; un borrador incierto no se vuelve a enviar.
+
+![Borrador Metricool en el Panel](/changelog/v5.99-pool-draft.png)
+
 ## v5.98 — 2026-09-21
 
-**Quien graba tiene historial: videos por idea, y las ideas que agregó en la grabación.**
-- En **Mi día**, el videógrafo ve **Tu historial de grabación**: cada video que subió, debajo de su idea, agrupado por sesión y cliente.
-- Una idea que esa persona creó dentro de la sesión sale marcada **Adicional**, aunque el video todavía no haya entrado.
-- En **Equipo**, el perfil de quien graba muestra el mismo historial para el administrador.
+**On Site: «Abrir Pipeline» lleva a esa toma, no al tablero genérico.**
+- Tras **Subir crudo** el aviso sigue igual, pero el enlace abre la idea y la sesión en Pipeline (`/pipeline?lote=…&idea=…&sesion=…`).
+- Owner / supervisor: se abre el lote del cliente en esa idea.
+- Editor: esa toma queda marcada en el banco. El panel de Subir crudo no se toca.
+
+![Subir crudo abre la toma en Pipeline](/changelog/v5.98-subir-crudo-deeplink.png)
 
 ## v5.97 — 2026-09-21
 
-**Un administrador asigna la contraseña desde Usuarios.**
-- En **Usuarios y permisos**, cada persona que te corresponda tiene **Nueva contraseña**.
-- El diálogo genera una clave, la puedes ver, regenerar y copiar. Después de asignarla **sigue en pantalla** hasta que pulses Listo: no se vuelve a mostrar.
-- La clave anterior deja de servir para entrar. Si esa persona tiene el dashboard abierto, cierra sesión desde el menú. Después puede cambiarla en Cuenta → Seguridad.
-- Un Supervisor puede hacerlo con el equipo de ejecución (editor, videógrafo, copy, diseñador). La contraseña de un Owner o de otro Supervisor solo la asigna un Owner. Nadie se asigna la suya desde aquí.
+**Hoy enseña los huecos de grabación: sin confirmar, SIN VIDEO y faltan ideas.**
+- En **Mi día** (`/mi-dia`) las tres tarjetas van primero: sesiones sin cliente/videógrafo/hora, sin videógrafo en 7 días (hora de Puerto Rico), y sesiones con menos ideas que la meta de posting.
+- En On Site, **Subir crudo** pide el cliente a mano — no hereda el de la sesión abierta. Sin cliente no se crea sesión.
+- El número naranja de **Grabación** cuenta solo esos huecos accionables, no el total ruidoso del mes.
+- Fechas del Pipeline tipo timestamp ya no salen como «NaN sep».
+
+![Huecos de grabación en Mi día](/changelog/v5.97-hoy-gaps.png)
 
 ## v5.96 — 2026-09-21
 
@@ -65,7 +115,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Un marcador viejo ya no convierte las cookies en “solo esta pestaña” al refrescar el token.
 
 ![Login correo y sesión persistente](/changelog/v5.93-login-email.png)
-
 ## v5.92 — 2026-09-21
 
 **Panel en el teléfono: toca video, toca el día y Agendar.**
@@ -89,7 +138,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Si hay dos bloques `## vX.Y` iguales, el merge-gate falla.
 - `lib/version.ts` tiene que coincidir con la **última** entrada del CHANGELOG.
 - Documentado en las reglas de merge (`docs/MERGE_RULES.md`).
-
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**
