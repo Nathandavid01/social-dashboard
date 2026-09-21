@@ -12,8 +12,14 @@ const addIdeaToSession = vi.fn(async (_input?: unknown): Promise<{ ok?: true; er
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
+const storeUploads: Record<string, { id: string; fileName: string; ideaId: string; phase: string }> = {}
 vi.mock('@/lib/stores/upload-store', () => ({
-  useUploadStore: (sel: (s: { startUpload: typeof startUpload }) => unknown) => sel({ startUpload }),
+  useUploadStore: (sel: (s: { startUpload: typeof startUpload; uploads: typeof storeUploads }) => unknown) =>
+    sel({ startUpload, uploads: storeUploads }),
+}))
+const getOnsiteUploadContext = vi.fn(async (_id?: string) => ({ context: undefined }))
+vi.mock('@/lib/actions/onsite-upload-context', () => ({
+  getOnsiteUploadContext: (id: string) => getOnsiteUploadContext(id),
 }))
 vi.mock('@/lib/actions/recording-sessions', () => ({
   createRecordingSession: (values: unknown) => createRecordingSession(values),
@@ -78,6 +84,8 @@ beforeEach(() => {
   createRecordingSession.mockReset().mockResolvedValue({ id: 's-new' })
   createContentIdeaManual.mockReset().mockResolvedValue({ idea: { id: 'idea-new' } })
   addIdeaToSession.mockReset().mockResolvedValue({ ok: true })
+  getOnsiteUploadContext.mockReset().mockResolvedValue({ context: undefined })
+  for (const key of Object.keys(storeUploads)) delete storeUploads[key]
 })
 
 describe('SubirCrudoPanel', () => {
@@ -194,5 +202,50 @@ describe('SubirCrudoPanel', () => {
   it('sin permiso de subida no se muestra', () => {
     renderPanel({ canUpload: false })
     expect(screen.queryByRole('heading', { name: 'Subir crudo' })).not.toBeInTheDocument()
+  })
+
+  it('muestra para quién se sube, qué idea falta y lo ya subido', () => {
+    renderPanel({
+      defaultClientId: 'c1',
+      defaultSessionId: 's1',
+      uploadContext: {
+        sessionId: 's1',
+        clientName: 'Blue Chiropractic',
+        sessionTitle: 'Mañana Arecibo',
+        sessionDate: '2026-09-19',
+        ideas: [
+          { ideaId: 'i1', title: 'Intro Patricia', rawCount: 1 },
+          { ideaId: 'i2', title: 'Tour de sala', rawCount: 0 },
+        ],
+        uploads: [
+          { videoId: 'v1', name: 'IMG_8841.MOV', status: 'uploaded', ideaId: 'i1', ideaTitle: 'Intro Patricia' },
+        ],
+      },
+    })
+    expect(screen.getByTestId('upload-target-context')).toHaveTextContent('Blue Chiropractic · Mañana Arecibo · 2 ideas')
+    expect(screen.getByText('Intro Patricia')).toBeInTheDocument()
+    expect(screen.getByText('Ya hay crudo')).toBeInTheDocument()
+    expect(screen.getByText('Tour de sala')).toBeInTheDocument()
+    expect(screen.getByText('Falta crudo')).toBeInTheDocument()
+    expect(screen.getByText('IMG_8841.MOV')).toBeInTheDocument()
+    expect(screen.getByText(/Subido · Intro Patricia/)).toBeInTheDocument()
+  })
+
+  it('lista también una subida en vuelo de esta sesión', () => {
+    storeUploads['up-2'] = { id: 'up-2', fileName: 'nuevo.MOV', ideaId: 'i1', phase: 'subiendo' }
+    renderPanel({
+      defaultClientId: 'c1',
+      defaultSessionId: 's1',
+      uploadContext: {
+        sessionId: 's1',
+        clientName: 'Blue Chiropractic',
+        sessionTitle: 'Mañana',
+        sessionDate: '2026-09-19',
+        ideas: [{ ideaId: 'i1', title: 'Intro Patricia', rawCount: 0 }],
+        uploads: [],
+      },
+    })
+    expect(screen.getByText('nuevo.MOV')).toBeInTheDocument()
+    expect(screen.getByText(/Subiendo · Intro Patricia/)).toBeInTheDocument()
   })
 })

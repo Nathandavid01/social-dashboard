@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { clientDisplayName } from '@/lib/utils/client-display-name'
 import { useToast } from '@/lib/hooks/use-toast'
 import { SHOT_TYPES, shotTypeLabel, type OnsiteShot } from '@/lib/onsite/shot-types'
+import { footageLabel } from '@/lib/onsite/upload-context'
 import { viralityBand } from '@/lib/onsite/virality'
 import { emptyOnsiteSlots, groupOnsiteSessions, progressAgainstTarget } from '@/lib/onsite/slot-count'
 import { alreadyCheckedIn, formatArrivalStamp } from '@/lib/onsite/arrival'
@@ -481,7 +482,7 @@ function IdeaCard({
           )}
         </div>
         <article className="min-w-0 flex-1">
-          <header className="flex items-start gap-2">
+          <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
             <div className="min-w-0 flex-1">
               <p className={docLabel}>Documento de toma</p>
               {canBrief ? (
@@ -499,15 +500,29 @@ function IdeaCard({
                 <h3 className="mt-1.5 text-[18px] font-semibold leading-snug tracking-tight">{titulo || 'Sin título'}</h3>
               )}
             </div>
-            <button
-              type="button"
-              onClick={onOpen}
-              aria-expanded={abierta}
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-              aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle'}
-            >
-              {abierta ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              {shot.rawCount != null && (
+                <span
+                  className={cn(
+                    'whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                    shot.rawCount > 0
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                      : 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+                  )}
+                >
+                  {footageLabel(shot.rawCount)}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={onOpen}
+                aria-expanded={abierta}
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                aria-label={abierta ? 'Cerrar detalle' : 'Abrir detalle'}
+              >
+                {abierta ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </button>
+            </div>
           </header>
 
           <div className="mt-4 space-y-4 border-t border-[hsl(36_12%_16%)] pt-4">

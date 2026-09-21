@@ -126,6 +126,8 @@ describe('EditorVideoBank', () => {
           editorId: 'ed-maria',
           editorName: 'María R.',
           assignedVia: 'idea',
+          fileName: 'IMG_1.MOV',
+          linkKind: 'linked',
         }],
       }],
     }
@@ -146,7 +148,7 @@ describe('EditorVideoBank', () => {
           clients: [{
             clientId: 'c1', clientName: 'Lucky Pet', logoUrl: null, cardColor: '#A97845',
             approvedCount: 0, remainingInBank: 1, inRevision: 0, postingDays: [1, 3, 5],
-            clips: [clip({ ideaId: 'i1', title: 'Baño y corte, antes y después', yours: true, queue: 'active' })],
+            clips: [clip({ ideaId: 'i1', title: 'Baño y corte, antes y después', yours: true, queue: 'active', linkKind: 'linked' })],
           }],
         })]}
         videoBank={bank}
@@ -160,6 +162,13 @@ describe('EditorVideoBank', () => {
     expect(screen.getByTestId('editor-slot-ed-maria-1')).toHaveTextContent('Espacio libre')
     expect(screen.getByRole('heading', { name: /banco de videos crudos/i })).toBeInTheDocument()
     expect(screen.getByTestId('raw-video-v1')).toHaveTextContent('2:14')
+    expect(screen.getByTestId('raw-video-v1')).toHaveTextContent('Idea')
+    expect(screen.getByTestId('raw-video-v1')).toHaveTextContent('De la idea')
+    expect(screen.getByTestId('raw-video-v1')).toHaveTextContent('IMG_1.MOV')
+    expect(screen.getByTestId('editor-slot-ed-maria-0')).toHaveTextContent('Idea')
+    expect(screen.getByTestId('editor-slot-ed-maria-0')).toHaveTextContent('De la idea')
+    expect(screen.getByTestId('raw-video-v1')).toHaveTextContent('Libre')
+    expect(screen.getAllByRole('button', { name: /empezar edición/i }).length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { name: /ritmo de los editores/i })).toBeInTheDocument()
     expect(screen.getByTestId('editor-pace-ed-maria')).toHaveTextContent('1.9 d')
     expect(screen.getByTestId('editor-pace-ed-maria')).toHaveTextContent('14 en 30 d')

@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.95 — 2026-09-21
+
+**El videógrafo ve para quién sube; el editor ve de qué idea es cada video.**
+- En On Site (`/onsite`), al entrar a **Subir crudo** aparece cliente, sesión e ideas: **Ya hay crudo** o **Falta crudo**, y la lista de lo ya subido en esa sesión (nombre + estado).
+- En las tarjetas del call sheet también se ve si esa toma ya tiene crudo, para no subir a ciegas ni duplicar.
+- En Pipeline (`/pipeline`) y en Revisión de videos, cada carátula nombra la **Idea** y marca **De la idea** (toma de On Site) o **Extra** (suelto / banco).
+- En las mismas carátulas de Pipeline sigue **Empezar edición / En edición** (v5.94): no se pisan.
+
+![Videógrafo y editor ven la idea](/changelog/v5.95-idea-clarity.png)
+
 ## v5.94 — 2026-09-21
 
 **En Pipeline se ve quién está cortando cada video.**

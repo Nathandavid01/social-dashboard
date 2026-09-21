@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Upload } from 'lucide-react'
@@ -9,6 +9,7 @@ import { useUploadStore } from '@/lib/stores/upload-store'
 import { createRecordingSession } from '@/lib/actions/recording-sessions'
 import { createContentIdeaManual } from '@/lib/actions/content-ideas'
 import { addIdeaToSession, type OnsiteSession } from '@/lib/actions/onsite'
+import { getOnsiteUploadContext } from '@/lib/actions/onsite-upload-context'
 import { ideaTitleFromUpload } from '@/lib/pipeline/banco-direct-upload'
 import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 import { clientDisplayName } from '@/lib/utils/client-display-name'
@@ -18,6 +19,13 @@ import {
   todaySessionCreateValues,
   todaySessionsForClient,
 } from '@/lib/onsite/subir-crudo'
+import {
+  footageLabel,
+  mergeInFlightUploads,
+  uploadStatusLabel,
+  uploadTargetSummary,
+  type OnsiteUploadContext,
+} from '@/lib/onsite/upload-context'
 import { cn } from '@/lib/utils'
 
 const SELECT =
@@ -37,6 +45,7 @@ export function SubirCrudoPanel({
   defaultClientId = null,
   defaultSessionId = null,
   existingIdeaId = null,
+  uploadContext = null,
 }: {
   clients: SubirCrudoClient[]
   sessions: OnsiteSession[]
@@ -46,10 +55,12 @@ export function SubirCrudoPanel({
   defaultClientId?: string | null
   defaultSessionId?: string | null
   existingIdeaId?: string | null
+  uploadContext?: OnsiteUploadContext | null
 }) {
   const router = useRouter()
   const { toast } = useToast()
   const startUpload = useUploadStore((s) => s.startUpload)
+  const storeUploads = useUploadStore((s) => s.uploads)
   const fileRef = useRef<HTMLInputElement>(null)
   const [clientId, setClientId] = useState(defaultClientId ?? '')
   const [sessionId, setSessionId] = useState(defaultSessionId ?? '')
@@ -66,6 +77,49 @@ export function SubirCrudoPanel({
   const autoSession = pickTodaySession(todayForClient)
   const resolvedSessionId = sessionId || autoSession?.id || ''
   const clientName = clients.find((c) => c.id === clientId)?.name ?? ''
+  const [liveContext, setLiveContext] = useState<OnsiteUploadContext | null>(
+    uploadContext && uploadContext.sessionId === (defaultSessionId ?? '')
+      ? uploadContext
+      : null,
+  )
+
+  useEffect(() => {
+    if (!resolvedSessionId) {
+      setLiveContext(null)
+      return
+    }
+    if (uploadContext?.sessionId === resolvedSessionId) {
+      setLiveContext(uploadContext)
+      return
+    }
+    let cancelled = false
+    void getOnsiteUploadContext(resolvedSessionId).then((res) => {
+      if (cancelled) return
+      setLiveContext((prev) => res.context ?? (prev?.sessionId === resolvedSessionId ? prev : null))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [resolvedSessionId, uploadContext])
+
+  const ideaTitles = useMemo(
+    () => new Map((liveContext?.ideas ?? []).map((idea) => [idea.ideaId, idea.title])),
+    [liveContext],
+  )
+  const sessionUploads = useMemo(
+    () => mergeInFlightUploads(
+      liveContext?.uploads ?? [],
+      Object.values(storeUploads ?? {}).map((u) => ({
+        id: u.id,
+        fileName: u.fileName,
+        ideaId: u.ideaId,
+        phase: u.phase,
+      })),
+      ideaTitles,
+    ),
+    [liveContext, storeUploads, ideaTitles],
+  )
+
   const canSubmit =
     !!clientId &&
     files.length > 0 &&
@@ -226,6 +280,64 @@ export function SubirCrudoPanel({
               </select>
             )}
           </label>
+        )}
+
+        {clientId && (
+          <div
+            data-testid="upload-target-context"
+            className="rounded-xl border border-border/80 bg-background/70 px-3 py-3"
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Subiendo para
+            </p>
+            <p className="mt-1 text-sm font-medium">
+              {liveContext
+                ? uploadTargetSummary({
+                  clientName: clientDisplayName(liveContext.clientName || clientName),
+                  sessionTitle: liveContext.sessionTitle,
+                  ideaCount: liveContext.ideas.length,
+                })
+                : clientDisplayName(clientName)}
+            </p>
+            {liveContext && liveContext.ideas.length > 0 && (
+              <ul className="mt-2 space-y-1.5" aria-label="Ideas de esta sesión">
+                {liveContext.ideas.map((idea) => (
+                  <li key={idea.ideaId} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="min-w-0 truncate">{idea.title}</span>
+                    <span
+                      className={cn(
+                        'shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                        idea.rawCount > 0
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                          : 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+                      )}
+                    >
+                      {footageLabel(idea.rawCount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-3 border-t border-border/70 pt-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Subido en esta sesión
+              </p>
+              {sessionUploads.length === 0 ? (
+                <p className="mt-1 text-xs text-muted-foreground">Todavía no hay crudo en esta sesión</p>
+              ) : (
+                <ul className="mt-1.5 space-y-1" aria-label="Crudos de esta sesión">
+                  {sessionUploads.map((item) => (
+                    <li key={item.videoId} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+                      <span className="min-w-0 truncate">{item.name}</span>
+                      <span className="shrink-0 whitespace-nowrap text-muted-foreground">
+                        {uploadStatusLabel(item.status)} · {item.ideaTitle}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         )}
 
         <div

@@ -17,6 +17,7 @@ import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import type { Client, ContentIdeaType, ContentIdeaVideo } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
+import { classifyVideoLink, videoLinkLabel, type VideoLinkKind } from '@/lib/pipeline/video-link'
 
 export interface EditQueueItem {
   video: PipelineVideo
@@ -40,6 +41,10 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
   const TypeIcon = type.icon
   const caption = video.generated_caption?.trim() || null
   const source = [...video.videos.raw, ...video.videos.broll].filter((v) => ACTIVE.has(v.status))
+  const linkKind = classifyVideoLink({
+    hasRecordingSession: Boolean(video.recording_session_id),
+    isBrollLibrary: video.theme === 'client-broll-library',
+  })
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 animate-in fade-in slide-in-from-bottom-1 duration-300">
@@ -47,14 +52,25 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
       <div className="flex items-start gap-2">
         <ClientLogo name={client.name} logoUrl={client.logo_url} className="h-7 w-7 text-[9px]" />
         <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Idea</p>
           <Link href={`/produccion/idea/${video.id}`} className="block truncate text-sm font-semibold hover:text-primary">
             {video.title || 'Sin título'}
           </Link>
           <p className="truncate text-xs text-muted-foreground">{client.name}</p>
         </div>
-        <Badge variant="outline" className={cn('shrink-0 gap-1 whitespace-nowrap text-[10px]', type.color)}>
-          <TypeIcon className="h-3 w-3" /> {type.label}
-        </Badge>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <Badge variant="outline" className={cn('gap-1 whitespace-nowrap text-[10px]', type.color)}>
+            <TypeIcon className="h-3 w-3" /> {type.label}
+          </Badge>
+          <span className={cn(
+            'rounded-full border px-2 py-0.5 text-[10px] font-medium',
+            linkKind === 'linked'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+              : 'border-border bg-muted/40 text-muted-foreground',
+          )}>
+            {videoLinkLabel(linkKind)}
+          </span>
+        </div>
       </div>
 
       <p className={cn('line-clamp-2 text-xs', caption ? 'text-muted-foreground' : 'italic text-muted-foreground/50')}>
@@ -78,7 +94,7 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
         ) : (
           <div className="space-y-1.5">
             {source.map((v) => (
-              <MaterialRow key={v.id} video={v} />
+              <MaterialRow key={v.id} video={v} linkKind={linkKind} />
             ))}
           </div>
         )}
@@ -90,7 +106,7 @@ export function EditorVideoCard({ item }: { item: EditQueueItem }) {
   )
 }
 
-function MaterialRow({ video }: { video: ContentIdeaVideo }) {
+function MaterialRow({ video, linkKind }: { video: ContentIdeaVideo; linkKind: VideoLinkKind }) {
   const { toast } = useToast()
   // Both R2 buckets support signed preview via getVideoPreviewUrl.
   const isR2 = video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
@@ -122,6 +138,7 @@ function MaterialRow({ video }: { video: ContentIdeaVideo }) {
       <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-2 py-1.5">
         <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate text-xs">{video.name}</span>
+        <span className="shrink-0 whitespace-nowrap text-[10px] text-muted-foreground">{videoLinkLabel(linkKind)}</span>
         {isR2 && (
           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={togglePreview} disabled={loading}>
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : previewUrl ? <X className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}

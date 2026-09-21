@@ -36,6 +36,8 @@ export interface OnsiteShot {
   recorded: boolean
   /** Notas de quien grabó. No es el brief ni las correcciones de Revisión. */
   shootingNotes: string | null
+  /** Crudos vivos en content_idea_videos (kind=raw). Ausente si no se pidió el conteo. */
+  rawCount?: number
 }
 
 export interface ShotGroup {

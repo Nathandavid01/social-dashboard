@@ -24,11 +24,13 @@ function mat(kind: ContentIdeaVideo['kind'], i: number): ContentIdeaVideo {
   } as ContentIdeaVideo
 }
 
-function video(): PipelineVideo {
+function video(over: Partial<PipelineVideo> = {}): PipelineVideo {
   return {
     id: 'v1', client_id: 'c1', content_type: 'R', title: 'Reel 1', generated_caption: 'Mi caption',
     status: 'grabada', approval_status: 'pending', recording_date: null, publish_date: null,
+    recording_session_id: 's1',
     videos: { raw: [mat('raw', 0), mat('raw', 1)], broll: [mat('broll', 0)], edited: [] },
+    ...over,
   } as unknown as PipelineVideo
 }
 
@@ -55,6 +57,17 @@ describe('EditorVideoCard', () => {
     expect(screen.getByText('Anotaciones de grabación')).toBeInTheDocument()
     expect(screen.getByText(/Toma 2, mejor luz/)).toBeInTheDocument()
     expect(screen.getByText('raw-0.mp4')).toBeInTheDocument()
+  })
+
+  it('nombra la idea y marca cada archivo De la idea', () => {
+    render(<EditorVideoCard item={item} />)
+    expect(screen.getByText('Idea')).toBeInTheDocument()
+    expect(screen.getAllByText('De la idea').length).toBeGreaterThan(0)
+  })
+
+  it('marca Extra si el video no está ligado a una sesión', () => {
+    render(<EditorVideoCard item={{ ...item, video: video({ recording_session_id: null }) }} />)
+    expect(screen.getAllByText('Extra').length).toBeGreaterThan(0)
   })
 
   it('renders the edited uploader (video, multiple)', () => {

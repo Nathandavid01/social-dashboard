@@ -212,6 +212,22 @@ describe('groupEditorVideoBank', () => {
     expect(maria.clients[0].clips[0].title).toBe('Intro clínica')
     expect(maria.clients[0].clips[0].files.map((f) => f.name)).toEqual(['crudo.mp4'])
     expect(maria.clients[0].clips[0].shootingNotes).toBe('Toma 2, 35mm')
+    expect(maria.clients[0].clips[0].linkKind).toBe('extra')
+  })
+
+  it('un clip de sesión On Site queda De la idea, el del banco queda Extra', () => {
+    const rows = groupEditorVideoBank([
+      idea({ recording_session_id: 's1', title: 'Intro clínica' }),
+      idea({
+        id: 'i-extra',
+        title: 'Suelto',
+        recording_session_id: null,
+        videos: [raw({ id: 'vx', idea_id: 'i-extra', name: 'extra.mp4' })],
+      }),
+    ])
+    const clips = rows.flatMap((r) => r.clients.flatMap((c) => c.clips))
+    expect(clips.find((c) => c.ideaId === 'i1')?.linkKind).toBe('linked')
+    expect(clips.find((c) => c.ideaId === 'i-extra')?.linkKind).toBe('extra')
   })
 
   it('lleva quién reclamó el corte (no el asignado) para el badge En edición', () => {

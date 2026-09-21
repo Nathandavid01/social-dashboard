@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.94 — Para quién se sube y de qué idea es</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --emerald:#34d399; --amber:#fbbf24; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 24px 16px 48px; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.02em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0 0 22px; line-height: 1.5; }
+    .grid { display: grid; gap: 18px; }
+    @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+    .card { background: linear-gradient(180deg, #1a1408, var(--card)); border: 1px solid #d4af3766; border-radius: 16px; padding: 16px; }
+    .card.dark { background: #12161a; border-color: #2a2f36; }
+    h2 { font-size: 20px; margin: 4px 0 8px; }
+    p.lead { margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+    .target { background: #0d0d0d; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; margin-top: 8px; }
+    .pill { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 3px 8px; white-space: nowrap; }
+    .ok { color: #6ee7b7; background: #34d3991a; border: 1px solid #34d3994d; }
+    .wait { color: #fcd34d; background: #fbbf241a; border: 1px solid #fbbf244d; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .file { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 12px; margin-top: 6px; }
+    .drop { border: 1px dashed #3a3a3a; border-radius: 12px; padding: 16px; text-align: center; margin-top: 12px; }
+    .btn { width: 100%; min-height: 44px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--gold); color: #111; font-weight: 700; }
+    .thumb { height: 110px; border-radius: 10px; background: linear-gradient(135deg, #1e293b, #000); display: grid; place-items: center; color: #94a3b8; font-size: 11px; }
+    .idea { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; margin: 10px 0 2px; }
+    .title { font-size: 14px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>On Site y Pipeline · ya se ve la idea</h1>
+    <p class="sub">v5.95 — El videógrafo no sube a ciegas: ve cliente, sesión, qué toma falta y lo que ya subió. El editor ve el título de la idea, si el archivo es de esa toma o extra, y <strong>En edición</strong> si alguien ya lo reclamó.</p>
+    <div class="grid">
+      <section class="card">
+        <p class="label">Puerta principal · /onsite</p>
+        <h2>Subir crudo</h2>
+        <p class="lead">Cliente → sesión de hoy → videos. Entran al Pipeline como crudo.</p>
+        <div class="target">
+          <p class="label" style="color:#a6a6a6">Subiendo para</p>
+          <p style="margin:4px 0 0;font-weight:600">Blue Chiropractic · Mañana Arecibo · 2 ideas</p>
+          <div class="row"><span>Intro Patricia</span><span class="pill ok">Ya hay crudo</span></div>
+          <div class="row"><span>Tour de sala</span><span class="pill wait">Falta crudo</span></div>
+          <p class="label" style="color:#a6a6a6;margin-top:12px">Subido en esta sesión</p>
+          <div class="file"><span>IMG_8841.MOV</span><span class="muted">Subido · Intro Patricia</span></div>
+        </div>
+        <div class="drop">
+          <p style="margin:0;font-weight:600">Arrastra los videos o elige archivos</p>
+          <p class="muted">mp4, mov, webm… Se suben como crudo.</p>
+        </div>
+        <button class="btn" type="button">Subir crudo</button>
+      </section>
+      <section class="card dark">
+        <p class="label">Editor · /pipeline</p>
+        <h2>Banco de videos crudos</h2>
+        <p class="lead">Cada carátula dice de qué idea es el archivo.</p>
+        <div class="thumb">Crudo</div>
+        <p class="idea">Idea</p>
+        <p class="title">Intro Patricia</p>
+        <span class="pill ok">De la idea</span>
+        <span class="pill" style="color:#7dd3fc;background:#0ea5e91a;border:1px solid #0ea5e94d;margin-left:6px">En edición — María</span>
+        <p class="muted" style="margin:8px 0 0">IMG_8841.MOV · Grabó Neitan · Empezar edición</p>
+        <div style="margin-top:16px;border-top:1px solid #2a2f36;padding-top:12px">
+          <p class="idea">Idea suelta del banco</p>
+          <p class="title">Toma patio</p>
+          <span class="pill" style="color:#cbd5e1;background:#ffffff0d;border:1px solid #ffffff26">Extra</span>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
