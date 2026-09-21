@@ -40,7 +40,7 @@ const editedIdea = {
       storage_provider: 'entregas-r2',
       status: 'uploaded',
       drive_file_id: 'key',
-      uploaded_at: '2026-09-19T10:00:00Z',
+      uploaded_at: `${publishThisWeek}T10:00:00Z`,
     } as any,
   ],
 } as any

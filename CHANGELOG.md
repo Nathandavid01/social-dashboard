@@ -4,7 +4,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v5.12 — 2026-09-21
+## v5.92 — 2026-09-21
 
 **Panel en el teléfono: toca video, toca el día y Agendar.**
 - En `/pool` ya no hace falta arrastrar. Eliges un video **Listo**, tocas la fecha del calendario y el botón **Agendar**.
@@ -12,7 +12,14 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - En pantalla grande el arrastrar al día sigue igual. Sin Agendar no se publica.
 - Owner y supervisor agendan; copy solo mira.
 
-![Agendar en el teléfono](/changelog/v5.12-mobile-agendar.png)
+![Agendar en el teléfono](/changelog/v5.92-mobile-agendar.png)
+
+## v5.91 — 2026-09-21
+
+**CI avisa si el Panel (`/pool`) se cae con error 500.**
+- Tras un deploy o preview, un smoke pega `/pool` (redirect a login vale) y `/api/health/pool` (sin login).
+- Si responde 500 — por ejemplo un preview sin env — la prueba falla. Sin URL de preview, se omite; no pide secretos de Supabase.
+- El health público no toca la base: el Panel sigue pidiendo `posting.read` para ver o agendar.
 
 ## v5.9 — 2026-09-21
 
