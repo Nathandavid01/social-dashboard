@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({
   claimed: [{ id: 'idea' }] as Array<{ id: string }>,
   recordFail: false,
   post: vi.fn(),
+  update: vi.fn(),
   health: vi.fn(),
 }))
 
@@ -19,7 +20,14 @@ vi.mock('@/lib/auth/server', () => ({
   currentUserHas: vi.fn(async () => true),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
-vi.mock('@/lib/metricool/post', () => ({ createDraftPost: h.post }))
+vi.mock('@/lib/metricool/post', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/metricool/post')>()
+  return {
+    ...actual,
+    createDraftPost: h.post,
+    updateScheduledPost: h.update,
+  }
+})
 vi.mock('@/lib/integrations/video-health', () => ({ checkVideoPlayable: h.health }))
 vi.mock('@/lib/integrations/r2', () => ({ r2PublicUrl: () => 'https://pipeline.example/edited.mp4' }))
 vi.mock('@/lib/integrations/entregas-r2', () => ({
@@ -84,6 +92,7 @@ beforeEach(() => {
   h.claimed = [{ id: 'idea' }]
   h.recordFail = false
   h.post.mockReset().mockResolvedValue({ data: { id: 44, uuid: 'u-44' } })
+  h.update.mockReset().mockResolvedValue({ data: { id: 99, uuid: 'u-44' } })
   h.health.mockReset().mockResolvedValue({ ok: true })
   h.videos = [{
     id: 'vid',
@@ -183,14 +192,57 @@ describe('schedulePoolIdea', () => {
     expect(h.post.mock.calls[0][0]).toBe('Hook del reel')
   })
 
-  it('Agendado se reprograma sin un segundo POST a Metricool', async () => {
+  it('Agendado se reprograma con PUT a Metricool y guarda el id nuevo', async () => {
     h.idea.metricool_post_id = 44
+    h.idea.metricool_uuid = 'u-44'
     h.idea.posted_at = '2026-09-20T10:00:00Z'
     const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-25' })
     expect(res).toMatchObject({ ok: true, state: 'agendado', rescheduled: true })
     expect(h.post).not.toHaveBeenCalled()
-    expect(h.writes).toEqual([expect.objectContaining({ publish_date: '2026-09-25' })])
-    expect(h.writes[0]).not.toHaveProperty('metricool_post_id')
+    expect(h.update).toHaveBeenCalledWith(
+      44,
+      'blog-ai',
+      expect.objectContaining({
+        id: 44,
+        uuid: 'u-44',
+        text: 'Caption listo',
+        media: ['https://entregas.example/edited.mp4'],
+        providers: [{ network: 'instagram' }],
+        publicationDate: {
+          dateTime: '2026-09-25T09:15:00',
+          timezone: 'America/Puerto_Rico',
+        },
+        autoPublish: true,
+      }),
+    )
+    expect(h.writes).toEqual([
+      expect.objectContaining({
+        publish_date: '2026-09-25',
+        metricool_post_id: 99,
+        metricool_uuid: 'u-44',
+      }),
+    ])
+  })
+
+  it('Agendado sin metricool_post_id no inventa un post ni mueve la fecha', async () => {
+    h.idea.metricool_post_id = null
+    h.idea.posted_at = '2026-09-20T10:00:00Z'
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-25' })
+    expect(res.error).toMatch(/metricool_post_id|Metricool/i)
+    expect(h.post).not.toHaveBeenCalled()
+    expect(h.update).not.toHaveBeenCalled()
+    expect(h.writes).toEqual([])
+  })
+
+  it('si el PUT a Metricool falla no toca publish_date local', async () => {
+    h.idea.metricool_post_id = 44
+    h.idea.metricool_uuid = 'u-44'
+    h.idea.posted_at = '2026-09-20T10:00:00Z'
+    h.update.mockRejectedValue(new Error('Metricool down'))
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-25' })
+    expect(res.error).toMatch(/Metricool|reprogram/i)
+    expect(h.post).not.toHaveBeenCalled()
+    expect(h.writes).toEqual([])
   })
 
   it('no crea otro post si el claim ya está tomado', async () => {

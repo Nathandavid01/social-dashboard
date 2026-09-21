@@ -110,7 +110,7 @@ describe('schedule gates', () => {
     expect(canCreateMetricoolSchedule('publicado', 'ai')).toBe(false)
   })
 
-  it('Agendado se puede reprogramar sin un segundo POST', () => {
+  it('Agendado se puede reprogramar (PUT, no un segundo POST)', () => {
     expect(canReschedulePoolIdea('agendado')).toBe(true)
     expect(canReschedulePoolIdea('listo')).toBe(false)
     expect(canReschedulePoolIdea('publicado')).toBe(false)

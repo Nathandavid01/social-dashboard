@@ -102,6 +102,8 @@ export function ClientPoolPanelView({
       if (res.error) {
         setPanel(prev)
         toast({ title: 'No se pudo agendar', description: res.error, variant: 'destructive' })
+      } else if (res.rescheduled) {
+        toast({ title: 'Fecha actualizada en Metricool', description: 'el post ya agendado cambió de día' })
       } else {
         toast({
           title: 'Borrador en Metricool',
@@ -127,7 +129,8 @@ export function ClientPoolPanelView({
               Toca un video Listo, un día y Agendar: se crea un borrador en Metricool.
             </span>
             <span className="hidden md:inline">
-              Arrastra un video al calendario: se crea un <strong>borrador</strong> en Metricool. El live se confirma ahí.
+              Arrastra un Listo: se crea un <strong>borrador</strong> en Metricool.
+              Un Agendado a otro día cambia la fecha del post ya existente.
             </span>
           </p>
         </div>
@@ -321,6 +324,38 @@ function PoolCard({
   )
 }
 
+function CalendarCard({
+  video,
+  canSchedule,
+}: {
+  video: PoolVideo
+  canSchedule: boolean
+}) {
+  const canDrag = canSchedule && video.state === 'agendado'
+  return (
+    <div
+      data-testid={video.state === 'agendado' ? `pool-agendado-${video.id}` : undefined}
+      draggable={canDrag}
+      onDragStart={(e) => {
+        if (!canDrag) return
+        e.dataTransfer.setData('text/plain', video.id)
+        e.dataTransfer.effectAllowed = 'move'
+      }}
+      className={cn('space-y-1', canDrag && 'cursor-grab active:cursor-grabbing')}
+    >
+      {canDrag && (
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <GripVertical className="h-3 w-3" aria-hidden="true" />
+          Arrastra a otro día
+        </div>
+      )}
+      <Caratula video={video} className="aspect-[9/16] w-full" />
+      <p className="truncate text-[11px] font-medium">{video.title}</p>
+      <StateBadge state={video.state} fromHere={video.scheduledFromHere} review={video.needsMetricoolReview} />
+    </div>
+  )
+}
+
 function DayCell({
   date,
   items,
@@ -368,10 +403,8 @@ function DayCell({
       </p>
       <ul className="mt-2 space-y-2">
         {items.map((v) => (
-          <li key={v.id} className="space-y-1">
-            <Caratula video={v} className="aspect-[9/16] w-full" />
-            <p className="truncate text-[11px] font-medium">{v.title}</p>
-            <StateBadge state={v.state} fromHere={v.scheduledFromHere} review={v.needsMetricoolReview} />
+          <li key={v.id}>
+            <CalendarCard video={v} canSchedule={canSchedule} />
           </li>
         ))}
       </ul>

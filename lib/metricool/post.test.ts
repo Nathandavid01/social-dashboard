@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createDraftPost, postFormatData } from './post'
+import { createDraftPost, postFormatData, updateScheduledPost } from './post'
 
 function captureFetch() {
   const spy = vi.fn(async () => ({ ok: true, json: async () => ({ data: { id: 1, uuid: 'u' } }) }))
@@ -149,6 +149,48 @@ describe('createDraftPost', () => {
       ],
     })
   })
+
+describe('updateScheduledPost', () => {
+  it('PUTs the full post (text/media/providers/uuid) to /v2/scheduler/posts/{id}', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({ data: { id: 99, uuid: 'u-44' } }) }))
+    vi.stubGlobal('fetch', spy)
+
+    const res = await updateScheduledPost(44, 'blog-9', {
+      id: 44,
+      uuid: 'u-44',
+      text: 'Caption listo',
+      draft: false,
+      autoPublish: true,
+      providers: [{ network: 'instagram' }],
+      publicationDate: { dateTime: '2026-09-25T09:15:00', timezone: 'America/Puerto_Rico' },
+      media: ['https://entregas.example/edited.mp4'],
+      instagramData: { type: 'REEL', showReelOnFeed: true },
+    })
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    const [url, init] = spy.mock.calls[0] as unknown as [string, { method: string; body: string }]
+    expect(url).toContain('/v2/scheduler/posts/44')
+    expect(url).toContain('blogId=blog-9')
+    expect(url).toContain('userId=uid')
+    expect(init.method).toBe('PUT')
+    const b = JSON.parse(init.body)
+    expect(b.uuid).toBe('u-44')
+    expect(b.text).toBe('Caption listo')
+    expect(b.media).toEqual(['https://entregas.example/edited.mp4'])
+    expect(b.providers).toEqual([{ network: 'instagram' }])
+    expect(b.publicationDate).toEqual({
+      dateTime: '2026-09-25T09:15:00',
+      timezone: 'America/Puerto_Rico',
+    })
+    expect(b.autoPublish).toBe(true)
+    expect(res.data?.id).toBe(99)
+  })
+
+  it('throws when Metricool credentials are not configured', async () => {
+    delete process.env.METRICOOL_TOKEN
+    await expect(updateScheduledPost(44, 'blog-9', { text: 'x' })).rejects.toThrow(/credentials/i)
+  })
+})
 
 describe('postFormatData', () => {
   it('maps a Reel (R) to REEL on IG (+showReelOnFeed) and FB', () => {
