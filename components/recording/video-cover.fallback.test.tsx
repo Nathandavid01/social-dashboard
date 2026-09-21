@@ -14,6 +14,9 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock('@/lib/actions/video-thumbs', () => ({ getPipelineVideoThumbViewUrls: mocks.thumbs }))
 vi.mock('@/lib/actions/video-preview', () => ({ getVideoPreviewUrl: mocks.preview }))
+vi.mock('@/lib/utils/persist-pool-poster', () => ({
+  persistPoolPosterFromCanvas: vi.fn(async () => ({ ok: false })),
+}))
 
 describe('VideoCover fallback', () => {
   it('sin thumbs guardados monta el video oculto para pintar un frame real', async () => {

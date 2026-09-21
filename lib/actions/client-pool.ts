@@ -12,7 +12,12 @@ import { resolvePlatforms, resolveVideoForPublish } from '@/lib/utils/idea-posti
 import { automaticPublishSchedule } from '@/lib/utils/automatic-publish-schedule'
 import { resolveSlotTime } from '@/lib/utils/posting-schedule'
 import { rangoSemana, diaDeFecha } from '@/lib/entregas/dias'
-import { coverUrlForIdea } from '@/lib/pipeline/editor-history'
+import { getPoolCoverUrls } from '@/lib/actions/pool-covers'
+import {
+  applySignedPoolCaratula,
+  resolvePoolCaratula,
+  type PoolVideoCoverInput,
+} from '@/lib/utils/pool-caratula'
 import {
   buildClientPoolPanel,
   canCreateMetricoolSchedule,
@@ -22,7 +27,6 @@ import {
   type PoolClientInput,
   type PoolIdeaInput,
 } from '@/lib/utils/client-pool-state'
-import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export type SchedulePoolResult = {
   ok?: true
@@ -48,10 +52,6 @@ function publicVideoUrl(video: { drive_file_id: string | null; storage_provider?
     : r2PublicUrl(video.drive_file_id)
 }
 
-function coverVideoIdOf(videos: Array<{ id: string; kind?: string | null; status?: string | null }>): string | null {
-  const edited = videos.find((v) => v.kind === 'edited' && v.status !== 'archived' && v.status !== 'failed')
-  return edited?.id ?? videos.find((v) => v.status !== 'archived' && v.status !== 'failed')?.id ?? null
-}
 
 /**
  * Drag Listo → fecha: agenda en Metricool (blog_id del cliente).
@@ -291,8 +291,19 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
     edit_mode: ((c as { edit_mode?: 'ai' | 'human' | null }).edit_mode ?? 'human') as 'ai' | 'human',
   }))
 
+  const resolvedByIdea = new Map<string, ReturnType<typeof resolvePoolCaratula>>()
+  const thumbVideoIds: string[] = []
+  for (const raw of ideas) {
+    const resolved = resolvePoolCaratula((raw.videos ?? []) as PoolVideoCoverInput[])
+    resolvedByIdea.set(raw.id, resolved)
+    if (resolved.coverThumb) thumbVideoIds.push(resolved.coverThumb.videoId)
+  }
+  const signed = thumbVideoIds.length > 0
+    ? ((await getPoolCoverUrls(thumbVideoIds)).urls ?? {})
+    : {}
+
   const ideaRows: PoolIdeaInput[] = ideas.map((raw) => {
-    const videos = (raw.videos ?? []) as IdeaWithPipeline['videos']
+    const cover = applySignedPoolCaratula(resolvedByIdea.get(raw.id)!, signed)
     return {
       id: raw.id,
       client_id: raw.client_id as string,
@@ -307,8 +318,8 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
       staff_client_approval: (raw.staff_client_approval as string | null) ?? null,
       client_review_status: (raw.client_review_status as string | null) ?? null,
       generated_caption: (raw.generated_caption as string | null) ?? null,
-      coverVideoId: coverVideoIdOf(videos ?? []),
-      coverUrl: coverUrlForIdea({ videos } as IdeaWithPipeline),
+      coverVideoId: cover.coverVideoId,
+      coverUrl: cover.coverUrl,
     }
   })
 

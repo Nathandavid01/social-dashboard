@@ -18,13 +18,17 @@ vi.mock('@/components/entregas/enviar-al-cliente', () => ({
 }))
 
 import { ReciboBoard } from './recibo-board'
+import { rangoSemana } from '@/lib/entregas/dias'
+
+/** Recibo filtra "Solo esta semana" por defecto; la fecha debe caer en la semana actual. */
+const WEEK = rangoSemana(new Date(), 0)
 
 const editedIdea = {
   id: 'i1',
   client_id: 'c1',
   title: 'Reel playa',
   status: 'producida',
-  publish_date: '2026-09-19',
+  publish_date: WEEK.desde,
   manual_posted_status: null,
   staff_client_approval: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },

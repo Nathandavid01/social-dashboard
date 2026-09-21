@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.10 — 2026-09-21
+
+**Panel: carátula real del video, no un recuadro vacío.**
+- En `/pool` cada pieza del calendario y del pool **Listo** muestra la **carátula** del video: miniatura ya guardada en R2 (pipeline o Entregas) o el thumbnail de Drive.
+- Si no hay foto guardada, se saca un fotograma del mp4 y se intenta guardar como poster en el mismo video (sin FK nueva).
+- Solo si eso falla aparece **Sin carátula**.
+
+![Carátula real en el Panel](/changelog/v5.10-panel-caratula.png)
+
+Vista: [preview HTML](/previews/v5.10-panel-caratula.html)
+
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**
