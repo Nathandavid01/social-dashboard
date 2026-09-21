@@ -5,6 +5,15 @@ const cookieDelete = vi.fn()
 const signInWithPassword = vi.fn(
   async (_d: unknown): Promise<{ error: { message: string } | null }> => ({ error: null })
 )
+const supabaseSignOut = vi.fn(async () => ({ error: null }))
+const createClient = vi.fn(
+  async (_opts?: { sessionOnly?: boolean }) => ({
+    auth: {
+      signInWithPassword: (d: unknown) => signInWithPassword(d),
+      signOut: () => supabaseSignOut(),
+    },
+  })
+)
 const redirectMock = vi.fn((url: string) => {
   throw new Error(`NEXT_REDIRECT:${url}`)
 })
@@ -15,12 +24,10 @@ vi.mock('next/headers', () => ({
   cookies: async () => ({ set: cookieSet, delete: cookieDelete, get: () => undefined, getAll: () => [] }),
 }))
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({
-    auth: { signInWithPassword: (d: unknown) => signInWithPassword(d) },
-  }),
+  createClient: (opts?: { sessionOnly?: boolean }) => createClient(opts),
 }))
 
-import { signIn } from './auth'
+import { signIn, signOut } from './auth'
 
 function form(entries: Record<string, string>) {
   const fd = new FormData()
@@ -32,33 +39,30 @@ beforeEach(() => {
   cookieSet.mockReset()
   cookieDelete.mockReset()
   signInWithPassword.mockReset().mockResolvedValue({ error: null })
+  supabaseSignOut.mockReset().mockResolvedValue({ error: null })
+  createClient.mockClear()
   redirectMock.mockClear()
 })
 
 describe('signIn — persistencia de sesión', () => {
-  it('con "mantener sesión" marcado borra el marcador de sesión temporal', async () => {
+  it('siempre persiste: borra el marcador y no crea cookies de sesión', async () => {
     await expect(
       signIn(form({ email: 'a@b.com', password: 'x', remember: '1' }))
     ).rejects.toThrow('NEXT_REDIRECT:/pipeline')
+    expect(createClient).toHaveBeenCalled()
+    expect(createClient.mock.calls[0]?.[0]?.sessionOnly).not.toBe(true)
     expect(cookieDelete).toHaveBeenCalledWith('nm_session_only')
     expect(cookieSet).not.toHaveBeenCalledWith('nm_session_only', expect.anything(), expect.anything())
   })
 
-  it('sin "mantener sesión" pone el marcador como cookie de sesión (sin maxAge)', async () => {
+  it('persiste aunque el form no mande remember (no hay opt-out)', async () => {
     await expect(signIn(form({ email: 'a@b.com', password: 'x' }))).rejects.toThrow(
       'NEXT_REDIRECT:/pipeline'
     )
-    expect(cookieSet).toHaveBeenCalledWith(
-      'nm_session_only',
-      '1',
-      expect.objectContaining({ httpOnly: true, sameSite: 'lax', path: '/' })
-    )
-    const options = cookieSet.mock.calls.find((c) => c[0] === 'nm_session_only')?.[2] as
-      | Record<string, unknown>
-      | undefined
-    expect(options).toBeDefined()
-    expect(options).not.toHaveProperty('maxAge')
-    expect(options).not.toHaveProperty('expires')
+    expect(createClient).toHaveBeenCalled()
+    expect(createClient.mock.calls[0]?.[0]?.sessionOnly).not.toBe(true)
+    expect(cookieDelete).toHaveBeenCalledWith('nm_session_only')
+    expect(cookieSet).not.toHaveBeenCalledWith('nm_session_only', expect.anything(), expect.anything())
   })
 
   it('si las credenciales fallan devuelve el error y no toca el marcador', async () => {
@@ -67,5 +71,13 @@ describe('signIn — persistencia de sesión', () => {
     expect(result).toEqual({ error: 'Invalid login credentials' })
     expect(cookieSet).not.toHaveBeenCalled()
     expect(cookieDelete).not.toHaveBeenCalled()
+  })
+})
+
+describe('signOut', () => {
+  it('cierra la sesión de Supabase, borra el marcador y manda a /login', async () => {
+    await expect(signOut()).rejects.toThrow('NEXT_REDIRECT:/login')
+    expect(supabaseSignOut).toHaveBeenCalledTimes(1)
+    expect(cookieDelete).toHaveBeenCalledWith('nm_session_only')
   })
 })

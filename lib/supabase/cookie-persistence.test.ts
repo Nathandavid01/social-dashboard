@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { SESSION_ONLY_COOKIE, applyCookiePersistence } from './cookie-persistence'
+import {
+  SESSION_ONLY_COOKIE,
+  applyCookiePersistence,
+  shouldUseSessionOnlyCookies,
+} from './cookie-persistence'
 
 describe('applyCookiePersistence', () => {
   it('strips maxAge and expires when the session is browser-only', () => {
@@ -22,5 +26,12 @@ describe('applyCookiePersistence', () => {
 
   it('exposes the marker cookie name', () => {
     expect(SESSION_ONLY_COOKIE).toBe('nm_session_only')
+  })
+})
+
+describe('shouldUseSessionOnlyCookies', () => {
+  it('never downgrades auth cookies, even if a leftover marker is present', () => {
+    expect(shouldUseSessionOnlyCookies(true)).toBe(false)
+    expect(shouldUseSessionOnlyCookies(false)).toBe(false)
   })
 })

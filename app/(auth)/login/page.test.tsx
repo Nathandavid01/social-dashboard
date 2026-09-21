@@ -8,15 +8,16 @@ import LoginPage from './page'
 afterEach(cleanup)
 
 describe('LoginPage — oauth_error', () => {
-  it('muestra el error de Google que trae el callback', () => {
+  it('muestra el error del callback sin mencionar Google', () => {
     render(<LoginPage searchParams={{ oauth_error: 'provider is not enabled' }} />)
-    expect(screen.getByText(/no se pudo entrar con google/i)).toBeInTheDocument()
+    expect(screen.getByText(/no se pudo iniciar sesión/i)).toBeInTheDocument()
     expect(screen.getByText(/provider is not enabled/i)).toBeInTheDocument()
+    expect(screen.queryByText(/google/i)).not.toBeInTheDocument()
     expect(screen.getByTestId('form')).toBeInTheDocument()
   })
 
   it('sin oauth_error no muestra el banner', () => {
     render(<LoginPage />)
-    expect(screen.queryByText(/no se pudo entrar con google/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/no se pudo iniciar sesión/i)).not.toBeInTheDocument()
   })
 })

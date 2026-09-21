@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { areaForPath, canAccessPath } from '@/lib/auth/areas'
-import { SESSION_ONLY_COOKIE, applyCookiePersistence } from '@/lib/supabase/cookie-persistence'
+import { SESSION_ONLY_COOKIE, applyCookiePersistence, shouldUseSessionOnlyCookies } from '@/lib/supabase/cookie-persistence'
 import { VIEW_AS_COOKIE, resolveEffectiveRole, canStartViewAs, isViewAsEditorId, viewAsTargetOk } from '@/lib/auth/view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
 import { isPublicHealthPath } from '@/lib/utils/pool-smoke'
@@ -32,9 +32,11 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // "Mantener sesión iniciada" apagado: token refreshes must keep the
-          // auth cookies session-scoped, or the first refresh re-persists them.
-          const sessionOnly = request.cookies.get(SESSION_ONLY_COOKIE) !== undefined
+          // Always persist. A leftover nm_session_only marker must not strip
+          // maxAge on refresh — that is what dropped sessions after login.
+          const sessionOnly = shouldUseSessionOnlyCookies(
+            request.cookies.get(SESSION_ONLY_COOKIE) !== undefined
+          )
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>

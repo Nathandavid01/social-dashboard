@@ -1,10 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { applyCookiePersistence } from './cookie-persistence'
+import { applyCookiePersistence, shouldUseSessionOnlyCookies } from './cookie-persistence'
 
 export async function createClient(opts?: { sessionOnly?: boolean }) {
   const cookieStore = await cookies()
-  const sessionOnly = opts?.sessionOnly === true
+  const sessionOnly = shouldUseSessionOnlyCookies(opts?.sessionOnly === true)
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

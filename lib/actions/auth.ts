@@ -7,10 +7,9 @@ import { createClient } from '@/lib/supabase/server'
 import { SESSION_ONLY_COOKIE } from '@/lib/supabase/cookie-persistence'
 
 export async function signIn(formData: FormData) {
-  // "Mantener sesión iniciada": unchecked → auth cookies become browser-session
-  // cookies, plus a marker so the middleware keeps them that way on refresh.
-  const remember = Boolean(formData.get('remember'))
-  const supabase = await createClient({ sessionOnly: !remember })
+  // Always persist: long-lived auth cookies. Clear any leftover session-only
+  // marker so middleware cannot downgrade the next token refresh.
+  const supabase = await createClient()
 
   const data = {
     email: formData.get('email') as string,
@@ -24,12 +23,7 @@ export async function signIn(formData: FormData) {
   }
 
   const cookieStore = await cookies()
-  if (remember) {
-    cookieStore.delete(SESSION_ONLY_COOKIE)
-  } else {
-    // No maxAge on purpose — the marker itself dies with the browser session.
-    cookieStore.set(SESSION_ONLY_COOKIE, '1', { httpOnly: true, sameSite: 'lax', path: '/' })
-  }
+  cookieStore.delete(SESSION_ONLY_COOKIE)
 
   revalidatePath('/', 'layout')
   redirect('/pipeline')
@@ -81,6 +75,8 @@ export async function updatePassword(input: {
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  const cookieStore = await cookies()
+  cookieStore.delete(SESSION_ONLY_COOKIE)
   revalidatePath('/', 'layout')
   redirect('/login')
 }

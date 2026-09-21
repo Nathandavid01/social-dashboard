@@ -30,7 +30,7 @@ export default function LoginPage({
       )}
       {searchParams?.oauth_error && (
         <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          No se pudo entrar con Google: {searchParams.oauth_error}
+          No se pudo iniciar sesión: {searchParams.oauth_error}
         </div>
       )}
       <LoginForm />
