@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.100 — 2026-09-21
+
+**Arrastra un Agendado a otro día: también cambia en Metricool.**
+- En el Panel (`/pool`), un video **Agendado** se puede arrastrar a otra fecha.
+- Esa fecha se actualiza en **Metricool** (el post ya existente), no solo en el calendario del dashboard.
+- Si el video no tiene `metricool_post_id`, sale un error y no se inventa un post nuevo.
+- **Publicado** sigue bloqueado. Listo → primer agendado sigue siendo borrador (v5.99).
+
+![Reprogramar Agendado en Metricool](/changelog/v5.100-reschedule-metricool.png)
+
 ## v5.99 — 2026-09-21
 
 **Panel: arrastrar Listo crea un borrador en Metricool, no publica solo.**

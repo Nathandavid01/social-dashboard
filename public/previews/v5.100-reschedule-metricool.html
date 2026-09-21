@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.100 — Reprogramar Agendado en Metricool</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --amber:#fbbf24; --green:#6ee7b7; --rose:#fca5a5; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:960px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .states { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px; }
+    @media (max-width:720px) { .states { grid-template-columns:1fr; } }
+    .cal { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .day { background:var(--card); border:1px solid var(--border); border-radius:10px; min-height:160px; padding:8px; }
+    .day.target { border-color:var(--gold); background:#16120a; }
+    .day b { font-size:11px; color:var(--muted); }
+    .thumb { height:72px; border-radius:8px; background:#1a1a1a; display:flex; align-items:center; justify-center; justify-content:center; font-size:10px; color:var(--muted); margin:8px 0 4px; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; }
+    .ag { color:#082f49; background:var(--sky); }
+    .pub { color:#052e1f; background:var(--green); }
+    .from { font-size:10px; color:var(--sky); margin:4px 0 0; }
+    .drag { font-size:10px; color:var(--muted); margin-top:4px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+    .toast { margin-top:12px; border-radius:10px; padding:10px 12px; font-size:12px; }
+    .ok { background:#052e1f; color:var(--green); }
+    .err { background:#3f1212; color:var(--rose); }
+    .arrow { text-align:center; color:var(--gold); font-size:22px; margin:8px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · arrastrar Agendado cambia Metricool</h1>
+    <p class="sub">Un video ya <strong>Agendado</strong> se arrastra a otro día. El dashboard no se queda solo con la fecha local: actualiza el post existente en Metricool. Si no hay <strong>metricool_post_id</strong>, error — no se inventa un post nuevo.</p>
+
+    <div class="states">
+      <div>
+        <p class="label">Antes · miércoles</p>
+        <div class="cal">
+          <div class="day">
+            <b>Mié 23</b>
+            <div class="thumb">carátula</div>
+            <div>Reel Arecibo</div>
+            <span class="chip ag">Agendado</span>
+            <p class="from">agendado desde aquí</p>
+            <p class="drag">↕ Arrastra a otro día</p>
+          </div>
+          <div class="day"><b>Jue 24</b></div>
+          <div class="day"><b>Vie 25</b></div>
+          <div class="day">
+            <b>Sáb 26</b>
+            <div class="thumb">carátula</div>
+            <div>Tip del viernes</div>
+            <span class="chip pub">Publicado</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="label">Después · viernes (Metricool actualizado)</p>
+        <div class="cal">
+          <div class="day"><b>Mié 23</b></div>
+          <div class="day"><b>Jue 24</b></div>
+          <div class="day target">
+            <b>Vie 25</b>
+            <div class="thumb">carátula</div>
+            <div>Reel Arecibo</div>
+            <span class="chip ag">Agendado</span>
+            <p class="from">fecha actualizada en Metricool</p>
+          </div>
+          <div class="day">
+            <b>Sáb 26</b>
+            <div class="thumb">carátula</div>
+            <div>Tip del viernes</div>
+            <span class="chip pub">Publicado</span>
+          </div>
+        </div>
+        <div class="toast ok">Fecha actualizada en Metricool — el post ya agendado cambió de día</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="label">Si falta metricool_post_id</p>
+      <p class="sub" style="margin:0 0 10px">No se mueve la fecha local ni se crea otro post. El equipo ve el error y revisa Metricool.</p>
+      <div class="toast err">No se pudo agendar — Este video no tiene un post en Metricool (falta metricool_post_id). No se reprogramó.</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -3,10 +3,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ClientPoolPanel } from '@/lib/utils/client-pool-state'
 
 const schedulePoolIdea = vi.fn()
+const toast = vi.fn()
 vi.mock('@/lib/actions/client-pool', () => ({
   schedulePoolIdea: (...a: unknown[]) => schedulePoolIdea(...a),
 }))
-vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 vi.mock('@/components/recording/video-cover', () => ({
   VideoCover: ({ title }: { title: string }) => <div data-testid="caratula">{title}</div>,
 }))
@@ -98,6 +99,7 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
 describe('ClientPoolPanelView', () => {
   beforeEach(() => {
     schedulePoolIdea.mockReset().mockResolvedValue({ ok: true, state: 'agendado' })
+    toast.mockReset()
   })
 
   it('muestra clientes, pool Listo, carátula y Revisar en Metricool', () => {
@@ -156,5 +158,36 @@ describe('ClientPoolPanelView', () => {
     expect(screen.queryByRole('button', { name: 'Agendar' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByTestId('pool-day-2026-09-25'))
     expect(schedulePoolIdea).not.toHaveBeenCalled()
+  })
+
+  it('al arrastrar un Agendado a otro día reprograma (no solo Listo)', async () => {
+    render(<ClientPoolPanelView data={panel()} canSchedule />)
+    const card = screen.getByTestId('pool-agendado-a1')
+    expect(card).toHaveAttribute('draggable', 'true')
+    fireEvent.drop(screen.getByTestId('pool-day-2026-09-25'), {
+      dataTransfer: { getData: () => 'a1' },
+    })
+    await waitFor(() => {
+      expect(schedulePoolIdea).toHaveBeenCalledWith({ ideaId: 'a1', date: '2026-09-25' })
+    })
+  })
+
+  it('si falta metricool_post_id muestra toast de error y no inventa éxito', async () => {
+    schedulePoolIdea.mockResolvedValue({
+      error: 'Este video no tiene un post en Metricool (falta metricool_post_id)',
+    })
+    render(<ClientPoolPanelView data={panel()} canSchedule />)
+    fireEvent.drop(screen.getByTestId('pool-day-2026-09-25'), {
+      dataTransfer: { getData: () => 'a1' },
+    })
+    await waitFor(() => {
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({
+        variant: 'destructive',
+        description: expect.stringMatching(/metricool_post_id/i),
+      }))
+    })
+    expect(toast).not.toHaveBeenCalledWith(expect.objectContaining({
+      title: expect.stringMatching(/Agendado en Metricool/i),
+    }))
   })
 })
