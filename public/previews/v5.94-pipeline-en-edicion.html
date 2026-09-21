@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>v5.94 · En edición en Pipeline</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0d0f;--card:#12161a;--line:#252a30;--muted:#8b949e;--gold:#c8a34a;--white:#f5f7fa;--sky:#7dd3fc}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:14px/1.45 Inter,system-ui,sans-serif}
+    .page{max-width:1100px;margin:auto;padding:32px 22px 64px}
+    h1{font-size:28px;letter-spacing:-.03em;margin:8px 0 0}
+    .eyebrow{color:var(--gold);font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+    .muted{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+    .col h2{font-size:13px;margin:0 0 10px}
+    .card{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+    .cover{height:88px;background:linear-gradient(135deg,#27465b,#111820);position:relative}
+    .tag{position:absolute;right:8px;top:8px;background:#090b0de6;padding:2px 6px;border-radius:4px;font-size:8px}
+    .copy{padding:10px 12px 12px}
+    .copy b{display:block;font-size:12px}
+    .row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+    .badge{border-radius:5px;padding:3px 6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .free{color:#8b949e}
+    .taken{background:#0ea5e926;color:var(--sky)}
+    .btn{border:1px solid #c8a34a66;background:#c8a34a1a;color:#d6b55f;border-radius:6px;padding:4px 8px;font-size:9px;font-weight:700}
+    .btn[disabled]{opacity:.45}
+    .ghost{background:none;border:0;color:#8b949e;text-decoration:underline;font-size:9px}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <p class="eyebrow">Nate Media · v5.94</p>
+  <h1>Se ve quién está cortando el video</h1>
+  <p class="muted">En Pipeline, un toque en <b>Empezar edición</b> marca el crudo. El resto del equipo ve el nombre y desde cuándo — sin Slack y sin pisarse el corte.</p>
+  <div class="grid">
+    <section class="col">
+      <h2>Libre — listo para tomar</h2>
+      <article class="card">
+        <div class="cover"><span class="tag">CRUDO</span></div>
+        <div class="copy">
+          <b>Baño y corte, antes y después</b>
+          <p class="muted" style="margin:4px 0 0;font-size:11px">Lucky Pet · Sin camarógrafo</p>
+          <div class="row">
+            <span class="badge free">Libre</span>
+            <button class="btn" type="button">Empezar edición</button>
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="col">
+      <h2>Tomado — no lo dupliques</h2>
+      <article class="card">
+        <div class="cover"><span class="tag">CRUDO</span></div>
+        <div class="copy">
+          <b>Testimonio de la dueña de Max</b>
+          <p class="muted" style="margin:4px 0 0;font-size:11px">Lucky Pet · Grabó Neitan</p>
+          <div class="row">
+            <span class="badge taken">En edición — María R. · hace 15 min</span>
+            <button class="btn" type="button" disabled>Empezar edición</button>
+          </div>
+          <p class="muted" style="margin:8px 0 0;font-size:11px">Si lo abandonas, <button class="ghost" type="button">Soltar</button> lo deja libre otra vez.</p>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+</body>
+</html>

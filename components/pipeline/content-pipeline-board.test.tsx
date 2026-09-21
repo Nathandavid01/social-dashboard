@@ -25,6 +25,18 @@ const { currentSearch, reset: resetNav, simulateBrowserBack } = nav as unknown a
 vi.mock('./new-video-dialog', () => ({ NewVideoDialog: () => <button>Nuevo video</button> }))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
+  useEffectiveUserId: () => 'ed-diego',
+  RoleGate: ({ children }: { children: unknown }) => children,
+}))
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => {
+    const channel = { on() { return this }, subscribe() { return this } }
+    return { channel: () => channel, removeChannel: () => undefined }
+  },
+}))
+vi.mock('@/lib/actions/pipeline-claim', () => ({
+  claimPipelineEdit: vi.fn(),
+  releasePipelineEdit: vi.fn(),
 }))
 const getClientBatchData = vi.fn(async (..._a: unknown[]) => ({ pipeline: { client: { id: 'x', name: 'X' }, videos: [], assets: [] }, plannedSlots: [] }))
 vi.mock('@/lib/actions/client-batch', () => ({ getClientBatchData: (...a: unknown[]) => getClientBatchData(...a) }))

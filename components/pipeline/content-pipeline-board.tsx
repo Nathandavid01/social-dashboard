@@ -1,6 +1,8 @@
 'use client'
 
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Search, ChevronDown, ChevronLeft, ChevronRight, GripVertical, Users, X, Building2, Check, Flag, Clapperboard, Columns3 } from 'lucide-react'
 import { cn, calendarDaysSince, formatDaysElapsedEs } from '@/lib/utils'
 import { panScrollLeft, isPanDrag } from '@/lib/utils/drag-scroll'
@@ -138,6 +140,19 @@ function ContentPipelineBoardInner({
   const [overrides, setOverrides] = useState<Record<string, BatchStageKey>>({})
   const [, startMove] = useTransition()
   const { toast } = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    const refresh = () => router.refresh()
+    const channel = supabase
+      .channel('pipeline-editing-claims')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'content_ideas' }, refresh)
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [router])
 
   // In-place full-screen overlay of a client's batch view (no navigation) —
   // "what's open" lives in the URL (?lote=&planificado=&fecha=&etiqueta=) so

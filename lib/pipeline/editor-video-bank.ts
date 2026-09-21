@@ -1,4 +1,5 @@
 import type { ContentIdeaVideo, IdeaWithPipeline, UserRole, UserStatus } from '@/lib/supabase/types'
+import { editingClaimFromFields, type EditingClaim } from '@/lib/pipeline/editing-claim'
 import { ROLE_LABEL } from '@/lib/auth/permissions'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { deadlineStatus, todayISOInTimeZone, type DeadlineStatus } from '@/lib/utils/deadlines'
@@ -45,6 +46,8 @@ export interface EditorBankClip {
   yours: boolean
   files: EditorBankFile[]
   queue: 'active' | 'waiting'
+  /** Quién está cortando ahora (independiente de assigned_to). */
+  editingClaim?: EditingClaim
 }
 
 export interface EditorBankNextSlot {
@@ -418,6 +421,11 @@ export function groupEditorVideoBank(
       yours: !waiting,
       files,
       queue: waiting ? 'waiting' : 'active',
+      editingClaim: editingClaimFromFields(
+        idea.editing_started_by,
+        idea.editing_started_at,
+        idea.editingClaimer?.full_name ?? profileNames[idea.editing_started_by ?? ''] ?? null,
+      ),
     })
   }
 
