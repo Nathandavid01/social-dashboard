@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.9 — Versión y CHANGELOG alineados</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0b0d0f; color: #f5f5f4; }
+    main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 15px; margin: 0; }
+    h2 { font-size: 22px; margin: 4px 0 16px; }
+    p { color: #a8a29e; font-size: 13px; line-height: 1.45; }
+    .muted { color: #78716c; font-size: 12px; }
+    .grid { display: grid; gap: 12px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { border-radius: 16px; padding: 16px; }
+    .fail { background: #12161a; border: 1px solid #ef444466; }
+    .pass { background: linear-gradient(180deg, #ca8a0426, #12161a); border: 1px solid #ca8a0466; }
+    .chip { display: inline-block; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+    .chip-fail { border: 1px solid #ef444455; background: #ef444418; color: #fca5a5; }
+    .chip-pass { border: 1px solid #10b98155; background: #10b98118; color: #6ee7b7; }
+    code { font-family: ui-monospace, monospace; font-size: 12px; color: #f5f5f4; }
+    ul { margin: 10px 0 0; padding-left: 18px; color: #d6d3d1; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">Vista de ejemplo · v5.9</p>
+    <h1>Novedades</h1>
+    <h2>El merge no pasa si la versión y el CHANGELOG no coinciden</h2>
+    <div class="grid">
+      <section class="card fail">
+        <span class="chip chip-fail">merge-gate · FAIL</span>
+        <p>Dos bloques <code>## v5.9</code> o <code>APP_VERSION = '5.8'</code> con CHANGELOG en v5.9.</p>
+        <ul>
+          <li>Headers duplicados</li>
+          <li>version.ts no coincide con la última entrada</li>
+        </ul>
+      </section>
+      <section class="card pass">
+        <span class="chip chip-pass">merge-gate · PASS</span>
+        <p>Una sola entrada <code>## v5.9</code> y <code>lib/version.ts</code> en <code>5.9</code>.</p>
+        <ul>
+          <li>Owner / supervisor / video / editor: mismo flujo</li>
+          <li>On Site, Revisión y Entregas no cambian</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

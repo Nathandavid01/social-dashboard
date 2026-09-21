@@ -16,14 +16,25 @@ These rules exist so **Nathan, Eric, or any contributor** cannot land broken sto
 ### Graph model (what “verified” means)
 
 ```
+version-hygiene  (CHANGELOG ## vX.Y headers unique; lib/version.ts APP_VERSION == latest header)
+        ↓
 static-db-relationships
         ↓
-unit-core-guards  (relationships + dual-R2 + migration plan + schema mocks)
+unit-core-guards  (relationships + dual-R2 + migration plan + schema mocks + version hygiene tests)
         ↓
 r2-inventory-dry-run  (lists remaining pipeline-r2 rows; needs Supabase env in CI secrets)
 ```
 
 All nodes must PASS. If any node fails, **merge is blocked**.
+
+### Version / CHANGELOG hygiene
+
+`npm run merge-gate` (node `version-hygiene`) fails if either is true:
+
+1. **Duplicate headers** — two or more `## vX.Y` (or `## vX.Y.Z`) blocks in `CHANGELOG.md`.
+2. **Version mismatch** — `APP_VERSION` in `lib/version.ts` is not the **first** (latest) `## vX.Y` header in `CHANGELOG.md`.
+
+Standalone: `node scripts/check-version-hygiene.mjs`. Tests: `scripts/check-version-hygiene.test.ts`.
 
 Local:
 
