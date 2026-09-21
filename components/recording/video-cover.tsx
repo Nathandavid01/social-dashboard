@@ -7,6 +7,7 @@ import { getPipelineVideoThumbViewUrls } from '@/lib/actions/video-thumbs'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { extractFramesFromVideoElement } from '@/lib/utils/video-frames-dom'
 import { evenTimestamps } from '@/lib/utils/video-frames'
+import { persistPoolPosterFromCanvas } from '@/lib/utils/persist-pool-poster'
 
 type CoverState =
   | { kind: 'loading' }
@@ -22,7 +23,16 @@ type CoverState =
  *     que tener una foto, no puede ser negro."
  * Cualquier fallo cae al placeholder sin romper la tarjeta.
  */
-export function VideoCover({ videoId, title }: { videoId: string; title: string }) {
+export function VideoCover({
+  videoId,
+  title,
+  persistPoster = false,
+}: {
+  videoId: string
+  title: string
+  /** Panel: guarda el frame extraído en thumb_keys del mismo video. */
+  persistPoster?: boolean
+}) {
   const [state, setState] = useState<CoverState>({ kind: 'loading' })
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -85,15 +95,26 @@ export function VideoCover({ videoId, title }: { videoId: string; title: string 
         }
       },
     })
-      .then((res) => {
-        if (alive && res.timestamps.length === 0) setState({ kind: 'none' })
+      .then(async (res) => {
+        if (!alive) return
+        if (res.timestamps.length === 0) {
+          setState({ kind: 'none' })
+          return
+        }
+        if (persistPoster) {
+          try {
+            await persistPoolPosterFromCanvas(canvasRef.current, videoId)
+          } catch {
+            /* la carátula en vivo ya está; guardar es extra */
+          }
+        }
       })
       .catch(() => {
         if (alive) setState({ kind: 'none' })
       })
 
     return () => { alive = false }
-  }, [state])
+  }, [state, persistPoster, videoId])
 
   if (state.kind === 'image') {
     return <Image src={state.url} alt={label} fill unoptimized sizes="(max-width: 640px) 100vw, 25vw" className="object-cover" />

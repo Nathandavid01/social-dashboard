@@ -124,4 +124,65 @@ describe('ClientPoolPanelView', () => {
       expect(schedulePoolIdea).toHaveBeenCalledWith({ ideaId: 'l1', date: '2026-09-25' })
     })
   })
+
+  it('prefiere la carátula real (URL) y no el placeholder', () => {
+    render(<ClientPoolPanelView data={panel({
+      clients: [{
+        client: {
+          id: 'ai',
+          name: 'Arecibo Lab',
+          posting_days: [3],
+          edit_mode: 'ai',
+        },
+        weekDates: ['2026-09-23'],
+        weekPosts: [],
+        hidePool: false,
+        pool: [{
+          id: 'l1',
+          clientId: 'ai',
+          clientName: 'Arecibo Lab',
+          title: 'Video listo',
+          state: 'listo',
+          publishDate: null,
+          coverVideoId: 'v2',
+          coverUrl: 'https://cdn.example/caratula.jpg',
+          scheduledFromHere: false,
+        }],
+      }],
+      calendar: [],
+    })} canSchedule />)
+    const img = screen.getByRole('img', { name: 'Carátula de Video listo' })
+    expect(img).toHaveAttribute('src', 'https://cdn.example/caratula.jpg')
+    expect(screen.queryByTestId('caratula')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Sin carátula de Video listo')).not.toBeInTheDocument()
+  })
+
+  it('sin URL ni video muestra Sin carátula', () => {
+    render(<ClientPoolPanelView data={panel({
+      clients: [{
+        client: {
+          id: 'ai',
+          name: 'Arecibo Lab',
+          posting_days: [3],
+          edit_mode: 'ai',
+        },
+        weekDates: ['2026-09-23'],
+        weekPosts: [],
+        hidePool: false,
+        pool: [{
+          id: 'l1',
+          clientId: 'ai',
+          clientName: 'Arecibo Lab',
+          title: 'Sin foto',
+          state: 'listo',
+          publishDate: null,
+          coverVideoId: null,
+          coverUrl: null,
+          scheduledFromHere: false,
+        }],
+      }],
+      calendar: [],
+    })} canSchedule />)
+    expect(screen.getByLabelText('Sin carátula de Sin foto')).toBeInTheDocument()
+  })
 })

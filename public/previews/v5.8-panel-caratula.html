@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.8 — Panel: carátula real</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --amber:#fbbf24; --green:#6ee7b7; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"DejaVu Sans","Liberation Sans",Arial,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:720px) { .cols { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+    .row { display:flex; align-items:center; gap:10px; }
+    .logo { width:36px; height:36px; border-radius:8px; background:var(--gold); color:#111; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; }
+    .pool { display:flex; gap:10px; margin-top:12px; }
+    .tile { width:110px; }
+    .thumb { height:168px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); margin:0 0 6px; }
+    .empty { background:linear-gradient(180deg,#1a1a1a,#0d0d0d); border:1px dashed #2a2a2a; }
+    .real { background:
+      radial-gradient(circle at 50% 38%, #f4d28c 0 18%, transparent 19%),
+      linear-gradient(180deg, #2a2014 0%, #5a3d1c 40%, #1a140c 100%);
+      color:#111; font-weight:700; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; }
+    .ok { color:#422006; background:var(--amber); }
+    .ag { color:#082f49; background:var(--sky); }
+    .muted { color:var(--muted); font-size:12px; }
+    .title { font-size:12px; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · carátula real</h1>
+    <p class="sub">
+      Cada video del calendario y del pool <strong>Listo</strong> muestra su <strong>carátula</strong>
+      (miniatura de R2 o un fotograma del mp4). El recuadro vacío solo aparece si no se pudo sacar el frame.
+    </p>
+    <div class="cols">
+      <section class="card">
+        <p class="label">Antes — placeholder</p>
+        <div class="row">
+          <div class="logo">AL</div>
+          <div>
+            <strong>Arecibo Lab</strong>
+            <div class="muted">Pool · Listo</div>
+          </div>
+        </div>
+        <div class="pool">
+          <div class="tile">
+            <div class="thumb empty">Sin carátula</div>
+            <div class="title">Video listo</div>
+            <span class="chip ok">Listo</span>
+          </div>
+          <div class="tile">
+            <div class="thumb empty">Sin carátula</div>
+            <div class="title">Reel agendado</div>
+            <span class="chip ag">Agendado</span>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <p class="label">Ahora — carátula del video</p>
+        <div class="row">
+          <div class="logo">AL</div>
+          <div>
+            <strong>Arecibo Lab</strong>
+            <div class="muted">Pool · Listo</div>
+          </div>
+        </div>
+        <div class="pool">
+          <div class="tile">
+            <div class="thumb real" role="img" aria-label="Carátula de Video listo">carátula</div>
+            <div class="title">Video listo</div>
+            <span class="chip ok">Listo</span>
+          </div>
+          <div class="tile">
+            <div class="thumb real" role="img" aria-label="Carátula de Reel agendado">carátula</div>
+            <div class="title">Reel agendado</div>
+            <span class="chip ag">Agendado</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

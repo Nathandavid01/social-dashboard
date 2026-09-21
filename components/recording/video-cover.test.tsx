@@ -14,6 +14,9 @@ vi.mock('@/lib/actions/video-thumbs', () => ({
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: actionMocks.getVideoPreviewUrl,
 }))
+vi.mock('@/lib/utils/persist-pool-poster', () => ({
+  persistPoolPosterFromCanvas: vi.fn(async () => ({ ok: false })),
+}))
 
 describe('VideoCover', () => {
   beforeEach(() => vi.clearAllMocks())

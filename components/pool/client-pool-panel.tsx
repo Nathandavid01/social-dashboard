@@ -23,21 +23,21 @@ const STATE_CHIP: Record<PoolVideo['state'], string> = {
 }
 
 function Caratula({ video, className }: { video: PoolVideo; className?: string }) {
-  if (video.coverVideoId) {
-    return (
-      <div className={cn('relative overflow-hidden rounded-lg bg-black', className)}>
-        <VideoCover videoId={video.coverVideoId} title={video.title} />
-      </div>
-    )
-  }
   if (video.coverUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
+      // eslint-disable-next-line @next/next/no-img-element -- URL presignada de R2 o Drive
       <img
         src={video.coverUrl}
         alt={`Carátula de ${video.title}`}
         className={cn('rounded-lg object-cover', className)}
       />
+    )
+  }
+  if (video.coverVideoId) {
+    return (
+      <div className={cn('relative overflow-hidden rounded-lg bg-black', className)}>
+        <VideoCover videoId={video.coverVideoId} title={video.title} persistPoster />
+      </div>
     )
   }
   return (
