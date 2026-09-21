@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.97 — 2026-09-21
+
+**Hoy enseña los huecos de grabación: sin confirmar, SIN VIDEO y faltan ideas.**
+- En **Mi día** (`/mi-dia`) las tres tarjetas van primero: sesiones sin cliente/videógrafo/hora, sin videógrafo en 7 días (hora de Puerto Rico), y sesiones con menos ideas que la meta de posting.
+- En On Site, **Subir crudo** pide el cliente a mano — no hereda el de la sesión abierta. Sin cliente no se crea sesión.
+- El número naranja de **Grabación** cuenta solo esos huecos accionables, no el total ruidoso del mes.
+- Fechas del Pipeline tipo timestamp ya no salen como «NaN sep».
+
+![Huecos de grabación en Mi día](/changelog/v5.97-hoy-gaps.png)
+
 ## v5.96 — 2026-09-21
 
 **Un video no se sube dos veces: si ya estaba, el dashboard lo dice y no lo repite.**

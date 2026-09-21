@@ -117,6 +117,22 @@ describe('SubirCrudoPanel', () => {
     expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeEnabled()
   })
 
+  it('obliga a elegir cliente: no hereda el de la sesión de hoy', () => {
+    renderPanel()
+    expect(screen.getByLabelText('Cliente')).toHaveValue('')
+    pickFile()
+    expect(screen.getByRole('button', { name: 'Subir crudo' })).toBeDisabled()
+    expect(createRecordingSession).not.toHaveBeenCalled()
+  })
+
+  it('sin cliente no crea sesión aunque haya videos', () => {
+    renderPanel({ sessions: [] })
+    pickFile()
+    fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
+    expect(createRecordingSession).not.toHaveBeenCalled()
+    expect(startUpload).not.toHaveBeenCalled()
+  })
+
   it('elige la sesión de hoy sola y sube como crudo a esa toma', async () => {
     const file = (() => {
       renderPanel({ defaultClientId: 'c1', defaultSessionId: 's1', existingIdeaId: 'i1' })

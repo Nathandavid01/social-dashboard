@@ -6,6 +6,7 @@ const h = vi.hoisted(() => ({
   canShare: true,
   sessions: [{ id: 's' }] as any[],
   active: { id: 's', clientId: 'c1' } as any,
+  subirProps: null as { defaultClientId?: string | null } | null,
 }))
 vi.mock('@/lib/auth/server', () => ({
   requirePermission: async () => {},
@@ -28,7 +29,12 @@ vi.mock('@/lib/actions/client-asset-bank', () => ({
 }))
 vi.mock('@/lib/onsite/slot-count', () => ({ pickOnsiteSession: () => h.active }))
 vi.mock('@/components/onsite/onsite-studio', () => ({ OnsiteStudio: () => <div>Call Sheet</div> }))
-vi.mock('@/components/onsite/subir-crudo-panel', () => ({ SubirCrudoPanel: () => <div>Subir crudo</div> }))
+vi.mock('@/components/onsite/subir-crudo-panel', () => ({
+  SubirCrudoPanel: (props: { defaultClientId?: string | null }) => {
+    h.subirProps = props
+    return <div>Subir crudo</div>
+  },
+}))
 vi.mock('@/components/onsite/supervisor-process-steps', () => ({ SupervisorProcessSteps: () => null }))
 vi.mock('@/components/ideas/client-proposal-panel', () => ({ ClientProposalPanel: () => <div>Export Panel</div> }))
 import Page from './page'
@@ -38,6 +44,7 @@ beforeEach(() => {
   h.canShare = true
   h.sessions = [{ id: 's' }]
   h.active = { id: 's', clientId: 'c1' }
+  h.subirProps = null
 })
 it('shows a recoverable error instead of an empty call sheet when shots fail', async () => {
   h.shots = { error: 'offline' }
@@ -74,6 +81,10 @@ it('Subir crudo es la puerta aunque no haya sesiones agendadas', async () => {
   render(await Page({ searchParams: Promise.resolve({}) }))
   expect(screen.getByText('Subir crudo')).toBeInTheDocument()
   expect(screen.queryByText('Call Sheet')).not.toBeInTheDocument()
+})
+it('no autoelige cliente en Subir crudo aunque haya sesión activa', async () => {
+  render(await Page({ searchParams: Promise.resolve({ s: 's' }) }))
+  expect(h.subirProps?.defaultClientId ?? null).toBeNull()
 })
 it('el call sheet queda secundario, no tapa Subir crudo', async () => {
   render(await Page({ searchParams: Promise.resolve({ s: 's' }) }))

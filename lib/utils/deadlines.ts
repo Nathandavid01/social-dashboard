@@ -98,6 +98,8 @@ const MES_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', '
  * it as UTC midnight, which renders as the PREVIOUS day west of Greenwich.
  */
 export function formatDateShortES(iso: string): string {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${d} ${MES_ES[(m ?? 1) - 1]}`
+  const datePart = (iso ?? '').slice(0, 10)
+  const [, m, d] = datePart.split('-').map(Number)
+  if (!m || !d || m < 1 || m > 12) return ''
+  return `${d} ${MES_ES[m - 1]}`
 }
