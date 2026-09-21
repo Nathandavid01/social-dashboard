@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.98 — 2026-09-21
+
+**On Site: «Abrir Pipeline» lleva a esa toma, no al tablero genérico.**
+- Tras **Subir crudo** el aviso sigue igual, pero el enlace abre la idea y la sesión en Pipeline (`/pipeline?lote=…&idea=…&sesion=…`).
+- Owner / supervisor: se abre el lote del cliente en esa idea.
+- Editor: esa toma queda marcada en el banco. El panel de Subir crudo no se toca.
+
+![Subir crudo abre la toma en Pipeline](/changelog/v5.98-subir-crudo-deeplink.png)
+
 ## v5.97 — 2026-09-21
 
 **Hoy enseña los huecos de grabación: sin confirmar, SIN VIDEO y faltan ideas.**
@@ -84,7 +93,6 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Si hay dos bloques `## vX.Y` iguales, el merge-gate falla.
 - `lib/version.ts` tiene que coincidir con la **última** entrada del CHANGELOG.
 - Documentado en las reglas de merge (`docs/MERGE_RULES.md`).
-
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**

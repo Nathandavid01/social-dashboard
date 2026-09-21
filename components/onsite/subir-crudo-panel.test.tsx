@@ -150,6 +150,10 @@ describe('SubirCrudoPanel', () => {
     expect(createRecordingSession).not.toHaveBeenCalled()
     expect(createContentIdeaManual).not.toHaveBeenCalled()
     expect(screen.getByRole('status')).toHaveTextContent(/Pipeline/i)
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=i1&sesion=s1',
+    )
   })
 
   it('si no hay sesión de hoy, la crea con la API existente y pega el crudo', async () => {
@@ -186,7 +190,10 @@ describe('SubirCrudoPanel', () => {
         provider: 'r2',
       })),
     )
-    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute('href', '/pipeline')
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=idea-new&sesion=s-new',
+    )
   })
 
   it('rechaza un archivo que no es video', () => {
@@ -222,6 +229,10 @@ describe('SubirCrudoPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Subir crudo' }))
     await waitFor(() => expect(startUpload).toHaveBeenCalled())
     expect(createRecordingSession).not.toHaveBeenCalled()
+    expect(screen.getByRole('link', { name: /Pipeline/i })).toHaveAttribute(
+      'href',
+      '/pipeline?lote=c1&idea=idea-new&sesion=s-b',
+    )
   })
 
   it('sin permiso de subida no se muestra', () => {

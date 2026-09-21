@@ -20,6 +20,7 @@ import { clientDisplayName } from '@/lib/utils/client-display-name'
 import {
   canResolveSessionTarget,
   pickTodaySession,
+  pipelineDeepLink,
   todaySessionCreateValues,
   todaySessionsForClient,
 } from '@/lib/onsite/subir-crudo'
@@ -72,6 +73,7 @@ export function SubirCrudoPanel({
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [uploadedCount, setUploadedCount] = useState(0)
+  const [pipelineHref, setPipelineHref] = useState('/pipeline')
   const [dragOver, setDragOver] = useState(false)
 
   const todayForClient = useMemo(
@@ -218,6 +220,11 @@ export function SubirCrudoPanel({
       for (const file of fresh) {
         startUpload({ file, ideaId, kind: 'raw', provider: 'r2', title: title || 'Crudo' })
       }
+      setPipelineHref(pipelineDeepLink({
+        clientId,
+        ideaId,
+        sessionId: targetSessionId,
+      }))
       setUploadedCount(fresh.length)
       setFiles([])
       if (fileRef.current) fileRef.current.value = ''
@@ -412,7 +419,7 @@ export function SubirCrudoPanel({
               ? 'Subida en marcha · el archivo va al Pipeline'
               : `${uploadedCount} subidas en marcha · van al Pipeline`}
             {' · '}
-            <Link href="/pipeline" className="font-semibold underline-offset-2 hover:underline">
+            <Link href={pipelineHref} className="font-semibold underline-offset-2 hover:underline">
               Abrir Pipeline
             </Link>
           </p>

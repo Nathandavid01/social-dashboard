@@ -33,6 +33,23 @@ export function canResolveSessionTarget(input: {
   return false
 }
 
+/** Deep-link to the uploaded idea/session in Pipeline — never the generic board. */
+export function pipelineDeepLink(input: {
+  clientId?: string | null
+  ideaId?: string | null
+  sessionId?: string | null
+}): string {
+  const params = new URLSearchParams()
+  const clientId = input.clientId?.trim()
+  const ideaId = input.ideaId?.trim()
+  const sessionId = input.sessionId?.trim()
+  if (clientId) params.set('lote', clientId)
+  if (ideaId) params.set('idea', ideaId)
+  if (sessionId) params.set('sesion', sessionId)
+  const qs = params.toString()
+  return qs ? `/pipeline?${qs}` : '/pipeline'
+}
+
 export function todaySessionCreateValues(input: {
   clientId: string
   clientName: string
