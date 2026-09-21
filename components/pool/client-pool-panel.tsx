@@ -103,7 +103,10 @@ export function ClientPoolPanelView({
         setPanel(prev)
         toast({ title: 'No se pudo agendar', description: res.error, variant: 'destructive' })
       } else {
-        toast({ title: 'Agendado en Metricool', description: 'agendado desde aquí' })
+        toast({
+          title: 'Borrador en Metricool',
+          description: 'Revisar en Metricool — no se publica solo.',
+        })
       }
       setPendingId(null)
     })
@@ -121,10 +124,10 @@ export function ClientPoolPanelView({
             Qué publicar esta semana, con carátula. El pool Listo sale de Recibo
             cuando el cliente aprueba.{' '}
             <span className="md:hidden">
-              Toca un video Listo, un día y Agendar para publicarlo en Metricool.
+              Toca un video Listo, un día y Agendar: se crea un borrador en Metricool.
             </span>
             <span className="hidden md:inline">
-              Arrastra un video al calendario para agendarlo en Metricool.
+              Arrastra un video al calendario: se crea un <strong>borrador</strong> en Metricool. El live se confirma ahí.
             </span>
           </p>
         </div>
@@ -184,7 +187,7 @@ export function ClientPoolPanelView({
                   <li key={v.id} className="w-28 shrink-0 space-y-1">
                     <Caratula video={v} className="aspect-[9/16] w-full" />
                     <p className="truncate text-xs font-medium">{v.title}</p>
-                    <StateBadge state={v.state} fromHere={v.scheduledFromHere} />
+                    <StateBadge state={v.state} fromHere={v.scheduledFromHere} review={v.needsMetricoolReview} />
                   </li>
                 ))}
               </ul>
@@ -246,13 +249,24 @@ export function ClientPoolPanelView({
   )
 }
 
-function StateBadge({ state, fromHere }: { state: PoolVideo['state']; fromHere?: boolean }) {
+function StateBadge({
+  state,
+  fromHere,
+  review,
+}: {
+  state: PoolVideo['state']
+  fromHere?: boolean
+  review?: boolean
+}) {
   return (
     <div className="space-y-0.5">
       <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold', STATE_CHIP[state])}>
         {STATE_LABEL[state]}
       </span>
-      {state === 'agendado' && fromHere && (
+      {review && (
+        <p className="text-[10px] text-amber-300/90">Revisar en Metricool</p>
+      )}
+      {state === 'agendado' && fromHere && !review && (
         <p className="text-[10px] text-sky-300/90">agendado desde aquí</p>
       )}
     </div>
@@ -302,7 +316,7 @@ function PoolCard({
       )}
       <Caratula video={video} className="aspect-[9/16] w-full" />
       <p className="truncate text-xs font-medium">{video.title}</p>
-      <StateBadge state={video.state} />
+      <StateBadge state={video.state} review={video.needsMetricoolReview} />
     </button>
   )
 }
@@ -357,7 +371,7 @@ function DayCell({
           <li key={v.id} className="space-y-1">
             <Caratula video={v} className="aspect-[9/16] w-full" />
             <p className="truncate text-[11px] font-medium">{v.title}</p>
-            <StateBadge state={v.state} fromHere={v.scheduledFromHere} />
+            <StateBadge state={v.state} fromHere={v.scheduledFromHere} review={v.needsMetricoolReview} />
           </li>
         ))}
       </ul>
@@ -375,6 +389,7 @@ function optimisticSchedule(cur: ClientPoolPanel, ideaId: string, date: string):
     state: 'agendado',
     publishDate: date,
     scheduledFromHere: true,
+    needsMetricoolReview: true,
   }
   return {
     ...cur,

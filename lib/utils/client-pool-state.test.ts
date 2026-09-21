@@ -4,8 +4,10 @@ import {
   canCreateMetricoolSchedule,
   canReschedulePoolIdea,
   isCalendarEligible,
+  metricoolDraftByIdea,
   poolPublishState,
   shouldNotifyClientVote,
+  showRevisarEnMetricool,
   weekCadenceDates,
   type PoolClientInput,
   type PoolIdeaInput,
@@ -131,6 +133,23 @@ describe('aviso de /aprobacion — silencioso solo en Recibo/AI al aprobar', () 
   })
 })
 
+describe('draft-first Metricool badge', () => {
+  it('solo Agendado con metadata draft muestra Revisar en Metricool', () => {
+    expect(showRevisarEnMetricool('agendado', true)).toBe(true)
+    expect(showRevisarEnMetricool('agendado', false)).toBe(false)
+    expect(showRevisarEnMetricool('publicado', true)).toBe(false)
+    expect(showRevisarEnMetricool('listo', true)).toBe(false)
+  })
+
+  it('toma el posted_to_metricool más reciente por idea', () => {
+    expect(metricoolDraftByIdea([
+      { content_idea_id: 'a1', metadata: { draft: true, autoPublish: false } },
+      { content_idea_id: 'a1', metadata: { draft: false, autoPublish: true } },
+      { content_idea_id: 'live', metadata: { autoPublish: true } },
+    ])).toEqual({ a1: true, live: false })
+  })
+})
+
 describe('weekCadenceDates', () => {
   it('solo los posting_days de esa semana (lun=1 … dom=0)', () => {
     // 2026-09-21 lun … 2026-09-27 dom; posting_days mié(3) y vie(5)
@@ -232,6 +251,34 @@ describe('buildClientPoolPanel', () => {
     })
     expect(panel.calendar.map((v) => v.id).sort()).toEqual(['a1', 'p1'])
     expect(panel.calendar.every((v) => v.state === 'agendado' || v.state === 'publicado')).toBe(true)
+  })
+
+  it('marca Revisar en Metricool solo en Agendado draft', () => {
+    const panel = buildClientPoolPanel({
+      clients: [ai],
+      ideas: [
+        row({
+          id: 'a1',
+          client_id: 'ai',
+          metricool_post_id: 1,
+          posted_at: '2026-09-21T10:00:00Z',
+          publish_date: '2026-09-23',
+          metricoolDraft: true,
+        }),
+        row({
+          id: 'p1',
+          client_id: 'ai',
+          status: 'publicada',
+          publish_date: '2026-09-25',
+          metricoolDraft: true,
+        }),
+      ],
+      week: WEEK,
+    })
+    const a1 = panel.calendar.find((v) => v.id === 'a1')
+    const p1 = panel.calendar.find((v) => v.id === 'p1')
+    expect(a1?.needsMetricoolReview).toBe(true)
+    expect(p1?.needsMetricoolReview).toBe(false)
   })
 
   it('oculta clientes sin cadencia, sin posts de la semana y sin pool', () => {

@@ -7,7 +7,7 @@ export const revalidate = 0
 
 /**
  * Panel clientes: pool Listo (Recibo AI aprobado) + calendario
- * agendado/publicado. El drag agenda en Metricool.
+ * agendado/publicado. El drag crea un borrador en Metricool.
  */
 export default async function PoolPage() {
   await requirePermission('posting.read')

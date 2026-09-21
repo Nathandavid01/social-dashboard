@@ -35,6 +35,7 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
         coverVideoId: 'v1',
         coverUrl: null,
         scheduledFromHere: true,
+        needsMetricoolReview: true,
       },
     ],
     clients: [
@@ -58,6 +59,7 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
             coverVideoId: 'v1',
             coverUrl: null,
             scheduledFromHere: true,
+            needsMetricoolReview: true,
           },
         ],
         pool: [
@@ -71,6 +73,7 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
             coverVideoId: 'v2',
             coverUrl: null,
             scheduledFromHere: false,
+            needsMetricoolReview: false,
           },
         ],
         hidePool: false,
@@ -97,13 +100,14 @@ describe('ClientPoolPanelView', () => {
     schedulePoolIdea.mockReset().mockResolvedValue({ ok: true, state: 'agendado' })
   })
 
-  it('muestra clientes, pool Listo, carátula y agendado desde aquí', () => {
+  it('muestra clientes, pool Listo, carátula y Revisar en Metricool', () => {
     render(<ClientPoolPanelView data={panel()} canSchedule />)
     expect(screen.getByRole('heading', { name: 'Panel' })).toBeInTheDocument()
     expect(screen.getAllByText('Arecibo Lab').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Video listo').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Listo').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('agendado desde aquí').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Revisar en Metricool').length).toBeGreaterThan(0)
+    expect(screen.queryByText('agendado desde aquí')).not.toBeInTheDocument()
     expect(screen.getAllByTestId('caratula').length).toBeGreaterThan(0)
   })
 
