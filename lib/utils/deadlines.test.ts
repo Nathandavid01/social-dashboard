@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deadlineStatus, addDaysISO, todayISO, todayISOInTimeZone, deadlineTone, worstDeadlineStatus } from './deadlines'
+import { deadlineStatus, addDaysISO, todayISO, todayISOInTimeZone, deadlineTone, worstDeadlineStatus, formatDateShortES } from './deadlines'
 
 describe('todayISO', () => {
   it('uses local calendar parts (no UTC off-by-one near midnight)', () => {
@@ -80,6 +80,19 @@ describe('worstDeadlineStatus', () => {
       { deadline: '2026-06-09', status: 'idea' }, // due-soon
     ]
     expect(worstDeadlineStatus(vids, today)).toBe('due-soon')
+  })
+})
+
+describe('formatDateShortES', () => {
+  it('lee YYYY-MM-DD sin pasar por Date', () => {
+    expect(formatDateShortES('2026-09-21')).toBe('21 sep')
+  })
+  it('acepta un timestamp ISO y no pinta NaN sep', () => {
+    expect(formatDateShortES('2026-09-21T15:30:00.000Z')).toBe('21 sep')
+  })
+  it('fecha inválida queda vacía, no NaN', () => {
+    expect(formatDateShortES('no-fecha')).toBe('')
+    expect(formatDateShortES('')).toBe('')
   })
 })
 
