@@ -17,6 +17,10 @@ import {
   type BancoUploadKind,
   type BancoUploadMode,
 } from '@/lib/pipeline/banco-direct-upload'
+import { findDuplicateVideo } from '@/lib/actions/video-dedupe'
+import { fingerprintFile } from '@/lib/utils/video-fingerprint'
+import { duplicateVideoMessage } from '@/lib/utils/duplicate-video-message'
+import { preflightVideoUploads } from '@/lib/utils/preflight-video-uploads'
 import { cn } from '@/lib/utils'
 
 const SELECT =
@@ -88,6 +92,20 @@ export function BancoUploadDialog({
 
     setPending(true)
     setError(null)
+    const { fresh, blocked } = await preflightVideoUploads(files, {
+      fingerprint: fingerprintFile,
+      findDuplicate: findDuplicateVideo,
+    })
+    if (blocked.length > 0) {
+      const detail = blocked.map((b) => `No se subió: ${duplicateVideoMessage(b.duplicate)}`).join(' · ')
+      setError(detail)
+      if (fresh.length === 0) {
+        setPending(false)
+        return
+      }
+      toast({ title: 'Algunos ya estaban', description: detail, variant: 'destructive' })
+    }
+
     let targetIdeaId = ideaId
     let uploadTitle = ideaTitle
     if (kind === 'broll') {
@@ -111,11 +129,11 @@ export function BancoUploadDialog({
       uploadTitle = ideaTitle
     }
 
-    for (const file of files) {
+    for (const file of fresh) {
       startUpload({ file, ideaId: targetIdeaId, kind, provider: 'r2', title: uploadTitle })
     }
     toast({
-      title: files.length === 1 ? 'Subiendo video' : `Subiendo ${files.length} videos`,
+      title: fresh.length === 1 ? 'Subiendo video' : `Subiendo ${fresh.length} videos`,
       description: 'Sigue en la esquina. Puedes salir de esta pantalla.',
     })
     setOpen(false)

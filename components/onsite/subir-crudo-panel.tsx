@@ -11,6 +11,10 @@ import { createContentIdeaManual } from '@/lib/actions/content-ideas'
 import { addIdeaToSession, type OnsiteSession } from '@/lib/actions/onsite'
 import { getOnsiteUploadContext } from '@/lib/actions/onsite-upload-context'
 import { ideaTitleFromUpload } from '@/lib/pipeline/banco-direct-upload'
+import { findDuplicateVideo } from '@/lib/actions/video-dedupe'
+import { fingerprintFile } from '@/lib/utils/video-fingerprint'
+import { duplicateVideoMessage } from '@/lib/utils/duplicate-video-message'
+import { preflightVideoUploads } from '@/lib/utils/preflight-video-uploads'
 import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
 import { clientDisplayName } from '@/lib/utils/client-display-name'
 import {
@@ -154,6 +158,15 @@ export function SubirCrudoPanel({
     setPending(true)
     setError(null)
     try {
+      const { fresh, blocked } = await preflightVideoUploads(files, {
+        fingerprint: fingerprintFile,
+        findDuplicate: findDuplicateVideo,
+      })
+      if (blocked.length > 0) {
+        setError(blocked.map((b) => `No se subió: ${duplicateVideoMessage(b.duplicate)}`).join(' · '))
+      }
+      if (fresh.length === 0) return
+
       let targetSessionId = resolvedSessionId
       if (!targetSessionId) {
         if (todayForClient.length > 0) {
@@ -178,7 +191,7 @@ export function SubirCrudoPanel({
       }
 
       const reuseIdea = targetSessionId === defaultSessionId ? existingIdeaId : null
-      const title = ideaTitleFromUpload('', files)
+      const title = ideaTitleFromUpload('', fresh)
       let ideaId = reuseIdea
       if (!ideaId) {
         const idea = await createContentIdeaManual({
@@ -202,10 +215,10 @@ export function SubirCrudoPanel({
         }
       }
 
-      for (const file of files) {
+      for (const file of fresh) {
         startUpload({ file, ideaId, kind: 'raw', provider: 'r2', title: title || 'Crudo' })
       }
-      setUploadedCount(files.length)
+      setUploadedCount(fresh.length)
       setFiles([])
       if (fileRef.current) fileRef.current.value = ''
       router.refresh()

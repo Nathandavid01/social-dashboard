@@ -10,7 +10,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
 import { getR2DownloadUrl, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
-import { useUploadStore, type UploadItem } from '@/lib/stores/upload-store'
+import { useUploadStore, TERMINAL_UPLOAD_PHASES, type UploadItem } from '@/lib/stores/upload-store'
 import { NateUploadLogo } from '@/components/uploads/nate-upload-logo'
 import { uploadPhaseText } from '@/lib/utils/upload-phase-text'
 import type { ContentIdeaVideo, ContentIdeaVideoKind } from '@/lib/supabase/types'
@@ -211,7 +211,7 @@ function SlotGroup({
   const MAX_BYTES = 5 * 1024 * 1024 * 1024
 
   function waitForUploadDone(id: string): Promise<UploadItem> {
-    const isDone = (item: UploadItem) => item.phase === 'listo' || item.phase === 'error' || item.phase === 'cancelado'
+    const isDone = (item: UploadItem) => TERMINAL_UPLOAD_PHASES.has(item.phase)
     const now = useUploadStore.getState().uploads[id]
     if (now && isDone(now)) return Promise.resolve(now)
     return new Promise((resolve) => {
@@ -243,6 +243,9 @@ function SlotGroup({
     results.forEach((r) => {
       if (r.phase === 'error') {
         toast({ title: 'Falló una subida', description: r.error ?? 'Error', variant: 'destructive' })
+      }
+      if (r.phase === 'duplicado') {
+        toast({ title: 'No se subió: ya estaba', description: r.error ?? 'Este video ya estaba', variant: 'destructive' })
       }
     })
     const done = results.filter((r) => r.phase === 'listo').length
@@ -327,11 +330,11 @@ function SlotGroup({
             <NateUploadLogo pct={u.pct} size={32} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium">{u.fileName}</p>
-              <p className={cn('text-xs', u.phase === 'error' ? 'text-red-500' : 'text-muted-foreground')}>
+              <p className={cn('text-xs', (u.phase === 'error' || u.phase === 'duplicado') ? 'text-red-500' : 'text-muted-foreground')}>
                 {uploadPhaseText(u)}
               </p>
             </div>
-            {u.phase === 'error' ? (
+            {(u.phase === 'error' || u.phase === 'duplicado') ? (
               <button
                 type="button"
                 onClick={() => useUploadStore.getState().dismissUpload(u.id)}

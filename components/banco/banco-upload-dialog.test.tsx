@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 const refresh = vi.fn()
 const toast = vi.fn()
 const startUpload = vi.fn(() => 'up-1')
+const findDuplicateVideo = vi.fn(async (): Promise<import('@/lib/actions/video-dedupe').DuplicateVideo | null> => null)
 const createBankIdea = vi.fn(async (_input: { clientId: string; title: string }): Promise<{ ideaId?: string; error?: string }> => ({ ideaId: 'idea-new' }))
 const ensureClientBrollLibrary = vi.fn(async (_input: { clientId: string; clientName: string }): Promise<{ ideaId?: string; error?: string }> => ({ ideaId: 'broll-lib' }))
 
@@ -11,6 +12,13 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 vi.mock('@/lib/stores/upload-store', () => ({
   useUploadStore: (sel: (s: { startUpload: typeof startUpload }) => unknown) => sel({ startUpload }),
+}))
+vi.mock('@/lib/actions/video-dedupe', () => ({
+  findDuplicateVideo: () => findDuplicateVideo(),
+  rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
+}))
+vi.mock('@/lib/utils/video-fingerprint', () => ({
+  fingerprintFile: async () => 'v1-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 }))
 vi.mock('@/lib/actions/banco-direct-upload', () => ({
   createBankIdea: (input: { clientId: string; title: string }) => createBankIdea(input),
@@ -47,6 +55,7 @@ beforeEach(() => {
   refresh.mockClear()
   toast.mockClear()
   startUpload.mockClear()
+  findDuplicateVideo.mockReset().mockResolvedValue(null)
   createBankIdea.mockReset().mockResolvedValue({ ideaId: 'idea-new' })
   ensureClientBrollLibrary.mockReset().mockResolvedValue({ ideaId: 'broll-lib' })
 })
@@ -157,6 +166,26 @@ describe('BancoUploadDialog', () => {
     pickFile()
     fireEvent.click(screen.getByRole('button', { name: /^subir$/i }))
     await waitFor(() => expect(toast).toHaveBeenCalled())
+    expect(startUpload).not.toHaveBeenCalled()
+  })
+
+  it('si el archivo ya estaba, no crea una idea vacía', async () => {
+    findDuplicateVideo.mockResolvedValueOnce({
+      videoId: 'vid-9',
+      kind: 'raw',
+      fileName: 'IMG_8841.MOV',
+      uploadedAt: '2026-08-28T15:00:00Z',
+      ideaId: 'idea-9',
+      ideaTitle: 'Intro clínica',
+      clientName: 'ARASIBO',
+      uploadedBy: 'Carlos',
+    })
+    open()
+    fireEvent.change(screen.getByLabelText(/cliente/i), { target: { value: 'c1' } })
+    pickFile()
+    fireEvent.click(screen.getByRole('button', { name: /^subir$/i }))
+    await waitFor(() => expect(screen.getByText(/No se subió/)).toBeInTheDocument())
+    expect(createBankIdea).not.toHaveBeenCalled()
     expect(startUpload).not.toHaveBeenCalled()
   })
 })

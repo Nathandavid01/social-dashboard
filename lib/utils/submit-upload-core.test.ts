@@ -125,3 +125,35 @@ describe('submitOneVideo — progreso', () => {
     expect(pcts).toContain(80)
   })
 })
+
+describe('submitOneVideo — duplicados', () => {
+  it('comprueba la huella ANTES de crear la idea y para en "duplicado" con el detalle', async () => {
+    const d = deps({
+      fingerprint: vi.fn(async () => 'v1-1-' + 'a'.repeat(64)),
+      findDuplicate: vi.fn(async () => ({
+        videoId: 'vid-9', kind: 'edited', fileName: 'final.mp4', uploadedAt: '2026-08-28T15:00:00Z',
+        ideaId: 'idea-9', ideaTitle: 'Intro clínica', clientName: 'ARASIBO', uploadedBy: 'Carlos',
+      })),
+    })
+    const res = await submitOneVideo(d, input)
+    expect(res.ok).toBe(false)
+    expect(res.stage).toBe('duplicado')
+    expect(res.error).toMatch(/Intro clínica/)
+    expect(res.duplicateOf?.ideaId).toBe('idea-9')
+    expect(d.createIdea).not.toHaveBeenCalled()
+    expect(d.putFile).not.toHaveBeenCalled()
+  })
+
+  it('sin duplicado registra y pasa la huella a registerVideo', async () => {
+    const d = deps({ fingerprint: vi.fn(async () => 'v1-1-' + 'b'.repeat(64)) })
+    const res = await submitOneVideo(d, input)
+    expect(res.ok).toBe(true)
+    expect(d.registerVideo).toHaveBeenCalledWith(expect.objectContaining({ fingerprint: 'v1-1-' + 'b'.repeat(64) }))
+  })
+
+  it('si la huella o la comprobación fallan, sigue subiendo', async () => {
+    const d = deps({ fingerprint: vi.fn(async () => { throw new Error('crypto') }) })
+    const res = await submitOneVideo(d, input)
+    expect(res.ok).toBe(true)
+  })
+})
