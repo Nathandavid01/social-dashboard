@@ -17,6 +17,7 @@ import {
   buildClientPoolPanel,
   canCreateMetricoolSchedule,
   canReschedulePoolIdea,
+  metricoolDraftByIdea,
   poolPublishState,
   type ClientPoolPanel,
   type PoolClientInput,
@@ -27,6 +28,7 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 export type SchedulePoolResult = {
   ok?: true
   state?: 'agendado'
+  draft?: true
   rescheduled?: boolean
   error?: string
 }
@@ -54,8 +56,9 @@ function coverVideoIdOf(videos: Array<{ id: string; kind?: string | null; status
 }
 
 /**
- * Drag Listo → fecha: agenda en Metricool (blog_id del cliente).
- * Agendado → otra fecha: solo mueve publish_date (sin segundo POST).
+ * Drag Listo → fecha: crea un BORRADOR en Metricool (blog_id del cliente).
+ * Nunca autoPublish: el live se confirma en Metricool. Agendado → otra fecha:
+ * solo mueve publish_date (sin segundo POST).
  */
 export async function schedulePoolIdea(input: {
   ideaId: string
@@ -173,7 +176,7 @@ export async function schedulePoolIdea(input: {
       schedule.iso,
       {
         mediaUrls: [pubUrl],
-        autoPublish: true,
+        // autoPublish omitted → Metricool draft:true. Live is confirmed in Metricool.
         contentType: (idea.content_type as string | null) ?? null,
       },
     )
@@ -207,10 +210,12 @@ export async function schedulePoolIdea(input: {
         scheduledFor: schedule.iso,
         metricoolPostId: postId,
         platforms,
+        draft: true,
+        autoPublish: false,
       },
     })
     revalidatePoolPaths()
-    return { ok: true, state: 'agendado' }
+    return { ok: true, state: 'agendado', draft: true }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
     const definitelyNotCreated = err instanceof Error && 'definitelyNotCreated' in err && err.definitelyNotCreated === true
@@ -267,17 +272,29 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
   const ideas = (ideasRes.data ?? []) as Array<Record<string, unknown> & { id: string; videos?: unknown[] }>
   const ideaIds = ideas.map((i) => i.id)
   const reviewByIdea: Record<string, string> = {}
+  let draftByIdea: Record<string, boolean> = {}
   if (ideaIds.length > 0) {
-    const reviews = await supabase
-      .from('entregas_client_review_items')
-      .select('idea_id, status, decided_at')
-      .in('idea_id', ideaIds)
-      .order('decided_at', { ascending: false })
+    const [reviews, drafts] = await Promise.all([
+      supabase
+        .from('entregas_client_review_items')
+        .select('idea_id, status, decided_at')
+        .in('idea_id', ideaIds)
+        .order('decided_at', { ascending: false }),
+      supabase
+        .from('content_idea_activity')
+        .select('content_idea_id, metadata, created_at')
+        .eq('action', 'posted_to_metricool')
+        .in('content_idea_id', ideaIds)
+        .order('created_at', { ascending: false }),
+    ])
     for (const row of reviews.data ?? []) {
       const id = row.idea_id as string
       if (reviewByIdea[id]) continue
       reviewByIdea[id] = row.status as string
     }
+    draftByIdea = metricoolDraftByIdea(
+      (drafts.data ?? []) as Array<{ content_idea_id?: string | null; metadata?: Record<string, unknown> | null }>,
+    )
   }
 
   const clients: PoolClientInput[] = (clientsRes.data ?? []).map((c) => ({
@@ -309,6 +326,7 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
       generated_caption: (raw.generated_caption as string | null) ?? null,
       coverVideoId: coverVideoIdOf(videos ?? []),
       coverUrl: coverUrlForIdea({ videos } as IdeaWithPipeline),
+      metricoolDraft: draftByIdea[raw.id] === true,
     }
   })
 

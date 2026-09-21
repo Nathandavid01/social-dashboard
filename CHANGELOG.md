@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.99 — 2026-09-21
+
+**Panel: arrastrar Listo crea un borrador en Metricool, no publica solo.**
+- En `/pool`, al soltar un video **Listo** en un día, Metricool recibe un **borrador** (sin autoPublish). El claim `posting_started_at` sigue impidiendo un doble envío.
+- El calendario muestra la etiqueta **Revisar en Metricool**. El live no sale desde el panel: se confirma en Metricool después de revisar el caption y el video.
+- Reprogramar un Agendado a otra fecha sigue moviendo solo la fecha local, sin un segundo POST. La recuperación de Metricool sigue siendo solo para posts live; un borrador incierto no se vuelve a enviar.
+
+![Borrador Metricool en el Panel](/changelog/v5.99-pool-draft.png)
+
 ## v5.98 — 2026-09-21
 
 **On Site: «Abrir Pipeline» lleva a esa toma, no al tablero genérico.**

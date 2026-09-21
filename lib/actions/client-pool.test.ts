@@ -147,8 +147,9 @@ describe('schedulePoolIdea', () => {
   })
 
   it('Listo → Agendado: Metricool con el blog_id del cliente y persiste el id', async () => {
+    const { logIdeaActivity } = await import('@/lib/utils/idea-activity')
     const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })
-    expect(res).toMatchObject({ ok: true, state: 'agendado' })
+    expect(res).toMatchObject({ ok: true, state: 'agendado', draft: true })
     expect(h.post).toHaveBeenCalledWith(
       'Caption listo',
       'blog-ai',
@@ -156,11 +157,24 @@ describe('schedulePoolIdea', () => {
       undefined,
       '2026-09-23T09:15:00',
       expect.objectContaining({
-        autoPublish: true,
         mediaUrls: ['https://entregas.example/edited.mp4'],
       }),
     )
-    expect(h.writes.some((w) => w.metricool_post_id === 44 && w.publish_date === '2026-09-23')).toBe(true)
+    const opts = h.post.mock.calls[0]?.[5] as { autoPublish?: boolean }
+    expect(opts.autoPublish).toBeUndefined()
+    expect(h.writes.some((w) => w.metricool_post_id === 44 && w.publish_date === '2026-09-23' && w.posted_at)).toBe(true)
+    expect(vi.mocked(logIdeaActivity)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ideaId: 'idea',
+        action: 'posted_to_metricool',
+        metadata: expect.objectContaining({
+          source: 'client_panel',
+          draft: true,
+          autoPublish: false,
+        }),
+      }),
+    )
   })
 
   it('usa el caption si existe; si no, el título (una redada, todas las redes)', async () => {
