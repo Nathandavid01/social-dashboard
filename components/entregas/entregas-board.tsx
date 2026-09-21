@@ -35,6 +35,7 @@ import type { IdeaWithPipeline, SocialPlatform } from '@/lib/supabase/types'
 import type { ReviewNote } from '@/lib/actions/review-notes-core'
 import { EnlaceClienteBoton } from './enlace-cliente-boton'
 import { EnviarAlCliente } from './enviar-al-cliente'
+import { SendHumanToPoolButton } from './send-human-to-pool-button'
 import { marcaAprobacionCliente, type EstadoCliente } from '@/lib/entregas/marca-cliente'
 
 type Idea = IdeaWithPipeline
@@ -804,6 +805,22 @@ const BatchCard = memo(function BatchCard({ batch, stage, postingTime = null, on
             clientName={batch.clientName}
             ideaId={batch.ideas[0].id}
           />
+        )}
+        {(stage === 'copy' || stage === 'publication') && batch.ideas[0] && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <SendHumanToPoolButton
+              ideaId={batch.ideas[0].id}
+              input={{
+                status: batch.ideas[0].status,
+                approval_status: batch.ideas[0].approval_status,
+                staff_client_approval: batch.ideas[0].staff_client_approval ?? null,
+                client_review_status: batch.ideas[0].client_review_status ?? null,
+                entregas_review_status: clientApprovals[batch.ideas[0].id] ?? null,
+                staff_pool_ready: batch.ideas[0].staff_pool_ready ?? false,
+                client_edit_mode: batch.ideas[0].client?.edit_mode ?? null,
+              }}
+            />
+          </div>
         )}
 
         {/* footer: platforms + assignee (colored) */}

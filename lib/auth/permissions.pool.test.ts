@@ -25,4 +25,12 @@ describe('panel /pool', () => {
     expect(hasPermission('copy', 'posting.publish')).toBe(false)
     expect(hasPermission('editor', 'posting.publish')).toBe(false)
   })
+
+  it('solo owner y supervisor envían un Recibo humano al pool (pool.send_human)', () => {
+    expect(hasPermission('owner', 'pool.send_human')).toBe(true)
+    expect(hasPermission('supervisor', 'pool.send_human')).toBe(true)
+    expect(hasPermission('copy', 'pool.send_human')).toBe(false)
+    expect(hasPermission('editor', 'pool.send_human')).toBe(false)
+    expect(hasPermission('video', 'pool.send_human')).toBe(false)
+  })
 })

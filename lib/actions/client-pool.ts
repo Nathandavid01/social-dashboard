@@ -73,11 +73,19 @@ export async function schedulePoolIdea(input: {
   const { data: idea, error: ideaErr } = await supabase
     .from('content_ideas')
     .select(
-      'id, title, hook, content_type, generated_caption, status, published_at, publish_date, metricool_post_id, posted_at, manual_posted_status, staff_client_approval, client_review_status, approved_video_id, client_id, client:clients(id, edit_mode, metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
+      'id, title, hook, content_type, generated_caption, status, published_at, publish_date, metricool_post_id, posted_at, manual_posted_status, staff_client_approval, client_review_status, approval_status, staff_pool_ready, approved_video_id, client_id, client:clients(id, edit_mode, metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
     )
     .eq('id', input.ideaId)
     .single()
   if (ideaErr || !idea) return { error: 'Idea no encontrada' }
+
+  const { data: review } = await supabase
+    .from('entregas_client_review_items')
+    .select('status')
+    .eq('idea_id', input.ideaId)
+    .order('decided_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   const client = (idea.client ?? {}) as {
     id?: string | null
@@ -98,6 +106,9 @@ export async function schedulePoolIdea(input: {
     publish_date: idea.publish_date as string | null,
     staff_client_approval: (idea as { staff_client_approval?: string | null }).staff_client_approval ?? null,
     client_review_status: (idea as { client_review_status?: string | null }).client_review_status ?? null,
+    entregas_review_status: (review?.status as string | null) ?? null,
+    approval_status: (idea as { approval_status?: string | null }).approval_status ?? null,
+    staff_pool_ready: Boolean((idea as { staff_pool_ready?: boolean | null }).staff_pool_ready),
     client_edit_mode: editMode,
   })
 
@@ -112,7 +123,6 @@ export async function schedulePoolIdea(input: {
     return { ok: true, state: 'agendado', rescheduled: true }
   }
   if (!canCreateMetricoolSchedule(state, editMode)) {
-    if (editMode !== 'ai') return { error: 'Solo el pool de Recibo (clientes AI) se agenda desde aquí' }
     return { error: 'El video tiene que estar Listo (aprobado en Recibo) para agendarlo' }
   }
 
@@ -254,7 +264,8 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
       .select(`
         id, client_id, title, hook, status, publish_date, published_at,
         manual_posted_status, metricool_post_id, posted_at,
-        staff_client_approval, client_review_status, generated_caption,
+        staff_client_approval, client_review_status, approval_status, staff_pool_ready,
+        generated_caption,
         videos:content_idea_videos!content_idea_videos_idea_id_fkey(
           id, kind, status, drive_thumb_url, drive_file_id, storage_provider, thumb_keys, uploaded_at
         )
@@ -306,6 +317,8 @@ export async function getClientPoolPanel(): Promise<{ data?: ClientPoolPanel; er
       posted_at: (raw.posted_at as string | null) ?? null,
       staff_client_approval: (raw.staff_client_approval as string | null) ?? null,
       client_review_status: (raw.client_review_status as string | null) ?? null,
+      approval_status: (raw.approval_status as string | null) ?? null,
+      staff_pool_ready: Boolean((raw as { staff_pool_ready?: boolean | null }).staff_pool_ready),
       generated_caption: (raw.generated_caption as string | null) ?? null,
       coverVideoId: coverVideoIdOf(videos ?? []),
       coverUrl: coverUrlForIdea({ videos } as IdeaWithPipeline),

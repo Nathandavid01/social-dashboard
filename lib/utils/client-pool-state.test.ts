@@ -3,6 +3,8 @@ import {
   buildClientPoolPanel,
   canCreateMetricoolSchedule,
   canReschedulePoolIdea,
+  canSendHumanReciboToPool,
+  humanPoolGate,
   isCalendarEligible,
   poolPublishState,
   shouldNotifyClientVote,
@@ -46,6 +48,31 @@ describe('poolPublishState — recibo → Listo → Agendado → Publicado', () 
       client_edit_mode: 'human',
       entregas_review_status: 'approved',
       client_review_status: 'approved',
+      approval_status: 'approved',
+    }))).toBe('recibo')
+  })
+
+  it('humano Listo solo con CTA explícito + Revisión + aprobación del cliente', () => {
+    expect(poolPublishState(idea({
+      client_edit_mode: 'human',
+      staff_client_approval: 'approved',
+      approval_status: 'approved',
+      staff_pool_ready: true,
+    }))).toBe('listo')
+    expect(poolPublishState(idea({
+      client_edit_mode: 'human',
+      entregas_review_status: 'approved',
+      approval_status: 'approved',
+      staff_pool_ready: true,
+    }))).toBe('listo')
+  })
+
+  it('humano con CTA pero sin Revisión se queda en recibo', () => {
+    expect(poolPublishState(idea({
+      client_edit_mode: 'human',
+      staff_client_approval: 'approved',
+      staff_pool_ready: true,
+      approval_status: 'submitted',
     }))).toBe('recibo')
   })
 
@@ -100,11 +127,12 @@ describe('calendario del panel: solo agendado + publicado', () => {
 })
 
 describe('schedule gates', () => {
-  it('solo Listo de Recibo/AI crea el post de Metricool', () => {
+  it('Listo de Recibo (AI o humano con CTA) crea el post de Metricool', () => {
     expect(canCreateMetricoolSchedule('listo', 'ai')).toBe(true)
-    expect(canCreateMetricoolSchedule('listo', 'human')).toBe(false)
+    expect(canCreateMetricoolSchedule('listo', 'human')).toBe(true)
     expect(canCreateMetricoolSchedule('agendado', 'ai')).toBe(false)
     expect(canCreateMetricoolSchedule('recibo', 'ai')).toBe(false)
+    expect(canCreateMetricoolSchedule('recibo', 'human')).toBe(false)
     expect(canCreateMetricoolSchedule('publicado', 'ai')).toBe(false)
   })
 
@@ -128,6 +156,39 @@ describe('aviso de /aprobacion — silencioso solo en Recibo/AI al aprobar', () 
     expect(shouldNotifyClientVote('approved', 'human')).toBe(true)
     expect(shouldNotifyClientVote('rejected', 'human')).toBe(true)
     expect(shouldNotifyClientVote('approved', null)).toBe(true)
+  })
+})
+
+describe('puente humano Recibo → pool', () => {
+  const humanApproved = {
+    client_edit_mode: 'human' as const,
+    staff_client_approval: 'approved' as const,
+    approval_status: 'approved' as const,
+  }
+
+  it('el CTA no es automático: aprobado humano sin staff_pool_ready no se envía', () => {
+    expect(canSendHumanReciboToPool(idea(humanApproved))).toBe(true)
+    expect(humanPoolGate(idea(humanApproved))).toBe('ok')
+    expect(canSendHumanReciboToPool(idea({ ...humanApproved, staff_pool_ready: true }))).toBe(false)
+    expect(humanPoolGate(idea({ ...humanApproved, staff_pool_ready: true }))).toBe('already_listo')
+  })
+
+  it('no salta Revisión: submitted / revision_needed bloquean el pool', () => {
+    expect(humanPoolGate(idea({ ...humanApproved, approval_status: 'submitted' }))).toBe('falta_revision')
+    expect(humanPoolGate(idea({ ...humanApproved, approval_status: 'revision_needed' }))).toBe('falta_revision')
+    expect(canSendHumanReciboToPool(idea({ ...humanApproved, approval_status: 'submitted' }))).toBe(false)
+  })
+
+  it('cliente AI no usa el CTA (entra solo al aprobar en Recibo)', () => {
+    expect(humanPoolGate(idea({ staff_client_approval: 'approved' }))).toBe('ai_auto')
+    expect(canSendHumanReciboToPool(idea({ staff_client_approval: 'approved' }))).toBe(false)
+  })
+
+  it('sin aprobación del cliente no se envía', () => {
+    expect(humanPoolGate(idea({
+      client_edit_mode: 'human',
+      approval_status: 'approved',
+    }))).toBe('not_approved')
   })
 })
 
@@ -179,7 +240,7 @@ describe('buildClientPoolPanel', () => {
     expect(panel.clients[0].weekDates).toEqual(['2026-09-23', '2026-09-25'])
   })
 
-  it('el pool Listo solo muestra videos AI aprobados sin fecha Metricool', () => {
+  it('el pool Listo muestra AI aprobados y humano solo con CTA a Listo', () => {
     const panel = buildClientPoolPanel({
       clients: [ai, human],
       ideas: [
@@ -196,7 +257,16 @@ describe('buildClientPoolPanel', () => {
           id: 'h1',
           client_id: 'hum',
           entregas_review_status: 'approved',
+          approval_status: 'approved',
           title: 'Humano aprobado',
+        }),
+        row({
+          id: 'h2',
+          client_id: 'hum',
+          staff_client_approval: 'approved',
+          approval_status: 'approved',
+          staff_pool_ready: true,
+          title: 'Humano Listo',
         }),
       ],
       week: WEEK,
@@ -206,8 +276,8 @@ describe('buildClientPoolPanel', () => {
     expect(arecibo?.pool.map((v) => v.id)).toEqual(['l1'])
     expect(arecibo?.hidePool).toBe(false)
     expect(arecibo?.weekPosts.map((v) => v.id)).toEqual(['a1'])
-    expect(humano?.pool).toEqual([])
-    expect(humano?.hidePool).toBe(true)
+    expect(humano?.pool.map((v) => v.id)).toEqual(['h2'])
+    expect(humano?.hidePool).toBe(false)
   })
 
   it('el calendario del panel solo lleva agendado y publicado', () => {

@@ -63,7 +63,7 @@ export async function getIdeacionPipeline(filter?: {
       .from('content_ideas')
       .select(`
         *,
-        client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms, status, assigned_to, posting_days),
+        client:clients!content_ideas_client_id_fkey(id, name, industry, logo_url, platforms, status, assigned_to, posting_days, edit_mode),
         recording_session:recording_sessions!content_ideas_recording_session_id_fkey(status, location, location_address),
         videos:content_idea_videos!content_idea_videos_idea_id_fkey(*),
         production_task:production_tasks!content_ideas_production_task_id_fkey(

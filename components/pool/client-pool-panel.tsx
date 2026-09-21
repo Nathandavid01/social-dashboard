@@ -119,7 +119,8 @@ export function ClientPoolPanelView({
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Qué publicar esta semana, con carátula. El pool Listo sale de Recibo
-            cuando el cliente aprueba.{' '}
+            AI al aprobar, o de un Recibo humano si el staff pulsa{' '}
+            <strong>Enviar al pool · Listo</strong>.{' '}
             <span className="md:hidden">
               Toca un video Listo, un día y Agendar para publicarlo en Metricool.
             </span>

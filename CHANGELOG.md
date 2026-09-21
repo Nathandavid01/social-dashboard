@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.14 — 2026-09-21
+
+**Recibo humano: envía al pool como Listo (sin saltar Revisión).**
+- En `/recibo` hay un **puente humano → pool**: un corte de Entregas humano **no** entra solo al pool cuando el cliente aprueba.
+- Owner/supervisor pulsa **Enviar al pool · Listo**. El servidor exige Revisión (`approval_status = approved`) y la aprobación del cliente.
+- Si falta Revisión, el botón no aparece: se lee **Falta Revisión — no se puede saltar al pool**.
+- El mismo CTA vive en Entregas (Copy/Publicación). Desde el Panel, ese Listo se agenda en Metricool igual que el Recibo AI.
+
+![Puente Recibo humano](/changelog/v5.14-puente-humano.png)
+
 ## v5.92 — 2026-09-21
 
 **Panel en el teléfono: toca video, toca el día y Agendar.**

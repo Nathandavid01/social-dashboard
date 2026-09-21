@@ -492,6 +492,8 @@ export interface ContentIdea {
   manual_posted_status?: 'posted' | 'not_posted' | null
   /** Staff manual client approval (Recibo). Migration 0086. */
   staff_client_approval?: 'approved' | 'rejected' | null
+  /** Explicit staff CTA: human Recibo/Entregas cut → pool Listo. Migration 0088. */
+  staff_pool_ready?: boolean
   posting_error: string | null
   posting_started_at: string | null
   created_by: string | null
@@ -506,7 +508,7 @@ export interface ContentIdea {
 export interface IdeaWithPipeline extends ContentIdea {
   recordingScheduled: boolean
   videos: ContentIdeaVideo[]
-  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms' | 'status'>>) | null
+  client?: (Pick<Client, 'id' | 'name' | 'industry'> & Partial<Pick<Client, 'logo_url' | 'platforms' | 'status' | 'edit_mode'>>) | null
   /** Person the linked production task is assigned to (null when unassigned).
    * avatar_url is optional so optimistic updates (from a name-only profile list)
    * still type-check; the fetched data includes it. */

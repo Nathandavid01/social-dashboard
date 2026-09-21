@@ -1,9 +1,13 @@
 /**
  * Panel clientes — estados Listo / Agendado / Publicado.
  *
- * Se derivan de columnas que ya existen (Recibo, /aprobacion, Metricool).
- * No hay tabla ni enum nuevo. El pool Listo es solo Recibo/AI: un video
- * de Entregas humano no entra aquí (saltar Revisión sería el atajo).
+ * Se derivan de columnas existentes (Recibo, /aprobacion, Metricool) más
+ * `staff_pool_ready` (CTA explícito del puente humano).
+ *
+ * Gate (no saltar Revisión):
+ * - AI Recibo: aprobado → Listo automático.
+ * - Humano Entregas/Recibo: Listo solo si el staff pulsa el CTA, el cliente
+ *   ya aprobó, y `approval_status === 'approved'` (pasó Revisión).
  */
 
 export type PoolPublishState = 'recibo' | 'listo' | 'agendado' | 'publicado'
@@ -21,6 +25,10 @@ export interface PoolStateInput {
   client_review_status?: string | null
   entregas_review_status?: string | null
   client_edit_mode?: ClientEditMode | null
+  /** Internal Revisión. Human Listo requires `approved`. */
+  approval_status?: string | null
+  /** Explicit staff CTA. Never inferred for human videos. */
+  staff_pool_ready?: boolean | null
 }
 
 export function isPublishedIdea(input: PoolStateInput): boolean {
@@ -44,11 +52,76 @@ export function isClientApproved(input: PoolStateInput): boolean {
     || input.entregas_review_status === 'approved'
 }
 
+/** Internal Revisión passed. Human pool must not skip this. */
+export function hasPassedRevision(input: PoolStateInput): boolean {
+  return input.approval_status === 'approved'
+}
+
+export type HumanPoolGateReason =
+  | 'ok'
+  | 'ai_auto'
+  | 'not_human'
+  | 'not_approved'
+  | 'falta_revision'
+  | 'already_listo'
+  | 'descartada'
+  | 'already_scheduled'
+
+/**
+ * ¿Puede el staff pulsar “Enviar al pool · Listo”?
+ * Documented gate: human + client approved + Revisión approved + not yet sent.
+ */
+export function humanPoolGate(input: PoolStateInput): HumanPoolGateReason {
+  if (input.status === 'descartada') return 'descartada'
+  if (isReciboAiClient(input.client_edit_mode)) return 'ai_auto'
+  if (input.client_edit_mode !== 'human') return 'not_human'
+  if (isPublishedIdea(input) || isAgendadoIdea(input)) return 'already_scheduled'
+  if (input.staff_pool_ready && isClientApproved(input) && hasPassedRevision(input)) {
+    return 'already_listo'
+  }
+  if (!isClientApproved(input)) return 'not_approved'
+  if (!hasPassedRevision(input)) return 'falta_revision'
+  return 'ok'
+}
+
+export function canSendHumanReciboToPool(input: PoolStateInput): boolean {
+  return humanPoolGate(input) === 'ok'
+}
+
+export function humanPoolGateMessage(reason: HumanPoolGateReason): string {
+  switch (reason) {
+    case 'ok':
+      return ''
+    case 'ai_auto':
+      return 'Este video es de un cliente AI: entra al pool solo cuando se aprueba en Recibo'
+    case 'not_human':
+      return 'Solo cortes de clientes humanos'
+    case 'not_approved':
+      return 'Falta la aprobación del cliente'
+    case 'falta_revision':
+      return 'Falta Revisión — no se puede saltar al pool'
+    case 'already_listo':
+      return 'Ya está Listo en el pool'
+    case 'descartada':
+      return 'El video está descartado'
+    case 'already_scheduled':
+      return 'El video ya está agendado o publicado'
+  }
+}
+
+export function isHumanListo(input: PoolStateInput): boolean {
+  return input.client_edit_mode === 'human'
+    && Boolean(input.staff_pool_ready)
+    && isClientApproved(input)
+    && hasPassedRevision(input)
+}
+
 export function poolPublishState(input: PoolStateInput): PoolPublishState {
   if (input.status === 'descartada') return 'recibo'
   if (isPublishedIdea(input)) return 'publicado'
   if (isAgendadoIdea(input)) return 'agendado'
   if (isReciboAiClient(input.client_edit_mode) && isClientApproved(input)) return 'listo'
+  if (isHumanListo(input)) return 'listo'
   return 'recibo'
 }
 
@@ -58,9 +131,10 @@ export function isCalendarEligible(state: PoolPublishState): boolean {
 
 export function canCreateMetricoolSchedule(
   state: PoolPublishState,
-  editMode: ClientEditMode | null | undefined,
+  _editMode?: ClientEditMode | null,
 ): boolean {
-  return state === 'listo' && isReciboAiClient(editMode)
+  // Listo already encodes the Recibo/AI auto path or the human CTA + Revisión gate.
+  return state === 'listo'
 }
 
 export function canReschedulePoolIdea(state: PoolPublishState): boolean {
@@ -124,6 +198,8 @@ export interface PoolIdeaInput {
   staff_client_approval?: string | null
   client_review_status?: string | null
   entregas_review_status?: string | null
+  approval_status?: string | null
+  staff_pool_ready?: boolean | null
   generated_caption?: string | null
   coverVideoId?: string | null
   coverUrl?: string | null
