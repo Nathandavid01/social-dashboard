@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.8 — Gap de la semana (Falta Listo)</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --sky:#7dd3fc; --amber:#fbbf24; --red:#f87171; --green:#6ee7b7; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:14px; }
+    .row { display:flex; align-items:center; gap:10px; }
+    .logo { width:36px; height:36px; border-radius:8px; background:var(--gold); color:#111; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; }
+    .muted { color:var(--muted); font-size:12px; }
+    .label { font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+    .gap { margin-top:12px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; border:1px solid rgba(248,113,113,.45); background:rgba(251,191,36,.1); border-radius:10px; padding:10px 12px; }
+    .gap strong { color:#fde68a; font-size:14px; }
+    .gap p { margin:2px 0 0; font-size:12px; color:#fca5a5; }
+    .chip { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; border:1px solid rgba(248,113,113,.4); background:rgba(248,113,113,.15); color:#fecaca; }
+    .ok { color:#422006; background:var(--amber); border:none; }
+    .pool { display:flex; gap:10px; margin-top:12px; }
+    .tile { width:110px; }
+    .thumb { height:88px; border-radius:8px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); margin:0 0 4px; }
+    .state { display:flex; gap:16px; margin-top:8px; }
+    .col { flex:1; }
+    h2 { font-size:13px; color:var(--muted); font-weight:600; margin:20px 0 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel · hueco de la semana</h1>
+    <p class="sub">Si un cliente Recibo/AI debe publicar esta semana y no hay video <strong>Listo</strong>, el Panel ya no esconde el vacío: muestra <strong>Falta Listo</strong> en ámbar/rojo. Sin cadencia, o con el hueco ya cubierto, el pool vacío sigue oculto.</p>
+
+    <h2>Con gap (cadencia + pool vacío)</h2>
+    <div class="card">
+      <div class="row">
+        <div class="logo">AL</div>
+        <div>
+          <strong>Arecibo Lab</strong>
+          <div class="muted">Cadencia esta semana: Mié, Vie</div>
+        </div>
+      </div>
+      <div class="gap">
+        <div>
+          <strong>Falta Listo</strong>
+          <p>Cadencia sin video: Mié, Vie</p>
+        </div>
+        <span class="chip">Falta Listo</span>
+      </div>
+    </div>
+
+    <h2>Sin gap (hay Listo, o no hay cadencia)</h2>
+    <div class="state">
+      <div class="col card">
+        <div class="row">
+          <div class="logo">AL</div>
+          <div>
+            <strong>Arecibo Lab</strong>
+            <div class="muted">Cadencia esta semana: Mié, Vie</div>
+          </div>
+        </div>
+        <p class="label" style="margin-top:14px">Pool · Listo</p>
+        <div class="pool">
+          <div class="tile">
+            <div class="thumb">carátula</div>
+            <div>Video listo</div>
+            <span class="chip ok">Listo</span>
+          </div>
+        </div>
+      </div>
+      <div class="col card">
+        <div class="row">
+          <div class="logo">CH</div>
+          <div>
+            <strong>Cliente humano</strong>
+            <div class="muted">Cadencia esta semana: Lun · pool vacío (escondido, sin Falta Listo)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

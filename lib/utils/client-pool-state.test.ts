@@ -7,6 +7,7 @@ import {
   poolPublishState,
   shouldNotifyClientVote,
   weekCadenceDates,
+  weekCadenceGap,
   type PoolClientInput,
   type PoolIdeaInput,
   type PoolStateInput,
@@ -138,6 +139,70 @@ describe('weekCadenceDates', () => {
   })
 })
 
+describe('weekCadenceGap — Falta Listo', () => {
+  const cadence = ['2026-09-23', '2026-09-25']
+
+  it('marca gap cuando Recibo/AI tiene cadencia esta semana y el pool está vacío', () => {
+    expect(weekCadenceGap({
+      editMode: 'ai',
+      weekDates: cadence,
+      weekPosts: [],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: true, gapDates: cadence })
+  })
+
+  it('no marca gap si hay Listo en el pool', () => {
+    expect(weekCadenceGap({
+      editMode: 'ai',
+      weekDates: cadence,
+      weekPosts: [],
+      poolCount: 1,
+    })).toEqual({ hasWeekGap: false, gapDates: [] })
+  })
+
+  it('no marca gap si no hay cadencia esta semana', () => {
+    expect(weekCadenceGap({
+      editMode: 'ai',
+      weekDates: [],
+      weekPosts: [],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: false, gapDates: [] })
+  })
+
+  it('no marca gap en cliente humano/Entregas aunque tenga cadencia y pool vacío', () => {
+    expect(weekCadenceGap({
+      editMode: 'human',
+      weekDates: cadence,
+      weekPosts: [],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: false, gapDates: [] })
+    expect(weekCadenceGap({
+      editMode: null,
+      weekDates: cadence,
+      weekPosts: [],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: false, gapDates: [] })
+  })
+
+  it('solo deja los días de cadencia que aún no están agendados/publicados', () => {
+    expect(weekCadenceGap({
+      editMode: 'ai',
+      weekDates: cadence,
+      weekPosts: [{ publishDate: '2026-09-23' }],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: true, gapDates: ['2026-09-25'] })
+  })
+
+  it('no marca gap si todos los días de cadencia ya tienen post', () => {
+    expect(weekCadenceGap({
+      editMode: 'ai',
+      weekDates: cadence,
+      weekPosts: [{ publishDate: '2026-09-23' }, { publishDate: '2026-09-25' }],
+      poolCount: 0,
+    })).toEqual({ hasWeekGap: false, gapDates: [] })
+  })
+})
+
 describe('buildClientPoolPanel', () => {
   const ai: PoolClientInput = {
     id: 'ai',
@@ -177,6 +242,8 @@ describe('buildClientPoolPanel', () => {
     expect(panel.clients[0].pool).toEqual([])
     expect(panel.clients[0].hidePool).toBe(true)
     expect(panel.clients[0].weekDates).toEqual(['2026-09-23', '2026-09-25'])
+    expect(panel.clients[0].hasWeekGap).toBe(true)
+    expect(panel.clients[0].gapDates).toEqual(['2026-09-23', '2026-09-25'])
   })
 
   it('el pool Listo solo muestra videos AI aprobados sin fecha Metricool', () => {
@@ -208,6 +275,48 @@ describe('buildClientPoolPanel', () => {
     expect(arecibo?.weekPosts.map((v) => v.id)).toEqual(['a1'])
     expect(humano?.pool).toEqual([])
     expect(humano?.hidePool).toBe(true)
+    expect(arecibo?.hasWeekGap).toBe(false)
+    expect(humano?.hasWeekGap).toBe(false)
+  })
+
+  it('AI con cadencia y pool vacío muestra gap; humano no', () => {
+    const panel = buildClientPoolPanel({
+      clients: [ai, human],
+      ideas: [],
+      week: WEEK,
+    })
+    const arecibo = panel.clients.find((c) => c.client.id === 'ai')
+    const humano = panel.clients.find((c) => c.client.id === 'hum')
+    expect(arecibo?.hasWeekGap).toBe(true)
+    expect(arecibo?.gapDates).toEqual(['2026-09-23', '2026-09-25'])
+    expect(arecibo?.hidePool).toBe(true)
+    expect(humano?.hasWeekGap).toBe(false)
+    expect(humano?.hidePool).toBe(true)
+  })
+
+  it('AI sin cadencia esta semana no tiene gap aunque el pool esté vacío', () => {
+    const noCadence: PoolClientInput = {
+      ...ai,
+      id: 'quiet',
+      name: 'Sin cadencia',
+      posting_days: [],
+    }
+    const panel = buildClientPoolPanel({
+      clients: [noCadence],
+      ideas: [
+        row({
+          id: 'p1',
+          client_id: 'quiet',
+          status: 'publicada',
+          publish_date: '2026-09-24',
+        }),
+      ],
+      week: WEEK,
+    })
+    expect(panel.clients).toHaveLength(1)
+    expect(panel.clients[0].hidePool).toBe(true)
+    expect(panel.clients[0].hasWeekGap).toBe(false)
+    expect(panel.clients[0].gapDates).toEqual([])
   })
 
   it('el calendario del panel solo lleva agendado y publicado', () => {
