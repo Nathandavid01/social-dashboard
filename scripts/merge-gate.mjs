@@ -3,10 +3,10 @@
  * Hard merge gate — must pass before a PR is allowed into main.
  *
  * Graph of checks (all required, in order):
- *   1. static-db-relationships  → bare/wrong PostgREST embeds
- *   2. unit-relationships       → relationship + dual-R2 + r2 migration planners
- *   3. unit-entregas-delivery   → /revision filter cannot accept pipeline-r2 as delivery
- *   4. r2-migration-verify      → zero leftover pipeline-r2 rows OR dry inventory OK
+ *   1. version-hygiene          → duplicate CHANGELOG headers or version.ts mismatch
+ *   2. static-db-relationships  → bare/wrong PostgREST embeds
+ *   3. unit-core-guards         → relationship + dual-R2 + r2 migration planners
+ *   4. r2-inventory-dry-run     → leftover pipeline-r2 inventory (read-only)
  *
  * CI job name: "merge-gate" (wire as required status check on main).
  */
@@ -19,6 +19,17 @@ const root = process.cwd()
 
 /** @type {{ id: string, label: string, run: () => { ok: boolean, detail?: string } }[]} */
 const GRAPH = [
+  {
+    id: 'version-hygiene',
+    label: 'CHANGELOG headers unique + version.ts matches latest entry',
+    run: () => {
+      const r = spawnSync('node', ['scripts/check-version-hygiene.mjs'], {
+        cwd: root,
+        encoding: 'utf8',
+      })
+      return { ok: r.status === 0, detail: (r.stdout || '') + (r.stderr || '') }
+    },
+  },
   {
     id: 'static-db-relationships',
     label: 'Static PostgREST embed scan',
@@ -43,6 +54,7 @@ const GRAPH = [
           'lib/utils/entregas-delivery.test.ts',
           'lib/utils/r2-provider-migration.test.ts',
           'scripts/check-content-idea-video-schema.test.ts',
+          'scripts/check-version-hygiene.test.ts',
           '--exclude',
           '**/.claude/**',
         ],
