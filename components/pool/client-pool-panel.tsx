@@ -1,14 +1,14 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { CalendarDays, GripVertical, Layers } from 'lucide-react'
+import { AlertTriangle, CalendarDays, GripVertical, Layers } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { VideoCover } from '@/components/recording/video-cover'
 import { useToast } from '@/lib/hooks/use-toast'
 import { schedulePoolIdea } from '@/lib/actions/client-pool'
 import { DIAS, diaDeFecha } from '@/lib/entregas/dias'
 import { cn } from '@/lib/utils'
-import type { ClientPoolPanel, PoolVideo } from '@/lib/utils/client-pool-state'
+import { weekCadenceGap, type ClientPoolPanel, type PoolVideo } from '@/lib/utils/client-pool-state'
 
 const STATE_LABEL: Record<PoolVideo['state'], string> = {
   listo: 'Listo',
@@ -158,6 +158,26 @@ export function ClientPoolPanelView({
                 </div>
               </div>
             </div>
+
+            {row.hasWeekGap && (
+              <div
+                data-testid={`week-gap-${row.client.id}`}
+                className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg border border-red-500/45 bg-amber-500/10 px-3 py-2"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-amber-200">Falta Listo</p>
+                    <p className="text-xs text-red-300/90">
+                      Cadencia sin video: {row.gapDates.map(diaShort).join(', ')}
+                    </p>
+                  </div>
+                </div>
+                <span className="shrink-0 whitespace-nowrap rounded-full border border-red-500/40 bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-200">
+                  Falta Listo
+                </span>
+              </div>
+            )}
 
             {row.weekPosts.length > 0 && (
               <ul className="mt-3 flex gap-2 overflow-x-auto">
@@ -317,7 +337,13 @@ function optimisticSchedule(cur: ClientPoolPanel, ideaId: string, date: string):
         ...row.weekPosts.filter((v) => v.id !== ideaId),
         ...(row.client.id === moved.clientId ? [moved] : []),
       ]
-      return { ...row, pool, weekPosts, hidePool: pool.length === 0 }
+      const gap = weekCadenceGap({
+        editMode: row.client.edit_mode,
+        weekDates: row.weekDates,
+        weekPosts,
+        poolCount: pool.length,
+      })
+      return { ...row, pool, weekPosts, hidePool: pool.length === 0, ...gap }
     }),
   }
 }

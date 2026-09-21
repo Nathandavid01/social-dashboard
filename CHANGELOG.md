@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.8 — 2026-09-21
+
+**Panel: se ve el hueco de la semana (Falta Listo).**
+- En `/pool`, si un cliente Recibo/AI tiene cadencia un día de esta semana y el pool está vacío, aparece una fila ámbar/roja **Falta Listo** con esos días — ya no se esconde el vacío sin aviso.
+- Si no hay cadencia esta semana (o el hueco ya está cubierto con Agendado/Publicado), el pool vacío sigue oculto.
+- Clientes de Entregas humano no muestran este aviso: su flujo no entra al pool Listo.
+
+![Gap de la semana en el Panel](/changelog/v5.8-gap-semana.png)
+
 ## v5.7 — 2026-09-20
 
 **On Site: «Subir crudo» es la puerta principal.**

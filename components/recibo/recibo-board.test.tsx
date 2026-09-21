@@ -17,14 +17,17 @@ vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarIdeaAlCliente: () => <button type="button">Enviar al cliente</button>,
 }))
 
+import { rangoSemana } from '@/lib/entregas/dias'
 import { ReciboBoard } from './recibo-board'
+
+const week = rangoSemana()
 
 const editedIdea = {
   id: 'i1',
   client_id: 'c1',
   title: 'Reel playa',
   status: 'producida',
-  publish_date: '2026-09-19',
+  publish_date: week.desde,
   manual_posted_status: null,
   staff_client_approval: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },

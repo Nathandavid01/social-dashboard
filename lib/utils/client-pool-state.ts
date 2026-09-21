@@ -99,6 +99,23 @@ export function weekCadenceDates(
   return out
 }
 
+/** Hueco de la semana: Recibo/AI debe publicar y no hay Listo para esos días. */
+export function weekCadenceGap(opts: {
+  editMode: ClientEditMode | null | undefined
+  weekDates: string[]
+  weekPosts: { publishDate: string | null }[]
+  poolCount: number
+}): { hasWeekGap: boolean; gapDates: string[] } {
+  if (!isReciboAiClient(opts.editMode) || opts.poolCount > 0) {
+    return { hasWeekGap: false, gapDates: [] }
+  }
+  const covered = new Set(
+    opts.weekPosts.map((p) => p.publishDate).filter((d): d is string => Boolean(d)),
+  )
+  const gapDates = opts.weekDates.filter((d) => !covered.has(d))
+  return { hasWeekGap: gapDates.length > 0, gapDates }
+}
+
 export interface PoolClientInput {
   id: string
   name: string
@@ -149,6 +166,8 @@ export interface PoolClientRow {
   weekPosts: PoolVideo[]
   pool: PoolVideo[]
   hidePool: boolean
+  hasWeekGap: boolean
+  gapDates: string[]
 }
 
 export interface ClientPoolPanel {
@@ -216,8 +235,14 @@ export function buildClientPoolPanel(opts: {
       }
     }
     const hidePool = pool.length === 0
+    const { hasWeekGap, gapDates } = weekCadenceGap({
+      editMode: client.edit_mode,
+      weekDates,
+      weekPosts,
+      poolCount: pool.length,
+    })
     if (hidePool && weekDates.length === 0 && weekPosts.length === 0) continue
-    rows.push({ client, weekDates, weekPosts, pool, hidePool })
+    rows.push({ client, weekDates, weekPosts, pool, hidePool, hasWeekGap, gapDates })
   }
 
   return { week: opts.week, clients: rows, calendar }

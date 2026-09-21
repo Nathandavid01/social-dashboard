@@ -74,6 +74,8 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
           },
         ],
         hidePool: false,
+        hasWeekGap: false,
+        gapDates: [],
       },
       {
         client: {
@@ -86,6 +88,8 @@ function panel(over: Partial<ClientPoolPanel> = {}): ClientPoolPanel {
         weekPosts: [],
         pool: [],
         hidePool: true,
+        hasWeekGap: false,
+        gapDates: [],
       },
     ],
     ...over,
@@ -113,6 +117,38 @@ describe('ClientPoolPanelView', () => {
     const calendar = screen.getByTestId('pool-calendar')
     expect(calendar).toHaveTextContent('Reel agendado')
     expect(calendar).not.toHaveTextContent('Video listo')
+  })
+
+  it('muestra Falta Listo en amber/rojo cuando hay gap de cadencia', () => {
+    render(<ClientPoolPanelView data={panel({
+      clients: [
+        {
+          client: {
+            id: 'gap',
+            name: 'Arecibo vacío',
+            posting_days: [3, 5],
+            edit_mode: 'ai',
+          },
+          weekDates: ['2026-09-23', '2026-09-25'],
+          weekPosts: [],
+          pool: [],
+          hidePool: true,
+          hasWeekGap: true,
+          gapDates: ['2026-09-23', '2026-09-25'],
+        },
+      ],
+    })} canSchedule />)
+    const row = screen.getByTestId('week-gap-gap')
+    expect(row).toHaveTextContent('Falta Listo')
+    expect(row).toHaveTextContent('Mié')
+    expect(row).toHaveTextContent('Vie')
+    expect(screen.queryByTestId('pool-gap')).not.toBeInTheDocument()
+  })
+
+  it('no pinta Falta Listo si el pool vacío no es un gap de cadencia', () => {
+    render(<ClientPoolPanelView data={panel()} canSchedule />)
+    expect(screen.queryByText('Falta Listo')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('week-gap-hum')).not.toBeInTheDocument()
   })
 
   it('al soltar un Listo en un día llama a schedulePoolIdea', async () => {
