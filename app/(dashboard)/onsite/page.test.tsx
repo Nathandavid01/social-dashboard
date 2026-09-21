@@ -17,6 +17,9 @@ vi.mock('@/lib/actions/onsite', () => ({
   getOnsiteShots: async () => h.shots,
   getAddableIdeas: async () => h.ideas,
 }))
+vi.mock('@/lib/actions/onsite-upload-context', () => ({
+  listOnsiteRawVideos: async () => ({ videos: [] }),
+}))
 vi.mock('@/lib/actions/clients', () => ({
   getClients: async () => [{ id: 'c1', name: 'Blue Chiropractic' }],
 }))

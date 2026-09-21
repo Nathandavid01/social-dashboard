@@ -54,6 +54,26 @@ describe('VideoPipelineRow', () => {
     expect(screen.getByText('Mi caption')).toBeInTheDocument()
   })
 
+  it('nombra la idea y distingue De la idea vs Extra', () => {
+    row(video({
+      title: 'Promo del finde',
+      recording_session_id: 's1',
+      videos: {
+        raw: [{ id: 'r1', name: 'IMG_1.MOV', status: 'uploaded' } as PipelineVideo['videos']['raw'][number]],
+        broll: [],
+        edited: [],
+      },
+    }))
+    expect(screen.getByText('Idea')).toBeInTheDocument()
+    expect(screen.getAllByText('De la idea').length).toBeGreaterThan(0)
+    expect(screen.getByText('IMG_1.MOV')).toBeInTheDocument()
+  })
+
+  it('marca Extra cuando la idea no viene de una sesión', () => {
+    row(video({ recording_session_id: null, theme: null }))
+    expect(screen.getByText('Extra')).toBeInTheDocument()
+  })
+
   it('does not render caption text when there is no caption', () => {
     row(video({ generated_caption: null }))
     expect(screen.queryByText('Mi caption')).not.toBeInTheDocument()

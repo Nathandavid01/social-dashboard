@@ -3,6 +3,7 @@ import { editingClaimFromFields, type EditingClaim } from '@/lib/pipeline/editin
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { clientAssigneeId, isIdeaApproved } from './editor-video-bank'
 import { isClientBrollLibrary } from './banco-direct-upload'
+import { classifyVideoLink, type VideoLinkKind } from './video-link'
 
 /**
  * El banco visto como biblioteca de video: una carátula por crudo, agrupadas
@@ -37,6 +38,10 @@ export interface BankVideoTile {
   editorName: string | null
   assignedVia: AssignedVia
   editingClaim?: EditingClaim
+  /** Nombre del archivo; el título de la tarjeta es el de la idea. */
+  fileName?: string | null
+  /** De la idea (sesión On Site) vs Extra (banco / B-roll library). */
+  linkKind?: VideoLinkKind
 }
 
 export interface BankClientRail {
@@ -134,6 +139,11 @@ function toTile(
       idea.editing_started_at,
       idea.editingClaimer?.full_name ?? editorNames[idea.editing_started_by ?? ''] ?? null,
     ),
+    fileName: video.name ?? null,
+    linkKind: classifyVideoLink({
+      hasRecordingSession: Boolean(idea.recording_session_id),
+      isBrollLibrary: isClientBrollLibrary(idea),
+    }),
   }
 }
 

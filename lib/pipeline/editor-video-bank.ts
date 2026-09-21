@@ -3,6 +3,7 @@ import { editingClaimFromFields, type EditingClaim } from '@/lib/pipeline/editin
 import { ROLE_LABEL } from '@/lib/auth/permissions'
 import { clientCardColor } from '@/lib/utils/client-accent'
 import { deadlineStatus, todayISOInTimeZone, type DeadlineStatus } from '@/lib/utils/deadlines'
+import { classifyVideoLink, type VideoLinkKind } from './video-link'
 
 const URGENCY_RANK: Record<DeadlineStatus, number> = { none: 0, future: 1, 'due-soon': 2, overdue: 3 }
 const NATE_TZ = 'America/Puerto_Rico'
@@ -29,6 +30,7 @@ export interface EditorBankFile {
   kind: 'raw' | 'broll'
   storageProvider: ContentIdeaVideo['storage_provider']
   driveViewLink: string | null
+  linkKind?: VideoLinkKind
 }
 
 export interface EditorBankClip {
@@ -48,6 +50,7 @@ export interface EditorBankClip {
   queue: 'active' | 'waiting'
   /** Quién está cortando ahora (independiente de assigned_to). */
   editingClaim?: EditingClaim
+  linkKind?: VideoLinkKind
 }
 
 export interface EditorBankNextSlot {
@@ -400,7 +403,11 @@ export function groupEditorVideoBank(
     }
 
     const waiting = idea.bankQueue === 'waiting'
-    const files = sourceFiles(idea.videos)
+    const linkKind = classifyVideoLink({
+      hasRecordingSession: Boolean(idea.recording_session_id),
+      isBrollLibrary: idea.theme === 'client-broll-library',
+    })
+    const files = sourceFiles(idea.videos).map((file) => ({ ...file, linkKind }))
     if (files.length === 0 && !waiting) continue
 
     const uploaderId = idea.videos.find((v) => v.uploaded_by)?.uploaded_by ?? null
@@ -426,6 +433,7 @@ export function groupEditorVideoBank(
         idea.editing_started_at,
         idea.editingClaimer?.full_name ?? profileNames[idea.editing_started_by ?? ''] ?? null,
       ),
+      linkKind,
     })
   }
 

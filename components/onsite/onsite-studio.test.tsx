@@ -284,6 +284,27 @@ describe('OnsiteStudio', () => {
     await user.type(screen.getByLabelText('Título de la idea 1'), 'El primer sandwich del día')
     expect(screen.getByText('Subida El primer sandwich del día')).toBeInTheDocument()
   })
+
+  it('en la tarjeta se ve si ya hay crudo o si falta', () => {
+    render(
+      <OnsiteStudio
+        sessions={[session()]}
+        active={session()}
+        shots={[
+          shot({ id: 'i1', title: 'Intro Patricia', rawCount: 2 }),
+          shot({ id: 'i2', title: 'Tour de sala', rawCount: 0 }),
+        ]}
+        addable={[]}
+        canBrief={false}
+        canRecord
+        canUpload
+        today="2026-08-20"
+        currentUserId="u1"
+      />,
+    )
+    expect(screen.getByText('Ya hay crudo')).toBeInTheDocument()
+    expect(screen.getByText('Falta crudo')).toBeInTheDocument()
+  })
 })
 
 it.each([['Carlos Villalta', 'Carlos Villalta'], [null, 'Sin Editor Asignado']])('shows the client editor in the session header: %s', (name, expected) => {

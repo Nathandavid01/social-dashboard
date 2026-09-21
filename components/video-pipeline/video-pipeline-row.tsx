@@ -13,6 +13,7 @@ import type {
   ContentIdeaType, ContentIdeaStatus, IdeaApprovalStatus, ContentIdeaVideo,
 } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
+import { classifyVideoLink, videoLinkLabel } from '@/lib/pipeline/video-link'
 
 const TYPE_CFG: Record<ContentIdeaType, { label: string; icon: typeof Film; color: string }> = {
   R: { label: 'Reel', icon: Film, color: 'text-pink-600' },
@@ -81,6 +82,11 @@ export function VideoPipelineRow({
     { key: 'broll', icon: Video, n: activeLen(video.videos.broll), total: 4 },
     { key: 'edited', icon: Clapperboard, n: activeLen(video.videos.edited), total: 2 },
   ]
+  const linkKind = classifyVideoLink({
+    hasRecordingSession: Boolean(video.recording_session_id),
+    isBrollLibrary: video.theme === 'client-broll-library',
+  })
+  const sourceFiles = [...video.videos.raw, ...video.videos.broll].filter((v) => ACTIVE.has(v.status))
 
   return (
     <tr className={cn('group transition-colors hover:bg-muted/40', video.status === 'descartada' && 'opacity-60')}>
@@ -94,12 +100,15 @@ export function VideoPipelineRow({
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <TypeIcon className={cn('h-4 w-4 shrink-0', type.color)} />
-              <Link
-                href={`/produccion/idea/${video.id}`}
-                className="block truncate text-sm font-semibold hover:text-primary"
-              >
-                {video.title || 'Sin título'}
-              </Link>
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Idea</p>
+                <Link
+                  href={`/produccion/idea/${video.id}`}
+                  className="block truncate text-sm font-semibold hover:text-primary"
+                >
+                  {video.title || 'Sin título'}
+                </Link>
+              </div>
             </div>
 
             {/* Date on the same top row as title */}
@@ -117,6 +126,11 @@ export function VideoPipelineRow({
           <div className="flex flex-wrap items-center gap-1">
             <span className={cn(pill, status.cls)}>{status.label}</span>
             <span className={cn(pill, approval.cls)}>{approval.label}</span>
+            <span className={cn(pill, linkKind === 'linked'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+              : 'border-border bg-muted/40 text-muted-foreground')}>
+              {videoLinkLabel(linkKind)}
+            </span>
             {caption && (
               <span className="ml-1 truncate text-xs text-muted-foreground">{caption}</span>
             )}
@@ -148,16 +162,28 @@ export function VideoPipelineRow({
 
       {/* MATERIAL */}
       <td className="py-2.5 pr-3 align-middle">
-        <div className="flex items-center gap-2 text-[11px] tabular-nums text-muted-foreground">
-          {counts.map((c) => {
-            const Icon = c.icon
-            return (
-              <span key={c.key} className={cn('inline-flex items-center gap-0.5', c.n >= c.total && 'text-emerald-600')}>
-                <Icon className="h-3 w-3" />
-                {c.n}/{c.total}
-              </span>
-            )
-          })}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-[11px] tabular-nums text-muted-foreground">
+            {counts.map((c) => {
+              const Icon = c.icon
+              return (
+                <span key={c.key} className={cn('inline-flex items-center gap-0.5', c.n >= c.total && 'text-emerald-600')}>
+                  <Icon className="h-3 w-3" />
+                  {c.n}/{c.total}
+                </span>
+              )
+            })}
+          </div>
+          {sourceFiles.length > 0 && (
+            <ul className="space-y-0.5" aria-label="Videos de esta idea">
+              {sourceFiles.map((file) => (
+                <li key={file.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]">
+                  <span className="min-w-0 truncate">{file.name}</span>
+                  <span className="shrink-0 whitespace-nowrap text-muted-foreground">{videoLinkLabel(linkKind)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </td>
 

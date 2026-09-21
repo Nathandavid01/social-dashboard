@@ -3,6 +3,8 @@ import { ClientProposalPanel } from '@/components/ideas/client-proposal-panel'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { requirePermission, currentUserHas, getEffectiveUserId } from '@/lib/auth/server'
 import { getOnsiteSessions, getOnsiteShots, getAddableIdeas } from '@/lib/actions/onsite'
+import { listOnsiteRawVideos } from '@/lib/actions/onsite-upload-context'
+import { buildOnsiteUploadContext, withRawCount } from '@/lib/onsite/upload-context'
 import { getClients } from '@/lib/actions/clients'
 import { listClientBankAssets } from '@/lib/actions/client-asset-bank'
 import { pickOnsiteSession } from '@/lib/onsite/slot-count'
@@ -62,7 +64,22 @@ export default async function OnsitePage({
   // Solo las tomas bloquean la sesión. Fallar al listar ideas añadibles no
   // debe dejar a la crew en «Volver A Cargar» con el call sheet vacío.
   const loadError = shotResult.error
-  const shots = shotResult.shots
+  const rawResult = activa && !shotResult.error && (shotResult.shots?.length ?? 0) > 0
+    ? await listOnsiteRawVideos(shotResult.shots!.map((s) => s.id))
+    : { videos: [] as Awaited<ReturnType<typeof listOnsiteRawVideos>>['videos'] }
+  const uploadContext = activa && !shotResult.error
+    ? buildOnsiteUploadContext({
+      sessionId: activa.id,
+      clientName: activa.clientName ?? 'Sin cliente',
+      sessionTitle: activa.title ?? '',
+      sessionDate: activa.date ?? '',
+      shots: shotResult.shots ?? [],
+      videos: rawResult.videos ?? [],
+    })
+    : null
+  const shots = uploadContext && shotResult.shots
+    ? withRawCount(shotResult.shots, uploadContext.ideas)
+    : shotResult.shots
   const ideas = ideaResult.error ? [] : ideaResult.ideas
   const clients = (Array.isArray(clientsRaw) ? clientsRaw : [])
     .map((c) => ({ id: String((c as { id?: string }).id ?? ''), name: String((c as { name?: string }).name ?? '') }))
@@ -106,6 +123,7 @@ export default async function OnsitePage({
         defaultClientId={activa?.clientId ?? null}
         defaultSessionId={todaySession?.id ?? null}
         existingIdeaId={todaySession ? (shots?.[0]?.id ?? null) : null}
+        uploadContext={uploadContext}
       />
 
       {loadError && activa ? (

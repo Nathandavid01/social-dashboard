@@ -228,6 +228,23 @@ describe('buildVideoBank', () => {
     expect(bank.rails[0].editorId).toBeNull()
   })
 
+  it('marca De la idea vs Extra según sesión On Site o banco suelto', () => {
+    const bank = buildVideoBank(
+      [
+        idea({ id: 'a', title: 'Intro clínica' }),
+        { ...idea({ id: 'b', title: 'Toma extra' }), recording_session_id: null, theme: null } as IdeaWithPipeline,
+        { ...idea({ id: 'c', title: 'B-roll patio', clientId: 'c2', clientName: 'Speedy Net', videos: [{ id: 'c-v1', kind: 'broll' }] }), recording_session_id: 's1', theme: 'client-broll-library' } as IdeaWithPipeline,
+      ].map((row, idx) => idx === 0 ? { ...row, recording_session_id: 's1' } : row),
+      { now: NOW },
+    )
+    const tiles = bank.rails.flatMap((r) => [...r.videos, ...(r.brolls ?? [])])
+    const byIdea = (id: string) => tiles.find((v) => v.ideaId === id)!
+    expect(byIdea('a').linkKind).toBe('linked')
+    expect(byIdea('a').fileName).toBe('a-v1.mp4')
+    expect(byIdea('b').linkKind).toBe('extra')
+    expect(byIdea('c').linkKind).toBe('extra')
+  })
+
   it('el título del video es el de la idea, y cae al hook si no hay título', () => {
     const sinTitulo = { ...idea({ id: 'a' }), title: '   ', hook: 'Un gancho' } as IdeaWithPipeline
     const bank = buildVideoBank([sinTitulo], { now: NOW })
