@@ -108,6 +108,21 @@ describe('mergeInFlightUploads', () => {
       { videoId: 'up-2', name: 'nuevo.MOV', status: 'uploading', ideaId: 'i1', ideaTitle: 'Intro' },
     ])
   })
+
+  it('no lista un duplicado o cancelado como si se estuviera subiendo', () => {
+    const merged = mergeInFlightUploads(
+      [],
+      [
+        { id: 'up-dup', fileName: 'mismo.mp4', ideaId: 'i1', phase: 'duplicado' },
+        { id: 'up-can', fileName: 'no.mp4', ideaId: 'i1', phase: 'cancelado' },
+        { id: 'up-ok', fileName: 'nuevo.mp4', ideaId: 'i1', phase: 'subiendo' },
+      ],
+      new Map([['i1', 'Intro']]),
+    )
+    expect(merged).toEqual([
+      { videoId: 'up-ok', name: 'nuevo.mp4', status: 'uploading', ideaId: 'i1', ideaTitle: 'Intro' },
+    ])
+  })
 })
 
 describe('withRawCount', () => {

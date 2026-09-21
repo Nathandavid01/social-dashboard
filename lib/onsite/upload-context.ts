@@ -112,6 +112,7 @@ export function mergeInFlightUploads(
   const extra: OnsiteSessionUpload[] = []
   for (const item of inFlight) {
     if (!ideaTitles.has(item.ideaId) || known.has(item.id)) continue
+    if (item.phase === 'duplicado' || item.phase === 'cancelado') continue
     extra.push({
       videoId: item.id,
       name: item.fileName,
