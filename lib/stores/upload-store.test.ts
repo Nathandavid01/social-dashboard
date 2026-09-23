@@ -85,6 +85,7 @@ beforeEach(() => {
   // clearAllMocks no borra los mockImplementationOnce sin consumir (p.ej. el
   // startMultipartUpload diferido del test de cancelar en "preparando"): se
   // restablecen los multipart para que ningún test herede uno colgado.
+  vi.mocked(getR2UploadUrl).mockReset().mockImplementation(async () => ({ url: 'https://r2/put', key: 'ideas/idea-1/edited/x.mp4' }))
   vi.mocked(startMultipartUpload).mockReset().mockImplementation(async () => ({ uploadId: 'up-1', key: 'ideas/idea-1/edited/big.mp4' }))
   vi.mocked(presignUploadParts).mockReset().mockImplementation(async (input: { partNumbers: number[] }) => ({
     urls: Object.fromEntries(input.partNumbers.map((n) => [n, `https://r2/part-${n}`])),
@@ -505,7 +506,11 @@ describe('upload-store — cola: pocos archivos a la vez (el primero aparece rá
   })
 
   it('una subida que falla suelta su turno: el siguiente de la fila arranca', async () => {
-    vi.mocked(getR2UploadUrl).mockResolvedValueOnce({ error: 'R2 caído' } as never)
+    // Atado al archivo, no al orden de llamada: cuál pide URL primero depende
+    // de cuánto tarda la huella de cada uno (en CI no siempre es a.mp4).
+    vi.mocked(getR2UploadUrl).mockImplementation(async (input: { fileName: string }) =>
+      input.fileName === 'a.mp4' ? ({ error: 'R2 caído' } as never) : { url: 'https://r2/put', key: 'ideas/idea-1/edited/x.mp4' },
+    )
     const held = holdPuts()
     const start = useUploadStore.getState().startUpload
     const ids = ['a.mp4', 'b.mp4', 'c.mp4'].map((name) =>
