@@ -5,6 +5,7 @@ import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 import { planParts, shouldUseMultipart, backoffDelayMs, aggregateProgress, type UploadPartPlan } from '@/lib/utils/upload-parts'
 import { putBlob } from '@/lib/utils/upload-http'
 import { sleep } from '@/lib/utils/sleep'
+import { createSlotQueue } from '@/lib/utils/slot-queue'
 import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { getEntregasUploadUrl, registerEntregasVideo } from '@/lib/actions/entregas-r2'
 import {
@@ -29,10 +30,16 @@ import { videoNameFromIdea } from '@/lib/uploads/video-name-from-idea'
  * Larger files go through S3/R2 multipart: up to 3 parts in parallel, each
  * retried up to 5 times with backoff — a flaky connection loses at most one
  * part's progress, never the whole file.
+ *
+ * Una tanda de muchos archivos sube de a MAX_PARALLEL_UPLOADS: el resto espera
+ * "en-cola". El total tarda lo mismo (manda el internet de quien sube), pero
+ * el primer crudo aparece en segundos y los demás van cayendo uno a uno.
  */
 
 export type UploadPhase =
   | 'preparando'
+  /** Esperando turno: otros archivos de la tanda están subiendo. */
+  | 'en-cola'
   | 'subiendo'
   | 'reintentando'
   | 'ensamblando'
@@ -64,6 +71,10 @@ export interface UploadItem {
   partsDone: number
   partsTotal: number
   attempt: number
+  /** Se fue el internet: la subida espera a que vuelva, sin gastar intentos. */
+  offline?: boolean
+  /** Tanda a la que pertenece: una subida que arranca con todo terminado abre una nueva. */
+  batch?: number
   error?: string
   videoId?: string
   /** Cuando phase === 'duplicado': el video que ya existe. */
@@ -78,6 +89,24 @@ export interface UploadItem {
 
 const MAX_ATTEMPTS = 5
 const CONCURRENCY = 3
+
+/**
+ * Archivos subiendo a la vez. Medido en prod (sep-2026): 56 crudos arrancando
+ * juntos iban cada uno a <1 Mbps y el primero tardaba ~2 min en aparecer, con
+ * el mismo total de la tanda. 2 archivos × 3 partes = 6 PUTs en vuelo, que es
+ * lo que el browser abre por host y ya llena el internet de quien sube.
+ */
+export const MAX_PARALLEL_UPLOADS = 2
+const uploadSlots = createSlotQueue(MAX_PARALLEL_UPLOADS)
+
+/**
+ * Con el wifi conectado pero sin internet, `navigator.onLine` sigue en true y
+ * cada PUT falla con error de red. Esos fallos se reintentan sin gastar los 5
+ * intentos durante este tiempo; pasado, la subida se rinde como antes.
+ */
+const NETWORK_OUTAGE_BUDGET_MS = 5 * 60_000
+
+let currentBatch = 0
 
 /**
  * Engine-only bookkeeping (File objects, abort controllers, per-part byte
@@ -132,6 +161,7 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
 
   startUpload(input) {
     const id = nextId()
+    const batch = get().hasActiveUploads() ? currentBatch : ++currentBatch
     const item: UploadItem = {
       id,
       fileName: videoNameFromIdea(input.title, input.file.name),
@@ -144,6 +174,7 @@ export const useUploadStore = create<UploadStoreState>((set, get) => ({
       partsDone: 0,
       partsTotal: 0,
       attempt: 0,
+      batch,
     }
     engines.set(id, { file: input.file, controller: new AbortController() })
     set((s) => ({ uploads: { ...s.uploads, [id]: item } }))
@@ -252,6 +283,36 @@ function setPartRetrying(id: string, partNumber: number, retrying: boolean): voi
   patchUpload(id, changes)
 }
 
+/** Fallo de red sin respuesta del servidor (ver UploadNetworkError en upload-http). */
+function isNetworkError(err: unknown): boolean {
+  return err instanceof Error && err.name === 'UploadNetworkError'
+}
+
+function httpStatus(err: unknown): number | undefined {
+  const status = (err as { status?: unknown } | null)?.status
+  return typeof status === 'number' ? status : undefined
+}
+
+function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false
+}
+
+/** Resuelve cuando vuelve el internet; rechaza con AbortError si cancelan antes. */
+function waitForOnline(signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.reject(new DOMException('Aborted', 'AbortError'))
+  if (!isOffline()) return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      window.removeEventListener('online', onOnline)
+      signal.removeEventListener('abort', onAbort)
+    }
+    const onOnline = () => { cleanup(); resolve() }
+    const onAbort = () => { cleanup(); reject(new DOMException('Aborted', 'AbortError')) }
+    window.addEventListener('online', onOnline)
+    signal.addEventListener('abort', onAbort)
+  })
+}
+
 /**
  * Retries fn up to MAX_ATTEMPTS with exponential backoff + jitter; abort
  * short-circuits immediately. `partNumber` is omitted for the single-PUT
@@ -260,6 +321,8 @@ function setPartRetrying(id: string, partNumber: number, retrying: boolean): voi
  */
 async function withRetry<T>(id: string, fn: (attempt: number) => Promise<T>, partNumber?: number): Promise<T> {
   let attempt = 0
+  let outageSince: number | null = null
+  let outageRetries = 0
   // eslint-disable-next-line no-constant-condition
   while (true) {
     attempt += 1
@@ -282,12 +345,29 @@ async function withRetry<T>(id: string, fn: (attempt: number) => Promise<T>, par
         if (partNumber != null) setPartRetrying(id, partNumber, false)
         throw err
       }
-      if (attempt >= MAX_ATTEMPTS) {
+      // Sin internet (o con wifi pero sin red), reintentar a ciegas quema los 5
+      // intentos en ~8 s y la subida entera se pierde: se espera sin contarlos.
+      const offline = isOffline()
+      if (offline || isNetworkError(err)) outageSince ??= Date.now()
+      else outageSince = null
+      const waitOutage = offline || (outageSince != null && Date.now() - outageSince < NETWORK_OUTAGE_BUDGET_MS)
+      if (!waitOutage && attempt >= MAX_ATTEMPTS) {
         if (partNumber != null) setPartRetrying(id, partNumber, false)
         throw new Error(`Se cayó la conexión y no se pudo subir después de ${MAX_ATTEMPTS} intentos`)
       }
       if (partNumber != null) setPartRetrying(id, partNumber, true)
-      await sleep(backoffDelayMs(attempt))
+      if (waitOutage) {
+        patchUpload(id, partNumber == null ? { phase: 'reintentando', offline: true } : { offline: true })
+        try {
+          if (offline) await waitForOnline(engines.get(id)!.controller.signal)
+          else await sleep(backoffDelayMs(++outageRetries))
+        } finally {
+          patchUpload(id, { offline: false })
+        }
+        attempt -= 1
+      } else {
+        await sleep(backoffDelayMs(attempt))
+      }
     }
   }
 }
@@ -313,16 +393,24 @@ async function uploadPart(id: string, plan: UploadPartPlan, url: string): Promis
 
   const result = await withRetry(
     id,
-    () =>
-      putBlob(url, blob, eng.file.type || 'video/mp4', {
-        signal: eng.controller.signal,
-        onProgress: (loaded) => {
-          eng.inFlight!.set(plan.partNumber, loaded)
-          patchUpload(id, {
-            pct: aggregateProgress({ totalBytes: total, completedBytes: eng.completedBytes ?? 0, inFlightBytes: sumMap(eng.inFlight!) }),
-          })
-        },
-      }),
+    async () => {
+      try {
+        return await putBlob(url, blob, eng.file.type || 'video/mp4', {
+          signal: eng.controller.signal,
+          onProgress: (loaded) => {
+            eng.inFlight!.set(plan.partNumber, loaded)
+            patchUpload(id, {
+              pct: aggregateProgress({ totalBytes: total, completedBytes: eng.completedBytes ?? 0, inFlightBytes: sumMap(eng.inFlight!) }),
+            })
+          },
+        })
+      } catch (err) {
+        // Las URLs de las partes duran 1 h: tras una espera larga (sin
+        // internet, cola lenta) R2 responde 403. Se firma de nuevo esa parte.
+        if (httpStatus(err) === 403) url = (await refreshPartUrl(id, plan.partNumber)) ?? url
+        throw err
+      }
+    },
     plan.partNumber,
   )
 
@@ -334,6 +422,14 @@ async function uploadPart(id: string, plan: UploadPartPlan, url: string): Promis
     pct: aggregateProgress({ totalBytes: total, completedBytes: eng.completedBytes, inFlightBytes: sumMap(eng.inFlight!) }),
   })
   return { partNumber: plan.partNumber, etag: result.etag ?? '' }
+}
+
+async function refreshPartUrl(id: string, partNumber: number): Promise<string | undefined> {
+  const eng = engines.get(id)
+  const item = useUploadStore.getState().uploads[id]
+  if (!eng?.uploadId || !eng.key || !item) return undefined
+  const fresh = await presignUploadParts({ provider: item.provider, key: eng.key, uploadId: eng.uploadId, partNumbers: [partNumber] }).catch(() => null)
+  return fresh?.urls?.[partNumber]
 }
 
 async function runSinglePut(id: string): Promise<void> {
@@ -461,27 +557,40 @@ async function finishAfterRegister(id: string, videoId?: string): Promise<void> 
 async function runEngine(id: string): Promise<void> {
   const eng = engines.get(id)
   if (!eng) return
-  patchUpload(id, { phase: 'preparando' })
   try {
-    // Nunca dos veces el mismo archivo: huella (3 muestras, milisegundos) y
-    // consulta antes de abrir el multipart. Si la comprobación falla, se sube.
-    try {
-      eng.fingerprint = await fingerprintFile(eng.file)
-      const dup = await findDuplicateVideo(eng.fingerprint)
-      if (dup) {
-        patchUpload(id, { phase: 'duplicado', error: duplicateVideoMessage(dup), duplicateOf: dup })
-        return
+    if (!uploadSlots.hasFree()) patchUpload(id, { phase: 'en-cola' })
+    // Todo, incluida la consulta de duplicado, va dentro del turno: Next corre
+    // las server actions de una en una, y 50 consultas por delante retrasarían
+    // la primera subida aunque el internet esté libre.
+    await uploadSlots.run(async () => {
+      patchUpload(id, { phase: 'preparando' })
+      // Sin internet, arrancar solo haría fallar la primera server action y
+      // soltar el turno al siguiente, que también fallaría: la cola se caería
+      // entera en segundos. Se espera aquí, con el turno tomado.
+      if (isOffline()) {
+        patchUpload(id, { offline: true })
+        try {
+          await waitForOnline(eng.controller.signal)
+        } finally {
+          patchUpload(id, { offline: false })
+        }
       }
-    } catch {
-      eng.fingerprint = undefined
-    }
-    // Si cancelaron mientras se calculaba la huella, no se abre nada en R2.
-    if (eng.controller.signal.aborted) return
-    if (shouldUseMultipart(eng.file.size)) {
-      await runMultipart(id)
-    } else {
-      await runSinglePut(id)
-    }
+      // Nunca dos veces el mismo archivo: huella (3 muestras, milisegundos) y
+      // consulta antes de abrir el multipart. Si la comprobación falla, se sube.
+      try {
+        eng.fingerprint = await fingerprintFile(eng.file)
+        const dup = await findDuplicateVideo(eng.fingerprint)
+        if (dup) {
+          patchUpload(id, { phase: 'duplicado', error: duplicateVideoMessage(dup), duplicateOf: dup })
+          return
+        }
+      } catch {
+        eng.fingerprint = undefined
+      }
+      // Si cancelaron mientras se calculaba la huella, no se abre nada en R2.
+      if (eng.controller.signal.aborted) return
+      await (shouldUseMultipart(eng.file.size) ? runMultipart(id) : runSinglePut(id))
+    }, eng.controller.signal)
   } catch (err) {
     if (isAbortError(err)) {
       patchUpload(id, { phase: 'cancelado' })

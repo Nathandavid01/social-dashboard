@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { extractFramesFromVideoElement, extractFramesInParallel } from './video-frames-dom'
+import { extractFramesFromVideoElement, extractFramesInParallel, extractVideoFrames } from './video-frames-dom'
 
 /**
  * <video>+canvas real (decode/seek) no es simulable en jsdom, pero un
@@ -164,5 +164,52 @@ describe('extractFramesInParallel', () => {
     expect(res.frames).toHaveLength(4)
     expect(onFrame).toHaveBeenCalledTimes(4)
     expect(maxInFlight).toBeGreaterThan(1)
+  })
+})
+
+describe('extractVideoFrames — una decodificación a la vez', () => {
+  // Medido en prod: cuando muchas subidas terminaban juntas, cada una abría 4
+  // <video> para su carátula y el browser se quedaba sin reproductores — esas
+  // salían sin carátula. Ahora esperan turno.
+  it('dos extracciones simultáneas no abren <video> a la vez: la segunda espera a que termine la primera', async () => {
+    const createObjectURL = vi.fn(() => 'blob:fake')
+    const revokeObjectURL = vi.fn()
+    Object.assign(URL, { createObjectURL, revokeObjectURL })
+    const created: HTMLVideoElement[] = []
+    const realCreate = document.createElement.bind(document)
+    const spy = vi.spyOn(document, 'createElement').mockImplementation(((tag: string, opts?: ElementCreationOptions) => {
+      const el = realCreate(tag, opts)
+      if (tag === 'video') {
+        Object.defineProperty(el, 'readyState', { value: 0, configurable: true })
+        created.push(el as HTMLVideoElement)
+      }
+      return el
+    }) as typeof document.createElement)
+    const tick = () => new Promise((r) => setTimeout(r, 0))
+    const load = vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {})
+    try {
+      const file = new File([new Uint8Array(10)], 'a.mp4', { type: 'video/mp4' })
+      const first = extractVideoFrames(file, 5)
+      const second = extractVideoFrames(file, 5)
+      await tick()
+      expect(created).toHaveLength(1)
+
+      created[0].onerror?.(new Event('error'))
+      await expect(first).rejects.toThrow(/decodificar/)
+      await tick()
+      expect(created).toHaveLength(2)
+
+      created[1].onerror?.(new Event('error'))
+      await expect(second).rejects.toThrow(/decodificar/)
+
+      // Cada <video> se suelta al terminar: sin src y recargado, así deja de bajar del proxy.
+      expect(created.every((v) => !v.hasAttribute('src'))).toBe(true)
+      expect(load).toHaveBeenCalledTimes(created.length)
+      // La carátula (frameCount) usa un solo <video> que pide solo metadatos.
+      expect(created.every((v) => v.preload === 'metadata')).toBe(true)
+    } finally {
+      spy.mockRestore()
+      load.mockRestore()
+    }
   })
 })

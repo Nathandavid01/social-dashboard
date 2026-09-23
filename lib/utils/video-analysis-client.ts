@@ -17,7 +17,7 @@ import { postVideoAnalysisChunks } from './video-analysis-chunks'
  * chequeo de permiso que `getVideoPreviewUrl` server-side — ver
  * `app/api/video-file/[videoId]/route.ts`.
  */
-function videoFileUrl(videoId: string): string {
+export function videoFileUrl(videoId: string): string {
   return `/api/video-file/${encodeURIComponent(videoId)}`
 }
 

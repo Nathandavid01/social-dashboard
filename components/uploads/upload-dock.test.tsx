@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
 vi.mock('@/lib/actions/video-dedupe', () => ({
   findDuplicateVideo: vi.fn(async () => null),
   rememberVideoFingerprint: vi.fn(async () => ({ ok: true })),
@@ -49,11 +49,31 @@ describe('UploadDock', () => {
     expect(screen.getByText(/45%/)).toBeInTheDocument()
   })
 
-  it('shows the count when there is more than one upload', async () => {
+  it('con más de una subida dice cuántas van listas de la tanda', async () => {
     seed('u1', { phase: 'subiendo' })
     seed('u2', { phase: 'reintentando', attempt: 2 })
     render(<UploadDock />)
-    expect(await screen.findByText(/2 subidas/)).toBeInTheDocument()
+    expect(await screen.findByText('0 de 2 listas')).toBeInTheDocument()
+  })
+
+  it('las subidas de una tanda anterior que nadie cerró no cuentan en la tanda nueva', async () => {
+    seed('u1', { phase: 'listo', pct: 100, sizeBytes: 500, batch: 1 })
+    seed('u2', { phase: 'listo', pct: 100, sizeBytes: 500, batch: 1 })
+    seed('u3', { phase: 'subiendo', pct: 10, sizeBytes: 100, batch: 2 })
+    seed('u4', { phase: 'en-cola', pct: 0, sizeBytes: 100, batch: 2 })
+    render(<UploadDock />)
+    expect(await screen.findByText('0 de 2 listas · 1 en cola')).toBeInTheDocument()
+    expect(within(screen.getByTestId('upload-dock')).getByRole('img', { name: 'Subiendo 5%' })).toBeInTheDocument()
+  })
+
+  it('una tanda grande dice cuántas esperan en cola y el logo avanza por tamaño', async () => {
+    seed('u1', { phase: 'listo', pct: 100, sizeBytes: 100 })
+    seed('u2', { phase: 'subiendo', pct: 50, sizeBytes: 200 })
+    seed('u3', { phase: 'en-cola', pct: 0, sizeBytes: 700 })
+    render(<UploadDock />)
+    expect(await screen.findByText('1 de 3 listas · 1 en cola')).toBeInTheDocument()
+    // (100 + 100 + 0) / 1000 = 20 %, no el promedio de porcentajes.
+    expect(within(screen.getByTestId('upload-dock')).getByRole('img', { name: 'Subiendo 20%' })).toBeInTheDocument()
   })
 
   it('each phase renders its own explanatory text, not a mute bar', async () => {
@@ -144,5 +164,29 @@ describe('UploadDock — cuando el post-proceso termina, refresca la página', (
       useUploadStore.setState((s) => ({ uploads: { ...s.uploads, u1: { ...s.uploads.u1, postprocess: 'error' } } }))
     })
     expect(refresh).not.toHaveBeenCalled()
+  })
+})
+
+describe('UploadDock — una tanda de crudos no recarga la página por cada carátula', () => {
+  it('refresca al primer post-proceso listo y junta los siguientes en uno cada 10 s', async () => {
+    vi.useFakeTimers()
+    try {
+      refresh.mockClear()
+      useUploadStore.setState({ uploads: {} })
+      for (const id of ['a', 'b', 'c']) seed(id, { phase: 'listo' as never, pct: 100, postprocess: 'pendiente' as never })
+      render(<UploadDock />)
+      const finish = (id: string) => act(() => {
+        useUploadStore.setState((s) => ({ uploads: { ...s.uploads, [id]: { ...s.uploads[id], postprocess: 'listo' } } }))
+      })
+      finish('a')
+      expect(refresh).toHaveBeenCalledTimes(1)
+      finish('b')
+      finish('c')
+      expect(refresh).toHaveBeenCalledTimes(1)
+      await act(async () => { vi.advanceTimersByTime(10_000) })
+      expect(refresh).toHaveBeenCalledTimes(2)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

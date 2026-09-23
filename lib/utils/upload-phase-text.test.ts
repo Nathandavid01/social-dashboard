@@ -20,7 +20,7 @@ describe('uploadPhaseText', () => {
   })
 
   it('every phase has its own text', () => {
-    const phases: UploadPhase[] = ['preparando', 'subiendo', 'reintentando', 'ensamblando', 'registrando', 'listo', 'error', 'cancelado']
+    const phases: UploadPhase[] = ['preparando', 'en-cola', 'subiendo', 'reintentando', 'ensamblando', 'registrando', 'listo', 'error', 'cancelado']
     const texts = new Set(phases.map((p) => uploadPhaseText(item(p))))
     expect(texts.size).toBe(phases.length)
   })
@@ -50,5 +50,15 @@ describe('uploadPhaseText — post-proceso en segundo plano', () => {
   })
   it('post-proceso fallido: el video está, el análisis no', () => {
     expect(uploadPhaseText(item('listo', { kind: 'edited', postprocess: 'error' }))).toBe('Listo · el análisis de IA falló; se reintenta solo')
+  })
+})
+
+describe('uploadPhaseText — tanda en cola y sin internet', () => {
+  it('en-cola dice que espera turno, no que se trabó', () => {
+    expect(uploadPhaseText(item('en-cola'))).toBe('En cola · sube cuando termine otro')
+  })
+
+  it('sin internet no cuenta intentos: dice que sigue sola cuando vuelva', () => {
+    expect(uploadPhaseText(item('reintentando', { attempt: 1, offline: true }))).toBe('Sin internet · sigue sola cuando vuelva')
   })
 })

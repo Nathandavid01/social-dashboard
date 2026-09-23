@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.106 — 2026-09-23
+
+**Subir los crudos de una grabación: el primero aparece en segundos, aguanta si se va el internet y ninguno se queda sin carátula.**
+- Al subir muchos videos juntos, suben **de dos en dos** y el resto espera **En cola**. Antes arrancaban todos a la vez: cada uno iba a menos de 1 Mbps y el primero aparecía a los ~2 minutos. El total de la tanda tarda lo mismo, porque depende del internet de quien sube (30 crudos de 4 GB ≈ 27 min con 20 Mbps).
+- El círculo de subidas dice **«3 de 30 listas · 25 en cola»** (solo la tanda en curso), y la N se llena según los megas que faltan, no por promedio.
+- Si **se va el internet** (también con el wifi conectado pero sin internet), la subida dice «Sin internet · sigue sola cuando vuelva» y continúa cuando vuelve. Si el navegador detecta que no hay red, los que esperan en cola no arrancan hasta que vuelva. Antes, ~8 segundos sin conexión y se perdía el archivo entero. Tras una caída larga, las partes se vuelven a firmar solas.
+- Los crudos que se quedaron **sin carátula** (27 de 134) la generan solos la primera vez que alguien los ve en el banco del **Pipeline**, y queda guardada. Las carátulas nuevas se hacen una a una, así el navegador no se queda sin reproductores.
+- Mientras sube una tanda, la página se actualiza como mucho una vez cada 10 segundos, no una vez por cada carátula.
+
+![Subidas en cola, sin internet y carátulas curadas](/changelog/v5.106-subidas-en-cola.png)
+
 ## v5.103 — 2026-09-21
 
 **Contraseña desde Usuarios, e historial de lo que graba cada persona.**

@@ -21,6 +21,7 @@ import {
   luminanceFingerprint,
   FRAME_FPS, FRAME_HARD_MAX, FRAME_JPEG_QUALITY, FRAME_MAX_SIDE, FRAME_EXTRACT_WORKERS,
 } from './video-frames'
+import { createSlotQueue } from './slot-queue'
 
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -211,42 +212,73 @@ export interface ExtractedFrames {
   fingerprints?: { t: number; fingerprint: number[] }[]
 }
 
-async function captureFromSrc(
+/**
+ * Una extracción a la vez en toda la pestaña. Cada una abre hasta
+ * FRAME_EXTRACT_WORKERS <video>; cuando 30 subidas terminaban juntas, el
+ * browser se quedaba sin reproductores y esas carátulas salían vacías (medido
+ * en prod, sep-2026). Cada paso tiene su timeout, así que la fila nunca se traba.
+ */
+const decodeQueue = createSlotQueue(1)
+
+function captureFromSrc(
+  src: string,
+  opts: { waitForBuffer: boolean; frameCount?: number; background?: boolean },
+): Promise<ExtractedFrames> {
+  return decodeQueue.run(() => captureFromSrcNow(src, opts), undefined, { low: opts.background })
+}
+
+async function captureFromSrcNow(
   src: string,
   opts: { waitForBuffer: boolean; frameCount?: number },
 ): Promise<ExtractedFrames> {
+  // La carátula (5 seeks) no necesita el video entero ni varios <video>: con
+  // uno que pide solo metadatos, cada seek baja apenas lo que necesita.
+  const cover = !!opts.frameCount
   const fingerprints: { t: number; fingerprint: number[] }[] = []
+  const created: HTMLVideoElement[] = []
   const createVideo = () => {
     const video = document.createElement('video')
     video.muted = true
     video.playsInline = true
-    video.preload = 'auto'
+    video.preload = cover ? 'metadata' : 'auto'
     video.src = src
+    created.push(video)
     return video
   }
-  const result = await extractFramesInParallel(createVideo, {
-    timestampsFor: (duration) =>
-      // `frameCount` es el camino barato de la carátula: 5 seeks en vez de 240.
-      opts.frameCount ? evenTimestamps(duration, opts.frameCount) : frameTimestamps(duration, FRAME_FPS, FRAME_HARD_MAX),
-    waitForBuffer: opts.waitForBuffer,
-    onFrame: ({ video, width, height, t }) => {
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      ctx.drawImage(video, 0, 0, width, height)
-      try {
-        const sw = Math.min(32, width)
-        const sh = Math.min(32, height)
-        fingerprints.push({ t, fingerprint: luminanceFingerprint(ctx.getImageData(0, 0, sw, sh).data) })
-      } catch {
-        // canvas tainted / jsdom sin getImageData — el filtro de cortes se salta.
-      }
-      return canvas.toDataURL('image/jpeg', FRAME_JPEG_QUALITY)
-    },
-  })
-  return { ...result, fingerprints }
+  try {
+    const result = await extractFramesInParallel(createVideo, {
+      timestampsFor: (duration) =>
+        // `frameCount` es el camino barato de la carátula: 5 seeks en vez de 240.
+        opts.frameCount ? evenTimestamps(duration, opts.frameCount) : frameTimestamps(duration, FRAME_FPS, FRAME_HARD_MAX),
+      workers: cover ? 1 : undefined,
+      waitForBuffer: opts.waitForBuffer,
+      onFrame: ({ video, width, height, t }) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+        ctx.drawImage(video, 0, 0, width, height)
+        try {
+          const sw = Math.min(32, width)
+          const sh = Math.min(32, height)
+          fingerprints.push({ t, fingerprint: luminanceFingerprint(ctx.getImageData(0, 0, sw, sh).data) })
+        } catch {
+          // canvas tainted / jsdom sin getImageData — el filtro de cortes se salta.
+        }
+        return canvas.toDataURL('image/jpeg', FRAME_JPEG_QUALITY)
+      },
+    })
+    return { ...result, fingerprints }
+  } finally {
+    // Soltar los <video>: si no, siguen bajando del proxy después de sacar los fotogramas.
+    for (const video of created) {
+      video.onloadedmetadata = null
+      video.onerror = null
+      video.removeAttribute('src')
+      video.load()
+    }
+  }
 }
 
 /** Extrae frames de un `File` local (el editor, en el momento de subir). */
@@ -269,6 +301,12 @@ export async function extractVideoFrames(file: File, frameCount?: number): Promi
  * petición SIN cookies de sesión, y el proxy depende de esa cookie para
  * autenticar.
  */
-export async function extractVideoFramesFromUrl(url: string): Promise<ExtractedFrames> {
-  return captureFromSrc(url, { waitForBuffer: true })
+export async function extractVideoFramesFromUrl(
+  url: string,
+  frameCount?: number,
+  opts?: { background?: boolean },
+): Promise<ExtractedFrames> {
+  // Con `frameCount` (la carátula: 5 seeks) no hace falta bajar el video entero antes.
+  // `background`: cede la fila a la carátula de una subida y al "Analizar con IA".
+  return captureFromSrc(url, { waitForBuffer: !frameCount, frameCount, background: opts?.background })
 }
