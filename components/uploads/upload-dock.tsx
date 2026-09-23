@@ -6,6 +6,8 @@ import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUploadStore, TERMINAL_UPLOAD_PHASES } from '@/lib/stores/upload-store'
 import { uploadPhaseText as phaseText } from '@/lib/utils/upload-phase-text'
+import { uploadBatchSummary } from '@/lib/utils/upload-batch'
+import { createThrottle } from '@/lib/utils/throttle'
 import { NateUploadLogo } from './nate-upload-logo'
 
 /**
@@ -15,6 +17,8 @@ import { NateUploadLogo } from './nate-upload-logo'
  * proves it's still going. Bottom-LEFT on purpose: ChatBubble already owns
  * bottom-right.
  */
+const REFRESH_EVERY_MS = 10_000
+
 export function UploadDock() {
   const uploads = useUploadStore((s) => s.uploads)
   const cancelUpload = useUploadStore((s) => s.cancelUpload)
@@ -28,15 +32,20 @@ export function UploadDock() {
   // El QC IA y la carátula corren en segundo plano después de "listo". Cuando
   // uno termina, los datos del servidor cambiaron (bolitas, tira de escenas):
   // se refresca la página para que se enciendan solas, sin recargar a mano.
+  // En una tanda de 50 crudos serían 50 recargas de la página entera: la
+  // primera va al momento y las siguientes se juntan en una cada 10 s.
   const pendingIds = useRef<Set<string>>(new Set())
+  const refreshThrottle = useRef<ReturnType<typeof createThrottle> | null>(null)
+  refreshThrottle.current ??= createThrottle(() => router.refresh(), REFRESH_EVERY_MS)
   useEffect(() => {
     let finished = false
     for (const item of items) {
       if (item.postprocess === 'pendiente') pendingIds.current.add(item.id)
       else if (pendingIds.current.delete(item.id) && item.postprocess === 'listo') finished = true
     }
-    if (finished) router.refresh()
-  }, [items, router])
+    if (finished) refreshThrottle.current?.call()
+  }, [items])
+  useEffect(() => () => refreshThrottle.current?.cancel(), [])
 
   // Closing the tab kills the upload (the File lives in memory) — warn before
   // that happens. Navigating within the app is fine; the engine survives it.
@@ -55,7 +64,10 @@ export function UploadDock() {
 
   if (items.length === 0) return null
   const headline = active[0] ?? items[0]
-  const avgPct = active.length > 0 ? Math.round(active.reduce((s, i) => s + i.pct, 0) / active.length) : items[0].pct
+  // Solo la tanda en curso: lo que terminó antes y nadie cerró no infla el avance.
+  const latestBatch = Math.max(...items.map((i) => i.batch ?? 0))
+  const batch = uploadBatchSummary(items.filter((i) => (i.batch ?? 0) === latestBatch))
+  const logoPct = active.length > 0 ? batch.pct : headline.pct
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2">
@@ -102,11 +114,13 @@ export function UploadDock() {
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-border bg-background py-1.5 pl-1.5 pr-3 text-xs font-medium shadow-lg transition hover:border-primary/50"
       >
-        <NateUploadLogo pct={avgPct} size={28} />
+        <NateUploadLogo pct={logoPct} size={28} />
         <span className="flex flex-col items-start leading-tight">
           <span className="max-w-[9rem] truncate">{phaseText(headline)}</span>
-          {items.length > 1 && (
-            <span className="text-[10px] text-muted-foreground">{items.length} subidas</span>
+          {batch.total > 1 && (
+            <span className="text-[10px] text-muted-foreground">
+              {batch.done} de {batch.total} listas{batch.queued > 0 ? ` · ${batch.queued} en cola` : ''}
+            </span>
           )}
         </span>
       </button>

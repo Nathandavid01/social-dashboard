@@ -7,6 +7,7 @@ import { getPipelineVideoThumbViewUrls } from '@/lib/actions/video-thumbs'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
 import { extractFramesFromVideoElement } from '@/lib/utils/video-frames-dom'
 import { evenTimestamps } from '@/lib/utils/video-frames'
+import { healVideoCover } from '@/lib/utils/video-cover-heal'
 
 type CoverState =
   | { kind: 'loading' }
@@ -15,15 +16,30 @@ type CoverState =
   | { kind: 'none' }
 
 /**
- * Una sola carátula estática que llena la tarjeta. Dos caminos:
+ * Una sola carátula estática que llena la tarjeta. Caminos:
  *  1. thumb_keys guardados al subir → <img> directa (lo barato).
+ *  1b. `healMissing` (banco de crudos): sin thumbs, la genera UNA vez desde el
+ *     video y la guarda — la próxima visita ya sale por el camino 1.
  *  2. Fallback al vuelo (videos viejos sin thumbs): <video> oculto + canvas,
  *     UN solo frame del medio — mismo motor que la tira de escenas. "Tiene
  *     que tener una foto, no puede ser negro."
  * Cualquier fallo cae al placeholder sin romper la tarjeta.
  */
-export function VideoCover({ videoId, title }: { videoId: string; title: string }) {
+export function VideoCover({
+  videoId,
+  title,
+  healMissing = false,
+}: {
+  videoId: string
+  title: string
+  /** Solo donde hay pocos videos sin carátula (crudos): curar baja el video. */
+  healMissing?: boolean
+}) {
   const [state, setState] = useState<CoverState>({ kind: 'loading' })
+  // Leído dentro del efecto sin ser dependencia: que cambie (p.ej. el video
+  // cumple 15 min en un re-render) no debe volver a pedir todo desde cero.
+  const healMissingRef = useRef(healMissing)
+  healMissingRef.current = healMissing
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const label = `Carátula de ${title}`
@@ -41,6 +57,16 @@ export function VideoCover({ videoId, title }: { videoId: string; title: string 
         }
       } catch {
         // La carátula es informativa y nunca debe romper la tarjeta.
+      }
+
+      if (healMissingRef.current) {
+        // Sigue aunque la tarjeta se desmonte: lo que importa es que quede guardada.
+        const healed = await healVideoCover(videoId)
+        if (!alive) return
+        if (healed) {
+          setState({ kind: 'image', url: healed })
+          return
+        }
       }
 
       try {

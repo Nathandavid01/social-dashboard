@@ -5,6 +5,17 @@
 Tracked work not yet done. Each is implemented **test-first (TDD)** when unblocked
 (see CLAUDE.md). Check off + reference the commit when completed.
 
+## Subidas de grabación — pendientes (v5.106, 2026-09-23)
+Medido en prod: tandas de 30–56 crudos a 12–55 Mbps agregados; el total lo manda el internet de quien sube. v5.106 hizo la cola (2 archivos), la espera sin internet, la decodificación de a una y la curación de carátulas. Queda:
+- [ ] **Sin telemetría de fallos.** `content_idea_videos` solo guarda lo que se subió; una subida que falla no deja rastro (`multipart_uploads` se limpia). Registrar `error`/`cancelado` (evento o Sentry) para poder decir cuántas se caen.
+- [x] **`navigator.onLine` es una señal débil** — v5.106: los errores de red (`UploadNetworkError`) se reintentan sin gastar intentos durante 5 min.
+- [x] **Partes firmadas por 1 h** — v5.106: un 403 en una parte la vuelve a firmar (`refreshPartUrl`).
+- [ ] **403 en el PUT único (<8 MB).** No se re-firma (la key sale de `getR2UploadUrl`); solo pasa tras >1 h sin internet con un archivo chico.
+- [ ] **Un fallo pasajero al leer las carátulas guardadas** (`getVideoThumbViewUrls` devuelve `[]` en su catch) hace que el banco la cure de nuevo: descarga de más y JPEG huérfanos en R2 (~175 KB). Raro; distinguir "sin carátula" de "error al leer".
+- [ ] **Server actions que fallan sin internet a mitad de un archivo** (`completeMultipartUpload`, `register*`): ese archivo termina en error. La cola ya no se cae en cascada (espera internet antes de arrancar cada archivo), pero el que estaba ensamblando/registrando sí.
+- [ ] **Curar carátulas pasa el video por `/api/video-file`** (función de Vercel, ~45–85 MB por crudo 4K medido en Chrome). Con una regla CORS en el bucket/Worker de R2 se podría leer la URL firmada con `crossOrigin` sin pasar por Vercel.
+- [ ] **Recargas por archivo.** El dock junta sus `router.refresh` (1 cada 10 s), pero `registerR2Video` hace `revalidatePath` y el tablero refresca por realtime sin freno; unificar en un refresh compartido.
+
 ## Migraciones por aplicar en prod (Supabase SQL Editor)
 - [ ] **`0084_client_posting_timezone.sql`** — columna `clients.posting_timezone`. Sin ella, días/hora/horario por día siguen funcionando; la zona no se guarda hasta aplicarla (el editor degrada y omite el campo).
 - [ ] **`0083_client_asset_bank.sql`** — amplía `client_assets.kind` con `photo` y `broll`. Sin ella, subir Foto/B-roll al banco del cliente responde que falta una actualización. Los kinds viejos (logo, other, etc.) siguen igual.

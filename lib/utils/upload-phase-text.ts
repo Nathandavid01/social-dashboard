@@ -6,9 +6,13 @@ import type { UploadItem } from '@/lib/stores/upload-store'
  * Never a mute progress bar: every phase has an explanation.
  */
 export function uploadPhaseText(item: UploadItem): string {
+  const ended = item.phase === 'listo' || item.phase === 'error' || item.phase === 'cancelado' || item.phase === 'duplicado'
+  if (item.offline && !ended) return 'Sin internet · sigue sola cuando vuelva'
   switch (item.phase) {
     case 'preparando':
       return 'Preparando…'
+    case 'en-cola':
+      return 'En cola · sube cuando termine otro'
     case 'subiendo':
       return item.partsTotal > 1
         ? `Subiendo… ${item.pct}% · parte ${Math.min(item.partsDone + 1, item.partsTotal)} de ${item.partsTotal}`

@@ -41,10 +41,10 @@ const putBlobMock = vi.fn(async (_url: string, _blob: Blob, _ct: string, opts?: 
 })
 vi.mock('@/lib/utils/upload-http', () => ({ putBlob: (...args: Parameters<typeof putBlobMock>) => putBlobMock(...args) }))
 
-import { useUploadStore } from './upload-store'
+import { useUploadStore, MAX_PARALLEL_UPLOADS, TERMINAL_UPLOAD_PHASES } from './upload-store'
 import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { registerEntregasVideo } from '@/lib/actions/entregas-r2'
-import { startMultipartUpload, completeMultipartUpload, abortMultipartUpload } from '@/lib/actions/multipart-upload'
+import { startMultipartUpload, completeMultipartUpload, abortMultipartUpload, presignUploadParts } from '@/lib/actions/multipart-upload'
 import { generateVideoThumbs, processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import { findDuplicateVideo, rememberVideoFingerprint } from '@/lib/actions/video-dedupe'
 import { PART_SIZE_BYTES } from '@/lib/utils/upload-parts'
@@ -75,7 +75,21 @@ function deferred<T = void>() {
 }
 
 beforeEach(() => {
+  // La cola de subidas vive en el módulo: una subida que un test dejó esperando
+  // turno o internet ocuparía los turnos del siguiente. Se cancelan todas.
+  const { uploads, cancelUpload } = useUploadStore.getState()
+  for (const [id, u] of Object.entries(uploads)) {
+    if (!TERMINAL_UPLOAD_PHASES.has(u.phase)) cancelUpload(id)
+  }
   vi.clearAllMocks()
+  // clearAllMocks no borra los mockImplementationOnce sin consumir (p.ej. el
+  // startMultipartUpload diferido del test de cancelar en "preparando"): se
+  // restablecen los multipart para que ningún test herede uno colgado.
+  vi.mocked(getR2UploadUrl).mockReset().mockImplementation(async () => ({ url: 'https://r2/put', key: 'ideas/idea-1/edited/x.mp4' }))
+  vi.mocked(startMultipartUpload).mockReset().mockImplementation(async () => ({ uploadId: 'up-1', key: 'ideas/idea-1/edited/big.mp4' }))
+  vi.mocked(presignUploadParts).mockReset().mockImplementation(async (input: { partNumbers: number[] }) => ({
+    urls: Object.fromEntries(input.partNumbers.map((n) => [n, `https://r2/part-${n}`])),
+  }))
   putBlobMock.mockImplementation(async (_url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
     opts?.onProgress?.(blob.size)
     return { etag: '"etag"' }
@@ -412,5 +426,287 @@ describe('upload-store — el post-proceso (QC IA / carátula) no bloquea "listo
     await waitForPhase(id, ['listo', 'error'])
     expect(useUploadStore.getState().hasActiveUploads()).toBe(false)
     qc.resolve({ analyzed: true })
+  })
+})
+
+describe('upload-store — cola: pocos archivos a la vez (el primero aparece rápido)', () => {
+  /** putBlob que se queda colgado hasta que el test lo suelte, uno por llamada. */
+  function holdPuts() {
+    const held: Array<{ url: string; release: () => void; fail: (e: Error) => void }> = []
+    putBlobMock.mockImplementation((url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void; signal?: AbortSignal }) =>
+      new Promise((resolve, reject) => {
+        held.push({
+          url,
+          release: () => { opts?.onProgress?.(blob.size); resolve({ etag: '"etag"' }) },
+          fail: reject,
+        })
+        opts?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      }),
+    )
+    return held
+  }
+
+  async function until(check: () => boolean, timeoutMs = 2000) {
+    const start = Date.now()
+    while (!check()) {
+      if (Date.now() - start > timeoutMs) throw new Error('timeout esperando condición')
+      await new Promise((r) => setTimeout(r, 5))
+    }
+  }
+
+  it(`con 4 archivos solo ${MAX_PARALLEL_UPLOADS} suben a la vez; los demás quedan "en-cola" y entran en orden`, async () => {
+    const held = holdPuts()
+    const start = useUploadStore.getState().startUpload
+    const ids = ['a.mp4', 'b.mp4', 'c.mp4', 'd.mp4'].map((name) =>
+      start({ file: smallFile(name), ideaId: 'idea-1', kind: 'raw', provider: 'r2' }),
+    )
+
+    await until(() => held.length === MAX_PARALLEL_UPLOADS)
+    await new Promise((r) => setTimeout(r, 20))
+    expect(held).toHaveLength(MAX_PARALLEL_UPLOADS)
+    expect(vi.mocked(getR2UploadUrl)).toHaveBeenCalledTimes(MAX_PARALLEL_UPLOADS)
+    const phases = () => ids.map((id) => useUploadStore.getState().uploads[id].phase)
+    expect(phases().slice(MAX_PARALLEL_UPLOADS)).toEqual(['en-cola', 'en-cola'])
+    // Esperar turno sigue siendo "subida activa": cerrar la pestaña la mataría.
+    expect(useUploadStore.getState().hasActiveUploads()).toBe(true)
+
+    held[0].release()
+    await waitForPhase(ids[0], ['listo'])
+    await until(() => held.length === MAX_PARALLEL_UPLOADS + 1)
+    // Entra el que llegó primero a la fila (c), no cualquiera.
+    expect(vi.mocked(getR2UploadUrl).mock.calls[MAX_PARALLEL_UPLOADS][0]).toMatchObject({ fileName: 'c.mp4' })
+    expect(useUploadStore.getState().uploads[ids[3]].phase).toBe('en-cola')
+
+    // Soltar el resto, en el orden en que van llegando a R2.
+    for (let i = 1; i < 4; i++) {
+      await until(() => held.length > i)
+      held[i].release()
+    }
+    for (const id of ids) await waitForPhase(id, ['listo'])
+  })
+
+  it('cancelar uno que espera en la fila: queda "cancelado" sin abrir nada en R2', async () => {
+    const held = holdPuts()
+    const start = useUploadStore.getState().startUpload
+    const ids = ['a.mp4', 'b.mp4', 'c.mp4'].map((name) =>
+      start({ file: smallFile(name), ideaId: 'idea-1', kind: 'raw', provider: 'r2' }),
+    )
+    await waitForPhase(ids[2], ['en-cola'])
+
+    useUploadStore.getState().cancelUpload(ids[2])
+    await waitForPhase(ids[2], ['cancelado'])
+
+    await until(() => held.length === 2)
+    held.forEach((h) => h.release())
+    await waitForPhase(ids[0], ['listo'])
+    await waitForPhase(ids[1], ['listo'])
+    await new Promise((r) => setTimeout(r, 20))
+    expect(vi.mocked(getR2UploadUrl)).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(registerR2Video)).toHaveBeenCalledTimes(2)
+  })
+
+  it('una subida que falla suelta su turno: el siguiente de la fila arranca', async () => {
+    // Atado al archivo, no al orden de llamada: cuál pide URL primero depende
+    // de cuánto tarda la huella de cada uno (en CI no siempre es a.mp4).
+    vi.mocked(getR2UploadUrl).mockImplementation(async (input: { fileName: string }) =>
+      input.fileName === 'a.mp4' ? ({ error: 'R2 caído' } as never) : { url: 'https://r2/put', key: 'ideas/idea-1/edited/x.mp4' },
+    )
+    const held = holdPuts()
+    const start = useUploadStore.getState().startUpload
+    const ids = ['a.mp4', 'b.mp4', 'c.mp4'].map((name) =>
+      start({ file: smallFile(name), ideaId: 'idea-1', kind: 'raw', provider: 'r2' }),
+    )
+    await waitForPhase(ids[0], ['error'])
+    await until(() => held.length === 2)
+    held.forEach((h) => h.release())
+    await waitForPhase(ids[1], ['listo'])
+    await waitForPhase(ids[2], ['listo'])
+  })
+})
+
+describe('upload-store — si se va el internet, espera en vez de fallar', () => {
+  it('se va el internet a mitad de la subida: no gasta intentos, espera y sigue sola cuando vuelve', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
+    let calls = 0
+    putBlobMock.mockImplementation(async (_url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
+      calls++
+      if (calls === 1) {
+        online.mockReturnValue(false)
+        throw Object.assign(new Error('Error de red durante la subida'), { name: 'UploadNetworkError' })
+      }
+      opts?.onProgress?.(blob.size)
+      return { etag: '"etag"' }
+    })
+    try {
+      const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+
+      const start = Date.now()
+      while (!useUploadStore.getState().uploads[id].offline) {
+        if (Date.now() - start > 2000) throw new Error('nunca marcó "sin internet"')
+        await new Promise((r) => setTimeout(r, 5))
+      }
+      // Mientras no vuelva la conexión, no se reintenta a ciegas.
+      await new Promise((r) => setTimeout(r, 30))
+      expect(calls).toBe(1)
+      expect(useUploadStore.getState().uploads[id].phase).toBe('reintentando')
+
+      online.mockReturnValue(true)
+      window.dispatchEvent(new Event('online'))
+      const item = await waitForPhase(id, ['listo', 'error'])
+      expect(item.phase).toBe('listo')
+      expect(item.offline).toBeFalsy()
+      // El intento que se cayó por falta de internet no cuenta contra los 5.
+      expect(item.attempt).toBe(1)
+    } finally {
+      online.mockRestore()
+    }
+  })
+
+  it('cancelar mientras espera el internet: termina "cancelado"', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    putBlobMock.mockImplementation(async () => { throw new Error('Error de red durante la subida') })
+    try {
+      const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+      const start = Date.now()
+      while (!useUploadStore.getState().uploads[id].offline) {
+        if (Date.now() - start > 2000) throw new Error('nunca marcó "sin internet"')
+        await new Promise((r) => setTimeout(r, 5))
+      }
+      useUploadStore.getState().cancelUpload(id)
+      const item = await waitForPhase(id, ['cancelado'])
+      expect(item.phase).toBe('cancelado')
+    } finally {
+      online.mockRestore()
+    }
+  })
+})
+
+describe('upload-store — la consulta de duplicado también espera turno', () => {
+  it('los archivos en cola no consultan al servidor hasta que les toca (Next corre las server actions de una en una)', async () => {
+    const held: Array<() => void> = []
+    putBlobMock.mockImplementation((_url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) =>
+      new Promise((resolve) => {
+        held.push(() => { opts?.onProgress?.(blob.size); resolve({ etag: '"etag"' }) })
+      }),
+    )
+    const start = useUploadStore.getState().startUpload
+    const ids = ['a.mp4', 'b.mp4', 'c.mp4', 'd.mp4'].map((name) =>
+      start({ file: smallFile(name), ideaId: 'idea-1', kind: 'raw', provider: 'r2' }),
+    )
+    const t0 = Date.now()
+    while (held.length < MAX_PARALLEL_UPLOADS) {
+      if (Date.now() - t0 > 2000) throw new Error('timeout')
+      await new Promise((r) => setTimeout(r, 5))
+    }
+    await new Promise((r) => setTimeout(r, 20))
+    expect(vi.mocked(findDuplicateVideo)).toHaveBeenCalledTimes(MAX_PARALLEL_UPLOADS)
+
+    const t1 = Date.now()
+    while (held.length < ids.length) {
+      if (Date.now() - t1 > 2000) throw new Error('timeout')
+      held.forEach((release) => release())
+      await new Promise((r) => setTimeout(r, 5))
+    }
+    held.forEach((release) => release())
+    for (const id of ids) await waitForPhase(id, ['listo'])
+    expect(vi.mocked(findDuplicateVideo)).toHaveBeenCalledTimes(ids.length)
+  })
+})
+
+describe('upload-store — review: la cola aguanta de verdad sin internet', () => {
+  function networkError() {
+    const e = new Error('Error de red durante la subida')
+    e.name = 'UploadNetworkError'
+    return e
+  }
+
+  it('sin internet, los archivos en cola no arrancan uno tras otro para caerse en cascada: esperan', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    try {
+      const start = useUploadStore.getState().startUpload
+      const ids = ['a.mp4', 'b.mp4', 'c.mp4'].map((name) =>
+        start({ file: smallFile(name), ideaId: 'idea-1', kind: 'raw', provider: 'r2' }),
+      )
+      await new Promise((r) => setTimeout(r, 30))
+      expect(vi.mocked(getR2UploadUrl)).not.toHaveBeenCalled()
+      expect(vi.mocked(findDuplicateVideo)).not.toHaveBeenCalled()
+      const items = ids.map((id) => useUploadStore.getState().uploads[id])
+      expect(items.some((i) => i.phase === 'error')).toBe(false)
+      expect(items[0].offline).toBe(true)
+
+      online.mockReturnValue(true)
+      window.dispatchEvent(new Event('online'))
+      for (const id of ids) await waitForPhase(id, ['listo'])
+    } finally {
+      online.mockRestore()
+    }
+  })
+
+  it('wifi conectado pero sin internet: los errores de red se reintentan por tiempo, no se agotan en 5 intentos', async () => {
+    let calls = 0
+    putBlobMock.mockImplementation(async (_url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
+      calls++
+      if (calls <= 8) throw networkError()
+      opts?.onProgress?.(blob.size)
+      return { etag: '"etag"' }
+    })
+    const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(calls).toBe(9)
+    expect(item.offline).toBeFalsy()
+  })
+
+  it('pasados varios minutos sin red, sí se rinde (no se queda colgada para siempre)', async () => {
+    let clock = 1_000_000
+    const now = vi.spyOn(Date, 'now').mockImplementation(() => clock)
+    putBlobMock.mockImplementation(async () => {
+      clock += 2 * 60_000
+      throw networkError()
+    })
+    try {
+      const id = useUploadStore.getState().startUpload({ file: smallFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+      // waitForPhase mide su timeout con Date.now, que aquí está falseado: se sondea por vueltas.
+      for (let i = 0; i < 400 && !['listo', 'error'].includes(useUploadStore.getState().uploads[id].phase); i++) {
+        await new Promise((r) => setTimeout(r, 5))
+      }
+      expect(useUploadStore.getState().uploads[id].phase).toBe('error')
+    } finally {
+      now.mockRestore()
+    }
+  })
+
+  it('una parte con la URL vencida (403 tras una espera larga): se vuelve a firmar esa parte y la subida sigue', async () => {
+    let first403 = true
+    putBlobMock.mockImplementation(async (url: string, blob: Blob, _ct: string, opts?: { onProgress?: (n: number) => void }) => {
+      if (url === 'https://r2/part-1' && first403) {
+        first403 = false
+        throw Object.assign(new Error('HTTP 403'), { name: 'UploadHttpError', status: 403 })
+      }
+      opts?.onProgress?.(blob.size)
+      return { etag: `"etag-${url}"` }
+    })
+    vi.mocked(presignUploadParts).mockImplementation(async (input: { partNumbers: number[] }) => ({
+      urls: Object.fromEntries(input.partNumbers.map((n) => [n, first403 ? `https://r2/part-${n}` : `https://r2/part-${n}?fresca`])),
+    }))
+
+    const id = useUploadStore.getState().startUpload({ file: bigFile(), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const item = await waitForPhase(id, ['listo', 'error'])
+    expect(item.phase).toBe('listo')
+    expect(vi.mocked(presignUploadParts)).toHaveBeenLastCalledWith(expect.objectContaining({ partNumbers: [1] }))
+    expect(putBlobMock.mock.calls.some(([url]) => url === 'https://r2/part-1?fresca')).toBe(true)
+  })
+
+  it('una tanda nueva empieza su propio conteo: lo que ya terminó antes no es parte de ella', async () => {
+    const start = useUploadStore.getState().startUpload
+    const old = start({ file: smallFile('viejo.mp4'), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    await waitForPhase(old, ['listo'])
+    const a = start({ file: smallFile('a.mp4'), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const b = start({ file: smallFile('b.mp4'), ideaId: 'idea-1', kind: 'raw', provider: 'r2' })
+    const s = useUploadStore.getState().uploads
+    expect(s[a].batch).toBe(s[b].batch)
+    expect(s[a].batch).toBeGreaterThan(s[old].batch ?? 0)
+    await waitForPhase(a, ['listo'])
+    await waitForPhase(b, ['listo'])
   })
 })

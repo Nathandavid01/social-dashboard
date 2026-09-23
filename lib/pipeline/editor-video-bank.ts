@@ -31,6 +31,7 @@ export interface EditorBankFile {
   storageProvider: ContentIdeaVideo['storage_provider']
   driveViewLink: string | null
   linkKind?: VideoLinkKind
+  uploadedAt?: string | null
 }
 
 export interface EditorBankClip {
@@ -185,6 +186,7 @@ export function sourceFiles(videos: ContentIdeaVideo[] | null | undefined): Edit
       kind: v.kind as 'raw' | 'broll',
       storageProvider: v.storage_provider,
       driveViewLink: v.drive_view_link,
+      uploadedAt: v.uploaded_at ?? null,
     }))
 }
 

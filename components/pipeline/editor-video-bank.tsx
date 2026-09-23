@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { VideoCover } from '@/components/recording/video-cover'
 import { useHasPermission } from '@/components/auth/role-gate'
+import { oldEnoughToHeal } from '@/lib/utils/video-cover-heal'
 import { useToast } from '@/lib/hooks/use-toast'
 import { reassignVideo } from '@/lib/actions/content-ideas'
 import { getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
@@ -128,12 +129,14 @@ function EditorWorkCard({ row, pace, teamPace, canOpenProfile, showClientMarks, 
 
 function ActiveEditorSlot({ testId, client, clip, estimate, showClientMark, broll = [], bank = [], claim, onClaim, focused = false }: { testId: string; client: EditorBankRow['clients'][number]; clip: EditorBankClip; estimate: number | null; showClientMark: boolean; broll?: GlobalBrollGroup["files"]; bank?: ClientBankFile[]; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void; focused?: boolean }) {
   const canSetLogo = useHasPermission('clients.brand.edit')
+  // Curar una carátula baja el video: solo quien la puede guardar.
+  const canHealCover = useHasPermission('video.upload')
   const file = clip.files[0]
   const elapsed = daysSince(clip.recordedAt)
   return (
     <article id={`pipeline-idea-${clip.ideaId}`} data-testid={testId} data-pipeline-focus={focused ? 'true' : undefined} className={cn('group min-w-0 [&:has(details[open])]:col-span-2 overflow-hidden rounded-lg border bg-[#0d1013]', focused ? 'border-[#c8a34a] ring-2 ring-[#c8a34a]/50' : 'border-white/10')} style={{ borderColor: focused ? undefined : `${client.cardColor}66` }}>
       <div data-testid="client-bank-card" className="relative min-h-24 overflow-hidden border-b border-white/10 bg-gradient-to-br from-slate-800 to-slate-950" style={{ borderColor: client.cardColor }}>
-        {file ? <VideoCover videoId={file.id} title={clip.title} /> : null}
+        {file ? <VideoCover videoId={file.id} title={clip.title} healMissing={canHealCover && oldEnoughToHeal(file.uploadedAt)} /> : null}
         <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1 py-0.5 text-[8px] uppercase text-slate-200">{file?.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>
       </div>
       <div className="min-w-0 p-2">
@@ -183,6 +186,7 @@ function ClientRunwayBadge({ clientId, runway }: { clientId: string; runway?: Ru
 
 function RawVideoCard({ video, teamMembers, color, claim, onClaim }: { video: BankVideoTile; teamMembers: TeamMember[]; color: string; claim: EditingClaim | null; onClaim: (next: EditingClaim | null) => void }) {
   const canAssign = useHasPermission('planning.assign')
+  const canHealCover = useHasPermission('video.upload')
   const { toast } = useToast()
   const [assigned, setAssigned] = useState(video.editorId ?? '')
   const [pending, startTransition] = useTransition()
@@ -194,7 +198,7 @@ function RawVideoCard({ video, teamMembers, color, claim, onClaim }: { video: Ba
   }
   return (
     <article data-testid={`raw-video-${video.videoId}`} className="min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#12161a]">
-      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-black" style={{ boxShadow: `inset 0 2px 0 ${color}` }}><VideoCover videoId={video.videoId} title={video.title} /><span className="absolute right-1.5 top-1.5 rounded bg-black/75 px-1 py-0.5 text-[8px] font-semibold uppercase text-slate-200">{video.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>{video.durationSec != null && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1 py-0.5 text-[9px] tabular-nums text-white">{formatDuration(video.durationSec)}</span>}</div>
+      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-slate-800 to-black" style={{ boxShadow: `inset 0 2px 0 ${color}` }}><VideoCover videoId={video.videoId} title={video.title} healMissing={canHealCover && oldEnoughToHeal(video.uploadedAt)} /><span className="absolute right-1.5 top-1.5 rounded bg-black/75 px-1 py-0.5 text-[8px] font-semibold uppercase text-slate-200">{video.kind === 'broll' ? 'B-roll' : 'Crudo'}</span>{video.durationSec != null && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1 py-0.5 text-[9px] tabular-nums text-white">{formatDuration(video.durationSec)}</span>}</div>
       <div className="p-2.5"><p className="text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500">Idea</p><h4 className="truncate text-[11px] font-semibold text-white" title={video.title}>{video.title}</h4>{video.linkKind && <span className={`mt-1 inline-flex rounded-full border px-1.5 py-0.5 text-[8px] font-semibold uppercase ${video.linkKind === 'linked' ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-white/15 bg-white/5 text-slate-400'}`}>{video.linkKind === 'linked' ? 'De la idea' : 'Extra'}</span>}{video.fileName && <p className="mt-0.5 truncate text-[9px] text-slate-400">{video.fileName}</p>}<p className="mt-0.5 truncate text-[9px] text-slate-500">{video.recordedBy ? `Grabó ${video.recordedBy}` : 'Sin camarógrafo'}{video.uploadedAt ? ` · ${formatDateShortES(video.uploadedAt)}` : ''}</p><EditingClaimControls ideaId={video.ideaId} claim={claim} onOptimistic={onClaim} /><div className="mt-2 flex items-center gap-1.5"><VideoTileActions videoId={video.videoId} />{canAssign && video.productionTaskId ? <select aria-label={`Asignar ${video.title}`} value={assigned} disabled={pending} onChange={(event) => changeEditor(event.target.value)} className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-[9px] text-slate-300 outline-none focus:border-[#c8a34a]/60"><option value="">Sin editor</option>{teamMembers.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select> : <span className="min-w-0 flex-1 truncate text-[9px] text-slate-500">{video.editorName ?? 'Sin editor'}</span>}</div></div>
     </article>
   )

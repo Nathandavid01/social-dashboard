@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { generateVideoThumbs, processUploadedVideo, type ProcessUploadedVideoDeps } from './video-postupload-client'
+import { generateVideoThumbs, healVideoThumbs, processUploadedVideo, type ProcessUploadedVideoDeps } from './video-postupload-client'
 import { FRAME_CHUNK_SIZE } from './video-frames'
 import { THUMB_COUNT } from './video-thumbs'
 
@@ -10,6 +10,7 @@ const timestamps8 = frames8.map((_, i) => i * 0.5)
 
 function makeDeps(overrides: Partial<{
   extract: ReturnType<typeof vi.fn>
+  extractFromUrl: ReturnType<typeof vi.fn>
   post: ReturnType<typeof vi.fn>
   getUploadUrls: ReturnType<typeof vi.fn>
   register: ReturnType<typeof vi.fn>
@@ -17,6 +18,7 @@ function makeDeps(overrides: Partial<{
 }> = {}) {
   return {
     extract: vi.fn().mockResolvedValue({ frames: frames8, timestamps: timestamps8 }),
+    extractFromUrl: vi.fn().mockResolvedValue({ frames: frames8, timestamps: timestamps8 }),
     post: vi.fn().mockResolvedValue({ ok: true }),
     getUploadUrls: vi.fn().mockResolvedValue({
       urls: ['https://put/0', 'https://put/1', 'https://put/2', 'https://put/3', 'https://put/4'],
@@ -177,5 +179,37 @@ describe('generateVideoThumbs — carátula del crudo', () => {
     await generateVideoThumbs('vid-raw', file, deps)
     expect(deps.getUploadUrls).not.toHaveBeenCalled()
     expect(deps.register).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * 27 de 134 crudos en prod (sep-2026) no tienen carátula: la pestaña se cerró
+ * antes de generarla o el browser no dio abasto. Nada las recuperaba.
+ */
+describe('healVideoThumbs — carátula de un video ya subido que se quedó sin ella', () => {
+  it('lee el video por el proxy del mismo origen, guarda la tira y devuelve la primera imagen', async () => {
+    const deps = makeDeps()
+    await expect(healVideoThumbs('vid-raw', deps)).resolves.toEqual({ cover: frames8[0], saved: true })
+    // Mismo origen: una URL firmada de R2 deja el canvas "tainted" y no se puede leer.
+    expect(deps.extractFromUrl).toHaveBeenCalledWith('/api/video-file/vid-raw', THUMB_COUNT, { background: true })
+    expect(deps.register).toHaveBeenCalledWith('vid-raw', ['k0', 'k1', 'k2', 'k3', 'k4'])
+    expect(deps.post).not.toHaveBeenCalled()
+  })
+
+  it('si el browser no puede decodificarlo: sin imagen y nada a R2', async () => {
+    const deps = makeDeps({ extractFromUrl: vi.fn().mockRejectedValue(new Error('decode')) })
+    await expect(healVideoThumbs('vid-raw', deps)).resolves.toEqual({ cover: null, saved: false })
+    expect(deps.getUploadUrls).not.toHaveBeenCalled()
+  })
+
+  it('si no se puede guardar (p.ej. sin permiso de subir), igual devuelve la imagen para pintarla', async () => {
+    const deps = makeDeps({ getUploadUrls: vi.fn().mockResolvedValue({ error: 'No autorizado' }) })
+    await expect(healVideoThumbs('vid-raw', deps)).resolves.toEqual({ cover: frames8[0], saved: false })
+    expect(deps.register).not.toHaveBeenCalled()
+  })
+
+  it('sin fotogramas: sin imagen', async () => {
+    const deps = makeDeps({ extractFromUrl: vi.fn().mockResolvedValue({ frames: [], timestamps: [] }) })
+    await expect(healVideoThumbs('vid-raw', deps)).resolves.toEqual({ cover: null, saved: false })
   })
 })
