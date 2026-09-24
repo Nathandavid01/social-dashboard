@@ -21,6 +21,12 @@ vi.mock('@/lib/actions/idea-captions', () => ({
 vi.mock('@/lib/actions/pipeline-submit', () => ({
   discardEntregaVideos: vi.fn(async () => ({ ok: true, count: 1 })),
 }))
+vi.mock('@/lib/actions/recibo-publish', () => ({
+  publishReciboOnCadence: vi.fn(async () => ({ ok: true, label: 'viernes 25 de septiembre, 6:00 p.m.' })),
+}))
+vi.mock('@/lib/actions/entregas-client-review', () => ({
+  crearEnlaceCliente: vi.fn(async () => ({ token: 'abc' })),
+}))
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }))
@@ -102,6 +108,9 @@ describe('ReciboBoard', () => {
     expect(screen.queryByRole('button', { name: 'Enviar al cliente' })).not.toBeInTheDocument()
     expect(screen.queryByText('Reel playa')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
+    expect(screen.getByRole('button', { name: 'Enviado' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'Aprobado' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText(/Márcalo aprobado para publicarlo/i)).toBeInTheDocument()
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
