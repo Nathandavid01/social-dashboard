@@ -76,8 +76,11 @@ describe('ReciboBoard', () => {
     expect(screen.queryByRole('button', { name: 'Ya se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'No se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByText('Publicación')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Aprobado por el cliente' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'No aprobado' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Aprobado por el cliente' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'No aprobado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Enviar al cliente' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Reel playa')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
@@ -110,7 +113,7 @@ describe('ReciboBoard', () => {
     expect(field).toHaveValue('El laboratorio ya abrió en Arecibo.')
     await user.clear(field)
     await user.type(field, 'Texto corregido para todas las redes.')
-    await user.click(screen.getByRole('button', { name: 'Guardar caption' }))
+    field.blur()
     await waitFor(() => {
       expect(saveIdeaCaption).toHaveBeenCalledWith('i1', 'Texto corregido para todas las redes.')
     })
@@ -131,6 +134,57 @@ describe('ReciboBoard', () => {
       expect(fillReciboCaption).toHaveBeenCalledWith('i3', expect.any(Array))
     })
     expect(await screen.findByDisplayValue('Caption nuevo desde Metricool')).toBeInTheDocument()
+  })
+
+  it('cuenta los cortes de Nathan y de Eric, y marca cada tarjeta', async () => {
+    const nathan = {
+      ...editedIdea,
+      id: 'n1',
+      title: 'De Nathan',
+      videos: [{ ...editedIdea.videos[0], id: 'vn', uploader: { full_name: 'Nathan Torres' } }],
+    }
+    const eric = {
+      ...editedIdea,
+      id: 'e1',
+      title: 'De Eric',
+      videos: [{ ...editedIdea.videos[0], id: 've', uploader: { full_name: 'Eric Perez' } }],
+    }
+    const yabu = {
+      ...editedIdea,
+      id: 'y1',
+      client_id: 'c2',
+      title: 'De Yabuuchi',
+      client: { id: 'c2', name: 'YabushiSushi', industry: null, logo_url: null },
+      videos: [{ ...editedIdea.videos[0], id: 'vy', uploader: { full_name: 'Eric Perez' } }],
+    }
+    render(
+      <ReciboBoard
+        showUploadCounts
+        aiClients={[
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+          { id: 'c2', name: 'YabushiSushi', logo_url: null },
+        ]}
+        ideas={[nathan, eric, editedIdea, yabu]}
+      />,
+    )
+    await screen.findAllByTestId('recibo-video-player')
+    expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Total 4 · Nathan 1 · Eric 2 · Sin autor 1')
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('Total 3 · Nathan 1 · Eric 1 · Sin autor 1')
+    expect(screen.getByTestId('recibo-client-counts-c2')).toHaveTextContent('Total 1 · Nathan 0 · Eric 1 · Sin autor 0')
+    expect(screen.queryByTestId('recibo-uploader-n1')).not.toBeInTheDocument()
+  })
+
+  it('esconde el conteo si quien mira no está en la lista', async () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+      />,
+    )
+    await screen.findByTestId('recibo-video-player')
+    expect(screen.queryByTestId('recibo-upload-counts')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('1 video')
+    expect(screen.queryByTestId('recibo-uploader-i1')).not.toBeInTheDocument()
   })
 
   it('explica cómo activar AI si no hay clientes', () => {

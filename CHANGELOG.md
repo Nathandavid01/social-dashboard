@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.111 — 2026-09-23
+
+**Debajo del video en Recibo solo está el caption.**
+- No salen el título, la fecha, quién lo subió, enviar al cliente ni la aprobación.
+
+## v5.110 — 2026-09-23
+
+**Recibo cuenta quién subió cada corte: Nathan o Eric.**
+- El total y el desglose van arriba y otra vez en cada cliente: Total, Nathan, Eric y Sin autor.
+- Solo lo ven Eric Perez, Eric, Denisha Matos y Nathan Torres. El resto de Recibo sigue igual.
+- Un video sin `uploaded_by` entra en Sin autor. No se inventa el nombre.
+
 ## v5.109 — 2026-09-23
 
 **Recibo muestra lo que falta por aprobar y lo que falta por programar.**
