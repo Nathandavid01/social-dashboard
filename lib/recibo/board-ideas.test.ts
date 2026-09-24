@@ -58,6 +58,18 @@ describe('reciboBoardIdeas', () => {
     expect(reciboBoardIdeas([pausado], ['ai'])).toEqual([])
   })
 
+  it('Aníbal, Arasibo, VSS y Primer Round no entran solos', () => {
+    const [eric] = [...ERIC_IDS]
+    const held = ['165b8416-5316-43e1-b6d6-f23caaa57b0c', 'afd0b9e9-efaa-45ac-96c0-d5ee6664c8a8', '8a8f2355-f7e3-403d-96bd-2f1ea1cbd6a6', '7f4a8757-7811-4fb4-afc0-87dc0c50c56d']
+    const ideas = held.map((clientId) => ({
+      ...edited,
+      id: clientId,
+      client_id: clientId,
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', uploaded_by: eric }],
+    }))
+    expect(reciboBoardIdeas(ideas, held)).toEqual([])
+  })
+
   it('un corte de Eric archivado, o ya programado, no entra', () => {
     const [eric] = [...ERIC_IDS]
     const archivado = {

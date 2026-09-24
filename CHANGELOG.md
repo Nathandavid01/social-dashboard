@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.117 — 2026-09-24
+
+**Aníbal, Arasibo, VSS y Primer Round Oficial no vuelven solos a Recibo.**
+- Esos clientes salen de la lista. Un video de ellos solo entra si Eric lo pide por el CLI.
+
 ## v5.116 — 2026-09-24
 
 **Un cliente en pausa no sale en Recibo.**
