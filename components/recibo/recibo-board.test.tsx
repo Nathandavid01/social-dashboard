@@ -76,8 +76,11 @@ describe('ReciboBoard', () => {
     expect(screen.queryByRole('button', { name: 'Ya se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'No se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByText('Publicación')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Aprobado por el cliente' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'No aprobado' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Aprobado por el cliente' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'No aprobado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Enviar al cliente' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Reel playa')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
@@ -110,7 +113,7 @@ describe('ReciboBoard', () => {
     expect(field).toHaveValue('El laboratorio ya abrió en Arecibo.')
     await user.clear(field)
     await user.type(field, 'Texto corregido para todas las redes.')
-    await user.click(screen.getByRole('button', { name: 'Guardar caption' }))
+    field.blur()
     await waitFor(() => {
       expect(saveIdeaCaption).toHaveBeenCalledWith('i1', 'Texto corregido para todas las redes.')
     })
@@ -168,9 +171,7 @@ describe('ReciboBoard', () => {
     expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Total 4 · Nathan 1 · Eric 2 · Sin autor 1')
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('Total 3 · Nathan 1 · Eric 1 · Sin autor 1')
     expect(screen.getByTestId('recibo-client-counts-c2')).toHaveTextContent('Total 1 · Nathan 0 · Eric 1 · Sin autor 0')
-    expect(screen.getByTestId('recibo-uploader-n1')).toHaveTextContent('Subió Nathan')
-    expect(screen.getByTestId('recibo-uploader-e1')).toHaveTextContent('Subió Eric')
-    expect(screen.getByTestId('recibo-uploader-i1')).toHaveTextContent('Sin autor')
+    expect(screen.queryByTestId('recibo-uploader-n1')).not.toBeInTheDocument()
   })
 
   it('esconde el conteo si quien mira no está en la lista', async () => {

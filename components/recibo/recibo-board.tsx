@@ -1,25 +1,22 @@
 'use client'
 
-import { useMemo, useState, useTransition, type ReactNode } from 'react'
-import { Bot, Check, Loader2, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Bot, Loader2 } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
-import { EnviarAlCliente, EnviarIdeaAlCliente } from '@/components/entregas/enviar-al-cliente'
+import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
-import { setStaffClientApproval } from '@/lib/actions/recibo'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
-import { currentEntregasEdit, formatUploadCounts, reciboUploadCounts, uploaderLabel, uploaderSide } from '@/lib/recibo/upload-counts'
+import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
-import { cn } from '@/lib/utils'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
  * Recibo — intake for clients with edit_mode='ai'.
- * Vertical 9:16 review cards: title, idea/hook, caption, approve/reject, posted flags.
- * Captions copy the voice of posts already in Metricool. No Metricool auto-post.
+ * Under each video, only the caption. No title, approval, or send button.
  */
 
 function captionOf(idea: IdeaWithPipeline, overrides: Record<string, string>): string {
@@ -38,17 +35,6 @@ function ideaTitle(idea: IdeaWithPipeline): string {
   return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
 }
 
-function ideaBrief(idea: IdeaWithPipeline): string | null {
-  const hook = idea.hook?.trim()
-  const title = idea.title?.trim()
-  if (hook && hook !== title) return hook
-  const angle = idea.caption_angle?.trim()
-  if (angle) return angle
-  const objective = idea.objective?.trim()
-  if (objective) return objective
-  return null
-}
-
 export function ReciboBoard({
   ideas,
   aiClients,
@@ -59,8 +45,6 @@ export function ReciboBoard({
   showUploadCounts?: boolean
 }) {
   const { toast } = useToast()
-  const [pendingId, setPendingId] = useState<string | null>(null)
-  const [isPending, start] = useTransition()
   const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
   const [filling, setFilling] = useState(false)
   const [fillLabel, setFillLabel] = useState<string | null>(null)
@@ -129,16 +113,6 @@ export function ReciboBoard({
     setFillLabel(null)
     toast({
       title: failed ? `Captions listos: ${written}. Fallaron ${failed}.` : `Captions listos: ${written}`,
-    })
-  }
-
-  function markApproval(ideaId: string, status: 'approved' | 'rejected') {
-    setPendingId(ideaId)
-    start(async () => {
-      const res = await setStaffClientApproval({ ideaId, status })
-      if (res.error) toast({ title: 'No se pudo guardar', description: res.error, variant: 'destructive' })
-      else toast({ title: status === 'approved' ? 'Aprobado' : 'No aprobado' })
-      setPendingId(null)
     })
   }
 
@@ -217,12 +191,8 @@ export function ReciboBoard({
                 ) : (
                   <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
-                      const busy = isPending && pendingId === idea.id
-                      const approval = idea.staff_client_approval
                       const hasEdit = ideaTieneEditadoEntregas(idea)
-                      const brief = ideaBrief(idea)
                       const caption = captionOf(idea, captionOverrides)
-                      const uploaderName = currentEntregasEdit(idea.videos)?.uploader?.full_name
                       return (
                         <li
                           key={idea.id}
@@ -234,67 +204,7 @@ export function ReciboBoard({
                               <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
                             </div>
                           </div>
-
-                          <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
-                            <div className="min-w-0 space-y-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="break-words text-[15px] font-semibold leading-snug tracking-tight">
-                                  {ideaTitle(idea)}
-                                </h3>
-                                {busy && (
-                                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />
-                                )}
-                              </div>
-                              {brief ? (
-                                <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                  {brief}
-                                </p>
-                              ) : (
-                                <p className="text-sm italic text-muted-foreground/70">Sin idea / hook en el brief</p>
-                              )}
-                              <p className="text-[11px] text-muted-foreground/80">
-                                {idea.publish_date ? `Publicación ${idea.publish_date}` : 'Sin fecha de publicación'}
-                                {hasEdit ? ' · Editado' : ' · Sin archivo'}
-                                {hasEdit && showUploadCounts ? (
-                                  <>
-                                    {' · '}
-                                    <span data-testid={`recibo-uploader-${idea.id}`}>{uploaderLabel(uploaderSide(uploaderName))}</span>
-                                  </>
-                                ) : null}
-                              </p>
-                            </div>
-
-                            <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
-
-                            <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
-                              {hasEdit ? <EnviarIdeaAlCliente idea={idea} /> : null}
-                              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                ¿Aprueba el cliente?
-                              </p>
-                              <div className="grid grid-cols-2 gap-2">
-                                <ToggleBtn
-                                  active={approval === 'approved'}
-                                  disabled={busy}
-                                  onClick={() => markApproval(idea.id, 'approved')}
-                                  tone="ok"
-                                  label="Aprobado por el cliente"
-                                  shortLabel="Aprobar"
-                                  icon={<Check className="h-4 w-4" aria-hidden="true" />}
-                                  large
-                                />
-                                <ToggleBtn
-                                  active={approval === 'rejected'}
-                                  disabled={busy}
-                                  onClick={() => markApproval(idea.id, 'rejected')}
-                                  tone="warn"
-                                  label="No aprobado"
-                                  shortLabel="No aprobar"
-                                  icon={<X className="h-4 w-4" aria-hidden="true" />}
-                                  large
-                                />
-                              </div>
-                            </div>
-                          </div>
+                          <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
                         </li>
                       )
                     })}
@@ -306,46 +216,5 @@ export function ReciboBoard({
         </>
       )}
     </div>
-  )
-}
-
-function ToggleBtn({
-  active,
-  disabled,
-  onClick,
-  label,
-  shortLabel,
-  icon,
-  tone,
-  large,
-}: {
-  active: boolean
-  disabled?: boolean
-  onClick: () => void
-  label: string
-  shortLabel?: string
-  icon: ReactNode
-  tone: 'ok' | 'warn'
-  large?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      aria-pressed={active}
-      aria-label={label}
-      onClick={onClick}
-      className={cn(
-        'inline-flex items-center justify-center gap-1.5 rounded-xl border font-semibold transition',
-        large ? 'min-h-11 w-full px-3 text-sm' : 'min-h-11 flex-1 px-2.5 text-[11px] sm:min-h-9 sm:flex-none',
-        active && tone === 'ok' && 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200',
-        active && tone === 'warn' && 'border-amber-500/60 bg-amber-500/20 text-amber-100',
-        !active && 'border-border bg-background/80 text-muted-foreground hover:bg-muted/60',
-        disabled && 'opacity-50',
-      )}
-    >
-      {icon}
-      {shortLabel ?? label}
-    </button>
   )
 }
