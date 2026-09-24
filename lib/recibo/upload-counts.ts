@@ -58,10 +58,15 @@ export function formatUploadCounts(counts: { nathan: number; eric: number; otro:
   return `Total ${counts.total} · Nathan ${counts.nathan} · Eric ${counts.eric} · Sin autor ${counts.otro}`
 }
 
-/** Real accounts that may see who uploaded each Recibo cut. Not view-as. */
-const RECIBO_COUNT_VIEWER_IDS = new Set([
+/** Eric's real accounts. Cuts he uploads enter Recibo whatever the client's edit_mode (board-ideas.ts). */
+export const ERIC_IDS: ReadonlySet<string> = new Set([
   '2ec6c260-4ed5-4c4b-8f85-8b76353532cb', // Eric Perez
   'f27c2a4c-fda8-49d9-9a59-da9777556144', // Eric
+])
+
+/** Real accounts that may see who uploaded each Recibo cut. Not view-as. */
+const RECIBO_COUNT_VIEWER_IDS = new Set([
+  ...ERIC_IDS,
   'a16752e4-05d1-42e3-812c-28a1afb5752c', // Denisha Matos
   '165e5259-8f69-4ff4-b0f0-f790cba77b80', // Nathan Torres
 ])

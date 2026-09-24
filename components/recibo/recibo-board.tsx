@@ -16,7 +16,7 @@ import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
- * Recibo — intake for clients with edit_mode='ai'.
+ * Recibo — intake for clients with edit_mode='ai', plus any cut Eric uploaded (v5.113).
  * Under each video, only the caption. No title, approval, or send button.
  */
 
@@ -54,7 +54,7 @@ export function ReciboBoard({
 
   const byClient = useMemo(() => {
     const known = new Map(aiClients.map((client) => [client.id, client]))
-    const map = new Map<string, { client: { id: string; name: string; logo_url?: string | null }; ideas: IdeaWithPipeline[] }>()
+    const map = new Map<string, { client: { id: string; name: string; logo_url?: string | null; ai: boolean }; ideas: IdeaWithPipeline[] }>()
     for (const idea of filtered) {
       const entry = map.get(idea.client_id)
       if (entry) entry.ideas.push(idea)
@@ -64,6 +64,8 @@ export function ReciboBoard({
             id: idea.client_id,
             name: idea.client?.name?.trim() || 'Cliente',
             logo_url: idea.client?.logo_url ?? known.get(idea.client_id)?.logo_url ?? null,
+            // A human-editor client can be here through a cut Eric uploaded (v5.113): no AI badge for it.
+            ai: known.has(idea.client_id),
           },
           ideas: [idea],
         })
@@ -168,12 +170,14 @@ export function ReciboBoard({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="truncate text-base font-semibold">{client.name}</span>
-                      <span
-                        data-testid="recibo-ai-badge"
-                        className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300"
-                      >
-                        AI
-                      </span>
+                      {client.ai ? (
+                        <span
+                          data-testid="recibo-ai-badge"
+                          className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300"
+                        >
+                          AI
+                        </span>
+                      ) : null}
                     </div>
                     <p className="text-xs text-muted-foreground" data-testid={`recibo-client-counts-${client.id}`}>
                       {showUploadCounts

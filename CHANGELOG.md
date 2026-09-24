@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.113 — 2026-09-24
+
+**Recibo muestra los cortes que sube Eric, aunque el cliente tenga editor.**
+- Un video editado y subido por Eric entra en Recibo sin cambiar el modo del cliente: solo ese corte, los del editor humano siguen fuera.
+- Los primeros: Farmacia Buena Vida — «¿Cuál es el medicamento que no puedes nombrar bien?» y «Ay pero te copiaste de mi outfit».
+- Sale de Recibo igual que los demás: al programarlo en Metricool o al publicarlo. Ese cliente no lleva la etiqueta «AI».
+- El corte también sigue en Entregas, como pasa con los clientes AI: no es un duplicado.
+
+![Recibo con los cortes de Eric en Farmacia Buena Vida](/changelog/v5.113-recibo-cortes-de-eric.png)
+
 ## v5.112 — 2026-09-23
 
 **Recibo solo muestra los videos subidos con AI, y se pueden borrar.**

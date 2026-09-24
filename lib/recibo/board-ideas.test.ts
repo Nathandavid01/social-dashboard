@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reciboBoardIdeas } from './board-ideas'
+import { ERIC_IDS, reciboBoardIdeas } from './board-ideas'
 
 const edited = {
   id: 'cut',
@@ -26,5 +26,42 @@ describe('reciboBoardIdeas', () => {
     const publicado = { ...edited, id: 'publicado', status: 'publicada' }
     const descartada = { ...edited, id: 'fuera', status: 'descartada' }
     expect(reciboBoardIdeas([bare, agendado, publicado, descartada], ['ai'])).toEqual([])
+  })
+
+  // Eric 2026-09-24: «quiero que puedas poner en recibo los videos que yo edito aunque el cliente sea de un editor».
+  it('deja el corte que subió Eric aunque el cliente sea de un editor humano, y solo ese corte', () => {
+    const [eric] = [...ERIC_IDS]
+    const deEric = {
+      ...edited,
+      id: 'de-eric',
+      client_id: 'human',
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', uploaded_by: eric }],
+    }
+    const deAlexa = {
+      ...edited,
+      id: 'de-alexa',
+      client_id: 'human',
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', uploaded_by: 'alexa' }],
+    }
+    expect(reciboBoardIdeas([deEric, deAlexa], ['ai']).map((idea) => idea.id)).toEqual(['de-eric'])
+  })
+
+  it('un corte de Eric archivado, o ya programado, no entra', () => {
+    const [eric] = [...ERIC_IDS]
+    const archivado = {
+      ...edited,
+      id: 'arch',
+      client_id: 'human',
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'archived', uploaded_by: eric }],
+    }
+    const agendado = {
+      ...edited,
+      id: 'agendado',
+      client_id: 'human',
+      staff_client_approval: 'approved',
+      metricool_post_id: 9,
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', uploaded_by: eric }],
+    }
+    expect(reciboBoardIdeas([archivado, agendado], ['ai'])).toEqual([])
   })
 })
