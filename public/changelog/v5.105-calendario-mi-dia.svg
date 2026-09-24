@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">Mi Día: calendario y pendientes de grabación</title>
+  <desc id="desc">Vista semanal del calendario junto a las listas de grabaciones sin confirmar, sin videógrafo y con ideas faltantes.</desc>
+  <defs><style>
+    text{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#f4f4f5}.muted{fill:#a1a1aa}.gold{fill:#fbbf24}.sm{font-size:14px}.xs{font-size:12px}.title{font-size:26px;font-weight:700}.head{font-size:19px;font-weight:650}.body{font-size:15px}.strong{font-weight:650}
+  </style></defs>
+  <rect width="1280" height="900" fill="#090a0d"/><rect width="1280" height="62" fill="#0b0c10"/><path d="M0 62h1280" stroke="#272930"/>
+  <text x="34" y="39" font-size="20" font-weight="800" letter-spacing="2">NATE <tspan class="gold">MEDIA</tspan></text><text x="210" y="38" class="sm muted">/ Mi Día</text>
+  <text x="38" y="111" class="title">Mi Día</text><text x="38" y="139" class="sm muted">Calendario y pendientes de grabación · hora de Puerto Rico</text>
+  <!-- Pending groups -->
+  <g transform="translate(32 164)">
+    <rect width="390" height="250" rx="14" fill="#121318" stroke="#292b32"/><text x="22" y="53" font-size="39" font-weight="700">13</text><text x="22" y="83" class="head">Sin confirmar</text><text x="22" y="105" class="xs muted">Falta cliente, videógrafo u hora</text>
+    <rect x="20" y="121" width="350" height="48" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="151" class="body strong">La Guira</text><text x="288" y="150" class="sm muted">22 sep</text><text x="34" y="164" class="xs gold">Falta videógrafo, hora</text>
+    <rect x="20" y="178" width="350" height="40" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="203" class="body strong">Farmacia Buena Vida</text><text x="288" y="203" class="sm muted">22 sep</text>
+    <text x="20" y="239" class="xs muted">+11 más en el calendario</text>
+  </g>
+  <g transform="translate(445 164)">
+    <rect width="390" height="250" rx="14" fill="#121318" stroke="#292b32"/><text x="22" y="53" font-size="39" font-weight="700">12</text><text x="22" y="83" class="head">Sin videógrafo</text><text x="22" y="105" class="xs muted">Sin asignar en los próximos 7 días</text>
+    <rect x="20" y="121" width="350" height="40" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="147" class="body strong">La Guira</text><text x="288" y="147" class="sm muted">22 sep</text>
+    <rect x="20" y="169" width="350" height="40" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="195" class="body strong">Farmacia Buena Vida</text><text x="288" y="195" class="sm muted">22 sep</text>
+    <text x="20" y="239" class="xs muted">+10 más en el calendario</text>
+  </g>
+  <g transform="translate(858 164)">
+    <rect width="390" height="250" rx="14" fill="#121318" stroke="#292b32"/><text x="22" y="53" font-size="39" font-weight="700">13</text><text x="22" y="83" class="head">Faltan ideas</text><text x="22" y="105" class="xs muted">Menos ideas que la meta de publicación</text>
+    <rect x="20" y="121" width="350" height="40" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="147" class="body strong">La Guira</text><text x="288" y="147" class="sm muted">22 sep</text><text x="34" y="158" class="xs muted">0 / 20 ideas</text>
+    <rect x="20" y="169" width="350" height="40" rx="9" fill="#101116" stroke="#292b32"/><text x="34" y="195" class="body strong">Farmacia Buena Vida</text><text x="288" y="195" class="sm muted">22 sep</text>
+    <text x="20" y="239" class="xs muted">+11 más en On Site</text>
+  </g>
+  <!-- Calendar -->
+  <rect x="32" y="436" width="1216" height="422" rx="15" fill="#121318" stroke="#292b32"/><text x="56" y="478" class="head">▦  Calendario de grabación</text>
+  <g font-size="13" text-anchor="middle"><rect x="973" y="451" width="54" height="34" rx="8" fill="#191a20" stroke="#30323a"/><text x="1000" y="473">‹</text><rect x="1034" y="451" width="64" height="34" rx="8" fill="#191a20" stroke="#30323a"/><text x="1066" y="473">Hoy</text><rect x="1105" y="451" width="54" height="34" rx="8" fill="#191a20" stroke="#30323a"/><text x="1132" y="473">›</text><rect x="1166" y="451" width="64" height="34" rx="8" fill="#332910" stroke="#a37d11"/><text x="1198" y="473" fill="#fde68a">Semana</text></g>
+  <text x="56" y="518" class="sm strong">21–27 de septiembre de 2026</text><circle cx="58" cy="543" r="4" fill="#60a5fa"/><text x="69" y="547" class="xs muted">María R.</text><circle cx="150" cy="543" r="4" fill="#fbbf24"/><text x="161" y="547" class="xs muted">Sin videógrafo</text><text x="286" y="547" class="xs muted">Selecciona una sesión para revisar sus detalles e ideas.</text>
+  <g transform="translate(52 568)">
+    <g><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">LUN</text><text x="14" y="55" font-size="20" font-weight="650">21</text></g>
+    <g transform="translate(170)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">MAR</text><text x="14" y="55" font-size="20" font-weight="650">22</text><rect x="9" y="70" width="145" height="71" rx="7" fill="#151922" stroke="#292b32"/><path d="M11 77v57" stroke="#fbbf24" stroke-width="3"/><text x="20" y="91" class="xs muted">10:00</text><text x="20" y="111" class="sm strong">La Guira</text><text x="20" y="130" font-size="10" class="gold">Sin videógrafo</text><rect x="9" y="149" width="145" height="71" rx="7" fill="#151922" stroke="#292b32"/><path d="M11 156v57" stroke="#60a5fa" stroke-width="3"/><text x="20" y="170" class="xs muted">13:00</text><text x="20" y="190" font-size="13" class="strong">Farmacia Buena Vida</text><text x="20" y="209" font-size="10" class="gold">Sin confirmar</text></g>
+    <g transform="translate(340)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">MIÉ</text><text x="14" y="55" font-size="20" font-weight="650">23</text><rect x="9" y="70" width="145" height="71" rx="7" fill="#151922" stroke="#292b32"/><path d="M11 77v57" stroke="#fbbf24" stroke-width="3"/><text x="20" y="91" class="xs muted">09:30</text><text x="20" y="111" font-size="13" class="strong">Farmacia Tierras</text><text x="20" y="130" font-size="10" class="gold">Sin videógrafo</text></g>
+    <g transform="translate(510)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">JUE</text><text x="14" y="55" font-size="20" font-weight="650">24</text></g>
+    <g transform="translate(680)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">VIE</text><text x="14" y="55" font-size="20" font-weight="650">25</text><rect x="9" y="70" width="145" height="71" rx="7" fill="#151922" stroke="#292b32"/><path d="M11 77v57" stroke="#60a5fa" stroke-width="3"/><text x="20" y="91" class="xs muted">11:00</text><text x="20" y="111" font-size="12" class="strong">Restauco Leather</text><text x="20" y="130" font-size="10" class="gold">16 / 20 ideas</text></g>
+    <g transform="translate(850)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">SÁB</text><text x="14" y="55" font-size="20" font-weight="650">26</text></g>
+    <g transform="translate(1020)"><rect width="163" height="265" rx="9" fill="#0d0e13" stroke="#292b32"/><text x="14" y="27" class="xs muted">DOM</text><text x="14" y="55" font-size="20" font-weight="650">27</text></g>
+  </g>
+</svg>

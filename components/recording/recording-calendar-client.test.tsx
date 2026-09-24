@@ -1,6 +1,6 @@
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()}),usePathname:()=>'/recording-calendar'}))
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
 
 const { updateRecordingSession, canAssign } = vi.hoisted(() => ({
   updateRecordingSession: vi.fn(),
@@ -50,26 +50,67 @@ beforeEach(() => {
   updateRecordingSession.mockResolvedValue({ success: true })
 })
 
-describe('el día que pulsas es la fecha de la sesión', () => {
-  /** Los campos del diálogo se inicializan con useState, que solo lee el valor
-   *  una vez. Sin remontarlo, pulsar otro día no cambiaba la fecha. */
-  const fecha = (n: number) =>
-    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(n).padStart(2, '0')}`
+function isoOnDay(n: number) {
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(n).padStart(2, '0')}`
+}
 
-  it('al pulsar un día, el diálogo abre con ESA fecha', () => {
+function dayButtonName(n: number) {
+  const month = new Date(today.getFullYear(), today.getMonth(), n).toLocaleDateString('es', { month: 'long' })
+  return `Día ${n} de ${month}`
+}
+
+/** Un día de este mes que no cae en la semana visible (lunes a domingo). */
+function dayOutsideThisWeek(): number {
+  const dow = (today.getDay() + 6) % 7
+  const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow)
+  const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6)
+  for (let n = 1; n <= 28; n++) {
+    const candidate = new Date(today.getFullYear(), today.getMonth(), n)
+    if (candidate < weekStart || candidate > weekEnd) return n
+  }
+  throw new Error('este mes no tiene un día fuera de la semana')
+}
+
+describe('el día que pulsas es la fecha de la sesión', () => {
+  /** Pulsar el número abre la lista de ese día. Crear sigue siendo un paso aparte,
+   *  y el formulario tiene que nacer con ESA fecha, no con la del clic anterior. */
+  function openMonthDay(n: number) {
+    fireEvent.click(screen.getByRole('button', { name: 'Mes' }))
+    fireEvent.click(screen.getByRole('button', { name: dayButtonName(n) }))
+  }
+
+  it('al pulsar el número del día abre su lista y no el formulario', () => {
     render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
-    fireEvent.click(screen.getByText('7'))
-    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(7))
+    openMonthDay(7)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: /sesiones del 7 de/i })).toBeInTheDocument()
+    expect(screen.getByText(/sin sesiones este día/i)).toBeInTheDocument()
+  })
+
+  it('agregar en ese día abre el formulario con ESA fecha', () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    openMonthDay(7)
+    fireEvent.click(screen.getByRole('button', { name: /agregar en este día/i }))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(isoOnDay(7))
   })
 
   it('pulsar otro día actualiza la fecha, no se queda con la primera', () => {
     render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
-    fireEvent.click(screen.getByText('7'))
-    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(7))
-    // Cerrar y elegir otro día: aquí es donde fallaba.
+    openMonthDay(7)
+    fireEvent.click(screen.getByRole('button', { name: /agregar en este día/i }))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(isoOnDay(7))
     fireEvent.click(screen.getByRole('button', { name: /cancelar/i }))
-    fireEvent.click(screen.getByText('12'))
-    expect(screen.getByLabelText(/fecha/i)).toHaveValue(fecha(12))
+    openMonthDay(12)
+    fireEvent.click(screen.getByRole('button', { name: /agregar en este día/i }))
+    expect(screen.getByLabelText(/fecha/i)).toHaveValue(isoOnDay(12))
+  })
+
+  it('pulsar el cuadro del día no crea una sesión', () => {
+    render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Mes' }))
+    fireEvent.click(screen.getByTestId(`day-${isoOnDay(7)}`))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /sesiones del 7 de/i })).not.toBeInTheDocument()
   })
 })
 
@@ -81,10 +122,62 @@ describe('RecordingCalendarClient — premium redesign', () => {
     expect(screen.queryByText('Grabación Nora')).not.toBeInTheDocument()
   })
 
-  it('does not show the always-on videographer color legend', () => {
+  it('no muestra leyenda si nadie graba esta semana', () => {
     render(<RecordingCalendarClient initialSessions={[]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
-    expect(screen.queryByText('Videógrafos')).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Videógrafos' })).not.toBeInTheDocument()
     expect(screen.queryByText(/conflicto de disponibilidad/i)).not.toBeInTheDocument()
+  })
+
+  it('abre en la semana y el mes muestra los días que la semana esconde', () => {
+    const outside = dayOutsideThisWeek()
+    render(<RecordingCalendarClient
+      initialSessions={[
+        session(),
+        session({
+          id: 'lejos',
+          session_date: isoOnDay(outside),
+          client: { id: 'c2', name: 'Lejos' },
+          client_id: 'c2',
+          videographer_id: 'v2',
+          videographer: { id: 'v2', full_name: 'Diego V.' },
+        }),
+      ]}
+      clients={[...clients, { id: 'c2', name: 'Lejos' }]}
+      teamMembers={team}
+      clientIdeasMap={{}}
+    />)
+    expect(screen.getByRole('button', { name: 'Semana', pressed: true })).toBeInTheDocument()
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
+    expect(screen.queryByText('Lejos')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mes' }))
+    expect(screen.getByRole('button', { name: 'Mes', pressed: true })).toBeInTheDocument()
+    expect(screen.getByText('Lejos')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mes Anterior' })).toBeInTheDocument()
+  })
+
+  it('la leyenda muestra quién graba y filtra al pulsarla', () => {
+    render(<RecordingCalendarClient
+      initialSessions={[
+        session(),
+        session({
+          id: 's-diego',
+          client: { id: 'c2', name: 'Cliente Diego' },
+          client_id: 'c2',
+          videographer_id: 'v2',
+          videographer: { id: 'v2', full_name: 'Diego V.' },
+        }),
+      ]}
+      clients={[...clients, { id: 'c2', name: 'Cliente Diego' }]}
+      teamMembers={team}
+      clientIdeasMap={{}}
+    />)
+    const legend = screen.getByRole('group', { name: 'Videógrafos' })
+    expect(within(legend).getByRole('button', { name: 'María R.' })).toBeInTheDocument()
+    fireEvent.click(within(legend).getByRole('button', { name: 'Diego V.' }))
+    expect(screen.getByText('Cliente Diego')).toBeInTheDocument()
+    expect(screen.queryByText('Nora Fitness')).not.toBeInTheDocument()
+    fireEvent.click(within(legend).getByRole('button', { name: 'Diego V.' }))
+    expect(screen.getByText('Nora Fitness')).toBeInTheDocument()
   })
 
   it('shows an availability selector only when a videographer is double-booked this month', () => {
@@ -151,7 +244,7 @@ describe('RecordingCalendarClient — premium redesign', () => {
     render(<RecordingCalendarClient initialSessions={[session({ title: 'Blue Chiro - Recording' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
     const clientName = screen.getByText('Nora Fitness')
     expect(clientName).toHaveAttribute('data-slot', 'session-chip-client')
-    expect(clientName).toHaveClass('line-clamp-2', 'text-xs', 'font-semibold', 'tracking-tight', 'text-foreground')
+    expect(clientName).toHaveClass('truncate', 'text-xs', 'font-semibold', 'tracking-tight', 'text-foreground')
     expect(screen.queryByText('Blue Chiro - Recording')).not.toBeInTheDocument()
     expect(screen.queryByText(/recording/i)).not.toBeInTheDocument()
   })
@@ -200,10 +293,38 @@ describe('RecordingCalendarClient — premium redesign', () => {
       teamMembers={[{ id: 'v1', full_name: 'Delian Loyola' }]}
       clientIdeasMap={{ c1: [{ id: 'i1', recording_session_id: 's1' } as never] }}
     />)
-    expect(screen.getByText('Dra. Delian Loyola')).toBeInTheDocument()
-    expect(screen.queryByText('Delian Loyola')).not.toBeInTheDocument()
-    expect(screen.queryByText('Oficina')).not.toBeInTheDocument()
+    const chip = screen.getByRole('button', { name: /Dra\. Delian Loyola/ })
+    expect(within(chip).queryByText('Delian Loyola')).not.toBeInTheDocument()
+    expect(within(chip).queryByText('Oficina')).not.toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Videógrafos' })).toHaveTextContent('Delian Loyola')
     expect(screen.queryByText('1 ideas')).not.toBeInTheDocument()
+  })
+
+  it('dos tomas iguales el mismo día muestran el lugar', () => {
+    render(<RecordingCalendarClient
+      initialSessions={[
+        session({ id: 'a', start_time: '10:30:00', location: 'Plaza', client: { id: 'c1', name: '5K Sociedad' } }),
+        session({ id: 'b', start_time: '10:30:00', location: 'Paseo', client: { id: 'c1', name: '5K Sociedad' } }),
+      ]}
+      clients={[{ id: 'c1', name: '5K Sociedad' }]}
+      teamMembers={team}
+      clientIdeasMap={{}}
+    />)
+    expect(screen.getByText('Plaza')).toBeInTheDocument()
+    expect(screen.getByText('Paseo')).toBeInTheDocument()
+  })
+
+  it('si las dos tomas iguales no tienen lugar, lo dice', () => {
+    render(<RecordingCalendarClient
+      initialSessions={[
+        session({ id: 'a', start_time: '10:30:00', location: null, client: { id: 'c1', name: '5K Sociedad' } }),
+        session({ id: 'b', start_time: '10:30:00', location: '   ', client: { id: 'c1', name: '5K Sociedad' } }),
+      ]}
+      clients={[{ id: 'c1', name: '5K Sociedad' }]}
+      teamMembers={team}
+      clientIdeasMap={{}}
+    />)
+    expect(screen.getAllByText('Sin lugar')).toHaveLength(2)
   })
 
   it('al pulsar la sesión del día, el admin asigna videógrafo y lugar', async () => {
@@ -283,18 +404,23 @@ it('uses the selected client name as a read-only title and shows the recording t
   expect(screen.getByText('14 Videos Para Grabar')).toBeInTheDocument()
 })
 
-it('shows recording time and a visible assignment warning in the monthly grid',()=>{
+it('shows recording time and a visible assignment warning in the weekly grid',()=>{
  render(<RecordingCalendarClient initialSessions={[session({start_time:'09:30:00',videographer_id:null,videographer:null})]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
  expect(screen.getByText('09:30')).toBeInTheDocument()
  expect(screen.queryByText('Asignar Videógrafo')).not.toBeInTheDocument()
- expect(screen.getByLabelText('Asignación Pendiente')).toBeInTheDocument()
- expect(screen.getByRole('button',{name:'Mes Anterior'})).toBeInTheDocument()
+ expect(screen.getByLabelText('Sin videógrafo')).toBeInTheDocument()
+ expect(screen.getByRole('button',{name:'Semana anterior'})).toBeInTheDocument()
  expect(screen.getByRole('button',{name:'Volver A Hoy'})).toBeInTheDocument()
 })
-it('expands a busy day without opening a new-session form',()=>{
+it('con videógrafo asignado no marca el punto aunque falte el editor', () => {
+  render(<RecordingCalendarClient initialSessions={[session({ start_time: '09:30:00' })]} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
+  expect(screen.queryByLabelText('Sin videógrafo')).not.toBeInTheDocument()
+  expect(screen.getByTitle('María R.')).toBeInTheDocument()
+})
+it('muestra todas las tomas del día sin esconderlas detrás de Ver más',()=>{
  render(<RecordingCalendarClient initialSessions={[1,2,3,4].map(n=>session({id:`s${n}`,title:`Sesión ${n}`,client_id:null,client:null}))} clients={clients} teamMembers={team} clientIdeasMap={{}} />)
- fireEvent.click(screen.getByRole('button',{name:/ver 1 más/i}))
  expect(screen.getByText('Sesión 4')).toBeInTheDocument()
+ expect(screen.queryByRole('button',{name:/ver \d+ más/i})).not.toBeInTheDocument()
  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
 

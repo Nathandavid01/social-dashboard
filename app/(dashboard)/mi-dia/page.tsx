@@ -12,6 +12,7 @@ import { VideographerHistory } from '@/components/recording/videographer-history
 import { getOwnRecordingHistory } from '@/lib/actions/videographer-history'
 import { getAssignedRecordings } from '@/lib/actions/assigned-recordings'
 import { effectiveConfirmationStatus } from '@/lib/utils/recording-confirmation'
+import { MyDayRecordingCalendar } from '@/components/my-day/my-day-recording-calendar'
 
 /**
  * "Mi día" — the landing page. Every role has one: what do I have to do today?
@@ -46,6 +47,7 @@ export default async function MiDiaPage() {
     return (
       <div className="space-y-6">
         {gapCards}
+        <MyDayRecordingCalendar />
         <RoleGate perm="operations.overview">{body}</RoleGate>
       </div>
     )

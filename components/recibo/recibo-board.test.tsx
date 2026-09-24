@@ -12,15 +12,24 @@ vi.mock('@/lib/actions/recibo', () => ({
   setStaffClientApproval: vi.fn(),
   getReciboIdeaPreviewUrl: vi.fn(async () => ({ url: 'https://signed.example/play.mp4' })),
 }))
+vi.mock('@/lib/actions/recibo-captions', () => ({
+  fillReciboCaption: vi.fn(async () => ({ ok: true, caption: 'Caption nuevo desde Metricool' })),
+}))
+vi.mock('@/lib/actions/idea-captions', () => ({
+  saveIdeaCaption: vi.fn(async () => ({ ok: true })),
+}))
 vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarAlCliente: () => <div data-testid="enviar" />,
   EnviarIdeaAlCliente: () => <button type="button">Enviar al cliente</button>,
 }))
 
+import userEvent from '@testing-library/user-event'
 import { rangoSemana } from '@/lib/entregas/dias'
+import { fillReciboCaption } from '@/lib/actions/recibo-captions'
+import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { ReciboBoard } from './recibo-board'
 
-/** Recibo defaults to "Solo esta semana"; a hardcoded date drifts out of the week. */
+/** Dated inside the current week so the week filter still includes the card. */
 const publishThisWeek = rangoSemana().desde
 
 const editedIdea = {
@@ -29,6 +38,8 @@ const editedIdea = {
   title: 'Reel playa',
   status: 'producida',
   publish_date: publishThisWeek,
+  generated_caption: 'El laboratorio ya abrió en Arecibo.',
+  caption_draft: null,
   manual_posted_status: null,
   staff_client_approval: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },
@@ -62,8 +73,9 @@ describe('ReciboBoard', () => {
     )
     expect(screen.getByTestId('recibo-board')).toBeInTheDocument()
     expect(screen.getByTestId('recibo-ai-badge')).toHaveTextContent('AI')
-    expect(screen.getByRole('button', { name: 'Ya se posteó' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'No se posteó' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ya se posteó' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'No se posteó' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Publicación')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Aprobado por el cliente' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'No aprobado' })).toBeInTheDocument()
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
@@ -84,6 +96,41 @@ describe('ReciboBoard', () => {
       />,
     )
     expect(screen.getByTestId('recibo-video-empty')).toHaveTextContent('Sin video editado')
+  })
+
+  it('muestra el caption y lo guarda al editarlo', async () => {
+    const user = userEvent.setup()
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+      />,
+    )
+    const field = screen.getByLabelText('Caption')
+    expect(field).toHaveValue('El laboratorio ya abrió en Arecibo.')
+    await user.clear(field)
+    await user.type(field, 'Texto corregido para todas las redes.')
+    await user.click(screen.getByRole('button', { name: 'Guardar caption' }))
+    await waitFor(() => {
+      expect(saveIdeaCaption).toHaveBeenCalledWith('i1', 'Texto corregido para todas las redes.')
+    })
+  })
+
+  it('pone captions solo en los videos que todavía no tienen', async () => {
+    const user = userEvent.setup()
+    const sinCaption = { ...editedIdea, id: 'i3', title: 'Sin texto', generated_caption: '', caption_draft: null }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, sinCaption]}
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: 'Poner captions' }))
+    await waitFor(() => {
+      expect(fillReciboCaption).toHaveBeenCalledTimes(1)
+      expect(fillReciboCaption).toHaveBeenCalledWith('i3', expect.any(Array))
+    })
+    expect(await screen.findByDisplayValue('Caption nuevo desde Metricool')).toBeInTheDocument()
   })
 
   it('explica cómo activar AI si no hay clientes', () => {

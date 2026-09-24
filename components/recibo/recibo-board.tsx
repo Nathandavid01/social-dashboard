@@ -4,19 +4,27 @@ import { useMemo, useState, useTransition, type ReactNode } from 'react'
 import { Bot, Check, Loader2, X } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente, EnviarIdeaAlCliente } from '@/components/entregas/enviar-al-cliente'
+import { ReciboCaption } from '@/components/recibo/recibo-caption'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
-import { setManualPostedStatus, setStaffClientApproval } from '@/lib/actions/recibo'
+import { fillReciboCaption } from '@/lib/actions/recibo-captions'
+import { setStaffClientApproval } from '@/lib/actions/recibo'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
+import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { cn } from '@/lib/utils'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
  * Recibo — intake for clients with edit_mode='ai'.
- * Vertical 9:16 review cards: title, idea/hook, approve/reject, posted flags.
- * No Metricool auto-post.
+ * Vertical 9:16 review cards: title, idea/hook, caption, approve/reject, posted flags.
+ * Captions copy the voice of posts already in Metricool. No Metricool auto-post.
  */
+
+function captionOf(idea: IdeaWithPipeline, overrides: Record<string, string>): string {
+  if (overrides[idea.id] != null) return overrides[idea.id]
+  return (idea.generated_caption ?? '').trim() || displayCaptionDraft(idea.caption_draft)
+}
 
 function enEstaSemana(idea: IdeaWithPipeline, semana = 0): boolean {
   const fecha = idea.publish_date || idea.submitted_at?.slice(0, 10) || idea.created_at?.slice(0, 10)
@@ -48,9 +56,12 @@ export function ReciboBoard({
   aiClients: { id: string; name: string; logo_url?: string | null }[]
 }) {
   const { toast } = useToast()
-  const [soloSemana, setSoloSemana] = useState(true)
+  const [soloSemana, setSoloSemana] = useState(false)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, start] = useTransition()
+  const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
+  const [filling, setFilling] = useState(false)
+  const [fillLabel, setFillLabel] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const base = ideas.filter((i) => i.status !== 'descartada')
@@ -80,13 +91,48 @@ export function ReciboBoard({
     return [...map.values()].sort((a, b) => a.client.name.localeCompare(b.client.name, 'es'))
   }, [filtered, aiClients])
 
-  function markPosted(ideaId: string, status: 'posted' | 'not_posted') {
-    setPendingId(ideaId)
-    start(async () => {
-      const res = await setManualPostedStatus({ ideaId, status })
-      if (res.error) toast({ title: 'No se pudo guardar', description: res.error, variant: 'destructive' })
-      else toast({ title: status === 'posted' ? 'Marcado: Ya se posteó' : 'Marcado: No se posteó' })
-      setPendingId(null)
+  async function fillCaptions() {
+    const missing = ideas.filter(
+      (idea) => idea.status !== 'descartada' && ideaTieneEditadoEntregas(idea) && !captionOf(idea, captionOverrides),
+    )
+    if (missing.length === 0) {
+      toast({ title: 'Todos los videos ya tienen caption' })
+      return
+    }
+    setFilling(true)
+    const byClient = new Map<string, { titulo: string; caption: string }[]>()
+    for (const idea of ideas) {
+      const text = captionOf(idea, captionOverrides)
+      if (!text) continue
+      const list = byClient.get(idea.client_id) ?? []
+      list.push({ titulo: idea.title ?? '', caption: text })
+      byClient.set(idea.client_id, list)
+    }
+    let written = 0
+    let failed = 0
+    for (const idea of missing) {
+      setFillLabel(`Poniendo captions ${written + failed + 1}/${missing.length}`)
+      const hermanos = (byClient.get(idea.client_id) ?? []).slice(-8)
+      const res = await fillReciboCaption(idea.id, hermanos)
+      if (res.caption) {
+        setCaptionOverrides((prev) => ({ ...prev, [idea.id]: res.caption! }))
+        const list = byClient.get(idea.client_id) ?? []
+        list.push({ titulo: idea.title ?? '', caption: res.caption })
+        byClient.set(idea.client_id, list)
+        written += 1
+      } else {
+        failed += 1
+        toast({
+          title: ideaTitle(idea),
+          description: res.error || 'No se pudo escribir el caption',
+          variant: 'destructive',
+        })
+      }
+    }
+    setFilling(false)
+    setFillLabel(null)
+    toast({
+      title: failed ? `Captions listos: ${written}. Fallaron ${failed}.` : `Captions listos: ${written}`,
     })
   }
 
@@ -114,10 +160,20 @@ export function ReciboBoard({
             Recibo
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Revisa cada corte en 9:16, lee el título y la idea, y marca si el cliente aprueba.
-            Sin auto-post a Metricool.
+            Revisa cada corte en 9:16, lee el título, la idea y el caption, y marca si el cliente aprueba.
+            El caption imita lo ya publicado en Metricool. Sin auto-post.
           </p>
         </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+          <button
+            type="button"
+            disabled={filling}
+            onClick={() => void fillCaptions()}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-violet-500/20 px-4 text-xs font-semibold text-violet-100 disabled:opacity-60"
+          >
+            {filling && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+            {fillLabel ?? 'Poner captions'}
+          </button>
         <label className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-card/80 px-3.5 text-xs font-medium backdrop-blur sm:w-auto sm:justify-start">
           <input
             type="checkbox"
@@ -127,6 +183,7 @@ export function ReciboBoard({
           />
           Solo esta semana
         </label>
+        </div>
       </header>
 
       {aiClients.length === 0 ? (
@@ -169,10 +226,10 @@ export function ReciboBoard({
                   <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
                       const busy = isPending && pendingId === idea.id
-                      const posted = idea.manual_posted_status
                       const approval = idea.staff_client_approval
                       const hasEdit = ideaTieneEditadoEntregas(idea)
                       const brief = ideaBrief(idea)
+                      const caption = captionOf(idea, captionOverrides)
                       return (
                         <li
                           key={idea.id}
@@ -208,6 +265,8 @@ export function ReciboBoard({
                               </p>
                             </div>
 
+                            <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
+
                             <div className="mt-auto space-y-2 border-t border-border/60 pt-3">
                               {hasEdit ? <EnviarIdeaAlCliente idea={idea} /> : null}
                               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -233,27 +292,6 @@ export function ReciboBoard({
                                   shortLabel="No aprobar"
                                   icon={<X className="h-4 w-4" aria-hidden="true" />}
                                   large
-                                />
-                              </div>
-                              <p className="pt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                Publicación
-                              </p>
-                              <div className="flex gap-1.5">
-                                <ToggleBtn
-                                  active={posted === 'posted'}
-                                  disabled={busy}
-                                  onClick={() => markPosted(idea.id, 'posted')}
-                                  tone="ok"
-                                  label="Ya se posteó"
-                                  icon={<Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                                />
-                                <ToggleBtn
-                                  active={posted === 'not_posted'}
-                                  disabled={busy}
-                                  onClick={() => markPosted(idea.id, 'not_posted')}
-                                  tone="warn"
-                                  label="No se posteó"
-                                  icon={<X className="h-3.5 w-3.5" aria-hidden="true" />}
                                 />
                               </div>
                             </div>

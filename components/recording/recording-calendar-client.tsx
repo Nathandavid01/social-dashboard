@@ -79,10 +79,13 @@ import {
   format,
   startOfMonth,
   endOfMonth,
+  startOfWeek,
+  endOfWeek,
   eachDayOfInterval,
   isSameMonth,
   isToday,
   addMonths,
+  addWeeks,
   subMonths,
   parseISO,
   isSameDay,
@@ -151,6 +154,19 @@ export function sessionChipClientLabel(
   return clientDisplayName(clientLabelFromTitle(session.title) ?? 'Sin Cliente')
 }
 
+/** Dos tomas del mismo día se confunden si comparten cliente y hora. */
+export function sessionsShareSlot(
+  session: { client?: { name?: string | null } | null; client_id?: string | null; title?: string | null; start_time?: string | null },
+  daySessions: { client?: { name?: string | null } | null; client_id?: string | null; title?: string | null; start_time?: string | null }[],
+  clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days' | 'assigned_to'>>)[] = [],
+): boolean {
+  const label = sessionChipClientLabel(session, clients)
+  const time = session.start_time?.slice(0, 5) ?? ''
+  return daySessions.filter((other) =>
+    sessionChipClientLabel(other, clients) === label && (other.start_time?.slice(0, 5) ?? '') === time,
+  ).length > 1
+}
+
 /** Videógrafo y cliente se leen como la misma persona (p. ej. Delian / Dra. Delian). */
 export function namesLookLikeSamePerson(left?: string | null, right?: string | null): boolean {
   if (!left?.trim() || !right?.trim()) return false
@@ -158,6 +174,58 @@ export function namesLookLikeSamePerson(left?: string | null, right?: string | n
   const b = normalizePersonName(right)
   if (!a || !b) return false
   return a === b || a.includes(b) || b.includes(a)
+}
+
+function SessionChip({
+  session,
+  daySessions,
+  clients,
+  editorName,
+  onOpen,
+}: {
+  session: ExtendedSession
+  daySessions: ExtendedSession[]
+  clients: RecordingCalendarClientProps['clients']
+  editorName: string
+  onOpen: (session: ExtendedSession) => void
+}) {
+  const accent = userAccent(session.videographer_id)
+  const clientLabel = sessionChipClientLabel(session, clients)
+  const time = session.start_time?.slice(0, 5) || 'Sin Hora'
+  const videographerName = session.videographer?.full_name?.trim()
+  const showInitials = !!videographerName && !namesLookLikeSamePerson(videographerName, clientLabel)
+  const showPlace = sessionsShareSlot(session, daySessions, clients)
+  const place = session.location?.trim() || 'Sin lugar'
+  return (
+    <button
+      type="button"
+      className="flex w-full min-h-8 items-center gap-1 rounded-md px-1.5 py-1 text-left text-[10px] leading-tight transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+      title={`${clientLabel} · ${time} · Editor: ${editorName} · Videógrafo: ${videographerName || 'Sin Asignar'}${showPlace ? ` · ${place}` : ''}`}
+      style={{ backgroundColor: accent.soft, boxShadow: `inset 2px 0 0 0 ${accent.dot}` }}
+      onClick={(e) => { e.stopPropagation(); onOpen(session) }}
+    >
+      <span className="shrink-0 font-medium tabular-nums text-muted-foreground">{time}</span>
+      <span
+        data-slot="session-chip-client"
+        className="min-w-0 flex-1 truncate text-xs font-semibold tracking-tight text-foreground"
+      >
+        {clientLabel}
+      </span>
+      {showPlace && (
+        <span data-slot="session-chip-place" className="max-w-[38%] shrink truncate text-[10px] text-muted-foreground">
+          {place}
+        </span>
+      )}
+      {showInitials && (
+        <span title={videographerName} className="shrink-0 text-[10px] font-semibold uppercase tracking-tight text-muted-foreground">
+          {initials(videographerName)}
+        </span>
+      )}
+      {!session.videographer_id && (
+        <span aria-label="Sin videógrafo" title="Sin videógrafo" className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+      )}
+    </button>
+  )
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
@@ -540,7 +608,8 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const canConfirm = useHasAnyPermission(['recording.create', 'operations.overview'])
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
   const [compact, setCompact] = useState(false)
-  const [expandedDays, setExpandedDays] = useState<string[]>([])
+  const [span, setSpan] = useState<'week' | 'month'>('week')
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
   useEffect(() => {
     if (!window.matchMedia) return
     const media = window.matchMedia('(max-width: 767px)')
@@ -576,11 +645,14 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
   const startDow = (monthStart.getDay() + 6) % 7
   const paddedDays = [...Array(startDow).fill(null), ...days]
+  const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(currentMonth, { weekStartsOn: 1 })
+  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
-  // Filtered sessions
-  const filtered = useMemo(() => {
+  // Filtered sessions. The videographer filter is applied last so the color
+  // legend can still list everyone in the visible range.
+  const scoped = useMemo(() => {
     let result = sessions
-    if (filterVideographer !== 'all') result = result.filter((s) => s.videographer_id === filterVideographer)
     if (filterClient !== 'all') result = result.filter((s) => s.client_id === filterClient)
     if (filterConfirmation === 'confirmed') {
       result = result.filter((s) => effectiveConfirmationStatus(s) === 'confirmed')
@@ -599,7 +671,29 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
       )
     }
     return result
-  }, [sessions, filterVideographer, filterClient, filterConfirmation, search])
+  }, [sessions, filterClient, filterConfirmation, search])
+
+  const filtered = useMemo(() => {
+    if (filterVideographer === 'all') return scoped
+    return scoped.filter((s) => s.videographer_id === filterVideographer)
+  }, [scoped, filterVideographer])
+
+  const legendPeople = useMemo(() => {
+    const inRange = (date: string) => {
+      if (span === 'month') return date.startsWith(format(currentMonth, 'yyyy-MM'))
+      const day = parseISO(date)
+      return day >= weekStart && day <= weekEnd
+    }
+    const seen = new Map<string, string>()
+    for (const session of scoped) {
+      if (!inRange(session.session_date) || !session.videographer_id) continue
+      const name = session.videographer?.full_name?.trim()
+      if (name) seen.set(session.videographer_id, name)
+    }
+    return [...seen.entries()]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  }, [scoped, span, currentMonth, weekStart, weekEnd])
 
   function editorFor(session: ExtendedSession) {
     if (!session.client_id) return 'Vincula El Cliente'
@@ -608,7 +702,9 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
   }
 
   function sessionsForDay(day: Date) {
-    return filtered.filter((s) => isSameDay(parseISO(s.session_date), day))
+    return filtered
+      .filter((s) => isSameDay(parseISO(s.session_date), day))
+      .sort((a, b) => (a.start_time ?? '99').localeCompare(b.start_time ?? '99'))
   }
 
   // This month's sessions for list view
@@ -912,87 +1008,151 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
 
       {/* Month navigation stays separate from filters for quick scanning. */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-        <div><h2 className="text-xl font-semibold capitalize">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2><p className="mt-1 text-xs text-muted-foreground">{compact ? 'Tu agenda, día por día' : 'Color por videógrafo · Abre una sesión para ver su call sheet'}</p></div>
-        <div className="flex items-center gap-1 rounded-xl border border-border p-1">
-          <button aria-label="Mes Anterior" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronLeft className="h-4 w-4" /></button>
-          <button aria-label="Volver A Hoy" onClick={() => setCurrentMonth(new Date())} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-muted">Hoy</button>
-          <button aria-label="Mes Siguiente" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronRight className="h-4 w-4" /></button>
+        <div>
+          <h2 className="text-xl font-semibold capitalize">
+            {span === 'week'
+              ? `${format(weekStart, 'd MMM', { locale: es })} – ${format(weekEnd, 'd MMM yyyy', { locale: es })}`
+              : format(currentMonth, 'MMMM yyyy', { locale: es })}
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {compact
+              ? 'Tu agenda, día por día'
+              : span === 'week'
+                ? 'Esta semana, una línea por toma. El color es quien graba.'
+                : 'El mes completo, una línea por toma. El color es quien graba.'}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {!compact && (
+            <div className="flex items-center gap-1 rounded-xl border border-border p-1">
+              <button type="button" aria-pressed={span === 'week'} onClick={() => setSpan('week')} className={cn('h-10 rounded-lg px-3 text-sm font-medium', span === 'week' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted')}>Semana</button>
+              <button type="button" aria-pressed={span === 'month'} onClick={() => setSpan('month')} className={cn('h-10 rounded-lg px-3 text-sm font-medium', span === 'month' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted')}>Mes</button>
+            </div>
+          )}
+          <div className="flex items-center gap-1 rounded-xl border border-border p-1">
+            <button aria-label={span === 'week' ? 'Semana anterior' : 'Mes Anterior'} onClick={() => setCurrentMonth(span === 'week' ? addWeeks(currentMonth, -1) : subMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronLeft className="h-4 w-4" /></button>
+            <button aria-label="Volver A Hoy" onClick={() => setCurrentMonth(new Date())} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-muted">Hoy</button>
+            <button aria-label={span === 'week' ? 'Semana siguiente' : 'Mes Siguiente'} onClick={() => setCurrentMonth(span === 'week' ? addWeeks(currentMonth, 1) : addMonths(currentMonth, 1))} className="grid h-10 w-10 place-items-center rounded-lg hover:bg-muted"><ChevronRight className="h-4 w-4" /></button>
+          </div>
         </div>
       </div>
 
+      {view === 'calendar' && !compact && legendPeople.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Videógrafos">
+          {legendPeople.map((person) => {
+            const accent = userAccent(person.id)
+            const selected = filterVideographer === person.id
+            return (
+              <button
+                key={person.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setFilterVideographer(selected ? 'all' : person.id)}
+                className={cn(
+                  'inline-flex min-h-9 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium',
+                  selected ? 'border-foreground/30 bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-muted/60',
+                )}
+              >
+                <span aria-hidden className="h-2 w-2 rounded-full" style={{ backgroundColor: accent.dot }} />
+                {person.name}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {view === 'map' ? <RecordingMap sessions={monthSessions.map(s=>({...s,title:sessionChipClientLabel(s,clients)}))} onOpen={id=>setIdeasSession(sessions.find(s=>s.id===id))}/> : view === 'calendar' && !compact ? (
         <div className="space-y-3">
-          {/* Day-of-week headers */}
           <div className="grid grid-cols-7 text-center">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => (
               <div key={d} className="text-[10px] font-semibold text-muted-foreground pb-2">{d}</div>
             ))}
           </div>
 
-          {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-2">
-            {paddedDays.map((day, i) => {
+            {(span === 'week' ? weekDays : paddedDays).map((day, i) => {
               if (!day) return <div key={`pad-${i}`} />
               const daySessions = sessionsForDay(day)
               const dateStr = format(day, 'yyyy-MM-dd')
               const isCurrentMonth = isSameMonth(day, currentMonth)
+              const dayLabel = `Día ${format(day, 'd')} de ${format(day, 'MMMM', { locale: es })}`
 
               return (
                 <div
                   key={dateStr}
+                  data-testid={`day-${dateStr}`}
                   className={cn(
-                    'group min-w-0 min-h-[120px] cursor-pointer rounded-xl border p-2 transition-colors xl:min-h-[140px]',
-                    isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border/70 bg-background/40 hover:border-sky-500/40',
-                    !isCurrentMonth && 'opacity-30',
+                    'group min-w-0 rounded-xl border p-2 transition-colors',
+                    span === 'week' ? 'min-h-[180px]' : 'min-h-[96px]',
+                    isToday(day) ? 'border-primary/40 bg-primary/[0.06]' : 'border-border/70 bg-background/40',
+                    selectedDay === dateStr && 'ring-1 ring-sky-500/50',
+                    span === 'month' && !isCurrentMonth && 'opacity-30',
                   )}
-                  onClick={() => { setAddDate(dateStr); setShowAdd(true) }}
                 >
-                  {/* Date number */}
-                  <div className={cn(
-                    'mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
-                    isToday(day) ? 'bg-primary text-black' : 'text-muted-foreground',
-                  )}>
-                    {format(day, 'd')}
-                  </div>
-
-                  {/* Sessions — colored by videographer */}
-                  <div className="space-y-1">
-                    {(expandedDays.includes(dateStr) ? daySessions : daySessions.slice(0, 3)).map((session) => {
-                      const a = userAccent(session.videographer_id)
-                      const clientLabel = sessionChipClientLabel(session, clients)
-                      return (
-                        <button
-                          type="button"
-                          key={session.id}
-                          className="w-full text-left min-h-[52px] cursor-pointer rounded-lg px-2 py-2 text-[10px] leading-tight transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
-                          title={`${clientLabel} · ${session.start_time?.slice(0,5) || 'Hora Por Confirmar'} · Editor: ${editorFor(session)} · Videógrafo: ${session.videographer?.full_name || 'Sin Asignar'}`}
-                          style={{ backgroundColor: a.soft, boxShadow: `inset 2px 0 0 0 ${a.dot}` }}
-                          onClick={(e) => { e.stopPropagation(); setIdeasSession(session) }}
-                        >
-                          <span className="mb-1 flex items-center justify-between gap-1 text-[10px] font-medium tabular-nums text-muted-foreground"><span>{session.start_time?.slice(0,5) || 'Sin Hora'}</span>{(!session.videographer_id || !session.client_id || !clients.find(c=>c.id===session.client_id)?.assigned_to) && <span aria-label="Asignación Pendiente" title="Asignación Pendiente · Abre La Sesión" className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />}</span>
-                          <p
-                            data-slot="session-chip-client"
-                            className="min-h-[14px] line-clamp-2 break-words text-xs font-semibold tracking-tight leading-snug text-foreground"
-                          >
-                            {clientLabel}
-                          </p>
-                        </button>
-                      )
-                    })}
-                    {daySessions.length > 3 && (
-                      <button type="button" className="min-h-9 w-full rounded-md text-xs font-medium text-sky-500 hover:bg-sky-500/10" onClick={e=>{e.stopPropagation();setExpandedDays(days=>days.includes(dateStr)?days.filter(d=>d!==dateStr):[...days,dateStr])}}>{expandedDays.includes(dateStr)?'Ver Menos':`Ver ${daySessions.length - 3} Más`}</button>
+                  <button
+                    type="button"
+                    aria-label={dayLabel}
+                    onClick={() => setSelectedDay(dateStr)}
+                    className={cn(
+                      'mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                      isToday(day) ? 'bg-primary text-black' : 'text-muted-foreground hover:bg-muted',
                     )}
-                  </div>
+                  >
+                    {format(day, 'd')}
+                  </button>
 
-                  {daySessions.length === 0 && (
-                    <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-muted-foreground mt-2">
-                      <Plus className="h-3 w-3 mr-0.5" /> Agregar
-                    </div>
-                  )}
+                  <div className="space-y-1">
+                    {daySessions.map((session) => (
+                      <SessionChip
+                        key={session.id}
+                        session={session}
+                        daySessions={daySessions}
+                        clients={clients}
+                        editorName={editorFor(session)}
+                        onOpen={setIdeasSession}
+                      />
+                    ))}
+                  </div>
                 </div>
               )
             })}
           </div>
+
+          {selectedDay && (
+            <section
+              aria-label={`Sesiones del ${format(parseISO(selectedDay), "d 'de' MMMM", { locale: es })}`}
+              className="space-y-2 rounded-xl border border-border p-3"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold capitalize">
+                  {format(parseISO(selectedDay), "EEEE d 'de' MMMM", { locale: es })}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => { setAddDate(selectedDay); setEditing(undefined); setShowAdd(true) }}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-black"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Agregar en este día
+                </button>
+              </div>
+              {sessionsForDay(parseISO(selectedDay)).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sin sesiones este día</p>
+              ) : (
+                <div className="space-y-1">
+                  {sessionsForDay(parseISO(selectedDay)).map((session) => (
+                    <SessionChip
+                      key={session.id}
+                      session={session}
+                      daySessions={sessionsForDay(parseISO(selectedDay))}
+                      clients={clients}
+                      editorName={editorFor(session)}
+                      onOpen={setIdeasSession}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       ) : (
         /* List view — grouped by date */

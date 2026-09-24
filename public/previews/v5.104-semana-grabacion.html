@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>v5.104 — Semana de grabación</title>
+<style>
+  :root { --gold-1: #FCE9A6; --gold-2: #E3B22B; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh; background: #0a0a0b; color: #fafafa; padding: 28px 16px 48px;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 700; }
+  h1 span {
+    background: linear-gradient(90deg, var(--gold-1), var(--gold-2));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .lead { margin: 6px 0 18px; color: #a1a1aa; font-size: 13px; line-height: 1.45; }
+  .card { border: 1px solid #2a2a2e; background: #141416; border-radius: 16px; padding: 16px; }
+  .top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+  .top h2 { font-size: 18px; font-weight: 650; }
+  .top p { margin-top: 4px; color: #a1a1aa; font-size: 12px; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .seg, .arrows { display: flex; border: 1px solid #2a2a2e; border-radius: 12px; padding: 4px; gap: 4px; }
+  button {
+    border: 0; background: transparent; color: #a1a1aa; height: 36px; padding: 0 12px;
+    border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600;
+  }
+  button.on { background: #27272a; color: #fafafa; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 14px; }
+  .person {
+    display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+    border: 1px solid #2a2a2e; border-radius: 999px; color: #d4d4d8; font-size: 12px; font-weight: 600;
+  }
+  .person.on { border-color: #3f3f46; background: #27272a; color: #fafafa; }
+  .dot { width: 8px; height: 8px; border-radius: 99px; }
+  .dow, .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  .day, .chip, .chip b { min-width: 0; }
+  .card { overflow: hidden; }
+  .dow { margin-bottom: 8px; text-align: center; color: #a1a1aa; font-size: 10px; font-weight: 700; }
+  .day { min-height: 168px; border: 1px solid #2a2a2e; border-radius: 12px; padding: 8px; background: #101012; }
+  .day.today { border-color: rgba(227,178,43,.45); background: rgba(227,178,43,.06); }
+  .num {
+    width: 24px; height: 24px; border-radius: 99px; display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; color: #a1a1aa; margin-bottom: 6px;
+  }
+  .today .num { background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); color: #1a1404; }
+  .chip {
+    display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px;
+    padding: 2px 6px; border-radius: 6px; font-size: 11px;
+  }
+  .chip b { font-size: 12px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip span { color: #a1a1aa; font-variant-numeric: tabular-nums; flex: none; }
+  .chip i { color: #a1a1aa; font-style: normal; font-size: 10px; font-weight: 700; flex: none; }
+  .amber { width: 6px; height: 6px; border-radius: 99px; background: #fbbf24; flex: none; }
+  .day-list { margin-top: 12px; border: 1px solid #2a2a2e; border-radius: 12px; padding: 12px; }
+  .day-list header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .day-list h3 { font-size: 14px; text-transform: capitalize; }
+  .add { background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); color: #1a1404; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>v5.104 · <span>Semana de grabación</span></h1>
+    <p class="lead">Al entrar se ve la semana. Cada toma es una línea. El color es quien graba. El punto ámbar solo aparece si falta el videógrafo.</p>
+    <article class="card">
+      <div class="top">
+        <div>
+          <h2>21 sep – 27 sep 2026</h2>
+          <p>Esta semana, una línea por toma. El color es quien graba.</p>
+        </div>
+        <div class="nav">
+          <div class="seg">
+            <button class="on">Semana</button>
+            <button>Mes</button>
+          </div>
+          <div class="arrows">
+            <button>‹</button>
+            <button>Hoy</button>
+            <button>›</button>
+          </div>
+        </div>
+      </div>
+      <div class="legend">
+        <button class="person on"><span class="dot" style="background:#8B5CF6"></span>Alondra Rodríguez</button>
+        <button class="person"><span class="dot" style="background:#06B6D4"></span>Johan Rafael</button>
+        <button class="person"><span class="dot" style="background:#10B981"></span>María R.</button>
+      </div>
+      <div class="dow"><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div></div>
+      <div class="grid">
+        <div class="day today">
+          <div class="num">21</div>
+          <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:00</span><b>Dr. Soler Ultrafit</b><i>AR</i></div>
+          <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:30</span><b>Dra. Delian Loyola</b></div>
+        </div>
+        <div class="day">
+          <div class="num">22</div>
+          <div class="chip" style="background:rgba(6,182,212,.14);box-shadow:inset 2px 0 0 #06B6D4"><span>Sin hora</span><b>La Guira</b><i>JR</i></div>
+          <div class="chip" style="background:rgba(16,185,129,.14);box-shadow:inset 2px 0 0 #10B981"><span>10:00</span><b>Farmacia Buena Vida</b><i>MR</i></div>
+          <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:00</span><b>Restauro Leather</b><i>AR</i></div>
+        </div>
+        <div class="day">
+          <div class="num">23</div>
+          <div class="chip" style="background:rgba(6,182,212,.14);box-shadow:inset 2px 0 0 #06B6D4"><span>09:00</span><b>Neumáticos PR</b><i>JR</i></div>
+          <div class="chip" style="background:rgba(16,185,129,.14);box-shadow:inset 2px 0 0 #10B981"><span>14:30</span><b>Farmacia Tierras Nuevas</b><i>MR</i></div>
+          <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:00</span><b>Apiario Coffee</b><i>AR</i></div>
+        </div>
+        <div class="day"><div class="num">24</div>
+          <div class="chip" style="background:rgba(100,116,139,.14);box-shadow:inset 2px 0 0 #64748B"><span>15:00</span><b>Yan Seguros</b><span class="amber" title="Sin videógrafo"></span></div>
+        </div>
+        <div class="day"><div class="num">25</div>
+          <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>Sin hora</span><b>Apiario Coffee</b><i>AR</i></div>
+          <div class="chip" style="background:rgba(6,182,212,.14);box-shadow:inset 2px 0 0 #06B6D4"><span>13:30</span><b>Mojito Mojito</b><i>JR</i></div>
+        </div>
+        <div class="day"><div class="num">26</div></div>
+        <div class="day"><div class="num">27</div>
+          <div class="chip" style="background:rgba(16,185,129,.14);box-shadow:inset 2px 0 0 #10B981"><span>10:30</span><b>5K Sociedad</b><i>Plaza</i><i>MR</i></div>
+          <div class="chip" style="background:rgba(16,185,129,.14);box-shadow:inset 2px 0 0 #10B981"><span>10:30</span><b>5K Sociedad</b><i>Paseo</i><i>MR</i></div>
+        </div>
+      </div>
+      <section class="day-list">
+        <header>
+          <h3>lunes 21 de septiembre</h3>
+          <button class="add">Agregar en este día</button>
+        </header>
+        <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:00</span><b>Dr. Soler Ultrafit</b><i>AR</i></div>
+        <div class="chip" style="background:rgba(139,92,246,.14);box-shadow:inset 2px 0 0 #8B5CF6"><span>15:30</span><b>Dra. Delian Loyola</b></div>
+      </section>
+    </article>
+  </div>
+</body>
+</html>

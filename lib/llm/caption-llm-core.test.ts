@@ -92,6 +92,16 @@ describe('buildGrokRequest', () => {
       messages: [{ role: 'user', content: 'write a caption' }],
     })
   })
+
+  it('drops a broken emoji so the JSON stays valid', () => {
+    const req = buildGrokRequest({
+      prompt: 'hola \uD83D mundo',
+      apiKey: 'xai-secret',
+      model: 'grok-4-1-fast-non-reasoning',
+      maxTokens: 32,
+    })
+    expect(JSON.parse(req.body).messages[0].content).toBe('hola  mundo')
+  })
 })
 
 describe('parseGrokResponse', () => {
