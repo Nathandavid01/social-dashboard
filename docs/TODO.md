@@ -2,6 +2,9 @@
 
 - [ ] **Publicar biblioteca completa del editor (v4.96)** — Cambio preparado en `codex/nanas-editor-library`. Verificado localmente como Richard Jimenez: 63 videos de Nanas, 63 controles de descarga y 2 trabajos activos; móvil 390 px sin desbordamiento. Tras integrar main: 3311 pruebas pasan, 3 omitidas; TypeScript y merge-gate pasan. Pendiente PR/revisión/CI y verificar la publicación. El B-roll incompleto de la auditoría sigue necesitando el archivo original.
 
+## Para Nathan
+- [ ] **Revisar y publicar el corte 01 de Farmacia Buena Vida** («¿Cuál es el medicamento que no puedes nombrar bien?», idea `8a45bb73`, pedido por Eric 2026-09-23). Ya está en **Recibo** (desde v5.109 Recibo lista todo corte editado pendiente, de cualquier cliente) y en Entregas R2 (`entregas/8a45bb73-…/edited/1790218004216-01-medicamento-nombrar.mp4`, fila `6ce28ae1`). Editado por terminal (`~/nate-video-edits`) con el estilo de Alexa: los nombres mal dichos se llenan de rojo con chicharra y el bien dicho de verde con sonido de acierto; música «Short Pizzicato Song» (CC0, **sin** atribución). Pendiente: caption, enviar al cliente / aprobación y programarlo en Metricool. La idea sigue marcada «En edición — Eric Perez»: soltarla al publicar. Lo que suena (nombres, música, chicharra) no se verificó de oído en el taller.
+
 Tracked work not yet done. Each is implemented **test-first (TDD)** when unblocked
 (see CLAUDE.md). Check off + reference the commit when completed.
 
