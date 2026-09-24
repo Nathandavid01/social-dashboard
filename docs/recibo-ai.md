@@ -2,7 +2,9 @@
 
 ## Abrir
 - Staff: `/recibo` (menú Trabajo → Recibo). Requiere `entregas.read`.
-- Solo lista clientes con `clients.edit_mode = 'ai'`.
+- Lista los cortes pendientes de clientes con `clients.edit_mode = 'ai'` **y** (v5.113) cualquier corte pendiente que haya
+  subido Eric (`content_idea_videos.uploaded_by` en `ERIC_IDS`, `lib/recibo/board-ideas.ts`), aunque el cliente tenga
+  editor humano: solo ese corte, el cliente no cambia de modo.
 - Aprobación del cliente: enlace `/aprobacion/{token}` (generado desde Recibo o Entregas → Enviar al cliente).
 
 ## Migraciones
