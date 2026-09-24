@@ -56,8 +56,24 @@ export function belongsOnRecibo(idea: ReciboQueueIdea): boolean {
   return true
 }
 
+/**
+ * These clients stay off Recibo. Eric 2026-09-24: only put one of their videos
+ * back when he names that video in the CLI. Add that idea id to RECIBO_MANUAL_IDEA_IDS.
+ */
+export const RECIBO_HELD_CLIENT_IDS: ReadonlySet<string> = new Set([
+  '165b8416-5316-43e1-b6d6-f23caaa57b0c', // Anibal Fuentes PNP
+  'afd0b9e9-efaa-45ac-96c0-d5ee6664c8a8', // Arasibo Steakhouse
+  '8a8f2355-f7e3-403d-96bd-2f1ea1cbd6a6', // VSS Properties
+  '7f4a8757-7811-4fb4-afc0-87dc0c50c56d', // Primer Round Oficial
+])
+
+export const RECIBO_MANUAL_IDEA_IDS: ReadonlySet<string> = new Set()
+
 /** The AI clients' waiting cuts, plus any waiting cut Eric uploaded (whatever the client's editor). */
 export function reciboBoardIdeas<T extends ReciboQueueIdea>(ideas: T[], aiClientIds: Iterable<string>): T[] {
   const ids = new Set(aiClientIds)
-  return ideas.filter((idea) => (ids.has(idea.client_id) || hasEricCut(idea)) && belongsOnRecibo(idea))
+  return ideas.filter((idea) => {
+    if (RECIBO_HELD_CLIENT_IDS.has(idea.client_id) && !RECIBO_MANUAL_IDEA_IDS.has(idea.id)) return false
+    return (ids.has(idea.client_id) || hasEricCut(idea)) && belongsOnRecibo(idea)
+  })
 }
