@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.109 — 2026-09-23
+
+**Recibo muestra lo que falta por aprobar y lo que falta por programar.**
+- Entran los videos editados que el cliente todavía no aprueba.
+- Entran los aprobados que faltan por postear o por programar en Metricool.
+- Sale lo que ya está agendado en Metricool o publicado. Una idea sin video no entra.
+
 ## v5.108 — 2026-09-23
 
 **Recibo ya no muestra si el video se posteó.**

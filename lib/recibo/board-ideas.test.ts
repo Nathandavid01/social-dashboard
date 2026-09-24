@@ -5,18 +5,26 @@ const edited = {
   id: 'cut',
   client_id: 'ai',
   status: 'producida',
-  videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded' }],
-}
-const bare = { id: 'idea', client_id: 'ai', status: 'idea', videos: [] }
-const humanCut = {
-  id: 'human',
-  client_id: 'human',
-  status: 'producida',
+  published_at: null,
+  manual_posted_status: null,
+  metricool_post_id: null,
+  posted_at: null,
+  staff_client_approval: null,
   videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded' }],
 }
 
 describe('reciboBoardIdeas', () => {
-  it('muestra el corte editado del cliente AI y deja fuera la idea sin archivo', () => {
-    expect(reciboBoardIdeas([edited, bare, humanCut], ['ai']).map((idea) => idea.id)).toEqual(['cut'])
+  it('deja el video por aprobar y el aprobado que falta por programar', () => {
+    const listo = { ...edited, id: 'listo', staff_client_approval: 'approved' }
+    const human = { ...edited, id: 'human', client_id: 'human', staff_client_approval: 'approved' }
+    expect(reciboBoardIdeas([edited, listo, human]).map((idea) => idea.id)).toEqual(['cut', 'listo', 'human'])
+  })
+
+  it('saca la idea sin archivo, lo ya programado en Metricool y lo publicado', () => {
+    const bare = { ...edited, id: 'bare', videos: [] }
+    const agendado = { ...edited, id: 'agendado', staff_client_approval: 'approved', metricool_post_id: 9 }
+    const publicado = { ...edited, id: 'publicado', status: 'publicada' }
+    const descartada = { ...edited, id: 'fuera', status: 'descartada' }
+    expect(reciboBoardIdeas([bare, agendado, publicado, descartada])).toEqual([])
   })
 })
