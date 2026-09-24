@@ -68,6 +68,13 @@ export interface GrokRequest {
   body: string
 }
 
+/** A broken emoji is a half surrogate. Grok rejects the JSON escape it produces. */
+export function stripLoneSurrogates(value: string): string {
+  return value
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, '')
+    .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+}
+
 /** Build the OpenAI-compatible Grok chat-completions request. */
 export function buildGrokRequest(input: {
   prompt: string
@@ -84,7 +91,7 @@ export function buildGrokRequest(input: {
     body: JSON.stringify({
       model: input.model,
       max_tokens: input.maxTokens,
-      messages: [{ role: 'user', content: input.prompt }],
+      messages: [{ role: 'user', content: stripLoneSurrogates(input.prompt) }],
     }),
   }
 }

@@ -4,6 +4,39 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.108 — 2026-09-23
+
+**Recibo ya no muestra si el video se posteó.**
+- Salen el caption, enviar al cliente y la aprobación. Los botones «Ya se posteó» y «No se posteó» no están.
+
+## v5.107 — 2026-09-23
+
+**Recibo tiene caption en cada video, con la voz de lo ya publicado en Metricool.**
+- Cada corte muestra un caption. Si no había, **Poner captions** lo escribe con el estilo de los posts de ese cliente en Metricool.
+- Un caption para todas las redes. Se puede corregir y guardar. No se pisa uno que ya existía.
+- No agenda ni publica en Metricool.
+
+## v5.106 — 2026-09-22
+
+**El calendario y los pendientes de grabación ya se ven juntos en Mi Día.**
+- Consulta la semana de grabación desde el resumen, sin salir a otra página.
+- Cambia a vista mensual, filtra por videógrafo y revisa el detalle de cada sesión.
+- Mantén a la vista las listas de grabaciones sin confirmar, sin videógrafo y con ideas pendientes.
+
+![Calendario semanal y pendientes de grabación](/changelog/v5.105-calendario-mi-dia.svg)
+
+## v5.105 — 2026-09-21
+
+**El calendario de grabación abre en la semana, con una línea por toma.**
+- Al entrar se ve **esta semana**, de lunes a domingo. **Mes** sigue ahí para ver los huecos del mes.
+- Cada toma es una línea: hora, cliente y la inicial de quien graba. Ya no se esconden detrás de «Ver más».
+- Arriba, el nombre de cada videógrafo con su color. Al pulsarlo se queda solo esa persona.
+- El punto ámbar sale solo cuando **falta el videógrafo**.
+- Si el mismo cliente está dos veces a la misma hora, la línea muestra el lugar.
+- Pulsar el número del día abre las sesiones de ese día. Pulsar el cuadro ya no crea una toma sin querer. **Agregar en este día** abre el formulario con esa fecha.
+
+![Semana de grabación](/changelog/v5.104-semana-grabacion.png)
+
 ## v5.104 — 2026-09-23
 
 **Recibo solo muestra el corte que ya tiene video.**
