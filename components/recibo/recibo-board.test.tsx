@@ -133,6 +133,59 @@ describe('ReciboBoard', () => {
     expect(await screen.findByDisplayValue('Caption nuevo desde Metricool')).toBeInTheDocument()
   })
 
+  it('cuenta los cortes de Nathan y de Eric, y marca cada tarjeta', async () => {
+    const nathan = {
+      ...editedIdea,
+      id: 'n1',
+      title: 'De Nathan',
+      videos: [{ ...editedIdea.videos[0], id: 'vn', uploader: { full_name: 'Nathan Torres' } }],
+    }
+    const eric = {
+      ...editedIdea,
+      id: 'e1',
+      title: 'De Eric',
+      videos: [{ ...editedIdea.videos[0], id: 've', uploader: { full_name: 'Eric Perez' } }],
+    }
+    const yabu = {
+      ...editedIdea,
+      id: 'y1',
+      client_id: 'c2',
+      title: 'De Yabuuchi',
+      client: { id: 'c2', name: 'YabushiSushi', industry: null, logo_url: null },
+      videos: [{ ...editedIdea.videos[0], id: 'vy', uploader: { full_name: 'Eric Perez' } }],
+    }
+    render(
+      <ReciboBoard
+        showUploadCounts
+        aiClients={[
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+          { id: 'c2', name: 'YabushiSushi', logo_url: null },
+        ]}
+        ideas={[nathan, eric, editedIdea, yabu]}
+      />,
+    )
+    await screen.findAllByTestId('recibo-video-player')
+    expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Total 4 · Nathan 1 · Eric 2 · Sin autor 1')
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('Total 3 · Nathan 1 · Eric 1 · Sin autor 1')
+    expect(screen.getByTestId('recibo-client-counts-c2')).toHaveTextContent('Total 1 · Nathan 0 · Eric 1 · Sin autor 0')
+    expect(screen.getByTestId('recibo-uploader-n1')).toHaveTextContent('Subió Nathan')
+    expect(screen.getByTestId('recibo-uploader-e1')).toHaveTextContent('Subió Eric')
+    expect(screen.getByTestId('recibo-uploader-i1')).toHaveTextContent('Sin autor')
+  })
+
+  it('esconde el conteo si quien mira no está en la lista', async () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+      />,
+    )
+    await screen.findByTestId('recibo-video-player')
+    expect(screen.queryByTestId('recibo-upload-counts')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('1 video')
+    expect(screen.queryByTestId('recibo-uploader-i1')).not.toBeInTheDocument()
+  })
+
   it('explica cómo activar AI si no hay clientes', () => {
     render(<ReciboBoard aiClients={[]} ideas={[]} />)
     expect(screen.getByText(/No hay videos por aprobar ni por programar/i)).toBeInTheDocument()

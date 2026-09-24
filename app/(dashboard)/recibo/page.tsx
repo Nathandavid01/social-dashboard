@@ -2,7 +2,9 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
+import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
+import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -30,10 +32,42 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const boardIdeas = reciboBoardIdeas(ideas)
+  const boardIdeas = await withUploaderNames(supabase, reciboBoardIdeas(ideas))
   const shownClientIds = new Set(boardIdeas.map((idea) => idea.client_id))
   const boardClients = aiClients.filter((client) => shownClientIds.has(client.id))
+  const { data: auth } = await supabase.auth.getUser()
+  const viewer = auth.user
+  let viewerName: string | null = null
+  if (viewer) {
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', viewer.id).maybeSingle()
+    viewerName = profile?.full_name ?? null
+  }
 
   // Padding comes from dashboard layout — keep this wrapper lean for mobile width.
-  return <ReciboBoard ideas={boardIdeas} aiClients={boardClients} />
+  return (
+    <ReciboBoard
+      ideas={boardIdeas}
+      aiClients={boardClients}
+      showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
+    />
+  )
+}
+
+async function withUploaderNames(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ideas: IdeaWithPipeline[],
+): Promise<IdeaWithPipeline[]> {
+  const ids = [...new Set(ideas.flatMap((idea) => (idea.videos ?? []).map((video) => video.uploaded_by).filter((id): id is string => Boolean(id))))]
+  if (ids.length === 0) return ideas
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', ids)
+  const names = new Map((data ?? []).map((profile) => [profile.id, profile.full_name]))
+  return ideas.map((idea) => ({
+    ...idea,
+    videos: (idea.videos ?? []).map((video) => ({
+      ...video,
+      uploader: video.uploaded_by
+        ? { id: video.uploaded_by, full_name: names.get(video.uploaded_by) ?? null, email: '' }
+        : video.uploader ?? null,
+    })),
+  }))
 }

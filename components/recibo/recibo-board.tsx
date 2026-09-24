@@ -11,6 +11,7 @@ import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { setStaffClientApproval } from '@/lib/actions/recibo'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
+import { currentEntregasEdit, formatUploadCounts, reciboUploadCounts, uploaderLabel, uploaderSide } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { cn } from '@/lib/utils'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
@@ -51,9 +52,11 @@ function ideaBrief(idea: IdeaWithPipeline): string | null {
 export function ReciboBoard({
   ideas,
   aiClients,
+  showUploadCounts = false,
 }: {
   ideas: IdeaWithPipeline[]
   aiClients: { id: string; name: string; logo_url?: string | null }[]
+  showUploadCounts?: boolean
 }) {
   const { toast } = useToast()
   const [pendingId, setPendingId] = useState<string | null>(null)
@@ -143,6 +146,7 @@ export function ReciboBoard({
     () => ideas.filter((i) => i.status !== 'descartada' && enEstaSemana(i, 0) && ideaTieneEditadoEntregas(i)),
     [ideas],
   )
+  const uploadCounts = useMemo(() => reciboUploadCounts(ideas), [ideas])
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5 sm:space-y-6" data-testid="recibo-board">
@@ -156,6 +160,11 @@ export function ReciboBoard({
             Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.
             El caption imita lo ya publicado. Sin auto-post.
           </p>
+          {showUploadCounts ? (
+            <p className="mt-2 text-sm text-foreground" data-testid="recibo-upload-counts">
+              {formatUploadCounts(uploadCounts)}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -191,10 +200,12 @@ export function ReciboBoard({
                         AI
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {clientIdeas.length === 0
-                        ? 'Sin videos en el filtro actual'
-                        : `${clientIdeas.length} video${clientIdeas.length === 1 ? '' : 's'}`}
+                    <p className="text-xs text-muted-foreground" data-testid={`recibo-client-counts-${client.id}`}>
+                      {showUploadCounts
+                        ? formatUploadCounts(reciboUploadCounts(clientIdeas))
+                        : clientIdeas.length === 0
+                          ? 'Sin videos en el filtro actual'
+                          : `${clientIdeas.length} video${clientIdeas.length === 1 ? '' : 's'}`}
                     </p>
                   </div>
                 </div>
@@ -211,6 +222,7 @@ export function ReciboBoard({
                       const hasEdit = ideaTieneEditadoEntregas(idea)
                       const brief = ideaBrief(idea)
                       const caption = captionOf(idea, captionOverrides)
+                      const uploaderName = currentEntregasEdit(idea.videos)?.uploader?.full_name
                       return (
                         <li
                           key={idea.id}
@@ -243,6 +255,12 @@ export function ReciboBoard({
                               <p className="text-[11px] text-muted-foreground/80">
                                 {idea.publish_date ? `Publicación ${idea.publish_date}` : 'Sin fecha de publicación'}
                                 {hasEdit ? ' · Editado' : ' · Sin archivo'}
+                                {hasEdit && showUploadCounts ? (
+                                  <>
+                                    {' · '}
+                                    <span data-testid={`recibo-uploader-${idea.id}`}>{uploaderLabel(uploaderSide(uploaderName))}</span>
+                                  </>
+                                ) : null}
                               </p>
                             </div>
 
