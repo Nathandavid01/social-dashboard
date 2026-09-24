@@ -59,6 +59,23 @@ describe('getReciboIdeaPreviewUrl', () => {
     vi.clearAllMocks()
   })
 
+  it('rejects a newer file uploaded after the exact-cut card was rendered', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v8' })
+    getEntregasPreviewUrl.mockResolvedValue({ url: 'https://signed.example/v8.mp4' })
+    const { getReciboIdeaPreviewUrl } = await import('./recibo')
+    const res = await getReciboIdeaPreviewUrl('outfit', 'v7')
+    expect(res.error).toMatch(/video cambió/i)
+    expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+  })
+
+  it('signs the pinned file when it still matches the current idea delivery', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v7' })
+    getEntregasPreviewUrl.mockResolvedValue({ url: 'https://signed.example/v7.mp4' })
+    const { getReciboIdeaPreviewUrl } = await import('./recibo')
+    expect((await getReciboIdeaPreviewUrl('outfit', 'v7')).url).toContain('v7.mp4')
+    expect(getEntregasPreviewUrl).toHaveBeenCalledWith('v7')
+  })
+
   it('resolves edited id then returns Entregas preview URL', async () => {
     getEntregaVideoEditado.mockResolvedValue({ id: 'vid-edit' })
     getEntregasPreviewUrl.mockResolvedValue({ url: 'https://signed.example/v.mp4' })

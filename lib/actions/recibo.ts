@@ -72,12 +72,16 @@ export async function setStaffClientApproval(input: {
  */
 export async function getReciboIdeaPreviewUrl(
   ideaId: string,
+  expectedVideoId?: string,
 ): Promise<{ url?: string; error?: string }> {
   if (!ideaId) return { error: 'Falta el video' }
 
   const edited = await getEntregaVideoEditado(ideaId)
   if (edited.error) return { error: edited.error }
   if (!edited.id) return { error: 'Sin video editado' }
+  if (expectedVideoId && edited.id !== expectedVideoId) {
+    return { error: 'El video cambió. Vuelve a cargar Recibo.' }
+  }
 
   return getEntregasPreviewUrl(edited.id)
 }

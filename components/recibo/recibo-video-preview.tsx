@@ -11,10 +11,12 @@ import { cn } from '@/lib/utils'
 export function ReciboVideoPreview({
   ideaId,
   hasEdited,
+  expectedVideoId,
   className,
 }: {
   ideaId: string
   hasEdited: boolean
+  expectedVideoId?: string
   className?: string
 }) {
   const [url, setUrl] = useState<string | null>(null)
@@ -32,7 +34,10 @@ export function ReciboVideoPreview({
     setLoading(true)
     setUrl(null)
     setError(null)
-    getReciboIdeaPreviewUrl(ideaId).then((res) => {
+    const request = expectedVideoId
+      ? getReciboIdeaPreviewUrl(ideaId, expectedVideoId)
+      : getReciboIdeaPreviewUrl(ideaId)
+    request.then((res) => {
       if (!alive) return
       setLoading(false)
       if (res.url) setUrl(res.url)
@@ -41,7 +46,7 @@ export function ReciboVideoPreview({
     return () => {
       alive = false
     }
-  }, [ideaId, hasEdited])
+  }, [ideaId, hasEdited, expectedVideoId])
 
   const frame = cn(
     'aspect-[9/16] w-full overflow-hidden rounded-[1.25rem] bg-black',

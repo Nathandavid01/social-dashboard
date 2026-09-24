@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.114 — 2026-09-24
+
+- Recibo verifica que el reproductor abra el mismo corte que muestra la tarjeta; si fue reemplazado, pide recargar.
+- Las entregas de clientes con edición humana se identifican como «Entrega puntual» y conservan su flujo de edición: no entran en el envío masivo ni en el borrado de la idea desde Recibo.
+- Buena Vida: corte Outfit v7 profesional entregado con su caption; el cliente conserva edición humana.
+
 ## v5.113 — 2026-09-24
 
 **Recibo muestra los cortes que sube Eric, aunque el cliente tenga editor.**
