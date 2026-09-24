@@ -4,6 +4,11 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.104 — 2026-09-23
+
+**Recibo solo muestra el corte que ya tiene video.**
+- Las ideas sin archivo editado no salen en el tablero. Dra. Delian Loyola queda con el video que se subió, no con las 16 ideas vacías.
+
 ## v5.103 — 2026-09-21
 
 **Contraseña desde Usuarios, e historial de lo que graba cada persona.**

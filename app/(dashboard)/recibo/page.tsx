@@ -1,7 +1,7 @@
 import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
-import { filterEntregasDeliveredIdeas } from '@/lib/utils/entregas-delivery'
+import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
 
 export const dynamic = 'force-dynamic'
@@ -30,12 +30,7 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const aiIds = new Set(aiClients.map((c) => c.id))
-  const entregas = filterEntregasDeliveredIdeas(ideas).filter((i) => aiIds.has(i.client_id))
-  const aiIdeas = ideas.filter((i) => aiIds.has(i.client_id) && i.status !== 'descartada')
-  const byId = new Map(aiIdeas.map((i) => [i.id, i]))
-  for (const e of entregas) byId.set(e.id, e)
-  const boardIdeas = [...byId.values()]
+  const boardIdeas = reciboBoardIdeas(ideas, aiClients.map((c) => c.id))
 
   // Padding comes from dashboard layout — keep this wrapper lean for mobile width.
   return <ReciboBoard ideas={boardIdeas} aiClients={aiClients} />
