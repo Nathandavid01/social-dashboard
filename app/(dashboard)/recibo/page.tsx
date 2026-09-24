@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 /**
- * Recibo — AI-client intake. Review edited cuts from Entregas R2, manual
- * posted/approval flags, send /aprobacion links. No Metricool auto-post.
+ * Recibo — videos waiting for approval, or approved and still waiting
+ * to be posted or scheduled in Metricool. No Metricool auto-post.
  */
 export default async function ReciboPage() {
   await requirePermission('entregas.read')
@@ -30,8 +30,10 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const boardIdeas = reciboBoardIdeas(ideas, aiClients.map((c) => c.id))
+  const boardIdeas = reciboBoardIdeas(ideas)
+  const shownClientIds = new Set(boardIdeas.map((idea) => idea.client_id))
+  const boardClients = aiClients.filter((client) => shownClientIds.has(client.id))
 
   // Padding comes from dashboard layout — keep this wrapper lean for mobile width.
-  return <ReciboBoard ideas={boardIdeas} aiClients={aiClients} />
+  return <ReciboBoard ideas={boardIdeas} aiClients={boardClients} />
 }

@@ -56,24 +56,17 @@ export function ReciboBoard({
   aiClients: { id: string; name: string; logo_url?: string | null }[]
 }) {
   const { toast } = useToast()
-  const [soloSemana, setSoloSemana] = useState(false)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, start] = useTransition()
   const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
   const [filling, setFilling] = useState(false)
   const [fillLabel, setFillLabel] = useState<string | null>(null)
 
-  const filtered = useMemo(() => {
-    const base = ideas.filter((i) => i.status !== 'descartada')
-    if (!soloSemana) return base
-    return base.filter((i) => enEstaSemana(i, 0))
-  }, [ideas, soloSemana])
+  const filtered = ideas
 
   const byClient = useMemo(() => {
+    const known = new Map(aiClients.map((client) => [client.id, client]))
     const map = new Map<string, { client: { id: string; name: string; logo_url?: string | null }; ideas: IdeaWithPipeline[] }>()
-    for (const c of aiClients) {
-      map.set(c.id, { client: c, ideas: [] })
-    }
     for (const idea of filtered) {
       const entry = map.get(idea.client_id)
       if (entry) entry.ideas.push(idea)
@@ -82,7 +75,7 @@ export function ReciboBoard({
           client: {
             id: idea.client_id,
             name: idea.client?.name?.trim() || 'Cliente',
-            logo_url: idea.client?.logo_url ?? null,
+            logo_url: idea.client?.logo_url ?? known.get(idea.client_id)?.logo_url ?? null,
           },
           ideas: [idea],
         })
@@ -160,36 +153,24 @@ export function ReciboBoard({
             Recibo
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Revisa cada corte en 9:16, lee el título, la idea y el caption, y marca si el cliente aprueba.
-            El caption imita lo ya publicado en Metricool. Sin auto-post.
+            Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.
+            El caption imita lo ya publicado. Sin auto-post.
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-          <button
-            type="button"
-            disabled={filling}
-            onClick={() => void fillCaptions()}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-violet-500/20 px-4 text-xs font-semibold text-violet-100 disabled:opacity-60"
-          >
-            {filling && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
-            {fillLabel ?? 'Poner captions'}
-          </button>
-        <label className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-card/80 px-3.5 text-xs font-medium backdrop-blur sm:w-auto sm:justify-start">
-          <input
-            type="checkbox"
-            checked={soloSemana}
-            onChange={(e) => setSoloSemana(e.target.checked)}
-            className="accent-primary"
-          />
-          Solo esta semana
-        </label>
-        </div>
+        <button
+          type="button"
+          disabled={filling}
+          onClick={() => void fillCaptions()}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-violet-500/20 px-4 text-xs font-semibold text-violet-100 disabled:opacity-60"
+        >
+          {filling && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+          {fillLabel ?? 'Poner captions'}
+        </button>
       </header>
 
-      {aiClients.length === 0 ? (
+      {byClient.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
-          No hay clientes con modo de edición <strong>AI</strong>. Actívalo en el perfil del cliente
-          (Resumen → Modo de edición).
+          No hay videos por aprobar ni por programar en Metricool.
         </div>
       ) : (
         <>

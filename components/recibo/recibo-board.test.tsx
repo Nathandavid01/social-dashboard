@@ -135,6 +135,6 @@ describe('ReciboBoard', () => {
 
   it('explica cómo activar AI si no hay clientes', () => {
     render(<ReciboBoard aiClients={[]} ideas={[]} />)
-    expect(screen.getByText(/No hay clientes con modo de edición/i)).toBeInTheDocument()
+    expect(screen.getByText(/No hay videos por aprobar ni por programar/i)).toBeInTheDocument()
   })
 })
