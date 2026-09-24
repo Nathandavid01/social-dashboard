@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
+import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
 import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
@@ -23,13 +24,13 @@ export default async function ReciboPage() {
     getIdeacionPipeline({ complete: true }),
     supabase
       .from('clients')
-      .select('id, name, logo_url, edit_mode')
+      .select('id, name, logo_url, edit_mode, metricool_blog_id')
       .eq('status', 'active')
       .eq('edit_mode', 'ai')
       .order('name'),
   ])
 
-  let aiClients = (aiClientsRes.data ?? []) as { id: string; name: string; logo_url?: string | null; edit_mode?: string }[]
+  let aiClients = (aiClientsRes.data ?? []) as { id: string; name: string; logo_url?: string | null; edit_mode?: string; metricool_blog_id?: string | null }[]
   if (aiClientsRes.error && /edit_mode/i.test(aiClientsRes.error.message ?? '')) {
     aiClients = []
   }
@@ -46,6 +47,7 @@ export default async function ReciboPage() {
       ? supabase.from('clients').select('id, posting_days, posting_time, posting_schedule, metricool_blog_id').in('id', shownClientIds)
       : Promise.resolve({ data: [] as { id: string; posting_days: number[] | null; posting_time: string | null; posting_schedule: Record<string, string> | null; metricool_blog_id: string | null }[] }),
   ])
+  const published = await loadPublishedVideoCounts(aiClients)
   const cadenceByClient = Object.fromEntries((cadenceRows ?? []).map((client) => [client.id, {
     postingDays: client.posting_days,
     postingTime: client.posting_time,
@@ -68,6 +70,8 @@ export default async function ReciboPage() {
       sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
       cadenceByClient={cadenceByClient}
       todayISO={todayISOInTimeZone(POSTING_TZ)}
+      publishedTotal={published.total}
+      publishedByClient={published.byClient}
       showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
     />
   )

@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.118 — 2026-09-24
+
+**Recibo cuenta los videos de AI que ya están publicados en Metricool.**
+- El conteo dice cuántos videos publicados hay en Metricool para los clientes AI.
+- Si un corte de Recibo es el mismo video ya publicado, sale de Recibo.
+
 ## v5.117 — 2026-09-24
 
 **Aníbal, Arasibo, VSS y Primer Round Oficial no vuelven solos a Recibo.**
