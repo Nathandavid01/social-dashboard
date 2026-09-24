@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.115 — 2026-09-24
+
+**En la tarjeta de Recibo se marca si se envió y si se aprobó, y se publica en la cadencia.**
+- Dos marcas pequeñas sobre el video: Enviado y Aprobado.
+- **Publicar en Metricool** usa el próximo día y la hora de la cadencia del cliente.
+- Si no tiene días, hora o Metricool, el botón lo dice ahí mismo.
+
 ## v5.114 — 2026-09-24
 
 - Recibo verifica que el reproductor abra el mismo corte que muestra la tarjeta; si fue reemplazado, pide recargar.

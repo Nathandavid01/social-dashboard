@@ -6,6 +6,7 @@ import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
 import { ReciboDeleteButton } from '@/components/recibo/recibo-delete'
+import { ReciboPublishButton, ReciboStatusMarks } from '@/components/recibo/recibo-card-status'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
@@ -37,15 +38,29 @@ function ideaTitle(idea: IdeaWithPipeline): string {
   return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
 }
 
+export type ReciboCadence = {
+  postingDays?: number[] | null
+  postingTime?: string | null
+  postingSchedule?: Record<string, string> | null
+  metricool?: boolean
+}
+
 export function ReciboBoard({
   ideas,
   aiClients,
   showUploadCounts = false,
+  sentIdeaIds = [],
+  cadenceByClient = {},
+  todayISO,
 }: {
   ideas: IdeaWithPipeline[]
   aiClients: { id: string; name: string; logo_url?: string | null }[]
   showUploadCounts?: boolean
+  sentIdeaIds?: string[]
+  cadenceByClient?: Record<string, ReciboCadence>
+  todayISO?: string
 }) {
+  const sent = new Set(sentIdeaIds)
   const { toast } = useToast()
   const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
   const [filling, setFilling] = useState(false)
@@ -205,6 +220,7 @@ export function ReciboBoard({
                     {clientIdeas.map((idea) => {
                       const hasEdit = ideaTieneEditadoEntregas(idea)
                       const caption = captionOf(idea, captionOverrides)
+                      const approved = idea.staff_client_approval === 'approved' || idea.client_review_status === 'approved'
                       return (
                         <li
                           key={idea.id}
@@ -215,9 +231,21 @@ export function ReciboBoard({
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
                               <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedEntregasVideoId(idea) ?? undefined} />
                             </div>
+                            <ReciboStatusMarks
+                              ideaId={idea.id}
+                              clientId={idea.client_id}
+                              approved={approved}
+                              sent={sent.has(idea.id)}
+                            />
                             {client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                           </div>
                           <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
+                          <ReciboPublishButton
+                            ideaId={idea.id}
+                            approved={approved}
+                            todayISO={todayISO ?? ''}
+                            cadence={cadenceByClient[idea.client_id] ?? {}}
+                          />
                         </li>
                       )
                     })}
