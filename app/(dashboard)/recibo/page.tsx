@@ -32,7 +32,7 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const boardIdeas = await withUploaderNames(supabase, reciboBoardIdeas(ideas))
+  const boardIdeas = await withUploaderNames(supabase, reciboBoardIdeas(ideas, aiClients.map((client) => client.id)))
   const shownClientIds = new Set(boardIdeas.map((idea) => idea.client_id))
   const boardClients = aiClients.filter((client) => shownClientIds.has(client.id))
   const { data: auth } = await supabase.auth.getUser()

@@ -37,6 +37,8 @@ export function belongsOnRecibo(idea: ReciboQueueIdea): boolean {
   return true
 }
 
-export function reciboBoardIdeas<T extends ReciboQueueIdea>(ideas: T[]): T[] {
-  return ideas.filter(belongsOnRecibo)
+/** Only the AI clients' edited cuts that are still waiting. */
+export function reciboBoardIdeas<T extends ReciboQueueIdea>(ideas: T[], aiClientIds: Iterable<string>): T[] {
+  const ids = new Set(aiClientIds)
+  return ideas.filter((idea) => ids.has(idea.client_id) && belongsOnRecibo(idea))
 }
