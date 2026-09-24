@@ -34,6 +34,7 @@ import { rangoSemana } from '@/lib/entregas/dias'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
+import { getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
 import { ReciboBoard } from './recibo-board'
 
 /** Dated inside the current week so the week filter still includes the card. */
@@ -71,6 +72,19 @@ const bareIdea = {
 } as any
 
 describe('ReciboBoard', () => {
+  it('limita la entrega puntual al archivo mostrado y evita acciones de toda la idea', async () => {
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1', 'v1'))
+    expect(screen.queryByTestId('enviar')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /borrar/i })).not.toBeInTheDocument()
+  })
+  it('identifica una entrega puntual sin etiquetar al cliente humano como AI', () => {
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    expect(screen.getByText('Entrega puntual')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-ai-badge')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Caption')).toHaveValue(editedIdea.generated_caption)
+  })
+
   it('muestra badge AI, toggles y player cuando hay URL', async () => {
     render(
       <ReciboBoard

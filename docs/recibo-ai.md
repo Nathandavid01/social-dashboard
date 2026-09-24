@@ -19,3 +19,7 @@
 - Auto-post Metricool
 - Watermark
 - Sobrescribir crudos del Pipeline
+
+### Entregas puntuales y versiones (v5.114)
+
+Los clientes humanos conservan su configuración. Sus cortes de Eric aparecen como «Entrega puntual», con reproducción y caption, sin envío masivo ni borrado de toda la idea desde Recibo; esas acciones siguen en el flujo del cliente. El reproductor envía el ID del corte visible y el servidor rechaza un reemplazo concurrente antes de firmar la URL.

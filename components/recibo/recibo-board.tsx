@@ -13,6 +13,7 @@ import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
+import { editedEntregasVideoId } from '@/lib/recibo/preview'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
@@ -119,9 +120,15 @@ export function ReciboBoard({
     })
   }
 
+  // Human-client deliveries are individual reviews: bulk actions affect whole
+  // ideas, including their other cuts. Keep them in the client's editing workflow.
+  const actionableIdeas = useMemo(
+    () => ideas.filter((idea) => aiClients.some((client) => client.id === idea.client_id)),
+    [ideas, aiClients],
+  )
   const semanaIdeas = useMemo(
-    () => ideas.filter((i) => i.status !== 'descartada' && enEstaSemana(i, 0) && ideaTieneEditadoEntregas(i)),
-    [ideas],
+    () => actionableIdeas.filter((i) => i.status !== 'descartada' && enEstaSemana(i, 0) && ideaTieneEditadoEntregas(i)),
+    [actionableIdeas],
   )
   const uploadCounts = useMemo(() => reciboUploadCounts(ideas), [ideas])
 
@@ -160,7 +167,7 @@ export function ReciboBoard({
         </div>
       ) : (
         <>
-          <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : ideas} />
+          {actionableIdeas.length > 0 && <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : actionableIdeas} />}
 
           <ul className="space-y-8">
             {byClient.map(({ client, ideas: clientIdeas }) => (
@@ -177,7 +184,7 @@ export function ReciboBoard({
                         >
                           AI
                         </span>
-                      ) : null}
+                      ) : <span data-testid="recibo-manual-badge" className="text-xs text-muted-foreground">Entrega puntual</span>}
                     </div>
                     <p className="text-xs text-muted-foreground" data-testid={`recibo-client-counts-${client.id}`}>
                       {showUploadCounts
@@ -206,9 +213,9 @@ export function ReciboBoard({
                         >
                           <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
-                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
+                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedEntregasVideoId(idea) ?? undefined} />
                             </div>
-                            <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />
+                            {client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                           </div>
                           <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
                         </li>
