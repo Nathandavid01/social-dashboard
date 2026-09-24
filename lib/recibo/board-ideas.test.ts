@@ -46,6 +46,18 @@ describe('reciboBoardIdeas', () => {
     expect(reciboBoardIdeas([deEric, deAlexa], ['ai']).map((idea) => idea.id)).toEqual(['de-eric'])
   })
 
+  it('un cliente en pausa no entra, aunque Eric haya subido el corte', () => {
+    const [eric] = [...ERIC_IDS]
+    const pausado = {
+      ...edited,
+      id: 'anibal',
+      client_id: 'anibal',
+      client: { status: 'paused' },
+      videos: [{ kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', uploaded_by: eric }],
+    }
+    expect(reciboBoardIdeas([pausado], ['ai'])).toEqual([])
+  })
+
   it('un corte de Eric archivado, o ya programado, no entra', () => {
     const [eric] = [...ERIC_IDS]
     const archivado = {

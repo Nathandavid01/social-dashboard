@@ -18,6 +18,8 @@ export type ReciboQueueIdea = {
   client_review_status?: string | null
   entregas_review_status?: string | null
   videos?: ReciboVideo[] | null
+  /** Paused or archived clients stay off Recibo, even if Eric uploaded the cut. */
+  client?: { status?: string | null } | null
 }
 
 
@@ -45,6 +47,7 @@ export function hasEricCut(idea: ReciboQueueIdea): boolean {
  * An idea with no edited file is not a video yet.
  */
 export function belongsOnRecibo(idea: ReciboQueueIdea): boolean {
+  if (idea.client?.status && idea.client.status !== 'active') return false
   if (idea.status === 'descartada') return false
   if (!hasEditedCut(idea)) return false
   if (isPublishedIdea(idea)) return false
