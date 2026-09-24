@@ -18,6 +18,12 @@ vi.mock('@/lib/actions/recibo-captions', () => ({
 vi.mock('@/lib/actions/idea-captions', () => ({
   saveIdeaCaption: vi.fn(async () => ({ ok: true })),
 }))
+vi.mock('@/lib/actions/pipeline-submit', () => ({
+  discardEntregaVideos: vi.fn(async () => ({ ok: true, count: 1 })),
+}))
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}))
 vi.mock('@/components/entregas/enviar-al-cliente', () => ({
   EnviarAlCliente: () => <div data-testid="enviar" />,
   EnviarIdeaAlCliente: () => <button type="button">Enviar al cliente</button>,
@@ -27,6 +33,7 @@ import userEvent from '@testing-library/user-event'
 import { rangoSemana } from '@/lib/entregas/dias'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
+import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
 import { ReciboBoard } from './recibo-board'
 
 /** Dated inside the current week so the week filter still includes the card. */
@@ -185,6 +192,23 @@ describe('ReciboBoard', () => {
     expect(screen.queryByTestId('recibo-upload-counts')).not.toBeInTheDocument()
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('1 video')
     expect(screen.queryByTestId('recibo-uploader-i1')).not.toBeInTheDocument()
+  })
+
+  it('pide confirmación antes de borrar el video', async () => {
+    const user = userEvent.setup()
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: 'Borrar Reel playa' }))
+    expect(discardEntregaVideos).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Borrar' }))
+    await waitFor(() => {
+      expect(discardEntregaVideos).toHaveBeenCalledWith(['i1'])
+    })
   })
 
   it('explica cómo activar AI si no hay clientes', () => {

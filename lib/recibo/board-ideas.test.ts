@@ -17,7 +17,7 @@ describe('reciboBoardIdeas', () => {
   it('deja el video por aprobar y el aprobado que falta por programar', () => {
     const listo = { ...edited, id: 'listo', staff_client_approval: 'approved' }
     const human = { ...edited, id: 'human', client_id: 'human', staff_client_approval: 'approved' }
-    expect(reciboBoardIdeas([edited, listo, human]).map((idea) => idea.id)).toEqual(['cut', 'listo', 'human'])
+    expect(reciboBoardIdeas([edited, listo, human], ['ai']).map((idea) => idea.id)).toEqual(['cut', 'listo'])
   })
 
   it('saca la idea sin archivo, lo ya programado en Metricool y lo publicado', () => {
@@ -25,6 +25,6 @@ describe('reciboBoardIdeas', () => {
     const agendado = { ...edited, id: 'agendado', staff_client_approval: 'approved', metricool_post_id: 9 }
     const publicado = { ...edited, id: 'publicado', status: 'publicada' }
     const descartada = { ...edited, id: 'fuera', status: 'descartada' }
-    expect(reciboBoardIdeas([bare, agendado, publicado, descartada])).toEqual([])
+    expect(reciboBoardIdeas([bare, agendado, publicado, descartada], ['ai'])).toEqual([])
   })
 })

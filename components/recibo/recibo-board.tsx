@@ -5,6 +5,7 @@ import { Bot, Loader2 } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
+import { ReciboDeleteButton } from '@/components/recibo/recibo-delete'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
@@ -199,10 +200,11 @@ export function ReciboBoard({
                           data-testid={`recibo-idea-${idea.id}`}
                           className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/80 shadow-md shadow-black/20"
                         >
-                          <div className="bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
+                          <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
                               <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} />
                             </div>
+                            <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />
                           </div>
                           <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
                         </li>

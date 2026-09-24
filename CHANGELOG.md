@@ -4,6 +4,12 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.112 — 2026-09-23
+
+**Recibo solo muestra los videos subidos con AI, y se pueden borrar.**
+- Un video de un cliente que no está en modo AI no entra.
+- El basurero pide confirmación antes de quitar el video de Recibo. No se programa en Metricool.
+
 ## v5.111 — 2026-09-23
 
 **Debajo del video en Recibo solo está el caption.**
