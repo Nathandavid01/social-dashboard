@@ -52,6 +52,8 @@ export function ReciboBoard({
   sentIdeaIds = [],
   cadenceByClient = {},
   todayISO,
+  publishedTotal = 0,
+  publishedByClient = {},
 }: {
   ideas: IdeaWithPipeline[]
   aiClients: { id: string; name: string; logo_url?: string | null }[]
@@ -59,6 +61,8 @@ export function ReciboBoard({
   sentIdeaIds?: string[]
   cadenceByClient?: Record<string, ReciboCadence>
   todayISO?: string
+  publishedTotal?: number
+  publishedByClient?: Record<string, number>
 }) {
   const sent = new Set(sentIdeaIds)
   const { toast } = useToast()
@@ -162,6 +166,8 @@ export function ReciboBoard({
           {showUploadCounts ? (
             <p className="mt-2 text-sm text-foreground" data-testid="recibo-upload-counts">
               {formatUploadCounts(uploadCounts)}
+              {' · '}
+              Publicados {publishedTotal}
             </p>
           ) : null}
         </div>
@@ -203,7 +209,7 @@ export function ReciboBoard({
                     </div>
                     <p className="text-xs text-muted-foreground" data-testid={`recibo-client-counts-${client.id}`}>
                       {showUploadCounts
-                        ? formatUploadCounts(reciboUploadCounts(clientIdeas))
+                        ? `${formatUploadCounts(reciboUploadCounts(clientIdeas))} · Publicados ${publishedByClient[client.id] ?? 0}`
                         : clientIdeas.length === 0
                           ? 'Sin videos en el filtro actual'
                           : `${clientIdeas.length} video${clientIdeas.length === 1 ? '' : 's'}`}
