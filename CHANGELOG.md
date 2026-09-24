@@ -9,7 +9,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 **Recibo muestra los cortes que sube Eric, aunque el cliente tenga editor.**
 - Un video editado y subido por Eric entra en Recibo sin cambiar el modo del cliente: solo ese corte, los del editor humano siguen fuera.
 - Los primeros: Farmacia Buena Vida — «¿Cuál es el medicamento que no puedes nombrar bien?» y «Ay pero te copiaste de mi outfit».
-- Sale de Recibo igual que los demás: al programarlo en Metricool o al publicarlo.
+- Sale de Recibo igual que los demás: al programarlo en Metricool o al publicarlo. Ese cliente no lleva la etiqueta «AI».
+- El corte también sigue en Entregas, como pasa con los clientes AI: no es un duplicado.
 
 ![Recibo con los cortes de Eric en Farmacia Buena Vida](/changelog/v5.113-recibo-cortes-de-eric.png)
 

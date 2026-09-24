@@ -1,5 +1,8 @@
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import type { VideoProviderRef } from '@/lib/utils/entregas-delivery'
+import { ERIC_IDS } from './upload-counts'
+
+export { ERIC_IDS }
 
 type ReciboVideo = VideoProviderRef & { uploaded_by?: string | null }
 
@@ -17,15 +20,6 @@ export type ReciboQueueIdea = {
   videos?: ReciboVideo[] | null
 }
 
-/**
- * Eric's real accounts (same ids as RECIBO_COUNT_VIEWER_IDS in upload-counts.ts). Cuts he uploads
- * enter Recibo whatever the client's edit_mode — Eric 2026-09-24: «quiero que puedas poner en recibo
- * los videos que yo edito aunque el cliente sea de un editor».
- */
-export const ERIC_IDS: ReadonlySet<string> = new Set([
-  '2ec6c260-4ed5-4c4b-8f85-8b76353532cb', // Eric Perez
-  'f27c2a4c-fda8-49d9-9a59-da9777556144', // Eric
-])
 
 function usableCut(video: ReciboVideo): boolean {
   return video.kind === 'edited' && video.status !== 'archived' && video.status !== 'failed'
@@ -35,7 +29,10 @@ function hasEditedCut(idea: ReciboQueueIdea): boolean {
   return (idea.videos ?? []).some(usableCut)
 }
 
-/** A usable edited cut that Eric uploaded (from the dashboard or the terminal taller). */
+/**
+ * A usable edited cut that Eric uploaded (dashboard or terminal taller). Eric 2026-09-24: «quiero que puedas
+ * poner en recibo los videos que yo edito aunque el cliente sea de un editor».
+ */
 export function hasEricCut(idea: ReciboQueueIdea): boolean {
   return (idea.videos ?? []).some((video) => usableCut(video) && !!video.uploaded_by && ERIC_IDS.has(video.uploaded_by))
 }

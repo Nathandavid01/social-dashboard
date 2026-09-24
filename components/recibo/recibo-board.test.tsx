@@ -216,3 +216,18 @@ describe('ReciboBoard', () => {
     expect(screen.getByText(/No hay videos por aprobar ni por programar/i)).toBeInTheDocument()
   })
 })
+
+describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () => {
+  it('no marca «AI» al cliente humano; sigue marcando al AI', () => {
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      title: 'Pregunta para todas',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(<ReciboBoard ideas={[editedIdea, farmacia]} aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} />)
+    expect(screen.getAllByTestId('recibo-ai-badge')).toHaveLength(1)
+    expect(screen.getByText('Farmacia Buena Vida')).toBeInTheDocument()
+  })
+})
