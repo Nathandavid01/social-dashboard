@@ -1,4 +1,5 @@
 import { VIDEO_URL } from '@/lib/recibo/published-videos'
+import { usableCut } from '@/lib/recibo/board-ideas'
 
 /**
  * Which Recibo cuts already left through Metricool, even when the team posted
@@ -16,19 +17,14 @@ export type MatchPost = {
   draft?: boolean | null
   media?: unknown[] | null
   providers?: { status?: string | null }[] | null
-  publicationDate?: { dateTime?: string | null } | null
+  publicationDate?: { dateTime?: string | null; timezone?: string | null } | null
+  creationDate?: { dateTime?: string | null; timezone?: string | null } | null
 }
 
 type MatchVideo = { kind?: string | null; status?: string | null; size_bytes?: number | null }
 export type MatchIdea = { id: string; videos?: MatchVideo[] | null }
 
-export type ReciboPublishedMatch = {
-  ideaId: string
-  postId: number
-  uuid: string | null
-  /** Date part of Metricool's publicationDate. */
-  publishDate: string | null
-}
+export type ReciboPublishedMatch<P extends MatchPost = MatchPost> = { ideaId: string; post: P }
 
 function mediaUrl(item: unknown): string | null {
   if (typeof item === 'string') return item
@@ -63,16 +59,16 @@ export function measurableMedia(posts: MatchPost[]): string[] {
   return posts.map(leftVideoUrl).filter((url): url is string => url != null)
 }
 
-export function matchReciboPublished(
+export function matchReciboPublished<P extends MatchPost>(
   ideas: MatchIdea[],
-  posts: MatchPost[],
+  posts: P[],
   sizeOf: (url: string) => number | undefined,
-): ReciboPublishedMatch[] {
+): ReciboPublishedMatch<P>[] {
   // size → the one idea whose usable edited cut has it; null once two ideas share it.
   const owner = new Map<number, string | null>()
   for (const idea of ideas) {
     for (const video of idea.videos ?? []) {
-      if (video.kind !== 'edited' || video.status === 'archived' || video.status === 'failed') continue
+      if (!usableCut(video)) continue
       const size = video.size_bytes
       if (!size || size <= 0) continue
       const prev = owner.get(size)
@@ -80,7 +76,7 @@ export function matchReciboPublished(
     }
   }
 
-  const best = new Map<string, MatchPost>()
+  const best = new Map<string, P>()
   for (const post of posts) {
     const url = leftVideoUrl(post)
     const size = url ? sizeOf(url) : undefined
@@ -90,10 +86,5 @@ export function matchReciboPublished(
     if (!current || isBetter(post, current)) best.set(ideaId, post)
   }
 
-  return [...best].map(([ideaId, post]) => ({
-    ideaId,
-    postId: post.id,
-    uuid: post.uuid ?? null,
-    publishDate: post.publicationDate?.dateTime?.slice(0, 10) ?? null,
-  }))
+  return [...best].map(([ideaId, post]) => ({ ideaId, post }))
 }

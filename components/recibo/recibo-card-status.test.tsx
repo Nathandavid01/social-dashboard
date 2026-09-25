@@ -18,8 +18,8 @@ vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 
 import { ReciboStatusMarks } from './recibo-card-status'
 
-function renderMarks() {
-  render(<ReciboStatusMarks ideaId="i1" clientId="c1" approved={false} sent={false} />)
+function renderMarks(postedStatus: 'not_posted' | null = null) {
+  render(<ReciboStatusMarks ideaId="i1" clientId="c1" approved={false} sent={false} postedStatus={postedStatus} />)
   return screen.getByRole('button', { name: 'Publicado' })
 }
 
@@ -33,6 +33,19 @@ describe('ReciboStatusMarks — Publicado', () => {
     expect(screen.getByRole('button', { name: 'Enviado' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Aprobado' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('se enciende al instante y no se puede tocar dos veces mientras guarda', async () => {
+    let resolve!: (v: { ok: true }) => void
+    setManualPostedStatus.mockReturnValue(new Promise((r) => { resolve = r }))
+    const mark = renderMarks()
+    await userEvent.click(mark)
+    expect(mark).toHaveAttribute('aria-pressed', 'true')
+    expect(mark).toBeDisabled()
+    await userEvent.click(mark)
+    resolve({ ok: true })
+    await waitFor(() => expect(refresh).toHaveBeenCalled())
+    expect(setManualPostedStatus).toHaveBeenCalledTimes(1)
   })
 
   it('marcarlo lo da por publicado y Recibo se recarga sin él', async () => {
@@ -52,6 +65,15 @@ describe('ReciboStatusMarks — Publicado', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
     await waitFor(() => expect(setManualPostedStatus).toHaveBeenLastCalledWith({ ideaId: 'i1', status: null }))
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(2))
+  })
+
+  it('Deshacer devuelve el estado que tenía (no lo borra)', async () => {
+    setManualPostedStatus.mockResolvedValue({ ok: true })
+    await userEvent.click(renderMarks('not_posted'))
+    await waitFor(() => expect(toast).toHaveBeenCalled())
+    render((toast.mock.calls[0][0] as { action: ReactElement }).action)
+    await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
+    await waitFor(() => expect(setManualPostedStatus).toHaveBeenLastCalledWith({ ideaId: 'i1', status: 'not_posted' }))
   })
 
   it('si falla, avisa y la tarjeta se queda', async () => {

@@ -78,4 +78,18 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
     expect(res.status).toBe(200)
     expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
   })
+  it('si el cruce de Recibo se cuelga, a los 20 s sigue con el sync de siempre (el cron tiene 60 s)', async () => {
+    vi.useFakeTimers()
+    try {
+      vi.stubEnv('CRON_SECRET', 'secreto-real')
+      runReciboPublishedMatch.mockImplementationOnce(() => new Promise(() => {}))
+      const pending = GET(req({ Authorization: 'Bearer secreto-real' }))
+      await vi.advanceTimersByTimeAsync(20_000)
+      const res = await pending
+      expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
+      expect(await res.json()).toMatchObject({ recibo: { linked: 0, error: expect.stringMatching(/tardó/) } })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

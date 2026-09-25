@@ -33,9 +33,7 @@ describe('matchReciboPublished', () => {
       [post(381555336, 'https://static.metricool.com/a.mp4')],
       sizes({ 'https://static.metricool.com/a.mp4': ARECIBO_NUEVO }),
     )
-    expect(matches).toEqual([
-      { ideaId: 'nuevo', postId: 381555336, uuid: 'u381555336', publishDate: '2026-09-24' },
-    ])
+    expect(matches.map((m) => [m.ideaId, m.post.id])).toEqual([['nuevo', 381555336]])
   })
 
   it('lo encuentra aunque el caption publicado sea otro (Conoce a la doctora, 19-sep)', () => {
@@ -44,7 +42,7 @@ describe('matchReciboPublished', () => {
       [post(7, 'https://m/d.mp4', { text: '¿Necesitas un laboratorio clínico en Arecibo?', publicationDate: { dateTime: '2026-09-19T18:00:00' } } as Partial<MatchPost>)],
       sizes({ 'https://m/d.mp4': ARECIBO_DOCTORA }),
     )
-    expect(matches.map((m) => [m.ideaId, m.publishDate])).toEqual([['doctora', '2026-09-19']])
+    expect(matches.map((m) => [m.ideaId, m.post.id])).toEqual([['doctora', 7]])
   })
 
   it('un borrador en Metricool no saca el video de Recibo (Delian, borrador de Valeria)', () => {
@@ -62,7 +60,7 @@ describe('matchReciboPublished', () => {
       [post(1, 'https://m/p.mp4', { providers: [{ status: 'PENDING' }] })],
       sizes({ 'https://m/p.mp4': 100 }),
     )
-    expect(matches[0]).toMatchObject({ ideaId: 'i', postId: 1 })
+    expect(matches.map((m) => [m.ideaId, m.post.id])).toEqual([['i', 1]])
   })
 
   it('si falló en todas las redes, el video no salió', () => {
@@ -80,7 +78,7 @@ describe('matchReciboPublished', () => {
       [post(1, 'https://m/p.mp4', { providers: [{ status: 'ERROR' }, { status: 'PUBLISHED' }] })],
       sizes({ 'https://m/p.mp4': 100 }),
     )
-    expect(matches[0]).toMatchObject({ ideaId: 'i', postId: 1 })
+    expect(matches.map((m) => [m.ideaId, m.post.id])).toEqual([['i', 1]])
   })
 
   it('no decide cuando el mismo tamaño está en dos ideas distintas', () => {
@@ -129,7 +127,7 @@ describe('matchReciboPublished', () => {
       ],
       sizes({ 'https://m/1.mp4': 100, 'https://m/2.mp4': 100, 'https://m/3.mp4': 100 }),
     )
-    expect(matches).toEqual([{ ideaId: 'i', postId: 2, uuid: 'u2', publishDate: '2026-09-20' }])
+    expect(matches.map((m) => [m.ideaId, m.post.id])).toEqual([['i', 2]])
   })
 })
 

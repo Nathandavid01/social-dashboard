@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { setManualPostedStatus, setStaffClientApproval } from '@/lib/actions/recibo'
+import { setManualPostedStatus, setStaffClientApproval, type ManualPostedStatus } from '@/lib/actions/recibo'
 import { crearEnlaceCliente } from '@/lib/actions/entregas-client-review'
 import { publishReciboOnCadence } from '@/lib/actions/recibo-publish'
 import { nextCadenceSlot, type CadenceSlot } from '@/lib/recibo/cadence-slot'
@@ -15,16 +15,20 @@ export function ReciboStatusMarks({
   clientId,
   approved,
   sent,
+  postedStatus = null,
 }: {
   ideaId: string
   clientId: string
   approved: boolean
   sent: boolean
+  /** manual_posted_status now: Deshacer puts this back. */
+  postedStatus?: ManualPostedStatus
 }) {
   const { toast } = useToast()
   const router = useRouter()
   const [isApproved, setApproved] = useState(approved)
   const [isSent, setSent] = useState(sent)
+  const [isPublished, setPublished] = useState(false)
   const [pending, start] = useTransition()
 
   function toggleApproved() {
@@ -58,9 +62,12 @@ export function ReciboStatusMarks({
   // For what the Metricool match can't see (posted with another file). The card
   // leaves Recibo on refresh, so the undo lives in the toast.
   function markPublished() {
+    if (isPublished) return
+    setPublished(true)
     start(async () => {
       const res = await setManualPostedStatus({ ideaId, status: 'posted' })
       if (res.error) {
+        setPublished(false)
         toast({ title: 'No se pudo marcar como publicado', description: res.error, variant: 'destructive' })
         return
       }
@@ -71,7 +78,7 @@ export function ReciboStatusMarks({
           <ToastAction
             altText="Deshacer"
             onClick={() => {
-              void setManualPostedStatus({ ideaId, status: null }).then((undo) => {
+              void setManualPostedStatus({ ideaId, status: postedStatus }).then((undo) => {
                 if (undo.error) toast({ title: 'No se pudo deshacer', description: undo.error, variant: 'destructive' })
                 router.refresh()
               })
@@ -89,7 +96,7 @@ export function ReciboStatusMarks({
     <div className="absolute bottom-3 left-3 flex gap-1.5">
       <Mark on={isSent} disabled={pending || isSent} onClick={markSent} label="Enviado" />
       <Mark on={isApproved} disabled={pending} onClick={toggleApproved} label="Aprobado" />
-      <Mark on={false} disabled={pending} onClick={markPublished} label="Publicado" />
+      <Mark on={isPublished} disabled={pending || isPublished} onClick={markPublished} label="Publicado" />
     </div>
   )
 }

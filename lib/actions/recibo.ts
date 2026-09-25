@@ -89,6 +89,7 @@ export async function syncReciboPublished(): Promise<{ linked: number; error?: s
     revalidatePath('/recibo')
     revalidatePath('/entregas')
     revalidatePath('/pool')
+    revalidatePath('/calendar')
   }
   return res
 }
