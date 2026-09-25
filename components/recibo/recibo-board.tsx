@@ -247,6 +247,7 @@ export function ReciboBoard({
                               clientId={idea.client_id}
                               approved={approved}
                               sent={sent.has(idea.id)}
+                              postedStatus={idea.manual_posted_status ?? null}
                             />
                             {client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                           </div>

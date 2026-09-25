@@ -7,6 +7,7 @@ import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
 import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
+import { ReciboPublishedSync } from '@/components/recibo/recibo-published-sync'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -64,16 +65,19 @@ export default async function ReciboPage() {
 
   // Padding comes from dashboard layout — keep this wrapper lean for mobile width.
   return (
-    <ReciboBoard
-      ideas={boardIdeas}
-      aiClients={boardClients}
-      sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
-      cadenceByClient={cadenceByClient}
-      todayISO={todayISOInTimeZone(POSTING_TZ)}
-      publishedTotal={published.total}
-      publishedByClient={published.byClient}
-      showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
-    />
+    <>
+      <ReciboPublishedSync />
+      <ReciboBoard
+        ideas={boardIdeas}
+        aiClients={boardClients}
+        sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
+        cadenceByClient={cadenceByClient}
+        todayISO={todayISOInTimeZone(POSTING_TZ)}
+        publishedTotal={published.total}
+        publishedByClient={published.byClient}
+        showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
+      />
+    </>
   )
 }
 

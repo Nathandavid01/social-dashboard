@@ -5,6 +5,11 @@ vi.mock('@/lib/metricool/sync', () => ({
   runMetricoolPublishedSync: () => runMetricoolPublishedSync(),
 }))
 
+const runReciboPublishedMatch = vi.fn(async (_options?: { deadline?: number }) => ({ linked: 2 }))
+vi.mock('@/lib/recibo/sync-published', () => ({
+  runReciboPublishedMatch: (options?: { deadline?: number }) => runReciboPublishedMatch(options),
+}))
+
 const getAgencyReach = vi.fn(async () => ({ total: 1 }))
 vi.mock('@/lib/actions/agency-reach', () => ({
   getAgencyReach: () => getAgencyReach(),
@@ -18,6 +23,7 @@ function req(headers: Record<string, string> = {}): NextRequest {
 }
 
 beforeEach(() => {
+  runReciboPublishedMatch.mockClear()
   runMetricoolPublishedSync.mockClear()
   getAgencyReach.mockClear()
 })
@@ -32,6 +38,7 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
     const res = await GET(req())
     expect(res.status).toBe(401)
     expect(runMetricoolPublishedSync).not.toHaveBeenCalled()
+    expect(runReciboPublishedMatch).not.toHaveBeenCalled()
     expect(getAgencyReach).not.toHaveBeenCalled()
   })
 
@@ -55,5 +62,28 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
     const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
     expect(res.status).toBe(200)
     expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
+  })
+
+  it('enlaza primero lo publicado a mano desde Recibo, y luego el sync lo pasa a publicada en la misma corrida', async () => {
+    vi.stubEnv('CRON_SECRET', 'secreto-real')
+    const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
+    expect(runReciboPublishedMatch.mock.invocationCallOrder[0]).toBeLessThan(runMetricoolPublishedSync.mock.invocationCallOrder[0])
+    expect(await res.json()).toMatchObject({ recibo: { linked: 2 } })
+  })
+
+  it('si el cruce de Recibo falla, el sync de siempre corre igual', async () => {
+    vi.stubEnv('CRON_SECRET', 'secreto-real')
+    runReciboPublishedMatch.mockRejectedValueOnce(new Error('boom'))
+    const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
+    expect(res.status).toBe(200)
+    expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
+  })
+  it('le da al cruce de Recibo un plazo de 20 s: el cron tiene 60 y el sync de siempre va después', async () => {
+    vi.stubEnv('CRON_SECRET', 'secreto-real')
+    const before = Date.now()
+    await GET(req({ Authorization: 'Bearer secreto-real' }))
+    const deadline = runReciboPublishedMatch.mock.calls[0][0]?.deadline ?? 0
+    expect(deadline - before).toBeGreaterThanOrEqual(20_000)
+    expect(deadline - Date.now()).toBeLessThanOrEqual(20_000)
   })
 })

@@ -274,4 +274,8 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[bareIdea]} />)
     expect(screen.queryByRole('button', { name: /^Bajar/ })).not.toBeInTheDocument()
   })
+  it('cada tarjeta trae la marca Publicado junto a Enviado y Aprobado', () => {
+    render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
+  })
 })

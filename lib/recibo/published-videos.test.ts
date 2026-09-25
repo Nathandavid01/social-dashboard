@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { countPublishedVideos, isPublishedVideoPost, matchingPublishedPost } from './published-videos'
+import { countPublishedVideos } from './published-videos'
 
 const video = {
   id: 1,
@@ -17,16 +17,5 @@ describe('countPublishedVideos', () => {
       { ...video, id: 3, media: ['https://static.metricool.com/a.png'] },
       { ...video, id: 4, providers: [{ status: 'PENDING' }] },
     ])).toBe(1)
-  })
-})
-
-describe('matchingPublishedPost', () => {
-  it('exige un solo post y un texto propio del video', () => {
-    const other = { ...video, id: 9, text: 'Otro tema de encías y sonrisa' }
-    expect(matchingPublishedPost({ title: 'Nigiri Y Sashimi', generated_caption: 'corto' }, [video, other])).toBeNull()
-    expect(matchingPublishedPost({
-      title: 'Por que Yabuuchi',
-      generated_caption: 'Nuestro nombre tiene una historia detrás',
-    }, [video, other])?.id).toBe(1)
   })
 })

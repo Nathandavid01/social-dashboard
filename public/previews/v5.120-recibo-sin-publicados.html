@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.120 — Recibo sin publicados</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --ok:#34d399; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:960px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    h2 { font-size:13px; color:var(--gold); margin:0 0 10px; letter-spacing:.04em; text-transform:uppercase; }
+    .split { display:grid; grid-template-columns:1fr; gap:26px; }
+    @media (min-width:800px) { .split { grid-template-columns:1fr 1fr; } }
+    .client { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:600; }
+    .logo { width:30px; height:30px; border-radius:50%; background:var(--gold); color:#111; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; }
+    .ai { font-size:10px; font-weight:700; color:#c4b5fd; background:rgba(139,92,246,.2); padding:2px 8px; border-radius:999px; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; position:relative; }
+    .card.gone { opacity:.35; outline:2px dashed #7f1d1d; outline-offset:-2px; }
+    .stage { position:relative; background:#09090b; padding:6px 6px 4px; }
+    .phone { aspect-ratio:9/16; border-radius:10px; background:linear-gradient(160deg,#1c1c1c,#050505); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); text-align:center; padding:6px; }
+    .marks { position:absolute; left:8px; bottom:8px; display:flex; gap:3px; flex-wrap:wrap; }
+    .mark { font-size:8px; font-weight:600; padding:2px 5px; border-radius:999px; background:rgba(0,0,0,.55); color:rgba(255,255,255,.85); }
+    .mark.new { outline:1.5px solid var(--gold); }
+    .tag { position:absolute; top:8px; left:8px; right:8px; font-size:9px; font-weight:700; color:#fecaca; background:rgba(127,29,29,.85); border-radius:6px; padding:3px 5px; text-align:center; }
+    .toast { margin-top:14px; background:#18181b; border:1px solid #2a2a2a; border-radius:10px; padding:10px 12px; font-size:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .toast b { color:var(--ok); }
+    .toast .undo { border:1px solid #3f3f46; border-radius:6px; padding:3px 8px; font-size:11px; white-space:nowrap; }
+    .note { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.45; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recibo · lo publicado en Metricool ya no aparece</h1>
+    <p class="sub">Aunque el equipo lo haya subido a mano en Metricool y con otro caption. Recibo reconoce el video por su archivo al abrirse y en el sync de cada mañana. Un borrador en Metricool no cuenta.</p>
+
+    <div class="split">
+      <section>
+        <h2>Antes</h2>
+        <div class="client"><div class="logo">AL</div>Arecibo Lab <span class="ai">AI</span></div>
+        <div class="grid">
+          <div class="card gone"><div class="stage"><div class="phone">Nuevo Laboratorio En Arecibo</div><span class="tag">Publicado 24-sep</span><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span></div></div></div>
+          <div class="card gone"><div class="stage"><div class="phone">Conoce A La Doctora</div><span class="tag">Publicado 19-sep</span><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span></div></div></div>
+          <div class="card"><div class="stage"><div class="phone">Antes De Una Toma De Muestra</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span></div></div></div>
+        </div>
+        <p class="note">Los dos videos publicados a mano seguían en Recibo, como si faltara postearlos.</p>
+      </section>
+
+      <section>
+        <h2>Después (v5.120)</h2>
+        <div class="client"><div class="logo">AL</div>Arecibo Lab <span class="ai">AI</span></div>
+        <div class="grid">
+          <div class="card"><div class="stage"><div class="phone">Antes De Una Toma De Muestra</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span><span class="mark new">Publicado</span></div></div></div>
+          <div class="card"><div class="stage"><div class="phone">Servicios A Domicilio</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span><span class="mark new">Publicado</span></div></div></div>
+          <div class="card"><div class="stage"><div class="phone">Tiempo De Resultados</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span><span class="mark new">Publicado</span></div></div></div>
+        </div>
+        <div class="toast"><span><b>2 videos</b> ya estaban en Metricool y salieron de Recibo</span></div>
+        <div class="toast"><span>Marcado como publicado · Sale de Recibo.</span><span class="undo">Deshacer</span></div>
+        <p class="note"><strong>Publicado</strong> es para lo que se publicó con otro archivo (por ejemplo, otra versión del corte). Se deshace desde el aviso.</p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
