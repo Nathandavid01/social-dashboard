@@ -5,6 +5,11 @@ vi.mock('@/lib/metricool/sync', () => ({
   runMetricoolPublishedSync: () => runMetricoolPublishedSync(),
 }))
 
+const runReciboPublishedMatch = vi.fn(async () => ({ linked: 2 }))
+vi.mock('@/lib/recibo/sync-published', () => ({
+  runReciboPublishedMatch: () => runReciboPublishedMatch(),
+}))
+
 const getAgencyReach = vi.fn(async () => ({ total: 1 }))
 vi.mock('@/lib/actions/agency-reach', () => ({
   getAgencyReach: () => getAgencyReach(),
@@ -18,6 +23,7 @@ function req(headers: Record<string, string> = {}): NextRequest {
 }
 
 beforeEach(() => {
+  runReciboPublishedMatch.mockClear()
   runMetricoolPublishedSync.mockClear()
   getAgencyReach.mockClear()
 })
@@ -32,6 +38,7 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
     const res = await GET(req())
     expect(res.status).toBe(401)
     expect(runMetricoolPublishedSync).not.toHaveBeenCalled()
+    expect(runReciboPublishedMatch).not.toHaveBeenCalled()
     expect(getAgencyReach).not.toHaveBeenCalled()
   })
 
@@ -52,6 +59,21 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
 
   it('con Authorization: Bearer <CRON_SECRET> correcto → ejecuta el sync', async () => {
     vi.stubEnv('CRON_SECRET', 'secreto-real')
+    const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
+    expect(res.status).toBe(200)
+    expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
+  })
+
+  it('enlaza primero lo publicado a mano desde Recibo, y luego el sync lo pasa a publicada en la misma corrida', async () => {
+    vi.stubEnv('CRON_SECRET', 'secreto-real')
+    const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
+    expect(runReciboPublishedMatch.mock.invocationCallOrder[0]).toBeLessThan(runMetricoolPublishedSync.mock.invocationCallOrder[0])
+    expect(await res.json()).toMatchObject({ recibo: { linked: 2 } })
+  })
+
+  it('si el cruce de Recibo falla, el sync de siempre corre igual', async () => {
+    vi.stubEnv('CRON_SECRET', 'secreto-real')
+    runReciboPublishedMatch.mockRejectedValueOnce(new Error('boom'))
     const res = await GET(req({ Authorization: 'Bearer secreto-real' }))
     expect(res.status).toBe(200)
     expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)

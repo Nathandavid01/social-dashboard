@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/lib/hooks/use-toast'
-import { setStaffClientApproval } from '@/lib/actions/recibo'
+import { ToastAction } from '@/components/ui/toast'
+import { setManualPostedStatus, setStaffClientApproval } from '@/lib/actions/recibo'
 import { crearEnlaceCliente } from '@/lib/actions/entregas-client-review'
 import { publishReciboOnCadence } from '@/lib/actions/recibo-publish'
 import { nextCadenceSlot, type CadenceSlot } from '@/lib/recibo/cadence-slot'
@@ -54,10 +55,41 @@ export function ReciboStatusMarks({
     })
   }
 
+  // For what the Metricool match can't see (posted with another file). The card
+  // leaves Recibo on refresh, so the undo lives in the toast.
+  function markPublished() {
+    start(async () => {
+      const res = await setManualPostedStatus({ ideaId, status: 'posted' })
+      if (res.error) {
+        toast({ title: 'No se pudo marcar como publicado', description: res.error, variant: 'destructive' })
+        return
+      }
+      toast({
+        title: 'Marcado como publicado',
+        description: 'Sale de Recibo.',
+        action: (
+          <ToastAction
+            altText="Deshacer"
+            onClick={() => {
+              void setManualPostedStatus({ ideaId, status: null }).then((undo) => {
+                if (undo.error) toast({ title: 'No se pudo deshacer', description: undo.error, variant: 'destructive' })
+                router.refresh()
+              })
+            }}
+          >
+            Deshacer
+          </ToastAction>
+        ),
+      })
+      router.refresh()
+    })
+  }
+
   return (
     <div className="absolute bottom-3 left-3 flex gap-1.5">
       <Mark on={isSent} disabled={pending || isSent} onClick={markSent} label="Enviado" />
       <Mark on={isApproved} disabled={pending} onClick={toggleApproved} label="Aprobado" />
+      <Mark on={false} disabled={pending} onClick={markPublished} label="Publicado" />
     </div>
   )
 }

@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.120 — 2026-09-25
+
+**Lo que ya está publicado en Metricool sale de Recibo, aunque se haya subido a mano.**
+- Al abrir Recibo se revisa Metricool: si un video de la tarjeta ya está publicado o programado allí, sale de la lista y aparece un aviso. También lo hace el sync de cada mañana.
+- Lo reconoce por el archivo, no por el caption: sirve aunque se haya publicado con otro texto. Un borrador en Metricool no cuenta.
+- Nueva marca **Publicado** en la tarjeta, junto a Enviado y Aprobado, para lo que se publicó con otro archivo. Se puede deshacer desde el aviso.
+- Hoy salen dos de Arecibo Lab que ya estaban publicados: «Conoce A La Doctora» y «Nuevo Laboratorio En Arecibo».
+
+![Recibo sin los videos ya publicados](/changelog/v5.120-recibo-sin-publicados.png)
+
 ## v5.119 — 2026-09-25
 
 **En Recibo cada video se puede bajar.**

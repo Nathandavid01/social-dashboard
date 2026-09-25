@@ -11,8 +11,13 @@ const getEntregasDownloadUrl = vi.fn()
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ from })),
 }))
+const requirePermission = vi.fn(async (..._a: unknown[]) => undefined)
 vi.mock('@/lib/auth/server', () => ({
-  requirePermission: vi.fn(async () => undefined),
+  requirePermission: (...a: unknown[]) => requirePermission(...a),
+}))
+const runReciboPublishedMatch = vi.fn()
+vi.mock('@/lib/recibo/sync-published', () => ({
+  runReciboPublishedMatch: () => runReciboPublishedMatch(),
 }))
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -139,5 +144,35 @@ describe('getReciboIdeaDownloadUrl', () => {
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     expect((await getReciboIdeaDownloadUrl('')).error).toBe('Falta el video')
     expect(getEntregaVideoEditado).not.toHaveBeenCalled()
+  })
+})
+
+describe('syncReciboPublished', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
+    requirePermission.mockResolvedValue(undefined)
+    runReciboPublishedMatch.mockResolvedValue({ linked: 2 })
+  })
+
+  it('pide permiso de Recibo y enlaza lo publicado a mano', async () => {
+    const { syncReciboPublished } = await import('./recibo')
+    expect(await syncReciboPublished()).toEqual({ linked: 2 })
+    expect(requirePermission).toHaveBeenCalledWith('entregas.read')
+    expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
+  })
+
+  it('sin permiso no toca Metricool', async () => {
+    requirePermission.mockRejectedValueOnce(new Error('No autorizado'))
+    const { syncReciboPublished } = await import('./recibo')
+    expect(await syncReciboPublished()).toEqual({ linked: 0, error: 'No autorizado' })
+    expect(runReciboPublishedMatch).not.toHaveBeenCalled()
+  })
+
+  it('abrir Recibo varias veces seguidas consulta Metricool una sola vez por minuto', async () => {
+    const { syncReciboPublished } = await import('./recibo')
+    await syncReciboPublished()
+    expect(await syncReciboPublished()).toEqual({ linked: 0 })
+    expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
   })
 })

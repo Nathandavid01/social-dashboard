@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
 import { getEntregaVideoEditado, getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
 export type StaffClientApproval = 'approved' | 'rejected' | null
@@ -64,6 +65,32 @@ export async function setStaffClientApproval(input: {
   revalidatePath('/entregas')
   revalidatePath('/pool')
   return { ok: true }
+}
+
+const MATCH_EVERY_MS = 60_000
+let lastMatchAt = 0
+
+/**
+ * On opening Recibo: link the cuts the team already posted by hand in Metricool
+ * (same run as the daily cron), so they leave Recibo without waiting a day.
+ * At most once a minute per server instance — Recibo reloads a lot.
+ */
+export async function syncReciboPublished(): Promise<{ linked: number; error?: string }> {
+  try {
+    await requirePermission('entregas.read')
+  } catch (err) {
+    return { linked: 0, error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (Date.now() - lastMatchAt < MATCH_EVERY_MS) return { linked: 0 }
+  lastMatchAt = Date.now()
+
+  const res = await runReciboPublishedMatch()
+  if (res.linked > 0) {
+    revalidatePath('/recibo')
+    revalidatePath('/entregas')
+    revalidatePath('/pool')
+  }
+  return res
 }
 
 /**

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runMetricoolPublishedSync } from '@/lib/metricool/sync'
+import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 import { getAgencyReach } from '@/lib/actions/agency-reach'
 import { cronAuthDenial } from '@/lib/auth/cron'
 
@@ -16,11 +17,17 @@ export async function GET(req: NextRequest) {
   const denial = cronAuthDenial(req)
   if (denial) return NextResponse.json(denial.body, { status: denial.status })
 
+  // First link Recibo cuts the team posted by hand in Metricool, so the sync
+  // below flips the live ones to 'publicada' in this same run. Best-effort.
+  const recibo = await runReciboPublishedMatch().catch((err) => ({
+    linked: 0,
+    error: err instanceof Error ? err.message : String(err),
+  }))
   const result = await runMetricoolPublishedSync()
 
   // Warm the daily reach cache so the login counter reads it instantly (and
   // doesn't recompute 60+ accounts on a visitor's request). Best-effort.
   const reach = await getAgencyReach().catch(() => null)
 
-  return NextResponse.json({ ...result, reachWarmed: reach })
+  return NextResponse.json({ ...result, recibo, reachWarmed: reach })
 }
