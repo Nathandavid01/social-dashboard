@@ -6,6 +6,7 @@ import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
 import { ReciboDeleteButton } from '@/components/recibo/recibo-delete'
+import { ReciboDownloadButton } from '@/components/recibo/recibo-download'
 import { ReciboPublishButton, ReciboStatusMarks } from '@/components/recibo/recibo-card-status'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -225,6 +226,7 @@ export function ReciboBoard({
                   <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
                       const hasEdit = ideaTieneEditadoEntregas(idea)
+                      const editedVideoId = editedEntregasVideoId(idea)
                       const caption = captionOf(idea, captionOverrides)
                       const approved = idea.staff_client_approval === 'approved' || idea.client_review_status === 'approved'
                       return (
@@ -235,8 +237,11 @@ export function ReciboBoard({
                         >
                           <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
-                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedEntregasVideoId(idea) ?? undefined} />
+                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedVideoId ?? undefined} />
                             </div>
+                            {editedVideoId && (
+                              <ReciboDownloadButton ideaId={idea.id} videoId={editedVideoId} title={ideaTitle(idea)} />
+                            )}
                             <ReciboStatusMarks
                               ideaId={idea.id}
                               clientId={idea.client_id}
