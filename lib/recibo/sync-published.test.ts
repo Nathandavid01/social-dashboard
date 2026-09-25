@@ -25,6 +25,8 @@ let ideaRows: unknown[] = []
 /** When set, each `range(from, to)` read gets pages[from / 1000]. */
 let pages: unknown[][] | null = null
 let takenRows: { metricool_post_id: number }[] = []
+let takenError: { message: string } | null = null
+let clientUpdateError: { message: string } | null = null
 let updateReturns: unknown = { id: 'x' }
 let clientUpdateReturns: unknown = [{ id: 'arecibo' }]
 
@@ -32,11 +34,14 @@ function builder(table: string) {
   const op: Op = { table, kind: 'select', filters: [] }
   ops.push(op)
   const result = () => {
-    if (op.kind === 'update') return { data: table === 'clients' ? clientUpdateReturns : updateReturns, error: null }
+    if (op.kind === 'update') {
+      return table === 'clients'
+        ? { data: clientUpdateError ? null : clientUpdateReturns, error: clientUpdateError }
+        : { data: updateReturns, error: null }
+    }
     if (table === 'clients') return { data: [{ id: 'arecibo' }, { id: 'delian' }], error: null }
-    if (op.filters.some((f) => f.startsWith('in metricool_post_id'))) return { data: takenRows, error: null }
-    const range = op.filters.find((f) => f.startsWith('range '))
-    if (pages && range) return { data: pages[Number(range.slice(6).split('-')[0]) / 1000] ?? [], error: null }
+    if (op.filters.some((f) => f.startsWith('in metricool_post_id'))) return { data: takenError ? null : takenRows, error: takenError }
+    if (pages) return { data: pages[op.filters.some((f) => f.startsWith('gt id=')) ? 1 : 0] ?? [], error: null }
     return { data: ideaRows, error: null }
   }
   const b: Record<string, unknown> = {
@@ -50,6 +55,8 @@ function builder(table: string) {
     or: (expr: string) => { op.filters.push(`or ${expr}`); return b },
     order: () => b,
     range: (from: number, to: number) => { op.filters.push(`range ${from}-${to}`); return b },
+    gt: (col: string, val: unknown) => { op.filters.push(`gt ${col}=${val}`); return b },
+    limit: (n: number) => { op.filters.push(`limit ${n}`); return b },
     maybeSingle: async () => result(),
     then: (resolve: (v: unknown) => unknown) => resolve(result()),
   }
@@ -73,11 +80,15 @@ let sizes: Record<string, number> = {}
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // The module caches measured sizes per URL: a fresh module per test.
+  vi.resetModules()
   ops.length = 0
   updateReturns = { id: 'x' }
   clientUpdateReturns = [{ id: 'arecibo' }]
   profiles = []
   pages = null
+  takenError = null
+  clientUpdateError = null
   takenRows = []
   sizes = {}
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
@@ -129,7 +140,7 @@ describe('runReciboPublishedMatch', () => {
     const read = ops.find((op) => op.table === 'content_ideas' && op.kind === 'select')
     expect(read?.filters).toEqual(expect.arrayContaining([
       'not status in (descartada,publicada)', 'is metricool_post_id=null', 'is posted_at=null', 'is published_at=null',
-      'eq videos.kind=edited', 'range 0-999',
+      'eq videos.kind=edited', 'limit 1000',
     ]))
     expect(getScheduledPosts).not.toHaveBeenCalled()
   })
@@ -194,8 +205,9 @@ describe('runReciboPublishedMatch', () => {
     sizes['https://m/u.mp4'] = 7
     getScheduledPosts.mockResolvedValue([post(1, 'https://m/u.mp4')])
     expect(await run()).toEqual({ linked: 1 })
-    const reads = ops.filter((op) => op.table === 'content_ideas' && op.kind === 'select' && op.filters.some((f) => f.startsWith('range')))
-    expect(reads.map((op) => op.filters.find((f) => f.startsWith('range')))).toEqual(['range 0-999', 'range 1000-1999'])
+    // Por id (keyset), no por offset: si otra corrida enlaza ideas a la vez, no se salta ninguna.
+    const reads = ops.filter((op) => op.table === 'content_ideas' && op.kind === 'select' && op.filters.includes('limit 1000'))
+    expect(reads.map((op) => op.filters.find((f) => f.startsWith('gt id=')) ?? 'primera')).toEqual(['primera', 'gt id=p999'])
     expect(updates()[0].filters[0]).toBe('eq id=ultima')
   })
 
@@ -210,7 +222,8 @@ describe('runReciboPublishedMatch', () => {
 
     const clientUpdate = ops.find((op) => op.table === 'clients' && op.kind === 'update')
     expect(clientUpdate?.payload).toEqual({ metricool_blog_id: '6278882' })
-    expect(clientUpdate?.filters).toEqual(['eq id=arecibo', 'or metricool_blog_id.is.null,metricool_blog_id.eq.'])
+    // Compare-and-swap contra el valor que se leyó ('' aquí): nunca pisa uno que alguien guardó entre medio.
+    expect(clientUpdate?.filters).toEqual(['eq id=arecibo', 'eq metricool_blog_id='])
     expect(updates().filter((op) => op.table === 'content_ideas')).toHaveLength(1)
   })
 
@@ -235,5 +248,57 @@ describe('runReciboPublishedMatch', () => {
     getScheduledPosts.mockResolvedValue([])
     await run()
     expect(getScheduledPosts.mock.calls[0][1]).toBe('2026-09-06T10:00:00')
+  })
+  it('un blog guardado solo con espacios también se completa (compara con el valor leído)', async () => {
+    ideaRows = [onRecibo('nuevo', 100, { client: { status: 'active', name: 'Arecibo Lab', metricool_blog_id: '  ' } })]
+    profiles = [{ id: 6278882, label: 'Arecibo Lab' }]
+    sizes['https://m/a.mp4'] = 100
+    getScheduledPosts.mockResolvedValue([post(1, 'https://m/a.mp4')])
+    expect(await run()).toEqual({ linked: 1 })
+    expect(ops.find((op) => op.table === 'clients' && op.kind === 'update')?.filters).toEqual(['eq id=arecibo', 'eq metricool_blog_id=  '])
+  })
+
+  it('si falla guardar el blog, lo dice y no enlaza', async () => {
+    ideaRows = [onRecibo('nuevo', 100, { client: { status: 'active', name: 'Arecibo Lab', metricool_blog_id: null } })]
+    profiles = [{ id: 6278882, label: 'Arecibo Lab' }]
+    sizes['https://m/a.mp4'] = 100
+    getScheduledPosts.mockResolvedValue([post(1, 'https://m/a.mp4')])
+    clientUpdateError = { message: 'permission denied' }
+    const res = await run()
+    expect(res.linked).toBe(0)
+    expect(res.error).toMatch(/permission denied/)
+    expect(updates().filter((op) => op.table === 'content_ideas')).toEqual([])
+  })
+
+  it('no guarda el blog si el único post que casa ya es de otra idea', async () => {
+    ideaRows = [onRecibo('copia', 100, { client: { status: 'active', name: 'Arecibo Lab', metricool_blog_id: null } })]
+    profiles = [{ id: 6278882, label: 'Arecibo Lab' }]
+    sizes['https://m/p.mp4'] = 100
+    getScheduledPosts.mockResolvedValue([post(55, 'https://m/p.mp4')])
+    takenRows = [{ metricool_post_id: 55 }]
+    expect(await run()).toEqual({ linked: 0 })
+    expect(updates()).toEqual([])
+  })
+
+  it('si no se puede comprobar qué posts ya son de otra idea, no enlaza nada', async () => {
+    ideaRows = [onRecibo('nuevo', 100)]
+    sizes['https://m/p.mp4'] = 100
+    getScheduledPosts.mockResolvedValue([post(1, 'https://m/p.mp4')])
+    takenError = { message: 'timeout' }
+    const res = await run()
+    expect(res.linked).toBe(0)
+    expect(res.error).toMatch(/timeout/)
+    expect(updates()).toEqual([])
+  })
+
+  it('pasado el plazo no mide ni escribe nada (el cron sigue con su sync)', async () => {
+    ideaRows = [onRecibo('nuevo', 100)]
+    sizes['https://m/p.mp4'] = 100
+    getScheduledPosts.mockResolvedValue([post(1, 'https://m/p.mp4')])
+    const { runReciboPublishedMatch } = await import('./sync-published')
+    const res = await runReciboPublishedMatch({ deadline: Date.now() - 1 })
+    expect(res).toEqual({ linked: 0, error: 'El cruce de Recibo tardó demasiado.' })
+    expect(fetch).not.toHaveBeenCalled()
+    expect(updates()).toEqual([])
   })
 })

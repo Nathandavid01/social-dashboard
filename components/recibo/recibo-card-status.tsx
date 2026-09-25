@@ -80,6 +80,7 @@ export function ReciboStatusMarks({
             onClick={() => {
               void setManualPostedStatus({ ideaId, status: postedStatus }).then((undo) => {
                 if (undo.error) toast({ title: 'No se pudo deshacer', description: undo.error, variant: 'destructive' })
+                else setPublished(false)
                 router.refresh()
               })
             }}

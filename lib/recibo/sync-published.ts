@@ -21,6 +21,14 @@ type CandidateIdea = Omit<ReciboQueueIdea, 'client' | 'videos'> & {
   videos?: (NonNullable<ReciboQueueIdea['videos']>[number] & { size_bytes?: number | null; uploaded_at?: string | null })[] | null
 }
 
+type ClientMatches = {
+  clientId: string
+  blogId: string
+  /** metricool_blog_id exactly as read — null/blank means the blog was found by name. */
+  readBlogId: string | null
+  matches: ReciboPublishedMatch<ScheduledPost>[]
+}
+
 const DAY = 24 * 60 * 60 * 1000
 /** Before the first cut was uploaded nothing could have been posted; a margin covers re-registered files. */
 const LOOKBACK_DAYS = 14
@@ -29,6 +37,7 @@ const FALLBACK_LOOKBACK_DAYS = 60
 const LOOKAHEAD_DAYS = 90
 const PAGE = 1000
 const HEADS_AT_ONCE = 6
+const TOO_LATE: ReciboPublishedSyncResult = { linked: 0, error: 'El cruce de Recibo tardó demasiado.' }
 
 // Metricool media URLs are immutable: a size measured once stays true.
 const sizeCache = new Map<string, number>()
@@ -47,11 +56,11 @@ async function mediaSize(url: string): Promise<number | undefined> {
   }
 }
 
-async function measureAll(urls: string[]): Promise<Map<string, number | undefined>> {
+async function measureAll(urls: string[], late: () => boolean): Promise<Map<string, number | undefined>> {
   const sizes = new Map<string, number | undefined>()
   let next = 0
   const worker = async () => {
-    while (next < urls.length) {
+    while (next < urls.length && !late()) {
       const url = urls[next++]
       sizes.set(url, await mediaSize(url))
     }
@@ -60,11 +69,16 @@ async function measureAll(urls: string[]): Promise<Map<string, number | undefine
   return sizes
 }
 
-/** Unlinked, unpublished ideas that have an edited cut — every page, not just PostgREST's first 1000 rows. */
+/**
+ * Unlinked, unpublished ideas that have an edited cut — every page, not just
+ * PostgREST's first 1000 rows. Keyset by id, so a concurrent run linking ideas
+ * can't shift rows past a page boundary.
+ */
 async function loadCandidates(supabase: SupabaseClient): Promise<{ rows: CandidateIdea[]; error?: string }> {
   const rows: CandidateIdea[] = []
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase
+  let after: string | null = null
+  for (;;) {
+    let query = supabase
       .from('content_ideas')
       .select(
         'id, client_id, status, published_at, manual_posted_status, metricool_post_id, posted_at, staff_client_approval, client_review_status, client:clients!content_ideas_client_id_fkey(status, name, metricool_blog_id), videos:content_idea_videos!content_idea_videos_idea_id_fkey!inner(kind, status, storage_provider, uploaded_by, uploaded_at, size_bytes)',
@@ -74,11 +88,13 @@ async function loadCandidates(supabase: SupabaseClient): Promise<{ rows: Candida
       .is('posted_at', null)
       .is('published_at', null)
       .eq('videos.kind', 'edited')
-      .order('id')
-      .range(from, from + PAGE - 1)
+    if (after) query = query.gt('id', after)
+    const { data, error } = await query.order('id').limit(PAGE)
     if (error) return { rows, error: error.message }
-    rows.push(...((data ?? []) as CandidateIdea[]))
-    if (!data || data.length < PAGE) return { rows }
+    const page = (data ?? []) as CandidateIdea[]
+    rows.push(...page)
+    if (page.length < PAGE) return { rows }
+    after = page[page.length - 1].id
   }
 }
 
@@ -97,9 +113,11 @@ function windowStart(ideas: CandidateIdea[], now: number): string {
  * the whole existing machinery applies: Recibo drops it as agendado, and
  * runMetricoolPublishedSync flips it to 'publicada' once it's live everywhere.
  * Writes only rows still unlinked and with no send in flight, so it never
- * overrides a dashboard send.
+ * overrides a dashboard send. Past `deadline` it measures and writes nothing.
  */
-export async function runReciboPublishedMatch(): Promise<ReciboPublishedSyncResult> {
+export async function runReciboPublishedMatch(options: { deadline?: number } = {}): Promise<ReciboPublishedSyncResult> {
+  const late = () => options.deadline !== undefined && Date.now() > options.deadline
+  if (late()) return TOO_LATE
   const base = getServerConfig()
   if (!base) return { linked: 0, error: 'Metricool no está configurado.' }
   const supabase = createAdminClient()
@@ -127,59 +145,71 @@ export async function runReciboPublishedMatch(): Promise<ReciboPublishedSyncResu
   const end = new Date(now + LOOKAHEAD_DAYS * DAY).toISOString().slice(0, 19)
 
   const perClient = await Promise.allSettled(
-    [...byClient].map(async ([clientId, ideas]) => {
-      const saved = ideas[0].client?.metricool_blog_id?.trim() || null
-      const blogId = saved || matchMetricoolBlogId(ideas[0].client?.name ?? '', profiles)
-      if (!blogId) return []
+    [...byClient].map(async ([clientId, ideas]): Promise<ClientMatches | null> => {
+      const readBlogId = ideas[0].client?.metricool_blog_id ?? null
+      const blogId = readBlogId?.trim() || matchMetricoolBlogId(ideas[0].client?.name ?? '', profiles)
+      if (!blogId) return null
       const posts = await getScheduledPosts({ ...base, blogId }, windowStart(ideas, now), end)
-      const sizes = await measureAll(measurableMedia(posts))
-      const matches = matchReciboPublished(ideas, posts, (url) => sizes.get(url))
-      // The daily sync only reads saved blog ids: a blog found by name must be
-      // saved first — a byte-exact match proves it's this client's — or the
-      // linked post would look "missing" every morning.
-      if (matches.length > 0 && !saved && !(await saveBlogId(supabase, clientId, blogId))) return []
-      return matches
+      const sizes = await measureAll(measurableMedia(posts), late)
+      return { clientId, blogId, readBlogId, matches: matchReciboPublished(ideas, posts, (url) => sizes.get(url)) }
     }),
   )
+  if (late()) return TOO_LATE
+
+  const errors: string[] = []
   const failed = perClient.filter((r) => r.status === 'rejected').length
-  let matches = perClient.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  if (failed) errors.push(`Metricool no respondió para ${failed} cliente(s).`)
+  const found = perClient.flatMap((r) => (r.status === 'fulfilled' && r.value?.matches.length ? [r.value] : []))
 
   // A post that already belongs to another idea (same file registered twice) is not this cut's.
-  if (matches.length > 0) {
-    const { data: taken } = await supabase
+  // If that can't be checked, nothing is linked.
+  const postIds = found.flatMap((c) => c.matches.map((m) => m.post.id))
+  if (postIds.length > 0) {
+    const { data: taken, error: takenErr } = await supabase
       .from('content_ideas')
       .select('metricool_post_id')
-      .in('metricool_post_id', matches.map((m) => m.post.id))
+      .in('metricool_post_id', postIds)
+    if (takenErr) return { linked: 0, error: takenErr.message }
     const takenIds = new Set((taken ?? []).map((row) => row.metricool_post_id as number))
-    matches = matches.filter((m) => !takenIds.has(m.post.id))
+    for (const c of found) c.matches = c.matches.filter((m) => !takenIds.has(m.post.id))
   }
 
-  const clientOf = new Map(board.map((idea) => [idea.id, idea.client_id]))
   let linked = 0
-  for (const match of matches) {
-    if (await linkIdea(supabase, match)) {
+  for (const client of found) {
+    if (client.matches.length === 0) continue
+    // The daily sync only reads saved blog ids: a blog found by name is saved
+    // first — a byte-exact match proves it's this client's — or the linked
+    // post would look "missing" every morning.
+    if (!client.readBlogId?.trim()) {
+      const saved = await saveBlogId(supabase, client)
+      if (saved.error) errors.push(saved.error)
+      if (!saved.ok) continue
+    }
+    for (const match of client.matches) {
+      if (!(await linkIdea(supabase, match))) continue
       linked += 1
       await logIdeaActivity(supabase, {
         ideaId: match.ideaId,
         action: 'posted_to_metricool',
-        clientId: clientOf.get(match.ideaId) ?? null,
+        clientId: client.clientId,
         userId: null,
         metadata: { source: 'metricool_match', metricoolPostId: match.post.id },
       })
     }
   }
 
-  return failed ? { linked, error: `Metricool no respondió para ${failed} cliente(s).` } : { linked }
+  return errors.length ? { linked, error: errors.join(' ') } : { linked }
 }
 
-async function saveBlogId(supabase: SupabaseClient, clientId: string, blogId: string): Promise<boolean> {
-  const { data } = await supabase
-    .from('clients')
-    .update({ metricool_blog_id: blogId })
-    .eq('id', clientId)
-    .or('metricool_blog_id.is.null,metricool_blog_id.eq.')
-    .select('id')
-  return (data ?? []).length > 0
+/** Compare-and-swap against the value read: never overwrites a blog someone saved meanwhile. */
+async function saveBlogId(supabase: SupabaseClient, client: ClientMatches): Promise<{ ok: boolean; error?: string }> {
+  const update = supabase.from('clients').update({ metricool_blog_id: client.blogId }).eq('id', client.clientId)
+  const { data, error } = await (client.readBlogId === null
+    ? update.is('metricool_blog_id', null)
+    : update.eq('metricool_blog_id', client.readBlogId)
+  ).select('id')
+  if (error) return { ok: false, error: error.message }
+  return { ok: (data ?? []).length > 0 }
 }
 
 async function linkIdea(supabase: SupabaseClient, { ideaId, post }: ReciboPublishedMatch<ScheduledPost>): Promise<boolean> {

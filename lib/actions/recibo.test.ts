@@ -17,7 +17,7 @@ vi.mock('@/lib/auth/server', () => ({
 }))
 const runReciboPublishedMatch = vi.fn()
 vi.mock('@/lib/recibo/sync-published', () => ({
-  runReciboPublishedMatch: () => runReciboPublishedMatch(),
+  runReciboPublishedMatch: (options?: unknown) => runReciboPublishedMatch(options),
 }))
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -160,6 +160,10 @@ describe('syncReciboPublished', () => {
     expect(await syncReciboPublished()).toEqual({ linked: 2 })
     expect(requirePermission).toHaveBeenCalledWith('entregas.read')
     expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
+    // Plazo corto: la server action tiene su propio límite en Vercel.
+    const { deadline } = runReciboPublishedMatch.mock.calls[0][0] as { deadline: number }
+    expect(deadline - Date.now()).toBeGreaterThan(5_000)
+    expect(deadline - Date.now()).toBeLessThanOrEqual(8_000)
   })
 
   it('sin permiso no toca Metricool', async () => {

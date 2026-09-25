@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { runMetricoolPublishedSync } from '@/lib/metricool/sync'
-import { runReciboPublishedMatch, type ReciboPublishedSyncResult } from '@/lib/recibo/sync-published'
+import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 import { getAgencyReach } from '@/lib/actions/agency-reach'
 import { cronAuthDenial } from '@/lib/auth/cron'
 
@@ -22,10 +22,12 @@ export async function GET(req: NextRequest) {
 
   // First link Recibo cuts the team posted by hand in Metricool, so the sync
   // below flips the live ones to 'publicada' in this same run. Best-effort.
-  const recibo = await Promise.race<ReciboPublishedSyncResult>([
-    runReciboPublishedMatch(),
-    new Promise((resolve) => setTimeout(() => resolve({ linked: 0, error: 'El cruce de Recibo tardó demasiado.' }), RECIBO_BUDGET_MS)),
-  ]).catch((err) => ({ linked: 0, error: err instanceof Error ? err.message : String(err) }))
+  // A deadline the match honours (no measuring or writing past it), not a race:
+  // a raced run would keep writing after the response is sent.
+  const recibo = await runReciboPublishedMatch({ deadline: Date.now() + RECIBO_BUDGET_MS }).catch((err) => ({
+    linked: 0,
+    error: err instanceof Error ? err.message : String(err),
+  }))
   const result = await runMetricoolPublishedSync()
 
   // Warm the daily reach cache so the login counter reads it instantly (and

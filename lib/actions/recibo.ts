@@ -37,6 +37,7 @@ export async function setManualPostedStatus(input: {
   revalidatePath('/recibo')
   revalidatePath('/entregas')
   revalidatePath('/pool')
+  revalidatePath('/calendar')
   return { ok: true }
 }
 
@@ -68,6 +69,8 @@ export async function setStaffClientApproval(input: {
 }
 
 const MATCH_EVERY_MS = 60_000
+/** Well inside the server action's own time limit, so a slow run stops before writing. */
+const MATCH_BUDGET_MS = 8_000
 let lastMatchAt = 0
 
 /**
@@ -84,7 +87,7 @@ export async function syncReciboPublished(): Promise<{ linked: number; error?: s
   if (Date.now() - lastMatchAt < MATCH_EVERY_MS) return { linked: 0 }
   lastMatchAt = Date.now()
 
-  const res = await runReciboPublishedMatch()
+  const res = await runReciboPublishedMatch({ deadline: Date.now() + MATCH_BUDGET_MS })
   if (res.linked > 0) {
     revalidatePath('/recibo')
     revalidatePath('/entregas')

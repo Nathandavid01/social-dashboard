@@ -65,6 +65,9 @@ describe('ReciboStatusMarks — Publicado', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
     await waitFor(() => expect(setManualPostedStatus).toHaveBeenLastCalledWith({ ideaId: 'i1', status: null }))
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(2))
+    // Si la tarjeta sigue en pantalla, la marca vuelve a quedar disponible.
+    expect(screen.getAllByRole('button', { name: 'Publicado' })[0]).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getAllByRole('button', { name: 'Publicado' })[0]).toBeEnabled()
   })
 
   it('Deshacer devuelve el estado que tenía (no lo borra)', async () => {
