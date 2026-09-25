@@ -10,6 +10,7 @@ import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { notifyVideoUploaded } from '@/lib/utils/video-upload-notify'
 import { r2Client, r2Bucket, isR2Configured, isR2PublicConfigured, r2PublicUrl } from '@/lib/integrations/r2'
 import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
+import { attachmentDisposition } from '@/lib/utils/content-disposition'
 import type { ContentIdeaVideoKind } from '@/lib/supabase/types'
 
 function slugify(name: string): string {
@@ -240,7 +241,7 @@ export async function getR2DownloadUrl(videoId: string): Promise<{ url?: string;
       new GetObjectCommand({
         Bucket: r2Bucket(),
         Key: video.drive_file_id,
-        ResponseContentDisposition: `attachment; filename="${video.name}"`,
+        ResponseContentDisposition: attachmentDisposition(video.name),
       }),
       { expiresIn: 60 * 60 },
     )
