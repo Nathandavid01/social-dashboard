@@ -6,6 +6,7 @@ const from = vi.fn(() => ({ update }))
 
 const getEntregaVideoEditado = vi.fn()
 const getEntregasPreviewUrl = vi.fn()
+const getEntregasDownloadUrl = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ from })),
@@ -19,6 +20,7 @@ vi.mock('next/cache', () => ({
 vi.mock('@/lib/actions/entregas-r2', () => ({
   getEntregaVideoEditado: (...a: unknown[]) => getEntregaVideoEditado(...a),
   getEntregasPreviewUrl: (...a: unknown[]) => getEntregasPreviewUrl(...a),
+  getEntregasDownloadUrl: (...a: unknown[]) => getEntregasDownloadUrl(...a),
 }))
 
 describe('recibo manual flags', () => {
@@ -92,5 +94,50 @@ describe('getReciboIdeaPreviewUrl', () => {
     const res = await getReciboIdeaPreviewUrl('idea-2')
     expect(res.error).toMatch(/Sin video editado/i)
     expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+  })
+})
+
+describe('getReciboIdeaDownloadUrl', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('downloads the same cut the card is showing', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v7' })
+    getEntregasDownloadUrl.mockResolvedValue({ url: 'https://signed.example/v7.mp4?attachment' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
+    expect(getEntregaVideoEditado).toHaveBeenCalledWith('outfit')
+    expect(getEntregasDownloadUrl).toHaveBeenCalledWith('v7')
+    expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+    expect(res.url).toBe('https://signed.example/v7.mp4?attachment')
+  })
+
+  it('refuses a newer cut than the one on the card instead of downloading it', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v8' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
+    expect(res.error).toMatch(/video cambió/i)
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('returns Sin video editado when the idea has no usable cut', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: null })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('idea-2')).error).toMatch(/Sin video editado/i)
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('passes the permission error through without signing', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ error: 'No autorizado' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('idea-3', 'v1')).error).toBe('No autorizado')
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('rejects an empty idea id', async () => {
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('')).error).toBe('Falta el video')
+    expect(getEntregaVideoEditado).not.toHaveBeenCalled()
   })
 })

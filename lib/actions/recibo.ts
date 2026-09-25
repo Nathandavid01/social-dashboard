@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { getEntregaVideoEditado, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getEntregaVideoEditado, getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
 export type StaffClientApproval = 'approved' | 'rejected' | null
@@ -74,6 +74,27 @@ export async function getReciboIdeaPreviewUrl(
   ideaId: string,
   expectedVideoId?: string,
 ): Promise<{ url?: string; error?: string }> {
+  const edited = await currentReciboCut(ideaId, expectedVideoId)
+  return edited.id ? getEntregasPreviewUrl(edited.id) : { error: edited.error }
+}
+
+/**
+ * Presigned GET that forces a download of the cut the card is showing — "Bajar".
+ * Same pin as the preview: a newer upload means the card is stale, so it
+ * refuses instead of handing over a cut nobody on Recibo has seen.
+ */
+export async function getReciboIdeaDownloadUrl(
+  ideaId: string,
+  expectedVideoId?: string,
+): Promise<{ url?: string; error?: string }> {
+  const edited = await currentReciboCut(ideaId, expectedVideoId)
+  return edited.id ? getEntregasDownloadUrl(edited.id) : { error: edited.error }
+}
+
+async function currentReciboCut(
+  ideaId: string,
+  expectedVideoId?: string,
+): Promise<{ id?: string; error?: string }> {
   if (!ideaId) return { error: 'Falta el video' }
 
   const edited = await getEntregaVideoEditado(ideaId)
@@ -82,6 +103,5 @@ export async function getReciboIdeaPreviewUrl(
   if (expectedVideoId && edited.id !== expectedVideoId) {
     return { error: 'El video cambió. Vuelve a cargar Recibo.' }
   }
-
-  return getEntregasPreviewUrl(edited.id)
+  return { id: edited.id }
 }

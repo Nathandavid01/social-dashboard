@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.119 — 2026-09-25
+
+**En Recibo cada video se puede bajar.**
+- Botón **Bajar** arriba a la izquierda de cada tarjeta con video editado, también en las entregas puntuales.
+- Baja el mismo corte que se ve en la tarjeta. Si alguien subió otro mientras Recibo estaba abierto, avisa que hay que recargar en vez de bajar uno que no has visto.
+- Funciona en computadora y en el celular (en el iPhone el reproductor no deja descargar).
+- Los nombres con acentos o «—» ya no llegan rotos al bajar, aquí ni en Entregas («La Güira 48.mp4», no «La GÃ¼ira 48.mp4»).
+
+![Recibo con el botón Bajar](/changelog/v5.119-recibo-bajar.png)
+
 ## v5.118 — 2026-09-24
 
 **Recibo cuenta los videos de AI que ya están publicados en Metricool.**

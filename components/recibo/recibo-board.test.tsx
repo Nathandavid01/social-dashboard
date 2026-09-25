@@ -11,6 +11,7 @@ vi.mock('@/lib/actions/recibo', () => ({
   setManualPostedStatus: vi.fn(),
   setStaffClientApproval: vi.fn(),
   getReciboIdeaPreviewUrl: vi.fn(async () => ({ url: 'https://signed.example/play.mp4' })),
+  getReciboIdeaDownloadUrl: vi.fn(async () => ({ url: 'https://signed.example/download.mp4' })),
 }))
 vi.mock('@/lib/actions/recibo-captions', () => ({
   fillReciboCaption: vi.fn(async () => ({ ok: true, caption: 'Caption nuevo desde Metricool' })),
@@ -40,7 +41,7 @@ import { rangoSemana } from '@/lib/entregas/dias'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
-import { getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
+import { getReciboIdeaDownloadUrl, getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
 import { ReciboBoard } from './recibo-board'
 
 /** Dated inside the current week so the week filter still includes the card. */
@@ -253,5 +254,24 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
     render(<ReciboBoard ideas={[editedIdea, farmacia]} aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} />)
     expect(screen.getAllByTestId('recibo-ai-badge')).toHaveLength(1)
     expect(screen.getByText('Farmacia Buena Vida')).toBeInTheDocument()
+  })
+
+  it('cada tarjeta con corte tiene «Bajar» y baja ese mismo archivo', async () => {
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Bajar Reel playa' }))
+    await waitFor(() => expect(getReciboIdeaDownloadUrl).toHaveBeenCalledWith('i1', 'v1'))
+    await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
+    click.mockRestore()
+  })
+
+  it('la entrega puntual (cliente humano) también se puede bajar', () => {
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    expect(screen.getByRole('button', { name: 'Bajar Reel playa' })).toBeInTheDocument()
+  })
+
+  it('sin corte editado no hay nada que bajar', () => {
+    render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[bareIdea]} />)
+    expect(screen.queryByRole('button', { name: /^Bajar/ })).not.toBeInTheDocument()
   })
 })

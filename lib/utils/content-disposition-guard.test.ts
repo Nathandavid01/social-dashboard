@@ -1,17 +1,22 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import { execSync } from 'node:child_process'
 
 /**
- * Guard de clase: ninguna descarga arma `attachment; filename="${…}"` a mano.
- * R2 reenvía ese header con bytes UTF-8 crudos y los nombres con acentos o «—»
- * llegan rotos. Toda descarga pasa por attachmentDisposition().
+ * Guard de clase: cada URL firmada de R2 se sirve `'inline'` o con
+ * attachmentDisposition(). Un `attachment; filename="…"` armado a mano viaja con
+ * bytes UTF-8 crudos y los nombres con acentos o «—» llegan rotos.
  */
 describe('Content-Disposition de descargas', () => {
-  it('no hay filename interpolado a mano en app/, lib/ ni components/', () => {
-    const hits = execSync(
-      `git grep -nE "attachment; filename=\\"\\\\$\\{" -- app lib components ':!*.test.ts' ':!*.test.tsx' || true`,
+  it("todo ResponseContentDisposition es 'inline' o attachmentDisposition()", () => {
+    const lines = execSync(
+      `git grep -n "ResponseContentDisposition:" -- app lib components ':!*.test.ts' ':!*.test.tsx' || true`,
       { encoding: 'utf8' },
-    ).trim()
-    expect(hits).toBe('')
+    ).trim().split('\n').filter(Boolean)
+    expect(lines.length).toBeGreaterThan(0)
+    const offenders = lines.filter(
+      (line) => !/ResponseContentDisposition:\s*('inline'|attachmentDisposition\()/.test(line),
+    )
+    expect(offenders).toEqual([])
   })
 })
