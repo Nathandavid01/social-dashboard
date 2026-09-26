@@ -1,0 +1,241 @@
+{
+	"systeminfo": "WHISPER : VITISAI = 0 | COREML = 0 | OPENVINO = 0 | MTL : EMBED_LIBRARY = 1 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | MATMUL_INT8 = 1 | DOTPROD = 1 | SME = 1 | ACCELERATE = 1 | OPENMP = 1 | REPACK = 1 | ",
+	"model": {
+		"type": "small",
+		"multilingual": true,
+		"vocab": 51865,
+		"audio": {
+			"ctx": 1500,
+			"state": 768,
+			"head": 12,
+			"layer": 12
+		},
+		"text": {
+			"ctx": 448,
+			"state": 768,
+			"head": 12,
+			"layer": 12
+		},
+		"mels": 80,
+		"ftype": 1
+	},
+	"params": {
+		"model": "$TMPDIR/eduardo-ggml-small.bin",
+		"language": "es",
+		"translate": false
+	},
+	"result": {
+		"language": "es"
+	},
+	"transcription": [
+		{
+			"timestamps": {
+				"from": "00:00:00,000",
+				"to": "00:00:03,800"
+			},
+			"offsets": {
+				"from": 0,
+				"to": 3800
+			},
+			"text": " Pero, el humor es de VW, Lambo.",
+			"tokens": [
+				{
+					"text": "[_BEG_]",
+					"timestamps": {
+						"from": "00:00:00,000",
+						"to": "00:00:00,000"
+					},
+					"offsets": {
+						"from": 0,
+						"to": 0
+					},
+					"id": 50364,
+					"p": 0.996884,
+					"t_dtw": -1
+				},
+				{
+					"text": " Pero",
+					"timestamps": {
+						"from": "00:00:00,080",
+						"to": "00:00:00,400"
+					},
+					"offsets": {
+						"from": 80,
+						"to": 400
+					},
+					"id": 9377,
+					"p": 0.793755,
+					"t_dtw": -1
+				},
+				{
+					"text": ",",
+					"timestamps": {
+						"from": "00:00:00,460",
+						"to": "00:00:00,640"
+					},
+					"offsets": {
+						"from": 460,
+						"to": 640
+					},
+					"id": 11,
+					"p": 0.346907,
+					"t_dtw": -1
+				},
+				{
+					"text": " el",
+					"timestamps": {
+						"from": "00:00:00,670",
+						"to": "00:00:00,920"
+					},
+					"offsets": {
+						"from": 670,
+						"to": 920
+					},
+					"id": 806,
+					"p": 0.836766,
+					"t_dtw": -1
+				},
+				{
+					"text": " humor",
+					"timestamps": {
+						"from": "00:00:01,270",
+						"to": "00:00:01,490"
+					},
+					"offsets": {
+						"from": 1270,
+						"to": 1490
+					},
+					"id": 14318,
+					"p": 0.0657619,
+					"t_dtw": -1
+				},
+				{
+					"text": " es",
+					"timestamps": {
+						"from": "00:00:01,490",
+						"to": "00:00:01,720"
+					},
+					"offsets": {
+						"from": 1490,
+						"to": 1720
+					},
+					"id": 785,
+					"p": 0.869355,
+					"t_dtw": -1
+				},
+				{
+					"text": " de",
+					"timestamps": {
+						"from": "00:00:01,720",
+						"to": "00:00:01,950"
+					},
+					"offsets": {
+						"from": 1720,
+						"to": 1950
+					},
+					"id": 368,
+					"p": 0.37747,
+					"t_dtw": -1
+				},
+				{
+					"text": " V",
+					"timestamps": {
+						"from": "00:00:01,950",
+						"to": "00:00:02,060"
+					},
+					"offsets": {
+						"from": 1950,
+						"to": 2060
+					},
+					"id": 691,
+					"p": 0.927408,
+					"t_dtw": -1
+				},
+				{
+					"text": "W",
+					"timestamps": {
+						"from": "00:00:02,060",
+						"to": "00:00:02,170"
+					},
+					"offsets": {
+						"from": 2060,
+						"to": 2170
+					},
+					"id": 54,
+					"p": 0.99422,
+					"t_dtw": -1
+				},
+				{
+					"text": ",",
+					"timestamps": {
+						"from": "00:00:02,170",
+						"to": "00:00:02,400"
+					},
+					"offsets": {
+						"from": 2170,
+						"to": 2400
+					},
+					"id": 11,
+					"p": 0.747933,
+					"t_dtw": -1
+				},
+				{
+					"text": " Lamb",
+					"timestamps": {
+						"from": "00:00:02,400",
+						"to": "00:00:02,860"
+					},
+					"offsets": {
+						"from": 2400,
+						"to": 2860
+					},
+					"id": 19302,
+					"p": 0.285949,
+					"t_dtw": -1
+				},
+				{
+					"text": "o",
+					"timestamps": {
+						"from": "00:00:02,860",
+						"to": "00:00:03,000"
+					},
+					"offsets": {
+						"from": 2860,
+						"to": 3000
+					},
+					"id": 78,
+					"p": 0.959254,
+					"t_dtw": -1
+				},
+				{
+					"text": ".",
+					"timestamps": {
+						"from": "00:00:03,000",
+						"to": "00:00:03,770"
+					},
+					"offsets": {
+						"from": 3000,
+						"to": 3770
+					},
+					"id": 13,
+					"p": 0.942626,
+					"t_dtw": -1
+				},
+				{
+					"text": "[_TT_190]",
+					"timestamps": {
+						"from": "00:00:03,800",
+						"to": "00:00:03,800"
+					},
+					"offsets": {
+						"from": 3800,
+						"to": 3800
+					},
+					"id": 50554,
+					"p": 0.014248,
+					"t_dtw": -1
+				}
+			]
+		}
+	]
+}

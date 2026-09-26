@@ -1,0 +1,17 @@
+{
+  "output": "Restauco-Fall-Winter-v2.mp4",
+  "output_sha256": "700ba09f1a71400b21fbb180bfdc8df0462463103f7c09a54d8741e6836201a0",
+  "verification": {
+    "full_decode": true,
+    "duration": "19.600000",
+    "expected_duration": 19.6
+  },
+  "outro_source": "$HOME/Downloads/RESTAUCOOUTROINGLES.mp4",
+  "outro_sha256": "6122c347f74872ec7f0f98c17ce6def59510528a119d838b87d6a26219b28897",
+  "outro_start": 14.066666666666666,
+  "outro_duration": 5.533333333333333,
+  "captions": "Preserved from v1",
+  "music_source": "$HOME/Downloads/WhatsApp Video 2026-08-04 at 21.13.24.mp4",
+  "music": "Same bed, extended through new outro, final fade retained",
+  "visual_review": "Ending contact sheet inspected: final speech caption retained, full English outro animation and website visible, no old outro present."
+}

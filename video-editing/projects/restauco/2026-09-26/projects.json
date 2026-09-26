@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-26",
+  "client_id": "restauco",
+  "projects": [
+    {
+      "id": "lambo-vw",
+      "language": "es",
+      "latest_revision": "v5",
+      "latest_video": "history/restauco-lambo/Restauco-Lambo-VW-v5.mp4",
+      "source_asset": "inputs/restauco-lambo-source.mp4",
+      "source_ranges": [
+        [
+          2.08,
+          13.1
+        ],
+        [
+          16.5,
+          38.32
+        ]
+      ],
+      "outro_language": "es",
+      "duration_seconds": 36.066667,
+      "status": "editorial_review_required",
+      "open_questions": [
+        "Confirm the inferred final-caption word n\u00famero."
+      ],
+      "final_script_sequence": [
+        "history/restauco-lambo/render_v5.py"
+      ],
+      "dependencies": [
+        "history/restauco-lambo/Restauco-Lambo-VW-v4.mp4 (approved music mix reused by v5)",
+        "history/restauco-lambo/pipeline/edits/v3.json"
+      ]
+    },
+    {
+      "id": "fall-winter",
+      "language": "en",
+      "latest_revision": "v3",
+      "latest_video": "history/restauco-fall-winter/Restauco-Fall-Winter-v3.mp4",
+      "source_asset": "inputs/restauco-fall-winter-source.mp4",
+      "source_ranges": [
+        [
+          2.3,
+          14.3
+        ]
+      ],
+      "outro_language": "en",
+      "duration_seconds": 17.533333333333335,
+      "status": "technical_checks_passed_user_review_pending",
+      "final_script_sequence": [
+        "history/restauco-fall-winter/v3/render.py",
+        "history/restauco-fall-winter/v3/align_audio.py"
+      ],
+      "caption_data": "history/restauco-fall-winter/v3/captions.json",
+      "timing_checks": {
+        "caption_render_error_max_frames": 1,
+        "audio_delay_compensation_ms": 25,
+        "audio_alignment_residual_ms": -0.06,
+        "countdown_removed": true
+      }
+    }
+  ]
+}

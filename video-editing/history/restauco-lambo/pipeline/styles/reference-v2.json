@@ -1,0 +1,18 @@
+{
+  "font_family": "Arial",
+  "font_file": "Arial.ttf",
+  "font_size": 72,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00787878",
+  "back_colour": "&H20000000",
+  "bold": 0,
+  "outline": 4,
+  "shadow": 5,
+  "bottom_margin": 415,
+  "margin_x": 100,
+  "max_words": 9,
+  "max_chars": 50,
+  "caption_animation": "none",
+  "fixed_size": true,
+  "wrap_width": 890
+}

@@ -1,0 +1,351 @@
+{
+  "status": "local_draft",
+  "edit": {
+    "source": "$HOME/Downloads/dji_mimo_20260922_175002_20260922174922_1790124960225_video.MP4",
+    "transcript": "../transcript.json",
+    "style": "../styles/reference.json",
+    "clips": [
+      {
+        "in": 2.08,
+        "out": 13.1,
+        "zoom": 1
+      },
+      {
+        "in": 16.5,
+        "out": 38.32,
+        "zoom": 1
+      }
+    ],
+    "captions": [
+      {
+        "start": 0.08,
+        "end": 2.04,
+        "text": "Gente, yo quiero\nque ustedes vean esto,"
+      },
+      {
+        "start": 2.55,
+        "end": 4.07,
+        "text": "porque mucha gente ha dicho"
+      },
+      {
+        "start": 4.07,
+        "end": 6.9,
+        "text": "que yo me mofo de los\ndueños de estos carros."
+      },
+      {
+        "start": 7.04,
+        "end": 7.97,
+        "text": "Yo no me mofo,"
+      },
+      {
+        "start": 8.0,
+        "end": 9.47,
+        "text": "yo digo la realidad."
+      },
+      {
+        "start": 9.6,
+        "end": 10.82,
+        "text": "Ven para que veas esto."
+      },
+      {
+        "start": 11.68,
+        "end": 12.32,
+        "text": "Ven acá."
+      },
+      {
+        "start": 13.87,
+        "end": 15.37,
+        "text": "Eso es el turbo, ¿verdad?"
+      },
+      {
+        "start": 15.8,
+        "end": 17.07,
+        "text": "¿Y qué dice ahí?"
+      },
+      {
+        "start": 17.94,
+        "end": 19.47,
+        "text": "¡Adiós! Ahí dice VW."
+      },
+      {
+        "start": 21.72,
+        "end": 22.42,
+        "text": "Ven acá."
+      },
+      {
+        "start": 22.64,
+        "end": 24.34,
+        "text": "Y si buscamos esa pieza,"
+      },
+      {
+        "start": 26.57,
+        "end": 27.77,
+        "text": "¿dirá Lambo"
+      },
+      {
+        "start": 28.3,
+        "end": 29.38,
+        "text": "o dirá VW?"
+      },
+      {
+        "start": 29.54,
+        "end": 30.14,
+        "text": "Pero…"
+      }
+    ],
+    "sounds": [],
+    "effects": [],
+    "catalog": "catalog.json",
+    "idea_id": "reference-edit",
+    "references": {
+      "edited_example": "$HOME/Downloads/dummy - 2026-09-26T013320.088.mp4"
+    },
+    "voice_filter": "highpass=f=65,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+    "editorial_notes": [
+      "Reference-style sentence-case white Arial captions with dark shadow; no inherited brand accent.",
+      "Countdown and camera-walk pause removed. Engine demonstration kept in original order.",
+      "Final sentence after pero remains audible but uncaptioned pending user wording confirmation."
+    ]
+  },
+  "style": {
+    "font_family": "Arial",
+    "font_file": "Arial.ttf",
+    "font_size": 72,
+    "primary_colour": "&H00FFFFFF",
+    "outline_colour": "&H80303030",
+    "back_colour": "&H80000000",
+    "bold": 0,
+    "outline": 3,
+    "shadow": 3,
+    "bottom_margin": 415,
+    "margin_x": 100,
+    "max_words": 9,
+    "max_chars": 50,
+    "caption_animation": "none",
+    "fixed_size": true,
+    "wrap_width": 890
+  },
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 2.04,
+      "text": "Gente, yo quiero\nque ustedes vean esto,"
+    },
+    {
+      "start": 2.55,
+      "end": 4.07,
+      "text": "porque mucha gente ha dicho"
+    },
+    {
+      "start": 4.07,
+      "end": 6.9,
+      "text": "que yo me mofo de los\ndueños de estos carros."
+    },
+    {
+      "start": 7.04,
+      "end": 7.97,
+      "text": "Yo no me mofo,"
+    },
+    {
+      "start": 8.0,
+      "end": 9.47,
+      "text": "yo digo la realidad."
+    },
+    {
+      "start": 9.6,
+      "end": 10.82,
+      "text": "Ven para que veas esto."
+    },
+    {
+      "start": 11.68,
+      "end": 12.32,
+      "text": "Ven acá."
+    },
+    {
+      "start": 13.87,
+      "end": 15.37,
+      "text": "Eso es el turbo, ¿verdad?"
+    },
+    {
+      "start": 15.8,
+      "end": 17.07,
+      "text": "¿Y qué dice ahí?"
+    },
+    {
+      "start": 17.94,
+      "end": 19.47,
+      "text": "¡Adiós! Ahí dice VW."
+    },
+    {
+      "start": 21.72,
+      "end": 22.42,
+      "text": "Ven acá."
+    },
+    {
+      "start": 22.64,
+      "end": 24.34,
+      "text": "Y si buscamos esa pieza,"
+    },
+    {
+      "start": 26.57,
+      "end": 27.77,
+      "text": "¿dirá Lambo"
+    },
+    {
+      "start": 28.3,
+      "end": 29.38,
+      "text": "o dirá VW?"
+    },
+    {
+      "start": 29.54,
+      "end": 30.14,
+      "text": "Pero…"
+    }
+  ],
+  "source_sha256": "6ee8fb1d7e7d63cbd98dda6bb5d3c7e53f1a04b7e3feb7dd98b37eb1f04fcdfc",
+  "verification": {
+    "full_decode": true,
+    "duration": 32.866667,
+    "expected_duration": 32.84
+  },
+  "output": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "mime_codec_string": "avc1.640028",
+        "width": 1080,
+        "height": 1920,
+        "coded_width": 1080,
+        "coded_height": 1920,
+        "has_b_frames": 2,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "9:16",
+        "pix_fmt": "yuv420p",
+        "level": 40,
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709",
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "14775/493",
+        "time_base": "1/15360",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 504832,
+        "duration": "32.866667",
+        "bit_rate": "11653347",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "985",
+        "extradata_size": 51,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "encoder": "Lavc63.1.101 libx264"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "mime_codec_string": "mp4a.40.2",
+        "sample_fmt": "fltp",
+        "sample_rate": "48000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 0,
+        "initial_padding": 1024,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 1576320,
+        "duration": "32.840000",
+        "bit_rate": "154610",
+        "nb_frames": "1538",
+        "extradata_size": 5,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "SoundHandler"
+        }
+      }
+    ],
+    "format": {
+      "filename": "$WORKSPACE/output/reference-edit-20260926/Restauco-Lambo-VW-v1-render/output.mp4",
+      "nb_streams": 2,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "32.866667",
+      "size": "48548264",
+      "bit_rate": "11817021",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf63.1.101"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "output_time": 0.3,
+    "audio_alignment_error_ms": -0.06
+  },
+  {
+    "output_time": 3.3,
+    "audio_alignment_error_ms": -0.06
+  },
+  {
+    "output_time": 7.3,
+    "audio_alignment_error_ms": -0.06
+  },
+  {
+    "output_time": 10.1,
+    "audio_alignment_error_ms": -0.06
+  }
+]

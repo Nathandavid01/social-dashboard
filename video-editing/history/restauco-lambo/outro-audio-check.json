@@ -1,0 +1,157 @@
+{
+	"systeminfo": "WHISPER : VITISAI = 0 | COREML = 0 | OPENVINO = 0 | MTL : EMBED_LIBRARY = 1 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | MATMUL_INT8 = 1 | DOTPROD = 1 | SME = 1 | ACCELERATE = 1 | OPENMP = 1 | REPACK = 1 | ",
+	"model": {
+		"type": "small",
+		"multilingual": true,
+		"vocab": 51865,
+		"audio": {
+			"ctx": 1500,
+			"state": 768,
+			"head": 12,
+			"layer": 12
+		},
+		"text": {
+			"ctx": 448,
+			"state": 768,
+			"head": 12,
+			"layer": 12
+		},
+		"mels": 80,
+		"ftype": 1
+	},
+	"params": {
+		"model": "$TMPDIR/eduardo-ggml-small.bin",
+		"language": "es",
+		"translate": false
+	},
+	"result": {
+		"language": "es"
+	},
+	"transcription": [
+		{
+			"timestamps": {
+				"from": "00:00:00,000",
+				"to": "00:00:02,000"
+			},
+			"offsets": {
+				"from": 0,
+				"to": 2000
+			},
+			"text": " [Música de cierre]",
+			"tokens": [
+				{
+					"text": "[_BEG_]",
+					"timestamps": {
+						"from": "00:00:00,000",
+						"to": "00:00:00,000"
+					},
+					"offsets": {
+						"from": 0,
+						"to": 0
+					},
+					"id": 50364,
+					"p": 0.894231,
+					"t_dtw": -1
+				},
+				{
+					"text": " [",
+					"timestamps": {
+						"from": "00:00:00,000",
+						"to": "00:00:00,120"
+					},
+					"offsets": {
+						"from": 0,
+						"to": 120
+					},
+					"id": 542,
+					"p": 0.326345,
+					"t_dtw": -1
+				},
+				{
+					"text": "Música",
+					"timestamps": {
+						"from": "00:00:00,120",
+						"to": "00:00:00,860"
+					},
+					"offsets": {
+						"from": 120,
+						"to": 860
+					},
+					"id": 38725,
+					"p": 0.705642,
+					"t_dtw": -1
+				},
+				{
+					"text": " de",
+					"timestamps": {
+						"from": "00:00:00,860",
+						"to": "00:00:01,110"
+					},
+					"offsets": {
+						"from": 860,
+						"to": 1110
+					},
+					"id": 368,
+					"p": 0.373622,
+					"t_dtw": -1
+				},
+				{
+					"text": " cier",
+					"timestamps": {
+						"from": "00:00:01,110",
+						"to": "00:00:01,610"
+					},
+					"offsets": {
+						"from": 1110,
+						"to": 1610
+					},
+					"id": 39769,
+					"p": 0.342549,
+					"t_dtw": -1
+				},
+				{
+					"text": "re",
+					"timestamps": {
+						"from": "00:00:01,610",
+						"to": "00:00:01,850"
+					},
+					"offsets": {
+						"from": 1610,
+						"to": 1850
+					},
+					"id": 265,
+					"p": 0.959864,
+					"t_dtw": -1
+				},
+				{
+					"text": "]",
+					"timestamps": {
+						"from": "00:00:01,850",
+						"to": "00:00:02,000"
+					},
+					"offsets": {
+						"from": 1850,
+						"to": 2000
+					},
+					"id": 60,
+					"p": 0.961408,
+					"t_dtw": -1
+				},
+				{
+					"text": "[_TT_100]",
+					"timestamps": {
+						"from": "00:00:02,000",
+						"to": "00:00:02,000"
+					},
+					"offsets": {
+						"from": 2000,
+						"to": 2000
+					},
+					"id": 50464,
+					"p": 0.124285,
+					"t_dtw": -1
+				}
+			]
+		}
+	]
+}

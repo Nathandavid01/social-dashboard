@@ -1,0 +1,90 @@
+{
+  "client_id": "restauco",
+  "profile_version": 1,
+  "reference": "supplied Nos fuimos viral screenshot",
+  "font": {
+    "family": "Tahoma",
+    "weight": "regular",
+    "size_px": 72,
+    "glyph_height_scale": 0.93,
+    "supersampling": 3,
+    "identity": "visual_match_not_confirmed_original"
+  },
+  "fill": {
+    "top_rgb": [
+      255,
+      255,
+      255
+    ],
+    "bottom_rgb": [
+      189,
+      189,
+      189
+    ],
+    "white_fraction": 0.54
+  },
+  "outline": {
+    "rgb": [
+      113,
+      113,
+      113
+    ],
+    "width_px": 2.667
+  },
+  "shadow": {
+    "rgb": [
+      0,
+      0,
+      0
+    ],
+    "blur_px": 2.1,
+    "offset_x_px": 2.4,
+    "offset_y_px": 4.8
+  },
+  "layout": {
+    "frame_width": 1080,
+    "frame_height": 1920,
+    "canvas_height": 280,
+    "canvas_y": 1255,
+    "block_bottom_y": 250,
+    "max_line_width": 890,
+    "line_gap": 17,
+    "case": "sentence",
+    "alignment": "center",
+    "animation": "none"
+  },
+  "music": {
+    "asset": "inputs/restauco-music.mp4",
+    "gain": 0.185,
+    "duck_threshold": 0.035,
+    "duck_ratio": 3,
+    "duck_attack_ms": 20,
+    "duck_release_ms": 350,
+    "loop_crossfade_seconds": 0.8,
+    "fade_out_seconds": 1.766667
+  },
+  "outros": {
+    "en": {
+      "asset": "inputs/restauco-outro-en.mp4",
+      "source_start": 0,
+      "timeline_frames": 166,
+      "fps": 30
+    },
+    "es": {
+      "asset": "inputs/restauco-style-reference.mp4",
+      "source_start": 50.6,
+      "source_end": 53.8
+    }
+  },
+  "output": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "codec": "h264",
+    "crf": 18,
+    "audio_codec": "aac",
+    "audio_rate": 48000,
+    "audio_bitrate": "256k",
+    "faststart": true
+  }
+}

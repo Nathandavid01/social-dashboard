@@ -1,0 +1,22 @@
+{
+  "output": "Restauco-Lambo-VW-v4.mp4",
+  "output_sha256": "50cd54bfcf43d1a6ad19ed8e8d11193291a6eb95cb00c26758a71e556b966ca9",
+  "source_video": "$WORKSPACE/output/reference-edit-20260926/Restauco-Lambo-VW-v3.mp4",
+  "music_source": "$HOME/Downloads/WhatsApp Video 2026-08-04 at 21.13.24.mp4",
+  "music_source_sha256": "0f990c57e97461052957f9f223d03ca976a35dd07aaf7476ea54ee67e72e83b3",
+  "duration": 36.066667,
+  "voice_ends": 32.84,
+  "video_stream_copied": true,
+  "full_decode": true,
+  "music_notes": [
+    "User-supplied audio replaces the previous outro soundtrack and runs under the dialogue.",
+    "0.8-second crossfade loop extends the supplied 30.8-second track.",
+    "Music gain -14.66 dB, sidechain ducking under speech, gentle rise into outro, final fade to silence."
+  ],
+  "caption_note": "Caption content and approved visual style inherited from v3.",
+  "audio_measurements": {
+    "input_i": "-21.04",
+    "input_tp": "-2.22",
+    "input_lra": "5.40"
+  }
+}

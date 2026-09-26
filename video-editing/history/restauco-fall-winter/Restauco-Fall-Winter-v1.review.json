@@ -1,0 +1,90 @@
+{
+  "output": "Restauco-Fall-Winter-v1.mp4",
+  "output_sha256": "af17dd76eba57713e91fa55acf70e92008376537f3192daeac904dadf17c9eb4",
+  "source": "$HOME/Downloads/dji_mimo_20260922_153444_20260922153430_1790124988957_video.MP4",
+  "source_sha256": "dfb6a35add46994a670ad4235f379a05980a4d199c31250f0eadc6c3835881b5",
+  "verification": {
+    "full_decode": true,
+    "duration": "17.266667",
+    "expected_duration": 17.266666666666666
+  },
+  "source_range": [
+    0,
+    14.066666666666666
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 2.35,
+      "text": "So, fall and winter"
+    },
+    {
+      "start": 2.4,
+      "end": 3.8,
+      "text": "are coming up,"
+    },
+    {
+      "start": 3.83,
+      "end": 4.77,
+      "text": "and if you're looking for"
+    },
+    {
+      "start": 4.79,
+      "end": 5.56,
+      "text": "something specifically"
+    },
+    {
+      "start": 5.56,
+      "end": 6.58,
+      "text": "like a battery,"
+    },
+    {
+      "start": 6.58,
+      "end": 7.76,
+      "text": "a heater core,"
+    },
+    {
+      "start": 7.76,
+      "end": 8.78,
+      "text": "or alternator,"
+    },
+    {
+      "start": 8.81,
+      "end": 9.91,
+      "text": "just give us a call"
+    },
+    {
+      "start": 9.91,
+      "end": 11.35,
+      "text": "or check Restauco.com"
+    },
+    {
+      "start": 11.37,
+      "end": 12.56,
+      "text": "and we can help you out"
+    },
+    {
+      "start": 12.58,
+      "end": 13.95,
+      "text": "with those items."
+    }
+  ],
+  "caption_style": "Exact raster-caption implementation reused from Restauco Lambo VW v5: Tahoma Regular, gradient white/silver, gray outline, soft shadow.",
+  "music_source": "$HOME/Downloads/WhatsApp Video 2026-08-04 at 21.13.24.mp4",
+  "outro_source": "$HOME/Downloads/dummy - 2026-09-26T013320.088.mp4",
+  "outro_range": [
+    50.6,
+    53.8
+  ],
+  "editorial_notes": [
+    "Preserved entire spoken English message; trimmed only trailing idle footage.",
+    "Website spelling corrected from ASR to Restauco.com using the supplied branded outro.",
+    "Same music, ducking, fade and original Restauco outro as the previous approved edit."
+  ],
+  "visual_review": "Full timeline contact sheet and enlarged caption inspected: captions cover all dialogue, website is legible, original outro present.",
+  "audio_measurements": {
+    "integrated_lufs": -16.8,
+    "true_peak_dbtp": -1.84,
+    "loudness_range_lu": 10.5
+  }
+}

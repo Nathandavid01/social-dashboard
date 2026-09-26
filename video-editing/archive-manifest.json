@@ -1,0 +1,751 @@
+{
+  "date": "2026-09-26",
+  "client": "restauco",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1205,
+      "sha256": "92df51620da7b30336f277857efaed8c36a8f0869143ab45be555fb21044ef4a"
+    },
+    {
+      "path": "WORKFLOW.md",
+      "bytes": 3995,
+      "sha256": "6299b9e7a1734a28261d77011e1f4f33b3d8fef0343087d628e3751125ffceee"
+    },
+    {
+      "path": "client-rules/README.md",
+      "bytes": 434,
+      "sha256": "197272ff89b5a05d5da2d82158d46dc66411ee0c96e60ccfc8c561fe3a417766"
+    },
+    {
+      "path": "client-rules/restauco/RULES.md",
+      "bytes": 3867,
+      "sha256": "b004bdc0d06d2c289d8cc43c30ed21f0d4a8418918b21e7f0912a65a4232ff74"
+    },
+    {
+      "path": "client-rules/restauco/caption-style-reference.png",
+      "bytes": 78629,
+      "sha256": "804319d5c3235c8d14687d967f5d89b5ff081aef5e251ca2885f65635934c055"
+    },
+    {
+      "path": "client-rules/restauco/style.json",
+      "bytes": 1699,
+      "sha256": "2df27fbe3fc819e96f4b319effa6925554af4247080319ae347d722f6ff55d01"
+    },
+    {
+      "path": "history/restauco-fall-winter/ENGLISH-OUTRO-v2.md",
+      "bytes": 607,
+      "sha256": "b21bc6a2c89808c6ba070b72ffe527aeb28737f1806db894d8ad78a98c072fa0"
+    },
+    {
+      "path": "history/restauco-fall-winter/README.md",
+      "bytes": 763,
+      "sha256": "e5299dcc0f21e1f7ddaaf2840c2b8d537de19842cc347dcd9fdaf026c4f99fff"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v1.mp4",
+      "bytes": 16398357,
+      "sha256": "af17dd76eba57713e91fa55acf70e92008376537f3192daeac904dadf17c9eb4"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v1.review.json",
+      "bytes": 2449,
+      "sha256": "32fe290fcce050e6ffdfdfce28ecd24f7bc4f767f426243a0aada91d230a23a8"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v2.mp4",
+      "bytes": 19026263,
+      "sha256": "700ba09f1a71400b21fbb180bfdc8df0462463103f7c09a54d8741e6836201a0"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v2.review.json",
+      "bytes": 835,
+      "sha256": "4960e7b3892bf27c042f71b9c70e90660c3d67bf878d9d13760073f5f9e1f86f"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v3.mp4",
+      "bytes": 17025128,
+      "sha256": "861dcfe4a186f5f50b372146d1e525e6e92db206b7ef600354f06abfde0854ae"
+    },
+    {
+      "path": "history/restauco-fall-winter/Restauco-Fall-Winter-v3.review.json",
+      "bytes": 3122,
+      "sha256": "96b156e7c275683a89cd42a7630227bf592c8b3251c8018c908a76878476b94c"
+    },
+    {
+      "path": "history/restauco-fall-winter/audio-check.log",
+      "bytes": 2131,
+      "sha256": "ed88d301bc25d85c2bb542ca796be0dcd94cc241e81fe8f4f2ed0940a9bf5f54"
+    },
+    {
+      "path": "history/restauco-fall-winter/caption-detail.png",
+      "bytes": 224716,
+      "sha256": "103387acf10ca3dfd403948430dc67260b196e81d04949596f2b88b74d9b6ab9"
+    },
+    {
+      "path": "history/restauco-fall-winter/caption_style.py",
+      "bytes": 1948,
+      "sha256": "d62350c134824a48f6e379173a04ebee60d6977882368f2e99a3fb0be1eb19b3"
+    },
+    {
+      "path": "history/restauco-fall-winter/captions.json",
+      "bytes": 865,
+      "sha256": "1b809cb128f701c468386b14aaa141854db75adfb8c1157a0be3b1cd6b3854f3"
+    },
+    {
+      "path": "history/restauco-fall-winter/english-outro/audio.wav",
+      "bytes": 175852,
+      "sha256": "ae2e544796ba646f1b137124372ab3fbcd62d4399246cd9b3fd3631abcd70399"
+    },
+    {
+      "path": "history/restauco-fall-winter/english-outro/contact.jpg",
+      "bytes": 43728,
+      "sha256": "4a89f150371e884b09397b1c264ccf3bfb4d0653a1691727afadf2024fb1cc0c"
+    },
+    {
+      "path": "history/restauco-fall-winter/english-outro/final-check.jpg",
+      "bytes": 51677,
+      "sha256": "24ac7b661f7e25b7fa328f0179aa97575b4144c9cc116c97d489fb7767ea7270"
+    },
+    {
+      "path": "history/restauco-fall-winter/english-outro/transcribe.log",
+      "bytes": 3242,
+      "sha256": "a71056bdd13a3175ba2434853888d41291dcb0b9e38c99ea682f397c51311818"
+    },
+    {
+      "path": "history/restauco-fall-winter/english-outro/transcript.json",
+      "bytes": 2264,
+      "sha256": "05f0c09a638748fc914878943c39702dd85807afbc1b12ff515bb81bd7e441dd"
+    },
+    {
+      "path": "history/restauco-fall-winter/filter.txt",
+      "bytes": 930,
+      "sha256": "c57a94232ada67777773438ceadc4918b5e7766f0fc1c4433adec55c3f899f3b"
+    },
+    {
+      "path": "history/restauco-fall-winter/final-sheet.jpg",
+      "bytes": 120952,
+      "sha256": "ebd111d899a06ce0b89ccc10b446dcd7a64eebf725995bdd7e819c97f103dac6"
+    },
+    {
+      "path": "history/restauco-fall-winter/render-v2.log",
+      "bytes": 9725,
+      "sha256": "6d70e4514bb825ae1fc3d11d0a8231ff8da1d96ddbb0db8c3a57322e091ac850"
+    },
+    {
+      "path": "history/restauco-fall-winter/render.log",
+      "bytes": 9667,
+      "sha256": "6ca2dda94d201a19f373d5619b5a246fde78aa94db5a2a11ca357878a2bdb4af"
+    },
+    {
+      "path": "history/restauco-fall-winter/render.py",
+      "bytes": 4487,
+      "sha256": "b99ff191bd7226dc8d0ddb8661a94857a8dde749ae9d4c3d29fc8317436c8294"
+    },
+    {
+      "path": "history/restauco-fall-winter/replace_outro_v2.py",
+      "bytes": 2689,
+      "sha256": "22e2b673e634e5ac52e77fa5d1e318d90a42bb8c15c017ab2382f1f0c75de4ee"
+    },
+    {
+      "path": "history/restauco-fall-winter/silence.log",
+      "bytes": 817,
+      "sha256": "070bfa8cfd801ff2dc47adbd4a32dbb67d18335cf09cb55656a64fd551d0c8b5"
+    },
+    {
+      "path": "history/restauco-fall-winter/source-sheet.jpg",
+      "bytes": 117971,
+      "sha256": "5082574da6bebabec8e5ef9c0447e9b1fe3e984e4f3fa465efb0f8ecb3695fa5"
+    },
+    {
+      "path": "history/restauco-fall-winter/source.wav",
+      "bytes": 470360,
+      "sha256": "abacd42088e66662d200ca5ebf9868d89955551c3c804c6a54205101dd9ab187"
+    },
+    {
+      "path": "history/restauco-fall-winter/transcribe-en.log",
+      "bytes": 3415,
+      "sha256": "33957c950b99075cd52075d212c515bd348fa2c017aba5d8199e5142401e7b11"
+    },
+    {
+      "path": "history/restauco-fall-winter/transcribe.log",
+      "bytes": 3417,
+      "sha256": "4e981f3cc559d5b6f1e94767473dbeee0530ce61b73fa98eae042b6689ca3aa0"
+    },
+    {
+      "path": "history/restauco-fall-winter/transcript-en.json",
+      "bytes": 12913,
+      "sha256": "304d509d00f3c6898c248f4fca344c5dbfd03eceea7d51da44707d9deb3f9774"
+    },
+    {
+      "path": "history/restauco-fall-winter/transcript.json",
+      "bytes": 13846,
+      "sha256": "17f5b681756ef34710882ad32450103bd84726be86af3f0cdc27b454d161952d"
+    },
+    {
+      "path": "history/restauco-fall-winter/v2-filter.txt",
+      "bytes": 851,
+      "sha256": "f7286882ec1eadbbbcd089a666eaaa9e688690f9b114bb684be1ab545c9da416"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/align_audio.py",
+      "bytes": 1384,
+      "sha256": "90e162b444a5993a5bcff201dfbe9d9e462c3d6fbfb9bab33906d185900e4d90"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/audio-alignment-render.log",
+      "bytes": 4049,
+      "sha256": "640ce342185468a01b7440f44f65b6aa9d86462f234d0b71dd86ea85d2ee7cc1"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/audio-check.log",
+      "bytes": 2130,
+      "sha256": "e6ef9b9a58eefc6e18314dabdf6fb4f4808b2ce2ce10f60c2b6d18872050fc5f"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/audio-sync-check.json",
+      "bytes": 287,
+      "sha256": "a8ca55a10afb58e9646e3d6cb325a8fde47558b35fdf9e9c611053438bff6656"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/caption-frame-timing.json",
+      "bytes": 368,
+      "sha256": "3b45498fa6698784a75695b8a9a63a64ace87bbbf9540d63644b6e7558fd899f"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/caption_style.py",
+      "bytes": 1948,
+      "sha256": "d62350c134824a48f6e379173a04ebee60d6977882368f2e99a3fb0be1eb19b3"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/captions.json",
+      "bytes": 1413,
+      "sha256": "328b9a23e62a726141593483dcf21a1a43f4ec0ef585db6a882d3fbf04299903"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/filter.txt",
+      "bytes": 1011,
+      "sha256": "c67d137b15901864f1c3c51b7cb54a5b45586270d1fb66dd3d7607ce47123abc"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/final-sheet.jpg",
+      "bytes": 133209,
+      "sha256": "09dbd68c70c00782627fcc23ee72d510b595acc7adb451a2342c894d0f68de47"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/render.log",
+      "bytes": 12888,
+      "sha256": "8d3e5e711142d2d193c2c30408243d8828d73873ee57500ba6d87d745f72e27e"
+    },
+    {
+      "path": "history/restauco-fall-winter/v3/render.py",
+      "bytes": 4790,
+      "sha256": "46b2084adbed46ba98199c43166fc5a41d702a3e48bc7e59017291a24b8411b3"
+    },
+    {
+      "path": "history/restauco-lambo/README.md",
+      "bytes": 2854,
+      "sha256": "cbe61c55cbf77a0c7f3dd5d1829ca0cabe9e848332b584143cc05502a496de2b"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1-compare.jpg",
+      "bytes": 139833,
+      "sha256": "5144fc898cb7dcea3342456e2f85d026a10b776eb2579280cfb2fd712d82cf5f"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1-render/captions.ass",
+      "bytes": 1690,
+      "sha256": "b46257df54db68116194ece640e594cddda019c6af6bbd5766d94e8537752e32"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1-render/ffmpeg.log",
+      "bytes": 11783,
+      "sha256": "b9d56346a96080ec6aa3f8f455ab0a142ab49ef3780e8644c5b8ee0736dde03d"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1-render/filter.txt",
+      "bytes": 738,
+      "sha256": "ea5ecbd879bd5674fd8a9d4a48c4e5963d95e25daccec22bb24fc12b106a7976"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1-render/sounds.wav",
+      "bytes": 3152686,
+      "sha256": "847804afb46556e3eca99789032b7bc549c6d3288f8e4a515a633845ba2345b8"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1.json",
+      "bytes": 8689,
+      "sha256": "461f79bc0a36ed622387970c3fd5c8335184ec9c3fc86adbb2c1d1c7c9757867"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1.mp4",
+      "bytes": 48548264,
+      "sha256": "0f0ec4852ed914212a5105752a8b097c6c4c3606cdc026c3171cec9db5a24222"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v1.review.json",
+      "bytes": 2922,
+      "sha256": "3b2e2bc73bcd5c0b31de86b62bfddc5190b8c28b65f93905ba1ebffc9d0e7e59"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2-compare.jpg",
+      "bytes": 129356,
+      "sha256": "069be73d0a611a51adab7f8b4d43761d366dc59cfdf991cde5133b5de5a425e7"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2-render/captions.ass",
+      "bytes": 1690,
+      "sha256": "0ba4aabbb3560aa48b55807bd9c99b7cb4ad42c313ff87c101860e10ea71ea53"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2-render/ffmpeg.log",
+      "bytes": 11660,
+      "sha256": "d8eea68ad7aa35d18a22ac05a498b5ebfd378c33d13d7505869008c449da0e38"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2-render/filter.txt",
+      "bytes": 738,
+      "sha256": "ea5ecbd879bd5674fd8a9d4a48c4e5963d95e25daccec22bb24fc12b106a7976"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2-render/sounds.wav",
+      "bytes": 3152686,
+      "sha256": "847804afb46556e3eca99789032b7bc549c6d3288f8e4a515a633845ba2345b8"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2.json",
+      "bytes": 8966,
+      "sha256": "6f9510c2bbfa48462933d90c4d2416457a564fad6b9b0a46415a91848956d150"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2.mp4",
+      "bytes": 48415956,
+      "sha256": "c2e1e9359078f27dfd73c3bc4879b5794f910a72cdc1a80922ee98f8737caab2"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v2.review.json",
+      "bytes": 2787,
+      "sha256": "2ccd23f75dc15b3927b24b4ef56af0734f006569a5362e6f350e797412347de8"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3-render/captions.ass",
+      "bytes": 1836,
+      "sha256": "6fdecaf7eed2a26f2975dd9218052397c9e6af8ceee37459236ee80931c23db3"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3-render/ffmpeg.log",
+      "bytes": 14501,
+      "sha256": "4cc3eae543b46006f4b6bbf559bb42eb56e852a225d3721defebdd9aa94c9ad1"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3-render/filter.txt",
+      "bytes": 1034,
+      "sha256": "6173b998029629f90abfd4dff116ad00863ad5c497176a15750d7cb60b6a0bbc"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3-render/sounds.wav",
+      "bytes": 3152686,
+      "sha256": "847804afb46556e3eca99789032b7bc549c6d3288f8e4a515a633845ba2345b8"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3.json",
+      "bytes": 9814,
+      "sha256": "6321909f42cab587e03ff5f24f5305b9e16341a354e07eeb648d3aacf7f8d814"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3.mp4",
+      "bytes": 50666927,
+      "sha256": "01f5472374e925892942160c8bfd34e0bac5e02435d5126ef77a165dba0abfea"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v3.review.json",
+      "bytes": 1186,
+      "sha256": "3a9637d9ee2f9c5f9f7e8d501af247178ead42249fbdd8050d0c2354007d6827"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v4.mp4",
+      "bytes": 50756975,
+      "sha256": "50cd54bfcf43d1a6ad19ed8e8d11193291a6eb95cb00c26758a71e556b966ca9"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v4.review.json",
+      "bytes": 1087,
+      "sha256": "58c6e0907755a36d52308ddeabd22dc49c12986c39509d32857e8ae1b041b2c1"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v5.mp4",
+      "bytes": 50584596,
+      "sha256": "9a7cb4e92a7660873ced9f92640ac712930ad9bfc603f8c860cffde9ed4bb981"
+    },
+    {
+      "path": "history/restauco-lambo/Restauco-Lambo-VW-v5.review.json",
+      "bytes": 2233,
+      "sha256": "c6a0c02a4594f7d8f68f2a705630804ada4b07e3fa39d54b5815d0ac3a73102c"
+    },
+    {
+      "path": "history/restauco-lambo/add_music_v4.py",
+      "bytes": 2194,
+      "sha256": "28fb16f8bcddc28f12640dafa22a519c70837a486f5aac34e113475b526cb0d7"
+    },
+    {
+      "path": "history/restauco-lambo/audio-check.log",
+      "bytes": 2236,
+      "sha256": "aa20536ef9678cde2eb1c82ee918c5722694fadd95e26085672ac0d11154550b"
+    },
+    {
+      "path": "history/restauco-lambo/audio-v4-check.log",
+      "bytes": 2236,
+      "sha256": "068c47e5783659edc3edbe5762ad1571ead0ee1af02c5d693ca209dc1b47e211"
+    },
+    {
+      "path": "history/restauco-lambo/build_edit.py",
+      "bytes": 3324,
+      "sha256": "071b0fee5fce02e8075c92a242d568e0661b3547da1fdd074b32b087a8aa0846"
+    },
+    {
+      "path": "history/restauco-lambo/caption-font-comparison.png",
+      "bytes": 116508,
+      "sha256": "cdd42947a5aefb943daec94c0522bf06d8da5681055418b9c615f56e750891f4"
+    },
+    {
+      "path": "history/restauco-lambo/caption-style-reference.png",
+      "bytes": 78629,
+      "sha256": "804319d5c3235c8d14687d967f5d89b5ff081aef5e251ca2885f65635934c055"
+    },
+    {
+      "path": "history/restauco-lambo/caption-v2-detail.png",
+      "bytes": 238017,
+      "sha256": "def40de96e7124b3072f9e315008cbed3dee8cce4125b7a01c0e5e91a64a0b3a"
+    },
+    {
+      "path": "history/restauco-lambo/caption-v5-detail.png",
+      "bytes": 267693,
+      "sha256": "c7fa8da83579d972bb6aac513f2fdffe1d0bc24c98a7f8604b4e6e5a2f1cc2c7"
+    },
+    {
+      "path": "history/restauco-lambo/compare_caption_fonts.py",
+      "bytes": 1456,
+      "sha256": "91c2d62af83429d06527929fccb978b33a4602fd02d3f2feb47d17745777c8bc"
+    },
+    {
+      "path": "history/restauco-lambo/ending-base.json",
+      "bytes": 10131,
+      "sha256": "bcb8344eb3b132433a3ad4e7321410331cf9eaae4baadb834610227cb57fd341"
+    },
+    {
+      "path": "history/restauco-lambo/ending-base.log",
+      "bytes": 3313,
+      "sha256": "c4c2238f42b419990bb6f1ffdeb47ba99c73328d58d077d4ddb8a31aaf247767"
+    },
+    {
+      "path": "history/restauco-lambo/ending-dtw.json",
+      "bytes": 8680,
+      "sha256": "3ac4f65dec72bda4238373699283e3539cb9b709a316f65d9e78290e852022e1"
+    },
+    {
+      "path": "history/restauco-lambo/ending-dtw.log",
+      "bytes": 3398,
+      "sha256": "16f831440a8f7d92edb78fec142419537b07af1917227ee826649b30641a4947"
+    },
+    {
+      "path": "history/restauco-lambo/ending-turbo.json",
+      "bytes": 10608,
+      "sha256": "e21fe07bdb597869a574ce40c202123f0f602d87a84b702034f47cf88ce33d87"
+    },
+    {
+      "path": "history/restauco-lambo/ending-turbo.log",
+      "bytes": 3333,
+      "sha256": "5832d0d52e15941ce80783a3933ca1ff6a75b2908956fb89839ffdabbc99bc5c"
+    },
+    {
+      "path": "history/restauco-lambo/ending.json",
+      "bytes": 12006,
+      "sha256": "d8c9a0fd63ef9ba8967440a4ab2cbf87c5090c9e09a5937ac2da58f27ab6fd8d"
+    },
+    {
+      "path": "history/restauco-lambo/ending.log",
+      "bytes": 3323,
+      "sha256": "ef713a5c48ccc2ed1b11c5f1ec16ef9a39a164c6ed7ace1cd89af196a62869b1"
+    },
+    {
+      "path": "history/restauco-lambo/ending.wav",
+      "bytes": 392078,
+      "sha256": "d3842adc2aeefa0823be9f53b53ea93bfaeafaf8992af9020c379b77928e36c7"
+    },
+    {
+      "path": "history/restauco-lambo/engine-transcript.json",
+      "bytes": 8813,
+      "sha256": "a845ea39fbf18aa8be7173e3bf219b097447180d0521c7de22a2147eb9ace977"
+    },
+    {
+      "path": "history/restauco-lambo/engine-transcript.log",
+      "bytes": 3466,
+      "sha256": "36015c9318c7d94a5833867a37fffffa2518eebcc4751de4d7a81121b7e1aefa"
+    },
+    {
+      "path": "history/restauco-lambo/engine.jpg",
+      "bytes": 34169,
+      "sha256": "4b57e438a851d3eb3b274ba356570df003ea58bcd3d4cdd9d78c2ed1cbb50857"
+    },
+    {
+      "path": "history/restauco-lambo/engine.wav",
+      "bytes": 336078,
+      "sha256": "4cf1982da22c383e0ffabe76dd7f547648b371dbfe6eea8b829357afc96b2e50"
+    },
+    {
+      "path": "history/restauco-lambo/final-detail.jpg",
+      "bytes": 107074,
+      "sha256": "c2ded57ceee8ec03763cf4c4e83351253752286297518a22ebfbca3d4c420cda"
+    },
+    {
+      "path": "history/restauco-lambo/final-sheet.jpg",
+      "bytes": 80308,
+      "sha256": "605adc53b69156be350087fcce0af3352793c4df9e7db084d76e5e967635e25a"
+    },
+    {
+      "path": "history/restauco-lambo/last-line-turbo.json",
+      "bytes": 4640,
+      "sha256": "cb88f36768bca71ebc45292c3be3ae82302738055b1f8f0cb3ed13bc94a69e70"
+    },
+    {
+      "path": "history/restauco-lambo/last-line-turbo.log",
+      "bytes": 3273,
+      "sha256": "36cafb414888b7b3b5d05e0ffee20d650bca2700ad982683f5662dd118d4e35e"
+    },
+    {
+      "path": "history/restauco-lambo/last-line.json",
+      "bytes": 4152,
+      "sha256": "243f59fd05b906c5e7fb90589c5a1220b78ddf412c84e9d9834de7b83ce3c4e0"
+    },
+    {
+      "path": "history/restauco-lambo/last-line.log",
+      "bytes": 3248,
+      "sha256": "aa8acf3a99362ba937e9ae8a5cd93f8af6e35dfbce06a478601d3eae62713de7"
+    },
+    {
+      "path": "history/restauco-lambo/last-line.wav",
+      "bytes": 136792,
+      "sha256": "0539cce6fd7578a113681d8c42b1f9b6fa1ef0b6143dc09956f366575f51e6f0"
+    },
+    {
+      "path": "history/restauco-lambo/match_caption_font.py",
+      "bytes": 1313,
+      "sha256": "13dfd94edbb72a22f8fdfbacd2216c0bfdd237cd446d9dc1202cb2722a0ea608"
+    },
+    {
+      "path": "history/restauco-lambo/music-analysis.log",
+      "bytes": 1520,
+      "sha256": "4ebec32caaddb95b49b06244e191d1226d1c9b90057236c1fcf823ed51f9bbbd"
+    },
+    {
+      "path": "history/restauco-lambo/music-v4-filter.txt",
+      "bytes": 680,
+      "sha256": "186aac7d7a2ebcd6429e6739a22f45dc6f73ae5945e5402dadde7a38f8104808"
+    },
+    {
+      "path": "history/restauco-lambo/outro-audio-check.json",
+      "bytes": 2740,
+      "sha256": "e663024f7ffa12506d102ea922f2925b1d4aa2beb7c4addf37cd23006a423fbd"
+    },
+    {
+      "path": "history/restauco-lambo/outro-audio-check.log",
+      "bytes": 3248,
+      "sha256": "eebab8c914d213eb958a69025b5a9224d7f8653a3a579d4ee23cd77e033600cd"
+    },
+    {
+      "path": "history/restauco-lambo/outro-audio.wav",
+      "bytes": 102478,
+      "sha256": "1e6fbc74b359755bbf94f1b2fee8ecfc12a66b5ee93c2f29c7c1ee3cb133c32a"
+    },
+    {
+      "path": "history/restauco-lambo/outro-cut-check.jpg",
+      "bytes": 54896,
+      "sha256": "cdb628cc2bc41e4784de86949a7950d4e8c31fff39975274ad24e438e6402ce4"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/catalog.json",
+      "bytes": 155,
+      "sha256": "87217dd151d705bacdee7191e182f40c126d2fcb6a364f07f716c18ee3a1bd6d"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/edits/v1.json",
+      "bytes": 2339,
+      "sha256": "3f14a630c3e0b136cd25b74a92b76277283447e5bdb5f83eca2fd387286b8c0e"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/edits/v2.json",
+      "bytes": 2614,
+      "sha256": "fcb3f437bcee7245602ba3f2d8403a2c65b2a52f66b02917d306fd780a72989a"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/edits/v3.json",
+      "bytes": 3239,
+      "sha256": "bb18a71b563139736e47ccdeac8fd95e212fb120202aad9ea5afbc290927686d"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/effects.py",
+      "bytes": 5679,
+      "sha256": "753cdb4f2e1b88fb4360f0f036963969a2433b0f0923ab027d6d0c30e790b9dc"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/pipeline.py",
+      "bytes": 20066,
+      "sha256": "04c9d23e499a78fe54ed8721cee8595a49c4e0449ee3d127f86414b96f275af6"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/review_loop.py",
+      "bytes": 3743,
+      "sha256": "ed55b4f2cac61c4868b82a69bce390e8c713b5b4cfe19379bfb14e810c7ac500"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/styles/reference-v2.json",
+      "bytes": 372,
+      "sha256": "96a55b27fb1e87c2baa88f27e585d2831a50a2352ccef90e23407f115dc9bcc4"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/styles/reference-v3.json",
+      "bytes": 378,
+      "sha256": "c74d09c35be0c2ff7952ece61093fd001ef68b5eb477b2b5490e2d50dd6468a0"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/styles/reference.json",
+      "bytes": 372,
+      "sha256": "2c2bf8fed1a10f56494012447eed3172e3437a52870c242a46675c83bd698f90"
+    },
+    {
+      "path": "history/restauco-lambo/pipeline/transcript.json",
+      "bytes": 10498,
+      "sha256": "e276d9f4208ffcce960a1621e138a4a0991d5b95a89b01f75dc226fb89298090"
+    },
+    {
+      "path": "history/restauco-lambo/reference-detail.jpg",
+      "bytes": 98043,
+      "sha256": "80dd787ea6f49d8a5e7dc2f0283fc3284bb7c0ef192d1082794c8f5ac0cce132"
+    },
+    {
+      "path": "history/restauco-lambo/reference-ending.jpg",
+      "bytes": 89951,
+      "sha256": "08c1db6a43fe07fe4b383217e8e8593f51521ca55aefa769ffab2de7cbbb3bb6"
+    },
+    {
+      "path": "history/restauco-lambo/reference-opening.png",
+      "bytes": 1491003,
+      "sha256": "a57917aee03b06cf9c907597c17491305f95908eafe8e719a58bb96d3ea2e952"
+    },
+    {
+      "path": "history/restauco-lambo/reference.jpg",
+      "bytes": 88867,
+      "sha256": "5e9e87bbf2bb44dd9e6fb04c33e83ce61f36f0c655224c60486e2082dea4e098"
+    },
+    {
+      "path": "history/restauco-lambo/render-resume.py",
+      "bytes": 1902,
+      "sha256": "87437132cdf4b906c97468aa13e2902e702e586ab26c1ef9cca8705dbc21b408"
+    },
+    {
+      "path": "history/restauco-lambo/render-v2.log",
+      "bytes": 384,
+      "sha256": "ae8813524bc5bb2765a5e504c645033d09b5b62bdc938e7bd59afd84ef17c44e"
+    },
+    {
+      "path": "history/restauco-lambo/render-v3.log",
+      "bytes": 193,
+      "sha256": "42dbda11635f8bcafac086e13af4f3c7135b8c06121c2043888aab683504f613"
+    },
+    {
+      "path": "history/restauco-lambo/render-v4.log",
+      "bytes": 2808,
+      "sha256": "54b85ac2478142c1d91a1ade2f2b6f74a802c0970fff669c0cbc968dfd779307"
+    },
+    {
+      "path": "history/restauco-lambo/render-v5.log",
+      "bytes": 13043,
+      "sha256": "81f3c7d7799fafd82eb9914c13c6d683eb4cdd7b0c8965c4b3e01abdf699dc0c"
+    },
+    {
+      "path": "history/restauco-lambo/render.log",
+      "bytes": 384,
+      "sha256": "098788634a57d21fba25d3a63210ea38fa240cf922dd95a8744b2a031bd3b837"
+    },
+    {
+      "path": "history/restauco-lambo/render_v5.py",
+      "bytes": 4513,
+      "sha256": "ac90c4b0a465faae815d6e3f5350ecdb57016197145b241ba42d035157fcd3ff"
+    },
+    {
+      "path": "history/restauco-lambo/source.jpg",
+      "bytes": 85243,
+      "sha256": "853ae971c1027fc0955a899f6da539266812cbbdd5aa144c25218ee4058756a9"
+    },
+    {
+      "path": "history/restauco-lambo/source.wav",
+      "bytes": 1256792,
+      "sha256": "c36686e233257839908173d35b7f456543f037f792b380530b4256920127f956"
+    },
+    {
+      "path": "history/restauco-lambo/transcribe-phrases.log",
+      "bytes": 3837,
+      "sha256": "b70a46f6b15179960ff75c474ef9134d5ed6fb54e4bb93a70b18154a2ce46632"
+    },
+    {
+      "path": "history/restauco-lambo/transcribe.log",
+      "bytes": 3628,
+      "sha256": "13a707407139690513f20ebf0e5d598fc1fb9e879219ebeb797a174a14802ea7"
+    },
+    {
+      "path": "history/restauco-lambo/transcript-phrases.json",
+      "bytes": 29883,
+      "sha256": "ea991db858fae2685772093b2729bc62dd990a3cb7c932308beac5cc66d087b4"
+    },
+    {
+      "path": "history/restauco-lambo/transcript.json",
+      "bytes": 28799,
+      "sha256": "96599484db81e65cdc141cb5fc855297c5b2178846d8ae2fb7ab9211d0cc6649"
+    },
+    {
+      "path": "history/restauco-lambo/v3-ending-check.jpg",
+      "bytes": 114853,
+      "sha256": "e2c55b52266f6fea46c7e4615f6919583ac592bf4a6d0712e12c4ddf3e0d6f59"
+    },
+    {
+      "path": "history/restauco-lambo/v5-ending-check.jpg",
+      "bytes": 38602,
+      "sha256": "6d67516c0111ec51e49d72945d2447a577201bea6255638ff55a79c5f7de61ae"
+    },
+    {
+      "path": "inputs/restauco-fall-winter-source.mp4",
+      "bytes": 43021761,
+      "sha256": "dfb6a35add46994a670ad4235f379a05980a4d199c31250f0eadc6c3835881b5"
+    },
+    {
+      "path": "inputs/restauco-lambo-source.mp4",
+      "bytes": 111989407,
+      "sha256": "6ee8fb1d7e7d63cbd98dda6bb5d3c7e53f1a04b7e3feb7dd98b37eb1f04fcdfc"
+    },
+    {
+      "path": "inputs/restauco-music.mp4",
+      "bytes": 4343424,
+      "sha256": "0f990c57e97461052957f9f223d03ca976a35dd07aaf7476ea54ee67e72e83b3"
+    },
+    {
+      "path": "inputs/restauco-outro-en.mp4",
+      "bytes": 13526496,
+      "sha256": "6122c347f74872ec7f0f98c17ce6def59510528a119d838b87d6a26219b28897"
+    },
+    {
+      "path": "inputs/restauco-style-reference.mp4",
+      "bytes": 103224470,
+      "sha256": "ad3ba31584bab473f3f1dc7801949bcf050389d02c8c58571eb693a3917281fb"
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 398,
+      "sha256": "421023cc2bbbf1bda17f04e80fe53981d2ae2d6abfaf406a9bc5c2575f75da57"
+    }
+  ],
+  "excluded": [
+    "System fonts",
+    "Python bytecode/cache",
+    "Speech-model weights"
+  ]
+}

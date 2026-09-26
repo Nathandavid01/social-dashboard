@@ -1,0 +1,99 @@
+{
+  "output": "Restauco-Lambo-VW-v5.mp4",
+  "output_sha256": "9a7cb4e92a7660873ced9f92640ac712930ad9bfc603f8c860cffde9ed4bb981",
+  "full_decode": true,
+  "font": "Tahoma Regular, 72px with 93% glyph-height scaling",
+  "fill": "white upper fill graduating to silver #bdbdbd at baseline",
+  "outline": "#717171, approximately 2.7px, antialiased",
+  "shadow": "black, soft 2.1px, offset 2.4px/4.8px",
+  "audio": "copied from v4 without re-encoding",
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 2.04,
+      "text": "Gente, yo quiero\nque ustedes vean esto,"
+    },
+    {
+      "start": 2.55,
+      "end": 4.07,
+      "text": "porque mucha gente ha dicho"
+    },
+    {
+      "start": 4.07,
+      "end": 6.9,
+      "text": "que yo me mofo de los\ndueños de estos carros."
+    },
+    {
+      "start": 7.04,
+      "end": 7.97,
+      "text": "Yo no me mofo,"
+    },
+    {
+      "start": 8.0,
+      "end": 9.47,
+      "text": "yo digo la realidad."
+    },
+    {
+      "start": 9.6,
+      "end": 10.82,
+      "text": "Ven para que veas esto."
+    },
+    {
+      "start": 11.68,
+      "end": 12.32,
+      "text": "Ven acá."
+    },
+    {
+      "start": 13.87,
+      "end": 15.37,
+      "text": "Eso es el turbo, ¿verdad?"
+    },
+    {
+      "start": 15.8,
+      "end": 17.07,
+      "text": "¿Y qué dice ahí?"
+    },
+    {
+      "start": 17.94,
+      "end": 19.47,
+      "text": "¡Adiós! Ahí dice VW."
+    },
+    {
+      "start": 21.72,
+      "end": 22.42,
+      "text": "Ven acá."
+    },
+    {
+      "start": 22.64,
+      "end": 24.34,
+      "text": "Y si buscamos esa pieza,"
+    },
+    {
+      "start": 26.57,
+      "end": 27.77,
+      "text": "¿dirá Lambo"
+    },
+    {
+      "start": 28.3,
+      "end": 29.38,
+      "text": "o dirá VW?"
+    },
+    {
+      "start": 29.54,
+      "end": 30.14,
+      "text": "Pero…"
+    },
+    {
+      "start": 30.75,
+      "end": 31.94,
+      "text": "el número es de VW,"
+    },
+    {
+      "start": 31.94,
+      "end": 32.84,
+      "text": "no es del Lambo."
+    }
+  ],
+  "reference": "caption-style-reference.png",
+  "visual_review": "Rendered caption detail and ending/outro sheet inspected. Gradient fill, gray edge, softer shadow, final captions and original outro present."
+}

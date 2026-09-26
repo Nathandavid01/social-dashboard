@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "output": "Restauco-Lambo-VW-v1.mp4",
+  "output_sha256": "0f0ec4852ed914212a5105752a8b097c6c4c3606cdc026c3171cec9db5a24222",
+  "idea": {
+    "title": "Restauco — Lambo / VW",
+    "hook": "Gente, yo quiero que ustedes vean esto.",
+    "catalog_date": "2026-09-26"
+  },
+  "references": [
+    {
+      "role": "edited_example",
+      "path": "$HOME/Downloads/dummy - 2026-09-26T013320.088.mp4",
+      "exists": true,
+      "sha256": "ad3ba31584bab473f3f1dc7801949bcf050389d02c8c58571eb693a3917281fb"
+    },
+    {
+      "role": "font",
+      "path": "styles/Arial.ttf",
+      "exists": true,
+      "sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9"
+    }
+  ],
+  "comparison_board": "Restauco-Lambo-VW-v1-compare.jpg",
+  "status": "editorial_review_required",
+  "nodes": [
+    {
+      "id": "idea",
+      "status": "pass"
+    },
+    {
+      "id": "references",
+      "status": "pass"
+    },
+    {
+      "id": "render",
+      "status": "pass",
+      "full_decode": true
+    },
+    {
+      "id": "technical_check",
+      "status": "pass",
+      "findings": []
+    },
+    {
+      "id": "visual_comparison",
+      "status": "pending",
+      "criteria": [
+        "Gancho y relación con la idea",
+        "B-roll pertinente y continuidad",
+        "Fuente, color, tamaño, posición y ritmo frente a Instagram y ejemplo de carpeta",
+        "Outro oficial"
+      ]
+    },
+    {
+      "id": "audio_comparison",
+      "status": "pending",
+      "criteria": [
+        "Voz inteligible",
+        "Música y efectos frente al ejemplo; no afirmar identidad sin escuchar"
+      ]
+    },
+    {
+      "id": "user_review",
+      "status": "pending"
+    },
+    {
+      "id": "revise",
+      "status": "conditional"
+    }
+  ],
+  "edges": [
+    [
+      "idea",
+      "references"
+    ],
+    [
+      "references",
+      "render"
+    ],
+    [
+      "render",
+      "technical_check"
+    ],
+    [
+      "technical_check",
+      "visual_comparison"
+    ],
+    [
+      "visual_comparison",
+      "audio_comparison"
+    ],
+    [
+      "audio_comparison",
+      "user_review"
+    ],
+    [
+      "technical_check",
+      "revise"
+    ],
+    [
+      "visual_comparison",
+      "revise"
+    ],
+    [
+      "audio_comparison",
+      "revise"
+    ],
+    [
+      "revise",
+      "render"
+    ]
+  ],
+  "policy": "Cada corrección crea una nueva versión; reabrir comparación tras cada render. Ninguna publicación automática.",
+  "editorial_findings": [
+    "Full-timeline contact sheet and full-resolution caption frame inspected; white sentence-case captions, dark shadow and reference-aligned lower-third position.",
+    "Last spoken sentence after pero is retained without caption pending user transcription confirmation."
+  ],
+  "audio_measurements": {
+    "integrated_lufs": -18.96,
+    "true_peak_dbtp": -2.13,
+    "loudness_range_lu": 5.8,
+    "critical_listening": "not performed"
+  }
+}

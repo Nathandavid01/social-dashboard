@@ -1,0 +1,25 @@
+{
+  "output": "Restauco-Lambo-VW-v3.mp4",
+  "output_sha256": "01f5472374e925892942160c8bfd34e0bac5e02435d5126ef77a165dba0abfea",
+  "status": "editorial_review_required",
+  "verification": {
+    "full_decode": true,
+    "duration": 36.066667,
+    "expected_duration": 36.04
+  },
+  "dimensions": [
+    1080,
+    1920
+  ],
+  "caption_overlap": false,
+  "last_caption_end": 32.84,
+  "outro_duration": 3.2,
+  "notes": [
+    "Caption style revised from user screenshot: Arial regular, white fill, opaque medium-gray outline and black offset shadow. The gray outline supplies the apparent heavier weight.",
+    "Countdown and camera-walk pause removed. Engine demonstration kept in original order.",
+    "Final sentence captioned using large-v3-turbo plus previous ASR passes. \"Número\" is an editorial interpretation of unclear audio; user review remains appropriate.",
+    "Exact Restauco logo and website outro reused from provided example, source 50.60–53.80 seconds, including embedded closing soundtrack."
+  ],
+  "visual_review": "Ending contact sheet inspected: final captions visible through dialogue, original logo and website outro follows cleanly.",
+  "user_review": "pending"
+}

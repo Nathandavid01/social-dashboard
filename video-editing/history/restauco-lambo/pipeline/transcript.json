@@ -1,0 +1,559 @@
+{
+  "segments": [
+    {
+      "words": [
+        {
+          "word": " dos",
+          "start": 0.0,
+          "end": 0.72
+        },
+        {
+          "word": ",",
+          "start": 0.85,
+          "end": 1.11
+        },
+        {
+          "word": " uno",
+          "start": 1.69,
+          "end": 2.0
+        },
+        {
+          "word": ".",
+          "start": 2.0,
+          "end": 2.01
+        },
+        {
+          "word": " Gente",
+          "start": 2.16,
+          "end": 2.46
+        },
+        {
+          "word": ",",
+          "start": 2.55,
+          "end": 2.57
+        },
+        {
+          "word": " yo",
+          "start": 2.57,
+          "end": 2.68
+        },
+        {
+          "word": " quiero",
+          "start": 2.68,
+          "end": 3.05
+        },
+        {
+          "word": " que",
+          "start": 3.05,
+          "end": 3.19
+        },
+        {
+          "word": " ustedes",
+          "start": 3.27,
+          "end": 3.52
+        },
+        {
+          "word": " ve",
+          "start": 3.52,
+          "end": 3.61
+        },
+        {
+          "word": "an",
+          "start": 3.61,
+          "end": 3.71
+        },
+        {
+          "word": " esto",
+          "start": 3.71,
+          "end": 3.98
+        },
+        {
+          "word": ",",
+          "start": 3.98,
+          "end": 4.08
+        },
+        {
+          "word": " porque",
+          "start": 4.63,
+          "end": 4.8
+        },
+        {
+          "word": " mucha",
+          "start": 4.8,
+          "end": 5.1
+        },
+        {
+          "word": " gente",
+          "start": 5.1,
+          "end": 5.4
+        },
+        {
+          "word": " ha",
+          "start": 5.4,
+          "end": 5.52
+        },
+        {
+          "word": " dicho",
+          "start": 5.52,
+          "end": 5.84
+        },
+        {
+          "word": " que",
+          "start": 5.84,
+          "end": 6.12
+        },
+        {
+          "word": " yo",
+          "start": 6.12,
+          "end": 6.24
+        },
+        {
+          "word": " me",
+          "start": 6.24,
+          "end": 6.4
+        },
+        {
+          "word": " mo",
+          "start": 6.4,
+          "end": 6.57
+        },
+        {
+          "word": "fo",
+          "start": 6.57,
+          "end": 6.74
+        },
+        {
+          "word": " de",
+          "start": 6.84,
+          "end": 6.91
+        },
+        {
+          "word": " los",
+          "start": 6.91,
+          "end": 7.1
+        },
+        {
+          "word": " due",
+          "start": 7.25,
+          "end": 7.42
+        },
+        {
+          "word": "ños",
+          "start": 7.42,
+          "end": 7.67
+        },
+        {
+          "word": " de",
+          "start": 7.67,
+          "end": 7.86
+        },
+        {
+          "word": " estos",
+          "start": 8.1,
+          "end": 8.29
+        },
+        {
+          "word": " car",
+          "start": 8.29,
+          "end": 8.41
+        },
+        {
+          "word": "ros",
+          "start": 8.41,
+          "end": 8.81
+        },
+        {
+          "word": ".",
+          "start": 8.96,
+          "end": 9.12
+        },
+        {
+          "word": " Yo",
+          "start": 9.12,
+          "end": 9.28
+        },
+        {
+          "word": " no",
+          "start": 9.28,
+          "end": 9.44
+        },
+        {
+          "word": " me",
+          "start": 9.44,
+          "end": 9.59
+        },
+        {
+          "word": " mo",
+          "start": 9.67,
+          "end": 9.76
+        },
+        {
+          "word": "fo",
+          "start": 9.76,
+          "end": 9.92
+        },
+        {
+          "word": ",",
+          "start": 9.92,
+          "end": 10.08
+        },
+        {
+          "word": " yo",
+          "start": 10.08,
+          "end": 10.24
+        },
+        {
+          "word": " digo",
+          "start": 10.24,
+          "end": 10.51
+        },
+        {
+          "word": " la",
+          "start": 10.56,
+          "end": 10.72
+        },
+        {
+          "word": " realidad",
+          "start": 11.03,
+          "end": 11.37
+        },
+        {
+          "word": ".",
+          "start": 11.43,
+          "end": 11.68
+        },
+        {
+          "word": " Ven",
+          "start": 11.68,
+          "end": 11.88
+        },
+        {
+          "word": " para",
+          "start": 11.88,
+          "end": 12.12
+        },
+        {
+          "word": " que",
+          "start": 12.19,
+          "end": 12.28
+        },
+        {
+          "word": " ve",
+          "start": 12.28,
+          "end": 12.36
+        },
+        {
+          "word": "as",
+          "start": 12.36,
+          "end": 12.43
+        },
+        {
+          "word": " esto",
+          "start": 12.45,
+          "end": 12.68
+        },
+        {
+          "word": ".",
+          "start": 12.68,
+          "end": 12.72
+        },
+        {
+          "word": " Ve",
+          "start": 16.72,
+          "end": 17.03
+        },
+        {
+          "word": "a",
+          "start": 17.03,
+          "end": 17.18
+        },
+        {
+          "word": " acá",
+          "start": 17.18,
+          "end": 17.64
+        },
+        {
+          "word": ",",
+          "start": 17.64,
+          "end": 17.84
+        },
+        {
+          "word": " eso",
+          "start": 17.96,
+          "end": 18.41
+        },
+        {
+          "word": " es",
+          "start": 18.43,
+          "end": 18.72
+        },
+        {
+          "word": " el",
+          "start": 18.72,
+          "end": 18.75
+        },
+        {
+          "word": " tub",
+          "start": 19.28,
+          "end": 19.49
+        },
+        {
+          "word": "o",
+          "start": 19.49,
+          "end": 19.64
+        },
+        {
+          "word": ",",
+          "start": 19.64,
+          "end": 19.91
+        },
+        {
+          "word": " ¿",
+          "start": 19.99,
+          "end": 20.1
+        },
+        {
+          "word": "ver",
+          "start": 20.1,
+          "end": 20.56
+        },
+        {
+          "word": "dad",
+          "start": 20.56,
+          "end": 20.9
+        },
+        {
+          "word": "?",
+          "start": 21.35,
+          "end": 21.48
+        },
+        {
+          "word": " ¿",
+          "start": 21.48,
+          "end": 21.63
+        },
+        {
+          "word": "Y",
+          "start": 21.63,
+          "end": 21.78
+        },
+        {
+          "word": " qué",
+          "start": 21.78,
+          "end": 22.24
+        },
+        {
+          "word": " dice",
+          "start": 22.24,
+          "end": 22.85
+        },
+        {
+          "word": " ahí",
+          "start": 22.85,
+          "end": 23.32
+        },
+        {
+          "word": "?",
+          "start": 23.32,
+          "end": 23.63
+        },
+        {
+          "word": " ¿",
+          "start": 23.63,
+          "end": 23.93
+        },
+        {
+          "word": "A",
+          "start": 23.93,
+          "end": 24.08
+        },
+        {
+          "word": " Dios",
+          "start": 24.59,
+          "end": 24.7
+        },
+        {
+          "word": " ahí",
+          "start": 24.7,
+          "end": 25.16
+        },
+        {
+          "word": " dice",
+          "start": 25.16,
+          "end": 25.7
+        },
+        {
+          "word": " B",
+          "start": 25.76,
+          "end": 25.93
+        },
+        {
+          "word": "W",
+          "start": 25.93,
+          "end": 26.08
+        },
+        {
+          "word": "?",
+          "start": 26.68,
+          "end": 26.72
+        },
+        {
+          "word": " Ve",
+          "start": 26.72,
+          "end": 26.94
+        },
+        {
+          "word": "a",
+          "start": 26.94,
+          "end": 27.04
+        },
+        {
+          "word": " acá",
+          "start": 27.04,
+          "end": 27.37
+        },
+        {
+          "word": ",",
+          "start": 27.37,
+          "end": 27.6
+        },
+        {
+          "word": " y",
+          "start": 27.6,
+          "end": 28.19
+        },
+        {
+          "word": " si",
+          "start": 28.19,
+          "end": 28.33
+        },
+        {
+          "word": " bus",
+          "start": 28.5,
+          "end": 28.56
+        },
+        {
+          "word": "c",
+          "start": 28.56,
+          "end": 28.61
+        },
+        {
+          "word": "amos",
+          "start": 28.61,
+          "end": 28.82
+        },
+        {
+          "word": " esa",
+          "start": 28.83,
+          "end": 29.08
+        },
+        {
+          "word": " pie",
+          "start": 29.08,
+          "end": 29.34
+        },
+        {
+          "word": "za",
+          "start": 29.34,
+          "end": 29.52
+        },
+        {
+          "word": ",",
+          "start": 29.52,
+          "end": 30.49
+        },
+        {
+          "word": " dir",
+          "start": 30.49,
+          "end": 31.95
+        },
+        {
+          "word": "á",
+          "start": 31.95,
+          "end": 32.44
+        },
+        {
+          "word": " Lam",
+          "start": 32.44,
+          "end": 32.69
+        },
+        {
+          "word": "bo",
+          "start": 32.7,
+          "end": 32.88
+        },
+        {
+          "word": " o",
+          "start": 32.89,
+          "end": 33.83
+        },
+        {
+          "word": " dir",
+          "start": 33.91,
+          "end": 34.11
+        },
+        {
+          "word": "á",
+          "start": 34.11,
+          "end": 34.2
+        },
+        {
+          "word": " B",
+          "start": 34.2,
+          "end": 34.34
+        },
+        {
+          "word": "W",
+          "start": 34.34,
+          "end": 34.64
+        },
+        {
+          "word": ",",
+          "start": 34.64,
+          "end": 34.87
+        },
+        {
+          "word": " pero",
+          "start": 34.87,
+          "end": 35.36
+        },
+        {
+          "word": " el",
+          "start": 36.14,
+          "end": 36.48
+        },
+        {
+          "word": " humor",
+          "start": 36.48,
+          "end": 36.73
+        },
+        {
+          "word": " es",
+          "start": 36.73,
+          "end": 36.83
+        },
+        {
+          "word": " de",
+          "start": 36.83,
+          "end": 36.95
+        },
+        {
+          "word": " B",
+          "start": 36.95,
+          "end": 37.0
+        },
+        {
+          "word": "W",
+          "start": 37.0,
+          "end": 37.05
+        },
+        {
+          "word": ".",
+          "start": 37.05,
+          "end": 37.24
+        }
+      ]
+    }
+  ],
+  "provenance": "whisper.cpp small, raw JSON retained in parent directory"
+}

@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "output": "Restauco-Lambo-VW-v2.mp4",
+  "output_sha256": "c2e1e9359078f27dfd73c3bc4879b5794f910a72cdc1a80922ee98f8737caab2",
+  "idea": {
+    "title": "Restauco — Lambo / VW",
+    "hook": "Gente, yo quiero que ustedes vean esto.",
+    "catalog_date": "2026-09-26"
+  },
+  "references": [
+    {
+      "role": "edited_example",
+      "path": "$HOME/Downloads/dummy - 2026-09-26T013320.088.mp4",
+      "exists": true,
+      "sha256": "ad3ba31584bab473f3f1dc7801949bcf050389d02c8c58571eb693a3917281fb"
+    },
+    {
+      "role": "caption_style",
+      "path": "$WORKSPACE/output/reference-edit-20260926/caption-style-reference.png",
+      "exists": true,
+      "sha256": "804319d5c3235c8d14687d967f5d89b5ff081aef5e251ca2885f65635934c055"
+    },
+    {
+      "role": "font",
+      "path": "styles/Arial.ttf",
+      "exists": true,
+      "sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9"
+    }
+  ],
+  "comparison_board": "Restauco-Lambo-VW-v2-compare.jpg",
+  "status": "editorial_review_required",
+  "nodes": [
+    {
+      "id": "idea",
+      "status": "pass"
+    },
+    {
+      "id": "references",
+      "status": "pass"
+    },
+    {
+      "id": "render",
+      "status": "pass",
+      "full_decode": true
+    },
+    {
+      "id": "technical_check",
+      "status": "pass",
+      "findings": []
+    },
+    {
+      "id": "visual_comparison",
+      "status": "pending",
+      "criteria": [
+        "Gancho y relación con la idea",
+        "B-roll pertinente y continuidad",
+        "Fuente, color, tamaño, posición y ritmo frente a Instagram y ejemplo de carpeta",
+        "Outro oficial"
+      ]
+    },
+    {
+      "id": "audio_comparison",
+      "status": "pending",
+      "criteria": [
+        "Voz inteligible",
+        "Música y efectos frente al ejemplo; no afirmar identidad sin escuchar"
+      ]
+    },
+    {
+      "id": "user_review",
+      "status": "pending"
+    },
+    {
+      "id": "revise",
+      "status": "conditional"
+    }
+  ],
+  "edges": [
+    [
+      "idea",
+      "references"
+    ],
+    [
+      "references",
+      "render"
+    ],
+    [
+      "render",
+      "technical_check"
+    ],
+    [
+      "technical_check",
+      "visual_comparison"
+    ],
+    [
+      "visual_comparison",
+      "audio_comparison"
+    ],
+    [
+      "audio_comparison",
+      "user_review"
+    ],
+    [
+      "technical_check",
+      "revise"
+    ],
+    [
+      "visual_comparison",
+      "revise"
+    ],
+    [
+      "audio_comparison",
+      "revise"
+    ],
+    [
+      "revise",
+      "render"
+    ]
+  ],
+  "policy": "Cada corrección crea una nueva versión; reabrir comparación tras cada render. Ninguna publicación automática."
+}
