@@ -48,3 +48,10 @@ describe('editedEntregasVideoId', () => {
     ).toBe('new')
   })
 })
+
+import { isReciboGraphic } from './preview'
+it('classifies the current image and ignores archived graphic versions', () => {
+  const file = { id: 'image', kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', drive_file_id: 'art.png', mime_type: 'image/png', uploaded_at: '2026-09-27' }
+  expect(isReciboGraphic({ videos: [vid(file)] })).toBe(true)
+  expect(isReciboGraphic({ videos: [vid({ ...file, status: 'archived' }), vid({ ...file, id: 'video', mime_type: 'video/mp4' })] })).toBe(false)
+})

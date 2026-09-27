@@ -22,3 +22,9 @@ export function editedEntregasVideoId(
   )
   return sorted[0]?.id ?? null
 }
+
+/** Classify the exact current file, never a stale or archived attachment. */
+export function isReciboGraphic(idea: Pick<IdeaWithPipeline, 'videos'>): boolean {
+  const id = editedEntregasVideoId(idea)
+  return !!idea.videos?.find((file) => file.id === id)?.mime_type?.startsWith('image/')
+}
