@@ -13,14 +13,14 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
-import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
+import { ERIC_IDS, formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { editedEntregasVideoId } from '@/lib/recibo/preview'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
  * Recibo — intake for clients with edit_mode='ai', plus any cut Eric uploaded (v5.113).
- * Under each video, only the caption. No title, approval, or send button.
+ * Per-video review marks, caption, and Metricool action for approved cuts.
  */
 
 function captionOf(idea: IdeaWithPipeline, overrides: Record<string, string>): string {
@@ -50,6 +50,7 @@ export function ReciboBoard({
   ideas,
   aiClients,
   showUploadCounts = false,
+  canPublishOwnCuts = false,
   sentIdeaIds = [],
   cadenceByClient = {},
   todayISO,
@@ -59,6 +60,7 @@ export function ReciboBoard({
   ideas: IdeaWithPipeline[]
   aiClients: { id: string; name: string; logo_url?: string | null }[]
   showUploadCounts?: boolean
+  canPublishOwnCuts?: boolean
   sentIdeaIds?: string[]
   cadenceByClient?: Record<string, ReciboCadence>
   todayISO?: string
@@ -162,7 +164,7 @@ export function ReciboBoard({
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.
-            El caption imita lo ya publicado. Sin auto-post.
+            El caption imita lo ya publicado. Tus videos se programan solo cuando confirmas la acción en su tarjeta.
           </p>
           {showUploadCounts ? (
             <p className="mt-2 text-sm text-foreground" data-testid="recibo-upload-counts">
@@ -226,9 +228,13 @@ export function ReciboBoard({
                   <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {clientIdeas.map((idea) => {
                       const hasEdit = ideaTieneEditadoEntregas(idea)
-                      const editedVideoId = editedEntregasVideoId(idea)
                       const caption = captionOf(idea, captionOverrides)
-                      const approved = idea.staff_client_approval === 'approved' || idea.client_review_status === 'approved'
+                      const videoId = editedEntregasVideoId(idea)
+                      const approved = idea.staff_client_approval === 'approved' && idea.staff_client_approved_video_id === videoId
+                      const video = (idea.videos ?? []).find((item) => item.id === videoId)
+                      const publishMode = canPublishOwnCuts && video?.uploaded_by && ERIC_IDS.has(video.uploaded_by)
+                        ? 'live'
+                        : client.ai ? 'draft' : null
                       return (
                         <li
                           key={idea.id}
@@ -237,14 +243,15 @@ export function ReciboBoard({
                         >
                           <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
-                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedVideoId ?? undefined} />
+                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={videoId ?? undefined} />
                             </div>
-                            {editedVideoId && (
-                              <ReciboDownloadButton ideaId={idea.id} videoId={editedVideoId} title={ideaTitle(idea)} />
+                            {videoId && (
+                              <ReciboDownloadButton ideaId={idea.id} videoId={videoId} title={ideaTitle(idea)} />
                             )}
                             <ReciboStatusMarks
                               ideaId={idea.id}
                               clientId={idea.client_id}
+                              videoId={videoId}
                               approved={approved}
                               sent={sent.has(idea.id)}
                               postedStatus={idea.manual_posted_status ?? null}
@@ -254,7 +261,9 @@ export function ReciboBoard({
                           <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
                           <ReciboPublishButton
                             ideaId={idea.id}
-                            approved={approved}
+                            videoId={videoId}
+                            mode={publishMode}
+                            approved={publishMode === 'live' ? approved : approved || idea.client_review_status === 'approved'}
                             todayISO={todayISO ?? ''}
                             cadence={cadenceByClient[idea.client_id] ?? {}}
                           />

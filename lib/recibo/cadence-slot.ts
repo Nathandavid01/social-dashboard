@@ -1,6 +1,7 @@
 import { addDaysISO } from '@/lib/utils/deadlines'
 import { spanishDateLabel } from '@/lib/utils/next-autopost-core'
 import { resolveSlotTime } from '@/lib/utils/posting-schedule'
+import { validateScheduleOverride } from '@/lib/utils/publish-override'
 
 export type CadenceSlot =
   | { ok: true; dateISO: string; time: string; label: string }
@@ -17,6 +18,7 @@ export function nextCadenceSlot(input: {
   postingSchedule?: Record<string, string> | null
   todayISO: string
   windowDays?: number
+  nowMs?: number
 }): CadenceSlot {
   const days = new Set((input.postingDays ?? []).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6))
   if (days.size === 0) return { ok: false, reason: 'sin-dias' }
@@ -29,6 +31,7 @@ export function nextCadenceSlot(input: {
     if (!days.has(weekday)) continue
     const time = resolveSlotTime(weekday, input.postingTime, input.postingSchedule)
     if (!time) return { ok: false, reason: 'sin-hora' }
+    if (input.nowMs != null && !validateScheduleOverride(`${dateISO}T${time}`, input.nowMs).ok) continue
     const [hourText, minuteText] = time.split(':')
     const hour = Number(hourText)
     const minute = Number(minuteText)

@@ -15,6 +15,7 @@ import { getWeeklyComplianceByClient } from '@/lib/utils/weekly-compliance'
 import { CadenciaCard } from '@/components/home/cadencia-card'
 import { getCadenciaData } from '@/lib/actions/cadencia'
 import { currentUserHas } from '@/lib/auth/server'
+import { ERIC_IDS } from '@/lib/recibo/upload-counts'
 import { PageSpinner } from '@/components/shared/page-spinner'
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -42,6 +43,7 @@ export default async function HomePage() {
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
 
   const { data: { user } } = await supabase.auth.getUser()
+  const isEric = !!user && ERIC_IDS.has(user.id)
 
   const [
     { count: activeClients },
@@ -57,6 +59,7 @@ export default async function HomePage() {
     { data: currentProfile },
     { count: productionInReview },
     { count: productionPublishingToday },
+    { count: myReciboUploads, error: myReciboUploadsError },
   ] = await Promise.all([
     supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase
@@ -103,6 +106,15 @@ export default async function HomePage() {
     user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null }),
     supabase.from('production_tasks').select('id', { count: 'exact', head: true }).in('status', ['en_revision', 'revisiones']),
     supabase.from('production_tasks').select('id', { count: 'exact', head: true }).eq('publish_date', now.toISOString().slice(0, 10)).in('status', ['aprobado', 'publicado']),
+    isEric
+      ? supabase.from('content_idea_videos')
+          .select('id', { count: 'exact', head: true })
+          .in('uploaded_by', [...ERIC_IDS])
+          .eq('kind', 'edited')
+          .eq('storage_provider', 'entregas-r2')
+          .in('status', ['uploaded', 'processing', 'archived'])
+          .not('drive_file_id', 'is', null)
+      : Promise.resolve({ count: null, error: null }),
   ] as const)
 
   // Count clients with low video buffer (< 6 grabadas)
@@ -166,6 +178,23 @@ export default async function HomePage() {
         </div>
         <QuickBriefingButton />
       </div>
+
+      {isEric && (
+        <Link href="/recibo" className="block" data-testid="my-recibo-edits">
+          <Card className="border-violet-500/30 bg-violet-500/5 transition-colors hover:border-violet-500/60">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="rounded-xl bg-violet-500/15 p-3 text-violet-500"><Clapperboard className="h-6 w-6" aria-hidden="true" /></div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">Mis Videos Editados</p>
+                <p className="text-xs text-muted-foreground">Subidas A Recibo · Total Acumulado</p>
+              </div>
+              <span className="text-3xl font-bold tabular-nums" aria-label={myReciboUploadsError ? 'Conteo no disponible' : `${myReciboUploads ?? 0} videos editados`}>
+                {myReciboUploadsError ? '—' : (myReciboUploads ?? 0)}
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* Cadencia — posting cadence from Metricool (today / week / per client).
           Streamed in Suspense so the Metricool sweep never blocks page paint. */}

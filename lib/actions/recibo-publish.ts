@@ -10,8 +10,10 @@ import { nextCadenceSlot } from '@/lib/recibo/cadence-slot'
  * Schedule this Recibo video in Metricool on the client's next cadence day and hour.
  * Does not pick a date of its own when the client has no cadence.
  */
-export async function publishReciboOnCadence(ideaId: string): Promise<{ ok?: true; label?: string; error?: string }> {
+export async function publishReciboOnCadence(ideaId: string, expectedVideoId: string, mode: 'live' | 'draft'): Promise<{ ok?: true; label?: string; error?: string }> {
   if (!ideaId) return { error: 'Falta el video' }
+  if (!expectedVideoId) return { error: 'Falta identificar el video mostrado. Actualiza Recibo.' }
+  if (mode !== 'live' && mode !== 'draft') return { error: 'Acción de Metricool no válida' }
   const supabase = await createClient()
   const { data: idea, error } = await supabase
     .from('content_ideas')
@@ -30,6 +32,7 @@ export async function publishReciboOnCadence(ideaId: string): Promise<{ ok?: tru
     postingTime: client?.posting_time,
     postingSchedule: client?.posting_schedule,
     todayISO: todayISOInTimeZone(POSTING_TZ),
+    nowMs: Date.now(),
   })
   if (!slot.ok) {
     return {
@@ -39,7 +42,7 @@ export async function publishReciboOnCadence(ideaId: string): Promise<{ ok?: tru
     }
   }
 
-  const scheduled = await schedulePoolIdea({ ideaId, date: slot.dateISO })
+  const scheduled = await schedulePoolIdea({ ideaId, date: slot.dateISO, mode, expectedVideoId })
   if (scheduled.error) return { error: scheduled.error }
   return { ok: true, label: slot.label }
 }

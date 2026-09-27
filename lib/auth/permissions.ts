@@ -45,6 +45,8 @@ export type Permission =
   // Posting
   | 'posting.read'
   | 'posting.publish'
+  /** Programar publicaciones automáticas de los propios cortes de Eric desde Recibo. */
+  | 'recibo.publish_own'
   | 'captions.use'
   | 'captions.edit'
   /** Gráficas IA: generar artes con Grok Imagine usando la marca del cliente. */
@@ -115,7 +117,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
-    'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
+    'posting.read', 'posting.publish', 'recibo.publish_own', 'captions.use', 'captions.edit',
     'graphics.generate', 'graphics.cost.read',
     'metricool.read', 'metricool.write', 'metricool.draft',
     'performance.read', 'efficiency.read',

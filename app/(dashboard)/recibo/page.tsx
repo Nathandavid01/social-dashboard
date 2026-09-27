@@ -1,11 +1,11 @@
-import { requirePermission } from '@/lib/auth/server'
+import { currentUserHas, requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
 import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
-import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
+import { canSeeReciboUploadCounts, ERIC_IDS } from '@/lib/recibo/upload-counts'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
 import { ReciboPublishedSync } from '@/components/recibo/recibo-published-sync'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
@@ -15,7 +15,7 @@ export const revalidate = 0
 
 /**
  * Recibo — videos waiting for approval, or approved and still waiting
- * to be posted or scheduled in Metricool. No Metricool auto-post.
+ * to be posted or scheduled in Metricool. Publishing requires an explicit action.
  */
 export default async function ReciboPage() {
   await requirePermission('entregas.read')
@@ -76,6 +76,7 @@ export default async function ReciboPage() {
         publishedTotal={published.total}
         publishedByClient={published.byClient}
         showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
+        canPublishOwnCuts={!!viewer && ERIC_IDS.has(viewer.id) && await currentUserHas('recibo.publish_own')}
       />
     </>
   )

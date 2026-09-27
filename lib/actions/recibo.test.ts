@@ -44,10 +44,18 @@ describe('recibo manual flags', () => {
   })
 
   it('setStaffClientApproval writes approved', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v2' })
     const { setStaffClientApproval } = await import('./recibo')
-    const res = await setStaffClientApproval({ ideaId: 'i2', status: 'approved' })
+    const res = await setStaffClientApproval({ ideaId: 'i2', status: 'approved', videoId: 'v2' })
     expect(res.ok).toBe(true)
-    expect(update).toHaveBeenCalledWith({ staff_client_approval: 'approved' })
+    expect(update).toHaveBeenCalledWith({ staff_client_approval: 'approved', staff_client_approved_video_id: 'v2' })
+  })
+
+  it('no marca aprobado un corte distinto al actual', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v3' })
+    const { setStaffClientApproval } = await import('./recibo')
+    expect((await setStaffClientApproval({ ideaId: 'i2', status: 'approved', videoId: 'v2' })).error).toMatch(/cambió/i)
+    expect(update).not.toHaveBeenCalled()
   })
 
   it('rejects invalid posted status', async () => {

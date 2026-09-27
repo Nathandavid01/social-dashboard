@@ -42,6 +42,7 @@ import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
 import { getReciboIdeaDownloadUrl, getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
+import { publishReciboOnCadence } from '@/lib/actions/recibo-publish'
 import { ReciboBoard } from './recibo-board'
 
 /** Dated inside the current week so the week filter still includes the card. */
@@ -57,6 +58,7 @@ const editedIdea = {
   caption_draft: null,
   manual_posted_status: null,
   staff_client_approval: null,
+  staff_client_approved_video_id: null,
   client: { id: 'c1', name: 'Arecibo Lab', industry: null, logo_url: null },
   videos: [
     {
@@ -111,7 +113,7 @@ describe('ReciboBoard', () => {
     expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
     expect(screen.getByRole('button', { name: 'Enviado' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'Aprobado' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText(/Márcalo aprobado para publicarlo/i)).toBeInTheDocument()
+    expect(screen.getByText(/márcalo Aprobado para publicarlo/i)).toBeInTheDocument()
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
@@ -130,6 +132,44 @@ describe('ReciboBoard', () => {
       />,
     )
     expect(screen.getByTestId('recibo-video-empty')).toHaveTextContent('Sin video editado')
+  })
+
+  it('permite programar el corte exacto cuando Eric marca la aprobación del cliente', async () => {
+    const user = userEvent.setup()
+    render(<ReciboBoard
+      aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+      canPublishOwnCuts
+      ideas={[{ ...editedIdea, staff_client_approval: 'approved', staff_client_approved_video_id: 'v1', videos: [{ ...editedIdea.videos[0], uploaded_by: '2ec6c260-4ed5-4c4b-8f85-8b76353532cb' }] }]}
+      todayISO={publishThisWeek}
+      cadenceByClient={{ c1: { postingDays: [0, 1, 2, 3, 4, 5, 6], postingTime: '18:00', metricool: true } }}
+    />)
+    await user.click(screen.getByRole('button', { name: /Programar Publicación/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', 'v1', 'live'))
+  })
+
+  it('una aprobación de una versión anterior no habilita el nuevo corte', () => {
+    render(<ReciboBoard
+      aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+      canPublishOwnCuts
+      ideas={[{ ...editedIdea, staff_client_approval: 'approved', staff_client_approved_video_id: 'old', videos: [{ ...editedIdea.videos[0], uploaded_by: '2ec6c260-4ed5-4c4b-8f85-8b76353532cb' }] }]}
+      todayISO={publishThisWeek}
+      cadenceByClient={{ c1: { postingDays: [0, 1, 2, 3, 4, 5, 6], postingTime: '18:00', metricool: true } }}
+    />)
+    expect(screen.getByRole('button', { name: 'Aprobado' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: /Publicar en Metricool/i })).toBeDisabled()
+  })
+
+  it('mantiene el borrador de Metricool para videos AI de otros editores', async () => {
+    const user = userEvent.setup()
+    render(<ReciboBoard
+      aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+      canPublishOwnCuts
+      ideas={[{ ...editedIdea, client_review_status: 'approved', videos: [{ ...editedIdea.videos[0], uploaded_by: 'nathan-id' }] }]}
+      todayISO={publishThisWeek}
+      cadenceByClient={{ c1: { postingDays: [0, 1, 2, 3, 4, 5, 6], postingTime: '18:00', metricool: true } }}
+    />)
+    await user.click(screen.getByRole('button', { name: /Crear Borrador/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', 'v1', 'draft'))
   })
 
   it('muestra el caption y lo guarda al editarlo', async () => {

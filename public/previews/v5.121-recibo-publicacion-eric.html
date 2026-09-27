@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recibo · Mis Videos Editados</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090909;color:#f5f5f5}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#222018 0%,#090909 42%);min-height:100vh}
+    header{height:64px;border-bottom:1px solid #292722;display:flex;align-items:center;padding:0 32px;gap:24px;background:#0d0c0b}
+    .brand{color:#d2ae69;font-weight:800;letter-spacing:.12em}.nav{color:#aca8a2;font-size:13px}.nav.active{color:#f6e4bd}
+    main{max-width:1080px;margin:0 auto;padding:40px 24px 80px}h1{font-size:29px;margin:0 0 7px}h2{font-size:19px;margin:0 0 6px}p{margin:0;color:#a8a39a;font-size:13px;line-height:1.5}
+    .section{margin-top:38px}.counter{display:flex;align-items:center;gap:18px;margin-top:20px;padding:22px 24px;border:1px solid #785632;border-radius:16px;background:linear-gradient(110deg,#292015,#17130f)}
+    .icon{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#614820;color:#f4d195;font-size:25px}.number{margin-left:auto;font-size:38px;font-weight:800;color:#f0ce90;font-variant-numeric:tabular-nums}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:20px}.card{border:1px solid #36302b;border-radius:17px;background:#161412;overflow:hidden}.card-head{background:#100f0e;padding:22px 24px 15px;min-height:190px}.label{font-size:12px;color:#d7b77e;font-weight:700;letter-spacing:.04em}.video{margin:17px auto 0;width:104px;height:110px;border-radius:10px;background:linear-gradient(150deg,#4d504b,#212623);display:grid;place-items:center;color:#e8d8ba;font-size:26px}.marks{display:flex;gap:7px;margin-top:-5px;position:relative}.mark{font-size:11px;background:#ede9e1;color:#1a1713;border-radius:30px;padding:4px 9px}.mark.off{background:#37322d;color:#b0aaa0}
+    .body{padding:18px 22px}.caption{font-size:13px;line-height:1.6;color:#e0ddd7;min-height:54px}.button{margin-top:17px;background:#74542b;color:#fff3dc;font-size:13px;font-weight:700;padding:12px;border-radius:10px;text-align:center}.button.draft{background:#39312a;color:#dbcab4}.meta{font-size:11px;margin-top:8px}
+    @media(max-width:650px){header{padding:0 16px;gap:16px}main{padding:27px 16px}.grid{grid-template-columns:1fr}.number{font-size:32px}}
+  </style>
+</head>
+<body>
+  <header><div class="brand">NATE MEDIA</div><div class="nav active">Inicio</div><div class="nav">Recibo</div></header>
+  <main>
+    <h1>Buenos días, Eric 👋</h1><p>Tu trabajo editado, visible desde el dashboard.</p>
+    <div class="counter"><div class="icon">▣</div><div><h2>Mis Videos Editados</h2><p>Subidas A Recibo · Total Acumulado</p></div><div class="number">24</div></div>
+    <div class="section"><h1>Recibo</h1><p>La publicación se programa solo cuando confirmas la acción en cada tarjeta.</p>
+      <div class="grid">
+        <div class="card"><div class="card-head"><span class="label">CORTE DE ERIC</span><div class="video">▶</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span><span class="mark off">Publicado</span></div></div><div class="body"><h2>Arecibo Lab</h2><div class="caption">El laboratorio ya abrió en Arecibo. Conoce nuestros servicios y agenda tu cita.</div><div class="button">Programar Publicación · sábado, 6:00 p.m.</div><p class="meta">Publicación automática en Metricool, en la cadencia del cliente.</p></div></div>
+        <div class="card"><div class="card-head"><span class="label">CORTE DE OTRO EDITOR</span><div class="video">▶</div><div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span><span class="mark off">Publicado</span></div></div><div class="body"><h2>Otro Cliente</h2><div class="caption">Caption revisado y guardado para el cliente.</div><div class="button draft">Crear Borrador · lunes, 6:00 p.m.</div><p class="meta">Queda como borrador en Metricool para revisión.</p></div></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

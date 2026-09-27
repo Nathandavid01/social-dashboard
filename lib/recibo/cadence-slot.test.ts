@@ -22,4 +22,14 @@ describe('nextCadenceSlot', () => {
       reason: 'sin-hora',
     })
   })
+
+  it('salta la hora de hoy si ya pasó el mínimo para programar', () => {
+    const slot = nextCadenceSlot({
+      postingDays: [0, 1, 2, 3, 4, 5, 6],
+      postingTime: '09:00',
+      todayISO: '2026-09-23',
+      nowMs: Date.parse('2026-09-23T13:00:00Z'),
+    })
+    expect(slot).toMatchObject({ ok: true, dateISO: '2026-09-24', time: '09:00' })
+  })
 })

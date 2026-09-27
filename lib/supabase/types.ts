@@ -500,6 +500,8 @@ export interface ContentIdea {
   manual_posted_status?: 'posted' | 'not_posted' | null
   /** Staff manual client approval (Recibo). Migration 0086. */
   staff_client_approval?: 'approved' | 'rejected' | null
+  /** Exact file covered by the staff approval in Recibo. Migration 0090. */
+  staff_client_approved_video_id?: string | null
   posting_error: string | null
   posting_started_at: string | null
   /** Quién está cortando ahora (Pipeline). Migración 0088. El candado es este id. */

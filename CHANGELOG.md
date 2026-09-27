@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.121 — 2026-09-26
+
+**Tus videos editados tienen un contador en Inicio y se pueden programar desde Recibo.**
+- Inicio muestra el total acumulado de los cortes que Eric subió a Recibo, incluso cuando una versión anterior ya salió de la cola.
+- En Recibo, la marca **Aprobado** queda ligada al video exacto. Si subes otro corte, se vuelve a pedir la aprobación.
+- Para los cortes de Eric, **Programar Publicación** crea un post automático en Metricool según la cadencia del cliente, con el caption guardado. Los cortes de otros editores siguen creando borradores.
+- Si faltan el caption, la cuenta de Metricool, las redes o la cadencia, Recibo explica qué falta antes de enviar.
+
+![Contador de videos y publicación desde Recibo](/changelog/v5.121-recibo-publicacion-eric.png)
+
 ## v5.120 — 2026-09-25
 
 **Lo que ya está publicado en Metricool sale de Recibo, aunque se haya subido a mano.**

@@ -44,6 +44,7 @@ export async function setManualPostedStatus(input: {
 export async function setStaffClientApproval(input: {
   ideaId: string
   status: StaffClientApproval
+  videoId?: string
 }): Promise<{ ok?: true; error?: string }> {
   try {
     await requirePermission('entregas.read')
@@ -54,11 +55,16 @@ export async function setStaffClientApproval(input: {
   if (input.status != null && input.status !== 'approved' && input.status !== 'rejected') {
     return { error: 'Estado de aprobación no válido' }
   }
+  if (input.status === 'approved') {
+    if (!input.videoId) return { error: 'Falta identificar el video mostrado. Actualiza Recibo.' }
+    const current = await getEntregaVideoEditado(input.ideaId)
+    if (current.error || current.id !== input.videoId) return { error: 'El video cambió. Actualiza Recibo antes de marcarlo aprobado.' }
+  }
 
   const supabase = await createClient()
   const { error } = await supabase
     .from('content_ideas')
-    .update({ staff_client_approval: input.status })
+    .update({ staff_client_approval: input.status, staff_client_approved_video_id: input.status === 'approved' ? input.videoId : null })
     .eq('id', input.ideaId)
 
   if (error) return { error: error.message }

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const h = vi.hoisted(() => ({
   perm: 'posting.publish' as string | null,
+  userId: 'owner',
   idea: {} as Record<string, unknown>,
   videos: [] as Record<string, unknown>[],
   writes: [] as Record<string, unknown>[],
@@ -36,7 +37,7 @@ vi.mock('@/lib/integrations/entregas-r2', () => ({
 vi.mock('@/lib/utils/idea-activity', () => ({ logIdeaActivity: vi.fn() }))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
-    auth: { getUser: async () => ({ data: { user: { id: 'owner' } } }) },
+    auth: { getUser: async () => ({ data: { user: { id: h.userId } } }) },
     from(table: string) {
       let write = false
       const q: Record<string, unknown> = {
@@ -87,6 +88,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(new Date('2026-09-20T14:00:00Z'))
   h.perm = 'posting.publish'
+  h.userId = 'owner'
   h.writes = []
   h.filters = []
   h.claimed = [{ id: 'idea' }]
@@ -102,6 +104,7 @@ beforeEach(() => {
     storage_provider: 'entregas-r2',
     drive_file_id: 'edited.mp4',
     uploaded_at: '2026-09-19T12:00:00Z',
+    uploaded_by: '2ec6c260-4ed5-4c4b-8f85-8b76353532cb',
   }]
   h.idea = {
     id: 'idea',
@@ -116,6 +119,7 @@ beforeEach(() => {
     metricool_post_id: null,
     posted_at: null,
     staff_client_approval: 'approved',
+    staff_client_approved_video_id: 'vid',
     client_review_status: null,
     client_id: 'ai-client',
     client: {
@@ -131,6 +135,51 @@ beforeEach(() => {
 })
 
 describe('schedulePoolIdea', () => {
+  const liveInput = { ideaId: 'idea', date: '2026-09-23', mode: 'live' as const, expectedVideoId: 'vid' }
+
+  it('Recibo programa una publicación real del corte aprobado de Eric, incluso para un cliente humano', async () => {
+    h.perm = 'recibo.publish_own'
+    h.userId = '2ec6c260-4ed5-4c4b-8f85-8b76353532cb'
+    ;(h.idea.client as { edit_mode: string }).edit_mode = 'human'
+    const res = await schedulePoolIdea(liveInput)
+    expect(res).toMatchObject({ ok: true, state: 'agendado' })
+    expect(res.draft).toBeUndefined()
+    expect(h.post.mock.calls[0]?.[5]).toMatchObject({ autoPublish: true, mediaUrls: ['https://entregas.example/edited.mp4'] })
+    const { logIdeaActivity } = await import('@/lib/utils/idea-activity')
+    expect(vi.mocked(logIdeaActivity)).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      metadata: expect.objectContaining({ source: 'recibo', draft: false, autoPublish: true, videoId: 'vid' }),
+    }))
+  })
+
+  it('Recibo exige la marca del corte exacto y un caption guardado', async () => {
+    h.perm = 'recibo.publish_own'
+    h.userId = '2ec6c260-4ed5-4c4b-8f85-8b76353532cb'
+    h.idea.staff_client_approved_video_id = 'old'
+    expect((await schedulePoolIdea(liveInput)).error).toMatch(/otro corte/i)
+    h.idea.staff_client_approved_video_id = 'vid'
+    h.idea.generated_caption = '  '
+    expect((await schedulePoolIdea(liveInput)).error).toMatch(/caption/i)
+    expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('Recibo no inventa redes si el cliente no las tiene configuradas', async () => {
+    h.perm = 'recibo.publish_own'
+    h.userId = '2ec6c260-4ed5-4c4b-8f85-8b76353532cb'
+    ;(h.idea.client as { platforms: string[]; default_platforms: string[] }).platforms = []
+    ;(h.idea.client as { platforms: string[]; default_platforms: string[] }).default_platforms = []
+    expect((await schedulePoolIdea(liveInput)).error).toMatch(/redes/i)
+    expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('Recibo rechaza otra cuenta, otro archivo y un post ya enviado', async () => {
+    h.perm = 'recibo.publish_own'
+    expect((await schedulePoolIdea(liveInput)).error).toMatch(/Solo Eric/i)
+    h.userId = '2ec6c260-4ed5-4c4b-8f85-8b76353532cb'
+    expect((await schedulePoolIdea({ ...liveInput, expectedVideoId: 'other' })).error).toMatch(/otro corte/i)
+    h.idea.metricool_post_id = 44
+    expect((await schedulePoolIdea(liveInput)).error).toMatch(/ya fue enviado/i)
+    expect(h.post).not.toHaveBeenCalled()
+  })
   it('exige posting.publish', async () => {
     h.perm = 'other'
     expect(await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })).toEqual({
@@ -152,6 +201,12 @@ describe('schedulePoolIdea', () => {
     expect(await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })).toMatchObject({
       error: expect.stringMatching(/Listo|aprobado|recibo/i),
     })
+    expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('Recibo no crea un borrador si cambió el archivo que se mostró', async () => {
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23', mode: 'draft', expectedVideoId: 'otro' })
+    expect(res.error).toMatch(/video mostrado cambió/i)
     expect(h.post).not.toHaveBeenCalled()
   })
 

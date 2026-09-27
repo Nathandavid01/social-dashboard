@@ -19,7 +19,7 @@ vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 import { ReciboStatusMarks } from './recibo-card-status'
 
 function renderMarks(postedStatus: 'not_posted' | null = null) {
-  render(<ReciboStatusMarks ideaId="i1" clientId="c1" approved={false} sent={false} postedStatus={postedStatus} />)
+  render(<ReciboStatusMarks ideaId="i1" clientId="c1" videoId="v1" approved={false} sent={false} postedStatus={postedStatus} />)
   return screen.getByRole('button', { name: 'Publicado' })
 }
 

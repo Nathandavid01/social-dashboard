@@ -13,12 +13,14 @@ import { cn } from '@/lib/utils'
 export function ReciboStatusMarks({
   ideaId,
   clientId,
+  videoId,
   approved,
   sent,
   postedStatus = null,
 }: {
   ideaId: string
   clientId: string
+  videoId: string | null
   approved: boolean
   sent: boolean
   /** manual_posted_status now: Deshacer puts this back. */
@@ -35,7 +37,7 @@ export function ReciboStatusMarks({
     const next = isApproved ? null : 'approved'
     setApproved(!isApproved)
     start(async () => {
-      const res = await setStaffClientApproval({ ideaId, status: next })
+      const res = await setStaffClientApproval({ ideaId, status: next, videoId: videoId ?? undefined })
       if (res.error) {
         setApproved(isApproved)
         toast({ title: 'No se pudo marcar', description: res.error, variant: 'destructive' })
@@ -96,7 +98,7 @@ export function ReciboStatusMarks({
   return (
     <div className="absolute bottom-3 left-3 flex gap-1.5">
       <Mark on={isSent} disabled={pending || isSent} onClick={markSent} label="Enviado" />
-      <Mark on={isApproved} disabled={pending} onClick={toggleApproved} label="Aprobado" />
+      <Mark on={isApproved} disabled={pending || !videoId} onClick={toggleApproved} label="Aprobado" />
       <Mark on={isPublished} disabled={pending || isPublished} onClick={markPublished} label="Publicado" />
     </div>
   )
@@ -132,11 +134,15 @@ function Mark({
 
 export function ReciboPublishButton({
   ideaId,
+  videoId,
+  mode,
   approved,
   cadence,
   todayISO,
 }: {
   ideaId: string
+  videoId: string | null
+  mode: 'live' | 'draft' | null
   approved: boolean
   cadence: {
     postingDays?: number[] | null
@@ -154,31 +160,34 @@ export function ReciboPublishButton({
     postingTime: cadence.postingTime,
     postingSchedule: cadence.postingSchedule,
     todayISO,
+    nowMs: Date.now(),
   })
 
-  let label = 'Publicar en Metricool'
+  let label = mode === 'draft' ? 'Crear Borrador En Metricool' : 'Publicar en Metricool'
   let hint = ''
-  if (!approved) hint = 'Márcalo aprobado para publicarlo.'
+  if (!mode) hint = 'Solo Eric puede publicar sus cortes desde Recibo.'
+  else if (!approved) hint = 'Cuando el cliente lo apruebe, márcalo Aprobado para publicarlo.'
+  else if (!videoId) hint = 'Falta el video editado.'
   else if (!cadence.metricool) hint = 'A este cliente le falta Metricool.'
   else if (!slot.ok && slot.reason === 'sin-dias') hint = 'Agrega los días de publicación en la cadencia del cliente.'
   else if (!slot.ok) hint = 'Agrega la hora de publicación en la cadencia del cliente.'
   else hint = slot.label
 
-  if (slot.ok && approved && cadence.metricool) label = `Publicar en Metricool · ${slot.label}`
+  if (slot.ok && approved && cadence.metricool && videoId) label = `${mode === 'draft' ? 'Crear Borrador' : 'Programar Publicación'} · ${slot.label}`
 
   function publish() {
-    if (!approved || !cadence.metricool || !slot.ok) return
+    if (!mode || !approved || !cadence.metricool || !slot.ok || !videoId) return
     start(async () => {
-      const res = await publishReciboOnCadence(ideaId)
-      if (res.error) toast({ title: 'No se publicó', description: res.error, variant: 'destructive' })
+      const res = await publishReciboOnCadence(ideaId, videoId, mode)
+      if (res.error) toast({ title: 'No se pudo enviar a Metricool', description: res.error, variant: 'destructive' })
       else {
-        toast({ title: 'Quedó en Metricool', description: res.label })
+        toast({ title: mode === 'live' ? 'Publicación Programada En Metricool' : 'Borrador Creado En Metricool', description: res.label })
         router.refresh()
       }
     })
   }
 
-  const blocked = !approved || !cadence.metricool || !slot.ok
+  const blocked = !mode || !approved || !cadence.metricool || !slot.ok || !videoId
 
   return (
     <div className="px-3 pb-3">
