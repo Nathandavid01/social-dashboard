@@ -28,6 +28,15 @@ describe('reciboBoardIdeas', () => {
     expect(reciboBoardIdeas([bare, agendado, publicado, descartada], ['ai'])).toEqual([])
   })
 
+  // Eric 2026-09-25: «quiero que cuando se publiquen los videos no aparezcan en recibos».
+  it('sale al marcarlo Publicado o al enlazarlo con su post de Metricool (aunque se publicara a mano)', () => {
+    const marcado = { ...edited, id: 'marcado', manual_posted_status: 'posted' }
+    const enlazado = { ...edited, id: 'enlazado', metricool_post_id: 381555336, posted_at: '2026-09-25T12:00:00Z' }
+    const conFecha = { ...edited, id: 'con-fecha', published_at: '2026-09-24T13:59:00Z' }
+    const noSePosteo = { ...edited, id: 'no-se-posteo', manual_posted_status: 'not_posted' }
+    expect(reciboBoardIdeas([marcado, enlazado, conFecha, noSePosteo], ['ai']).map((idea) => idea.id)).toEqual(['no-se-posteo'])
+  })
+
   // Eric 2026-09-24: «quiero que puedas poner en recibo los videos que yo edito aunque el cliente sea de un editor».
   it('deja el corte que subió Eric aunque el cliente sea de un editor humano, y solo ese corte', () => {
     const [eric] = [...ERIC_IDS]
