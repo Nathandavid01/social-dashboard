@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>v5.121 · Recibo con todos los cortes editados</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0a0a0a;--panel:#121212;--border:#292929;--text:#fafafa;--muted:#a6a6a6;--gold:#d4af37;--violet:#c4b5fd}
+    *{box-sizing:border-box}body{margin:0;padding:40px 20px;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}main{max-width:1040px;margin:auto}h1{font-size:28px;line-height:1.2;margin:12px 0}h2{font-size:13px;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin:0 0 20px}h3{font-size:19px;margin:0}.lead,.muted{color:var(--muted)}.lead{max-width:730px;margin-bottom:30px}.version{color:var(--gold);font-size:13px}.columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}section{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:24px}.description{font-size:13px;color:var(--muted);margin:6px 0 20px}.empty{border:1px dashed var(--border);border-radius:14px;padding:30px 18px;color:var(--muted);font-size:14px}.client{display:flex;gap:12px;align-items:center;margin:20px 0 14px}.avatar{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;color:var(--gold);font-weight:700}.client strong{display:block}.badge{font-size:12px;color:var(--muted)}.count{font-size:13px;margin:12px 0}.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{overflow:hidden;border:1px solid var(--border);border-radius:13px}.video{aspect-ratio:9/13;display:flex;flex-direction:column;justify-content:space-between;padding:12px;background:linear-gradient(155deg,#28262c,#09090b);font-size:12px}.download{align-self:flex-start;padding:5px 10px;background:#0a0a0acc;border:1px solid #555;border-radius:7px;color:white}.play{font-size:28px;text-align:center;color:var(--gold)}.video-title{font-weight:600}.caption{padding:12px;font-size:12px;color:#ddd}.note{font-size:12px;color:var(--muted);margin:18px 0 0}.pill{display:inline-block;padding:5px 10px;border-radius:30px;background:#8b5cf633;color:var(--violet);font-size:12px;margin-top:18px}footer{font-size:12px;color:var(--muted);margin-top:24px}@media(max-width:720px){body{padding:24px 14px}h1{font-size:24px}.columns{grid-template-columns:1fr}section{padding:20px}}
+  </style>
+</head>
+<body>
+<main>
+  <span class="version">Nate Media · v5.121</span>
+  <h1>Los cortes de Eric llegan a Recibo</h1>
+  <p class="lead">Los videos editados aparecen aunque el cliente no sea AI y aunque el archivo se haya subido por una ruta distinta a Entregas.</p>
+  <div class="columns">
+    <section aria-label="Antes">
+      <h2>Antes</h2>
+      <h3>Recibo</h3>
+      <p class="description">Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.</p>
+      <div class="empty">Sin video editado. El corte aparecerá aquí cuando esté en Entregas.</div>
+      <p class="note">Un corte editado subido por Eric al dashboard podía quedar fuera de Recibo, aunque todavía estuviera pendiente.</p>
+    </section>
+    <section aria-label="Después de la actualización">
+      <h2>Después · v5.121</h2>
+      <h3>Recibo</h3>
+      <p class="description">Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.</p>
+      <div class="client"><span class="avatar" aria-hidden="true">CE</span><div><strong>Cliente de ejemplo</strong><span class="badge">Entrega puntual</span></div></div>
+      <p class="count">Total 2 · Nathan 0 · Eric 2 · Sin autor 0 · Publicados 0</p>
+      <div class="cards">
+        <article class="card"><div class="video"><span class="download">↓ Bajar</span><span class="play" aria-hidden="true">▷</span><span class="video-title">Corte desde el dashboard</span></div><div class="caption">El video se puede ver y bajar desde su tarjeta.</div></article>
+        <article class="card"><div class="video"><span class="download">↓ Bajar</span><span class="play" aria-hidden="true">▷</span><span class="video-title">Corte desde Entregas</span></div><div class="caption">Ambas rutas cuentan en Recibo.</div></article>
+      </div>
+      <span class="pill">Recibo se actualiza al registrar la subida</span>
+      <p class="note">Sin archivo: «El video aparecerá aquí cuando subas un archivo editado».</p>
+    </section>
+  </div>
+  <footer>Vista ilustrativa del cambio. El cliente, los videos y el conteo son ejemplos; esta página no reproduce ni descarga archivos reales.</footer>
+</main>
+</body>
+</html>
