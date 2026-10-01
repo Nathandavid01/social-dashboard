@@ -1,8 +1,8 @@
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
- * Latest usable edited Entregas file id on an idea (client-side mirror of
- * getEntregaVideoEditado). Null → show "Sin video editado".
+ * Latest usable edited dashboard file id on an idea (client-side mirror of
+ * getReciboEditedVideo). Null → show "Sin video editado".
  */
 export function editedEntregasVideoId(
   idea: Pick<IdeaWithPipeline, 'videos'>,
@@ -10,7 +10,7 @@ export function editedEntregasVideoId(
   const candidates = (idea.videos ?? []).filter(
     (v) =>
       v.kind === 'edited' &&
-      v.storage_provider === 'entregas-r2' &&
+      ['r2', 'entregas-r2'].includes(v.storage_provider) &&
       v.status !== 'failed' &&
       v.status !== 'archived' &&
       !!v.drive_file_id &&
