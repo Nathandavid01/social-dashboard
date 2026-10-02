@@ -4,7 +4,7 @@ Esta carpeta reúne el motor local de edición, sus pruebas, fichas, perfiles y 
 
 ## Preparar otro equipo
 
-1. Instalar Python 3.9+, Node 22+ y FFmpeg/ffprobe con libass.
+1. Instalar Python 3.9+, Node 22+ y FFmpeg/ffprobe con libass. Mantener `ffprobe` en PATH; si FFmpeg no está en `/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg`, configurar `FFMPEG` con la ruta de su ejecutable antes de renderizar o ejecutar las pruebas.
 2. Instalar las dependencias del dashboard desde la raíz: `npm ci`.
 3. Desde esta carpeta: `python3 -m venv .venv`, activar el entorno y ejecutar `pip install -r requirements.txt`.
 4. Restaurar los medios autorizados desde Drive/R2/SSD siguiendo `GUIAS-RECURSOS.md` y `styles/client-assets.json`. Las fuentes, logos, outros, música, originales y exports no se distribuyen en Git. La única fuente incluida es una fixture de prueba Montserrat con su licencia OFL.

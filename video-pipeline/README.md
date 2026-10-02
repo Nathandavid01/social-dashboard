@@ -1,6 +1,6 @@
 # Nate Media — Pipeline De Edición
 
-Integrado en Social Dashboard. Para instalar, restaurar medios y entender las rutas históricas, leer [PORTABILITY.md](PORTABILITY.md).
+Integrado en Social Dashboard. Para instalar, restaurar medios y entender las rutas históricas, leer [PORTABILITY.md](PORTABILITY.md). La ubicación del repositorio y el alcance del traslado están en [Remoto del pipeline](docs/REMOTE.md).
 
 Primer pipeline **local** de Nate Media. Usa el material de las ideas del dashboard, transcribe en español en el Mac y renderiza un MP4 vertical a partir de una edición guardada en JSON.
 
@@ -53,7 +53,7 @@ Paso automático para todos los nuevos renders: preparación de voz por interven
 
 ## Componentes
 
-- `dashboard.mjs`: consultas **GET** limitadas al cliente Nana’s, catálogo, descargas R2 cuando la configuración del proveedor está disponible e importación de archivos bajados desde el dashboard. Usa el entorno existente; nunca copia credenciales al proyecto ni escribe en la base de datos.
+- `dashboard.mjs`: consultas **GET** del cliente seleccionado (`--client nanas`, `--client truco` o `--client UUID`; Nana’s por defecto), catálogo, descargas R2 cuando la configuración del proveedor está disponible e importación de archivos bajados desde el dashboard. Usa el entorno existente; nunca copia credenciales al proyecto ni escribe en la base de datos.
 - `pipeline.py`: Whisper local, sincronización de palabras tras cortes/reordenación, subtítulos ASS animados que ajustan su tamaño al ancho, encuadres, B-roll manteniendo la voz, outro, voz normalizada y sonidos sintetizados originales.
 - `styles/nanas.json`: fuente DTMF de la carpeta suministrada, subtítulos blancos con borde magenta. Estilo pendiente de revisión con Eric; los sonidos de Instagram todavía no se han analizado.
 - `edits/`: instrucciones de edición reproducibles y notas de revisión.
