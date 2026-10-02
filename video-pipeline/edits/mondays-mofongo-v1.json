@@ -1,0 +1,54 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v1.json",
+  "idea_id": "mondays-mofongo",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Eso no fue lo que yo pedí",
+  "source": "../runs/mondays-src/0437.mp4",
+  "transcript": "../runs/mondays-src/0437.small.json",
+  "clips": [
+    {
+      "in": 1.2,
+      "out": 9.4
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Foam Rubber.mp3",
+    "title": "Foam Rubber",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Foam%20Rubber.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.7,
+      "text": "Bueno, por aquí\nya están listos."
+    },
+    {
+      "start": 1.98,
+      "end": 4.3,
+      "text": "Si me puedes dar un sándwich\nde jamón y queso."
+    },
+    {
+      "start": 4.54,
+      "end": 6.0,
+      "text": "Un mofongo relleno de pollo."
+    },
+    {
+      "start": 6.24,
+      "end": 7.9,
+      "text": "Eso no fue lo que yo pedí."
+    }
+  ],
+  "review_notes": [
+    "Se quita la claqueta. Pide un sándwich y le ofrecen mofongo. Sin B-roll: el menú ya está en el plano."
+  ]
+}

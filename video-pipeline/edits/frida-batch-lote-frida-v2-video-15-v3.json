@@ -1,0 +1,148 @@
+{
+  "idea_id": "frida-20260903-15",
+  "title": "El Date Perfecto",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-15-master.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-15-transcript.json",
+  "style": "../styles/frida-v2.json",
+  "clips": [
+    {
+      "in": 1.25,
+      "out": 6.94,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.69,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 8.385333,
+      "out": 10.325333,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.94,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 1.13,
+      "text": "A mí me preguntan",
+      "emphasis": []
+    },
+    {
+      "start": 1.13,
+      "end": 2.35,
+      "text": "cuál es un date perfecto",
+      "emphasis": [
+        {
+          "text": "date perfecto",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 2.35,
+      "end": 3.53,
+      "text": "y es donde no puede faltar",
+      "emphasis": []
+    },
+    {
+      "start": 3.53,
+      "end": 4.17,
+      "text": "buena comida,",
+      "emphasis": [
+        {
+          "text": "buena comida",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 4.29,
+      "end": 4.87,
+      "text": "ricos tragos",
+      "emphasis": [
+        {
+          "text": "ricos tragos",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 4.87,
+      "end": 5.49,
+      "text": "y spots de fotos.",
+      "emphasis": []
+    },
+    {
+      "start": 5.77,
+      "end": 6.36,
+      "text": "Por eso yo vengo",
+      "emphasis": []
+    },
+    {
+      "start": 6.36,
+      "end": 7.5,
+      "text": "a Frida Food and Bar.",
+      "emphasis": [
+        {
+          "text": "Frida Food and Bar",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-15-master.mp4",
+      "in": 8.185333,
+      "out": 10.325333,
+      "at": 5.49,
+      "fade_in": 0.35,
+      "zoom": 1.0,
+      "reason": "Cierre propio de la pareja brindando, fundido suave como referencia publicada."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Unir toma completa 0729 y cierre 0730. Retirar claquetas y fallos; conservar pareja, comida y gestos originales. Corregir nombres y anglicismos del borrador Whisper. Revisión estilo V2: énfasis amarillo y fundidos de apoyo propios de Frida."
+  ],
+  "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+  "catalog": "runs/frida-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+  },
+  "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/music-15.wav",
+    "extend_through_outro": true
+  },
+  "audio_master": {
+    "lra_lu": 13
+  }
+}

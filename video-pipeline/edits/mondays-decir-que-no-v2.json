@@ -1,0 +1,63 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v2.json",
+  "idea_id": "mondays-decir-que-no",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Aprende a decir que no",
+  "source": "../runs/mondays-src/0433.mp4",
+  "transcript": "../runs/mondays-src/0433.small.json",
+  "clips": [
+    {
+      "in": 0.7,
+      "out": 9.3
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Silly Boy.mp3",
+    "title": "Silly Boy",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Silly%20Boy.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.22,
+      "end": 1.9,
+      "text": "¿Tienes que aprender\na decir que no?"
+    },
+    {
+      "start": 2.04,
+      "end": 3.0,
+      "text": "Si tu mesera te pregunta:"
+    },
+    {
+      "start": 3.34,
+      "end": 4.15,
+      "text": "¿Quieres un trago?"
+    },
+    {
+      "start": 4.26,
+      "end": 5.5,
+      "text": "Tú le vas a decir no."
+    },
+    {
+      "start": 7.16,
+      "end": 8.3,
+      "text": "Quiero dos."
+    }
+  ],
+  "review_notes": [
+    "Whisper oyó «si tu me será tu pregunta» y «trago». En pantalla: «si tu mesera te pregunta» y «trago». La ficha dice cerveza.",
+    "La pausa antes de «Quiero dos» se queda vacía. Ella actúa las dos partes, así que no se invierte.",
+    "Captions como los reels publicados de comida y anfitrión: blanco con borde #D03000, sin caja."
+  ]
+}

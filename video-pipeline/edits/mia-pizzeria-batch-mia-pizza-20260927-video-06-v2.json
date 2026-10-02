@@ -1,0 +1,101 @@
+{
+  "idea_id": "mia-20260919-06",
+  "title": "Pizza O Un Hombre Fabuloso",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/source/DJI_20260919114953_0892_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/video-06-transcript.json",
+  "style": "../styles/mia-pizzeria-v1.json",
+  "clips": [
+    {
+      "in": 3.4,
+      "out": 20.6,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 1.32,
+      "text": "¿QUÉ TÚ PREFIERES?"
+    },
+    {
+      "start": 1.62,
+      "end": 2.96,
+      "text": "¿LA PIZZA DE LA MÍA PIZZA"
+    },
+    {
+      "start": 3.52,
+      "end": 4.94,
+      "text": "O UN HOMBRE FABULOSO"
+    },
+    {
+      "start": 4.94,
+      "end": 6.08,
+      "text": "QUE TE DETALLE,"
+    },
+    {
+      "start": 6.2,
+      "end": 7.12,
+      "text": "QUE TE REGALE CARRO,"
+    },
+    {
+      "start": 7.22,
+      "end": 8.38,
+      "text": "QUE NO TE DIGA MENTIRAS,"
+    },
+    {
+      "start": 8.5,
+      "end": 10.24,
+      "text": "QUE TE DIGA BELLA, PRECIOSA?"
+    },
+    {
+      "start": 10.34,
+      "end": 11.16,
+      "text": "PERO CUANDO TÚ QUIERES"
+    },
+    {
+      "start": 11.16,
+      "end": 12.32,
+      "text": "FORMALIZAR UNA RELACIÓN…"
+    },
+    {
+      "start": 12.6,
+      "end": 13.76,
+      "text": "SE DESAPARECIÓ."
+    },
+    {
+      "start": 14.48,
+      "end": 14.83,
+      "text": "NAH."
+    },
+    {
+      "start": 15.2,
+      "end": 15.95,
+      "text": "YO PREFIERO LA PIZZA"
+    },
+    {
+      "start": 15.95,
+      "end": 16.84,
+      "text": "DE LA MÍA PIZZA."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Conservar pregunta completa, lista y remate. Retirar preparación inicial y final; mantener la pizza visible y reacción posterior al remate."
+  ],
+  "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+  "catalog": "runs/mia-pizzeria-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "references": {
+    "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+    "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+  }
+}

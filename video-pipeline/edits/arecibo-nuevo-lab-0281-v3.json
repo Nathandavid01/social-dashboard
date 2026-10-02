@@ -1,0 +1,151 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,aformat=channel_layouts=mono,loudnorm=I=-16:TP=-2:LRA=7:measured_I=-19.83:measured_TP=-2.05:measured_LRA=2.00:measured_thresh=-29.83:offset=0.82:linear=false,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-nuevo-lab-be-chillin-v1.wav",
+    "title": "Be Chillin",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Be%20Chillin.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28.5
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-nuevo-laboratorio",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Nuevo Laboratorio En Arecibo",
+  "source": "../media/arecibo/DJI_20260909093310_0281_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0281.json",
+  "clips": [
+    {
+      "in": 1.78,
+      "out": 4.26,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.48,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 10.28,
+      "out": 13.45,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 3.17,
+          "zoom": 1.04
+        }
+      ],
+      "audio_edge_fade": 0.008
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/DJI_20260909092322_0276_D.MP4",
+      "in": 0.3,
+      "out": 1.8,
+      "at": 0.98,
+      "reason": "Recepción real, vacía y con el logo visible cuando se presenta el nuevo laboratorio; toma inédita en las ediciones actuales.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.04
+        }
+      ],
+      "fade_in": 0.08,
+      "fade_out": 0.08
+    },
+    {
+      "source": "../media/arecibo/nuevo-lab-location-v3.mp4",
+      "in": 0,
+      "out": 3.17,
+      "at": 2.48,
+      "kind": "brand_graphic",
+      "original_source": "media/arecibo/DJI_20260909100140_0296_D.JPG",
+      "reason": "Movimiento cinematográfico creado con una foto real de la fachada. La tarjeta de ubicación cubre el anuncio antiguo y conserva solamente la dirección vigente grabada.",
+      "fade_in": 0.08,
+      "fade_out": 0
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 0.98,
+      "duration": 0.09,
+      "gain_db": -18
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 2.48,
+      "duration": 0.2,
+      "gain_db": -25
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.98,
+      "text": "¿SABÍAS QUE EN ARECIBO"
+    },
+    {
+      "start": 0.98,
+      "end": 1.74,
+      "text": "HAY UN NUEVO LABORATORIO?"
+    },
+    {
+      "start": 1.74,
+      "end": 2.48,
+      "text": "LLAMADO ARECIBO LAB"
+    },
+    {
+      "start": 2.58,
+      "end": 3.34,
+      "text": "ESTAMOS UBICADOS EN"
+    },
+    {
+      "start": 3.34,
+      "end": 4.22,
+      "text": "CARRETERA 683"
+    },
+    {
+      "start": 4.22,
+      "end": 5.65,
+      "text": "FRENTE A HQJ"
+    }
+  ],
+  "review_notes": [
+    "Nueva pieza desde 0281: se retira la claqueta y se conserva el gancho completo hasta Arecibo Lab.",
+    "Se omite la frase intermedia de servicios porque el reconocimiento automático no resuelve con suficiente certeza su inicio. No se inventan palabras ni servicios.",
+    "Se enlaza directamente con la ubicación grabada. La vía se rotula 683, corrección ya verificada en el perfil del cliente.",
+    "v3 usa una recepción real inédita y una foto real de la fachada con movimiento cinematográfico. La tarjeta cubre el anuncio con fecha vieja desde el primer fotograma y muestra la ubicación vigente.",
+    "Montserrat 70 fijo, captions verdes, zooms discretos, dos efectos ligados a cambios reales y outro oficial ya sonorizado.",
+    "Música Be Chillin CC0, distinta a las camas usadas en las piezas recientes. Escucha crítica y aprobación final pendientes."
+  ],
+  "previous_version": "../runs/arecibo-nuevo-lab-0281-v2.mp4"
+}

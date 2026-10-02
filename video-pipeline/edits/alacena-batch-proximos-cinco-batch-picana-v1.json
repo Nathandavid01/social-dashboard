@@ -1,0 +1,124 @@
+{
+  "idea_id": "96788b11-e3ff-4e91-9033-3233a6e4fe9f",
+  "title": "plato",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/media/12594096/58f2885b-eafb-4a62-b235-7752a71f4553.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/58f2885b-eafb-4a62-b235-7752a71f4553.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 1.7,
+      "out": 13.24,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.540000000000001,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.1,
+      "text": "Por aquí su"
+    },
+    {
+      "start": 1.1,
+      "end": 1.62,
+      "text": "platito."
+    },
+    {
+      "start": 1.7,
+      "end": 2.24,
+      "text": "Esta sería la"
+    },
+    {
+      "start": 2.24,
+      "end": 2.92,
+      "text": "picaña de"
+    },
+    {
+      "start": 2.92,
+      "end": 4.06,
+      "text": "aproximadamente una"
+    },
+    {
+      "start": 4.06,
+      "end": 4.68,
+      "text": "libra y cuatro"
+    },
+    {
+      "start": 4.68,
+      "end": 5.88,
+      "text": "onzas en término"
+    },
+    {
+      "start": 5.88,
+      "end": 6.24,
+      "text": "medium,"
+    },
+    {
+      "start": 6.4,
+      "end": 7.4,
+      "text": "acompañada con su"
+    },
+    {
+      "start": 7.4,
+      "end": 8.52,
+      "text": "majadito de viandas."
+    },
+    {
+      "start": 8.96,
+      "end": 10.22,
+      "text": "Aquí en Alacena"
+    },
+    {
+      "start": 10.22,
+      "end": 10.92,
+      "text": "Restaurant de"
+    },
+    {
+      "start": 10.92,
+      "end": 11.34,
+      "text": "Arecibo."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 11.53,
+      "duration": 0.045,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Retirar claquetas e intentos fallidos; conservar diálogo y cierre grabados. Movimiento suave y fundidos breves entre tomas asociadas. Captions Belleza blancos con sombra verde. Música distinta por reel, clicks solo en cambios. Sin B-roll genérico repetido: picaña y cócteles ya tienen primeros planos en sus originales. Escucha crítica y publicación independientes pendientes."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/picana-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/picana-music-provenance.json"
+  }
+}

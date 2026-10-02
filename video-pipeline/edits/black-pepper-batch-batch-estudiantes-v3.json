@@ -1,0 +1,154 @@
+{
+  "idea_id": "fbc5df7f-1071-4ead-9e81-9a2a8ff631a2",
+  "title": "Trabajas o estudias desde casa",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929102554_0362_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929102554_0362_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.1,
+      "out": 16.1,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.9,
+      "text": "Tú estás trabajando"
+    },
+    {
+      "start": 0.9,
+      "end": 2.26,
+      "text": "o estudiando desde tu"
+    },
+    {
+      "start": 2.26,
+      "end": 3.2,
+      "text": "casa y quieres un"
+    },
+    {
+      "start": 3.2,
+      "end": 4.52,
+      "text": "espacio como este,"
+    },
+    {
+      "start": 4.72,
+      "end": 6.02,
+      "text": "que te brinde una"
+    },
+    {
+      "start": 6.02,
+      "end": 7.24,
+      "text": "buena comida,"
+    },
+    {
+      "start": 7.66,
+      "end": 8.46,
+      "text": "un buen brunch y,"
+    },
+    {
+      "start": 8.46,
+      "end": 8.8,
+      "text": "por supuesto,"
+    },
+    {
+      "start": 9.06,
+      "end": 9.7,
+      "text": "un buen café para"
+    },
+    {
+      "start": 9.7,
+      "end": 10.86,
+      "text": "que te mantenga despierto,"
+    },
+    {
+      "start": 11.16,
+      "end": 11.86,
+      "text": "¿sabes dónde tienes que"
+    },
+    {
+      "start": 11.86,
+      "end": 12.12,
+      "text": "venir?"
+    },
+    {
+      "start": 12.14,
+      "end": 12.62,
+      "text": "¿Dónde más?"
+    },
+    {
+      "start": 12.72,
+      "end": 13.22,
+      "text": "Black Pepper,"
+    },
+    {
+      "start": 13.22,
+      "end": 13.82,
+      "text": "corillo,"
+    },
+    {
+      "start": 13.96,
+      "end": 14.72,
+      "text": "así que dale para"
+    },
+    {
+      "start": 14.72,
+      "end": 15.0,
+      "text": "acá."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 0.32,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Si tú estás trabajando"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 9.06,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "un buen café para"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 12.72,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Black Pepper,"
+    }
+  ],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric rechaza Take the Ride en este reel; reemplazada por Chill Beat CC0, lo-fi 70bpm. Apertura desde1.42 al comenzar Trabajando, ya en paso y bajando manos; elimina acomodarse gorra. Resto de narración y estilo conservados. Audición crítica de selección y mezcla pendientes. Eric pide empezar un poco antes: entrada adelantada 0.32 segundos a1.10, palabra tú, recuperando tú estás trabajando sin cortar sílabas. Mantener Chill Beat y resto de montaje."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Chill Beat - Seth Makes Sounds.mp3",
+    "title": "Chill Beat — Seth_Makes_Sounds",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://freesound.org/people/Seth_Makes_Sounds/sounds/678003/"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 16
+  }
+}

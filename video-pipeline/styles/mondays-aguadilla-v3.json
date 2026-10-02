@@ -1,0 +1,32 @@
+{
+  "name": "Mondays Aguadilla · una línea · borde rojo",
+  "font_file": "../media/mondays/brand/AvenirNext-DemiBold.ttf",
+  "font_family": "Avenir Next Demi Bold",
+  "font_size": 106,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H000030D0",
+  "back_colour": "&H00000000",
+  "border_style": 1,
+  "outline": 5,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 460,
+  "fixed_size": true,
+  "wrap_width": 1000,
+  "max_words": 3,
+  "max_chars": 18,
+  "caption_animation": "none",
+  "caption_case": "natural",
+  "status": "single_line_rule_confirmed_by_eric_2026-10-02",
+  "reference": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+  "notes": [
+    "Comida y anfitrión publicados: texto blanco, borde #D03000, sin caja, caso natural, tercio bajo. Medido en el frame completo de «en la carretera 459.» (tinta 684×59, y 1375–1433). Este estilo da 687×58 en y 1374–1431.",
+    "Avenir Next Demi Bold es el face del Mac que calza esa tinta. No es un archivo que Mondays haya entregado.",
+    "La pastilla naranja y la segunda línea en mayúsculas son solo el sketch de la tela roja (v2-2.jpg). No van en estos reels.",
+    "La pregunta detrás de cámara no cambia estos colores en la receta: el renderer invierte texto y borde con behind_camera.",
+    "Eric2026-10-02: captions SIEMPRE en una sola línea para Mondays, incluidos pregunta detrás de cámara y respuesta. Dividir en tarjetas breves sincronizadas con la voz; conservar106px, fuente, colores y posición. No insertar saltos ni reducir tamaño. Los límites3 palabras/18 caracteres son punto de partida: medir ancho real y verificar que el renderer no envuelva; reagrupar si no cabe. Esta regla sustituye toda referencia histórica a dos/tres líneas."
+  ],
+  "max_lines": 1
+}

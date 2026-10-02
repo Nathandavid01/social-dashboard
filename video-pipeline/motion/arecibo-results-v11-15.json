@@ -1,0 +1,24 @@
+{
+  "source": "/Users/ericperez/Downloads/DJI_20260909091347_0272_D (1).MP4",
+  "source_in": 7.05,
+  "source_speed": 1,
+  "duration": 1.1,
+  "center": [
+    540,
+    1390
+  ],
+  "radius": 230,
+  "values": [
+    15,
+    15
+  ],
+  "change_at": 0.4,
+  "accent": "#9CE608",
+  "secondary": "#62CCE6",
+  "font": "media/arecibo/brand/Montserrat-Bold.ttf",
+  "tick_interval": 0.4,
+  "tick_gain_db": -22,
+  "unit": "min",
+  "entry_duration": 0.2,
+  "exit_duration": 0.2
+}

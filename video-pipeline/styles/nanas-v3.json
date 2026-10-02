@@ -1,0 +1,14 @@
+{
+  "name": "Nana's Playhouse · DTMF Blanco Y Magenta",
+  "reference": "https://www.instagram.com/p/DdMQ6pACktW/",
+  "font_file": "../media/brand/DTMF.ttf",
+  "font_family": "Dtmf Font _ Nereangs",
+  "font_size": 72,
+  "bottom_margin": 580,
+  "max_words": 3,
+  "max_chars": 19,
+  "status": "reference_observed_audio_recreated",
+  "outline": 6,
+  "shadow": 1,
+  "caption_animation": "none"
+}

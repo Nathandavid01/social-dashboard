@@ -1,0 +1,31 @@
+{
+  "name": "Yabuuchi Sushi · Referencia local",
+  "font_file": "../media/yabuuchi/brand/Arial-Black.ttf",
+  "font_family": "Arial Black",
+  "font_size": 72,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00202020",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 3,
+  "alignment": 2,
+  "margin_x": 75,
+  "bottom_margin": 300,
+  "fixed_size": true,
+  "wrap_width": 1000,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "status": "caption_size_matched_native_resolution_user_review_pending",
+  "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+  "notes": [
+    "Referencia principal: video 1.2.mp4 aportado por Eric el 2026-09-20. Prevalece sobre el ejemplo anterior.",
+    "Acercamientos suaves, B-roll pertinente, gráficas pequeñas al nombrar conceptos, pop/whoosh contenidos.",
+    "Efectos originales sintetizados: similitud auditiva exacta pendiente. Música CC0 seleccionada; no se afirma identidad de pista.",
+    "Corrección de Eric 2026-09-20: igualar el tamaño de captions de los cuatro videos con la muestra de la izquierda. La configuración anterior de 52 era demasiado pequeña.",
+    "V4: Arial Black a tamaño ASS 72 fijo. Letras altas de aproximadamente 36–37 píxeles visibles en fotogramas nativos 1080×1920, frente a 35–38 en la referencia; antes eran 25–27. Máximo dos líneas, sin reducir el tamaño.",
+    "Blanco, negrita, sombra gris y posición baja; conservar el audio, B-roll, cortes y cierre de los cuatro videos v2."
+  ]
+}

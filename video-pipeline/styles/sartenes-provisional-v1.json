@@ -1,0 +1,27 @@
+{
+  "name": "Sartenes · provisional, sin reel publicado medido",
+  "font_file": "../media/sartenes/brand/Arial-Bold.ttf",
+  "font_family": "Arial Bold",
+  "font_size": 72,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00000000",
+  "back_colour": "&H00000000",
+  "border_style": 1,
+  "outline": 4,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 70,
+  "bottom_margin": 420,
+  "fixed_size": true,
+  "wrap_width": 920,
+  "max_words": 8,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "caption_case": "natural",
+  "status": "provisional_no_published_sample",
+  "notes": [
+    "Sartenes Manatí no está en el dashboard ni en Metricool desde aquí. No se copió la paleta de otro cliente.",
+    "Texto blanco con borde negro es solo para poder ver el corte. Hay que medirlo contra un reel publicado antes de tratarlo como el estilo del cliente."
+  ]
+}

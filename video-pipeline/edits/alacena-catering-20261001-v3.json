@@ -1,0 +1,353 @@
+{
+  "idea_id": "6bb111ea-bed4-4b8a-a03a-5cee53e29ef5",
+  "title": "Catering: ¿llevan hasta el personal?",
+  "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/0f66800b-bab5-4ea5-b223-b379c45da5a2.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/catering-v1/catering-corrected-timing.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 2.24,
+      "out": 5.76,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 3.52,
+          "zoom": 1.08
+        }
+      ]
+    },
+    {
+      "in": 6.1,
+      "out": 11.48,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.12
+        },
+        {
+          "time": 5.38,
+          "zoom": 1.16
+        }
+      ]
+    },
+    {
+      "in": 12.1,
+      "out": 16.5,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.05
+        },
+        {
+          "time": 4.4,
+          "zoom": 1.1
+        }
+      ]
+    },
+    {
+      "in": 18.46,
+      "out": 21.24,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.14
+        },
+        {
+          "time": 2.78,
+          "zoom": 1.115
+        }
+      ]
+    },
+    {
+      "in": 21.88,
+      "out": 23.6,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.115
+        },
+        {
+          "time": 1.72,
+          "zoom": 1.1
+        }
+      ]
+    },
+    {
+      "in": 24.8,
+      "out": 31.44,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 6.64,
+          "zoom": 1.13
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 0.38,
+      "text": "hablamos un"
+    },
+    {
+      "start": 0.38,
+      "end": 0.74,
+      "text": "poquito más"
+    },
+    {
+      "start": 0.74,
+      "end": 1.44,
+      "text": "de los catering."
+    },
+    {
+      "start": 1.5,
+      "end": 2.32,
+      "text": "¿Ustedes llevan todo?"
+    },
+    {
+      "start": 2.32,
+      "end": 3.46,
+      "text": "¿Hasta el personal?"
+    },
+    {
+      "start": 3.54,
+      "end": 4.42,
+      "text": "Sí, nos ajustamos"
+    },
+    {
+      "start": 4.42,
+      "end": 5.22,
+      "text": "a la necesidad"
+    },
+    {
+      "start": 5.22,
+      "end": 5.96,
+      "text": "del cliente"
+    },
+    {
+      "start": 5.96,
+      "end": 6.62,
+      "text": "y dependiendo"
+    },
+    {
+      "start": 6.62,
+      "end": 7.76,
+      "text": "del tipo de servicio"
+    },
+    {
+      "start": 7.76,
+      "end": 8.84,
+      "text": "que él solicite."
+    },
+    {
+      "start": 8.92,
+      "end": 10.1,
+      "text": "Llevamos a los"
+    },
+    {
+      "start": 10.1,
+      "end": 11.38,
+      "text": "meseros o bartender"
+    },
+    {
+      "start": 11.38,
+      "end": 13.24,
+      "text": "a solicitud del cliente."
+    },
+    {
+      "start": 13.3,
+      "end": 13.82,
+      "text": "Contamos con"
+    },
+    {
+      "start": 13.82,
+      "end": 14.36,
+      "text": "servicios de"
+    },
+    {
+      "start": 14.36,
+      "end": 15.24,
+      "text": "chef privado en vivo,"
+    },
+    {
+      "start": 15.46,
+      "end": 15.92,
+      "text": "en Airbnb,"
+    },
+    {
+      "start": 16.08,
+      "end": 16.72,
+      "text": "atendemos desde"
+    },
+    {
+      "start": 16.72,
+      "end": 17.74,
+      "text": "dos personas."
+    },
+    {
+      "start": 17.82,
+      "end": 19.26,
+      "text": "O si gustan"
+    },
+    {
+      "start": 19.26,
+      "end": 20.94,
+      "text": "el servicio entregado,"
+    },
+    {
+      "start": 21.2,
+      "end": 22.2,
+      "text": "cualquiera que sea"
+    },
+    {
+      "start": 22.2,
+      "end": 22.94,
+      "text": "su necesidad,"
+    },
+    {
+      "start": 23.16,
+      "end": 24.38,
+      "text": "nosotros los complacemos."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/source/DJI_20260818163025_0768_D.MP4",
+      "in": 0.6,
+      "out": 2.8,
+      "at": 10.6,
+      "reason": "Servicio de bartender: servir vino real, sin presentador."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/source/DJI_20260818160458_0744_D.MP4",
+      "in": 2.8,
+      "out": 5.0,
+      "at": 13.65,
+      "reason": "Chef privado en vivo: chef real cocinando, rango sin hablar."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/source/DJI_20260818150240_0711_D.MP4",
+      "in": 0.3,
+      "out": 2.5,
+      "at": 19.75,
+      "reason": "Servicio entregado: detalle del plato preparado real."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 3.52,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 8.9,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 10.6,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 12.8,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 13.3,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 13.65,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 15.85,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 16.08,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 17.8,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 19.75,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 21.95,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 24.39,
+      "duration": 0.045,
+      "gain_db": -24
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Nuevo reel de catering de grabación Sep30. Montaje de cinco planos con keyframes suaves; retirar repetición También tenemos y pausas. Sin B-roll ajeno. Fuente, blanco y sombra aprobados en familias v7.",
+    "v2: inicio mas directo y captions divididos en una linea uniforme.",
+    "v3: retirar primer intento de atendemos y su pausa (fuente21.24–21.88), mantener segunda entrega. B-roll literal de vino, chef y plato; click solo en cambios visibles."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/catering-v1/music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/descargas/896867/license.pdf"
+  }
+}

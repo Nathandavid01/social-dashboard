@@ -1,0 +1,51 @@
+{
+  "name": "Apiario · overlays rectángulo amarillo v5",
+  "status": "visual_reference_reconstruction_font_identity_pending",
+  "font_file": "../media/apiario/brand/Montserrat-ExtraBold.ttf",
+  "font_family": "Montserrat ExtraBold",
+  "font_size": 100,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H000F0C2A",
+  "back_colour": "&H000F0C2A",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "margin_x": 80,
+  "bottom_margin": 1370,
+  "alignment": 2,
+  "fixed_size": true,
+  "wrap_width": 1300,
+  "max_words": 5,
+  "max_chars": 30,
+  "caption_animation": "none",
+  "reference": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/countdown-2-semanas-dashboard.mp4",
+  "font_provenance": {
+    "file_source": "/Users/ericperez/Nate Media/video-pipeline/media/black-pepper/brand/Montserrat-ExtraBold.ttf",
+    "basis": "Visual glyph comparison against Apiario countdown reference; OFL font file, not a transfer of Black Pepper caption settings.",
+    "official_identity_confirmed": false
+  },
+  "observed": {
+    "case": "natural",
+    "box": true,
+    "white_caption": "short centered phrases with dark brown soft shadow",
+    "brand_emphasis": "gold",
+    "position": "near y=1200 on 1080x1920 reference"
+  },
+  "unverified": [
+    "Exact caption font not supplied in Drive; Times New Roman and Antrokasdemo listed in brand PDF refer to brand typography and do not match observed sans-serif captions.",
+    "Exact animation and design size reconstructed from existing same-client reference."
+  ],
+  "calibration": "2026-10-02: v1 tenía glyphs ≈41px frente a ≈49px de referencia; ajuste a 100 ASS y margen677 para respetar altura y baseline.",
+  "scope": "Todos los overlays editoriales Apiario de este estilo, según Eric2026-10-02.",
+  "caption_box": {
+    "colour": "&H000799CB",
+    "alpha": "00",
+    "radius": 0,
+    "padding_x": 28,
+    "padding_y": 16,
+    "line_height": 80
+  },
+  "background_rule": "Usar siempre paleta del cliente; Apiario amarillo de Brand Kit #CB9907 por corrección Eric2026-10-02.",
+  "overlay_duration_rule": "Full main content: start0, end=sum(clips duration), excluded from outro. Confirmed Eric2026-10-02."
+}

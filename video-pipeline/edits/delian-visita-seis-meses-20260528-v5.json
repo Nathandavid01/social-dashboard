@@ -1,0 +1,183 @@
+{
+  "idea_id": "visita-seis-meses-20260528",
+  "title": "¿Cada Cuánto Visitar Al Dentista?",
+  "source": "../../delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-05-28/0111-small-transcript.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 6.28,
+      "out": 10.1,
+      "zoom": 1.05,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 3.82,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 10.62,
+      "out": 12.37,
+      "zoom": 1.45,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.75,
+          "zoom": 1.01
+        }
+      ]
+    },
+    {
+      "in": 12.37,
+      "out": 14.87,
+      "zoom": 1.2,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.5,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 14.87,
+      "out": 19.05,
+      "zoom": 1.45,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 4.18,
+          "zoom": 1.06
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.4,
+      "text": "Doctora, ¿cada cuánto"
+    },
+    {
+      "start": 1.4,
+      "end": 2.42,
+      "text": "se supone que esté"
+    },
+    {
+      "start": 2.42,
+      "end": 3.62,
+      "text": "visitando mi dentista?"
+    },
+    {
+      "start": 3.94,
+      "end": 4.42,
+      "text": "Por lo menos"
+    },
+    {
+      "start": 4.42,
+      "end": 5.52,
+      "text": "cada seis meses,"
+    },
+    {
+      "start": 5.78,
+      "end": 6.42,
+      "text": "así que si estás"
+    },
+    {
+      "start": 6.42,
+      "end": 7.86,
+      "text": "próxima a tu limpieza,"
+    },
+    {
+      "start": 8.14,
+      "end": 9.22,
+      "text": "danos una llamadita al"
+    },
+    {
+      "start": 9.22,
+      "end": 12.14,
+      "text": "787-230-7573.",
+      "primary_colour": "&H00E560EB"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 4.42,
+      "duration": 0.09,
+      "gain_db": -29
+    }
+  ],
+  "music": {
+    "source": "../media/delian/music/visita-lovely-piano.m4a",
+    "title": "Lovely Piano Song",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Lovely Piano Song.provenance.json",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "effects": [],
+  "review_notes": [
+    "Toma 0111: pregunta 6.32-9.90 s, respuesta 10.74-18.94 s; se excluye la preparación del comienzo.",
+    "La toma muestra la consulta y después a la doctora de frente, pertinente al tema de limpieza semestral.",
+    "Subtítulos editoriales basados en Whisper small. Escucha crítica de voz y cifra telefónica pendiente.",
+    "Tipografía Montserrat Bold provisional según estilo Delian v3; falta el archivo Shoika de la referencia.",
+    "V2: LRA objetivo 10 LU permite normalización lineal de una mezcla con LRA 8 LU; v1 falló por 64 ms de latencia en normalización dinámica.",
+    "V3: subtitulos en zona y escala del reel publicado de Delian, con frases mas cortas.",
+    "V3: captions cortos al torso segun Publicados/14 agosto; zoom 1.1x preserva contexto clinico. Audio critico pendiente.",
+    "V4: movimiento suave y cama musical CC0; énfasis discreto en frecuencia semestral.",
+    "V5 (2026-09-23, pedido de Eric «más profesionales»): pausa tras la pregunta 0.84→0.45 s (corte 10.10–10.62 dentro del silencio medido 9.91–10.88); respuesta alterna primer plano 1.45/medio 1.2/primer plano con empuje (focus_y 0.3, resolución nativa); tarjeta Dra. Delian Loyola · DML Cosmetic Dentistry; captions 100 px (estilo v5); teléfono en violeta y sin punto."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-visita-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "audio_master": {
+    "lra_lu": 10
+  },
+  "graphics": [
+    {
+      "source": "../media/delian/graphics/nombre-dra-loyola.png",
+      "start": 3.84,
+      "end": 6.4,
+      "x": 240,
+      "y": 150,
+      "width": 600,
+      "enter": 0.12,
+      "kind": "brand_graphic",
+      "reason": "Identifica a la doctora cuando empieza a responder a cámara."
+    }
+  ]
+}

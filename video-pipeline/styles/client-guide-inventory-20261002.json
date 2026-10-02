@@ -1,0 +1,382 @@
+{
+  "date": "2026-10-02",
+  "source": "dashboard clients live read",
+  "clients": [
+    {
+      "id": "1d3c70ab-ddd1-4007-80c5-10dc3c10869a",
+      "name": "AA Real Estate"
+    },
+    {
+      "id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+      "name": "Alacena"
+    },
+    {
+      "id": "165b8416-5316-43e1-b6d6-f23caaa57b0c",
+      "name": "Anibal Fuentes PNP"
+    },
+    {
+      "id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+      "name": "Apiario Coffee"
+    },
+    {
+      "id": "afd0b9e9-efaa-45ac-96c0-d5ee6664c8a8",
+      "name": "Arasibo Steakhouse"
+    },
+    {
+      "id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+      "name": "Arecibo Lab"
+    },
+    {
+      "id": "2474df99-7088-41b6-b3c5-00714e8d7b94",
+      "name": "Arte Digital Online"
+    },
+    {
+      "id": "d0ed1ba9-9b59-4f3c-9242-858fd676b648",
+      "name": "Beyond Performance 5K"
+    },
+    {
+      "id": "5651c1b1-068f-4bc4-836f-d2486e9e8228",
+      "name": "Beyond PVC Cabinets and Closets"
+    },
+    {
+      "id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+      "name": "Black Pepper"
+    },
+    {
+      "id": "bb54f625-cee2-4f00-8715-a9e726c08fa9",
+      "name": "Blend Salon"
+    },
+    {
+      "id": "cf4dd365-2987-4a76-bb2e-29dc87946401",
+      "name": "Blue Chiropractic"
+    },
+    {
+      "id": "0760e278-1ca7-4d97-b838-9e1e20f06000",
+      "name": "Brisas del Mar"
+    },
+    {
+      "id": "94c9b664-8133-4511-b40a-ec8a8cc4320e",
+      "name": "Cafe Don Rogelio"
+    },
+    {
+      "id": "b42f8a4c-5d18-4c7b-bb97-e2de4b3f526e",
+      "name": "Café El Bosque"
+    },
+    {
+      "id": "297fce35-3c1b-46ac-8419-6a73245be5fb",
+      "name": "Casa Playa"
+    },
+    {
+      "id": "aaf395d4-d8e6-4860-9728-4a00b91db025",
+      "name": "Casita Vieja"
+    },
+    {
+      "id": "5b6240d3-03d6-47cf-ae3b-4ce178773719",
+      "name": "Centro de Inspeccion Colombo"
+    },
+    {
+      "id": "94c17451-0465-45de-8502-0ec5532d5495",
+      "name": "Cheesy"
+    },
+    {
+      "id": "3117c12f-0421-460f-a7e8-3d9b30414809",
+      "name": "Codepola"
+    },
+    {
+      "id": "9bd72748-868e-47fe-bb49-5d5d4473f4c3",
+      "name": "Dabel Brand"
+    },
+    {
+      "id": "5fd3c15a-1bc0-4f81-b44b-cbb1f62ed793",
+      "name": "Danny Mudanzas"
+    },
+    {
+      "id": "e16297ff-52c4-459c-b410-ee4c806d46b5",
+      "name": "Del Mar Construction and Development"
+    },
+    {
+      "id": "64cd9cab-23e1-4025-a952-ecae672e5bd6",
+      "name": "Dorado del Mar Club"
+    },
+    {
+      "id": "9f50b29a-7ae2-4f17-b361-c7a0fb5fe447",
+      "name": "Dorta Pizza"
+    },
+    {
+      "id": "803bd107-87be-4b2e-be69-d98ed1a9b340",
+      "name": "Dr. Normandia"
+    },
+    {
+      "id": "816f31b0-e12c-43c2-8277-87aa90d59e0d",
+      "name": "Dr. Rodriguez Caribbean Shoulder and Elbow Institute"
+    },
+    {
+      "id": "eda4736a-6023-4dac-9220-e0aab981e371",
+      "name": "Dr.Soler UltraFit Wellness Clinics "
+    },
+    {
+      "id": "9d512070-9c6e-4cce-8398-53cca0076287",
+      "name": "Dra. Delian Loyola"
+    },
+    {
+      "id": "06d47cf4-642b-42c8-9249-0f1ec4846dea",
+      "name": "Drop Coffee"
+    },
+    {
+      "id": "97ca949f-5bc2-4296-b946-4f2edcd06b8d",
+      "name": "DumpPink LLC"
+    },
+    {
+      "id": "7dd62e83-acc5-45eb-aba1-237987e9f4ff",
+      "name": "El Truco de Guin"
+    },
+    {
+      "id": "e5d28988-66d3-4f9f-88e0-83de2125c2b9",
+      "name": "Ely Rosa Sportwear"
+    },
+    {
+      "id": "4cdf156b-c2a7-48d1-8c07-7abdb2e24f8e",
+      "name": "Equipo De Mercadeo NMedia"
+    },
+    {
+      "id": "772dba20-6db2-4e3c-a1d9-37a4d05ca47b",
+      "name": "Familia Pelaez"
+    },
+    {
+      "id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+      "name": "Farmacia Buena Vida"
+    },
+    {
+      "id": "bc55a5fb-ccff-4576-a7ec-316ed39978cd",
+      "name": "Farmacia Tierras Nuevas"
+    },
+    {
+      "id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+      "name": "Frida"
+    },
+    {
+      "id": "8ac99fec-a919-4640-9598-84fd29f7d036",
+      "name": "Futones Por Sangit"
+    },
+    {
+      "id": "55e46bf2-f7e5-446b-bbdd-a5b341a1099c",
+      "name": "Geovanny Alamo"
+    },
+    {
+      "id": "1c1aea9a-0188-4ce2-a622-ea0032195589",
+      "name": "Go-Kart"
+    },
+    {
+      "id": "b5695755-35ba-4b79-8269-fb49435e51b6",
+      "name": "Karen Licenciada"
+    },
+    {
+      "id": "c510a48c-e69a-4736-a108-83f528323d32",
+      "name": "Kikiriki BBQ"
+    },
+    {
+      "id": "bc82993b-6a7d-488b-8138-838a952f82f3",
+      "name": "La Guarapera"
+    },
+    {
+      "id": "a53a66cc-fda0-43c6-9397-a14533fab44c",
+      "name": "La Guira"
+    },
+    {
+      "id": "851c2a63-f656-4048-9ba4-eb8f4ad80d7e",
+      "name": "La Herencia by Familia Pelaez"
+    },
+    {
+      "id": "efa744fa-c12a-4c1e-b455-c4cff2c53643",
+      "name": "La Rambla Tapas y Vino"
+    },
+    {
+      "id": "a6705cc5-af08-492d-a1a4-a027f23488cf",
+      "name": "La Rotonda"
+    },
+    {
+      "id": "86cbac75-43a8-492b-bd71-46deb38249a6",
+      "name": "Laboratorios Toledo"
+    },
+    {
+      "id": "0ab1ec30-b2a9-47ce-b166-ad251b487e0d",
+      "name": "Laut"
+    },
+    {
+      "id": "79bb2505-d04d-47d4-a97b-623ce0fc04e3",
+      "name": "Lenel"
+    },
+    {
+      "id": "8f85b032-348f-490b-ae65-f1967e9cbf93",
+      "name": "Lucas"
+    },
+    {
+      "id": "e6e840ae-4619-4d06-9957-36b6b8b14a36",
+      "name": "Lucky Pet"
+    },
+    {
+      "id": "fd68b1de-1b91-4f47-9d26-dd628cf1cded",
+      "name": "Lumavi Properties"
+    },
+    {
+      "id": "1c25f7c1-33c8-49e7-8017-4e64d0948340",
+      "name": "Magic 97.3 FM"
+    },
+    {
+      "id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+      "name": "Mia Pizzeria"
+    },
+    {
+      "id": "739d0b87-69b1-42f9-b93e-fc0b12063ac8",
+      "name": "Miti Miti "
+    },
+    {
+      "id": "91a876dc-746c-4c08-96eb-97b6d80f8a15",
+      "name": "Mojito Mojito"
+    },
+    {
+      "id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+      "name": "Mondays Aguadilla"
+    },
+    {
+      "id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+      "name": "Nanas Playhouse"
+    },
+    {
+      "id": "b7f932b9-7276-4020-bddd-fe35b81547be",
+      "name": "Nathandavidts._"
+    },
+    {
+      "id": "70242737-d9e2-4b14-b5f1-03a9f82d9c00",
+      "name": "Neumaticos PR"
+    },
+    {
+      "id": "6f58cfef-2c93-4b57-bde3-d94c07d4cd25",
+      "name": "New York"
+    },
+    {
+      "id": "71f43bee-c444-478e-adaf-6095d72de1fb",
+      "name": "New York Restaurant"
+    },
+    {
+      "id": "64745824-b86f-4b35-bf8f-d87828a73674",
+      "name": "Nordwave"
+    },
+    {
+      "id": "0ff514d3-bea0-47c7-bdec-31ba192ec875",
+      "name": "NutriMed"
+    },
+    {
+      "id": "e818fef9-e96e-4b54-ac6b-a7dc768b068e",
+      "name": "Pa' Ya Auto Parts Inc."
+    },
+    {
+      "id": "64052100-4667-45fc-a947-6043b6fcf33c",
+      "name": "Pa' ya Pal Barrio"
+    },
+    {
+      "id": "a85506be-7a93-4c45-9919-dfef9925d3cb",
+      "name": "Panaderia La Nueva Modelo"
+    },
+    {
+      "id": "f4bb3e4d-0326-400e-b2eb-76ce79eba0e5",
+      "name": "Picaros"
+    },
+    {
+      "id": "77c56562-6943-499a-a6d2-4a79f1810c0d",
+      "name": "Pizzeria San Lazaro"
+    },
+    {
+      "id": "ab64a8c5-312e-48e4-afbf-c52c0d0fa005",
+      "name": "Post Lucky Pet"
+    },
+    {
+      "id": "20b12701-ca67-4a3c-9ce0-cf888f33bc1a",
+      "name": "Post Sanguit"
+    },
+    {
+      "id": "2f343153-6ec8-4e49-b41e-7c047ae6b6f7",
+      "name": "Post VSS"
+    },
+    {
+      "id": "ef40737d-babe-4938-a2a1-b9127a697507",
+      "name": "PR SURF"
+    },
+    {
+      "id": "cfae7f0c-c301-4ed6-a37e-0c5a8e22973f",
+      "name": "Predator Gaming Center"
+    },
+    {
+      "id": "7f4a8757-7811-4fb4-afc0-87dc0c50c56d",
+      "name": "Primer Round Oficial"
+    },
+    {
+      "id": "fe13e02d-90f4-4595-bbc0-e39099aad175",
+      "name": "Profamilias"
+    },
+    {
+      "id": "6f0ed5af-96ef-4bc9-9554-7d0b44f320f8",
+      "name": "Puerto Rico Cardiology"
+    },
+    {
+      "id": "cc2411a3-9904-4c1e-b165-ce648d3caa39",
+      "name": "Quantika"
+    },
+    {
+      "id": "5c875adb-a919-462e-8b21-b18b05f1e974",
+      "name": "Restauco Leather and Tops"
+    },
+    {
+      "id": "834db959-bb9a-451e-85a9-50ff89333104",
+      "name": "Restaurante Kseros Fusion Caribena"
+    },
+    {
+      "id": "2d974994-3056-4659-9325-cb50ca89f813",
+      "name": "Ricky Tattoo"
+    },
+    {
+      "id": "83e53a6d-fa07-4aa2-b1bc-8cc736e6593b",
+      "name": "RP Sports"
+    },
+    {
+      "id": "f24d85b4-989f-4bae-8092-2562fc42577f",
+      "name": "Sal y Brisa"
+    },
+    {
+      "id": "4b3fd780-7ba9-4ab7-bcee-4ef5d0239712",
+      "name": "Shooters Sports Armory"
+    },
+    {
+      "id": "12984c76-aad4-4ea5-96dc-f21790495004",
+      "name": "Speedy Net"
+    },
+    {
+      "id": "c32682f4-f785-419a-b84d-ef20e676ee9c",
+      "name": "Style by Joeline"
+    },
+    {
+      "id": "517ff00c-65aa-4532-ba3e-cf825f4b33e1",
+      "name": "Tito Rios"
+    },
+    {
+      "id": "47de984f-33e2-418b-8a97-eddd0022731d",
+      "name": "Tu Cerrajero Puerto Rico"
+    },
+    {
+      "id": "8a8f2355-f7e3-403d-96bd-2f1ea1cbd6a6",
+      "name": "VSS Properties"
+    },
+    {
+      "id": "877289aa-4f1d-412c-a700-4c8dae1a9e4a",
+      "name": "White Point Esthetic"
+    },
+    {
+      "id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+      "name": "YabushiSushi"
+    },
+    {
+      "id": "b7e1e44a-dded-4dae-936e-fbc38120f15f",
+      "name": "Yan Seguros"
+    }
+  ]
+}

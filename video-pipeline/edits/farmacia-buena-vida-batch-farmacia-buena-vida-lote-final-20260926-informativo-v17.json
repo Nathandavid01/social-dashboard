@@ -1,0 +1,324 @@
+{
+  "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe",
+  "title": "Visítanos En Maunabo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/informativo.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/informativo-corrected.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 1.35,
+      "out": 6.3,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.65,
+      "out": 8.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.45,
+      "out": 10.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.18,
+      "out": 11.85,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.2,
+      "out": 13.45,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 13.87,
+      "out": 15.7,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.08,
+      "out": 17.55,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 18.03,
+      "out": 20.8,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.82,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.18,
+      "out": 31.1,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.07,
+      "end": 1.05,
+      "text": "Farmacia\nBuena Vida"
+    },
+    {
+      "start": 1.07,
+      "end": 1.69,
+      "text": "queda ubicado"
+    },
+    {
+      "start": 1.69,
+      "end": 2.17,
+      "text": "en la calle"
+    },
+    {
+      "start": 2.17,
+      "end": 3.05,
+      "text": "Muñoz Rivera"
+    },
+    {
+      "start": 3.05,
+      "end": 3.91,
+      "text": "número 24"
+    },
+    {
+      "start": 3.95,
+      "end": 4.95,
+      "text": "en el pueblo\nde Maunabo"
+    },
+    {
+      "start": 5.02,
+      "end": 6.36,
+      "text": "Contamos con\nservicio de"
+    },
+    {
+      "start": 6.36,
+      "end": 7.3,
+      "text": "Western Union"
+    },
+    {
+      "start": 7.34,
+      "end": 8.2,
+      "text": "sello de\ncolecturía"
+    },
+    {
+      "start": 8.2,
+      "end": 8.8,
+      "text": "digital"
+    },
+    {
+      "start": 8.83,
+      "end": 9.48,
+      "text": "fax"
+    },
+    {
+      "start": 9.52,
+      "end": 10.72,
+      "text": "impresión\nde emails"
+    },
+    {
+      "start": 10.76,
+      "end": 11.72,
+      "text": "delivery\ngratis de"
+    },
+    {
+      "start": 11.72,
+      "end": 12.56,
+      "text": "medicamentos"
+    },
+    {
+      "start": 12.58,
+      "end": 14.04,
+      "text": "refills\nautomáticos"
+    },
+    {
+      "start": 14.08,
+      "end": 16.22,
+      "text": "certificados\nde ASUME"
+    },
+    {
+      "start": 16.32,
+      "end": 16.85,
+      "text": "PAN"
+    },
+    {
+      "start": 16.87,
+      "end": 18.37,
+      "text": "antecedentes\npenales"
+    },
+    {
+      "start": 18.41,
+      "end": 19.29,
+      "text": "También\nimprimimos"
+    },
+    {
+      "start": 19.29,
+      "end": 20.89,
+      "text": "licencias de\nautomóvil"
+    },
+    {
+      "start": 20.93,
+      "end": 22.25,
+      "text": "podemos pagar\ntus multas"
+    },
+    {
+      "start": 22.25,
+      "end": 22.89,
+      "text": "de CESCO"
+    },
+    {
+      "start": 22.89,
+      "end": 24.07,
+      "text": "y de\nAutoExpreso"
+    },
+    {
+      "start": 24.07,
+      "end": 26.23,
+      "text": "Entre otros\nservicios"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-grafo-20260927/grafo-servicios-v1.mp4",
+      "at": 0,
+      "in": 0,
+      "out": 26.23,
+      "kind": "brand_graphic",
+      "reason": "Grafo continuo de 12 servicios: nodos, conexiones, contador y progreso sincronizados a cada frase. Dirección permanente; sin montaje de fotos."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 6.36,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 1"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 7.34,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 2"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.83,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 3"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 9.52,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 4"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.76,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 5"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.58,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 6"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 14.08,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 7"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 16.32,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 8"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 16.87,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 9"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 18.41,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 10"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 20.93,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 11"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 22.89,
+      "duration": 0.055,
+      "gain_db": -29,
+      "reason": "Avance del contador al servicio 12"
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric pide grafo para conteo animado e interactivo y rechaza incoherencia de v16. Una sola grafica continua con 12 nodos numerados, contador sincronizado, conexion progresiva y direccion fija; captions vigentes v7, voz y outro completos. Pagina de revision permite seleccionar servicio y saltar a su momento. MP4 conserva la animacion; interactividad en pagina."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "graphics": []
+}

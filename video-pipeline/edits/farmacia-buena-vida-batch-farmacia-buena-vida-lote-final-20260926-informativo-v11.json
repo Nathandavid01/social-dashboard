@@ -1,0 +1,470 @@
+{
+  "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe",
+  "title": "Visítanos En Maunabo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/informativo.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/informativo-corrected.json",
+  "style": "../styles/farmacia-buena-vida-v2.json",
+  "clips": [
+    {
+      "in": 1.35,
+      "out": 6.3,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.65,
+      "out": 8.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.45,
+      "out": 10.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.18,
+      "out": 11.85,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.2,
+      "out": 13.45,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 13.87,
+      "out": 15.7,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.08,
+      "out": 17.55,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 18.03,
+      "out": 20.8,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.82,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.18,
+      "out": 31.1,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 5.02,
+      "text": "Farmacia Buena Vida\nMuñoz Rivera #24 · Maunabo",
+      "bottom_margin": 300
+    },
+    {
+      "start": 5.02,
+      "end": 6.32,
+      "text": "Servicios para ti",
+      "bottom_margin": 300
+    },
+    {
+      "start": 6.32,
+      "end": 7.3,
+      "text": "Western Union",
+      "bottom_margin": 300
+    },
+    {
+      "start": 7.3,
+      "end": 8.8,
+      "text": "Sellos de\ncolecturía digital",
+      "bottom_margin": 300
+    },
+    {
+      "start": 8.8,
+      "end": 9.48,
+      "text": "Fax",
+      "bottom_margin": 300
+    },
+    {
+      "start": 9.48,
+      "end": 10.72,
+      "text": "Impresión de emails",
+      "bottom_margin": 300
+    },
+    {
+      "start": 10.72,
+      "end": 12.56,
+      "text": "Delivery gratis\nde medicamentos",
+      "bottom_margin": 300
+    },
+    {
+      "start": 12.56,
+      "end": 14.06,
+      "text": "Refills automáticos",
+      "bottom_margin": 300
+    },
+    {
+      "start": 14.06,
+      "end": 16.04,
+      "text": "Certificados de ASUME",
+      "bottom_margin": 300
+    },
+    {
+      "start": 16.04,
+      "end": 16.85,
+      "text": "Certificados del PAN",
+      "bottom_margin": 300
+    },
+    {
+      "start": 16.85,
+      "end": 18.38,
+      "text": "Antecedentes penales",
+      "bottom_margin": 300
+    },
+    {
+      "start": 18.38,
+      "end": 20.9,
+      "text": "Impresión de licencias\nde automóvil",
+      "bottom_margin": 300
+    },
+    {
+      "start": 20.9,
+      "end": 23.16,
+      "text": "Pago de multas\nde CESCO",
+      "bottom_margin": 300
+    },
+    {
+      "start": 23.16,
+      "end": 24.08,
+      "text": "AutoExpreso",
+      "bottom_margin": 300
+    },
+    {
+      "start": 24.08,
+      "end": 26.23,
+      "text": "Y otros servicios",
+      "bottom_margin": 300
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/fachada-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 5.02,
+      "at": 0,
+      "reason": "Imagen a pantalla completa de Farmacia Buena Vida Muñoz Rivera #24 · Maunabo",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.02,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/refills-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.3,
+      "at": 5.02,
+      "reason": "Imagen a pantalla completa de Servicios para ti",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.3,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/western-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 0.98,
+      "at": 6.32,
+      "reason": "Imagen a pantalla completa de Western Union",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.98,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/sellos-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.5,
+      "at": 7.3,
+      "reason": "Imagen a pantalla completa de Sellos de colecturía digital",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/fax-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 0.68,
+      "at": 8.8,
+      "reason": "Imagen a pantalla completa de Fax",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.68,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.24,
+      "at": 9.48,
+      "reason": "Imagen a pantalla completa de Impresión de emails",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.24,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/medicamentos-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.84,
+      "at": 10.72,
+      "reason": "Imagen a pantalla completa de Delivery gratis de medicamentos",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.84,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/refills-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.5,
+      "at": 12.56,
+      "reason": "Imagen a pantalla completa de Refills automáticos",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/asume-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.98,
+      "at": 14.06,
+      "reason": "Imagen a pantalla completa de Certificados de ASUME",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.98,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/pan-card-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 0.81,
+      "at": 16.04,
+      "reason": "Imagen a pantalla completa de Certificados del PAN",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.81,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/certificados-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 1.53,
+      "at": 16.85,
+      "reason": "Imagen a pantalla completa de Antecedentes penales",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.53,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/cesco-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 2.52,
+      "at": 18.38,
+      "reason": "Imagen a pantalla completa de Impresión de licencias de automóvil",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.52,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/cesco-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 2.26,
+      "at": 20.9,
+      "reason": "Imagen a pantalla completa de Pago de multas de CESCO",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.26,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/autoexpreso-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 0.92,
+      "at": 23.16,
+      "reason": "Imagen a pantalla completa de AutoExpreso",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.92,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/refills-fullbleed-v1.mp4",
+      "in": 0,
+      "out": 2.15,
+      "at": 24.08,
+      "reason": "Imagen a pantalla completa de Y otros servicios",
+      "reuse_reason": "Plano general de farmacia para introduccion/refills/cierre o identidad CESCO para dos servicios de la misma agencia.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.15,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Todas las menciones cubiertas por imagenes reales o marcas oficiales a pantalla completa; voz original debajo. Encuadre fotografico vertical con fondo de la misma imagen, sin mostrar presentadora durante el listado. Rotulos uniformes sin textos antiguos duplicados. PAN usa tarjeta de ejemplo oficial; no datos privados."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  }
+}

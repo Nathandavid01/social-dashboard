@@ -1,0 +1,165 @@
+{
+  "idea_id": "ultima-limpieza-20260921",
+  "title": "¿Cuándo Fue Tu Última Limpieza?",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-loyola-video/source-2026-09-21/dji_mimo_20260921_163338_20260921163324_1790125086406_video.mp4",
+  "transcript": "../runs/delian-sept-polish/transcripts/ultima-limpieza-20260921-editorial.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.64,
+      "out": 4.25,
+      "zoom": 1.15,
+      "focus_y": 0.48,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.61,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 5.08,
+      "out": 8.08,
+      "zoom": 1.12,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.0,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 8.35,
+      "out": 13.72,
+      "zoom": 1.24,
+      "focus_y": 0.42,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.37,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.755,
+      "text": "¿Y tú te acuerdas"
+    },
+    {
+      "start": 0.78,
+      "end": 1.535,
+      "text": "cuándo fue tu última"
+    },
+    {
+      "start": 1.56,
+      "end": 2.3,
+      "text": "limpieza dental?"
+    },
+    {
+      "start": 2.83,
+      "end": 4.045,
+      "text": "¿No te acuerdas?"
+    },
+    {
+      "start": 4.07,
+      "end": 5.37,
+      "text": "¿Uno, dos años?"
+    },
+    {
+      "start": 5.74,
+      "end": 6.195,
+      "text": "Yo creo que es"
+    },
+    {
+      "start": 6.22,
+      "end": 7.095,
+      "text": "tiempo de visitarnos."
+    },
+    {
+      "start": 7.12,
+      "end": 8.075,
+      "text": "Se puede comunicar al"
+    },
+    {
+      "start": 8.1,
+      "end": 10.76,
+      "text": "787-230-7573"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-20260927-assets/calendar.mp4",
+      "in": 0,
+      "out": 3,
+      "at": 2.61,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Calendario animado durante no te acuerdas / uno dos años, sin representar intervalo recomendado.",
+      "asset_family": "limpieza-calendar-exclusive-20260927",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-20260927-assets/provenance.json"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 2.61,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.61,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Revision autorizada tras comprobar no publicado ni programado. Pregunta autonoma completa y CTA propio; calendario 3D original muestra el tiempo transcurrido, no una recomendacion de intervalo. Doctora visible al inicio y CTA. Se conserva musica exclusiva de este reel. Correccion: continuar musica hasta el final del outro."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "graphics": [],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-v5/music-continuous.wav",
+    "title": "CBPD - Arulo",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-v5/CBPD - Arulo.provenance.json",
+    "source_offset": 8,
+    "fade_out_scope": "End of outro",
+    "extend_through_outro": true
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  }
+}

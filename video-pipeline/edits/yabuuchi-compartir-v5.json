@@ -1,0 +1,209 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "compartir",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "El Mejor Sushi Para Compartir",
+  "source": "../media/yabuuchi/derived/compartir-source-v5.mov",
+  "transcript": "../runs/yabuuchi-compartir-v4-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 9.733333,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.733333,
+      "out": 15.183333000000001,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.14,
+      "text": "Nuestros mejores rollos"
+    },
+    {
+      "start": 1.14,
+      "end": 1.82,
+      "text": "para compartir"
+    },
+    {
+      "start": 1.82,
+      "end": 2.98,
+      "text": "aquí en Yabuuchi"
+    },
+    {
+      "start": 2.98,
+      "end": 4.68,
+      "text": "son nuestras especialidades."
+    },
+    {
+      "start": 4.9,
+      "end": 5.48,
+      "text": "La Baby,"
+    },
+    {
+      "start": 5.56,
+      "end": 6.2,
+      "text": "La Madre"
+    },
+    {
+      "start": 6.2,
+      "end": 6.9,
+      "text": "y La Rocky."
+    },
+    {
+      "start": 7.12,
+      "end": 8.58,
+      "text": "Entre dos hasta"
+    },
+    {
+      "start": 8.58,
+      "end": 9.45,
+      "text": "cuatro personas."
+    },
+    {
+      "start": 9.813333,
+      "end": 11.083333,
+      "text": "Y si aún no lo has probado,"
+    },
+    {
+      "start": 11.173333,
+      "end": 12.493333,
+      "text": "puedes venir aquí a Yabuuchi"
+    },
+    {
+      "start": 12.493333,
+      "end": 13.533333,
+      "text": "en Dos Palmas,"
+    },
+    {
+      "start": 13.533333,
+      "end": 14.933333,
+      "text": "en Levittown, Toa Baja."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "in": 0,
+    "out": 2.92,
+    "gain": 1,
+    "provenance": "https://www.instagram.com/reel/DcCZF8YEtzV/",
+    "audio_range": [
+      16.1,
+      19.09
+    ]
+  },
+  "music": {
+    "source": "../media/music/Funshine.mp3",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Funshine.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "in": 3.3,
+      "out": 3.98,
+      "at": 4.867,
+      "reason": "Caja abierta de La Baby, rango anterior al ya usado en La Baby Para Dos, solo mientras se nombra La Baby.",
+      "eof_action": "pass",
+      "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "original_in": 3.3,
+      "original_out": 3.98,
+      "fade_in": 0.1,
+      "fade_out": 0.1
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914124936_0998_D.MP4",
+      "in": 1.1,
+      "out": 5.95,
+      "purpose": "Gancho: mejores rollos para compartir son las especialidades. Sin claqueta."
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914124954_0999_D.MP4",
+      "in": 0.88,
+      "out": 5.75,
+      "purpose": "Nombra La Baby, La Madre y La Rocky, y dice de dos a cuatro personas. Sin claqueta. Cola hasta 5.75 para la pausa antes del logo. Toma alternativa 0001 no usada."
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914125108_0002_D.MP4",
+      "in": 0.5,
+      "out": 5.95,
+      "at": 9.733333,
+      "purpose": "Invitación final tomada de La Baby Para Dos, sin conteo: Y si aún no lo has probado y dirección completa."
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "runs/yabuuchi-catalog.json"
+  },
+  "review_notes": [
+    "Idea del PDF que no tenía montaje: el mejor sushi para compartir. Tomas 0998 y 0999, fuera de los diez videos ya editados.",
+    "Se conserva el arco completo: gancho, los tres nombres y para cuántas personas. La toma alternativa 0001 queda sin usar.",
+    "La tercera especialidad se rotula La Rocky: el menú publicado usa ese nombre y la transcripción de 0999 dice Rocky con poca confianza. La toma 0001 lo oyó como rogui. Escucha crítica pendiente; no se afirma que se escuchó.",
+    "rollos se deja como lo transcribió Whisper (confianza baja). No se convirtió a roll.",
+    "B-roll solo de la caja abierta de La Baby en el instante de ese nombre, rango 3.30–3.98 s de 0021, anterior al tramo de La Baby Para Dos. La Madre y La Rocky siguen en la presentadora: no hay caja abierta confirmada para esos nombres.",
+    "Sin iconos dibujados. Captions Anybody Expanded Black 72, outro de piano y música Funshine CC0, distinta de Be Chillin, Backbeat y Downtown Boogie.",
+    "Audio Kit en el render. Escucha crítica y revisión de Eric pendientes.",
+    "v2: captions medidos sobre el archivo que se reproduce. La Madre llega hasta el final de la palabra. Pausa más larga antes del outro.",
+    "Grafo v1: los captions se calcularon con la toma cruda y no con el archivo derivado. La Madre se apagaba en 6.067 mientras la palabra sigue hasta 6.20, y y La Rocky entraba encima. v2 usa los tiempos medidos en compartir-source. El B-roll 0021 3.30–3.98 sigue solo sobre La Baby; no pisa el rango de La Baby Para Dos (desde 4.0).",
+    "v3: el outro usa el audio del cierre del reel oficial https://www.instagram.com/reel/DcCZF8YEtzV/ (16.10–19.09 s). El piano elegante queda en su archivo.",
+    "Eric 2026-09-23: El Mejor Sushi Para Compartir debe terminar con la invitación de La Baby Para Dos: Y si aún no lo has probado. v4 añade 0002 0.50–5.95 antes del outro oficial; no modifica La Baby ni entrega anterior. Escucha pendiente.",
+    "v5: clicks cortos en cada transición; retirados barridos bruscos; B-roll con fundidos de 100 ms y empalme a invitación con disolución de cuatro fotogramas, sin cambiar tiempos ni voz. Escucha y aprobación pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 4.866667,
+      "duration": 0.06,
+      "gain_db": -17,
+      "reason": "Entrada a La Baby"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.533333,
+      "duration": 0.06,
+      "gain_db": -17,
+      "reason": "Regreso a presentadora"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 9.733333,
+      "duration": 0.06,
+      "gain_db": -17,
+      "reason": "Invitación final"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 15.133333,
+      "duration": 0.04,
+      "gain_db": -17,
+      "reason": "Entrada al outro"
+    }
+  ],
+  "effects": [],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "speech_regions": [
+      {
+        "start": 0,
+        "end": 9.45,
+        "role": "presentacion"
+      },
+      {
+        "start": 9.733333,
+        "end": 15.183333000000001,
+        "role": "invitacion"
+      }
+    ]
+  }
+}

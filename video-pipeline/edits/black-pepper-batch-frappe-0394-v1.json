@@ -1,0 +1,186 @@
+{
+  "idea_id": "aa857024-1c00-4ede-863e-e940d80b0eb8",
+  "title": "Frappe de cheesecake de calabaza",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929112847_0394_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929112847_0394_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 0.88,
+      "out": 34.75,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.94,
+      "text": "Familia,"
+    },
+    {
+      "start": 0.94,
+      "end": 1.74,
+      "text": "uno de los productos"
+    },
+    {
+      "start": 1.74,
+      "end": 3.02,
+      "text": "más vendidos en el"
+    },
+    {
+      "start": 3.02,
+      "end": 5.08,
+      "text": "pumpkin season es nuestro"
+    },
+    {
+      "start": 5.08,
+      "end": 8.34,
+      "text": "frappe de cheesecake de"
+    },
+    {
+      "start": 8.34,
+      "end": 9.08,
+      "text": "calabaza."
+    },
+    {
+      "start": 9.32,
+      "end": 10.54,
+      "text": "Ahí está totalmente"
+    },
+    {
+      "start": 10.54,
+      "end": 14.12,
+      "text": "completado con su último"
+    },
+    {
+      "start": 14.12,
+      "end": 14.72,
+      "text": "toque,"
+    },
+    {
+      "start": 14.98,
+      "end": 15.64,
+      "text": "el caramel,"
+    },
+    {
+      "start": 15.94,
+      "end": 17.02,
+      "text": "el chocolate blanco y"
+    },
+    {
+      "start": 17.02,
+      "end": 17.66,
+      "text": "caramelo."
+    },
+    {
+      "start": 18.08,
+      "end": 21.22,
+      "text": "Ahí está acompañado con"
+    },
+    {
+      "start": 21.22,
+      "end": 22.66,
+      "text": "nueces caramelizadas,"
+    },
+    {
+      "start": 22.82,
+      "end": 23.46,
+      "text": "Nutella,"
+    },
+    {
+      "start": 23.74,
+      "end": 24.86,
+      "text": "el cheesecake de pumpkin"
+    },
+    {
+      "start": 24.86,
+      "end": 26.64,
+      "text": "y café."
+    },
+    {
+      "start": 26.64,
+      "end": 27.46,
+      "text": "Recuerda que todos"
+    },
+    {
+      "start": 27.46,
+      "end": 28.68,
+      "text": "nuestros frappes son a"
+    },
+    {
+      "start": 28.68,
+      "end": 29.92,
+      "text": "base de café corillo,"
+    },
+    {
+      "start": 30.02,
+      "end": 30.78,
+      "text": "así que dale pa'"
+    },
+    {
+      "start": 30.78,
+      "end": 32.08,
+      "text": "Black Pepper y vive"
+    },
+    {
+      "start": 32.08,
+      "end": 33.22,
+      "text": "la experiencia del pumpkin"
+    },
+    {
+      "start": 33.22,
+      "end": 33.87,
+      "text": "frappe."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 1.74,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "más vendidos en el"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 15.94,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "el chocolate blanco y"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 30.78,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Black Pepper y vive"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Inventing Flight.mp3",
+    "title": "Inventing Flight",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "La tarjeta pide qué café queda más lindo. Esta toma es el frappe terminado, no una votación.",
+    "guanlúz corregido a nueces caramelizadas, igual que el café de temporada. 0396 es toma falsa. 0397 es el cierre corto, no usado.",
+    "Escucha crítica pendiente. No publicar."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75"
+}

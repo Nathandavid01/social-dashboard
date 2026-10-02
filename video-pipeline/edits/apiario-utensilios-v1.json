@@ -1,0 +1,165 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "a23c2cc2-c1e9-431b-b00a-6c0915513c4f",
+  "source_idea_id": "424ff708-5bcb-47e4-9c73-be574641bf0b",
+  "title": "Herramientas del apicultor",
+  "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/2b88b9e0-7cac-403f-9bdd-d0d5f9f34a28.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-apicultor-full.json",
+  "style": "../styles/apiario-countdown-v2.json",
+  "clips": [
+    {
+      "in": 0.3,
+      "out": 11.1,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.45,
+      "out": 16.65,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 36.4,
+      "out": 40.35,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 203,
+      "out": 211.55,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.7,
+      "text": "Los utensilios"
+    },
+    {
+      "start": 1.7,
+      "end": 3.22,
+      "text": "que utilizamos para trabajar"
+    },
+    {
+      "start": 3.22,
+      "end": 4.72,
+      "text": "en el apiario con las abejas"
+    },
+    {
+      "start": 4.8,
+      "end": 6.82,
+      "text": "Tenemos el traje"
+    },
+    {
+      "start": 7.34,
+      "end": 8.58,
+      "text": "el mameluco, ¿verdad?"
+    },
+    {
+      "start": 8.58,
+      "end": 9.46,
+      "text": "para protegernos"
+    },
+    {
+      "start": 9.46,
+      "end": 10.75,
+      "text": "de las picaduras de las abejas"
+    },
+    {
+      "start": 10.85,
+      "end": 12.0,
+      "text": "Tenemos los guantes"
+    },
+    {
+      "start": 12.53,
+      "end": 13.67,
+      "text": "Tenemos el ahumador"
+    },
+    {
+      "start": 13.67,
+      "end": 14.89,
+      "text": "que es para tranquilizar"
+    },
+    {
+      "start": 14.89,
+      "end": 15.95,
+      "text": "las abejas"
+    },
+    {
+      "start": 16.02,
+      "end": 17.38,
+      "text": "El cepillo"
+    },
+    {
+      "start": 17.38,
+      "end": 18.66,
+      "text": "para no maltratar a las abejas"
+    },
+    {
+      "start": 18.66,
+      "end": 19.9,
+      "text": "que son bien importantes"
+    },
+    {
+      "start": 19.95,
+      "end": 21.43,
+      "text": "Si quieres conocer más"
+    },
+    {
+      "start": 21.43,
+      "end": 22.45,
+      "text": "de nuestro proceso"
+    },
+    {
+      "start": 22.67,
+      "end": 24.01,
+      "text": "puedes visitarnos aquí"
+    },
+    {
+      "start": 24.01,
+      "end": 25.05,
+      "text": "en Apiario Coffee Shop"
+    },
+    {
+      "start": 25.05,
+      "end": 26.27,
+      "text": "que ofrecemos"
+    },
+    {
+      "start": 26.27,
+      "end": 28.45,
+      "text": "tours educativos"
+    }
+  ],
+  "voice_filter": "highpass=f=75,afftdn=nr=5:nf=-40",
+  "audio_master": {
+    "mode": "dialogue"
+  },
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-utensilios-20261002/assets/music-bed-v1.wav",
+    "extend_through_outro": true,
+    "title": "Clever Girl",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/clever-girl-860888/",
+    "evidence": "Licensing Info consultado: suscriptores cubiertos, Identifyy Content ID, BMI"
+  },
+  "broll": [],
+  "review_notes": [
+    "Propuesta educativa: traje, guantes, ahumador y cepillo; cierre real sobre tours educativos.",
+    "Fuente muestra directamente cada herramienta; no se añade B-roll ajeno.",
+    "Se eliminan ensayos e instrucciones detrás de cámara.",
+    "Captions hablados: perfil de Apiario. Regla de overlay fijo se conserva para rótulos editoriales, no se aplica a subtítulos hablados.",
+    "Fondo a contraluz en toma original; conservar encuadre para mostrar objetos.",
+    "Transcripción automática corregida en términos evidentes; escucha crítica y verificación literal final pendientes."
+  ]
+}

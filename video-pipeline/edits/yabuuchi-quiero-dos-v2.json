@@ -1,0 +1,87 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "quiero-dos",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Aprende A Decir Que No",
+  "source": "../media/yabuuchi/derived/quiero-dos-reference-graphic-v2.mp4",
+  "transcript": "../runs/yabuuchi-quiero-dos-mapped.json",
+  "style": "../styles/yabuuchi-reference.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 6.7,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 2.02,
+      "text": "Tenemos que aprender a decir que no."
+    },
+    {
+      "start": 2.18,
+      "end": 3.6,
+      "text": "Si la mesera viene y dice:"
+    },
+    {
+      "start": 4.16,
+      "end": 5.12,
+      "text": "¿Quieres un rollo?"
+    },
+    {
+      "start": 5.46,
+      "end": 6.58,
+      "text": "No. ¡Quiero dos!"
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/quiero-dos-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131311_0006_D.MP4",
+      "in": 0.7,
+      "out": 7.4
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "graphic": "media/yabuuchi/graphics/sushi2.png"
+  },
+  "review_notes": [
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes.",
+    "V2: referencia principal del usuario video 1.2.mp4; captions 54px bajos con sombra; apoyos, acercamientos y efectos contenidos; cierre extraído de la referencia.",
+    "No se afirma coincidencia auditiva exacta."
+  ],
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 5.42,
+      "duration": 0.13,
+      "gain_db": -26
+    }
+  ],
+  "graphics": [
+    {
+      "source": "media/yabuuchi/graphics/sushi2.png",
+      "start": 5.42,
+      "end": 6.6,
+      "original_source": "media/yabuuchi/derived/quiero-dos-source-v1.mp4",
+      "kind": "original_vector_graphic",
+      "reason": "Gráfica pequeña y semántica según video 1.2.mp4, bajo el rostro y sobre captions."
+    }
+  ]
+}

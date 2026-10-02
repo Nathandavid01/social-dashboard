@@ -1,0 +1,76 @@
+{
+  "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+  "title": "El chef emplata el salmón · cuchillo audible",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5/editorial-titles.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 17.567,
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.18,
+      "text": "Así emplatamos"
+    },
+    {
+      "start": 1.2,
+      "end": 2.6,
+      "text": "nuestro salmón"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 4.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 8.05,
+      "duration": 0.035,
+      "gain_db": -34
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "v5: restore source knife image and original sound at natural speed, after cream; duck music 28dB with smooth ramps. No synthetic effects over the scraping. Retain v4 captions and other shots. Critical listening pending; local draft.",
+    "The first 0.2s of the official outro is precomposed in the source blend, as in v4. The appended branded clip begins at 0.2s. This batch continues the salmon v1-v4 family as v5."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0.2,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-music-provenance.json"
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial"
+}

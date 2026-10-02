@@ -1,0 +1,231 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v3.json",
+  "idea_id": "mondays-ladies-night",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Ladies Night",
+  "source": "../runs/mondays-src/0405.mp4",
+  "transcript": "../runs/mondays-src/0405.small.json",
+  "clips": [
+    {
+      "in": 0.74,
+      "out": 2.9,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.16,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 2.9,
+      "out": 6.64,
+      "zoom": 1.14,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.74,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 6.64,
+      "out": 11.46,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.82,
+          "zoom": 1.1
+        }
+      ]
+    },
+    {
+      "in": 11.46,
+      "out": 14.55,
+      "zoom": 1.16,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 3.09,
+          "zoom": 1
+        }
+      ]
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/music/ladies-god-mode-v3.wav",
+    "title": "God Mode",
+    "license": "Motion Array paid subscription license",
+    "source_url": "https://motionarray.com/royalty-free-music/god-mode-4206063/",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/catalogo.json",
+    "original_source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/96/965562c507a0e2f614cc778c221e63be255feb458b6de27341a20cfd9b471ccd.wav",
+    "original_sha256": "965562c507a0e2f614cc778c221e63be255feb458b6de27341a20cfd9b471ccd",
+    "extend_through_outro": true
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "approved_outro": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-visual-v10.mp4"
+  },
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.58,
+      "text": "¿No tienes"
+    },
+    {
+      "start": 0.6,
+      "end": 1.04,
+      "text": "qué hacer un"
+    },
+    {
+      "start": 1.06,
+      "end": 1.4,
+      "text": "miércoles"
+    },
+    {
+      "start": 1.42,
+      "end": 2.08,
+      "text": "con tus nenas?"
+    },
+    {
+      "start": 2.16,
+      "end": 2.73,
+      "text": "Aquí en Mondays"
+    },
+    {
+      "start": 2.74,
+      "end": 3.1,
+      "text": "te tenemos"
+    },
+    {
+      "start": 3.12,
+      "end": 3.96,
+      "text": "la solución."
+    },
+    {
+      "start": 3.96,
+      "end": 4.52,
+      "text": "Todos los"
+    },
+    {
+      "start": 4.54,
+      "end": 5.15,
+      "text": "miércoles:"
+    },
+    {
+      "start": 5.25,
+      "end": 5.9,
+      "text": "Ladies Night."
+    },
+    {
+      "start": 5.9,
+      "end": 6.54,
+      "text": "Tenemos"
+    },
+    {
+      "start": 6.54,
+      "end": 7.52,
+      "text": "prosecco a $6."
+    },
+    {
+      "start": 7.72,
+      "end": 9.18,
+      "text": "French 75 a $8"
+    },
+    {
+      "start": 9.18,
+      "end": 9.56,
+      "text": "y tapa"
+    },
+    {
+      "start": 9.56,
+      "end": 10.72,
+      "text": "seleccionada a $6."
+    },
+    {
+      "start": 10.72,
+      "end": 11.42,
+      "text": "Los esperamos"
+    },
+    {
+      "start": 11.42,
+      "end": 11.92,
+      "text": "aquí en Mondays"
+    },
+    {
+      "start": 11.92,
+      "end": 12.32,
+      "text": "Aguadilla,"
+    },
+    {
+      "start": 12.36,
+      "end": 13.6,
+      "text": "carretera 459."
+    }
+  ],
+  "review_notes": [
+    "Se quita la claqueta. Gaby frente al logo. Sin B-roll ni outro.",
+    "Whisper oyó «pro seco» y «Lo esperamos». En pantalla: prosecco y Los esperamos.",
+    "«tus nenas» queda como lo oyó Whisper small. La toma corta decía «tu nena».",
+    "Captions como los reels publicados de comida y anfitrión: blanco con borde #D03000, sin caja.",
+    "Eric2026-10-02 reeditar pieza actual, con regla vigente de captions SIEMPRE una línea. V3 usa perfilv3, tarjetas medidas a106px dentro920px sin saltos; se conserva diálogo completo; precios se representan con símbolo$. Gancho puntuado como pregunta, inferencia por sentido; escucha crítica pendiente.",
+    "Revisión de fuentes asociadas de esta sesión: Drive vids39 archivos y dashboard sin raw asociado; SSD0402–0405.0402–0404 son intentos incompletos, no proxies;0405 contiene ofertas y cierre.0445 es mimosa y0410 cóctel rojo, no prosecco/French75 confirmado; descartados como B-roll de las ofertas. Se aprovecha el vaso presente en la toma y cuatro encuadres progresivos. No se afirma cobertura de otras carpetas.",
+    "Música God Mode distinta de otros reels actuales de Mondays; recurso ya descargado con hash/procedencia de catálogo. Tres acentos discretos en precios; outro visualv10 y SFX reutilizados con esta música continua. Diseño sonoro propuesto, audición pendiente."
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-gaby-v10-sfx-v1.mp4",
+    "in": 0,
+    "out": 5.8,
+    "gain": 1
+  },
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 7.02,
+      "duration": 0.08,
+      "gain_db": -29
+    },
+    {
+      "preset": "pop",
+      "time": 8.9,
+      "duration": 0.08,
+      "gain_db": -29
+    },
+    {
+      "preset": "pop",
+      "time": 10.48,
+      "duration": 0.08,
+      "gain_db": -29
+    }
+  ],
+  "previous_version": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/edits/mondays-ladies-night-v2.mp4"
+}

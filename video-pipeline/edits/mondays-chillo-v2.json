@@ -1,0 +1,59 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v2.json",
+  "idea_id": "mondays-chillo",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Filete de chillo",
+  "source": "../runs/mondays-src/0421.mp4",
+  "transcript": "../runs/mondays-src/0421.small.json",
+  "clips": [
+    {
+      "in": 1.08,
+      "out": 8.47
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Still Pickin.mp3",
+    "title": "Still Pickin",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Still%20Pickin.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.52,
+      "text": "Oye, Gaby,\n¿qué estás escuchando?",
+      "behind_camera": true
+    },
+    {
+      "start": 1.8,
+      "end": 3.52,
+      "text": "Por aquí tengo\nun filete de chillo."
+    },
+    {
+      "start": 3.66,
+      "end": 5.22,
+      "text": "En vegetales salteados."
+    },
+    {
+      "start": 5.36,
+      "end": 7.36,
+      "text": "No. Es en salsa criolla."
+    }
+  ],
+  "review_notes": [
+    "La pregunta de detrás de cámara se invierte. Ella trae el plato y se corrige: salsa criolla, no vegetales salteados.",
+    "Whisper oyó «hechillo» y «cridó». En pantalla: chillo y criolla. Gabi queda como Gaby.",
+    "Captions como los reels publicados de comida y anfitrión: blanco con borde #D03000, sin caja."
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "otro-rollo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Y Si Pedimos Otro Rollo?",
+  "source": "../media/yabuuchi/derived/otro-roll-entrega-v8.mkv",
+  "transcript": "../runs/yabuuchi-otro-roll-entrega-v8-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.799999999999999,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 0.95,
+      "text": "¿Quieres otro roll?"
+    },
+    {
+      "start": 1.13,
+      "end": 2.03,
+      "text": "No tenemos tiempo."
+    },
+    {
+      "start": 2.19,
+      "end": 2.87,
+      "text": "¿Tiempo pa’ qué?"
+    },
+    {
+      "start": 3.19,
+      "end": 4.39,
+      "text": "Para preguntas innecesarias."
+    },
+    {
+      "start": 7.28,
+      "end": 7.9,
+      "text": "Por aquí."
+    },
+    {
+      "start": 8.02,
+      "end": 8.74,
+      "text": "Buen provecho."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/otro-roll-entrega-v8-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/derived/otro-rollo-inspiracion-v5.mp4",
+      "in": 0,
+      "out": 7.166666666666667,
+      "at": 0,
+      "duration": 7.166666666666667,
+      "original_source": "media/yabuuchi/source/DJI_20260914131647_0007_D.MP4",
+      "purpose": "Diálogo y llegada al mostrador de la edición anterior, excluyendo el plano de bebida"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123652_0989_D.MP4",
+      "in": 0.7333333333333333,
+      "out": 2.7666666666666666,
+      "at": 7.166666666666667,
+      "duration": 2.033333333333333,
+      "mute": false,
+      "crop": [
+        200,
+        670,
+        700,
+        1244
+      ],
+      "purpose": "Plano detalle de manos entregando caja, servilleta y palillos; conserva Por aquí y Buen provecho, sin conteo"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123448_0987_D.MP4",
+      "in": 11.4,
+      "out": 13,
+      "at": 9.2,
+      "duration": 1.6,
+      "mute": true,
+      "derived_source": "media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0987-03-caja-abierta-sobre-el-mostrador-b7f4e654d3.mp4",
+      "derived_in": 0.1888,
+      "derived_out": 1.7888000000000002,
+      "purpose": "Roll real visible en caja abierta; tramo no utilizado anteriormente en el lote"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "tiktok_inspiration": "https://www.tiktok.com/@mariamejiaspr/video/7678999845792763167"
+  },
+  "review_notes": [
+    "Eric solicita que el remate entregue un roll y no una bebida, para continuar la idea del pedido.",
+    "Se elimina por completo el plano 0014 de Ramune. No se reemplaza digitalmente ningún objeto.",
+    "Entrega real de 0989 en plano detalle: manos, caja y palillos. Su voz propia se conserva; cuenta inicial excluida.",
+    "0989 ya aparece en Churrasco: se reutiliza por ser la entrega de roll pertinente encontrada; el plano final 0987 11.4–13.0 no tenía uso en el lote.",
+    "El corte final muestra el roll en su caja, después de completar la acción de entrega.",
+    "Caption inicial literal ¿Quieres otro roll? y perfil Anybody 72 con entrada suave conservados.",
+    "Sonidos breves en cambios de plano, Audio Kit y cierre de piano. Nueva versión pendiente de revisión del usuario."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 0.986,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.036,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.986,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.436,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 5.086,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 7.052667,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Entrega real de la caja del roll"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 9.086,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Roll visible en su caja abierta"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 10.6,
+      "duration": 0.2,
+      "gain_db": -22,
+      "reason": "Entrada al outro"
+    }
+  ],
+  "effects": [],
+  "idea_page": 2,
+  "inspiration_shots": [
+    {
+      "in": 0,
+      "out": 1.1,
+      "crop_x": 0
+    },
+    {
+      "in": 1.1,
+      "out": 2.15,
+      "crop_x": 140
+    },
+    {
+      "in": 2.15,
+      "out": 3.1,
+      "crop_x": 0
+    },
+    {
+      "in": 3.1,
+      "out": 4.55,
+      "crop_x": 140
+    },
+    {
+      "in": 4.55,
+      "out": 5.2,
+      "crop_x": null
+    },
+    {
+      "in": 6.1,
+      "out": 8.07,
+      "crop_x": null
+    }
+  ],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0.05,
+        "end": 0.95,
+        "role": "1"
+      },
+      {
+        "start": 1.13,
+        "end": 2.03,
+        "role": "2"
+      },
+      {
+        "start": 2.19,
+        "end": 2.87,
+        "role": "3"
+      },
+      {
+        "start": 3.19,
+        "end": 4.39,
+        "role": "4"
+      },
+      {
+        "start": 7.28,
+        "end": 8.74,
+        "role": "entrega"
+      }
+    ]
+  },
+  "user_corrections": [
+    {
+      "source": "Corrección literal de Eric, 2026-09-21",
+      "phrase": "¿Quieres otro roll?",
+      "rule": "Respetar roll o rollo según la pronunciación de cada intervención; no sustituir globalmente."
+    }
+  ]
+}

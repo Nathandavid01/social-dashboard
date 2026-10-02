@@ -1,0 +1,299 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "anull,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-nuevo-lab-be-chillin-v4.wav",
+    "title": "Be Chillin",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Be%20Chillin.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28.5
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-nuevo-laboratorio",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Nuevo Laboratorio En Arecibo",
+  "source": "../media/arecibo/nuevo-lab-0281-0277-base-v4.mp4",
+  "transcript": "../runs/arecibo-nuevo-lab-v4-transcript.json",
+  "clips": [
+    {
+      "in": 0.0,
+      "out": 2.5,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.5,
+          "zoom": 1.03
+        }
+      ]
+    },
+    {
+      "in": 2.5,
+      "out": 16.7,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 14.2,
+          "zoom": 1.03
+        }
+      ]
+    },
+    {
+      "in": 16.7,
+      "out": 19.9,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.2,
+          "zoom": 1.03
+        }
+      ]
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/DJI_20260909092322_0276_D.MP4",
+      "in": 0.3,
+      "out": 1.82,
+      "at": 0.98,
+      "reason": "Recepción real, vacía y con el logo visible cuando se presenta el nuevo laboratorio; toma inédita en las ediciones actuales.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.52,
+          "zoom": 1.04
+        }
+      ],
+      "fade_in": 0.08,
+      "fade_out": 0
+    },
+    {
+      "source": "../media/arecibo/nuevo-lab-location-v3.mp4",
+      "in": 0,
+      "out": 3.1999999999999993,
+      "at": 16.7,
+      "kind": "brand_graphic",
+      "original_source": "media/arecibo/DJI_20260909100140_0296_D.JPG",
+      "reason": "Movimiento cinematográfico creado con una foto real de la fachada. La tarjeta de ubicación cubre el anuncio antiguo y conserva solamente la dirección vigente grabada. Se mantiene hasta el outro, sin volver al presentador.",
+      "fade_in": 0,
+      "fade_out": 0
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 0.98,
+      "duration": 0.09,
+      "gain_db": -18
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 2.5,
+      "duration": 0.2,
+      "gain_db": -26
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 12.12,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.06,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 15.3,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 16.7,
+      "duration": 0.2,
+      "gain_db": -25
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.98,
+      "text": "¿SABÍAS QUE EN ARECIBO"
+    },
+    {
+      "start": 0.98,
+      "end": 1.74,
+      "text": "HAY UN NUEVO LABORATORIO?"
+    },
+    {
+      "start": 1.74,
+      "end": 2.5,
+      "text": "LLAMADO ARECIBO LAB"
+    },
+    {
+      "start": 2.58,
+      "end": 3.76,
+      "text": "EN ARECIBO LAB OFRECEMOS"
+    },
+    {
+      "start": 3.76,
+      "end": 5.22,
+      "text": "SERVICIO DE TOMA DE MUESTRA"
+    },
+    {
+      "start": 5.22,
+      "end": 6.64,
+      "text": "PARA LAS PRUEBAS DE CERNIMIENTO"
+    },
+    {
+      "start": 6.64,
+      "end": 8.88,
+      "text": "QUE EL MÉDICO LE ENVÍA"
+    },
+    {
+      "start": 8.88,
+      "end": 10.96,
+      "text": "EN TRES A SEIS MESES"
+    },
+    {
+      "start": 11.32,
+      "end": 12.12,
+      "text": "TAMBIÉN OFRECEMOS"
+    },
+    {
+      "start": 12.12,
+      "end": 13.85,
+      "text": "PRUEBAS DE PATERNIDAD"
+    },
+    {
+      "start": 14.06,
+      "end": 14.9,
+      "text": "PRUEBAS DE DOPAJE"
+    },
+    {
+      "start": 15.3,
+      "end": 16.45,
+      "text": "CULTIVOS"
+    },
+    {
+      "start": 16.8,
+      "end": 17.56,
+      "text": "ESTAMOS UBICADOS EN"
+    },
+    {
+      "start": 17.56,
+      "end": 18.44,
+      "text": "CARRETERA 683"
+    },
+    {
+      "start": 18.44,
+      "end": 19.87,
+      "text": "FRENTE A HQJ"
+    }
+  ],
+  "review_notes": [
+    "Usuario rechaza v3 por demasiado corta. v4 amplía de 8.17 s a 22.4 s con diálogo real, sin ralentizar ni repetir escenas.",
+    "Gancho 0281; explicación continua de servicios 0277; cierre de ubicación 0281; outro oficial 2.5 s.",
+    "No usar la frase de servicios poco clara de 0281. Se conserva la explicación de la doctora con sus calificadores.",
+    "Recepción 0276 durante presentación; foto 0296 durante ubicación. Mantener a la doctora al describir servicios porque no hay otra toma literal inédita.",
+    "Voz normalizada por toma después de conversión mono; captions Montserrat 70 verdes y clicks al enumerar servicios.",
+    "Música CC0 extendida durante todo el diálogo, keyframes discretos y cobertura continua hasta el outro.",
+    "Revisión visual, escucha crítica y aprobación deben registrarse por separado."
+  ],
+  "previous_version": "../runs/arecibo-nuevo-lab-0281-v3.mp4",
+  "source_segments": [
+    {
+      "source": "media/arecibo/DJI_20260909093310_0281_D.MP4",
+      "in": 1.78,
+      "out": 4.26,
+      "timeline_start": 0.0,
+      "timeline_duration": 2.5,
+      "source_sha256": "61d43e8aedad92941ebc8737115fecbe48a45c3411293c7f8dc5940b2259898e",
+      "voice_measurement": {
+        "input_i": "-18.56",
+        "input_tp": "-4.64",
+        "input_lra": "0.00",
+        "input_thresh": "-28.56",
+        "output_i": "-16.00",
+        "output_tp": "-2.08",
+        "output_lra": "0.00",
+        "output_thresh": "-26.00",
+        "normalization_type": "linear",
+        "target_offset": "0.00"
+      }
+    },
+    {
+      "source": "media/arecibo/DJI_20260909092343_0277_D.MP4",
+      "in": 7.3,
+      "out": 21.5,
+      "timeline_start": 2.5,
+      "timeline_duration": 14.2,
+      "source_sha256": "db307f3168779ee83ab1fd3ed1768191e9f604e1194f5366f8032abfc71b4beb",
+      "voice_measurement": {
+        "input_i": "-24.88",
+        "input_tp": "-6.69",
+        "input_lra": "3.70",
+        "input_thresh": "-35.09",
+        "output_i": "-17.12",
+        "output_tp": "-2.00",
+        "output_lra": "2.80",
+        "output_thresh": "-27.24",
+        "normalization_type": "dynamic",
+        "target_offset": "1.12"
+      }
+    },
+    {
+      "source": "media/arecibo/DJI_20260909093310_0281_D.MP4",
+      "in": 10.28,
+      "out": 13.45,
+      "timeline_start": 16.7,
+      "timeline_duration": 3.2,
+      "source_sha256": "61d43e8aedad92941ebc8737115fecbe48a45c3411293c7f8dc5940b2259898e",
+      "voice_measurement": {
+        "input_i": "-20.47",
+        "input_tp": "-2.05",
+        "input_lra": "0.30",
+        "input_thresh": "-30.47",
+        "output_i": "-16.39",
+        "output_tp": "-2.00",
+        "output_lra": "0.00",
+        "output_thresh": "-26.39",
+        "normalization_type": "dynamic",
+        "target_offset": "0.39"
+      }
+    }
+  ]
+}

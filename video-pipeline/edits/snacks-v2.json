@@ -1,0 +1,242 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "87b63eff-6819-4724-82f1-ce0270006756",
+  "title": "Dulces Y Bebidas Para Completar La Visita",
+  "source": "../media/5bc69aba-70ac-445f-a42b-3815cefcd574.mp4",
+  "transcript": "../runs/snacks-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.22,
+      "out": 10.7,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 3.1,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.15
+    },
+    {
+      "time": 4.38,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.15
+    },
+    {
+      "time": 5.05,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.15
+    },
+    {
+      "time": 6.82,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.15
+    },
+    {
+      "time": 8.5,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.15
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "V2: corrección de transcripción del gancho: ser el lugar, según el brief."
+  ],
+  "broll": [
+    {
+      "source": "../media/5bc69aba-70ac-445f-a42b-3815cefcd574.mp4",
+      "in": 1.22,
+      "out": 10.7,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 9.48,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 0.3,
+      "out": 1.58,
+      "at": 3.1,
+      "reason": "Trampolín al mencionar lo divertido",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.28,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "../media/35cdcce8-1c2d-40d1-8ad2-b478a7da7962.mp4",
+      "in": 4,
+      "out": 5.77,
+      "at": 5.05,
+      "reason": "Vitrina durante variedad de dulces",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.77,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "../media/a10fa282-3816-4770-949a-1f38ccf25121.mp4",
+      "in": 6,
+      "out": 7.68,
+      "at": 6.82,
+      "reason": "Nevera durante bebidas",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.68,
+          "zoom": 1.06
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 3.1,
+      "duration": 0.1
+    },
+    {
+      "time": 4.38,
+      "duration": 0.1
+    },
+    {
+      "time": 5.05,
+      "duration": 0.1
+    },
+    {
+      "time": 6.82,
+      "duration": 0.1
+    },
+    {
+      "time": 8.5,
+      "duration": 0.1
+    }
+  ],
+  "music": {
+    "source": "../media/music/snacks-bed.wav",
+    "title": "Happy Whistling Ukulele",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+    "target_lufs": -29
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.12,
+      "text": "ADEMÁS DE NANA’S"
+    },
+    {
+      "start": 1.12,
+      "end": 1.46,
+      "text": "PLAYHOUSE,"
+    },
+    {
+      "start": 1.48,
+      "end": 1.9,
+      "text": "SER EL LUGAR"
+    },
+    {
+      "start": 1.9,
+      "end": 2.7,
+      "text": "PREFERIDO DE LOS"
+    },
+    {
+      "start": 2.7,
+      "end": 3.18,
+      "text": "PEQUEÑOS,"
+    },
+    {
+      "start": 3.18,
+      "end": 3.82,
+      "text": "POR LO DIVERTIDO"
+    },
+    {
+      "start": 3.82,
+      "end": 4.32,
+      "text": "QUE ES."
+    },
+    {
+      "start": 4.54,
+      "end": 5.12,
+      "text": "TENEMOS UNA"
+    },
+    {
+      "start": 5.12,
+      "end": 5.92,
+      "text": "AMPLIA VARIEDAD"
+    },
+    {
+      "start": 5.92,
+      "end": 6.84,
+      "text": "DE DULCES Y"
+    },
+    {
+      "start": 6.84,
+      "end": 7.36,
+      "text": "BEBIDAS QUE"
+    },
+    {
+      "start": 7.36,
+      "end": 7.96,
+      "text": "HACEN DE ESTE"
+    },
+    {
+      "start": 7.96,
+      "end": 8.9,
+      "text": "LUGAR UNO MÁS"
+    },
+    {
+      "start": 8.9,
+      "end": 9.379999999999999,
+      "text": "ESPECIAL."
+    }
+  ],
+  "previous_version": "../runs/nanas-snacks-v1.mp4"
+}

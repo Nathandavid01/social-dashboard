@@ -1,0 +1,26 @@
+{
+  "client": "Drop Coffee",
+  "version": "v1-evidence",
+  "status": "caption_parameters_pending",
+  "editor_guide": "styles/editor-guides/drop-coffee.md",
+  "references": "styles/references/drop-coffee/meta.json",
+  "observed": {
+    "text": "blanco/crema, grueso, una linea corta, sombra oscura",
+    "position": "centrado; altura variable entre piezas",
+    "case": "mixto",
+    "accent": "amarillo en pieza humoristica"
+  },
+  "unverified": [
+    "fuente y peso exactos",
+    "archivo original de fuente",
+    "tamano",
+    "colores numericos",
+    "sombra",
+    "animacion"
+  ],
+  "current_edit": {
+    "idea": "cf6fcd38-4141-476d-9d7f-9e84db907e0f",
+    "format": "montaje musical sin dialogo ni captions sobreimpresos",
+    "reason": "Solicitud de musica sobre tomas de preparacion; no aplicar tipografia sin verificar"
+  }
+}

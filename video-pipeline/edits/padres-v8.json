@@ -1,0 +1,199 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "ffa0d992-6d22-42b1-88e7-d45fe0e12455",
+  "title": "Un Plan Para Mamá Y Papá",
+  "source": "../media/6610126c-079d-4209-93f1-6f98586d4916.mp4",
+  "transcript": "../runs/padres-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.28,
+      "out": 12.3,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 3.26,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 4.58,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Duración mínima de captions corregida a 300ms; tamaño fijo conservado.",
+    "Reduce repetición entre reels: trampolín retirado según comentario del usuario.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original.",
+    "Audio: música diferente por reel a -34 LUFS; reducción moderada de ambiente; clicks por punto de lista. Escucha final pendiente.",
+    "Outro: whoosh de estrella, aterrizaje suave y campanillas de ensamblaje con cola hasta el final.",
+    "Mezcla revisada: reducción de ambiente reforzada y música a -27 LUFS desde segundo 3; escucha crítica pendiente.",
+    "Cambio solicitado: sustituir Lovely Piano Song por Happy Whistling Ukulele; conservar regla común de mezcla. Escucha crítica pendiente."
+  ],
+  "broll": [
+    {
+      "source": "../media/6610126c-079d-4209-93f1-6f98586d4916.mp4",
+      "in": 1.28,
+      "out": 12.3,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.02,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/d19845e3-c177-4c9c-a065-872216348bee.mp4",
+      "in": 0.5,
+      "out": 1.82,
+      "at": 3.26,
+      "reason": "Niño balanceándose en caballito azul; otra niña entra con canasta de supermercado",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.32,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro-with-star-sfx.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 1
+  },
+  "transitions": [
+    {
+      "time": 3.26,
+      "duration": 0.08
+    },
+    {
+      "time": 4.58,
+      "duration": 0.08
+    }
+  ],
+  "music": {
+    "title": "Happy Whistling Ukulele",
+    "source": "../media/music/nanas-padres-v8-bed.wav",
+    "license": "CC0 1.0",
+    "license_evidence": [
+      "https://github.com/0lhi/FreePD",
+      "https://www.bluegurus.com/video/freepd/"
+    ],
+    "sha256": "ed4059c8fba8673d657e85175ff54eaa32cef9e43f688f164bef585e6e65cf15",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Happy%20Whistling%20Ukulele.mp3",
+    "target_lufs": -27,
+    "source_in": 3
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.06,
+      "text": "MAMI Y PAPÁ,"
+    },
+    {
+      "start": 1.06,
+      "end": 1.6,
+      "text": "ESTÁS BUSCANDO"
+    },
+    {
+      "start": 1.6,
+      "end": 2.48,
+      "text": "UN LUGAR SEGURO"
+    },
+    {
+      "start": 2.48,
+      "end": 3.26,
+      "text": "DONDE LLEVAR A"
+    },
+    {
+      "start": 3.26,
+      "end": 3.86,
+      "text": "TUS NIÑOS A"
+    },
+    {
+      "start": 3.86,
+      "end": 4.58,
+      "text": "QUE SE DIVIERTAN"
+    },
+    {
+      "start": 4.58,
+      "end": 5.24,
+      "text": "MIENTRAS TÚ TE"
+    },
+    {
+      "start": 5.24,
+      "end": 5.98,
+      "text": "RELAJAS."
+    },
+    {
+      "start": 5.98,
+      "end": 6.7,
+      "text": "AQUÍ EN NANA’S"
+    },
+    {
+      "start": 6.7,
+      "end": 7.36,
+      "text": "PLAYHOUSE ES EL"
+    },
+    {
+      "start": 7.36,
+      "end": 8.12,
+      "text": "LUGAR PARA TI."
+    },
+    {
+      "start": 8.12,
+      "end": 8.42,
+      "text": "ESTAMOS"
+    },
+    {
+      "start": 8.42,
+      "end": 9.14,
+      "text": "UBICADOS EN"
+    },
+    {
+      "start": 9.14,
+      "end": 9.44,
+      "text": "PLAZA"
+    },
+    {
+      "start": 9.44,
+      "end": 10.22,
+      "text": "MONSERRATE EN"
+    },
+    {
+      "start": 10.22,
+      "end": 10.92,
+      "text": "HORMIGUEROS."
+    }
+  ],
+  "previous_version": "../runs/nanas-padres-v7.mp4",
+  "voice_filter": "highpass=f=110,afftdn=nr=18:nf=-28:tn=1,agate=threshold=0.035:ratio=3:range=0.12:attack=10:release=150,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000"
+}

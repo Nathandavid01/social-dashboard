@@ -1,0 +1,95 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "e69cd34c-1379-4792-bcc6-a9fd3debbd91",
+  "source_idea_id": "60f846c5-0bc3-47e5-9073-78f28c3c1462",
+  "catalog": "runs/a5d7705e-catalog.json",
+  "title": "Faltan tres semanas · Apiario Coffee",
+  "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/849b2b51-8cb1-413e-9326-755b7ed82fd5.mp4",
+  "transcript": "../runs/apiario-countdown3-selected-small.json",
+  "style": "../styles/apiario-countdown-v1.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 5.3,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 1.04,
+      "text": "Ya estamos a ley"
+    },
+    {
+      "start": 1.04,
+      "end": 1.7,
+      "text": "de tres semanas"
+    },
+    {
+      "start": 1.7,
+      "end": 2.86,
+      "text": "para la apertura"
+    },
+    {
+      "start": 2.86,
+      "end": 4.26,
+      "text": "de Apiario Coffee Shop",
+      "primary_colour": "&H000799CB"
+    },
+    {
+      "start": 4.26,
+      "end": 5.1,
+      "text": "¡Pendientes!"
+    }
+  ],
+  "voice_filter": "pan=stereo|c0=c0|c1=c0,highpass=f=75,afftdn=nr=5:nf=-40",
+  "audio_master": {
+    "mode": "dialogue",
+    "speech_regions": [
+      {
+        "start": 0.05,
+        "end": 5.05,
+        "role": "presenter"
+      }
+    ]
+  },
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/assets/3-semanas-card-v1.mp4",
+      "in": 0,
+      "out": 1.73,
+      "at": 1.1,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "pass",
+      "reason": "Misma tarjeta de countdown de Apiario, adaptada a tres semanas; ilustra cifra dicha."
+    }
+  ],
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/assets/music-bed-v1.wav",
+    "extend_through_outro": true,
+    "title": "Fresh Coffee And Sunshine (15sec)",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/fresh-coffee-and-sunshine-780925/",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/descargas/780925/fresh-coffee-and-sunshine-780925-License-780925-11942310.pdf"
+  },
+  "references": {
+    "countdown_same_client": "media/a5d7705e/d7a089db-db85-4e01-92cb-3a93ae8739da.mp4",
+    "official_outro": "media/apiario/brand/outro.mp4"
+  },
+  "review_notes": [
+    "Toma completa seleccionada de 6.9069 s, usa 0–5.3 s hasta remate ¡Pendientes!, sin instrucciones de grabación.",
+    "Cuatro archivos revisados por transcripción y dos countdowns por fotogramas; otros dos son concepto/localización.",
+    "Perfil visual reconstruido de referencia Apiario; identidad exacta de fuente aún no confirmada.",
+    "Publicación y fecha efectiva de apertura no verificadas por el render.",
+    "Canal L seco centrado para evitar duplicación de micrófono de ambiente."
+  ]
+}

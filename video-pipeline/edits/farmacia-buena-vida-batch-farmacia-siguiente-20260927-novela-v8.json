@@ -1,0 +1,147 @@
+{
+  "idea_id": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+  "title": "POV: Si la farmacia fuera una novela",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/source/novela-drama-retimed-v6.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/novela-editorial.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 5.5,
+      "zoom": 1.12,
+      "focus_y": 0.18,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.5,
+          "zoom": 1.16
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 5.5,
+      "out": 9.833333,
+      "zoom": 1.18,
+      "focus_y": 0.18,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.333333333333333,
+          "zoom": 1.2
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.833333,
+      "out": 16.0,
+      "zoom": 1.28,
+      "focus_y": 0.18,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.166666666666667,
+          "zoom": 1.2
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.0,
+      "out": 19.1,
+      "zoom": 1.04,
+      "focus_y": 0.18,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.1,
+          "zoom": 1.07
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 5.5,
+      "text": "POV: Si la farmacia\nfuera una novela"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "impact",
+      "time": 5.5,
+      "duration": 0.5,
+      "gain_db": -18
+    },
+    {
+      "preset": "impact",
+      "time": 9.833,
+      "duration": 0.5,
+      "gain_db": -18
+    },
+    {
+      "preset": "impact",
+      "time": 16.0,
+      "duration": 0.5,
+      "gain_db": -18
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_flash",
+      "time": 5.45,
+      "duration": 0.12,
+      "intensity": 0.4
+    },
+    {
+      "preset": "soft_flash",
+      "time": 9.783,
+      "duration": 0.12,
+      "intensity": 0.4
+    }
+  ],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Novela: giro y reacciones con camara lenta selectiva, acercamientos progresivos dramaticos, contraste calido y viñeta leve. Abanico abre completo. Perfil captions v7 conservado. Escucha critica pendiente.",
+    "Eric 2026-09-30: añadir POV Si la farmacia fuera una novela al inicio.",
+    "Eric 2026-09-30: encabezado POV completo durante el primer plano (0–5.5 s), perfil v7.",
+    "Eric 2026-09-30: usar estilo POV del cliente, Montserrat SemiBold65 con caja oliva.",
+    "POV usa perfil original v5: Montserrat SemiBold65, blanco y caja oliva redondeada. Última corrección prevalece sobre unificación anterior."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "caption_mode": "editorial",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/misterioso-bed-v6.wav",
+    "title": "Misterioso — Alon Peretz",
+    "license": "Motion Array paid subscription license",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/music-provenance.json",
+    "extend_through_outro": true
+  }
+}

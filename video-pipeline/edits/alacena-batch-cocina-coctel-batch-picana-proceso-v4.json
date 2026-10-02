@@ -1,0 +1,49 @@
+{
+  "idea_id": "dfe4e076-d084-4442-be0b-55188438061c",
+  "title": "plato",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-v4-source.mkv",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 13.354,
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [],
+  "broll": [],
+  "sounds": [
+    {"kind": "click", "time": 2.4, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 5.0, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 7.3, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 10.1, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 13.35, "duration": 0.045, "gain_db": -29}
+  ],
+  "effects": [],
+  "review_notes": [
+    "v4 replaces the wide empty grill, the blue board, and the unfinished puree spread. Opens on the steak over the fire, shows the medium center, the slice on the plate, the vegetables, and holds the finished plate. Same idea, same music. No captions over the food. v3 preserved."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music-provenance.json"
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "none"
+}

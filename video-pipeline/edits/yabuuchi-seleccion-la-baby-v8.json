@@ -1,0 +1,253 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "la-baby",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "La Baby Para Dos",
+  "source": "../media/yabuuchi/derived/la-baby-complete-v8.mp4",
+  "transcript": "../runs/yabuuchi-la-baby-complete-v8-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 17.75,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 1.15,
+      "text": "Si tienes hambre,"
+    },
+    {
+      "start": 1.19,
+      "end": 2.35,
+      "text": "tú y tu pareja de sushi,"
+    },
+    {
+      "start": 2.55,
+      "end": 3.85,
+      "text": "aquí en Yabuuchi Levittown"
+    },
+    {
+      "start": 3.93,
+      "end": 5.65,
+      "text": "tenemos la cajita de La Baby,"
+    },
+    {
+      "start": 5.85,
+      "end": 7.3,
+      "text": "que es perfecto para dos personas."
+    },
+    {
+      "start": 9.4,
+      "end": 11.25,
+      "text": "Y si aún no lo has probado,"
+    },
+    {
+      "start": 11.34,
+      "end": 12.66,
+      "text": "puedes venir aquí a Yabuuchi"
+    },
+    {
+      "start": 12.66,
+      "end": 13.7,
+      "text": "en Dos Palmas,"
+    },
+    {
+      "start": 13.7,
+      "end": 15.1,
+      "text": "en Levittown, Toa Baja."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/la-baby-v8-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0021-02-vista-completa-de-la-baby-6446ffb916.mp4",
+      "in": 0.7968,
+      "out": 3.3968,
+      "at": 3.8,
+      "eof_action": "pass",
+      "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "source_in": 4,
+      "source_out": 6.6,
+      "reason": "Vista completa de la caja al nombrar La Baby"
+    },
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0021-03-acercamiento-al-centro-y-bocados-dorados-6446ffb916.mp4",
+      "in": 0.1917,
+      "out": 3.8917,
+      "at": 6.4,
+      "eof_action": "pass",
+      "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "source_in": 8.5,
+      "source_out": 12.2,
+      "reason": "Detalle del centro y bocados; cubre el arranque de cámara de la invitación"
+    }
+  ],
+  "source_parts": [
+    {
+      "code": "0023",
+      "start": 0.85,
+      "end": 8.45,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Apertura y presentación originales completas",
+      "source": "media/yabuuchi/source/DJI_20260914133949_0023_D.MP4",
+      "at": 0,
+      "duration": 7.6
+    },
+    {
+      "code": "0021",
+      "start": 9.7,
+      "end": 11.5,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Continuidad de producto; cubierta por el B-roll 6.4–10.1",
+      "source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "at": 7.6,
+      "duration": 1.8
+    },
+    {
+      "code": "0002",
+      "start": 0,
+      "end": 5.95,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Invitación y ubicación completas; comienzo de cámara cubierto hasta 10.1",
+      "source": "media/yabuuchi/source/DJI_20260914125108_0002_D.MP4",
+      "at": 9.4,
+      "duration": 5.95
+    },
+    {
+      "code": "0021",
+      "start": 13.4,
+      "end": 15.8,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Cierre de producto con recorrido a los rolls, sin repetir el rango anterior",
+      "source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "at": 15.35,
+      "duration": 2.4
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "review_notes": [
+    "Eric indicó que el video 09 todavía requería mejor edición; v7 no está aprobado.",
+    "Se conservan las dos intervenciones completas: apertura de 0023 e invitación de 0002.",
+    "Anybody Expanded Black 72 y entrada reference_soft_in del perfil vigente.",
+    "Caja completa, detalle central y recorrido final: tres rangos distintos del producto real.",
+    "El detalle cubre el inicio movido de 0002; la voz continúa completa debajo.",
+    "Pausa final de producto de 2.4 s antes del logo; ningún plano se repite ni congela.",
+    "Cinco cambios editoriales con sonido contenido; se conserva el outro profesional de piano.",
+    "Audio Kit nivela presentación e invitación por separado y mide el AAC final. Escucha crítica pendiente."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 3.686,
+      "duration": 0.32,
+      "gain_db": -20,
+      "reason": "Entrada a la caja completa"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 6.286,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Cambio al detalle de producto"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 9.986,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Regreso a la invitación con cámara estable"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 15.236,
+      "duration": 0.32,
+      "gain_db": -20,
+      "reason": "Cierre con detalle de los rolls"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 17.55,
+      "duration": 0.2,
+      "gain_db": -22,
+      "reason": "Entrada al outro de piano"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 3.7,
+      "duration": 0.2,
+      "intensity": 0.45,
+      "reason": "Entrada a la caja completa"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 10.0,
+      "duration": 0.2,
+      "intensity": 0.45,
+      "reason": "Regreso a la invitación con cámara estable"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 15.25,
+      "duration": 0.2,
+      "intensity": 0.45,
+      "reason": "Cierre con detalle de los rolls"
+    }
+  ],
+  "effects_reference": {
+    "request": "Mejorar efectos y sonidos para hacer el swoosh de la referencia",
+    "reference_audit": "runs/yabuuchi-swoosh-reference-qa/reference-audit.json",
+    "sound": "whoosh_sweep: síntesis original, ataque rápido y cola breve",
+    "visual": "whip_pan: barrido lateral con bordes reflejados, captions estables",
+    "total_cues": 5,
+    "sound_duration": 0.32,
+    "sound_peak_lead": 0.05,
+    "listening": "pending; no se afirma identidad auditiva"
+  },
+  "voice_filter": "highpass=f=75",
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0,
+        "end": 7.3,
+        "role": "presentacion"
+      },
+      {
+        "start": 9.4,
+        "end": 15.15,
+        "role": "invitacion"
+      }
+    ]
+  }
+}

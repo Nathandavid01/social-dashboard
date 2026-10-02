@@ -1,0 +1,185 @@
+{
+  "idea_id": "90e85d58-bf55-4eaf-8e92-b61da82df669",
+  "title": "Servicios del equipo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/servicios-assembly.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/servicios-transcript-resolve.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 1.24,
+      "out": 4.85,
+      "zoom": 1.13,
+      "focus_y": 0.35,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.61,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 8.23,
+      "out": 10.8,
+      "zoom": 1.08,
+      "focus_y": 0.35,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.57,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.29,
+      "out": 13.58,
+      "zoom": 1.17,
+      "focus_y": 0.35,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.29,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 15.64,
+      "out": 20.0,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.36,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.56,
+      "text": "¿Estás ocupada?"
+    },
+    {
+      "start": 0.56,
+      "end": 1.28,
+      "text": "Para que me ayudes"
+    },
+    {
+      "start": 1.28,
+      "end": 1.7,
+      "text": "a recoger"
+    },
+    {
+      "start": 1.94,
+      "end": 2.6,
+      "text": "Sí, voy a hacer"
+    },
+    {
+      "start": 2.6,
+      "end": 3.36,
+      "text": "un Western Union"
+    },
+    {
+      "start": 3.68,
+      "end": 4.16,
+      "text": "Kiara"
+    },
+    {
+      "start": 4.16,
+      "end": 5.1,
+      "text": "¿Estás ocupada?"
+    },
+    {
+      "start": 5.66,
+      "end": 6.13,
+      "text": "Sí"
+    },
+    {
+      "start": 6.25,
+      "end": 6.79,
+      "text": "Voy a hacer"
+    },
+    {
+      "start": 6.79,
+      "end": 7.21,
+      "text": "un delivery"
+    },
+    {
+      "start": 7.21,
+      "end": 8.24,
+      "text": "a la égida"
+    },
+    {
+      "start": 9.11,
+      "end": 9.69,
+      "text": "¿Estás ocupada?"
+    },
+    {
+      "start": 10.05,
+      "end": 10.48,
+      "text": "Sí"
+    },
+    {
+      "start": 10.57,
+      "end": 11.09,
+      "text": "Voy a enviar"
+    },
+    {
+      "start": 11.09,
+      "end": 11.61,
+      "text": "una preautorización"
+    },
+    {
+      "start": 11.61,
+      "end": 12.45,
+      "text": "por fax"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Tres escenas de Western Union, delivery y fax; cuentas de grabacion y pausas largas fuera. Dos ASR resuelven palabras Western Union/preautorizacion; nombre Kiara y egida requieren escucha critica. Mantener reaccion y no inventar B-roll de un servicio distinto. Musica Inspector Ratchet original de Motion Array descargada, verificada y reservada exclusivamente para este reel. Escucha critica pendiente."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/servicios-music.wav",
+    "title": "Inspector Ratchet — Ty Simon",
+    "license": "Motion Array paid subscription license",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/music-servicios-provenance.json",
+    "extend_through_outro": true
+  }
+}

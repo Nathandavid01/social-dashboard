@@ -1,0 +1,83 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "primer-sushi",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Tu Primer Sushi",
+  "source": "../media/yabuuchi/derived/primer-sushi-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-primer-sushi-mapped.json",
+  "style": "../styles/yabuuchi.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.24,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 2.48,
+      "text": "Oye, Alondra, si fuera mi primera vez probando el sushi,"
+    },
+    {
+      "start": 2.72,
+      "end": 3.66,
+      "text": "¿qué tú me recomendarías?"
+    },
+    {
+      "start": 3.86,
+      "end": 5.44,
+      "text": "Yo te diría que el Churrasco Roll."
+    },
+    {
+      "start": 5.5,
+      "end": 7.36,
+      "text": "El que lleva churrasco, queso crema, cebollín,"
+    },
+    {
+      "start": 7.46,
+      "end": 8.9,
+      "text": "arriba amarillito y salsa anguila."
+    },
+    {
+      "start": 9.28,
+      "end": 10.18,
+      "text": "Perfecto, dame uno de esos."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "music": {
+    "source": "../media/yabuuchi/primer-sushi-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123749_0991_D.MP4",
+      "in": 0.3,
+      "out": 3.55,
+      "at": 5.5,
+      "reason": "Plano del Churrasco Roll cuando enumera ingredientes."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123008_0985_D.MP4",
+      "in": 1.12,
+      "out": 11.36
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro.mp4"
+  },
+  "review_notes": [
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes."
+  ]
+}

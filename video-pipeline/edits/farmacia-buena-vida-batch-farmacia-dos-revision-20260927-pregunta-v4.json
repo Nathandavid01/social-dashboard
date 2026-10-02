@@ -1,0 +1,179 @@
+{
+  "idea_id": "9278f290-46e8-402d-b24f-8cfad1f42b8a",
+  "title": "pregunta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-pregunta-20260926/review/pregunta-assembly-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-pregunta-20260926/review/pregunta-assembly-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 19.27,
+      "zoom": 1.0,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 1.02,
+      "text": "Una pregunta…"
+    },
+    {
+      "start": 1.16,
+      "end": 1.52,
+      "text": "Aquí en"
+    },
+    {
+      "start": 1.52,
+      "end": 2.31,
+      "text": "Farmacia Buena Vida,"
+    },
+    {
+      "start": 2.4,
+      "end": 3.12,
+      "text": "¿hay fax?"
+    },
+    {
+      "start": 3.32,
+      "end": 3.67,
+      "text": "Sí."
+    },
+    {
+      "start": 3.9,
+      "end": 4.53,
+      "text": "¿Impresiones?"
+    },
+    {
+      "start": 4.78,
+      "end": 5.17,
+      "text": "Sí."
+    },
+    {
+      "start": 5.48,
+      "end": 6.44,
+      "text": "¿Fotos 2x2?"
+    },
+    {
+      "start": 6.64,
+      "end": 6.96,
+      "text": "Sí."
+    },
+    {
+      "start": 7.12,
+      "end": 8.1,
+      "text": "¿Antecedentes penales?"
+    },
+    {
+      "start": 8.23,
+      "end": 8.5,
+      "text": "Sí."
+    },
+    {
+      "start": 8.69,
+      "end": 9.81,
+      "text": "¿Certificados de ASUME?"
+    },
+    {
+      "start": 10.07,
+      "end": 10.52,
+      "text": "Sí."
+    },
+    {
+      "start": 10.79,
+      "end": 11.39,
+      "text": "¿CESCO?"
+    },
+    {
+      "start": 11.67,
+      "end": 12.23,
+      "text": "Sí."
+    },
+    {
+      "start": 12.76,
+      "end": 13.7,
+      "text": "¿Y Western Union?"
+    },
+    {
+      "start": 13.87,
+      "end": 14.32,
+      "text": "Sí."
+    },
+    {
+      "start": 14.73,
+      "end": 15.58,
+      "text": "Sí, chica,"
+    },
+    {
+      "start": 15.77,
+      "end": 16.48,
+      "text": "aquí hacemos eso"
+    },
+    {
+      "start": 16.48,
+      "end": 17.43,
+      "text": "y mucho más."
+    },
+    {
+      "start": 17.71,
+      "end": 19.02,
+      "text": "Así que visítanos."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-revision-20260927/broll/fax-motion-v2.mp4",
+      "in": 0,
+      "out": 2.366,
+      "at": 2.35,
+      "reason": "Fax real e impresiones; recorte sin textos previos, encuadre y acercamiento animados."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-revision-20260927/broll/western-union-motion-v2.mp4",
+      "in": 0,
+      "out": 1.766,
+      "at": 12.65,
+      "reason": "Comprobante real de Western Union, cámara virtual suave y rótulos originales fuera del encuadre."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 2.35,
+      "gain_db": -30,
+      "duration": 0.2
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 12.65,
+      "gain_db": -30,
+      "duration": 0.2
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Corrección solicitada: captions según guía original de Brand Kit, Montserrat SemiBold 65 blanco sobre caja oliva redondeada. Conservar B-roll animado y versiones anteriores. Revisión local pendiente."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 16
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v1.json",
+  "idea_id": "mondays-ladies-night",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Ladies Night",
+  "source": "../runs/mondays-src/0405.mp4",
+  "transcript": "../runs/mondays-src/0405.small.json",
+  "clips": [
+    {
+      "in": 0.74,
+      "out": 14.55
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Barroom Ballet.mp3",
+    "title": "Barroom Ballet",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Barroom%20Ballet.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.4,
+      "end": 2.08,
+      "text": "No tienes que hacer un miércoles\ncon tus nenas."
+    },
+    {
+      "start": 2.16,
+      "end": 3.94,
+      "text": "Aquí en Mondays\nte tenemos la solución."
+    },
+    {
+      "start": 3.96,
+      "end": 5.88,
+      "text": "Todos los miércoles,\nLadies Night."
+    },
+    {
+      "start": 5.9,
+      "end": 7.66,
+      "text": "Tenemos prosecco a 6 dólares."
+    },
+    {
+      "start": 7.72,
+      "end": 9.16,
+      "text": "French 75 a 8"
+    },
+    {
+      "start": 9.18,
+      "end": 10.7,
+      "text": "y tapa seleccionada a 6."
+    },
+    {
+      "start": 10.72,
+      "end": 13.61,
+      "text": "Los esperamos en Mondays Aguadilla,\ncarretera 459."
+    }
+  ],
+  "review_notes": [
+    "Se quita la claqueta. Gaby frente al logo. Sin B-roll ni outro.",
+    "Whisper oyó «pro seco» y «Lo esperamos». En pantalla: prosecco y Los esperamos.",
+    "«tus nenas» queda como lo oyó Whisper small. La toma corta decía «tu nena»."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Dra. Delian Loyola · Publicados 14 agosto · v5 profesional · encuadre hábitos",
+  "font_file": "../media/delian/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 100,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00C000C8",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 3,
+  "shadow": 4,
+  "alignment": 2,
+  "margin_x": 70,
+  "bottom_margin": 350,
+  "fixed_size": true,
+  "wrap_width": 900,
+  "max_words": 4,
+  "max_chars": 25,
+  "caption_animation": "none",
+  "notes": [
+    "Referencia Publicados/14 agosto: frases cortas blancas centradas sobre el torso, alrededor de 70% de la altura, con sombra violeta.",
+    "Escala y posición estimadas por comparación visual de un fotograma publicado; comprobar por toma que no tapen boca, manos o acciones importantes.",
+    "Publicados alterna ocasionalmente una palabra violeta; aplicarla solo si la frase lo pide y puede cotejarse con la referencia.",
+    "Tipografia.jpg nombra Shoika; no se entrego archivo de fuente. Montserrat Bold OFL es una aproximacion provisional.",
+    "Variante de posición para 0293: la doctora se inclina al frente y la posición 525 px tapa barbilla/cuello en captions de dos líneas. Se baja el texto al torso.",
+    "v5 (2026-09-23, pedido de Eric «más profesionales»): 76→100 px (medido: altura de letra ~44 px en Publicados 14 agosto frente a 32 px con 76) para acercarse a la escala de Publicados 14 agosto/14 septiembre (texto ~70–85% del ancho); frases cortas partidas en 2 líneas antes de encoger.",
+    "Hábitos: planos cerrados con focus_y alto para subir el rostro por encima de los captions."
+  ]
+}

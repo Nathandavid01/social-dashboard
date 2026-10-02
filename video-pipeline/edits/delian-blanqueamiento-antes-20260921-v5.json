@@ -1,0 +1,159 @@
+{
+  "idea_id": "blanqueamiento-antes-20260921",
+  "title": "¿Blanqueamiento Antes O Después?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_171950_20260921171935_1790125022521_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/blanqueamiento-antes-20260921-editorial.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 2.72,
+      "out": 6.53,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.81,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 6.78,
+      "out": 13.7,
+      "zoom": 1.18,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.92,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.302,
+      "end": 0.895,
+      "text": "Oye, doctora,",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 0.92,
+      "end": 1.76,
+      "text": "blanqueamiento dental,",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 1.84,
+      "end": 2.575,
+      "text": "¿antes o después",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 2.6,
+      "end": 3.68,
+      "text": "del diseño de sonrisa?",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 3.997,
+      "end": 5.67,
+      "text": "Antes. Bien importante."
+    },
+    {
+      "start": 5.79,
+      "end": 6.065,
+      "text": "¿Por qué?"
+    },
+    {
+      "start": 6.09,
+      "end": 6.805,
+      "text": "Porque tenemos que coger"
+    },
+    {
+      "start": 6.83,
+      "end": 7.905,
+      "text": "el color de los dientes"
+    },
+    {
+      "start": 7.93,
+      "end": 8.965,
+      "text": "y así macharlo"
+    },
+    {
+      "start": 8.99,
+      "end": 10.61,
+      "text": "con el diseño de sonrisa."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/seleccion-tono-keyframes.mp4",
+      "in": 0,
+      "out": 2.65,
+      "at": 6.5,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Selección del tono al mencionar el color de los dientes. Fotografía editorial generada, no caso real ni resultado; sin rótulo por petición del usuario."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 3.81,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 6.5,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 9.15,
+      "gain_db": -22
+    }
+  ],
+  "effects": [],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/music-continuous.wav",
+    "title": "Hip Hop 03 - Lily J",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/Hip Hop 03 - Lily J.provenance.json",
+    "source_offset": 8,
+    "fade_out_scope": "End of outro"
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Pregunta y respuesta originales completas, Shoika blanca y sombra violeta; pregunta con sombra negra.",
+    "Apoyo editorial nuevo de selección de tono, keyframes discretos, cortes opacos y clicks. Sin fundidos ni Imagen ilustrativa por petición del usuario.",
+    "Música distinta Hip Hop 03 - Lily J; licencia Mixkit guardada, continuidad hasta el cierre.",
+    "Metricool marca 6354086: no coincidencia en las 10 entradas consultadas 2026-09-01 a 2027-09-24. No se ha subido a Metricool.",
+    "Escucha crítica y aprobación pendientes."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  }
+}

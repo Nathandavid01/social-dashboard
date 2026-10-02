@@ -1,0 +1,65 @@
+{
+  "idea_id": "frida-20260903-07",
+  "title": "Tu Próximo Brindis",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-7-silent-v2.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-7-transcript.json",
+  "style": "../styles/frida-v1.json",
+  "clips": [
+    {
+      "in": 0.45,
+      "out": 7.65,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.2,
+          "zoom": 1.04
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.2,
+      "end": 3.5,
+      "text": "Tu próximo brindis"
+    },
+    {
+      "start": 3.6,
+      "end": 6.9,
+      "text": "te espera en Frida."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Plano continuo del coctel, sin conversacion ajena. Texto editorial sobre la accion; no se afirma nombre ni ingredientes. Suave acercamiento y outro oficial."
+  ],
+  "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+  "catalog": "runs/frida-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+  },
+  "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+  "audio_master": {
+    "voice_mode": "preserve"
+  },
+  "caption_mode": "editorial",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/music-7.wav",
+    "extend_through_outro": true
+  }
+}

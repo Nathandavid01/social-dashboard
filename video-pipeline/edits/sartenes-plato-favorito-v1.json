@@ -1,0 +1,40 @@
+{
+  "client": "Sartenes",
+  "style": "../styles/sartenes-provisional-v1.json",
+  "idea_id": "sartenes-plato-favorito",
+  "title": "Plato favorito, pasta al pesto",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/sartenes-20261001/originales/DJI_20261001114432_0179_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/sartenes-20261001/transcripts/DJI_20261001114432_0179_D.json",
+  "clips": [
+    {
+      "in": 0.42,
+      "out": 8.85,
+      "zoom": 1
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Carefree.mp3",
+    "title": "Carefree",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Carefree.mp3",
+    "license_evidence": "media/music/FreePD-CC0-LICENSE.txt",
+    "target_lufs": -27
+  },
+  "captions": [
+    {"start": 0.06, "end": 2.2, "text": "¿Y cuál es su\nplato favorito"},
+    {"start": 2.26, "end": 2.9, "text": "aquí en Sartenes?"},
+    {"start": 2.92, "end": 4.45, "text": "Sí, este es\nmi plato favorito,"},
+    {"start": 4.56, "end": 5.5, "text": "la pasta al pesto."},
+    {"start": 5.56, "end": 7.65, "text": "Invito a que lo prueben"},
+    {"start": 7.7, "end": 8.25, "text": "aquí en Sartenes,\nen Manatí."}
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Toma 0179, justo antes del servicio. Whisper dijo Manatos; el lugar es Manatí.",
+    "La 0177 es otra clienta: «porque está exquisita. Siempre que vengo, lo pido.» No se usó en este corte.",
+    "La 0180 es la mesa comiendo. Ella habla, así que no se puso de B-roll debajo de otra voz.",
+    "Captions en paleta provisional. Aprobación pendiente. No subir a Recibo."
+  ]
+}

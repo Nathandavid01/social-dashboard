@@ -1,0 +1,183 @@
+{
+  "idea_id": "ea51f4bb-6f42-4561-a00e-ff03aa70b3c8",
+  "title": "Pidieron otro pancake de calabaza",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929091536_0327_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929091536_0327_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.84,
+      "out": 18.8,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.42,
+      "text": "Corillo,"
+    },
+    {
+      "start": 0.42,
+      "end": 1.82,
+      "text": "adivinen qué pasó."
+    },
+    {
+      "start": 3.02,
+      "end": 3.62,
+      "text": "Ustedes se lo pueden"
+    },
+    {
+      "start": 3.62,
+      "end": 4.06,
+      "text": "imaginar,"
+    },
+    {
+      "start": 4.06,
+      "end": 4.5,
+      "text": "mira lo que tengo"
+    },
+    {
+      "start": 4.5,
+      "end": 4.92,
+      "text": "en la mano."
+    },
+    {
+      "start": 5.24,
+      "end": 5.84,
+      "text": "La mesa ya había"
+    },
+    {
+      "start": 5.84,
+      "end": 7.02,
+      "text": "pedido pancake de calabaza"
+    },
+    {
+      "start": 7.02,
+      "end": 8.68,
+      "text": "y volvió a pedir"
+    },
+    {
+      "start": 8.68,
+      "end": 10.28,
+      "text": "otro pancake de calabaza."
+    },
+    {
+      "start": 10.28,
+      "end": 10.56,
+      "text": "Es que esto es"
+    },
+    {
+      "start": 10.56,
+      "end": 11.08,
+      "text": "una locura,"
+    },
+    {
+      "start": 11.34,
+      "end": 12.06,
+      "text": "se los digo yo,"
+    },
+    {
+      "start": 12.3,
+      "end": 12.94,
+      "text": "se los digo yo"
+    },
+    {
+      "start": 12.94,
+      "end": 13.3,
+      "text": "que esto es una"
+    },
+    {
+      "start": 13.3,
+      "end": 13.66,
+      "text": "locura,"
+    },
+    {
+      "start": 13.66,
+      "end": 14.1,
+      "text": "tú tienes que venir"
+    },
+    {
+      "start": 14.1,
+      "end": 14.44,
+      "text": "para acá."
+    },
+    {
+      "start": 14.56,
+      "end": 15.12,
+      "text": "Le voy a preguntar"
+    },
+    {
+      "start": 15.12,
+      "end": 15.84,
+      "text": "a ella cuál es"
+    },
+    {
+      "start": 15.84,
+      "end": 16.3,
+      "text": "su reacción,"
+    },
+    {
+      "start": 16.32,
+      "end": 16.92,
+      "text": "escúchenla."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 0.42,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "adivinen qué pasó."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 5.84,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "pedido pancake de calabaza"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 10.56,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "una locura,"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Spring Chicken.mp3",
+    "title": "Spring Chicken",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea comida de temporada. Gancho hasta escúchenla.",
+    "No entra la reacción de la clienta: discocho/sanahoria/plopito no está claro y no se inventa.",
+    "panquí corregido a pancake. Escucha crítica pendiente. No publicar."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "notes": [
+    "V2: acento en escúchenla. Mismos cortes, música y efectos que v1."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Alacena · serif natural A1 A3 A4",
+  "font_file": "../media/alacena/brand/Times New Roman.ttf",
+  "font_family": "Times New Roman",
+  "font_size": 96,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H70000000",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0.5,
+  "shadow": 1,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 630,
+  "fixed_size": true,
+  "wrap_width": 920,
+  "max_words": 4,
+  "max_chars": 25,
+  "caption_animation": "none",
+  "status": "visual_reference_matched_font_identity_unconfirmed",
+  "notes": [
+    "Serif blanca regular en A1, A3, A4; frase corta centrada sin caja, aproximadamente 65% altura. Times New Roman es una aproximacion visual; identidad exacta pendiente."
+  ]
+}

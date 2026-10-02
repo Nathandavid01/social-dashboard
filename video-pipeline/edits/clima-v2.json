@@ -1,0 +1,193 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "a25672bd-d8a0-4f93-8482-8ec860520c8f",
+  "title": "Clima · Nana's Playhouse",
+  "source": "../media/b4616322-f641-4d0d-8d41-983e6d898c91.mp4",
+  "transcript": "../runs/clima-reviewed.json",
+  "style": "../styles/nanas-v3.json",
+  "clips": [
+    {
+      "in": 1.36,
+      "out": 6.96,
+      "zoom": 1
+    },
+    {
+      "in": 7.1,
+      "out": 9.74,
+      "zoom": 1
+    },
+    {
+      "in": 9.96,
+      "out": 12.62,
+      "zoom": 1
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 3.1,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 8.24,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 5.6,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.17
+    }
+  ],
+  "review_notes": [
+    "Segundo reel independiente: Clima.",
+    "Voz original completa, silencios reducidos; B-roll cubre la toma original del mostrador.",
+    "Fuente y outro oficiales; música de biblioteca FreePD archivada bajo CC0.",
+    "No se ha publicado ni subido al dashboard.",
+    "V2: apertura con movimiento, subtítulos agrupados por sentido, secuencia de juegos revisada contra v1 e Instagram.",
+    "Comparación de audio pendiente de escucha humana; no se asigna una puntuación de similitud inventada."
+  ],
+  "broll": [
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 0.1,
+      "out": 3.2,
+      "at": 0,
+      "reason": "Abrir con acción: niño saltando desde el primer cuadro."
+    },
+    {
+      "source": "../media/c489cf71-c5ff-4ed5-b473-739e509dd2d2.mp4",
+      "in": 0.7,
+      "out": 3.2,
+      "at": 3.1,
+      "reason": "Cambio de juego al hablar de los planes familiares."
+    },
+    {
+      "source": "../media/c489cf71-c5ff-4ed5-b473-739e509dd2d2.mp4",
+      "in": 3.3,
+      "out": 5.94,
+      "at": 5.6,
+      "reason": "Sonrisa y juego al presentar Nana’s como alternativa."
+    },
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 4.3,
+      "out": 6.96,
+      "at": 8.24,
+      "reason": "Juego mientras se indica la ubicación."
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 5.6,
+      "duration": 0.17
+    }
+  ],
+  "music": {
+    "source": "../media/music/clima-bed.wav",
+    "title": "Happy Whistling Ukulele",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+    "target_lufs": -29
+  },
+  "previous_version": "../runs/nanas-clima-v1.mp4",
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.86,
+      "text": "SABEMOS LO RÁPIDO"
+    },
+    {
+      "start": 0.86,
+      "end": 1.36,
+      "text": "QUE CAMBIA"
+    },
+    {
+      "start": 1.36,
+      "end": 1.76,
+      "text": "EL CLIMA"
+    },
+    {
+      "start": 1.76,
+      "end": 2.06,
+      "text": "AQUÍ EN"
+    },
+    {
+      "start": 2.06,
+      "end": 2.7,
+      "text": "PUERTO RICO"
+    },
+    {
+      "start": 2.7,
+      "end": 3.3,
+      "text": "Y ESO"
+    },
+    {
+      "start": 3.3,
+      "end": 3.78,
+      "text": "PUEDE DAÑAR"
+    },
+    {
+      "start": 3.78,
+      "end": 4.16,
+      "text": "LOS PLANES"
+    },
+    {
+      "start": 4.16,
+      "end": 4.78,
+      "text": "QUE TENÍAS"
+    },
+    {
+      "start": 4.78,
+      "end": 5.62,
+      "text": "CON TUS PEQUES"
+    },
+    {
+      "start": 5.64,
+      "end": 6.32,
+      "text": "EN NANA'S PLAYHOUSE"
+    },
+    {
+      "start": 6.32,
+      "end": 6.94,
+      "text": "NO TIENES QUE"
+    },
+    {
+      "start": 6.94,
+      "end": 7.46,
+      "text": "PREOCUPARTE"
+    },
+    {
+      "start": 7.46,
+      "end": 8.26,
+      "text": "POR NADA DE ESO"
+    },
+    {
+      "start": 8.28,
+      "end": 9.04,
+      "text": "ESTAMOS UBICADOS"
+    },
+    {
+      "start": 9.04,
+      "end": 10.16,
+      "text": "EN PLAZA MONSERRATE"
+    },
+    {
+      "start": 10.16,
+      "end": 10.9,
+      "text": "HORMIGUEROS"
+    }
+  ]
+}

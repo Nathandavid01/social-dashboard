@@ -1,0 +1,37 @@
+{
+  "name": "Alacena · Belleza Regular · referencias A1 A3 A4",
+  "font_file": "../media/alacena/brand/Belleza-Regular.ttf",
+  "font_family": "Belleza",
+  "font_size": 146,
+  "bold": 0,
+  "primary_colour": "&H00FCFCFC",
+  "outline_colour": "&H70000000",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 619,
+  "fixed_size": true,
+  "wrap_width": 1380,
+  "max_words": 4,
+  "max_chars": 25,
+  "caption_animation": "none",
+  "status": "visually_identified_against_three_reference_edits",
+  "notes": [
+    "Belleza Regular coincide visualmente con Servicio de (A1), te esperamos. (A3), también walk-in, (A4). Comparacion directa de glifos guardada en evidencia; sin proyecto fuente original.",
+    "Fuente descargada del repositorio oficial google/fonts/ofl/belleza, licencia OFL conservada.",
+    "Tamaño ASS calibrado contra altura original; captions naturales blancos sin caja.",
+    "Color blanco neutro #FCFCFC muestreado en interiores de glifos de A1/A3/A4; compresion introduce variaciones. Sombra/glow verde oscuro suave detras, sin caja; valores reconstruidos visualmente.",
+    "146 ASS se calibra a Servicio de bbox x333..749 y1203..1270, similar al original."
+  ],
+  "caption_shadow": {
+    "colour": "&H000A210B",
+    "alpha": "40",
+    "spread": 5,
+    "blur": 8,
+    "offset_x": 4,
+    "offset_y": 6
+  }
+}

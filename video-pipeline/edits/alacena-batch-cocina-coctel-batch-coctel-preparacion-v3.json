@@ -1,0 +1,293 @@
+{
+  "idea_id": "913138fd-b1ea-49d1-8434-568dd60c424d",
+  "title": "Coctelería",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 41.55,
+      "out": 44.05,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 2.5,
+          "zoom": 1
+        }
+      ],
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 0,
+      "out": 33.33,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 33.33,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    },
+    {
+      "in": 35.11,
+      "out": 41.55,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.44,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.12,
+      "text": "Acompáñame"
+    },
+    {
+      "start": 1.12,
+      "end": 2.45,
+      "text": "a preparar un cóctel"
+    },
+    {
+      "start": 2.62,
+      "end": 3.18,
+      "text": "Oye, Andrea, ¿qué"
+    },
+    {
+      "start": 3.18,
+      "end": 3.84,
+      "text": "estás preparando?"
+    },
+    {
+      "start": 4.34,
+      "end": 5.78,
+      "text": "Bueno, este es"
+    },
+    {
+      "start": 5.78,
+      "end": 7.3,
+      "text": "de la coctelería"
+    },
+    {
+      "start": 7.3,
+      "end": 7.8,
+      "text": "de la casa."
+    },
+    {
+      "start": 8.1,
+      "end": 9.4,
+      "text": "Esto es el"
+    },
+    {
+      "start": 9.4,
+      "end": 10.08,
+      "text": "mezcal indá."
+    },
+    {
+      "start": 10.78,
+      "end": 12.48,
+      "text": "Esto lleva lo"
+    },
+    {
+      "start": 12.48,
+      "end": 13.38,
+      "text": "que es mezcal."
+    },
+    {
+      "start": 14.12,
+      "end": 14.8,
+      "text": "Es un trago"
+    },
+    {
+      "start": 14.8,
+      "end": 15.76,
+      "text": "como un sweet"
+    },
+    {
+      "start": 15.76,
+      "end": 16.24,
+      "text": "and sour."
+    },
+    {
+      "start": 16.5,
+      "end": 17.62,
+      "text": "Tiene su toque"
+    },
+    {
+      "start": 17.62,
+      "end": 19.42,
+      "text": "también ahumado por"
+    },
+    {
+      "start": 19.42,
+      "end": 20.06,
+      "text": "el mezcal."
+    },
+    {
+      "start": 20.36,
+      "end": 21.82,
+      "text": "Y a base"
+    },
+    {
+      "start": 21.82,
+      "end": 23.06,
+      "text": "de tamarindo."
+    },
+    {
+      "start": 23.46,
+      "end": 24.88,
+      "text": "Que este tamarindo"
+    },
+    {
+      "start": 24.88,
+      "end": 26.38,
+      "text": "es 100 %"
+    },
+    {
+      "start": 26.38,
+      "end": 26.92,
+      "text": "natural."
+    },
+    {
+      "start": 27.1,
+      "end": 27.8,
+      "text": "Lo hacemos aquí."
+    },
+    {
+      "start": 28.04,
+      "end": 29.02,
+      "text": "Tiene un poquito"
+    },
+    {
+      "start": 29.02,
+      "end": 30.12,
+      "text": "de lima también."
+    },
+    {
+      "start": 30.33,
+      "end": 31.45,
+      "text": "Y tiene su"
+    },
+    {
+      "start": 31.45,
+      "end": 34.29,
+      "text": "top de sparkling"
+    },
+    {
+      "start": 34.29,
+      "end": 35.77,
+      "text": "de toronja rosada,"
+    },
+    {
+      "start": 38.51,
+      "end": 40.01,
+      "text": "Y por aquí"
+    },
+    {
+      "start": 40.01,
+      "end": 40.65,
+      "text": "tenemos lo que"
+    },
+    {
+      "start": 40.65,
+      "end": 41.67,
+      "text": "es el mezcal"
+    },
+    {
+      "start": 41.67,
+      "end": 42.15,
+      "text": "indá."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.5,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 16.34,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 20.2,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 27.9,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 30.23,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 35.83,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 38.39,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 42.26,
+      "duration": 0.045,
+      "gain_db": -29
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Associated source takes compared. New process footage reserved to this reel; no supporting footage reused from earlier reels. Brief 120ms blends, restrained motion and synchronized clicks. Approved Alacena caption style; official outro. Critical listening and publication verification remain pending. Removed count-in, failed phrases, direction chatter and bottle-opening delay; preserved explanation and finishing action. Cocktail-name spelling remains to confirm. Revision before render: remove ambiguous trailing filler after toronja rosada, preserve complete factual ingredient phrase; improve caption sentence grouping. User-requested graph reedit: idea > source ranges > montage > captions/audio > export > evidence > correction. Preserve earlier versions. Move unique silent cocktail hero to opening with editorial invitation; do not duplicate at ending or synthesize speech. Name spelling remains pending."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-music-v2.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-music-provenance.json"
+  }
+}

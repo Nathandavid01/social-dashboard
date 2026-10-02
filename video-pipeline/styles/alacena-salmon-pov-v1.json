@@ -1,0 +1,38 @@
+{
+  "name": "Alacena · POV salmón · overlay verde superior",
+  "font_file": "../media/alacena/brand/Belleza-Regular.ttf",
+  "font_family": "Belleza",
+  "font_size": 84,
+  "bold": 0,
+  "primary_colour": "&H00FCFCFC",
+  "outline_colour": "&H70000000",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "alignment": 8,
+  "margin_x": 80,
+  "bottom_margin": 145,
+  "fixed_size": true,
+  "wrap_width": 950,
+  "max_words": 6,
+  "max_chars": 40,
+  "caption_animation": "none",
+  "status": "visually_identified_against_three_reference_edits",
+  "notes": [
+    "Specific salmon overlay requested by Eric: complete literal phrase, white Belleza Regular on solid green at top for the entire video.",
+    "Render uses the explicit overlay rectangle and centered drawtext parameters; no lower caption or inherited shadow."
+  ],
+  "caption_shadow": null,
+  "overlay": {
+    "text": "POV: Emplatando Salmon",
+    "box_colour": "#163F2C",
+    "x": 60,
+    "y": 145,
+    "width": 960,
+    "height": 138,
+    "text_colour": "#FCFCFC",
+    "duration": "entire_video_including_outro"
+  },
+  "scope": "Only salmon POV reel; explicit user correction 2026-10-01"
+}

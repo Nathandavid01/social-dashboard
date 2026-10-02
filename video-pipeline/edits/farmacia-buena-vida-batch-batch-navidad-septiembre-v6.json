@@ -1,0 +1,154 @@
+{
+  "idea_id": "330bec24-119a-4a30-b0a0-90664981fbe9",
+  "title": "POV: Navidad en septiembre",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-silent-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-editorial-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 16.582633,
+      "out": 19.282633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.7,
+          "zoom": 1.03
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 3.6,
+      "out": 8,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.4,
+          "zoom": 1.07
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 22.282633,
+      "out": 27.082633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.8,
+          "zoom": 1.05
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 27.794633,
+      "out": 29.344633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.55,
+          "zoom": 1.02
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12,
+      "out": 14.1,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 2.1,
+          "zoom": 1.08
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 30.894633,
+      "out": 32.644633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.01
+        },
+        {
+          "time": 1.75,
+          "zoom": 1.1
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 17.3,
+      "text": "POV: Llega septiembre\ny ya suena Navidad\nen la farmacia"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/broll/christmas-party-5978956.mp4",
+      "in": 16,
+      "out": 17.75,
+      "at": 15.55,
+      "zoom": 1,
+      "reason": "Replace entire final camera-facing reaction with Christmas party and visible tree. Provisional stock, not represented as filmed in Puerto Rico."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "User requested three more seconds and continuous Christmas song through logo. Main17.3s unchanged; official outro animation2.2 plus3s hold; total22.5s. Source song continuous26–47.35, delayed1.15s; fade only at end. Prior delivered file retained. Replace last1.75s shot using licensed Pexels stock Christmas party, location unverified; user explicitly informed this is provisional."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/outro-5.2s-music-continuity.mp4",
+    "in": 0,
+    "out": 5.2,
+    "gain": 0
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "graphics": [],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/music/navidad-music-through-logo-v3.wav",
+    "title": "Aires Navidenos",
+    "artist": "Decimania",
+    "license": "Commercial recording; synchronization/publication rights not verified",
+    "url": "https://www.youtube.com/watch?v=9iSTd0_H2XE",
+    "gain": 1,
+    "extend_through_outro": true
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial"
+}

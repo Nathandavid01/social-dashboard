@@ -1,0 +1,28 @@
+{
+  "client": "Lenel Restaurant",
+  "idea_id": "1b80ff89-8c55-4e66-bec3-00e919d6e8b0",
+  "catalog": "runs/79bb2505-catalog.json",
+  "title": "Calle Palma, Arecibo",
+  "source": "../media/lenel/source/DJI_20260918134839_0788_D.MP4",
+  "transcript": "../runs/lenel-transcripts/DJI_20260918134839_0788_D.json",
+  "style": "../styles/lenel.json",
+  "clips": [
+    {"in": 1.85, "out": 5.4, "zoom": 1.1, "focus_y": 0.4, "audio_edge_fade": 0.015}
+  ],
+  "captions": [
+    {"start": 0.15, "end": 3.2, "text": "Estamos en la calle Palma,\nen el pueblo de Arecibo."}
+  ],
+  "broll": [
+    {
+      "source": "../media/lenel/source/DJI_20260918134956_0793_D.MP4",
+      "in": 1.0,
+      "out": 2.3,
+      "at": 1.9,
+      "original_source": "../media/lenel/source/DJI_20260918134956_0793_D.MP4",
+      "source_in": 1.0,
+      "source_out": 2.3,
+      "note": "Comedor mientras dice el pueblo."
+    }
+  ],
+  "editorial_note": "0787 se corta en «frente al» y no entra. Esta frase es corta: no se alarga con silencio. Falta el horario y el catering; no están dichos en las tomas."
+}

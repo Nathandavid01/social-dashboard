@@ -1,0 +1,14 @@
+{
+  "name": "Nana’s · QUARTZO Instagram",
+  "reference": "https://www.instagram.com/p/DdMQ6pACktW/",
+  "font_file": "../media/brand/QUARTZO.ttf",
+  "font_family": "QUARTZO demo",
+  "font_size": 85,
+  "bottom_margin": 580,
+  "max_words": 3,
+  "max_chars": 19,
+  "status": "visual_match_to_instagram_commercial_font_license_unverified",
+  "outline": 6,
+  "shadow": 5,
+  "caption_animation": "none"
+}

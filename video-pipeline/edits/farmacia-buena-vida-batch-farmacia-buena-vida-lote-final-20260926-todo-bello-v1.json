@@ -1,0 +1,60 @@
+{
+  "idea_id": "5839ad9b-3502-4904-866b-11523a1bdcfd",
+  "title": "Todo Se Ve Bello",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/todo-bello-assembly-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/todo-bello-editorial.json",
+  "style": "../styles/farmacia-buena-vida.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.65,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 3.7,
+      "text": "POV: El cliente dice que\ntodo se ve bello",
+      "bottom_margin": 680
+    },
+    {
+      "start": 3.7,
+      "end": 7.65,
+      "text": "Nosotras: ¡Gracias!",
+      "bottom_margin": 680
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 3.7,
+      "duration": 0.13,
+      "gain_db": -24
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Dos tomas del mismo sketch, reacción completa. Indicaciones de grabación silenciadas en derivado con procedencia; música Fancy Family CC0 única. Texto editorial de la idea, no transcripción hablada."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve"
+  },
+  "caption_mode": "editorial"
+}

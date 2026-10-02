@@ -1,0 +1,92 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "primer-sushi",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Tu Primer Sushi",
+  "source": "../media/yabuuchi/derived/primer-sushi-selection-v1.mp4",
+  "transcript": "../runs/yabuuchi-primer-sushi-selection-mapped.json",
+  "style": "../styles/yabuuchi-reference-v4.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 8.87,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.84,
+      "text": "Si fuera mi primera vez probando el sushi,"
+    },
+    {
+      "start": 2.06,
+      "end": 3,
+      "text": "¿qué tú me recomendarías?"
+    },
+    {
+      "start": 3.2,
+      "end": 4.78,
+      "text": "Yo te diría que el Churrasco Roll."
+    },
+    {
+      "start": 4.84,
+      "end": 6.7,
+      "text": "El que lleva churrasco, queso crema, cebollín,"
+    },
+    {
+      "start": 6.8,
+      "end": 8.23,
+      "text": "arriba amarillito y salsa anguila."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 2.5
+  },
+  "music": {
+    "source": "../media/yabuuchi/primer-sushi-selection-music-v1.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123749_0991_D.MP4",
+      "in": 0.3,
+      "out": 4.33,
+      "at": 4.84,
+      "eof_action": "repeat",
+      "reason": "Plano cerrado del Churrasco Roll: ingredientes visibles, sin repetir toma en los otros tres reels."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123008_0985_D.MP4",
+      "in": 1.78,
+      "out": 10.05
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Pregunta directa, se retira el saludo inicial y la respuesta fuera de cámara del cierre.",
+    "El producto permanece hasta el outro; se elimina el regreso breve a la presentadora.",
+    "V2: elevar solo el audio del cierre +7.96 dB, de -32.95 a aproximadamente -25 LUFS, para suavizar la caída respecto a la voz. Misma imagen, captions y B-roll.",
+    "V3: captions aumentados de tamaño ASS 52 a 72 para igualar la altura visible de las letras de la referencia. Frases de una o dos líneas; audio, B-roll, cortes y outro idénticos a v2."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 4.84,
+      "duration": 0.18,
+      "gain_db": -29
+    }
+  ],
+  "effects": []
+}

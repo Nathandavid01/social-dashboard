@@ -1,0 +1,83 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "sin-pescado-crudo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Sushi Sin Pescado Crudo?",
+  "source": "../media/yabuuchi/derived/sin-pescado-crudo-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-sin-pescado-crudo-mapped.json",
+  "style": "../styles/yabuuchi-reference.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.45,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.7,
+      "text": "Chef, ¿el sushi siempre tiene que llevar"
+    },
+    {
+      "start": 1.7,
+      "end": 2.46,
+      "text": "pescado crudo?"
+    },
+    {
+      "start": 2.54,
+      "end": 4.86,
+      "text": "No. Tenemos variedad de churrasco con amarillo."
+    },
+    {
+      "start": 4.9,
+      "end": 7.72,
+      "text": "Al igual tenemos los onigiris de pollo"
+    },
+    {
+      "start": 7.72,
+      "end": 10.32,
+      "text": "y tenemos igualmente dumplings de pollo."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/sin-pescado-crudo-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914122012_0984_D.MP4",
+      "in": 1.1,
+      "out": 11.55
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Revisar por escucha nombre dumplings en la última frase.",
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes.",
+    "V2: referencia principal del usuario video 1.2.mp4; captions 54px bajos con sombra; apoyos, acercamientos y efectos contenidos; cierre extraído de la referencia.",
+    "No se afirma coincidencia auditiva exacta."
+  ],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 0,
+      "duration": 2.0,
+      "intensity": 0.18
+    }
+  ]
+}

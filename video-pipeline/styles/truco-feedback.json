@@ -1,0 +1,60 @@
+{
+  "client": "El Truco de Guin",
+  "client_id": "7dd62e83-acc5-45eb-aba1-237987e9f4ff",
+  "dashboard": "Nate Media social-dashboard",
+  "catalog": "runs/truco-catalog.json",
+  "connector": "node dashboard.mjs --client truco",
+  "style": "styles/truco.json",
+  "reference_edited": {
+    "file": "media/truco/TrucoReel53.mp4",
+    "idea": "El Truco de Guin — video 1",
+    "idea_id": "26ec9b62-e532-4484-9912-79e5f2cd22fb",
+    "video_id": "aeb9cabd-9520-4c02-b8ec-a93722d84759",
+    "provider": "entregas-r2",
+    "duration_s": 24.4,
+    "size": "1080x1920",
+    "measured": {
+      "font": "Impact 80px fixed",
+      "prompt_rgb": [
+        241,
+        228,
+        20
+      ],
+      "answer": "white",
+      "outline": "black 6px",
+      "placement": "chest, bottom_margin 800",
+      "food_pip": "yellow-bordered still of the named item, lower-left or split",
+      "outro": "media/truco/brand/outro.mp4",
+      "font_status": "Impact aproximado por comparación visual; fuente original no verificada"
+    }
+  },
+  "raw_download": {
+    "status": "browser_download_in_progress",
+    "detail": "Los crudos usan storage_provider r2. .env.local del dashboard tiene Entregas R2, no R2_ACCOUNT_ID. Vía comprobada: Bajar en el dashboard y node dashboard.mjs --client truco --import VIDEO_ID ARCHIVO.",
+    "verified_imports": [
+      "fd8ace9b-04f2-40d1-9fb2-06b6d3feabd0"
+    ]
+  },
+  "grabada_queue": [
+    "Bistec o Pastrami?",
+    "Ideas de Wilfreddy, lo que salga de aqui hay muchos",
+    "Gaby se enamora del truco y quiere trabajar ahi",
+    "¿Pastrami o Bistec? Bistec",
+    "¿Como esta ese Sandwich? Promocion al Sandwich de Bistec",
+    "¿$7.99 te salva la quincena?",
+    "El primer sandwich del día"
+  ],
+  "first_candidate": {
+    "title": "Bistec o Pastrami?",
+    "idea_id": "2e59c3b5-2018-4716-a9ad-11707c478e3e",
+    "status": "grabada",
+    "reason": "Idea grabada con varias tomas raw; aún no hay editado."
+  },
+  "caption_notes_from_dashboard": "Cierre habitual con direcciones y teléfono; frases recurrentes A sus penas póngale fin visitando El Truco de Güin, Un juego de sabores, Te esperamos.",
+  "approval": "pending",
+  "source_validation": {
+    "rule": "Verificar imágenes reales antes de usar un crudo; un título o cliente asignado no demuestra pertenencia.",
+    "excluded_local_file": "/Users/ericperez/Downloads/¿$7.99 te salva la quincena.mp4",
+    "reason": "Contiene Arasibo Steakhouse con subtítulos incrustados; no corresponde visualmente a El Truco. No se modificó el dashboard."
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "idea_id": "frida-20260903-14",
+  "title": "El Antojo Se Nota",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-14-silent-v2.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-14-transcript.json",
+  "style": "../styles/frida-v1.json",
+  "clips": [
+    {
+      "in": 0.5,
+      "out": 6.5,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 2.7,
+      "text": "Cuando dices:\n«solo voy a mirar»"
+    },
+    {
+      "start": 3.0,
+      "end": 5.85,
+      "text": "El antojo se nota."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Escena de humor completa: mira el plato, prueba el trago y sale sonriendo. Silenciar ambiente y cortar antes de perder al protagonista. Rotulo editorial, no cita de dialogo real."
+  ],
+  "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+  "catalog": "runs/frida-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+  },
+  "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+  "caption_mode": "editorial",
+  "audio_master": {
+    "voice_mode": "preserve"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/music-14.wav",
+    "extend_through_outro": true
+  }
+}

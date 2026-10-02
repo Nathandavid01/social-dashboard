@@ -1,0 +1,193 @@
+{
+  "idea_id": "261cea86-d943-4424-a9f1-91e78f491dcd",
+  "title": "Lo que sale de cocina",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929091141_0326_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929091141_0326_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.9,
+      "out": 3.78,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 7.62,
+      "out": 11.18,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 13.1,
+      "out": 19.36,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 25.7,
+      "out": 29.0,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 36.78,
+      "out": 38.72,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.24,
+      "text": "Por aquí estoy sacando"
+    },
+    {
+      "start": 1.24,
+      "end": 1.9,
+      "text": "un clásico,"
+    },
+    {
+      "start": 1.9,
+      "end": 2.96,
+      "text": "tiene unas cantidades de"
+    },
+    {
+      "start": 2.96,
+      "end": 5.44,
+      "text": "proteínas y las tostadas,"
+    },
+    {
+      "start": 5.44,
+      "end": 7.24,
+      "text": "por aquí sacando la"
+    },
+    {
+      "start": 7.24,
+      "end": 8.58,
+      "text": "temporada de pancake de"
+    },
+    {
+      "start": 8.58,
+      "end": 10.24,
+      "text": "calabaza que está hecho"
+    },
+    {
+      "start": 10.24,
+      "end": 11.7,
+      "text": "con calabaza natural,"
+    },
+    {
+      "start": 11.7,
+      "end": 12.48,
+      "text": "Por aquí voy a"
+    },
+    {
+      "start": 12.48,
+      "end": 14.06,
+      "text": "entregarle al cliente para"
+    },
+    {
+      "start": 14.06,
+      "end": 14.56,
+      "text": "que ustedes vean la"
+    },
+    {
+      "start": 14.56,
+      "end": 15.08,
+      "text": "experiencia."
+    },
+    {
+      "start": 15.08,
+      "end": 15.84,
+      "text": "Y por aquí tengo"
+    },
+    {
+      "start": 15.84,
+      "end": 16.94,
+      "text": "un pancake de calabaza,"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.88,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.44,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 11.7,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 15.0,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 1.24,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "un clásico,"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 10.24,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "con calabaza natural,"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 15.84,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "un pancake de calabaza,"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Going Bananas.mp3",
+    "title": "Going Bananas",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea qué hacen los de cocina. Clásico con proteína y tostadas, y pancake de calabaza al cliente.",
+    "Se saca el medio que no se entiende: gobe, tartar, mañita, guanus. No se inventa el plato.",
+    "Click seco en cada corte. Escucha crítica pendiente. No publicar."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  }
+}

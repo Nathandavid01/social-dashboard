@@ -1,0 +1,61 @@
+{
+  "current_style": "styles/black-pepper-v5.json",
+  "status": "local_draft_pending_review",
+  "references": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/black-pepper/meta.json",
+  "instruction": "Usar captions de Black Pepper; no presentar reconstrucción como fuente exacta. Mantener versiones, revisión, aprobación y publicación separadas.",
+  "visual_review": "V1/V2 pequeños, v3 peso/tamaño adecuados pero agrupación 2–3 líneas incorrecta. V4 frases cortas en una sola línea con ancho de medición calibrado al render ASS.",
+  "narrative_continuity": {
+    "date": "2026-10-02",
+    "user_instruction": "Necesito que sea lógica la narración",
+    "rule": "Priorizar frases completas y continuidad causal sobre brevedad. No abrir con una continuación sin antecedente ni conservar respuestas eliminando la pregunta que les da sentido. Vincular explícitamente el montaje a la idea del dashboard cuando el audio lo permite.",
+    "scope": "Todos los próximos montajes de Black Pepper; corrección Mallorca actual.",
+    "latest_instruction": "Eliminar mirada; usar jump cuts que se sientan seguidos sin cortar ninguna palabra.",
+    "cut_rule": "Sí usar jump cuts en pausas verificadas entre frases/palabras, con márgenes de voz. Preservar conectores y frases completas. Toma continua de Eventos v3 fue solución provisional, no estilo requerido. Si mirada coincide con habla, separar imagen de voz para conservar palabra."
+  },
+  "mallorca_audio_splice": {
+    "user_report": "Antes de Pero no solo con se escucha un ooooo",
+    "correction": "Recortar cola vocal antes de entrada del tercer tramo; no usar pausa aparente de transcripción como garantía de silencio. Conservar resto del montaje.",
+    "source_in_before": 58.5,
+    "source_in_after": 58.6,
+    "verification": "Pendiente escucha crítica; ver nueva exportación v4."
+  },
+  "estudiantes_revision": {
+    "music_rejected": "Take the Ride",
+    "scope": "Este reel: estudiantes/trabajo remoto",
+    "direction": "Base más suave y discreta. Eric autorizó entrega exacta v6 a Recibo2026-10-02; escucha del agente sigue pendiente; no publicación.",
+    "opening": "2026-10-02: cuando él empieza hablando. Entrada0.64 antes del Si0.66; frase Si tú estás trabajando completa. Sustituye cortes1.42 y1.10. Mantener Chill Beat.",
+    "new_music": "Chill Beat — Seth_Makes_Sounds",
+    "recibo_receipt": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/estudiantes-revision/recibo-v6-receipt.json"
+  },
+  "self_critique": {
+    "date": "2026-10-02",
+    "instruction": "Critícalo y mejóralo siempre",
+    "rule": "Revisión editorial proactiva antes de entregar: corregir problemas concretos de narración, legibilidad, cortes, encuadre y mezcla; no cambiar por cambiar ni esperar que Eric detecte errores. Conservar lo ya solicitado.",
+    "estudiantes_findings": "v4 tenía tarjetas de venir/acá/por supuesto demasiado breves; v5 agrupa por unidades legibles.",
+    "eventos_findings": "2026-10-02: recuperar para sentirnos en cierre; captions de mínimo0.52s, quitar clicks arbitrarios. Decisión editorial propuesta pendiente de revisión del usuario.",
+    "eventos_second_review": {
+      "date": "2026-10-02",
+      "request": "criticalo nuevamente",
+      "findings": [
+        "Gancho inicial demasiado fragmentado pese a caber en una línea.",
+        "Zoom sobre corte enfatizaba salto de cámara."
+      ],
+      "changes": "V2 agrupa primer caption1.18s y quita punch. Mantiene pregunta completa, recorrido, música y cierre.",
+      "status": "Propuesta editorial, no aprobación del usuario.",
+      "remaining": "Gancho informativo; no prometer viralidad ni validar mezcla sin escuchar."
+    }
+  },
+  "scene_sounds": {
+    "date": "2026-10-02",
+    "instruction": "utiliza clicks on swoosh cuando cambies de escenas",
+    "rule": "Usar clicks o swooshes discretos sincronizados a cambios de escena. No cortar palabras ni apilar efectos por palabra. Mantener voz al frente.",
+    "implementation": "Eventosv5: presets mouse_click y whoosh_soft del kit local, mezcla pendiente de escucha."
+  },
+  "horario_revision": {
+    "date": "2026-10-02",
+    "user_instruction": "quitale el sonido de fondo",
+    "scope": "Solo Horario",
+    "change": "Retirar música añadida. Conservar voces y efectos solicitados previamente. No prohibición global de la pista.",
+    "movement_correction": "Eric reporta mareo. Reducir balanceo y cubrir recorrido brusco con plano tranquilo del local; mantener voces completas y no añadir zooms."
+  }
+}

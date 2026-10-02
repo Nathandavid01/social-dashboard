@@ -1,0 +1,143 @@
+{
+  "idea_id": "9278f290-46e8-402d-b24f-8cfad1f42b8a",
+  "title": "¿Aquí Hacen Todo Eso?",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-pregunta-20260926/review/pregunta-assembly-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-pregunta-20260926/review/pregunta-assembly-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v3.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 19.27,
+      "zoom": 1.0,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 1.02,
+      "text": "Una pregunta…"
+    },
+    {
+      "start": 1.16,
+      "end": 2.31,
+      "text": "Aquí en Farmacia Buena Vida,"
+    },
+    {
+      "start": 4.25,
+      "end": 4.53,
+      "text": "¿Impresiones?"
+    },
+    {
+      "start": 4.78,
+      "end": 5.17,
+      "text": "Sí."
+    },
+    {
+      "start": 5.48,
+      "end": 6.44,
+      "text": "¿Fotos 2x2?"
+    },
+    {
+      "start": 6.64,
+      "end": 6.96,
+      "text": "Sí."
+    },
+    {
+      "start": 8.69,
+      "end": 9.81,
+      "text": "¿Certificados de ASUME?"
+    },
+    {
+      "start": 10.07,
+      "end": 10.52,
+      "text": "Sí."
+    },
+    {
+      "start": 11.82,
+      "end": 12.23,
+      "text": "Sí."
+    },
+    {
+      "start": 13.99,
+      "end": 14.32,
+      "text": "Sí."
+    },
+    {
+      "start": 14.73,
+      "end": 15.58,
+      "text": "Sí, chica,"
+    },
+    {
+      "start": 15.77,
+      "end": 17.43,
+      "text": "aquí hacemos eso y mucho más."
+    },
+    {
+      "start": 17.71,
+      "end": 19.02,
+      "text": "Así que visítanos."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "in": 18.95,
+      "out": 20.65,
+      "at": 2.55,
+      "reason": "Impresora y rótulo real de fax/copias del cliente; cubre la pregunta y el servicio siguiente."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "in": 10.6,
+      "out": 12.02,
+      "at": 7.18,
+      "reason": "Antecedentes penales en pantalla real; corte antes de la pregunta sobre ASUME."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "in": 2.05,
+      "out": 3.05,
+      "at": 10.82,
+      "reason": "Rótulo real del servicio CESCO de la farmacia."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "in": 7.22,
+      "out": 8.33,
+      "at": 12.88,
+      "reason": "Comprobante real de Western Union en la farmacia."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador local: cuatro servicios ilustrados con material real del cliente; preguntas y respuestas del original.",
+    "La palabra antecedentes se tomó de la segunda grabación; se omitieron conteo previo, error verbal y dirección de la toma.",
+    "Caption corrige errores de reconocimiento automático: fax, antecedentes penales, ASUME, CESCO.",
+    "Aprobación del cliente y publicación pendientes.",
+    "Rótulos originales del material de apoyo se mantienen; subtítulos propios se omiten sobre ellos para evitar duplicación."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 16
+  }
+}

@@ -1,0 +1,278 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "fc2703c6-9089-4863-81a0-e7db861f460d",
+  "title": "¿Se Aburre En El Parque?",
+  "source": "../media/assembled-parque.mp4",
+  "transcript": "../runs/parque-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 16.15,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 8.13,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 11.13,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 13.33,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Encuadres ajustados para excluir caras hablando de tomas de apoyo. Teléfono legible con fuente numérica de respaldo a los mismos 85px.",
+    "Reduce repetición entre reels: trampolín retirado según comentario del usuario.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original.",
+    "Audio: música diferente por reel a -34 LUFS; reducción moderada de ambiente; clicks por punto de lista. Escucha final pendiente.",
+    "Outro: whoosh de estrella, aterrizaje suave y campanillas de ensamblaje con cola hasta el final."
+  ],
+  "broll": [
+    {
+      "source": "../media/assembled-parque.mp4",
+      "in": 0,
+      "out": 16.15,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 16.15,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/venue-wide-slow-v2.mp4",
+      "in": 0,
+      "out": 2.82,
+      "at": 13.33,
+      "reason": "Vista del local durante ubicación",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.82,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "../media/fe4fa7f4-0a25-4352-920e-2cdfb1130db5.mp4",
+      "in": 1,
+      "out": 4,
+      "at": 8.13,
+      "reason": "Niño de camiseta gris recoge comida de juguete y canasta en supermercado",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "../media/ea956d16-56c5-4f62-8666-be16530d8aaa.mp4",
+      "in": 1.5,
+      "out": 3.7,
+      "at": 11.13,
+      "reason": "Niños suben escalones del área de juegos; actividad distinta del caballito usado en padres",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.2,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro-with-star-sfx.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 1
+  },
+  "transitions": [
+    {
+      "time": 8.13,
+      "duration": 0.08
+    },
+    {
+      "time": 11.13,
+      "duration": 0.08
+    },
+    {
+      "time": 13.33,
+      "duration": 0.08
+    }
+  ],
+  "music": {
+    "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Busybody.mp3",
+    "title": "Busybody",
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "sha256": "5170e23bc9a24f870b896965832c268e87db18418bd1ca9aa361ef5f52d67f98",
+    "target_lufs": -34
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.42,
+      "text": "AY,"
+    },
+    {
+      "start": 0.42,
+      "end": 0.94,
+      "text": "ES QUE SI"
+    },
+    {
+      "start": 0.94,
+      "end": 1.52,
+      "text": "LLEVO MI NIÑO"
+    },
+    {
+      "start": 1.52,
+      "end": 1.98,
+      "text": "AL PARQUE,"
+    },
+    {
+      "start": 1.98,
+      "end": 2.44,
+      "text": "SE ABURRE"
+    },
+    {
+      "start": 2.44,
+      "end": 2.94,
+      "text": "RÁPIDO."
+    },
+    {
+      "start": 3.1,
+      "end": 3.62,
+      "text": "POR ESO YO"
+    },
+    {
+      "start": 3.62,
+      "end": 4.08,
+      "text": "LLEVO AL MÍO"
+    },
+    {
+      "start": 4.08,
+      "end": 4.5,
+      "text": "A NANA’S"
+    },
+    {
+      "start": 4.5,
+      "end": 5.02,
+      "text": "PLAYHOUSE."
+    },
+    {
+      "start": 5.46,
+      "end": 6.04,
+      "text": "¿QUÉ ES NANA’S"
+    },
+    {
+      "start": 6.04,
+      "end": 6.5200000000000005,
+      "text": "PLAYHOUSE?"
+    },
+    {
+      "start": 7.36,
+      "end": 8.04,
+      "text": "VEN, TE ENSEÑO."
+    },
+    {
+      "start": 8.25,
+      "end": 9.17,
+      "text": "NANA’S PLAYHOUSE"
+    },
+    {
+      "start": 9.17,
+      "end": 10.15,
+      "text": "ES UN INDOOR"
+    },
+    {
+      "start": 10.15,
+      "end": 10.61,
+      "text": "PLAYGROUND"
+    },
+    {
+      "start": 10.61,
+      "end": 11.65,
+      "text": "DISEÑADO PARA LA"
+    },
+    {
+      "start": 11.65,
+      "end": 12.47,
+      "text": "DIVERSIÓN DE SUS"
+    },
+    {
+      "start": 12.47,
+      "end": 12.87,
+      "text": "NIÑOS."
+    },
+    {
+      "start": 13.07,
+      "end": 13.43,
+      "text": "ESTAMOS"
+    },
+    {
+      "start": 13.43,
+      "end": 14.17,
+      "text": "UBICADOS EN"
+    },
+    {
+      "start": 14.17,
+      "end": 14.47,
+      "text": "PLAZA"
+    },
+    {
+      "start": 14.47,
+      "end": 15.33,
+      "text": "MONSERRATE EN"
+    },
+    {
+      "start": 15.33,
+      "end": 16.05,
+      "text": "HORMIGUEROS."
+    }
+  ],
+  "previous_version": "../runs/nanas-parque-v6.mp4",
+  "voice_filter": "highpass=f=90,afftdn=nr=10:nf=-35:tn=1,agate=threshold=0.025:ratio=2:range=0.2:attack=15:release=180,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000"
+}

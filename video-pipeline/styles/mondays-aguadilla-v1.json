@@ -1,0 +1,38 @@
+{
+  "name": "Mondays Aguadilla · caja naranja",
+  "font_file": "../media/arecibo/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 62,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H003B6EF4",
+  "back_colour": "&H003B6EF4",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 460,
+  "fixed_size": true,
+  "wrap_width": 920,
+  "max_words": 6,
+  "max_chars": 32,
+  "caption_animation": "none",
+  "caption_case": "natural",
+  "status": "matched_to_published_dialogue_pill_font_unconfirmed",
+  "reference": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+  "notes": [
+    "Solo el sketch de la tela roja (v2-2.jpg): texto blanco sobre pastilla #F46E3B. La segunda línea publicada va en mayúsculas claras, no en este archivo.",
+    "Comida y anfitrión publicados no usan esta caja. Ese look está en mondays-aguadilla-v2.json.",
+    "Montserrat Bold es aproximación. La pregunta detrás de cámara la invierte el renderer con behind_camera."
+  ],
+  "caption_box": {
+    "colour": "&H003B6EF4",
+    "alpha": "00",
+    "radius": 28,
+    "padding_x": 28,
+    "padding_y": 14,
+    "line_height": 68,
+    "ass_font_scale": 1.562
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "El Truco de Guin - referencia Entregas v53",
+  "font_file": "../media/truco/brand/Impact.ttf",
+  "font_family": "Impact",
+  "font_size": 66,
+  "primary_colour": "&H0000EEFF",
+  "outline_colour": "&H00161616",
+  "back_colour": "&H80161616",
+  "border_style": 1,
+  "outline": 3,
+  "shadow": 2,
+  "bottom_margin": 590,
+  "margin_x": 75,
+  "max_words": 5,
+  "max_chars": 30,
+  "fixed_size": true,
+  "wrap_width": 900,
+  "caption_animation": "scale",
+  "status": "visual_approximation_pending_user_review",
+  "reference": "media/truco/TrucoReel53.mp4"
+}

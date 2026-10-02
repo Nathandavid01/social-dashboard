@@ -1,0 +1,301 @@
+{
+  "current_style": "styles/farmacia-buena-vida-v7.json",
+  "rules": [
+    "Captions según publicaciones del cliente; no aplicar estilos de otros clientes.",
+    "B-roll real pertinente o conservar la toma.",
+    "Mantener humor y reacción completa en sketches."
+  ],
+  "reference_evidence": "runs/farmacia-buena-vida-lote-20260926/metricool/style/farmacia-buena-vida/meta.json",
+  "approval": "pending",
+  "reevaluation": {
+    "scope": "lote septiembre 22",
+    "request": "Reeditar y reevaluar los tres videos",
+    "editorial_decisions": [
+      "Inicio directo al tema",
+      "Reducir cambios de zoom por palabra o servicio",
+      "No atribuir diálogo no grabado al equipo"
+    ],
+    "approval": "pending"
+  },
+  "informativo_broll_required": {
+    "request": "El primer video tiene que tener B-roll porque no sirve",
+    "scope": "idea d3819941-90e6-4aad-b568-534715e68ebe",
+    "rule": "Cubrir servicios con tomas reales pertinentes del cliente; no dejar el informativo entero a cámara. Conservar voz y sincronizar cada apoyo.",
+    "status": "in_progress"
+  },
+  "informativo_professional_revision": {
+    "scope": "idea d3819941-90e6-4aad-b568-534715e68ebe",
+    "request": "Todas las cosas que ella menciona deben ser B-roll de imagenes que llenan la pantalla",
+    "rules": [
+      "Todas las menciones de servicios y ubicacion deben llevar imagen o B-roll a pantalla completa",
+      "Mantener voz original y sincronizacion literal de cada servicio",
+      "Rotulos uniformes; evitar bandas sobre la fachada y textos antiguos duplicados"
+    ]
+  },
+  "pregunta_situacion_revision": {
+    "scope": [
+      "9278f290-46e8-402d-b24f-8cfad1f42b8a",
+      "a457cddc-174e-4dba-aea4-cf9d3ca09342"
+    ],
+    "request": "Captions y estilo del cliente; B-roll animado y profesional",
+    "rules": [
+      "Un solo estilo para futuras ediciones: perfil v7, blanco con acento oliva, sin caja, referencia DdjYVF1iRvv. No alternar perfiles por tipo de video.",
+      "Apoyos reales recortados para excluir rótulos antiguos, con movimiento suave y voz continua.",
+      "Conservar versiones anteriores, revisión local pendiente."
+    ]
+  },
+  "caption_style_consistency": {
+    "request": "Busca los videos que se hayan editado de esta y ponte de acuerdo porque se necesita solo un fondo de ahora en adelante para este cliente.",
+    "rule": "Habitual v7 sin caja; POV v5 con caja oliva, según última corrección 2026-09-30.",
+    "reference": "https://www.instagram.com/reel/DdjYVF1iRvv/",
+    "font": "https://drive.google.com/file/d/13-zxmjqTViTnOiClVsqK1rmOyvsM7QSC/view",
+    "scope": "Formatos habituales; POV usa v5 por corrección 2026-09-30",
+    "interpretation": "Un solo tratamiento de captions; sin caja conforme a referencia habitual mas reciente."
+  },
+  "bruma_professional_revision": {
+    "scope": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+    "request": "Reeditar temporada de mucha bruma más profesional, música trending y B-roll",
+    "rules": [
+      "Un solo estilo para futuras ediciones: perfil v7, blanco con acento oliva, sin caja, referencia DdjYVF1iRvv. No alternar perfiles por tipo de video.",
+      "B-roll semántico a pantalla completa: bruma y estornudo; presentadora visible para invitación final.",
+      "Evitar paneles pequeños y fondos borrosos de relleno; cortes limpios y movimientos contenidos.",
+      "Audio trending requiere pista identificada y disponibilidad de uso para la farmacia; música licenciada provisional claramente identificada mientras falta acceso."
+    ],
+    "approval": "pending"
+  },
+  "motion_array_resources": {
+    "request": "Utiliza Motion Array para los editajes de estos videos",
+    "scope": [
+      "9278f290-46e8-402d-b24f-8cfad1f42b8a",
+      "a457cddc-174e-4dba-aea4-cf9d3ca09342"
+    ],
+    "provider": "https://motionarray.com/",
+    "rules": [
+      "Buscar y usar recursos de Motion Array pertinentes para música, B-roll y efectos en estas revisiones.",
+      "Conservar captions originales del cliente; adaptar recursos al perfil vigente.",
+      "Registrar enlaces de cada recurso y descarga licenciada. No usar previews con marca de agua como entrega.",
+      "Distinguir música de catálogo de una tendencia verificada; no afirmar trending sin evidencia."
+    ],
+    "status": "seasonal_allergies_integrated_other_local_files_pending",
+    "existing_exports": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/batch/farmacia-buena-vida-batch-batch-situacion-v4.mp4",
+    "account_verification": {
+      "date": "2026-09-27",
+      "profile": "Nathan",
+      "plan": "Everything Monthly",
+      "surface": "Motion Array in-app browser",
+      "download_verified_in_website": true,
+      "local_download_file_verified": true
+    },
+    "candidate_assets": [
+      {
+        "title": "Seasonal Allergies",
+        "author": "stockyana",
+        "url": "https://motionarray.com/stock-video/seasonal-allergies-476132/",
+        "purpose": "Estornudos y congestión en Bruma",
+        "visual_review": "Mujer al aire libre usando pañuelo; vista previa revisada",
+        "status": "Original downloaded, certificate commercial use verified, integrated in Bruma v3",
+        "license": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/motion-array/seasonal-allergies-476132-License-476132-11942310.pdf"
+      },
+      {
+        "title": "Misty Tropical Rainforest Over A River",
+        "author": "Matthew Williams-Ellis Photography",
+        "url": "https://motionarray.com/stock-video/misty-tropical-rainforest-over-a-river-1376723/",
+        "purpose": "Bruma: ilustrar de mucha bruma y cambio de temperatura, rango del reel 1.18-4.25",
+        "status": "Preview visually inspected; not downloaded or incorporated",
+        "visual_review": "Paisaje tropical real con rio central y niebla, composicion apta para recorte vertical; no afirmar ubicacion Puerto Rico",
+        "format": "3840x2160 H.264, 23.97fps, 16s, 91.08MB",
+        "pending": "Revisar rango exacto del original y licencia al descargar"
+      },
+      {
+        "title": "Soft Whoosh",
+        "author": "Motion Audio",
+        "url": "https://motionarray.com/sound-effects/soft-whoosh-822268/",
+        "purpose": "Transiciones de B-roll y entrada de apoyos, nivel discreto bajo voz",
+        "status": "Product description verified; critical listening and download pending",
+        "format": "3 effects, WAV 44.1kHz, 997.4KB"
+      },
+      {
+        "title": "Better Than You Thought",
+        "author": "Igor Vitte",
+        "url": "https://motionarray.com/royalty-free-music/better-than-you-thought-3629040/",
+        "purpose": "Candidata musical para Bruma",
+        "status": "Metadata and licensing info reviewed; not auditioned, downloaded or selected as final",
+        "format": "117 BPM, WAV 48kHz, 1:28",
+        "license_note": "Page says paid subscriber projects covered; Content ID via Epic Elite; obtain per-asset license",
+        "trending_verified": false
+      }
+    ],
+    "research_notes": [
+      "Descartada animacion tropical 3831549 por aspecto sintetico evidente; preferida toma real 1376723.",
+      "Toma 1376725 revisada: encuadre inicial demasiado cubierto por nube; mejor rio central de 1376723."
+    ]
+  },
+  "transition_sound_assets": {
+    "local_inventory": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/motion-array/transitions/inventory.json",
+    "downloaded_pack": "Futuristic Transition - Umcsound - 4 WAVs",
+    "additional_candidate": "https://motionarray.com/sound-effects/button-switch-ticks-1180142/",
+    "additional_status": "Download requested and registered by website; local file unavailable",
+    "applied_to_export": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/batch/farmacia-buena-vida-batch-batch-situacion-v4.mp4",
+    "listening": "pending",
+    "applied_items": [
+      "Futuristic Transition03",
+      "Futuristic Transition02"
+    ]
+  },
+  "caption_verification_20260927": {
+    "export": "Bruma v3",
+    "reference": "media/farmacia-buena-vida/brand/caption-reference-original.png",
+    "result": "VERIFICACION ANTERIOR SUPERADA: se confundio referencia POV con captions habituales. Ver correccion DdjYVF1iRvv y variantes v6/v5.",
+    "limitation": "Box color and opacity matched visually, not numeric values recovered from Premiere."
+  },
+  "historical_caption_variants": {
+    "default": "styles/farmacia-buena-vida-v6.json",
+    "pov": "styles/farmacia-buena-vida-v5.json",
+    "rule": "Captions habituales según DdjYVF1iRvv. Caja oliva sólo para POV/mira esto, según corrección expresa de Eric.",
+    "status": "superseded_by_single_profile_v7"
+  },
+  "coordination": {
+    "task": "Añadir contador de videos editados",
+    "confirmed": "Usara v7 y ficha vigente; no restaurara seleccion automatica POV",
+    "bruma_export": "v5 usa parametros visuales v6 identicos a v7; no requiere rerender por nombre",
+    "approval": "pending"
+  },
+  "botiquin_motion_revision": {
+    "request": "Utilizar recursos de Motion Array implementados, mas profesional y creativo",
+    "scope": "6edecb89-0294-4556-be3d-543a64e83813",
+    "rule": "Revision profesional: 3 B-roll originales Motion Array y estantes reales; movimientos sutiles; transiciones discretas sincronizadas; voz continua, regreso a presentadora en CTA. Captions exclusivamente perfil v7, sin cajas. Audio original puede conservar distorsion; escucha pendiente.",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/provenance.json",
+    "approval": "pending"
+  },
+  "botiquin_photo_pops": {
+    "request": "Fotos pequenas que aparezcan y hagan pup pup con sonidito",
+    "scope": "6edecb89-0294-4556-be3d-543a64e83813",
+    "rule": "Eric pide fotos pequenas con pup pup: 4 fotos reales circulares aparecen a la voz con pop suave, a ambos lados sin cubrir rostro ni captions. Se conserva breve B-roll de Motion Array, voz, musica y cierre.",
+    "approval": "pending",
+    "status": "superseded_circles_rejected"
+  },
+  "reel_fluency": {
+    "request": "Más fluido, estilo reel, calidad de compañía que trabaja para marcas grandes",
+    "scope": "Bruma y próximas decisiones editoriales pertinentes",
+    "rules": [
+      "Recortar pausas reales sin mutilar palabras.",
+      "B-roll breve vinculado a la frase, evitando tapar a la presentadora durante tramos largos.",
+      "Cambios de encuadre motivados por frase y cierre; efectos discretos, no por palabra.",
+      "Conservar perfil vigente de captions."
+    ],
+    "approval": "pending"
+  },
+  "botiquin_no_circles": {
+    "request": "estos circulos como B rolls no me gustan",
+    "scope": "Botiquin",
+    "rule": "No usar las ventanas circulares de v6-v8. Revision propuesta con B-roll real a pantalla completa durante las menciones, conservando captions vigentes.",
+    "approval": "pending"
+  },
+  "botiquin_soft_broll": {
+    "request": "los cortes para los B rolls son muy duros",
+    "scope": "Botiquin",
+    "rule": "Eric indica que los cortes del B-roll son muy duros. Fundidos alfa de 220 ms al entrar/salir; agua se solapa con medicamentos para evitar destello de presentadora. Voz, captions, musica y duracion sin cambios.",
+    "approval": "pending"
+  },
+  "informativo_professional_reedit": {
+    "request": "quiero que re edites este video para que se vea mas profesional",
+    "scope": "d3819941-90e6-4aad-b568-534715e68ebe",
+    "rule": "Reedicion profesional de Servicios y Ubicacion: perfil unico v7, frases cortas legibles, logos oficiales moderados sobre fotografia real del local, cobertura completa, panes suaves y fundidos220ms. Fax/impresion y CESCO continuos; PAN sin imagen de tarjeta de beneficios; sin circulos. Voz y cierre completos, musica propia del reel conservada.",
+    "approval": "pending",
+    "work": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927",
+    "status": "superseded_by_continuous_service_graph"
+  },
+  "novela_longer_closed_fan": {
+    "request": "Añade más y corta antes que el abanico abra",
+    "scope": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+    "rule": "Ampliar actuaciones existentes y terminar ultima toma antes de abrir abanico. No inventar tomas adicionales.",
+    "approval": "pending",
+    "status": "superseded_by_open_fan"
+  },
+  "novela_open_fan": {
+    "request": "Tienes que dejar que abra el abanico",
+    "scope": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+    "rule": "Conservar tomas ampliadas y mostrar la apertura completa del abanico antes del outro. Esta correccion sustituye el corte anterior.",
+    "approval": "pending"
+  },
+  "informativo_service_graph": {
+    "request": "Utiliza un grafo para hacer el conteo animado, interactivo y profesional; no guarda coherencia",
+    "scope": "d3819941-90e6-4aad-b568-534715e68ebe",
+    "rule": "Eric pide grafo para conteo animado e interactivo y rechaza incoherencia de v16. Una sola grafica continua con 12 nodos numerados, contador sincronizado, conexion progresiva y direccion fija; captions vigentes v7, voz y outro completos. Pagina de revision permite seleccionar servicio y saltar a su momento. MP4 conserva la animacion; interactividad en pagina.",
+    "count": 12,
+    "nodes": "/Volumes/Extreme SSD/Nate Media/servicios-grafo-20260927/nodes.json",
+    "approval": "pending"
+  },
+  "novela_dramatic_effects": {
+    "request": "Efectos de novelas, zoom y camara lenta",
+    "scope": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+    "rule": "Acercamientos dramaticos y camara lenta selectiva sobre gestos; abanico abre antes del outro. Mantener captions v7.",
+    "approval": "pending"
+  },
+  "novela_pov_heading": {
+    "date": "2026-09-30",
+    "scope": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+    "request": "dale un pov que diga si la farmacia fuera una novela",
+    "rule": "Mostrar POV: Si la farmacia fuera una novela al inicio usando perfil POV v5, según corrección 2026-09-30.",
+    "approval": "pending"
+  },
+  "caption_style_by_format_20260930": {
+    "date": "2026-09-30",
+    "request": "utiliza el estilo que se usa para este cliente cuando hay POV en los videos",
+    "pov": "styles/farmacia-buena-vida-v5.json",
+    "habitual": "styles/farmacia-buena-vida-v7.json",
+    "rule": "POV: Montserrat SemiBold65, blanco, caja oliva translúcida redondeada. Otros formatos conservan v7. Esta corrección sustituye la regla de perfil único para POV.",
+    "approval": "pending"
+  },
+  "bruma_continuity_20260930": {
+    "scope": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+    "request": "seguimos editamos bruma",
+    "editorial_decision": "Mantener paisaje durante bruma/cambio de temperatura y solapar entrada del estornudo .16 s; fundido entrada paisaje .18 s y salida estornudo .18 s. Captions habituales v7.",
+    "approval": "pending"
+  },
+  "bruma_word_spacing_20260930": {
+    "scope": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+    "request": "Re edit a little more space between words the bruma video",
+    "interpretation": "Visual caption word spacing; optional clarification asked, not answered at render start.",
+    "decision": "Version8 adds10px to word gaps, source phrase and prior line layout preserved. Same habitual font/size/color; specific to Bruma.",
+    "approval": "pending"
+  },
+  "farmaceutico_professional_revision_20260930": {
+    "scope": "45bafd67-5264-4b8a-894b-d7eff5dfa1bb",
+    "request": "aqui tiene que estar mas profesionalmente editado con captions, efecots y sonidos",
+    "rule": "Reemplazar título persistente por encabezado inicial separado y captions del diálogo en estilo POVv5. Motivar acercamientos y efectos con las reacciones, añadir SFX reales sincronizados y mantener voz al frente. Crear nueva versión para revisión; no sustituir Recibo sin aprobación.",
+    "approval": "pending"
+  },
+  "navidad_septiembre_20260930": {
+    "date": "2026-09-30",
+    "scope": "330bec24-119a-4a30-b0a0-90664981fbe9",
+    "request": "Editar Navidad en septiembre y descargar de YouTube la canción que Eric identifica como ya van bajando los aires navideños para incorporarla al video.",
+    "caption_variant": "pov_v5",
+    "music_selection": {
+      "title": "Aires Navidenos",
+      "artist": "Decimania",
+      "url": "https://www.youtube.com/watch?v=9iSTd0_H2XE",
+      "basis": "Coincidencia de la frase Están soplando los aires navideños; versión pendiente de confirmación de Eric. Andrés Jiménez fue descartado por letra diferente."
+    },
+    "rule": "Pista elegida por Eric prevalece sobre selección musical genérica para esta idea. Preservar originales. Retirar instrucciones de rodaje del derivado y sincronizar coro con miradas/adornos. Revisar localmente; derechos de publicación no verificados.",
+    "approval": "pending"
+  },
+  "navidad_broll_20260930": {
+    "scope": "Navidad en septiembre only",
+    "request": "Replace external party with pharmacy-related B-roll; exclude person shown in user screenshot from all shots.",
+    "implementation": "Cover both take1 intervals2.7–7.1 and13.45–15.55 fully, plus previous party15.55–17.3, with own pharmacy shelves, dispensing area and storefront. Preserve POV/song/logo22.5s.",
+    "status": "revision_pending"
+  },
+  "navidad_broll_beat_20260930": {
+    "scope": "Navidad en septiembre",
+    "request": "Photo B-roll must be fast, beat-synchronized",
+    "implementation": "0.47–0.97second pharmacy inserts, actual song125.13BPM; excluded person stays covered; no party stock",
+    "status": "review_pending"
+  },
+  "navidad_octubre_20261002": {
+    "scope": "idea330bec24-119a-4a30-b0a0-90664981fbe9",
+    "request": "Change POV month to octubre; septiembre elapsed",
+    "caption": "POV: Llega octubre / y ya suena Navidad / en la farmacia",
+    "preserve": "beat B-roll, music,22.5s,excluded person"
+  }
+}

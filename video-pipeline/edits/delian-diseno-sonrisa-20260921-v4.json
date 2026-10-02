@@ -1,0 +1,240 @@
+{
+  "idea_id": "diseno-sonrisa-20260921",
+  "title": "¿Qué Es Un Diseño De Sonrisa?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_160340_20260921160319_1790125109070_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/diseno-sonrisa-20260921-editorial.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 2.48,
+      "out": 4.4,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 4.4,
+      "out": 10.8,
+      "zoom": 1.24,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.4,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 10.8,
+      "out": 17.8,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.0,
+          "zoom": 1.04
+        }
+      ]
+    },
+    {
+      "in": 17.8,
+      "out": 20.38,
+      "zoom": 1.4,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.58,
+          "zoom": 1.02
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.221,
+      "end": 0.815,
+      "text": "¿Qué realmente es"
+    },
+    {
+      "start": 0.84,
+      "end": 1.78,
+      "text": "un diseño de sonrisa?"
+    },
+    {
+      "start": 2.206,
+      "end": 2.855,
+      "text": "Cuando pensamos en"
+    },
+    {
+      "start": 2.88,
+      "end": 3.615,
+      "text": "un diseño de sonrisa,"
+    },
+    {
+      "start": 3.64,
+      "end": 4.995,
+      "text": "pensamos rápidamente en"
+    },
+    {
+      "start": 5.02,
+      "end": 5.96,
+      "text": "hacernos los dientes,"
+    },
+    {
+      "start": 6.22,
+      "end": 8.22,
+      "text": "en carillas, en laminados,"
+    },
+    {
+      "start": 8.799,
+      "end": 9.495,
+      "text": "y va mucho más"
+    },
+    {
+      "start": 9.52,
+      "end": 9.955,
+      "text": "que eso."
+    },
+    {
+      "start": 9.98,
+      "end": 10.68,
+      "text": "Tenemos que mirar"
+    },
+    {
+      "start": 10.888,
+      "end": 11.775,
+      "text": "todo el rostro,"
+    },
+    {
+      "start": 11.8,
+      "end": 13.56,
+      "text": "los labios, las encías,"
+    },
+    {
+      "start": 13.7,
+      "end": 15.12,
+      "text": "sobre todo la mordida,",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 15.564,
+      "end": 16.375,
+      "text": "para entonces poder crear"
+    },
+    {
+      "start": 16.4,
+      "end": 17.78,
+      "text": "una sonrisa armoniosa.",
+      "primary_colour": "&H00E560EB"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-sept-enriched/carillas-animated.mp4",
+      "in": 0,
+      "out": 2.25,
+      "at": 6.18,
+      "fade_in": 0.12,
+      "fade_out": 0.12,
+      "reason": "Imagen educativa generada e identificada como ilustrativa: carillas"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 15.32,
+      "gain_db": -24
+    },
+    {
+      "preset": "swipe",
+      "time": 6.09,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 8.34,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 1.83,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 17.63,
+      "gain_db": -23
+    }
+  ],
+  "effects": [
+    {
+      "preset": "blur_pass",
+      "time": 6.09,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "soft_flash",
+      "time": 8.34,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "whip_pan",
+      "time": 1.83,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "blur_pass",
+      "time": 17.63,
+      "duration": 0.18,
+      "intensity": 0.6
+    }
+  ],
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/music/sept-polish-diseno-sonrisa.m4a",
+    "title": "Lovely Piano Song",
+    "license": "CC0 1.0",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Lovely Piano Song.provenance.json",
+    "source_offset": 5,
+    "fade_in": 0.15,
+    "fade_out": 0.5
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Grabación nueva 21 septiembre; PDF idea 2. Mantener manos y explicación visible. ASR pendiente de cotejo auditivo; no aprobación humana.",
+    "Professional revision: second ASR against original audio; manual semantic caption groups, measured pause cuts, subtle keyframes, restrained synchronized sound accents, faded independent CC0 bed. Critical listening remains pending.",
+    "Eric requested transition effects, sounds, video B-roll, image B-roll and background music. Generated educational images explicitly labeled; new per-reel music balance 9 LU below voice. Critical listening pending."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 9
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "title": "El chef emplata el salmón · desde cero",
+  "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-desde-cero-v4-source.mkv",
+  "style": "../styles/alacena-v2.json",
+  "catalog": "runs/alacena-catalog.json",
+  "caption_mode": "editorial",
+  "clips": [
+    {
+      "in": 0,
+      "out": 13.333,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.18,
+      "text": "Así emplatamos"
+    },
+    {
+      "start": 1.2,
+      "end": 2.6,
+      "text": "nuestro salmón"
+    }
+  ],
+  "broll": [],
+  "effects": [],
+  "transitions": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 4.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 8.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 10.716667,
+      "duration": 0.035,
+      "gain_db": -34
+    }
+  ],
+  "audio_master": {
+    "mode": "music"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-desde-cero-v4-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-music-provenance.json"
+  },
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0.2,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "review_notes": [
+    "Rebuilt from original takes, no prior rendered montage used. New chronological food narrative: vegetables, fish placement, cream onto plate, finished garnish detail.",
+    "Cream segment ends at original 4.4 seconds, before droplets hit the fish. Prior whole-take exclusion corrected to a range-specific restriction. Kitchen direction chatter muted.",
+    "Opening captions retain the Alacena profile; subsequent action and food remain without overlays. Music remains unique to this Alacena reel, with a new excerpt; onset estimate near 90 BPM guides changes at 2, 4, 8 and 10.67 seconds.",
+    "Full current Drive inventory unavailable. Live dashboard and SSD checked; older Drive-derived local candidates and source transcripts consulted. Listening and client approval remain separate gates."
+  ]
+}

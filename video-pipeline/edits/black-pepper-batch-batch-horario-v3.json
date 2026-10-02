@@ -1,0 +1,141 @@
+{
+  "idea_id": "6dc5583c-ebb2-4f22-a127-09adb9fdcf32",
+  "title": "Horario",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/horario-revision/0339-estable-v3.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/horario-revision/transcript-turbo.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 5.28,
+      "zoom": 1.0,
+      "audio_edge_fade": 0
+    },
+    {
+      "in": 5.5,
+      "out": 8.12,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 8.28,
+      "out": 15.0,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.44,
+      "text": "Muchos invitados de"
+    },
+    {
+      "start": 1.44,
+      "end": 3.02,
+      "text": "nosotros nos preguntan"
+    },
+    {
+      "start": 3.02,
+      "end": 4.34,
+      "text": "y aún tienen dudas de"
+    },
+    {
+      "start": 4.34,
+      "end": 5.28,
+      "text": "cuál es nuestro horario."
+    },
+    {
+      "start": 5.36,
+      "end": 7.02,
+      "text": "Así que, Lory,"
+    },
+    {
+      "start": 7.02,
+      "end": 7.9,
+      "text": "¿cuál es nuestro horario?"
+    },
+    {
+      "start": 8.0,
+      "end": 9.0,
+      "text": "Sí, estamos aquí"
+    },
+    {
+      "start": 9.0,
+      "end": 10.36,
+      "text": "de lunes a viernes"
+    },
+    {
+      "start": 10.36,
+      "end": 11.22,
+      "text": "de 8 de la mañana"
+    },
+    {
+      "start": 11.22,
+      "end": 11.98,
+      "text": "a 3 de la tarde"
+    },
+    {
+      "start": 11.98,
+      "end": 13.1,
+      "text": "y sábado y domingo"
+    },
+    {
+      "start": 13.1,
+      "end": 14.04,
+      "text": "de 8 a 2"
+    },
+    {
+      "start": 14.04,
+      "end": 14.62,
+      "text": "de la tarde."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/horario-revision/local-tranquilo-v3b.mp4",
+      "in": 0,
+      "out": 6.7,
+      "at": 5.28,
+      "reason": "Cubrir desplazamiento y giro hacia Lory con plano del mismo local, ralentizado y estabilizado. Voz completa conservada."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 5.28,
+      "duration": 0.07,
+      "gain_db": -25,
+      "reason": "Jump cut en pausa antes de Así que Lory"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 11.9,
+      "duration": 0.24,
+      "gain_db": -27,
+      "reason": "Regreso a encuadre asentado de ambos a11.98"
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric: el movimiento marea. V3 estabiliza fuente moderadamente con recorte fijo2.5porciento por borde; cubre recorrido de cámara5.28–11.98 con0340del mismo local6–10.1ralentizado. Mantener todo diálogo y captions, sin música; solo dos cambios visuales con sonidos sutiles. No heredar aprobación."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "music": null,
+  "audio_master": {
+    "music_below_voice_lu": 16
+  }
+}

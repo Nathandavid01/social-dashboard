@@ -1,0 +1,398 @@
+{
+  "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+  "scope": "Yabuuchi Sushi, lote reciente Toa Baja",
+  "user_request": "Utilizar este editaje para captions, sonidos, B-roll y gráficas.",
+  "rules": [
+    "Referencia principal: video 1.2.mp4 aportado por Eric el 2026-09-20. Prevalece sobre el ejemplo anterior.",
+    "Acercamientos suaves, B-roll pertinente, gráficas pequeñas al nombrar conceptos, pop/whoosh contenidos.",
+    "Efectos originales sintetizados: similitud auditiva exacta pendiente. Música CC0 seleccionada; no se afirma identidad de pista.",
+    "Corrección 2026-09-20: captions blancos en Arial Black, tamaño ASS 72 fijo, para igualar la altura visible de la muestra de la izquierda. La configuración 52 quedó demasiado pequeña. Usar una o dos líneas sin reducir tamaño; comparar siempre al mismo tamaño nativo 1080×1920.",
+    "Corrección de Eric: no reducir una idea a fragmento. Recuperar la apertura, el desarrollo y el desenlace real de cada toma antes de seleccionar un corte corto.",
+    "En sketches, mantener la entrada del segundo personaje, pregunta, respuesta, entrega y reacción. Colocar B-roll fuera de esos momentos esenciales.",
+    "En preparación de producto, mostrar el proceso completo hasta corte, acabado y entrega; no terminar después de mencionar ingredientes.",
+    "La Baby conserva su apertura original y la invitación grabada a Dos Palmas. No eliminar una frase por una transcripción automática dudosa sin cotejar otra evidencia."
+  ],
+  "preserve": "Subtítulos nunca sobre los ojos. Originales y versiones anteriores conservados.",
+  "active_style": "styles/yabuuchi-reference-v6.json",
+  "selection_request": {
+    "count": 4,
+    "requirements": [
+      "B-roll real y pertinente en cada video",
+      "Parecido visual a video 1.2.mp4",
+      "Retirar frases dudosas cuando el corte conserve el sentido",
+      "Revisar cada export completo hasta el outro",
+      "Cada idea debe conservar su arco completo y la actuación final; la duración corta no sustituye la integridad de la idea."
+    ],
+    "manifest": "runs/yabuuchi-selection-manifest.json"
+  },
+  "caption_size_request": {
+    "applies_to": "Los cuatro videos seleccionados y futuros videos del cliente",
+    "comparison": "media/yabuuchi/brand/caption-size-user-reference.png",
+    "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "native_cap_height_pixels": {
+      "reference": [
+        35,
+        38
+      ],
+      "previous": [
+        25,
+        27
+      ],
+      "updated": [
+        36,
+        37
+      ]
+    }
+  },
+  "outro_music_request": {
+    "request": "Otra música más profesional en el outro",
+    "previous_origin": "Audio de la referencia, con ganancia 2.5 en las versiones v2/v3",
+    "replacement": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "title": "Elegant Piano Logo",
+    "artist": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json",
+    "treatment": "Cierre instrumental breve de piano, volumen moderado, salida suave; sustituye todo el audio anterior del outro."
+  },
+  "swoosh_request": {
+    "request": "Seguir mejorando efectos y sonidos para hacer el swoosh del video ejemplo",
+    "sound_preset": "whoosh_sweep",
+    "visual_preset": "whip_pan",
+    "duration": 0.32,
+    "sound_start_before_cut": 0.114,
+    "visual_duration": 0.2,
+    "scope": "Cuatro seleccionados y futuros videos del cliente",
+    "principle": "Sonorizar cada transición editorial según transition_sound_rule; sin sonidos por palabra ni duplicar el audio del outro.",
+    "reference_audit": "runs/yabuuchi-swoosh-reference-qa/reference-audit.json",
+    "critical_listening": "pending"
+  },
+  "broll_library": {
+    "requested_on": "2026-09-20",
+    "index": "media/yabuuchi/broll-index.json",
+    "visual_library": "runs/yabuuchi-library/index.html",
+    "catalog": "media/yabuuchi/BROLL-YABUUCHI.md",
+    "search_command": "python3 scripts/build_yabuuchi_library.py --search \"tema\"",
+    "rules": [
+      "Identificar visualmente todos los originales accesibles del cliente; separar hablados y descartes.",
+      "Buscar por contenido y usar rangos originales; no usar nombres de producto o sede sin evidencia.",
+      "Priorizar tomas pertinentes menos usadas; evitar repetición por familia de escena y hash.",
+      "Silenciar audio de apoyo y comprobar el tramo exacto antes de editar."
+    ],
+    "trim_policy": {
+      "requested_on": "2026-09-20",
+      "rule": "Siempre recortar cualquier parte no apta y dejar sólo B-roll utilizable en el archivo principal de la biblioteca.",
+      "scope": "Biblioteca de Yabuuchi, material actual y futuras incorporaciones",
+      "delivery": "Tramos físicos separados y versión limpia por toma, sin audio; originales conservados como archivo.",
+      "exclude": "Rostros presentando bajo voz ajena, esperas, preparativos, manos del equipo que obstruyen, sacudidas, desenfoques y finales vacíos. Si nada sirve, excluir del banco de B-roll.",
+      "review": "Comprobar los límites de cada tramo antes de exportar. Conservar tiempos, hash y familia del original para no contar un recorte como una nueva escena.",
+      "render_command": "python3 scripts/trim_yabuuchi_library.py --version N --watch"
+    }
+  },
+  "caption_font_request": {
+    "request": "Usar un caption que se parezca al font de Un sushi de fantasía",
+    "font": "Anybody Expanded Black",
+    "weight": 900,
+    "width": 125,
+    "size": 72,
+    "scope": "Video Historia actual y futuros videos Yabuuchi",
+    "note": "Aproximación visual, no fuente oficial; blanco, sombra y máximo dos líneas."
+  },
+  "caption_effect_request": {
+    "request": "Mismo efecto del ejemplo",
+    "scope": "Historia actual y futuros captions Yabuuchi",
+    "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "observed_interval": [
+      1.966667,
+      2.266667
+    ],
+    "effect": "reference_soft_in",
+    "fade_ms": 70,
+    "scale_start": 98,
+    "scale_end": 100,
+    "scale_duration_ms": 110,
+    "note": "Recreación de entrada visual observada, no preset original recuperado. Mantener fuente ancha actual y texto estable después de entrar."
+  },
+  "wind_request": {
+    "request": "Reduce the wind a little without hurting the voice",
+    "scope": "Historia outdoor recording 0004",
+    "recipe": "edits/yabuuchi-historia-v8.json",
+    "principle": "Conservative voice-only treatment; retain previous version for listening comparison. Do not promise total wind removal or apply exact settings blindly to other takes.",
+    "critical_listening": "pending"
+  },
+  "historical_photo_request": {
+    "request": "Cuando mencionan la mujer baja una foto de ella y ponla",
+    "person": "Keiko Yabuuchi",
+    "scope": "Historia",
+    "source_page": "https://www.yabuuchi.com/nuestra-historia",
+    "timing": [
+      3.2,
+      7.16
+    ],
+    "rule": "Usar fotografía histórica identificada por fuente; no sustituir por persona genérica o imagen generada."
+  },
+  "historia_location_request": {
+    "request": "Añadir clip de ubicación a Por Qué Yabuuchi",
+    "source": "DJI_20260914132858_0018_D.MP4",
+    "scope": "Historia",
+    "placement": "Después de historia y antes de outro, frase completa de ubicación y estacionamiento"
+  },
+  "delivery_sequence": {
+    "1": "historia",
+    "2": "calidad",
+    "3": "primer-sushi",
+    "4": "quiero-dos",
+    "5": "sin-pescado-crudo",
+    "6": "elige-tu-favorito",
+    "7": "churrasco-roll",
+    "8": "la-baby",
+    "9": "otro-rollo",
+    "10": "sashimi-nigiri",
+    "request": "Quitar el sample de la lista y dejarlo arriba como demo de referencia aparte.",
+    "scope": "Lista de revisión; mantener nombres de archivos y páginas existentes.",
+    "reference": {
+      "slug": "reference",
+      "placement": "above_edited_list",
+      "numbered": false
+    }
+  },
+  "otro_rollo_inspiration": {
+    "url": "https://www.tiktok.com/@mariamejiaspr/video/7678999845792763167",
+    "scope": "Solo otro-rollo",
+    "request": "Reeditar según esta inspiración",
+    "treatment": "Intercambio de encuadres, pausa de remate y final con acción; conservar caption de marca."
+  },
+  "otro_rollo_final": {
+    "scope": "Solo otro-rollo",
+    "request": "Entregar un roll en el cierre, no una bebida, para continuar la idea de pedir otro roll.",
+    "selection": "0989: entrega real de la caja con palillos, seguida por 0987: roll visible en caja abierta.",
+    "authorized": true,
+    "status": "new_revision_user_review_pending",
+    "note": "Eric precisó por qué rechazó Ramune: no corresponde al pedido de otro roll. Sustituir por entrega real de comida. No aplicar esta exclusión a reels de bebidas.",
+    "previous_rejected_source": "DJI_20260914132349_0014_D.MP4",
+    "recipe": "edits/yabuuchi-otro-rollo-v8.json",
+    "final_shots": [
+      {
+        "source": "0989",
+        "range": [
+          0.7333333333333333,
+          2.7666666666666666
+        ],
+        "purpose": "Entrega real de caja con palillos; voz propia sin conteo"
+      },
+      {
+        "source": "0987",
+        "range": [
+          11.4,
+          13
+        ],
+        "purpose": "Roll visible en caja abierta"
+      }
+    ]
+  },
+  "quiero_dos_caption_correction": {
+    "scope": "Aprende a decir que no, frase de la mesera",
+    "text": "¿Quieres un roll?",
+    "source": "Corrección directa de Eric",
+    "rule": "Conservar roll tal como se pronuncia; no expandir a rollo."
+  },
+  "sin_pescado_dumplings_final": {
+    "scope": "Sushi sin pescado crudo",
+    "request": "B-roll final de dumplings muy corto",
+    "previous_seconds": 1.13,
+    "seconds": 3,
+    "source_range": [
+      13.5,
+      16.5
+    ],
+    "rule": "Dejar completar mordida y reacción después de la frase antes del logo; no truncar la acción para terminar junto con la voz."
+  },
+  "transition_sound_rule": {
+    "request": "Utiliza sonidos en las transiciones, haz esto una regla para el cliente",
+    "scope": "Yabuuchi Sushi: nuevas ediciones y revisiones",
+    "required": true,
+    "placements": [
+      "entrada de B-roll",
+      "regreso al plano principal",
+      "cambio de escena",
+      "entrada al outro"
+    ],
+    "treatment": "Un efecto corto sincronizado con cada transición de edición. Voz por delante; no añadir sonidos por cambio de caption, ni duplicar efectos ya integrados al outro.",
+    "default": {
+      "preset": "whoosh_sweep",
+      "duration": 0.32,
+      "start_before_cut": 0.114,
+      "entry_gain_db": -20,
+      "return_gain_db": -23
+    },
+    "outro_boundary": {
+      "preset": "whoosh_soft",
+      "duration": 0.2,
+      "start_before_cut": 0.2,
+      "gain_db": -22
+    },
+    "qa": "Comprobar que todas las transiciones previstas tengan cue y que ningún efecto se trunque ni tape la voz. Escucha crítica se registra aparte.",
+    "current_recipe": "edits/yabuuchi-sin-pescado-crudo-v7.json"
+  },
+  "elige_tu_favorito_voice_request": {
+    "scope": "Solo Elige tu favorito; valorar niveles por persona en futuras ediciones",
+    "request": "La voz de quien está hablando revienta las bocinas; bajar un poco",
+    "finding": "Las preguntas medían entre 7 y 14 dB RMS por encima de las respuestas en v5.",
+    "treatment": "Atenuar la entrevistadora por frases entre 7.5 y 10 dB, con rampas suaves; compresión ligera y techo de picos en la voz. Las respuestas conservan su ganancia.",
+    "recipe": "edits/yabuuchi-elige-tu-favorito-v7.json",
+    "rule": "Comparar preguntas y respuestas por separado; no normalizar solo el conjunto cuando hay diferencia grande entre micrófonos. La reducción exacta es específica de este video.",
+    "status": "user_review_pending"
+  },
+  "la_baby_revision_request": {
+    "request": "El video 09 falta aún; editarlo mejor",
+    "scope": "Solo La Baby Para Dos, revisión de v7",
+    "status": "new_revision_user_review_pending",
+    "previous_version": "yabuuchi-seleccion-la-baby-v7.mp4",
+    "rule": "La entrega anterior no está aprobada. Mantener apertura e invitación completas y aplicar el perfil actual de captions, transiciones y Audio Kit. El nuevo montaje se revisa con el usuario.",
+    "editorial_plan": "Vista completa, detalle central y cierre de producto en rangos distintos; cubrir arranque de cámara de 0002, mantener voz completa.",
+    "current_recipe": "edits/yabuuchi-seleccion-la-baby-v11.json",
+    "review_page": "runs/yabuuchi-la-baby.html",
+    "reported_phrase": "Eric identifica «y tres» al inicio de la invitación de 0002.",
+    "count_correction": {
+      "interpretation": "Conteo previo a la invitación; asumido por posición al inicio de toma",
+      "original_source": "DJI_20260914125108_0002_D.MP4",
+      "removed_range": [
+        0,
+        0.5
+      ],
+      "retain": "Y si aún no lo has probado… completa desde la entrada de voz posterior al conteo",
+      "scope": "Solo esta toma en La Baby; original conservado"
+    }
+  },
+  "literal_roll_caption_rule": {
+    "scope": "Todos los captions de Yabuuchi",
+    "request": "A veces dice roll y a veces rollo; escuchar y transcribir lo que dice la persona.",
+    "rule": "Respetar cada pronunciación; no traducir ni expandir roll a rollo por automatismo. La transcripción automática es borrador. Cotejar el audio y registrar incertidumbres; las correcciones literales de Eric prevalecen.",
+    "confirmed_corrections": [
+      {
+        "idea": "quiero-dos",
+        "text": "¿Quieres un roll?"
+      },
+      {
+        "idea": "otro-rollo",
+        "text": "¿Quieres otro roll?"
+      }
+    ]
+  },
+  "sashimi_nigiri_reedit": {
+    "request": "Mejores apoyos mientras habla la chef; deben oírse los nombres que se describen.",
+    "resolved_idea": "sashimi-nigiri",
+    "current_list_number": 10,
+    "scope": "Solo Nigiri Y Sashimi",
+    "recipe": "edits/yabuuchi-sashimi-nigiri-v15.json",
+    "status": "audio_and_user_review_pending",
+    "treatment": "Fotos y comparación animadas sin el rótulo Imagen ilustrativa. Nombres, captions y audio de v12 conservados.",
+    "limitations": "Imágenes generadas e identificadas como ilustrativas; no son platos fotografiados del restaurante. Escucha crítica pendiente.",
+    "reusable_rule": "Cuando la pieza explica dos productos, nombrar cada uno en la voz y coordinar nombre, descripción, caption e imagen. Conservar procedencia exacta y declarar cualquier montaje de palabras."
+  },
+  "compartir_especialidades": {
+    "request": "Editar un video más de Yabuuchi que no estuviera editado, según el PDF de ideas",
+    "pdf": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "idea": "El mejor sushi para compartir aquí en Yabuuchi",
+    "recipe": "edits/yabuuchi-compartir-v2.json",
+    "takes": [
+      "0998",
+      "0999"
+    ],
+    "held_alternate": "0001",
+    "names": "La Baby, La Madre y La Rocky. La Rocky sale del menú publicado y de la transcripción de 0999; confianza baja y la toma 0001 suena a rogui. Pendiente de escucha.",
+    "broll": "0021 3.30–3.98 solo sobre La Baby. No ilustrar La Madre ni La Rocky con esa caja.",
+    "status": "user_review_pending",
+    "current_file": "runs/yabuuchi-compartir-v2.mp4",
+    "graph_fix": "Los captions de v1 seguían el crudo, no el archivo derivado. v2 los mide sobre ese archivo. La lista y el HTML embebido apuntan al mismo mp4."
+  },
+  "sashimi_nigiri_motion_rule": {
+    "request": "Si hay videos específicos, mostrarlos; si no, las gráficas no deben verse muertas. Tiene que ser específicamente de esto.",
+    "scope": "Nigiri Y Sashimi",
+    "rule": "Buscar B-roll literal de cada producto. No sustituirlo por rolls genéricos. Si no existe toma confirmada, usar imágenes ilustrativas específicas con movimiento de cámara, entradas de texto sincronizadas y comparación animada.",
+    "search_result": "Sin tomas reales confirmadas de ambos productos en índice local de 98 fuentes; candidatos 0367,0368,0021,0983 inspeccionados visualmente."
+  },
+  "sashimi_nigiri_audio_join_rule": {
+    "request": "Cuando dice nigiri o sashimi hay una pausa y un corte abrupto.",
+    "scope": "Nigiri Y Sashimi",
+    "rule": "No montar nombres aislados con silencios añadidos. Priorizar fragmentos continuos nombre+verbo, transición breve en límites de palabras y voz por encima del efecto. Alinear los captions a la frase continua; verificar naturalidad por escucha.",
+    "recipe": "edits/yabuuchi-sashimi-nigiri-v12.json",
+    "treatment": "El sashimi es (8.70–9.36) + el pescado solito (7.22–8.10); Y el nigiri es (5.76–6.48) + una bolita… (9.36–11.70); cruces de 12 ms sin silencio interior.",
+    "critical_listening": "pending"
+  },
+  "sashimi_nigiri_label_request": {
+    "request": "Quita Imagen ilustrativa de las fotos",
+    "scope": "Nigiri Y Sashimi, apoyos y comparación final",
+    "rule": "Omitir ese texto en pantalla; mantener la procedencia real de los recursos en los archivos de edición.",
+    "recipe": "edits/yabuuchi-sashimi-nigiri-v15.json"
+  },
+  "sashimi_nigiri_opening_mic": {
+    "request": "Al principio dice algo y el micrófono estaba muy pegado.",
+    "scope": "Nigiri Y Sashimi, solo el arranque de la pregunta",
+    "recipe": "edits/yabuuchi-sashimi-nigiri-v16.json",
+    "rule": "Quitar la sílaba inicial más fuerte antes de ¿cuál. El conteo Y tres del crudo 0983 no entra. No bajar el resto de la pregunta: ya suena al mismo nivel que la respuesta.",
+    "status": "local_review_export",
+    "critical_listening": "pending"
+  },
+  "compartir_closing_request": {
+    "request": "Añadir a El Mejor Sushi Para Compartir el cierre de La Baby Para Dos: Y si aún no lo has probado, y la dirección completa.",
+    "recipe": "edits/yabuuchi-compartir-v4.json",
+    "scope": "Solo Compartir",
+    "review": "pending"
+  },
+  "compartir_transition_request": {
+    "scope": "Solo El Mejor Sushi Para Compartir",
+    "request": "Usar click en las transiciones y cortes más fluidos",
+    "recipe": "edits/yabuuchi-compartir-v5.json",
+    "status": "user_review_pending"
+  },
+  "la_baby_remove_invitation": {
+    "request": "Quitar de La Baby Para Dos el cierre Y si aún no lo has probado y la dirección, trasladado a Compartir v5.",
+    "recipe": "edits/yabuuchi-seleccion-la-baby-v13.json",
+    "status": "review_pending"
+  },
+  "churrasco_finished_product_close": {
+    "request": "Añadir la toma aprobada de Churrasco Roll terminado después de la entrega y antes del logo.",
+    "source": "media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0991-01-detalle-del-roll-desde-un-angulo-alto-b5d052fe6d.mp4",
+    "duration": 3.3,
+    "base": "runs/yabuuchi-seleccion-churrasco-roll-v8.mp4",
+    "version": "v9",
+    "status": "user_review_pending"
+  },
+  "la_baby_start_noise": {
+    "reported": "Roce de micrófono o viento entre 0:00 y 0:01",
+    "revision": "v16",
+    "treatment": "Control localizado de graves y ruido con reducción gradual del ambiente inicial",
+    "status": "listening_confirmation_pending"
+  },
+  "content_ideas_reference": {
+    "file": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "request": "Usar las ideas del documento como referencia",
+    "salmon_tempura_mapping": "Página 1: opciones para quien no quiere pescado crudo; adaptar con voz grabada real, no inventar diálogo.",
+    "scope": "Ideación y edición de Yabuuchi"
+  },
+  "palillos_ending": {
+    "request": "Acaba muy de repente",
+    "recipe": "edits/yabuuchi-primera-cita-palillos-v2.json",
+    "change": "Extender reacción hasta18.9 del original; salida progresiva a logo",
+    "review": "pending"
+  },
+  "publication_precheck": {
+    "required": true,
+    "scope": "Antes de proponer o editar otra idea",
+    "rule": "Antes de proponer, seleccionar o editar un video, comprobar publicaciones reales y programación en Metricool y los enlaces de redes disponibles. Comparar idea, diálogo y escenas, no solo título o nombre de archivo. Registrar fecha, rango revisado, enlace y resultado. Recibo, R2 y falta de receta no prueban que no esté publicado. Si la comprobación es incompleta, marcar publicación no verificada y no ofrecerlo como inédito.",
+    "metricool_blog_id": "7054368",
+    "confirmed_published": [
+      {
+        "slug": "historia",
+        "date": "2026-09-23",
+        "url": "https://www.instagram.com/reel/Ddo0VE5E34O/",
+        "evidence": "Metricool scheduler PUBLISHED + Instagram stats"
+      }
+    ],
+    "current_candidate": {
+      "source": "DJI_20260909121455_0308_D.MP4",
+      "status": "no_coincidencia_textual_en_consulta_septiembre; cotejo_visual_pendiente",
+      "checked_range": "2026-09-01 a 2026-09-24"
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "idea_id": "b40a4770-a05e-4b4c-8afd-14ff515817f4",
+  "title": "Pregunta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/cf0bfead-201b-46cc-9efb-309e00e0a32b.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/familias-small.json",
+  "style": "../styles/alacena-v1.json",
+  "clips": [
+    {
+      "in": 1.26,
+      "out": 12.45,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 0.66,
+      "text": "¿Por qué tú crees"
+    },
+    {
+      "start": 0.66,
+      "end": 1.18,
+      "text": "que las familias"
+    },
+    {
+      "start": 1.18,
+      "end": 2.04,
+      "text": "prefieren Alacena?"
+    },
+    {
+      "start": 2.42,
+      "end": 2.76,
+      "text": "Pues mira,"
+    },
+    {
+      "start": 2.82,
+      "end": 3.26,
+      "text": "yo creo que"
+    },
+    {
+      "start": 3.26,
+      "end": 4.12,
+      "text": "las personas se sienten"
+    },
+    {
+      "start": 4.12,
+      "end": 4.8,
+      "text": "en casa,"
+    },
+    {
+      "start": 5.26,
+      "end": 6.42,
+      "text": "porque nos"
+    },
+    {
+      "start": 6.42,
+      "end": 7.18,
+      "text": "destacamos mucho"
+    },
+    {
+      "start": 7.18,
+      "end": 7.84,
+      "text": "en el servicio,"
+    },
+    {
+      "start": 8.02,
+      "end": 8.5,
+      "text": "en un ambiente"
+    },
+    {
+      "start": 8.5,
+      "end": 9.24,
+      "text": "acogedor"
+    },
+    {
+      "start": 9.24,
+      "end": 10.84,
+      "text": "y bastante familiar."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/source/DJI_20260818140554_0682_D.MP4",
+      "in": 16,
+      "out": 19.16,
+      "at": 8.03,
+      "reason": "Salón real de Alacena durante ambiente acogedor y familiar; sin personas hablando."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Pregunta completa desde por qué; retiro conteo y chef inicial. Respuesta íntegra con ambiente real del mismo restaurante. Referencias A1/A3/A4; serif aproximada documentada. Outro recuperado de A1. Música jazz/piano de biblioteca. Escucha crítica y aprobación pendientes."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.9,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/52/52133217c003cb3343ae929f0d9032c4d904a1200aa1b9a7fd934c406d14be24.wav",
+    "extend_through_outro": true
+  }
+}

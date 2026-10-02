@@ -1,0 +1,149 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0274-domicilio",
+  "catalog": "runs/arecibo-0274-catalog.json",
+  "title": "Servicios A Domicilio",
+  "source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "original_source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0274.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 1.5,
+      "out": 17.4,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 0.9,
+      "text": "¿ALI,"
+    },
+    {
+      "start": 1.5,
+      "end": 2.6,
+      "text": "ES CIERTO QUE"
+    },
+    {
+      "start": 2.6,
+      "end": 4.36,
+      "text": "REALIZAN SERVICIOS"
+    },
+    {
+      "start": 4.36,
+      "end": 4.85,
+      "text": "A LUGAR?"
+    },
+    {
+      "start": 5.24,
+      "end": 5.88,
+      "text": "SÍ, REALIZAMOS"
+    },
+    {
+      "start": 5.88,
+      "end": 6.8,
+      "text": "SERVICIOS A LUGAR"
+    },
+    {
+      "start": 6.92,
+      "end": 7.48,
+      "text": "LO QUE SON"
+    },
+    {
+      "start": 7.48,
+      "end": 8.96,
+      "text": "PACIENTES ENCAMADOS"
+    },
+    {
+      "start": 9.08,
+      "end": 9.72,
+      "text": "TAMBIÉN VISITAMOS"
+    },
+    {
+      "start": 9.72,
+      "end": 11.0,
+      "text": "CENTROS DE ENVEJECIENTES"
+    },
+    {
+      "start": 11.3,
+      "end": 12.98,
+      "text": "REALIZAMOS CULTIVOS\nDE ÚLCERA"
+    },
+    {
+      "start": 13.22,
+      "end": 14.46,
+      "text": "REALIZAMOS TOMAS"
+    },
+    {
+      "start": 14.46,
+      "end": 15.75,
+      "text": "DE CULTIVOS DE ORINA"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 7.48,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 9.72,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 11.88,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.7,
+      "duration": 0.09,
+      "gain_db": -19
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 5.24,
+      "duration": 3,
+      "intensity": 0.2
+    }
+  ],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-domicilio-bed-v1.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "New edit from locally catalogued clip 0274; continuous speech with no internal splice.",
+    "No relevant home-visit footage in local catalog; keep original presenter instead of unrelated B-roll.",
+    "Fixed Montserrat captions; clicks on mentioned services, music under voice and official sonorized outro.",
+    "Critical listening and user review pending."
+  ]
+}

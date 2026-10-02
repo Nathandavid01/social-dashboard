@@ -1,0 +1,111 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v2.json",
+  "idea_id": "mondays-yomo-flor-del-oeste",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Yomo: qu\u00e9 no puede faltar en tu c\u00f3ctel",
+  "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/vids/DJI_20260929160454_0412_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/transcripts/0412.small.json",
+  "clips": [
+    {
+      "in": 1.1,
+      "out": 8.05
+    }
+  ],
+  "broll": [],
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "outro_pattern": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/official-pattern.jpg",
+    "logo_user": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-brand-orange-reference.jpeg",
+    "logo_recreated": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-logo-recreated-v2.png"
+  },
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.46,
+      "text": "Oye, Yomo,",
+      "behind_camera": true
+    },
+    {
+      "start": 0.5,
+      "end": 1.1,
+      "text": "\u00bfQu\u00e9 cosas",
+      "behind_camera": true
+    },
+    {
+      "start": 1.1,
+      "end": 2.02,
+      "text": "no pueden faltar\nen tu c\u00f3ctel?",
+      "behind_camera": true
+    },
+    {
+      "start": 2.12,
+      "end": 3.62,
+      "text": "Para m\u00ed no le puede\nfaltar el mezcal."
+    },
+    {
+      "start": 3.86,
+      "end": 4.28,
+      "text": "Y por eso"
+    },
+    {
+      "start": 4.28,
+      "end": 5.1,
+      "text": "cuando yo vengo\na Mondays,"
+    },
+    {
+      "start": 5.18,
+      "end": 6.9,
+      "text": "pido la Flor\ndel Oeste."
+    }
+  ],
+  "review_notes": [
+    "Borrador de montaje y captions; transcripci\u00f3n small corregida costel -> c\u00f3ctel por contexto, pendiente de escucha cr\u00edtica. Flor del Oeste tambi\u00e9n requiere escucha de confirmaci\u00f3n.",
+    "Tomas 0411 y 0412 son distintas, no proxies: se selecciona 0412 por cierre acercando el c\u00f3ctel a c\u00e1mara; 0411 termina hablando sin ese cierre.",
+    "Drive consultado 2026-10-02: 39 archivos coinciden en nombres con inventario; dashboard sin raw asociado a Yomo. SSD revisado por cuadros de ambas tomas. No se afirma cobertura de otros folders de Drive.",
+    "Claqueta excluida. Sin B-roll, zoom ni efectos a\u00f1adidos: el movimiento grabado lleva al trago. Sin tarjeta artificial.",
+    "Biblioteca Motion Array consultada; selecci\u00f3n musical pendiente de audici\u00f3n. Este borrador de di\u00e1logo no tiene m\u00fasica a\u00f1adida.",
+    "V2: se dividen las dos tarjetas que produc\u00edan tres l\u00edneas en v1, conservando tama\u00f1o fijo y paleta.",
+    "Eric 2026-10-02 autoriza creatividad, Motion Array y efectos. V3 propone base funk real de Motion Array, zoom suave en mezcal y barrido discreto sobre acercamiento del vaso.",
+    "M\u00fasica verificada por hash y recortada 0\u20136.95 s con fundidos. Escucha cr\u00edtica pendiente; no se afirma identidad auditiva ni garant\u00eda de viralidad.",
+    "2026-10-02 Eric solicita outro con m\u00fasica: cierre animado de 2.5 s a partir del patr\u00f3n oficial recuperado de Drive, nombre tipogr\u00e1fico y Aguadilla. M\u00fasica propia del reel contin\u00faa en el cierre; masteriza mezcla completa.",
+    "Eric rechaz\u00f3 outro v1: sustituido por v2 limpio tipogr\u00e1fico, 2.2s, manteniendo resto del reel y m\u00fasica propia. Nueva propuesta pendiente de aprobaci\u00f3n.",
+    "Latest user request: cinematic outro with company colors, recreated MONDAYS logo, official tagline, motion, transition SFX and reel-specific music. Outro v5 replaces rejected versions; critical listening and approval pending."
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/music/yomo-groovy-thing-v3.wav",
+    "title": "Groovy Thing",
+    "license": "Motion Array subscription",
+    "source_url": "https://motionarray.com/royalty-free-music/groovy-thing-1172914/",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/catalogo.json",
+    "original_source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/22/2208831a7b83eb2221a5e2b94d49af428ce829857889fe41268e46090d4a463c.wav",
+    "original_sha256": "2208831a7b83eb2221a5e2b94d49af428ce829857889fe41268e46090d4a463c"
+  },
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 2.7,
+      "duration": 1.0,
+      "intensity": 0.65
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 5.32,
+      "duration": 0.25,
+      "gain_db": -29,
+      "intensity": 0.6
+    }
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-yomo-v5.mp4",
+    "in": 0,
+    "out": 3.2,
+    "gain": 1
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "idea_id": "913138fd-b1ea-49d1-8434-568dd60c424d",
+  "title": "Coctelería",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 41.55,
+      "out": 43.45,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 1.9,
+          "zoom": 1.055
+        }
+      ],
+      "focus_y": 0.42,
+      "audio_edge_fade": 0.035,
+      "zoom": 1
+    },
+    {
+      "in": 8.2,
+      "out": 10.98,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 2.78,
+          "zoom": 1.055
+        }
+      ],
+      "focus_y": 0.42,
+      "audio_edge_fade": 0.035,
+      "zoom": 1
+    },
+    {
+      "in": 11.5,
+      "out": 33.33,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 21.83,
+          "zoom": 1.055
+        }
+      ],
+      "focus_y": 0.42,
+      "audio_edge_fade": 0.035,
+      "zoom": 1
+    },
+    {
+      "in": 35.11,
+      "out": 37.67,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 2.56,
+          "zoom": 1.055
+        }
+      ],
+      "focus_y": 0.42,
+      "audio_edge_fade": 0.035,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.85,
+      "text": "Coctelería de la casa"
+    },
+    {
+      "start": 1.98,
+      "end": 3.68,
+      "text": "Esto lleva lo"
+    },
+    {
+      "start": 3.68,
+      "end": 4.58,
+      "text": "que es mezcal."
+    },
+    {
+      "start": 4.8,
+      "end": 6.26,
+      "text": "Es un trago como un"
+    },
+    {
+      "start": 6.26,
+      "end": 6.96,
+      "text": "sweet and sour."
+    },
+    {
+      "start": 7.18,
+      "end": 8.3,
+      "text": "Tiene su toque"
+    },
+    {
+      "start": 8.3,
+      "end": 10.1,
+      "text": "también ahumado por"
+    },
+    {
+      "start": 10.1,
+      "end": 10.74,
+      "text": "el mezcal."
+    },
+    {
+      "start": 11.04,
+      "end": 12.5,
+      "text": "Y a base"
+    },
+    {
+      "start": 12.5,
+      "end": 13.74,
+      "text": "de tamarindo."
+    },
+    {
+      "start": 14.14,
+      "end": 15.56,
+      "text": "Que este tamarindo"
+    },
+    {
+      "start": 15.56,
+      "end": 17.06,
+      "text": "es 100 %"
+    },
+    {
+      "start": 17.06,
+      "end": 17.6,
+      "text": "natural."
+    },
+    {
+      "start": 17.78,
+      "end": 18.48,
+      "text": "Lo hacemos aquí."
+    },
+    {
+      "start": 18.72,
+      "end": 19.7,
+      "text": "Tiene un poquito"
+    },
+    {
+      "start": 19.7,
+      "end": 20.8,
+      "text": "de lima también."
+    },
+    {
+      "start": 21.01,
+      "end": 22.13,
+      "text": "Y tiene su"
+    },
+    {
+      "start": 22.13,
+      "end": 24.97,
+      "text": "top de sparkling"
+    },
+    {
+      "start": 24.97,
+      "end": 26.45,
+      "text": "de toronja rosada,"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 1.9,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 4.68,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 7.02,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 10.88,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 18.58,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 20.91,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 26.51,
+      "duration": 0.04,
+      "gain_db": -31
+    },
+    {
+      "kind": "click",
+      "time": 29.06,
+      "duration": 0.04,
+      "gain_db": -31
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Professional tightening authorized: unique short product opening, immediate ingredients, remove interviewer and redundant introductions/uncertain cocktail name, retain complete ingredient claims, natural sweet and sour caption grouping, restrained continuous 2.5 to 5.5 percent reframing, 35ms audio edges and quiet clicks. Finish on garnish then official outro. Preserve all previous versions. Critical listening pending."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-music-v4.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/coctel-preparacion-music-provenance.json"
+  }
+}

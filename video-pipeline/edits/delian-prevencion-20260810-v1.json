@@ -1,0 +1,73 @@
+{
+  "idea_id": "prevencion-20260810",
+  "title": "La Prevención Antes Del Dolor",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810144428_0282_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-08-10/0282-small-transcript.json",
+  "style": "../styles/delian-reference-v1.json",
+  "clips": [
+    {
+      "in": 6.9,
+      "out": 15.58,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 1.4,
+      "text": "Desde el principio no debemos"
+    },
+    {
+      "start": 1.4,
+      "end": 2.76,
+      "text": "presentar dolor de muelas."
+    },
+    {
+      "start": 2.96,
+      "end": 4.4,
+      "text": "Si tenemos una carie y la"
+    },
+    {
+      "start": 4.4,
+      "end": 5.46,
+      "text": "carie llegó hasta el nervio,"
+    },
+    {
+      "start": 5.64,
+      "end": 6.66,
+      "text": "vamos a presentar dolor."
+    },
+    {
+      "start": 6.86,
+      "end": 8.0,
+      "text": "Así que lo más importante es"
+    },
+    {
+      "start": 8.0,
+      "end": 8.68,
+      "text": "la prevención."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Captions borrador del Edit Kit; corregir transcripción antes de quemar."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg"
+  }
+}

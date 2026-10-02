@@ -1,0 +1,387 @@
+{
+  "idea_id": "criterios-sonrisa-20260921",
+  "title": "Tres Cosas Que Evalúo Para Un Diseño De Sonrisa",
+  "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/sources-combined.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/transcript-combined.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 11.86,
+      "out": 16.62,
+      "zoom": 1.02,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 4.76,
+          "zoom": 1.07
+        }
+      ]
+    },
+    {
+      "in": 32.283933,
+      "out": 39.883933,
+      "zoom": 1.0,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 7.6,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 41.723933,
+      "out": 48.793933,
+      "zoom": 1.0,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 7.07,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 50.749366,
+      "out": 55.199366,
+      "zoom": 1.0,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.45,
+          "zoom": 1.04
+        }
+      ]
+    },
+    {
+      "in": 55.199366,
+      "out": 60.939366,
+      "zoom": 1.1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.1
+        },
+        {
+          "time": 5.74,
+          "zoom": 1.13
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.07,
+      "end": 1.12,
+      "text": "Estas son las tres cosas"
+    },
+    {
+      "start": 1.12,
+      "end": 2.3,
+      "text": "que evalúo al momento de hacer"
+    },
+    {
+      "start": 2.3,
+      "end": 3.26,
+      "text": "un diseño de sonrisa"
+    },
+    {
+      "start": 3.26,
+      "end": 4.54,
+      "text": "en orden de importancia."
+    },
+    {
+      "start": 4.82,
+      "end": 5.56,
+      "text": "Número uno:"
+    },
+    {
+      "start": 5.76,
+      "end": 6.42,
+      "text": "la mordida."
+    },
+    {
+      "start": 6.5,
+      "end": 7.66,
+      "text": "Lo más importante."
+    },
+    {
+      "start": 7.8,
+      "end": 8.22,
+      "text": "¿Por qué?"
+    },
+    {
+      "start": 8.38,
+      "end": 9.18,
+      "text": "Porque si tenemos una"
+    },
+    {
+      "start": 9.18,
+      "end": 10.28,
+      "text": "mordida muy profunda,"
+    },
+    {
+      "start": 10.44,
+      "end": 11.44,
+      "text": "podemos tumbar entonces"
+    },
+    {
+      "start": 11.44,
+      "end": 12.16,
+      "text": "los laminados."
+    },
+    {
+      "start": 12.42,
+      "end": 13.16,
+      "text": "Número dos:"
+    },
+    {
+      "start": 13.487,
+      "end": 14.86,
+      "text": "la posición de los dientes."
+    },
+    {
+      "start": 15.04,
+      "end": 16.08,
+      "text": "Bien importante si tenemos"
+    },
+    {
+      "start": 16.08,
+      "end": 17.16,
+      "text": "un apiñamiento en ellos,"
+    },
+    {
+      "start": 17.16,
+      "end": 18.26,
+      "text": "porque no queremos"
+    },
+    {
+      "start": 18.26,
+      "end": 19.28,
+      "text": "desgastar los dientes."
+    },
+    {
+      "start": 19.48,
+      "end": 20.22,
+      "text": "Y tercero:"
+    },
+    {
+      "start": 20.38,
+      "end": 21.32,
+      "text": "buscamos una armonización"
+    },
+    {
+      "start": 21.32,
+      "end": 21.78,
+      "text": "facial,"
+    },
+    {
+      "start": 21.94,
+      "end": 22.74,
+      "text": "que su diente se vea"
+    },
+    {
+      "start": 22.74,
+      "end": 23.82,
+      "text": "lo más natural posible."
+    },
+    {
+      "start": 24.02,
+      "end": 24.84,
+      "text": "Si estás en busca de un"
+    },
+    {
+      "start": 24.84,
+      "end": 25.68,
+      "text": "diseño de sonrisa,"
+    },
+    {
+      "start": 25.8,
+      "end": 26.84,
+      "text": "se puede comunicar al"
+    },
+    {
+      "start": 26.84,
+      "end": 29.34,
+      "text": "787-230-7573"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/planificacion.mp4",
+      "in": 0,
+      "out": 2.2,
+      "at": 0.8,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Planificación dental durante introducción.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/asset-provenance.json",
+      "asset_family": "criterios-v1-planificacion"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/mordida.mp4",
+      "in": 0,
+      "out": 2.42,
+      "at": 5.68,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Modelo genérico de mordida durante nombre del criterio; no rotulado como mordida profunda.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/asset-provenance.json",
+      "asset_family": "criterios-v1-mordida"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/posicion.mp4",
+      "in": 0,
+      "out": 3.9,
+      "at": 14.9,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Apiñamiento y posición dental, ilustración conceptual.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/asset-provenance.json",
+      "asset_family": "criterios-v1-posicion"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/armonia.mp4",
+      "in": 0,
+      "out": 3.0,
+      "at": 20.58,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Rostro y sonrisa durante armonización facial; persona ficticia, no resultado clínico.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/asset-provenance.json",
+      "asset_family": "criterios-v1-armonia"
+    }
+  ],
+  "graphics": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 4.61,
+      "duration": 0.3,
+      "intensity": 0.4
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 12.21,
+      "duration": 0.3,
+      "intensity": 0.4
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 19.28,
+      "duration": 0.3,
+      "intensity": 0.4
+    }
+  ],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 0.8,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 4.76,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.68,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.1,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.36,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 14.9,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 18.8,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 19.43,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 20.58,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 23.58,
+      "gain_db": -23
+    }
+  ],
+  "review_notes": [
+    "Cuatro crudos de la misma idea: introducción válida, mordida válida, posición y armonización/cierre. Conteos e intentos fallidos fuera.",
+    "Cuatro apoyos nuevos exclusivos, sin reutilización; keyframes, cortes opacos y clicks.",
+    "Caption normaliza evalúo, apiñamiento y que su diente se vea de ASR small/turbo. Escucha crítica pendiente.",
+    "Metricool: 53 entradas y 23 reels consultados; no coincidencia en rangos documentados. No subido ni programado por esta edición."
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/music-continuous.wav",
+    "title": "Trap Hamza - Arulo",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/Trap Hamza - Arulo.provenance.json",
+    "source_offset": 8
+  }
+}

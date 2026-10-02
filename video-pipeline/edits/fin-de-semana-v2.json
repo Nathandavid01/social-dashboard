@@ -1,0 +1,215 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "fcfaff33-5fec-4457-88bc-380125394cee",
+  "title": "Un Plan Diferente Para El Fin De Semana",
+  "source": "../media/b4096a9e-286b-4998-8e27-92e36a63d15e.mp4",
+  "transcript": "../runs/fin-de-semana-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.42,
+      "out": 9.9,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 2.96,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 3.96,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 6.18,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 8.28,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Duración mínima de captions corregida a 300ms; tamaño fijo conservado.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original."
+  ],
+  "broll": [
+    {
+      "source": "../media/b4096a9e-286b-4998-8e27-92e36a63d15e.mp4",
+      "in": 1.42,
+      "out": 9.9,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 8.48,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/9d2d72ec-0a64-4878-83bb-aea3392dafcd.mp4",
+      "in": 10,
+      "out": 11,
+      "at": 2.96,
+      "reason": "Niños jugando a cocinar con ollas, tazas y cocinita blanca junto al café de juguete",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "../media/dc81b7e7-2c2f-479a-bf66-83c9ab306db7.mp4",
+      "in": 6.2,
+      "out": 8.3,
+      "at": 6.18,
+      "reason": "Niña sentada en piscina de bolas, mira hacia cámara y juega con las bolas",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.1,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 2.96,
+      "duration": 0.08
+    },
+    {
+      "time": 3.96,
+      "duration": 0.08
+    },
+    {
+      "time": 6.18,
+      "duration": 0.08
+    },
+    {
+      "time": 8.28,
+      "duration": 0.08
+    }
+  ],
+  "music": {
+    "source": "../media/music/fin-de-semana-bed.wav",
+    "title": "Happy Whistling Ukulele",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+    "target_lufs": -29
+  },
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 0.62,
+      "text": "ES QUE YA"
+    },
+    {
+      "start": 0.62,
+      "end": 1.24,
+      "text": "NO SÉ QUÉ HACER"
+    },
+    {
+      "start": 1.24,
+      "end": 1.86,
+      "text": "CON MIS NIÑOS"
+    },
+    {
+      "start": 1.86,
+      "end": 2.34,
+      "text": "LOS FINES DE"
+    },
+    {
+      "start": 2.34,
+      "end": 2.8400000000000003,
+      "text": "SEMANA."
+    },
+    {
+      "start": 2.96,
+      "end": 3.32,
+      "text": "QUISIERA ALGO"
+    },
+    {
+      "start": 3.32,
+      "end": 3.8200000000000003,
+      "text": "DIFERENTE,"
+    },
+    {
+      "start": 4.02,
+      "end": 4.58,
+      "text": "PERO SEGURO."
+    },
+    {
+      "start": 4.84,
+      "end": 5.46,
+      "text": "TRÁELOS A NANA’S"
+    },
+    {
+      "start": 5.46,
+      "end": 6.12,
+      "text": "PLAYHOUSE."
+    },
+    {
+      "start": 6.18,
+      "end": 6.62,
+      "text": "ES EL LUGAR"
+    },
+    {
+      "start": 6.62,
+      "end": 7.36,
+      "text": "MÁS SEGURO EN"
+    },
+    {
+      "start": 7.36,
+      "end": 7.82,
+      "text": "EL ÁREA PARA"
+    },
+    {
+      "start": 7.82,
+      "end": 8.399999999999999,
+      "text": "TUS NIÑOS."
+    }
+  ],
+  "previous_version": "../runs/nanas-fin-de-semana-v1.mp4"
+}

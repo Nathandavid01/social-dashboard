@@ -1,0 +1,29 @@
+{
+  "name": "Farmacia Buena Vida · Publicados Septiembre 2026",
+  "font_file": "../media/farmacia-buena-vida/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 82,
+  "bold": -1,
+  "primary_colour": "&H00E8FFF7",
+  "outline_colour": "&H0046BEA1",
+  "back_colour": "&H50000000",
+  "border_style": 1,
+  "outline": 3,
+  "shadow": 1,
+  "alignment": 2,
+  "margin_x": 85,
+  "bottom_margin": 690,
+  "fixed_size": true,
+  "wrap_width": 900,
+  "max_words": 4,
+  "max_chars": 26,
+  "caption_animation": "none",
+  "status": "observed_published_style_font_approximation_review_pending",
+  "reference": "media/farmacia-buena-vida/brand/published-reference.mp4",
+  "notes": [
+    "Referencia publicada 2026-09-25 DdtnpTClDYE y 2026-09-21. Montserrat Bold es aproximación visual; fuente exacta no suministrada.",
+    "Texto claro con acento verde oliva/lima, frases cortas y posición sobre torso bajo.",
+    "Cierre extraído de referencia oficial, audio musical omitido para no reutilizar canción.",
+    "Reevaluación: tamaño 82 para legibilidad en móvil; blanco y borde verde según familia publicada. Propuesta editorial pendiente de aprobación."
+  ]
+}

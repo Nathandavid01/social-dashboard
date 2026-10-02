@@ -1,0 +1,212 @@
+[
+  {
+    "source": "media/d19845e3-c177-4c9c-a065-872216348bee.mp4",
+    "family": "caballito",
+    "videos": [
+      {
+        "slug": "padres",
+        "title": "Un Plan Para Mamá Y Papá",
+        "version": 8,
+        "at": 3.26,
+        "in": 0.5,
+        "out": 1.82
+      }
+    ]
+  },
+  {
+    "source": "media/6fdc1ad9-34dc-41af-ab19-0b8f951683ab.mp4",
+    "family": "cumpleanos",
+    "videos": [
+      {
+        "slug": "cumpleanos",
+        "title": "Dónde Celebrar Su Cumpleaños",
+        "version": 5,
+        "at": 1.24,
+        "in": 0.5,
+        "out": 2.05
+      }
+    ]
+  },
+  {
+    "source": "media/9d2d72ec-0a64-4878-83bb-aea3392dafcd.mp4",
+    "family": "cocinita",
+    "videos": [
+      {
+        "slug": "practico",
+        "title": "Tres Cosas Menos De Qué Preocuparte",
+        "version": 14,
+        "at": 5.36,
+        "in": 11.5,
+        "out": 13.38
+      }
+    ]
+  },
+  {
+    "source": "media/2ff43f37-3ae9-4cd9-b86c-f53c0d4c3ccf.mp4",
+    "family": "carrito",
+    "videos": [
+      {
+        "slug": "fin-de-semana",
+        "title": "Un Plan Diferente Para El Fin De Semana",
+        "version": 7,
+        "at": 2.96,
+        "in": 0.2,
+        "out": 1.52
+      }
+    ]
+  },
+  {
+    "source": "media/d7ff3a21-3e6c-4d65-9744-fb1c3dc57590.mp4",
+    "family": "dulces",
+    "videos": [
+      {
+        "slug": "snacks",
+        "title": "Dulces Y Bebidas",
+        "version": 7,
+        "at": 5.05,
+        "in": 4,
+        "out": 5.77
+      }
+    ]
+  },
+  {
+    "source": "media/8a3d4055-c01a-499c-b940-2261b87dfed1.mp4",
+    "family": "bebidas",
+    "videos": [
+      {
+        "slug": "snacks",
+        "title": "Dulces Y Bebidas",
+        "version": 7,
+        "at": 6.82,
+        "in": 6,
+        "out": 7.14
+      }
+    ]
+  },
+  {
+    "source": "media/66326bc0-f34e-44c3-bd6c-576872323be1.mp4",
+    "family": "popcorn",
+    "videos": [
+      {
+        "slug": "snacks",
+        "title": "Dulces Y Bebidas",
+        "version": 7,
+        "at": 7.96,
+        "in": 2,
+        "out": 3.5
+      }
+    ]
+  },
+  {
+    "source": "media/07dafca1-8568-4a61-a3d5-abd96dd59b5b.mp4",
+    "family": "acompanamiento",
+    "videos": [
+      {
+        "slug": "seguridad",
+        "title": "Reglas Del Área De Juegos",
+        "version": 8,
+        "at": 6.2,
+        "in": 0.5,
+        "out": 4.1
+      }
+    ]
+  },
+  {
+    "source": "media/c24fefc0-43f4-4c68-a152-079d3611d90c.mp4",
+    "family": "snacks",
+    "videos": [
+      {
+        "slug": "seguridad",
+        "title": "Reglas Del Área De Juegos",
+        "version": 8,
+        "at": 9.87,
+        "in": 0,
+        "out": 2.22
+      }
+    ]
+  },
+  {
+    "source": "media/4d7d93f7-fdc4-4814-959d-763c84f81252.mp4",
+    "family": "escalones",
+    "videos": [
+      {
+        "slug": "seguridad",
+        "title": "Reglas Del Área De Juegos",
+        "version": 8,
+        "at": 14.85,
+        "in": 0,
+        "out": 1.7
+      }
+    ]
+  },
+  {
+    "source": "media/c581c160-ad65-4b7d-a3b8-c8ec8917b403.mp4",
+    "family": "bloques",
+    "videos": [
+      {
+        "slug": "indoor",
+        "title": "Tres Razones Para Celebrar En Nana’s",
+        "version": 11,
+        "at": 0,
+        "in": 12,
+        "out": 15.9
+      }
+    ]
+  },
+  {
+    "source": "media/f90dfde8-0fe4-47e7-b5c0-cfeb4925a699.mp4",
+    "family": "acompanamiento",
+    "videos": [
+      {
+        "slug": "indoor",
+        "title": "Tres Razones Para Celebrar En Nana’s",
+        "version": 11,
+        "at": 3.9,
+        "in": 1,
+        "out": 4.12
+      }
+    ]
+  },
+  {
+    "source": "media/8ed1af63-e93c-4250-a57f-1491cb0a92f2.mp4",
+    "family": "piscina de bolas",
+    "videos": [
+      {
+        "slug": "indoor",
+        "title": "Tres Razones Para Celebrar En Nana’s",
+        "version": 11,
+        "at": 7.02,
+        "in": 0.5,
+        "out": 1.88
+      }
+    ]
+  },
+  {
+    "source": "media/fe4fa7f4-0a25-4352-920e-2cdfb1130db5.mp4",
+    "family": "supermercado",
+    "videos": [
+      {
+        "slug": "parque",
+        "title": "¿Se Aburre En El Parque?",
+        "version": 9,
+        "at": 8.13,
+        "in": 1,
+        "out": 4
+      }
+    ]
+  },
+  {
+    "source": "media/ea956d16-56c5-4f62-8666-be16530d8aaa.mp4",
+    "family": "chorrera",
+    "videos": [
+      {
+        "slug": "parque",
+        "title": "¿Se Aburre En El Parque?",
+        "version": 9,
+        "at": 11.13,
+        "in": 1.5,
+        "out": 3.7
+      }
+    ]
+  }
+]

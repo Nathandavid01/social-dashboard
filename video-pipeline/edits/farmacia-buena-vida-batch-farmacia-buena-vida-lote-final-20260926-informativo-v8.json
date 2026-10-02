@@ -1,0 +1,195 @@
+{
+  "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe",
+  "title": "Visítanos En Maunabo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/informativo.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/informativo-corrected.json",
+  "style": "../styles/farmacia-buena-vida-v3.json",
+  "clips": [
+    {
+      "in": 1.35,
+      "out": 6.3,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.65,
+      "out": 8.95,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.45,
+      "out": 10.95,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.18,
+      "out": 11.85,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.2,
+      "out": 13.45,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 13.87,
+      "out": 15.7,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.08,
+      "out": 17.55,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 18.03,
+      "out": 20.8,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.82,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.18,
+      "out": 31.1,
+      "zoom": 1.18,
+      "focus_y": 0.2,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.07,
+      "end": 1.05,
+      "text": "Farmacia Buena Vida"
+    },
+    {
+      "start": 1.07,
+      "end": 2.14,
+      "text": "queda ubicado en la calle"
+    },
+    {
+      "start": 2.17,
+      "end": 3.91,
+      "text": "Muñoz Rivera #24"
+    },
+    {
+      "start": 3.95,
+      "end": 4.95,
+      "text": "Maunabo"
+    },
+    {
+      "start": 5.02,
+      "end": 6.25,
+      "text": "Contamos con servicio de"
+    },
+    {
+      "start": 6.28,
+      "end": 7.24,
+      "text": "Western Union,"
+    },
+    {
+      "start": 7.29,
+      "end": 8.8,
+      "text": "sellos y comprobantes,"
+    },
+    {
+      "start": 14.08,
+      "end": 16.02,
+      "text": "Certificados de ASUME,"
+    },
+    {
+      "start": 16.1,
+      "end": 18.31,
+      "text": "PAN y antecedentes penales"
+    },
+    {
+      "start": 18.41,
+      "end": 20.82,
+      "text": "También imprimimos\nlicencias de automóvil"
+    },
+    {
+      "start": 24.07,
+      "end": 26.23,
+      "text": "entre otros servicios."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/fax-pro-v1.mp4",
+      "in": 0,
+      "out": 1.899,
+      "at": 8.8,
+      "reason": "fax-pro-v1; apoyo real pertinente, rotulo original conservado sin duplicar subtitulos",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "source_in": 18.58,
+      "source_out": 20.5
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/medicamentos-pro-v1.mp4",
+      "in": 0,
+      "out": 3.36,
+      "at": 10.72,
+      "reason": "medicamentos-pro-v1; apoyo real pertinente, rotulo original conservado sin duplicar subtitulos",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "source_in": 16.98,
+      "source_out": 18.4
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/cesco-pro-v1.mp4",
+      "in": 0,
+      "out": 3.132333,
+      "at": 20.93,
+      "reason": "cesco-pro-v1; apoyo real pertinente, rotulo original conservado sin duplicar subtitulos",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/broll/2026-08-10.mp4",
+      "source_in": 2.05,
+      "source_out": 2.95
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Reedicion profesional: sin banda de fachada; encuadre estable mas cercano; tres apoyos continuos sobre fax, medicamentos y CESCO; correccion de luminosidad; tipografia blanca consistente y frases completas. No inventar dialogo. Revision del cliente pendiente."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  }
+}

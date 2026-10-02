@@ -1,0 +1,54 @@
+{
+  "client": "Sartenes",
+  "style": "../styles/sartenes-provisional-v1.json",
+  "idea_id": "sartenes-servicio-lasana",
+  "title": "Servicio de lasaña y ravioles",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/sartenes-20261001/originales/DJI_20261001115633_0181_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/sartenes-20261001/transcripts/DJI_20261001115633_0181_D.json",
+  "clips": [
+    {
+      "in": 1.32,
+      "out": 22.95,
+      "zoom": 1
+    }
+  ],
+  "broll": [
+    {
+      "source": "../../../../../Volumes/Extreme SSD/Nate Media/sartenes-20261001/originales/DJI_20261001115700_0182_D.MP4",
+      "in": 0.35,
+      "out": 3.55,
+      "at": 6.04,
+      "eof_action": "pass",
+      "reason": "Plano del plato mientras nombra los ravioles de espinaca y queso ricotta."
+    }
+  ],
+  "music": {
+    "source": "../media/music/Fancy Family.mp3",
+    "title": "Fancy Family",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Fancy%20Family.mp3",
+    "license_evidence": "media/music/FreePD-CC0-LICENSE.txt",
+    "target_lufs": -27
+  },
+  "captions": [
+    {"start": 0.08, "end": 1.75, "text": "Con su permiso, familia."},
+    {"start": 1.8, "end": 4.45, "text": "Por aquí tengo\nla lasaña de carne."},
+    {"start": 4.54, "end": 6.45, "text": "Por aquí tengo\nlos nuevos ravioles"},
+    {"start": 6.58, "end": 8.05, "text": "de espinaca\ny queso ricotta,"},
+    {"start": 8.2, "end": 9.55, "text": "en la salsa napolitana."},
+    {"start": 9.8, "end": 12.15, "text": "Y por aquí,\npara la jovencita,"},
+    {"start": 12.24, "end": 13.3, "text": "tengo otra lasaña."},
+    {"start": 14.54, "end": 15.9, "text": "Buen provecho, familia."},
+    {"start": 16.06, "end": 18.9, "text": "¿Gustan algo más,\no estamos bien\npor el momento?"},
+    {"start": 19.52, "end": 20.55, "text": "Perfecto. Buen provecho."},
+    {"start": 20.68, "end": 21.55, "text": "Espero que lo disfruten."}
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Idea más reciente del 1 de octubre, toma 0181. El 0182 es el plano del plato.",
+    "Whisper oyó «radios» y «queso rico, ota». En cámara el plato es pasta rellena; se corrigió a ravioles de espinaca y queso ricotta. Falta la escucha de Eric.",
+    "Captions en paleta provisional. Sartenes no tiene perfil publicado en el pipeline.",
+    "Aprobación pendiente. No subir a Recibo."
+  ]
+}

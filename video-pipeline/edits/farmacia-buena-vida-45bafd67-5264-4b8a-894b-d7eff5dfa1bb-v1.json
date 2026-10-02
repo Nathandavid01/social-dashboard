@@ -1,0 +1,126 @@
+{
+  "idea_id": "45bafd67-5264-4b8a-894b-d7eff5dfa1bb",
+  "title": "POV: Lo que oye un farmacéutico todos los días",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/source-joined-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/joined-transcript-v1.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0.7,
+      "out": 4.35,
+      "zoom": 1.0,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 4.35,
+      "out": 6.67,
+      "zoom": 1.1,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 7.840367,
+      "out": 15.820367,
+      "zoom": 1.0,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 15.820367,
+      "out": 18.640367,
+      "zoom": 1.1,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 20.765334,
+      "out": 25.465334,
+      "zoom": 1.0,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 25.465334,
+      "out": 27.905334,
+      "zoom": 1.09,
+      "focus_y": 0.12,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 23.91,
+      "text": "POV: Lo que oye\nun farmacéutico\ntodos los días"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 5.97,
+      "duration": 0.25,
+      "gain_db": -34
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 16.77,
+      "duration": 0.25,
+      "gain_db": -34
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric: editar Lo que oye un farmacéutico. Perfil POV vigente v5; blanco Montserrat SemiBold65 sobre caja oliva.",
+    "Tres crudos R2 verificados por tamaño y SHA256; orden toma3, toma2, toma1. Selección de reacciones reales en contact sheets.",
+    "Eliminar preparación y resets; conservar consultas y reacciones con tres acercamientos moderados. Sin B-roll añadido: diálogo y expresión sostienen la idea.",
+    "Transcripción automática contiene términos inciertos: no se quemó como subtítulos de diálogo. Título editorial del brief; voz original conservada. Escucha crítica pendiente.",
+    "Música nueva Secret Garden (Mixkit595), sin usos anteriores por título/URL/hash. Licencia comercial sin atribución obligatoria verificada en documentación oficial. Audición crítica pendiente."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4",
+    "pov_caption_reference": "media/farmacia-buena-vida/brand/caption-reference-original.png"
+  },
+  "caption_mode": "editorial",
+  "audio_master": {
+    "mode": "dialogue",
+    "speech_regions": [
+      {
+        "start": 0,
+        "end": 3.4
+      },
+      {
+        "start": 6.1,
+        "end": 13.1
+      },
+      {
+        "start": 14.45,
+        "end": 16.75
+      },
+      {
+        "start": 17.12,
+        "end": 21.2
+      }
+    ],
+    "music_below_voice_lu": 16
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/music/Secret Garden - Eugenio Mininni.mp3",
+    "title": "Secret Garden",
+    "artist": "Eugenio Mininni",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/music/Secret Garden.provenance.json",
+    "extend_through_outro": false
+  }
+}

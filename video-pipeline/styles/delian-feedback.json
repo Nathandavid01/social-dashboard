@@ -1,0 +1,300 @@
+{
+  "client": "Dra. Delian Loyola",
+  "status": "reference_only",
+  "caption_reference": "media/delian/brand/ejemplo.jpg",
+  "font_reference": "media/delian/brand/tipografia.jpg",
+  "font_named_in_reference": "Shoika",
+  "font_file_available": true,
+  "font_fallback": "media/delian/brand/Montserrat-Bold.ttf",
+  "current_style": "styles/delian-reference-v6-shoika.json",
+  "outro": "media/delian/brand/outro-loyola.mp4",
+  "brand_logo": "media/delian/brand/logo-dml.jpg",
+  "notes": [
+    "El outro local se verifico visualmente: Dra. Delian Loyola, DML Cosmetic Dentistry y CTA 787-230-7573.",
+    "Correcciones contiene versiones historicas; no se confirmo cual fue aprobada.",
+    "Publicados/14 agosto muestra subtitulos blancos de frases cortas sobre el torso, con sombra violeta y una palabra violeta ocasional; priorizar esta referencia audiovisual frente a Ejemplo.jpg.",
+    "No inventar afirmaciones odontologicas, testimonio ni resultados; conservar la voz y el sentido registrados.",
+    "Solicitud de Eric para el lote de cinco: aplicar keyframes sutiles sin recortar rostro, manos ni telefono; musica comercial con licencia documentada debajo de la voz; SFX discretos ligados a cortes o enumeraciones reales; B-roll clinico pertinente, no de relleno; conservar el outro oficial y revisar la mezcla por oido antes de aprobar.",
+    "2026-09-23: Shoika SemiBold obtenida del catálogo de CapCut y cotejada con Publicados 14 agosto. Medición de la frase de referencia: caja blanca original x271–807 y1344–1388; nuevo render x269–809 y1344–1389. Tamaño ASS72, sombra violeta 5, sin contorno grueso."
+  ],
+  "professional_edit_rule": {
+    "date": "2026-09-23",
+    "request": "Eric: «vuelve a reeditar estos videos haciéndolos más profesionales»",
+    "scope": "global Delian",
+    "rule": [
+      "Encuadre como Publicados (14 agosto/28 agosto): alternar plano medio (1.1–1.25) y primer plano (1.45–1.5) en cortes de frase; crudos DJI 1728×3072 admiten 1.6 sin perder nitidez; usar focus_y para dejar el rostro sobre los captions (sentada: 0.7).",
+      "Cortar SOLO dentro de silencios medidos (silencedetect −42 dB/0.15 s); Whisper estira palabras sobre pausas → scripts/snap_words_to_silence.py antes de fijar cortes; verificar con envolvente que el final de cada palabra no quede mordido.",
+      "Captions con Shoika SemiBold ASS72, texto blanco, sombra violeta desplazada 5px, sin contorno grueso; tamaño y posición constantes como Publicados 14 agosto. Pregunta inicial con sombra negra. Perfil v6.",
+      "Placa de título al inicio (scripts/delian_plates.py, estilo habitos-title) cuando la voz no abre con la pregunta; tarjeta Dra. Delian Loyola · DML Cosmetic Dentistry cuando responde a cámara.",
+      "Pausas muertas >0.6 s se recortan a ~0.3–0.5 s; nada de silencio antes de la primera palabra."
+    ],
+    "versions": [
+      "delian-prevencion-20260810-v9",
+      "delian-visita-seis-meses-20260528-v5",
+      "delian-habitos-orales-20260810-v6",
+      "delian-cinco-opciones-20260810-v5",
+      "delian-hilo-dental-20260528-v4"
+    ],
+    "approval": "pending"
+  },
+  "september_finish": {
+    "date": "2026-09-23",
+    "scope": "five September 21 recordings",
+    "request": "Continuar hasta cerrar acabado profesional solicitado",
+    "requirements": [
+      "Resolver transcripción con segunda pasada y revisar palabras dudosas sin atribuir escucha humana a ASR.",
+      "Keyframes sutiles, acentos sonoros ligados a entradas o enumeraciones; evitar sonidos por palabra.",
+      "B-roll literal, variado y registrado por fuente; no representar carillas o mock-up con simulación Invisalign.",
+      "Captions móviles según encuadre para dejar demostraciones visibles; palabras compuestas permanecen juntas.",
+      "Comparar versiones actuales con anteriores, preservar originales y validar audio/export/playback."
+    ],
+    "font_search": "Resolved: Shoika SemiBold downloaded from CapCut on 2026-09-23, visible under Commercial filter; glyphs and scale compared with published reference.",
+    "approval": "pending"
+  },
+  "transition_broll_music_request": {
+    "date": "2026-09-23",
+    "scope": "Delian September five",
+    "request": "Transiciones con efectos y sonidos, B-roll de video e imágenes, música de fondo",
+    "rule": "Aplicar los cinco recursos al lote con apoyos semánticos; imágenes generadas identificadas como ilustrativas, conservar demostraciones, efectos ligados a cambios visuales, música 9 LU por debajo de voz como punto inicial medido; escucha crítica pendiente."
+  },
+  "diseno_sonrisa_reference_revision": {
+    "date": "2026-09-23",
+    "scope": "diseno-sonrisa-20260921",
+    "request": "Edición profesional basada en sus videos publicados; se comenzó con el primer video de la galería.",
+    "current_edit": "edits/delian-diseno-sonrisa-20260921-v7.json",
+    "criteria": [
+      "Conservar diálogo e ideas completos.",
+      "Cambiar encuadre por frase y mantener gestos visibles.",
+      "No dejar retornos de pocos fotogramas después del apoyo.",
+      "Dar continuidad musical al outro silencioso con la misma pista licenciada, conservando el video oficial."
+    ],
+    "font": "Shoika SemiBold original; tamaño/posición/sombra cotejados",
+    "critical_listening": "pending",
+    "approval": "pending",
+    "request_followup": "Ver publicados, usar los mismos captions y mejores B-rolls",
+    "broll": "Reemplaza la ilustración por un escaneo dental real de la consulta, con recorte para excluir interfaz superior. No representa instalación de carillas."
+  },
+  "font_file": "media/delian/brand/Shoika-SemiBold.otf",
+  "font_fallback_scope": "Historical exports only",
+  "audio_feedback": {
+    "date": "2026-09-23",
+    "request": "La música está triste y los sonidos de las transiciones deben ser clicks.",
+    "scope": "Delian; corrección aplicada a Diseño de Sonrisa",
+    "rules": [
+      "Música alegre y ligera, con pulso; evitar piano melancólico.",
+      "Clicks breves y secos sincronizados a cambios visuales; reemplazan swipes y whooshes.",
+      "Mantener voz clara y música por debajo; continuidad musical hasta final del outro."
+    ],
+    "current_music": "Funshine",
+    "music_provenance": "media/music/Funshine.provenance.json",
+    "transition_preset": "mouse_click",
+    "transition_duration": 0.06,
+    "transition_gain_db": -20,
+    "current_edit": "edits/delian-diseno-sonrisa-20260921-v7.json",
+    "approval": "pending"
+  },
+  "proceso_sonrisa_revision": {
+    "date": "2026-09-23",
+    "request": "Editar el próximo video usando lo aprendido en la edición anterior.",
+    "scope": "proceso-sonrisa-20260921",
+    "current_edit": "edits/delian-proceso-sonrisa-20260921-v12.json",
+    "changes": [
+      "Shoika original y captions de los publicados",
+      "Contexto escrito de diseño de sonrisa sobre la apertura original; no inventar voz",
+      "Funshine alegre, otra sección musical, continua hasta el outro",
+      "Clicks secos sincronizados; sin swipes ni flashes fuertes",
+      "Conservar voz y versiones previas",
+      "v6: nuevos apoyos de encerado y laboratorio sin rótulo; keyframes más visibles. Procedencia documentada fuera del video."
+    ],
+    "critical_listening": "pending",
+    "user_review": "pending"
+  },
+  "proceso_sonrisa_broll_correction": {
+    "date": "2026-09-23",
+    "request": "Quitar Imagen ilustrativa, mejorar mucho los B-rolls y añadir keyframes.",
+    "scope": "proceso-sonrisa-20260921",
+    "rules": [
+      "No mostrar el rótulo Imagen ilustrativa en esta revisión; conservar procedencia en los archivos de producción.",
+      "Sustituir el modelo sobre fondo lila de v5 por apoyos visuales nuevos de encerado y trabajo de laboratorio.",
+      "Aplicar keyframes perceptibles y suaves en apoyos y encuadres de la doctora, sin cortar rostro, manos ni captions."
+    ],
+    "status": "local_review_export",
+    "current_edit": "edits/delian-proceso-sonrisa-20260921-v6.json",
+    "current_export": "runs/delian-proceso-sonrisa-20260921-v6.mp4",
+    "direct_playback": "pass",
+    "critical_listening": "pending",
+    "user_review": "pending"
+  },
+  "proceso_sonrisa_more_broll": {
+    "request": "Eric: utilizar más B-rolls también.",
+    "scope": "proceso-sonrisa-20260921",
+    "rule": "Aumentar variedad y cobertura con apoyos pertinentes a evaluación, encerado, preferencia del paciente y laboratorio; conservar gestos de la explicación.",
+    "status": "local_review_export",
+    "current_edit": "edits/delian-proceso-sonrisa-20260921-v7.json",
+    "broll_count": 4,
+    "coverage_seconds": 8.32,
+    "critical_listening": "pending",
+    "direct_playback": "pending",
+    "user_review": "pending"
+  },
+  "unique_music_per_reel": {
+    "request": "Cada vez que haga un reel cambiar la música; nunca la misma.",
+    "scope": "all new reels",
+    "registry": "styles/music-usage.json",
+    "current_correction": "Beat One reemplaza City Sunshine incluyendo outro.",
+    "status": "local_review_export",
+    "approval": "pending",
+    "current_edit": "edits/delian-proceso-sonrisa-20260921-v10.json"
+  },
+  "clean_broll_cuts": {
+    "request": "No hay corte limpio entre B-rolls; evitar imagen fantasma de la doctora.",
+    "scope": "Delian B-roll transitions",
+    "rule": "Cortes directos opacos, sin fundidos alfa ni blur en empalmes de B-roll. No revelar plano base entre dos apoyos contiguos. Revisar fotogramas antes y después.",
+    "current_edit": "edits/delian-proceso-sonrisa-20260921-v9.json",
+    "status": "local_review_export"
+  },
+  "proceso_music_direction": {
+    "request": "Moderna estilo mexicano rap",
+    "scope": "proceso-sonrisa-20260921",
+    "direction": "Instrumental de rap mexicano moderno, bajo y batería marcados; voz al frente. No pop festivo City Sunshine ni música de meditación.",
+    "rejected_track": "City Sunshine",
+    "candidate": "White_Records — Latin background music for short video 1 minute hip hop Mexican beat",
+    "candidate_url": "https://pixabay.com/music/urban-latin-latin-background-music-for-short-video-1-minute-hip-hop-mexican-beat-144293/",
+    "status": "local_review_export",
+    "current_export_still": "runs/delian-proceso-sonrisa-20260921-v12.mp4",
+    "followup": "Eric: pon cualquier otra que tú entiendas; autoriza seleccionar alternativa disponible.",
+    "selected_track": "Vlog Hip-Hop - ProducesPlatinum",
+    "critical_listening": "pending",
+    "latest_request": "Música más moderna, a la moda",
+    "approval": "pending",
+    "user_provided_download": true
+  },
+  "metricool_before_edit": {
+    "user_request": "Asegúrate que no esté uploaded a Metricool",
+    "rule": "Antes de elegir o editar otro video, comprobar en la marca correcta de Metricool que no exista ya en borradores, programados o publicados; no basarse solo en el dashboard.",
+    "verified_brand_id": 6354086,
+    "instagram": "dmlcosmeticdentistry",
+    "hilo_check_evidence": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/metricool-check.json"
+  },
+  "gingivitis_caption_correction": {
+    "date": "2026-09-24",
+    "scope": "gingivitis-20260921",
+    "literal": "sangrado en las encías.",
+    "note": "Corrección explícita de Eric; no sangrar ni en la encía. La confirmación del usuario prevalece sobre la transcripción automática.",
+    "version": "v3"
+  },
+  "gingivitis_opening_broll": {
+    "date": "2026-09-24",
+    "scope": "gingivitis-20260921",
+    "request": "Más B-roll al principio y keyframes profesionales",
+    "implementation": "v4: clínica 1.1–3.8 s, hilo 7.98–10.18 s; keyframes suaves en apoyos y planos principales; sin fundidos.",
+    "latest_correction": {
+      "version": "v5",
+      "request": "No repetir mismo B-roll ni introducir apoyos sin sentido",
+      "rule": "Identificar escena y acción además de archivo: sillón 0105, sillón 0111 y visita-clinica pertenecen a la misma familia visual. Usar solo una aparición. Manos estirando hilo descartadas para este reel. No contar archivos distintos como variedad.",
+      "confirmed_scope": "Eric aclara: repetición dentro del mismo video, no entre distintos reels."
+    }
+  },
+  "prevencion_broll_transitions": {
+    "date": "2026-09-24",
+    "version": "v3",
+    "request": "Más B-roll y mejores transiciones",
+    "implementation": "Cuatro escenas distintas vinculadas a narración, movimientos smoothstep y acercamientos breves en cortes. Mantener clicks, sin transparencias ni repetición de escenas.",
+    "additional_check": "Evitar regreso de pocos fotogramas al plano inferior entre apoyo y siguiente clip. Limpieza se prolonga hasta 17.41."
+  },
+  "creative_broll_no_reuse": {
+    "date": "2026-09-24",
+    "scope": "Delian, nuevos reels y revisión actual de prevención de caries",
+    "request": "Este video está bueno; apoyos más creativos con imágenes nuevas, modelos 3D o motion graphics. No volver a usar B-rolls de videos anteriores.",
+    "rules": [
+      "No reutilizar B-roll entre reels de Delian; comprobar familia de escena, hash y registro de usos. Recortar o cambiar keyframes no crea un recurso nuevo.",
+      "Crear apoyos nuevos ligados al concepto hablado: imágenes licenciadas, ilustraciones educativas 3D o motion graphics; preservar voz, captions y estilo publicados.",
+      "Reservar cada recurso nuevo para su reel. Las versiones del mismo reel pueden conservarlo.",
+      "Sin rótulo Imagen ilustrativa por corrección del usuario; conservar procedencia fuera de pantalla y no presentar modelos educativos como pacientes o resultados reales."
+    ],
+    "current_edit": "edits/delian-prevencion-caries-20260921-v5.json",
+    "supersedes": "La aclaración previa de repetición solo dentro del video ya no permite reciclar B-roll entre reels."
+  },
+  "iguales_first_broll_rejected": {
+    "date": "2026-09-24",
+    "scope": "sonrisas-iguales-20260921 primer B-roll",
+    "user_feedback": "el primer b roll esta fatal",
+    "rejected_asset": "iguales-v1-rostros",
+    "correction": "Sustituir pareja de bustos 3D por fotografía real nueva animada con keyframes. No volver a ofrecer ese primer recurso en esta idea. No implica prohibición general de 3D ni rechazo del segundo apoyo.",
+    "current_edit": "edits/delian-sonrisas-iguales-20260921-v2.json",
+    "status": "pending_user_review"
+  },
+  "iguales_many_smiles": {
+    "scope": "sonrisas-iguales-20260921 primer B-roll",
+    "date": "2026-09-24",
+    "user_request": "necesito que se vean muchas sonrisas en este broll",
+    "rule": "Mostrar varias sonrisas distintas simultáneamente. No basta un solo rostro. Mosaico con bocas completas, keyframes suaves y captions sin taparlas.",
+    "current_edit": "edits/delian-sonrisas-iguales-20260921-v4.json",
+    "status": "pending_user_review"
+  },
+  "explanatory_motion_graphics": {
+    "date": "2026-09-26",
+    "scope": "Delian; current Tres Criterios revision and relevant future concept B-roll",
+    "request": "Flecha o gráfica animada indicando lo que la doctora está diciendo.",
+    "rules": [
+      "Sincronizar indicaciones al concepto hablado, con entradas suaves y seguimiento de los keyframes.",
+      "Señalar rasgos visibles concretos; no añadir diagnósticos, medidas, resultados ni afirmaciones nuevas.",
+      "Mantener rostros y subtítulos legibles, conservar cortes opacos y clicks."
+    ],
+    "current_edit": "edits/delian-criterios-sonrisa-20260921-v2.json",
+    "user_review": "pending"
+  },
+  "criterios_opening_removed": {
+    "date": "2026-09-26",
+    "scope": "criterios-sonrisa-20260921",
+    "request": "Quitar primer B-roll; el resto está bien.",
+    "rule": "No reemplazar apoyo de planificación; conservar doctora durante apertura y los otros tres apoyos animados.",
+    "current_edit": "edits/delian-criterios-sonrisa-20260921-v3.json"
+  },
+  "realistic_3d_broll": {
+    "date": "2026-09-27",
+    "request": "Hacer las graficas mas reales",
+    "rules": [
+      "Preferir geometria dental anatomica y materiales, luz y sombras realistas; animar objetos dentro de la escena.",
+      "Recursos distintos por concepto, flechas sincronizadas y cortes opacos.",
+      "Conservar las demostraciones reales utiles y la tipografia Shoika; procedencia y creditos fuera de pantalla."
+    ],
+    "approval": "pending"
+  },
+  "limpieza_outro_music": {
+    "request": "Eric: que el outro tenga musica de fondo",
+    "scope": "ultima-limpieza-20260921",
+    "rule": "Continuar la misma pista hasta el final del outro, con salida suave. Verificar audio en el tramo final."
+  },
+  "proceso_motionarray_revision": {
+    "request": "Eric solicita nueva edicion con musica diferente o concepto de Motion Array",
+    "music": "Upbeat Classy Hip Hop — Frequently Asked Music",
+    "current_edit": "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-batch-proceso-v1.json",
+    "music_through_outro": true,
+    "critical_listening": "pending",
+    "user_review": "pending"
+  },
+  "proceso_title_legibility": {
+    "scope": "proceso-sonrisa-20260921 title only",
+    "request": "Eric: titulo superior no se ve; cambiar tono/background",
+    "rule": "Titulo blanco sobre placa violeta oscura opaca; conservar captions de dialogo."
+  },
+  "diseno_opening_face_crop": {
+    "date": "2026-09-30",
+    "scope": "diseno-sonrisa-20260921 opening only",
+    "request": "Make the entry more of her face and less of her full body",
+    "revision_authorized": true,
+    "supersedes": "v7 no-reedit rule only for this explicitly requested opening revision",
+    "rule": "Use a closer face and upper-body crop for the opening question; keep the remaining edit.",
+    "current_edit": "edits/delian-diseno-sonrisa-20260921-v8.json",
+    "user_review": "pending"
+  },
+  "iguales_opening_face_crop": {
+    "date": "2026-09-30",
+    "scope": "sonrisas-iguales-20260921 opening",
+    "request": "Eric: leave Diseño de sonrisa v8 as is; apply closer face framing to the reel opening Oye doctora y todos los diseños de sonrisas",
+    "current_edit": "edits/delian-sonrisas-iguales-20260921-v5.json",
+    "rule": "Closer face and upper-body opening; preserve following eight-smile mosaic and remaining montage.",
+    "user_review": "pending"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "idea_id": "7d93e8c8-f933-45d8-9a0a-d0b88811bb3e",
+  "title": "experiencia",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/associated-takes.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/associated-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 11.66,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.66,
+          "zoom": 1.04
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 0.48,
+      "text": "Oye chef,"
+    },
+    {
+      "start": 0.76,
+      "end": 1.28,
+      "text": "¿qué pueden esperar"
+    },
+    {
+      "start": 1.28,
+      "end": 1.82,
+      "text": "las personas"
+    },
+    {
+      "start": 1.82,
+      "end": 2.48,
+      "text": "de la"
+    },
+    {
+      "start": 2.48,
+      "end": 3.58,
+      "text": "experiencia culinaria"
+    },
+    {
+      "start": 3.58,
+      "end": 4.4,
+      "text": "aquí en Alacena?"
+    },
+    {
+      "start": 4.62,
+      "end": 4.92,
+      "text": "Mira,"
+    },
+    {
+      "start": 4.98,
+      "end": 5.42,
+      "text": "las personas"
+    },
+    {
+      "start": 5.42,
+      "end": 5.9,
+      "text": "no solamente"
+    },
+    {
+      "start": 5.9,
+      "end": 6.8,
+      "text": "vienen a comer,"
+    },
+    {
+      "start": 7.24,
+      "end": 8.1,
+      "text": "vienes a vivir"
+    },
+    {
+      "start": 8.1,
+      "end": 8.6,
+      "text": "una experiencia"
+    },
+    {
+      "start": 8.6,
+      "end": 9.39,
+      "text": "culinaria."
+    },
+    {
+      "start": 9.42,
+      "end": 10.02,
+      "text": "En un ambiente"
+    },
+    {
+      "start": 10.02,
+      "end": 11.48,
+      "text": "acogedor y familiar."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 11.65,
+      "duration": 0.045,
+      "gain_db": -25
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Both associated chef takes used: question and answer plus recorded closing. Count-ins removed. Brief 120ms picture and audio blend at pause, gentle zoom, discreet clicks on actual changes, approved Belleza caption style. Unique Have Funk Your Way music in Alacena batch. No unrelated B-roll. Critical listening and independent publication history unverified. Revision solicitada: insertar un solo B-roll nuevo de salmon 7.15–9.65, conservando todo lo demas; oculta empalme entre tomas del chef. Clicks solo en cambios visibles.",
+    "Quitar el salmon 89c817a7: pertenece a la idea chef plateando, no a experiencia culinaria. El reel queda solo con las dos tomas de su idea."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/music-bed.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/music-provenance.json"
+  }
+}

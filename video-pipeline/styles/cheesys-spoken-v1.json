@@ -1,0 +1,25 @@
+{
+  "name": "Los Cheesys · Toma Hablada",
+  "font_file": "../media/cheesys/brand/Arial-Bold.ttf",
+  "font_family": "Arial",
+  "font_size": 64,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H000C70C5",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 4,
+  "shadow": 2,
+  "alignment": 2,
+  "margin_x": 70,
+  "bottom_margin": 390,
+  "fixed_size": true,
+  "wrap_width": 910,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "notes": [
+    "Arial Bold aproximada visualmente desde HECHOS; fuente oficial no confirmada.",
+    "Respuesta de presentadora: blanco con contorno naranja, zona baja y frases de una o dos líneas."
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "salmon-tempura",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Salmón Sin Comerlo Crudo?",
+  "source": "../media/yabuuchi/derived/salmon-tempura-complete-v1.mp4",
+  "transcript": "../runs/yabuuchi-salmon-tempura-complete-v1-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 17.95,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.16,
+      "text": "Oye, me gusta el salmón,"
+    },
+    {
+      "start": 1.3,
+      "end": 1.82,
+      "text": "pero no crudo."
+    },
+    {
+      "start": 1.9,
+      "end": 2.38,
+      "text": "¿Tengo opciones?"
+    },
+    {
+      "start": 2.5,
+      "end": 2.84,
+      "text": "Claro que sí."
+    },
+    {
+      "start": 2.92,
+      "end": 3.96,
+      "text": "Te tengo la opción perfecta."
+    },
+    {
+      "start": 4.04,
+      "end": 5.14,
+      "text": "Este es nuestro Tempura Roll."
+    },
+    {
+      "start": 5.56,
+      "end": 6.52,
+      "text": "Obviamente lleva lo que es"
+    },
+    {
+      "start": 6.52,
+      "end": 8.04,
+      "text": "salmón frito en tempura,"
+    },
+    {
+      "start": 8.28,
+      "end": 9.32,
+      "text": "con aguacate,"
+    },
+    {
+      "start": 9.56,
+      "end": 10.64,
+      "text": "tempura flakes,"
+    },
+    {
+      "start": 10.94,
+      "end": 11.96,
+      "text": "con puntitos de tártara"
+    },
+    {
+      "start": 11.96,
+      "end": 13.3,
+      "text": "y cebollín de topping."
+    },
+    {
+      "start": 13.68,
+      "end": 14.32,
+      "text": "¿Y dónde lo consigo?"
+    },
+    {
+      "start": 14.68,
+      "end": 15.52,
+      "text": "Lo consigues aquí en"
+    },
+    {
+      "start": 15.52,
+      "end": 16.14,
+      "text": "Yabuuchi Sushi."
+    }
+  ],
+  "source_parts": [
+    {
+      "code": "0339",
+      "start": 1.3,
+      "end": 17.75,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Pregunta y respuesta completas, sin conteo",
+      "source": "media/yabuuchi/source/DJI_20260909124519_0339_D.MP4",
+      "at": 0,
+      "duration": 16.45
+    },
+    {
+      "code": "0331",
+      "start": 0.15,
+      "end": 1.65,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Detalle final del mismo roll, sin voz de rodaje",
+      "source": "media/yabuuchi/source/DJI_20260909123938_0331_D.MP4",
+      "at": 16.45,
+      "duration": 1.5
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "in": 0,
+    "out": 2.92,
+    "gain": 1,
+    "provenance": "https://www.instagram.com/reel/DcCZF8YEtzV/",
+    "audio_range": [
+      16.1,
+      19.09
+    ]
+  },
+  "music": {
+    "source": "../media/music/City Sunshine.mp3",
+    "license": "CC0 1.0",
+    "provenance": "media/music/City Sunshine.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260909123919_0330_D.MP4",
+      "in": 11.0,
+      "out": 12.34,
+      "at": 11.96,
+      "eof_action": "pass",
+      "fade_in": 0.067,
+      "fade_out": 0.067,
+      "reason": "Añadir cebollín cuando lo menciona; mismo roll que 0339, audio silenciado."
+    }
+  ],
+  "effects": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 11.96,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Entrada al cebollín"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 13.3,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Regreso a la pregunta final"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 16.45,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Detalle de producto"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 17.88,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Entrada al outro"
+    }
+  ],
+  "voice_filter": "highpass=f=85",
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "speech_regions": [
+      {
+        "start": 0,
+        "end": 2.42,
+        "role": "pregunta"
+      },
+      {
+        "start": 2.48,
+        "end": 13.4,
+        "role": "respuesta"
+      },
+      {
+        "start": 13.65,
+        "end": 14.4,
+        "role": "pregunta_final"
+      },
+      {
+        "start": 14.65,
+        "end": 16.2,
+        "role": "respuesta_final"
+      }
+    ]
+  },
+  "review_notes": [
+    "Primer montaje de 0339, sin conteo y con conversación completa.",
+    "Producto y cebollín de la misma familia 0330/0331/0339, no usar otros rolls genéricos.",
+    "Captions corregidos sobre transcripción automática; confirmar por escucha nombre Tempura Roll, tempura flakes, tártara y topping. No afirmar escucha crítica.",
+    "Outro oficial, clicks y música CC0; sin publicación automática."
+  ],
+  "references": {
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "page": 1,
+    "concept": "Opciones para quien no quiere pescado crudo",
+    "adaptation": "Pregunta por salmón cocinado, respuesta Tempura Roll, ingredientes y cierre de marca, con diálogo grabado original."
+  }
+}

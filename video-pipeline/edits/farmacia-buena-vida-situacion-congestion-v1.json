@@ -1,0 +1,82 @@
+{
+  "idea_id": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+  "title": "¿Estornudos y Congestión?",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/source/situacion-original.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/review/transcript.json",
+  "style": "../styles/farmacia-buena-vida-v3.json",
+  "clips": [
+    {
+      "in": 0.55,
+      "out": 10.85,
+      "zoom": 1.0,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.13,
+      "end": 1.55,
+      "text": "En esta época de mucha bruma,"
+    },
+    {
+      "start": 2.25,
+      "end": 3.63,
+      "text": "cambio de temperatura,"
+    },
+    {
+      "start": 4.25,
+      "end": 5.85,
+      "text": "si estás estornudando"
+    },
+    {
+      "start": 5.85,
+      "end": 6.98,
+      "text": "con congestión,"
+    },
+    {
+      "start": 7.05,
+      "end": 8.39,
+      "text": "dolor de cabeza por congestión,"
+    },
+    {
+      "start": 8.89,
+      "end": 9.38,
+      "text": "echa para acá."
+    },
+    {
+      "start": 9.47,
+      "end": 10.12,
+      "text": "Aquí te ayudamos."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador local de la toma continua. Se recortan los silencios inicial y final.",
+    "El material grabado ya muestra la farmacia y a la portavoz; se conserva el mensaje sin B-roll de otro servicio.",
+    "Aprobación y publicación pendientes."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 16
+  }
+}

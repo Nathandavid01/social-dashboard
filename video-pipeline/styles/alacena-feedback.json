@@ -1,0 +1,331 @@
+{
+  "current_style": "styles/alacena-v2.json",
+  "status": "caption_style_approved",
+  "font_identity": "Belleza Regular identified by glyph comparison in A1 A3 A4; original project unavailable",
+  "familias_broll": {
+    "date": "2026-10-01",
+    "idea_id": "b40a4770-a05e-4b4c-8afd-14ff515817f4",
+    "user_feedback": "El B roll es un poco raro, o lo mejoras o lo quitas",
+    "decision": "Retirar B-roll de salon; mantener chef continuo en esta pieza.",
+    "scope": "Solo este reel; no prohibicion global de B-roll."
+  },
+  "exact_caption_font": {
+    "date": "2026-10-01",
+    "request": "Caption exactamente misma fuente del editor original",
+    "status": "identified_from_reference_glyphs",
+    "findings": "Belleza Regular coincide en tres frases. Times New Roman y Optima descartadas. Evidencia belleza-comparison.jpg y belleza-evidence.json."
+  },
+  "familias_pacing": {
+    "date": "2026-10-01",
+    "request": "Cortes mas profesionales, editajes y keyframes; mas vida",
+    "decision": "Tres planos con cambios de escala motivados por pregunta/respuesta y pausas; keyframes suaves, sin B-roll del salon.",
+    "scope": "familias"
+  },
+  "caption_colour_shadow": {
+    "date": "2026-10-01",
+    "request": "Mismo color y efecto atras",
+    "decision": "Blanco #FCFCFC con sombra verde oscuro difuminada sin caja. Reconstruccion visual de A1/A3/A4."
+  },
+  "familias_approval": {
+    "version": "v7",
+    "date": "2026-10-01",
+    "user_feedback": "Perfecto, subelo al dash como recibo, ponle captions y vete con el otro"
+  },
+  "catering_corrections": {
+    "date": "2026-10-01",
+    "decision": "Retirar primer intento trabado de atendemos; conservar segundo. B-roll profesional literal y click breve en cada cambio visible de escena.",
+    "scope": "catering y próximos reels aplicables"
+  },
+  "catering_approval": {
+    "date": "2026-10-01",
+    "version": "v3",
+    "user_feedback": "Perfecto, subelo a recibo y edita el proximo",
+    "destination": "Recibo"
+  },
+  "soft_transitions": {
+    "date": "2026-10-01",
+    "request": "Cortes muy duros; sonidos o efectos de transición",
+    "decision": "Movimiento continuo, fundidos breves para B-roll y whoosh suave sincronizado. Evitar salto de zoom y sonidos acumulados.",
+    "scope": "ambiente y siguientes aplicables"
+  },
+  "graph_engineering_loop": {
+    "date": "2026-10-01",
+    "request": "Siempre pasa el video por un graph engineering loop para verificar detalles, poner efectos, anadir musica, etc.",
+    "steps": [
+      "referencias e idea",
+      "fuentes y continuidad",
+      "cortes y keyframes",
+      "captions",
+      "B-roll pertinente",
+      "efectos y musica",
+      "render",
+      "revision visual",
+      "reproduccion completa",
+      "escucha critica",
+      "corregir y repetir"
+    ],
+    "scope": "Cada siguiente video; no marcar controles no realizados como aprobados"
+  },
+  "ambiente_approval": {
+    "version": "v2",
+    "date": "2026-10-01",
+    "destination": "Recibo",
+    "request": "subelo a recibo y edita el proximo"
+  },
+  "picana_process_no_overlay": {
+    "date": "2026-10-01",
+    "scope": "picana-proceso only",
+    "decision": "Remove on-screen captions obstructing food and chef hands; use music and discreet scene clicks. Keep other client caption styles unchanged."
+  },
+  "salmon_rebuild": {
+    "date": "2026-10-01",
+    "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+    "user_request": "Re edita emplatar el salmon desde 0 y busca si hay algo que debaas anadir",
+    "scope": "Solo reel de emplatado del salmón",
+    "decision": "Construir montaje nuevo desde originales; añadir crema vertida al plato antes de tocar el pescado y detalle final con brotes. Apertura corta con captions Belleza vigente; resto del proceso visible. v4 requiere revisión del usuario.",
+    "status": "superseded_by_v5_knife_correction",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-desde-cero-v4/source-search.json",
+    "new_assets": [
+      "crema al plato 2.12–4.40 s",
+      "detalle final con brotes 11.50–14.50 s"
+    ]
+  },
+  "salmon_knife_sound": {
+    "date": "2026-10-01",
+    "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+    "scope": "Solo reel de emplatado del salmón",
+    "request": "hay que escucharla cuando el chef raspa el cuchillo",
+    "clarification": "Que se oiga en la edición",
+    "decision": "Reincorporar toma b949cd1c con audio original sincronizado, velocidad natural y música atenuada durante el raspado. No añadir efectos encima. Conservar resto del montaje v4.",
+    "status": "retained_in_v6",
+    "critical_listening": "pending",
+    "approval": "pending",
+    "export": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/alacena-batch-cocina-coctel-batch-salmon-proceso-v5.mp4",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5/sound-check.json",
+    "timeline_seconds": [
+      10.666667,
+      15.0
+    ],
+    "music_duck_db": -28,
+    "source_gain_db": 14
+  },
+  "salmon_pov_title": {
+    "date": "2026-10-01",
+    "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+    "scope": "Solo reel del salmón",
+    "requests": [
+      "y ponle un overlay que dice, POV: Emplatando Salmon algo asi",
+      "No vas a creer como suena este salmon debe ser el nombre o algo asi"
+    ],
+    "title": "No vas a creer cómo suena este salmón",
+    "opening_overlay": "POV: emplatando salmón",
+    "decision": "Superseded: do not split the phrase or show it only at the start.",
+    "status": "superseded_by_v7",
+    "approval": "pending",
+    "export": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/alacena-batch-cocina-coctel-batch-salmon-proceso-v6.mp4",
+    "opening_cues": [
+      {
+        "text": "POV: emplatando",
+        "in": 0.12,
+        "out": 2.05
+      },
+      {
+        "text": "salmón",
+        "in": 2.1,
+        "out": 3.45
+      }
+    ],
+    "critical_listening": "pending"
+  },
+  "salmon_pov_overlay": {
+    "date": "2026-10-01",
+    "scope": "Only salmon reel",
+    "request": "POV: Emplatando Salmon arriba con un overlay verde y que salga por todo el video",
+    "text": "POV: Emplatando Salmon",
+    "position": "top",
+    "background": "#163F2C",
+    "coverage": "full video including official outro",
+    "profile": "styles/alacena-salmon-pov-v1.json",
+    "status": "v7_local_review_pending",
+    "approval": "pending",
+    "export": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/alacena-batch-cocina-coctel-batch-salmon-proceso-v7.mp4"
+  },
+  "salmon_no_counting": {
+    "date": "2026-10-01",
+    "scope": "Salmon knife sequence only",
+    "request": "cuando esta sonando el salmon no puede escucharse el uno dos y tres",
+    "decision": "Remove spoken counting from location audio. Use original nonvocal stem, exclude first .78 seconds containing speech, retain remaining synchronous knife scraping and music dip. Preserve full-length green overlay.",
+    "version": "v8",
+    "status": "local_review_pending",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-sin-conteo-v8",
+    "critical_listening": "pending",
+    "approval": "pending"
+  },
+  "salmon_opening_sound": {
+    "date": "2026-10-01",
+    "scope": "Salmon reel only",
+    "request": "el video no puede empezar con el raspazo del cuchillo de sonido",
+    "decision": "Remove initial audio attack with .45s silent head and smooth music fade ending at1.2s. Keep count-free knife audio at the knife shot.",
+    "version": "v10",
+    "status": "local_review_pending",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-entrada-v10",
+    "approval": "pending"
+  },
+  "salmon_audio_continuity": {
+    "date": "2026-10-01",
+    "scope": "Salmon audio correction",
+    "request": "no se escucha la mitad del audio despues de la mitad del video",
+    "decision": "Rebuild full sample-continuous mix. Verify actual decoded duration and packet gaps, not container duration alone.",
+    "version": "v11",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-audio-continuo-v11/verification.json",
+    "status": "local_review_pending",
+    "critical_listening": "pending"
+  },
+  "salmon_knife_visible_only": {
+    "date": "2026-10-02",
+    "request": "solo que salga el cuchillo cuando aparece el cuchillo",
+    "decision": "Raspado original limpio audible solo en cada intervalo de cuchillo visible, con bordes suaves dentro de esos intervalos.",
+    "windows": {
+      "final_timeline_windows": [
+        [
+          11.446667,
+          11.666667
+        ],
+        [
+          12.0,
+          12.133333
+        ],
+        [
+          12.466667,
+          12.666667
+        ],
+        [
+          13.0,
+          13.166667
+        ],
+        [
+          13.566667,
+          13.733333
+        ],
+        [
+          14.4,
+          14.566667
+        ]
+      ],
+      "edge_fade_seconds": 0.008,
+      "outside_windows_peak": 0,
+      "visual_evidence": "knife-final-detail.jpg",
+      "counting_head_exclusion_retained": true
+    },
+    "version": "v12",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-sincronizado-v12",
+    "status": "local_review_pending",
+    "critical_listening": "pending"
+  },
+  "salmon_knife_audibility": {
+    "date": "2026-10-02",
+    "request": "el cuchillo se debe escuchar bien",
+    "decision": "Subir cada raspado original a un nivel perceptible y uniforme, con control suave de picos y las mismas ventanas visibles.",
+    "windows": {
+      "final_timeline_windows": [
+        [
+          11.446667,
+          11.666667
+        ],
+        [
+          12.0,
+          12.133333
+        ],
+        [
+          12.466667,
+          12.666667
+        ],
+        [
+          13.0,
+          13.166667
+        ],
+        [
+          13.566667,
+          13.733333
+        ],
+        [
+          14.4,
+          14.566667
+        ]
+      ],
+      "edge_fade_seconds": 0.008,
+      "outside_windows_peak": 0,
+      "visual_evidence": "knife-final-detail.jpg",
+      "counting_head_exclusion_retained": true
+    },
+    "version": "v13",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-presente-v13",
+    "status": "local_review_pending",
+    "critical_listening": "pending"
+  },
+  "salmon_knife_natural": {
+    "date": "2026-10-02",
+    "request": "dejalo natural en su raspado del salmon",
+    "decision": "Recuperar audio original de cámara con ganancia fija, sin separación de voz, nivelación por raspado ni saturación suave; conservar dinámica natural y las ventanas visibles, excluyendo la cabecera del conteo.",
+    "windows": {
+      "final_timeline_windows": [
+        [
+          11.446667,
+          11.666667
+        ],
+        [
+          12.0,
+          12.133333
+        ],
+        [
+          12.466667,
+          12.666667
+        ],
+        [
+          13.0,
+          13.166667
+        ],
+        [
+          13.566667,
+          13.733333
+        ],
+        [
+          14.4,
+          14.566667
+        ]
+      ],
+      "edge_fade_seconds": 0.008,
+      "outside_windows_peak": 0,
+      "visual_evidence": "knife-final-detail.jpg",
+      "counting_head_exclusion_retained": true
+    },
+    "version": "v14",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-raspado-natural-v14",
+    "status": "local_review_pending",
+    "critical_listening": "pending"
+  },
+  "salmon_knife_original": {
+    "date": "2026-10-02",
+    "request": "yo quiero el sonido originial del raspado",
+    "decision": "Audio directo original continuo, ganancia unitaria, sin filtros ni cortes entre gestos; solo excluir la cabecera del conteo. Esta corrección reemplaza el recorte por cada aparición que fragmentaba el raspado.",
+    "windows": {
+      "final_timeline_windows": [
+        [
+          11.446667,
+          15.0
+        ]
+      ],
+      "original_source_range": [
+        0.78,
+        4.333333
+      ],
+      "fixed_gain_db": 0,
+      "processing": "original continuous camera sound; short clip boundary fades only",
+      "counting_head_exclusion_retained": true
+    },
+    "version": "v15",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-raspado-original-v15",
+    "status": "local_review_pending",
+    "critical_listening": "pending"
+  }
+}

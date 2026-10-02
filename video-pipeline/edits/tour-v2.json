@@ -1,0 +1,297 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "39039f79-14c7-4330-a8f4-9b926825f1eb",
+  "title": "Área De Juego · Nana’s Playhouse",
+  "source": "../media/bcb362d9-9917-4d00-aec6-ec43f4f9e5a6.mp4",
+  "transcript": "../runs/tour-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.1,
+      "out": 3.62,
+      "zoom": 1.04
+    },
+    {
+      "in": 4.1,
+      "out": 13.5,
+      "zoom": 1
+    },
+    {
+      "in": 13.68,
+      "out": 18.25,
+      "zoom": 1.05
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -19,
+      "duration": 0.045
+    },
+    {
+      "time": 2.52,
+      "kind": "whoosh",
+      "gain_db": -21,
+      "duration": 0.15
+    },
+    {
+      "time": 4.84,
+      "kind": "click",
+      "gain_db": -19,
+      "duration": 0.045
+    },
+    {
+      "time": 6.1,
+      "kind": "whoosh",
+      "gain_db": -21,
+      "duration": 0.15
+    },
+    {
+      "time": 7.8,
+      "kind": "click",
+      "gain_db": -19,
+      "duration": 0.045
+    },
+    {
+      "time": 9.1,
+      "kind": "whoosh",
+      "gain_db": -21,
+      "duration": 0.15
+    },
+    {
+      "time": 10.96,
+      "kind": "click",
+      "gain_db": -19,
+      "duration": 0.045
+    },
+    {
+      "time": 11.92,
+      "kind": "whoosh",
+      "gain_db": -21,
+      "duration": 0.15
+    },
+    {
+      "time": 14.06,
+      "kind": "click",
+      "gain_db": -19,
+      "duration": 0.045
+    }
+  ],
+  "review_notes": [
+    "Idea del dashboard: recorrido por las amenidades. Voz original; cuenta inicial y pausas retiradas.",
+    "Tomas reales de bloques y piscina/chorrera conservadas, B-roll de supermercado y trampolín sincronizado con la voz.",
+    "QUARTZO y outro existentes. Música CC0. Fuente comercial pendiente de licencia; revisión de audio y del usuario pendientes.",
+    "V2: frases de bloques y trampolín divididas tras revisión visual para conservar tamaño legible."
+  ],
+  "broll": [
+    {
+      "source": "../media/bcb362d9-9917-4d00-aec6-ec43f4f9e5a6.mp4",
+      "in": 1.1,
+      "out": 3.62,
+      "at": 0,
+      "reason": "Gancho con acercamiento suave a presentadora",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.52,
+          "zoom": 1.07
+        }
+      ]
+    },
+    {
+      "source": "../media/2a7a7a55-4816-4bbe-a74a-52d1e7bac0cb.mp4",
+      "in": 0.4,
+      "out": 2.2,
+      "at": 6.1,
+      "reason": "Niño en supermercado al mencionarlo",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.8,
+          "zoom": 1.08
+        }
+      ]
+    },
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 0.3,
+      "out": 1.6,
+      "at": 7.8,
+      "reason": "Salto al mencionar trampolín",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.07
+        },
+        {
+          "time": 1.3,
+          "zoom": 1
+        }
+      ]
+    },
+    {
+      "source": "../media/c489cf71-c5ff-4ed5-b473-739e509dd2d2.mp4",
+      "in": 2.1,
+      "out": 3.06,
+      "at": 10.96,
+      "reason": "Más juegos después de mostrar piscina y chorrera",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.96,
+          "zoom": 1.07
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 2.52,
+      "duration": 0.13
+    },
+    {
+      "time": 6.1,
+      "duration": 0.13
+    },
+    {
+      "time": 11.92,
+      "duration": 0.13
+    }
+  ],
+  "music": {
+    "source": "../media/music/tour-bed.wav",
+    "title": "Happy Whistling Ukulele",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+    "target_lufs": -29
+  },
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.84,
+      "text": "¿QUÉ LE ESPERA"
+    },
+    {
+      "start": 0.84,
+      "end": 1.24,
+      "text": "TU NIÑO"
+    },
+    {
+      "start": 1.24,
+      "end": 1.94,
+      "text": "CUANDO LLEGAN A"
+    },
+    {
+      "start": 1.94,
+      "end": 2.46,
+      "text": "NANA’S PLAYHOUSE?"
+    },
+    {
+      "start": 2.58,
+      "end": 3.24,
+      "text": "AQUÍ TENEMOS"
+    },
+    {
+      "start": 3.24,
+      "end": 3.98,
+      "text": "UNA MESA"
+    },
+    {
+      "start": 3.98,
+      "end": 4.66,
+      "text": "DE BLOQUES"
+    },
+    {
+      "start": 4.84,
+      "end": 5.4,
+      "text": "TENEMOS ÁREAS DE"
+    },
+    {
+      "start": 5.4,
+      "end": 6.14,
+      "text": "SIMULACIÓN DE"
+    },
+    {
+      "start": 6.14,
+      "end": 7.1,
+      "text": "SUPERMERCADO Y"
+    },
+    {
+      "start": 7.1,
+      "end": 7.68,
+      "text": "COFFEE SHOP"
+    },
+    {
+      "start": 7.74,
+      "end": 8.34,
+      "text": "TENEMOS UN"
+    },
+    {
+      "start": 8.34,
+      "end": 8.92,
+      "text": "TRAMPOLÍN"
+    },
+    {
+      "start": 9.12,
+      "end": 9.86,
+      "text": "TENEMOS PISCINA"
+    },
+    {
+      "start": 9.86,
+      "end": 10.84,
+      "text": "DE BOLA, CHORRERA"
+    },
+    {
+      "start": 10.84,
+      "end": 11.88,
+      "text": "Y MUCHAS COSAS MÁS"
+    },
+    {
+      "start": 11.96,
+      "end": 12.42,
+      "text": "ASÍ QUE LOS"
+    },
+    {
+      "start": 12.42,
+      "end": 13.34,
+      "text": "ESPERAMOS AQUÍ EN"
+    },
+    {
+      "start": 13.34,
+      "end": 14.06,
+      "text": "NANA’S PLAYHOUSE"
+    },
+    {
+      "start": 14.06,
+      "end": 14.94,
+      "text": "UBICADOS EN PLAZA"
+    },
+    {
+      "start": 14.94,
+      "end": 15.52,
+      "text": "MONSERRATE"
+    },
+    {
+      "start": 15.52,
+      "end": 16.42,
+      "text": "EN HORMIGUEROS"
+    }
+  ],
+  "previous_version": "../runs/nanas-tour-v1.mp4"
+}

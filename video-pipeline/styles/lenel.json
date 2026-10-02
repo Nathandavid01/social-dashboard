@@ -1,0 +1,27 @@
+{
+  "name": "Lenel Restaurant · provisional",
+  "font_file": "../media/lenel/brand/Arial-Bold.ttf",
+  "font_family": "Arial",
+  "font_size": 62,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00000000",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 4,
+  "shadow": 1,
+  "alignment": 2,
+  "margin_x": 70,
+  "bottom_margin": 420,
+  "fixed_size": true,
+  "wrap_width": 920,
+  "max_words": 8,
+  "max_chars": 36,
+  "caption_animation": "none",
+  "notes": [
+    "Provisional. Lenel no está en Metricool (71 marcas revisadas el 2026-09-29; no hay blog_id).",
+    "El reel publicado https://www.instagram.com/lenel_restaurant/reel/DdJ5e7PiM5_/ no muestra caption quemado en el arranque ni a los 2 s; es un plano de cocina. No hay outro ni fuente oficial en la carpeta Drive LENEL.",
+    "Arial Bold es aproximación para que el diálogo se lea. No es la fuente observada en un caption de Lenel.",
+    "Frases en caja baja natural, blanco con borde negro, zona baja. Pendiente de una muestra con captions visibles."
+  ]
+}

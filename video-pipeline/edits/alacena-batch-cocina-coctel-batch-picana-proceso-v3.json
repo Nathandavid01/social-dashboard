@@ -1,0 +1,118 @@
+{
+  "idea_id": "dfe4e076-d084-4442-be0b-55188438061c",
+  "title": "plato",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 21.3,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 21.3,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.15,
+      "end": 3.5,
+      "text": "Picaña a la parrilla"
+    },
+    {
+      "start": 4.2,
+      "end": 7.4,
+      "text": "Cortamos"
+    },
+    {
+      "start": 8.1,
+      "end": 10.7,
+      "text": "Preparamos el plato"
+    },
+    {
+      "start": 11.6,
+      "end": 17.3,
+      "text": "Emplatamos"
+    },
+    {
+      "start": 18.2,
+      "end": 20.9,
+      "text": "Lista para tu mesa"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 3.88,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 7.76,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 11.14,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 14.72,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 17.8,
+      "duration": 0.045,
+      "gain_db": -29
+    },
+    {
+      "kind": "click",
+      "time": 21.29,
+      "duration": 0.045,
+      "gain_db": -29
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "User correction: remove all captions/overlays blocking chef hands and food. Preserve montage, existing licensed music, discreet transition clicks, keyframes, official outro. Idea is chef preparing dish. No POV overlay needed. Preserve v2."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music-provenance.json"
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "none"
+}

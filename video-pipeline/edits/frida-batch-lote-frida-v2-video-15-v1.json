@@ -1,0 +1,108 @@
+{
+  "idea_id": "frida-20260903-15",
+  "title": "El Date Perfecto",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-15-master.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/video-15-transcript.json",
+  "style": "../styles/frida-v1.json",
+  "clips": [
+    {
+      "in": 1.25,
+      "out": 6.94,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.69,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 8.385333,
+      "out": 10.325333,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.94,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 1.13,
+      "text": "A mí me preguntan"
+    },
+    {
+      "start": 1.13,
+      "end": 2.35,
+      "text": "cuál es un date perfecto"
+    },
+    {
+      "start": 2.35,
+      "end": 3.53,
+      "text": "y es donde no puede faltar"
+    },
+    {
+      "start": 3.53,
+      "end": 4.17,
+      "text": "buena comida,"
+    },
+    {
+      "start": 4.29,
+      "end": 4.87,
+      "text": "ricos tragos"
+    },
+    {
+      "start": 4.87,
+      "end": 5.49,
+      "text": "y spots de fotos."
+    },
+    {
+      "start": 5.77,
+      "end": 6.36,
+      "text": "Por eso yo vengo"
+    },
+    {
+      "start": 6.36,
+      "end": 7.5,
+      "text": "a Frida Food and Bar."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Unir toma completa 0729 y cierre 0730. Retirar claquetas y fallos; conservar pareja, comida y gestos originales. Corregir nombres y anglicismos del borrador Whisper."
+  ],
+  "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+  "catalog": "runs/frida-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+  },
+  "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+  "audio_master": {},
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/music-15.wav",
+    "extend_through_outro": true
+  }
+}

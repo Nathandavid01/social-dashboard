@@ -1,0 +1,254 @@
+{
+  "idea_id": "6edecb89-0294-4556-be3d-543a64e83813",
+  "title": "Prepara Tu Botiquín",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/botiquin.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/botiquin-corrected.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 1.58,
+      "out": 6.55,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.75,
+      "out": 9.5,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.6,
+      "out": 16.16,
+      "zoom": 1.06,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.38,
+      "out": 23.0,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.56,
+      "text": "Llegó la temporada"
+    },
+    {
+      "start": 0.56,
+      "end": 1.25,
+      "text": "de huracanes."
+    },
+    {
+      "start": 1.32,
+      "end": 2.84,
+      "text": "Estas son algunas cositas"
+    },
+    {
+      "start": 2.84,
+      "end": 3.905,
+      "text": "que puedes tener"
+    },
+    {
+      "start": 3.905,
+      "end": 4.97,
+      "text": "de primera mano:"
+    },
+    {
+      "start": 5.06,
+      "end": 6.07,
+      "text": "agua potable,"
+    },
+    {
+      "start": 6.3,
+      "end": 7.72,
+      "text": "medicamentos al día,"
+    },
+    {
+      "start": 7.8,
+      "end": 8.64,
+      "text": "alguna mochilita"
+    },
+    {
+      "start": 8.64,
+      "end": 9.85,
+      "text": "que tengamos, ¿verdad?,"
+    },
+    {
+      "start": 9.94,
+      "end": 11.56,
+      "text": "disponible en la farmacia,"
+    },
+    {
+      "start": 11.56,
+      "end": 12.34,
+      "text": "que puedas adicionarle"
+    },
+    {
+      "start": 12.34,
+      "end": 13.04,
+      "text": "tus artículos"
+    },
+    {
+      "start": 13.04,
+      "end": 14.28,
+      "text": "de primera necesidad."
+    },
+    {
+      "start": 14.36,
+      "end": 14.94,
+      "text": "También tenemos"
+    },
+    {
+      "start": 14.94,
+      "end": 16.65,
+      "text": "linternas o velas."
+    },
+    {
+      "start": 16.86,
+      "end": 18.1,
+      "text": "Así que aquí los esperamos"
+    },
+    {
+      "start": 18.1,
+      "end": 19.18,
+      "text": "para que puedas conseguir"
+    },
+    {
+      "start": 19.18,
+      "end": 19.84,
+      "text": "todas esas cositas"
+    },
+    {
+      "start": 19.84,
+      "end": 20.9,
+      "text": "que necesitas."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/kit-vertical-v1.mp4",
+      "at": 11.56,
+      "in": 0,
+      "out": 0.78,
+      "reason": "Breve apoyo de botiquin antes de foto pequena"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 5.06,
+      "duration": 0.13,
+      "gain_db": -23,
+      "reason": "Pop sincronizado con entrada de foto agua"
+    },
+    {
+      "preset": "pop",
+      "time": 6.3,
+      "duration": 0.13,
+      "gain_db": -23,
+      "reason": "Pop sincronizado con entrada de foto medicamentos"
+    },
+    {
+      "preset": "pop",
+      "time": 12.34,
+      "duration": 0.13,
+      "gain_db": -23,
+      "reason": "Pop sincronizado con entrada de foto botiquin"
+    },
+    {
+      "preset": "pop",
+      "time": 14.94,
+      "duration": 0.13,
+      "gain_db": -23,
+      "reason": "Pop sincronizado con entrada de foto linterna"
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric pide fotos pequenas con pup pup: 4 fotos reales circulares aparecen a la voz con pop suave, a ambos lados sin cubrir rostro ni captions. Se conserva breve B-roll de Motion Array, voz, musica y cierre. Revision: entrada de fotos con crecimiento y rebote suave de 240 ms; captions y voz conservados."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14,
+    "max_voice_boost_db": 0
+  },
+  "graphics": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/photo-pops-v1/agua.png",
+      "start": 5.06,
+      "end": 7.72,
+      "x": 65,
+      "y": 820,
+      "width": 280,
+      "enter": 0.24,
+      "kind": "cutout",
+      "reason": "Foto real pequeña del articulo narrado, entrada pop",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/water-1580543.mp4",
+      "entrance": "pop"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/photo-pops-v1/medicamentos.png",
+      "start": 6.3,
+      "end": 7.72,
+      "x": 735,
+      "y": 820,
+      "width": 280,
+      "enter": 0.24,
+      "kind": "cutout",
+      "reason": "Foto real pequeña del articulo narrado, entrada pop",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/medicamentos-fullbleed-v1.mp4",
+      "entrance": "pop"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/photo-pops-v1/botiquin.png",
+      "start": 12.34,
+      "end": 16.65,
+      "x": 65,
+      "y": 820,
+      "width": 280,
+      "enter": 0.24,
+      "kind": "cutout",
+      "reason": "Foto real pequeña del articulo narrado, entrada pop",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/first-aid-kit-2213268.mp4",
+      "entrance": "pop"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/photo-pops-v1/linterna.png",
+      "start": 14.94,
+      "end": 16.65,
+      "x": 735,
+      "y": 820,
+      "width": 280,
+      "enter": 0.24,
+      "kind": "cutout",
+      "reason": "Foto real pequeña del articulo narrado, entrada pop",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/botiquin-motion-20260927/assets/flashlight-2392309.mp4",
+      "entrance": "pop"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/botiquin-music-reedit.wav",
+    "title": "From Page to Practice",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/From Page to Practice.provenance.json",
+    "license": "CC0 1.0"
+  }
+}

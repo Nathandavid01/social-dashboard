@@ -1,0 +1,247 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "elige-tu-favorito",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Elige Tu Favorito",
+  "source": "../media/yabuuchi/derived/elige-tu-favorito-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-elige-tu-favorito-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 21.43,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.2,
+      "text": "¿Cuál prefieres:\nel Borrachito"
+    },
+    {
+      "start": 1.2,
+      "end": 2.04,
+      "text": "o el Sushi Burrito?"
+    },
+    {
+      "start": 2.1,
+      "end": 2.8,
+      "text": "El Borrachito."
+    },
+    {
+      "start": 2.9,
+      "end": 4.42,
+      "text": "¿Qué prefieres:\nLa Jefa o El Boss?"
+    },
+    {
+      "start": 4.62,
+      "end": 5.14,
+      "text": "La Jefa."
+    },
+    {
+      "start": 5.24,
+      "end": 6.96,
+      "text": "¿Cuál prefieres:\nel cheesecake frito"
+    },
+    {
+      "start": 6.96,
+      "end": 7.72,
+      "text": "o el lava cake?"
+    },
+    {
+      "start": 7.9,
+      "end": 9.68,
+      "text": "El cheesecake frito\ncon guayaba."
+    },
+    {
+      "start": 9.8,
+      "end": 11.28,
+      "text": "¿El crab rangoon\no los dumplings?"
+    },
+    {
+      "start": 11.46,
+      "end": 12.04,
+      "text": "Los dumplings."
+    },
+    {
+      "start": 12.1,
+      "end": 13.44,
+      "text": "¿Prefieres el lychee"
+    },
+    {
+      "start": 13.44,
+      "end": 14.7,
+      "text": "o el de strawberry?"
+    },
+    {
+      "start": 14.88,
+      "end": 15.52,
+      "text": "El de lychee."
+    },
+    {
+      "start": 15.63,
+      "end": 16.75,
+      "text": "¿Onigiri o edamame?"
+    },
+    {
+      "start": 16.89,
+      "end": 17.43,
+      "text": "Edamame."
+    },
+    {
+      "start": 17.69,
+      "end": 18.97,
+      "text": "¿Todo eso\nlo tienen aquí?"
+    },
+    {
+      "start": 19.25,
+      "end": 20.35,
+      "text": "Sí, aquí en la avenida"
+    },
+    {
+      "start": 20.35,
+      "end": 21.33,
+      "text": "Dos Palmas, Levittown."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/elige-tu-favorito-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Backbeat.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/derived/elige-tu-favorito-entrada-slow-v1.mp4",
+      "in": 0,
+      "out": 1.93,
+      "at": 19.5,
+      "eof_action": "repeat",
+      "reason": "Entrada real de la sede de Toa Baja durante la dirección; rango limpio 0020, sin presentador ni audio, ralentizado 1.8x para dejar dos segundos de lectura.",
+      "original_source": "media/yabuuchi/source/DJI_20260914132949_0020_D.MP4",
+      "original_in": 12.278933333,
+      "original_out": 13.4134
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131935_0008_D.MP4",
+      "in": 0.62,
+      "out": 3.48
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132100_0010_D.MP4",
+      "in": 0.62,
+      "out": 2.96
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132207_0012_D.MP4",
+      "in": 1.02,
+      "out": 5.58
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132247_0013_D.MP4",
+      "in": 0.52,
+      "out": 2.86
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132349_0014_D.MP4",
+      "in": 0,
+      "out": 3.49
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132741_0017_D.MP4",
+      "in": 1.06,
+      "out": 6.9
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "Edición del concepto THIS OR THAT con el personal, página 1 del PDF. Actualiza borrador v3 no entregado en la selección vigente.",
+    "Seis preguntas y respuestas originales completas; conserva la pregunta final y la dirección grabada.",
+    "Nombres de productos conservados del diálogo. No se ilustran platos específicos con productos de identidad no confirmada.",
+    "Anybody Expanded Black 72 fijo, frases de hasta dos líneas y entrada suave del ejemplo.",
+    "Siete transiciones editoriales con un sonido corto cada una. El B-roll de entrada de local no se ha usado en los reels vigentes.",
+    "Outro de piano vigente; música de fondo Backbeat CC0.",
+    "Escucha crítica y revisión del usuario pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.746,
+      "duration": 0.32,
+      "gain_db": -23,
+      "transition_at": 2.86,
+      "reason": "Segunda pregunta"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 5.086,
+      "duration": 0.32,
+      "gain_db": -23,
+      "transition_at": 5.2,
+      "reason": "Tercera pregunta"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 9.646,
+      "duration": 0.32,
+      "gain_db": -23,
+      "transition_at": 9.76,
+      "reason": "Cuarta pregunta"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 11.986,
+      "duration": 0.32,
+      "gain_db": -23,
+      "transition_at": 12.1,
+      "reason": "Quinta pregunta"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 15.476,
+      "duration": 0.32,
+      "gain_db": -23,
+      "transition_at": 15.59,
+      "reason": "Sexta pregunta"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 19.386,
+      "duration": 0.32,
+      "gain_db": -20,
+      "transition_at": 19.5,
+      "reason": "Entrada al B-roll de ubicación"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 21.23,
+      "duration": 0.2,
+      "gain_db": -22,
+      "transition_at": 21.43,
+      "reason": "Entrada al outro; cola completa antes del piano"
+    }
+  ],
+  "idea_page": 1,
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 19.4,
+      "duration": 0.2,
+      "intensity": 0.55
+    }
+  ]
+}

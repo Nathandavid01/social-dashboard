@@ -1,0 +1,52 @@
+{
+  "idea_id": "dd0d8cfe-ce0f-4d53-b3fd-2e8fb15f9745",
+  "title": "Cuando ya no tienes20 años",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-batch-audit-20261002/veinte/source-scratch-v5.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/buena-vida-20-anos-20260927/editorial.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.4,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 7.7,
+      "text": "Cuando crees que\ntodavía tienes 20 años"
+    },
+    {
+      "start": 7.7,
+      "end": 10.4,
+      "text": "Tu espalda:",
+      "bottom_margin": 1120
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Retoma borrador existente del ultimo batch no encontrado publicado: caja, caminar y remate escenificado. Premisa completa desdeinicio; remate visible2.7s, corte a7.7 con Record Scratch original Motion Array y duck musical. Perfil POVv5 actualizado. Busybody CC0 yareservada aesta pieza conservada en fuente. No stock ajeno ni voz inventada. Escucha crítica pendiente. Corrección de grafo: caption del remate sube para no tapar rostro en el suelo; fuente, tamaño y paleta intactos."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve"
+  },
+  "caption_mode": "editorial"
+}

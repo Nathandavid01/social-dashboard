@@ -1,0 +1,116 @@
+{
+  "idea_id": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+  "title": "trend",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/source/novela-assembly-muted.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/novela-editorial.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 0.85,
+      "out": 3.65,
+      "zoom": 1.12,
+      "focus_y": 0.24,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.8,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 5.05,
+      "out": 7.85,
+      "zoom": 1.14,
+      "focus_y": 0.24,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.8,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 10.24,
+      "out": 13.04,
+      "zoom": 1.18,
+      "focus_y": 0.3,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.8,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 14.78,
+      "out": 17.68,
+      "zoom": 1.08,
+      "focus_y": 0.24,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.9,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.4,
+      "text": "Si la farmacia"
+    },
+    {
+      "start": 1.4,
+      "end": 4.8,
+      "text": "fuera una novela…"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Cuatro actuaciones reales del cliente. Texto editorial del concepto, no transcripcion. Audio de camara omitido en derivado separado: no afirmar dialogo a partir del Whisper incoherente. Musica Misterioso descargada y verificada. Propuesta local; escucha critica pendiente. Mantener reacciones y abanico final; no stock ajeno. Revision: gancho dividido en dos frases para conservar tamano y liberar rostros; reacciones finales sin rotulo."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/misterioso-bed-v1.wav",
+    "title": "Misterioso — Alon Peretz",
+    "license": "Motion Array paid subscription license",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/music-provenance.json",
+    "extend_through_outro": true
+  },
+  "caption_mode": "editorial"
+}

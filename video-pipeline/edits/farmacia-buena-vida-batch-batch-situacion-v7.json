@@ -1,0 +1,136 @@
+{
+  "idea_id": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+  "title": "Situación",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/source/situacion-original.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/review/transcript.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 0.64,
+      "out": 4.24,
+      "zoom": 1.26,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 4.74,
+      "out": 8.99,
+      "zoom": 1.26,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 9.36,
+      "out": 10.78,
+      "zoom": 1.3,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.18,
+      "text": "En esta época"
+    },
+    {
+      "start": 1.18,
+      "end": 2.12,
+      "text": "de mucha bruma,"
+    },
+    {
+      "start": 2.34,
+      "end": 3.54,
+      "text": "cambio de temperatura,"
+    },
+    {
+      "start": 3.66,
+      "end": 5.26,
+      "text": "si estás estornudando"
+    },
+    {
+      "start": 5.26,
+      "end": 6.32,
+      "text": "con congestión,"
+    },
+    {
+      "start": 6.46,
+      "end": 7.06,
+      "text": "dolor de cabeza"
+    },
+    {
+      "start": 7.06,
+      "end": 7.78,
+      "text": "por congestión,"
+    },
+    {
+      "start": 7.93,
+      "end": 8.37,
+      "text": "echa para acá."
+    },
+    {
+      "start": 8.51,
+      "end": 9.15,
+      "text": "Aquí te ayudamos."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/bruma.mp4",
+      "in": 1,
+      "out": 3.64,
+      "at": 1.18,
+      "reason": "Bruma ilustrativa continua durante bruma y cambio de temperatura, hasta fundido al estornudo. No atribuida a Maunabo.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.64,
+          "zoom": 1.035
+        }
+      ],
+      "fade_in": 0.18,
+      "fade_out": 0
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/motion-array/seasonal-allergies-vertical-v1.mp4",
+      "in": 0,
+      "out": 2.66,
+      "at": 3.66,
+      "reason": "Motion Array Seasonal Allergies (476132), original licenciado; accion real de estornudo en pañuelo sincronizada a estornudos y congestion; fuente 1.25–3.91s, stock escenificado.",
+      "fade_in": 0.16,
+      "fade_out": 0.18
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Ritmo reel: eliminar .87s de pausas sin cortar palabras, bruma1.28s, estornudo continuo2.66s, cierre mas cercano y fluido, un swish discreto biblioteca619541. Caption v7 intacto. Escucha/revision pendientes.",
+    "Bruma: continuidad del paisaje bajo cambio de temperatura y fundidos suaves de B-roll.",
+    "2026-09-30: paisaje continuo de 1.18–3.82 s; estornudo entra a 3.66 s con solape de .16 s para evitar retorno fugaz a presentadora. Voz, captions habituales v7 y música existente conservados."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/motion-array/fluid-bed-v1.wav",
+    "title": "House 02 - Lily J",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/House 02 - Lily J.provenance.json",
+    "license": "Mixkit Stock Music Free License"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  }
+}

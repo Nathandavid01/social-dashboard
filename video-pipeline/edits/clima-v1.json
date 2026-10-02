@@ -1,0 +1,103 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "a25672bd-d8a0-4f93-8482-8ec860520c8f",
+  "title": "Clima · Nana's Playhouse",
+  "source": "../media/b4616322-f641-4d0d-8d41-983e6d898c91.mp4",
+  "transcript": "../runs/clima-reviewed.json",
+  "style": "../styles/nanas-v3.json",
+  "clips": [
+    {
+      "in": 1.36,
+      "out": 6.96,
+      "zoom": 1
+    },
+    {
+      "in": 7.1,
+      "out": 9.74,
+      "zoom": 1
+    },
+    {
+      "in": 9.96,
+      "out": 12.62,
+      "zoom": 1
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 3.1,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 8.24,
+      "kind": "click",
+      "gain_db": -20
+    },
+    {
+      "time": 5.6,
+      "kind": "whoosh",
+      "gain_db": -23,
+      "duration": 0.17
+    }
+  ],
+  "review_notes": [
+    "Segundo reel independiente: Clima.",
+    "Voz original completa, silencios reducidos; B-roll cubre la toma original del mostrador.",
+    "Fuente y outro oficiales; música de biblioteca FreePD archivada bajo CC0.",
+    "No se ha publicado ni subido al dashboard."
+  ],
+  "broll": [
+    {
+      "source": "../media/c489cf71-c5ff-4ed5-b473-739e509dd2d2.mp4",
+      "in": 0.2,
+      "out": 3.3,
+      "at": 0,
+      "reason": "Juego bajo techo: niña en caballito."
+    },
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 4.3,
+      "out": 6.8,
+      "at": 3.1,
+      "reason": "Diversión infantil en interior."
+    },
+    {
+      "source": "../media/c489cf71-c5ff-4ed5-b473-739e509dd2d2.mp4",
+      "in": 3.3,
+      "out": 5.94,
+      "at": 5.6,
+      "reason": "Sonrisa y juego al presentar Nana’s como alternativa."
+    },
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 0.1,
+      "out": 2.76,
+      "at": 8.24,
+      "reason": "Juego mientras se indica la ubicación."
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 5.6,
+      "duration": 0.17
+    }
+  ],
+  "music": {
+    "source": "../media/music/clima-bed.wav",
+    "title": "Happy Whistling Ukulele",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+    "target_lufs": -29
+  }
+}

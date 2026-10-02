@@ -1,0 +1,71 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "toa-baja",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Visítanos En Toa Baja",
+  "source": "../media/yabuuchi/derived/toa-baja-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-toa-baja-mapped.json",
+  "style": "../styles/yabuuchi.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.89,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 2.2,
+      "text": "Y por si no lo sabías,"
+    },
+    {
+      "start": 2.4,
+      "end": 3.84,
+      "text": "estamos en la avenida Dos Palmas,"
+    },
+    {
+      "start": 3.88,
+      "end": 4.64,
+      "text": "aquí en Levittown,"
+    },
+    {
+      "start": 4.8,
+      "end": 6.12,
+      "text": "y contamos con amplio estacionamiento"
+    },
+    {
+      "start": 6.12,
+      "end": 7.78,
+      "text": "al frente y atrás para los clientes."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "music": {
+    "source": "../media/yabuuchi/toa-baja-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132858_0018_D.MP4",
+      "in": 0,
+      "out": 7.89
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro.mp4"
+  },
+  "review_notes": [
+    "Sin horario: las tomas 0019 y 0020 dicen horarios distintos.",
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes."
+  ]
+}

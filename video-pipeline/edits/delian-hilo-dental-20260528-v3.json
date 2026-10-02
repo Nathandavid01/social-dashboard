@@ -1,0 +1,161 @@
+{
+  "idea_id": "hilo-dental-20260528",
+  "title": "Por Qué Usar Hilo Dental",
+  "source": "../../delian-loyola-video/media/source-2026-05-28/DJI_20260528173806_0105_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-05-28/0105-small-transcript.json",
+  "style": "../styles/delian-reference-v4.json",
+  "clips": [
+    {
+      "in": 7.38,
+      "out": 19.9,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 12.52,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.74,
+      "text": "El uso del hilo dental"
+    },
+    {
+      "start": 1.74,
+      "end": 2.7,
+      "text": "definitivamente"
+    },
+    {
+      "start": 2.7,
+      "end": 4.16,
+      "text": "es lo más importante"
+    },
+    {
+      "start": 4.16,
+      "end": 5.18,
+      "text": "porque el cepillo no"
+    },
+    {
+      "start": 5.18,
+      "end": 6.66,
+      "text": "llega dentro, ¿verdad?"
+    },
+    {
+      "start": 6.66,
+      "end": 7.48,
+      "text": "entre medio de los"
+    },
+    {
+      "start": 7.48,
+      "end": 8.58,
+      "text": "dientes y el hilo"
+    },
+    {
+      "start": 8.58,
+      "end": 9.62,
+      "text": "dental es el único"
+    },
+    {
+      "start": 9.62,
+      "end": 10.16,
+      "text": "que va a poder"
+    },
+    {
+      "start": 10.16,
+      "end": 10.86,
+      "text": "accesar"
+    },
+    {
+      "start": 10.86,
+      "end": 11.72,
+      "text": "para poder limpiar"
+    },
+    {
+      "start": 11.72,
+      "end": 12.52,
+      "text": "bien esos dientes."
+    }
+  ],
+  "broll": [
+    {
+      "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4",
+      "in": 2.0,
+      "out": 5.1,
+      "at": 6.7,
+      "reason": "Uso real del hilo dental frente al espejo, sincronizado con entre medio de los dientes y el hilo dental; descarta poses posteriores e instrucciones del rodaje.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 3.1,
+          "zoom": 1.035
+        }
+      ],
+      "fade_in": 0.12,
+      "fade_out": 0.16
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 6.7,
+      "duration": 0.28,
+      "gain_db": -29
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "El clip empieza en la frase de la doctora, sin claqueta ni pregunta del entrevistador; la respuesta conserva su argumento completo.",
+    "Captions segmentados con tiempos de Whisper small. La palabra 'accesar' al final es incierta entre ASR small y base; se escribió como variante oral y requiere cotejo auditivo humano antes de publicar.",
+    "Perfil de referencia v4 basado en Publicados/14 agosto: Montserrat Bold provisional porque falta el archivo Shoika; comprobar que captions no tapen manos ni rostro.",
+    "V2: equilibrar la voz entre frases sin elevar en exceso los pasajes más fuertes.",
+    "V3: B-roll 0305 solo 2.00-5.10 s sobre la voz 6.70-9.80 s; audio original de B-roll omitido por pipeline. Fundidos alfa 0.12/0.16 s y zoom suave 1.000-1.035.",
+    "V3: cama Hilo del manifest CC0 1.0, 12.52 s a aprox. -32 LUFS; confirmar mezcla mediante escucha crítica antes de entregar.",
+    "V3: plano principal con acercamiento lento 1.000-1.025 durante 12.52 s; un solo whoosh_soft a -29 dB acompana la entrada real del B-roll a 6.70 s."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-hilo-catalog.json",
+  "audio_master": {
+    "voice_target_rms_dbfs": -27,
+    "max_voice_boost_db": 12
+  },
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "broll_contact": "../delian-loyola-video/review/0305-contact-dense-labeled.jpg",
+    "broll_source": "../delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4",
+    "music_manifest": "media/delian/music/manifest.json"
+  },
+  "music": {
+    "source": "../media/delian/music/hilo-compy-jazz.m4a",
+    "title": "Lovely Piano Song (fragmento a partir de 14 s)",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Lovely Piano Song.provenance.json",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Romance/Lovely%20Piano%20Song.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -32
+  },
+  "music_manifest": "media/delian/music/manifest.json",
+  "broll_drive_url": "https://drive.google.com/file/d/1IPn73ZWub4XysaFFnXTERVfPJ5aBAk2l/view"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Black Pepper — reconstrucción provisional v1",
+  "status": "provisional_visual_reconstruction_not_client_approved",
+  "reference": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+  "font_file": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 66,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H001F241A",
+  "back_colour": "&H60000000",
+  "border_style": 1,
+  "outline": 5,
+  "shadow": 1,
+  "margin_x": 70,
+  "bottom_margin": 425,
+  "alignment": 2,
+  "fixed_size": true,
+  "wrap_width": 920,
+  "max_words": 4,
+  "max_chars": 26,
+  "caption_animation": "none",
+  "unverified": [
+    "Identidad exacta de la fuente y peso; Montserrat Bold es aproximación visual, no fuente oficial confirmada.",
+    "Tamaño y colores son reconstrucción visual provisional.",
+    "Animación exacta pendiente de comparación completa."
+  ]
+}

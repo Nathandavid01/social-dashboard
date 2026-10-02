@@ -1,0 +1,134 @@
+{
+  "idea_id": "b7282284-57d3-4b37-84b3-d31e8822e436",
+  "title": "Pregunta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/41f785b9-01b3-4103-9413-8afb090a9603.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/41f785b9-01b3-4103-9413-8afb090a9603.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0.84,
+      "out": 16.7,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 15.86,
+          "zoom": 1.105
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 0.56,
+      "text": "Oye Karen,"
+    },
+    {
+      "start": 0.84,
+      "end": 1.48,
+      "text": "si hago mi actividad"
+    },
+    {
+      "start": 1.48,
+      "end": 2.26,
+      "text": "aquí en Alacena,"
+    },
+    {
+      "start": 2.58,
+      "end": 3.34,
+      "text": "¿puedo decorar y todo?"
+    },
+    {
+      "start": 3.98,
+      "end": 4.92,
+      "text": "Claro que sí."
+    },
+    {
+      "start": 5.22,
+      "end": 6.16,
+      "text": "Y si necesitas"
+    },
+    {
+      "start": 6.16,
+      "end": 7.14,
+      "text": "ese tipo de servicio,"
+    },
+    {
+      "start": 7.14,
+      "end": 8.04,
+      "text": "también contamos"
+    },
+    {
+      "start": 8.04,
+      "end": 8.48,
+      "text": "con él."
+    },
+    {
+      "start": 8.82,
+      "end": 9.26,
+      "text": "Así que,"
+    },
+    {
+      "start": 9.3,
+      "end": 9.72,
+      "text": "comunícate"
+    },
+    {
+      "start": 9.72,
+      "end": 10.4,
+      "text": "y con mucho gusto"
+    },
+    {
+      "start": 10.4,
+      "end": 11.34,
+      "text": "te orientamos al"
+    },
+    {
+      "start": 11.34,
+      "end": 14.56,
+      "text": "787-675-8407"
+    },
+    {
+      "start": 14.74,
+      "end": 15.71,
+      "text": "Alacena Restaurant."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 15.86,
+      "duration": 0.055,
+      "gain_db": -24
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Continuous question and answer with gentle eased keyframes. Belleza white captions with approved green shadow, unique Flutey Jazz bed and official outro. Replace whoosh with one discreet click exactly at the outro scene change. No verified decoration B-roll; retain Karen and the real venue. Dashboard checked 2026-10-01: raw only, no posted/scheduled IDs; independent Metricool history unverified. Critical listening pending."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/decoracion-batch/music/bed.wav",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/decoracion-batch/music/LICENSE.txt"
+  }
+}

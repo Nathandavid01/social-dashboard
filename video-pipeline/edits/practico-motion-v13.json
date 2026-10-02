@@ -1,0 +1,22 @@
+{
+  "style": "Nana’s · Animated List",
+  "scenes": [
+    {
+      "template": "hook",
+      "duration": 1.4,
+      "output": "media/practico-hook-v13.mp4"
+    },
+    {
+      "template": "clean",
+      "number": 1,
+      "duration": 0.72,
+      "output": "media/practico-clean-v13.mp4"
+    },
+    {
+      "template": "home",
+      "number": 3,
+      "duration": 1.12,
+      "output": "media/practico-home-v13.mp4"
+    }
+  ]
+}

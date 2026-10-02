@@ -1,0 +1,82 @@
+{
+  "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+  "title": "No vas a creer cómo suena este salmón",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5/editorial-titles.json",
+  "style": "../styles/alacena-salmon-pov-v1.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 17.567,
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 20.166667,
+      "text": "POV: Emplatando Salmon"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 4.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 8.05,
+      "duration": 0.035,
+      "gain_db": -34
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Exact user correction: complete text on a green top overlay throughout, including outro. No lower split captions. All footage, original knife sound, music dip and outro preserved."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0.2,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "caption_mode": "editorial",
+  "audio_master": {
+    "mode": "music"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-music-provenance.json"
+  },
+  "render_method": "Complete clean picture and branded outro, persistent top green text; copy normalized AAC from v6",
+  "audio_source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/alacena-batch-cocina-coctel-batch-salmon-proceso-v6.mp4",
+  "audio_stream_copy": true,
+  "overlay": {
+    "text": "POV: Emplatando Salmon",
+    "box_colour": "#163F2C",
+    "x": 60,
+    "y": 145,
+    "width": 960,
+    "height": 138,
+    "text_colour": "#FCFCFC",
+    "duration": "entire_video_including_outro"
+  }
+}

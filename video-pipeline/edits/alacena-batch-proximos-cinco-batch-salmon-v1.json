@@ -1,0 +1,116 @@
+{
+  "idea_id": "047b3022-74da-4461-a929-2035830c57ad",
+  "title": "plato",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/media/12594096/e90800f2-321d-4002-b593-8a89dd243ac9.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/salmon-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 3.32,
+      "out": 10.16,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.84,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.98,
+      "text": "Por aquí tenemos"
+    },
+    {
+      "start": 0.98,
+      "end": 1.72,
+      "text": "lo que es el"
+    },
+    {
+      "start": 1.72,
+      "end": 3.0,
+      "text": "salmón fresco"
+    },
+    {
+      "start": 3.0,
+      "end": 3.72,
+      "text": "con vegetales"
+    },
+    {
+      "start": 3.72,
+      "end": 4.4,
+      "text": "salteados"
+    },
+    {
+      "start": 4.68,
+      "end": 5.64,
+      "text": "y su salsita"
+    },
+    {
+      "start": 5.64,
+      "end": 6.7,
+      "text": "crema de ajo."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/media/12594096/2ac0fa60-3be6-411d-9913-21be3f70626d.mp4",
+      "in": 2.0,
+      "out": 5.2,
+      "at": 3.35,
+      "fade_in": 0.12,
+      "fade_out": 0.12,
+      "reason": "Close-up of the same salmon and vegetables, no other reel uses this source. Original B-roll audio omitted."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 6.83,
+      "duration": 0.045,
+      "gain_db": -27
+    },
+    {
+      "kind": "click",
+      "time": 3.35,
+      "duration": 0.045,
+      "gain_db": -28
+    },
+    {
+      "kind": "click",
+      "time": 6.55,
+      "duration": 0.045,
+      "gain_db": -28
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Retirar claquetas e intentos fallidos; conservar diálogo y cierre grabados. Movimiento suave y fundidos breves entre tomas asociadas. Captions Belleza blancos con sombra verde. Música distinta por reel, clicks solo en cambios. Sin B-roll genérico repetido: picaña y cócteles ya tienen primeros planos en sus originales. Escucha crítica y publicación independientes pendientes."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/salmon-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/salmon-music-provenance.json"
+  }
+}

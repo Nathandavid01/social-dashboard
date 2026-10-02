@@ -1,0 +1,100 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v2.json",
+  "idea_id": "mondays-decir-que-no",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Aprende a decir que no",
+  "source": "../runs/mondays-src/0433.mp4",
+  "transcript": "../runs/mondays-src/0433.small.json",
+  "clips": [
+    {
+      "in": 0.7,
+      "out": 6.25,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 7.45,
+      "out": 9.3,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/music/decir-no-design-v3.wav",
+    "title": "Have Funk Your Way + Record Scratch (dise\u00f1o local)",
+    "license": "Motion Array paid subscription license",
+    "source_url": "https://motionarray.com/royalty-free-music/have-funk-your-way-1298000/",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/catalogo.json",
+    "original_source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/b6/b6d3a1d5e62dc163114881932aa86eec42234f27b1f9364d655d2ecb57fce5d8.wav",
+    "original_sha256": "b6d3a1d5e62dc163114881932aa86eec42234f27b1f9364d655d2ecb57fce5d8"
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "outro_pattern": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/official-pattern.jpg",
+    "logo_user": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-brand-orange-reference.jpeg",
+    "logo_recreated": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-logo-recreated-v2.png"
+  },
+  "captions": [
+    {
+      "start": 0.22,
+      "end": 1.18,
+      "text": "Tienes que aprender"
+    },
+    {
+      "start": 1.2,
+      "end": 1.9,
+      "text": "a decir que no."
+    },
+    {
+      "start": 2.04,
+      "end": 3.0,
+      "text": "Si tu mesera te pregunta:"
+    },
+    {
+      "start": 3.34,
+      "end": 4.15,
+      "text": "\u00bfQuieres un trago?"
+    },
+    {
+      "start": 4.26,
+      "end": 5.5,
+      "text": "T\u00fa le vas a decir no."
+    },
+    {
+      "start": 5.96,
+      "end": 7.1,
+      "text": "Quiero dos."
+    }
+  ],
+  "review_notes": [
+    "Whisper oy\u00f3 \u00absi tu me ser\u00e1 tu pregunta\u00bb y \u00abtrago\u00bb. En pantalla: \u00absi tu mesera te pregunta\u00bb y \u00abtrago\u00bb. La ficha dice cerveza.",
+    "La pausa antes de \u00abQuiero dos\u00bb se queda vac\u00eda. Ella act\u00faa las dos partes, as\u00ed que no se invierte.",
+    "Captions como los reels publicados de comida y anfitri\u00f3n: blanco con borde #D03000, sin caja.",
+    "2026-10-02: revisi\u00f3n visual de 0432 y 0433, Drive/dashboard consultados en esta sesi\u00f3n; 0433 conserva introducci\u00f3n y remate completo. 0432 es toma alternativa, no proxy.",
+    "V3 acorta pausa sin palabras entre 6.25\u20137.45 del original, preservando preparaci\u00f3n del gesto. Duraci\u00f3n 7.4 s.",
+    "Have Funk Your Way Motion Array, silencio musical 5.30\u20135.96 y scratch discreto 5.33\u20135.75; punch zoom al remate. Escucha cr\u00edtica pendiente.",
+    "La frase inicial es afirmaci\u00f3n seg\u00fan transcripci\u00f3n base y funci\u00f3n narrativa; corregida puntuaci\u00f3n interrogativa del borrador. Confirmaci\u00f3n auditiva pendiente.",
+    "V4: gancho dividido en dos tarjetas para evitar tres l\u00edneas manteniendo fuente fija.",
+    "2026-10-02 Eric solicita outro con m\u00fasica: cierre animado de 2.5 s a partir del patr\u00f3n oficial recuperado de Drive, nombre tipogr\u00e1fico y Aguadilla. M\u00fasica propia del reel contin\u00faa en el cierre; masteriza mezcla completa.",
+    "Eric rechaz\u00f3 outro v1: sustituido por v2 limpio tipogr\u00e1fico, 2.2s, manteniendo resto del reel y m\u00fasica propia. Nueva propuesta pendiente de aprobaci\u00f3n.",
+    "Latest user request: cinematic outro with company colors, recreated MONDAYS logo, official tagline, motion, transition SFX and reel-specific music. Outro v5 replaces rejected versions; critical listening and approval pending."
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 5.95,
+      "duration": 0.65,
+      "intensity": 0.75
+    }
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-decir-no-v5.mp4",
+    "in": 0,
+    "out": 3.2,
+    "gain": 1
+  }
+}

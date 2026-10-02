@@ -1,0 +1,106 @@
+{
+  "idea_id": "visita-seis-meses-20260528",
+  "title": "¿Cada Cuánto Visitar Al Dentista?",
+  "source": "../../delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-05-28/0111-small-transcript.json",
+  "style": "../styles/delian-reference-v4.json",
+  "clips": [
+    {
+      "in": 6.28,
+      "out": 19.05,
+      "zoom": 1.1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {"time": 0, "zoom": 1},
+        {"time": 12.77, "zoom": 1.025}
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.4,
+      "text": "Doctora, ¿cada cuánto"
+    },
+    {
+      "start": 1.4,
+      "end": 2.42,
+      "text": "se supone que esté"
+    },
+    {
+      "start": 2.42,
+      "end": 3.62,
+      "text": "visitando mi dentista?"
+    },
+    {
+      "start": 4.46,
+      "end": 4.94,
+      "text": "Por lo menos"
+    },
+    {
+      "start": 4.94,
+      "end": 6.04,
+      "text": "cada seis meses,"
+    },
+    {
+      "start": 6.3,
+      "end": 6.94,
+      "text": "así que si estás"
+    },
+    {
+      "start": 6.94,
+      "end": 8.38,
+      "text": "próxima a tu limpieza,"
+    },
+    {
+      "start": 8.66,
+      "end": 9.74,
+      "text": "danos una llamadita al"
+    },
+    {
+      "start": 9.74,
+      "end": 12.66,
+      "text": "787-230-7573."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {"preset": "mouse_click", "time": 4.94, "duration": 0.09, "gain_db": -29}
+  ],
+  "music": {
+    "source": "../media/delian/music/visita-lovely-piano.m4a",
+    "title": "Lovely Piano Song",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Lovely Piano Song.provenance.json",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "effects": [],
+  "review_notes": [
+    "Toma 0111: pregunta 6.32-9.90 s, respuesta 10.74-18.94 s; se excluye la preparación del comienzo.",
+    "La toma muestra la consulta y después a la doctora de frente, pertinente al tema de limpieza semestral.",
+    "Subtítulos editoriales basados en Whisper small. Escucha crítica de voz y cifra telefónica pendiente.",
+    "Tipografía Montserrat Bold provisional según estilo Delian v3; falta el archivo Shoika de la referencia.",
+    "V2: LRA objetivo 10 LU permite normalización lineal de una mezcla con LRA 8 LU; v1 falló por 64 ms de latencia en normalización dinámica.",
+    "V3: subtitulos en zona y escala del reel publicado de Delian, con frases mas cortas.",
+    "V3: captions cortos al torso segun Publicados/14 agosto; zoom 1.1x preserva contexto clinico. Audio critico pendiente.",
+    "V4: movimiento suave y cama musical CC0; énfasis discreto en frecuencia semestral."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-visita-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "audio_master": {
+    "lra_lu": 10
+  }
+}

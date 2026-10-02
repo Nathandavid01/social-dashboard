@@ -1,0 +1,81 @@
+{
+  "client": "Los Cheesys",
+  "idea_id": "cheesys-antojo",
+  "catalog": "runs/cheesys-catalog.json",
+  "title": "¿Qué Se Te Antoja Hoy?",
+  "source": "../media/cheesys/antojo-source-v1.mp4",
+  "caption_mode": "editorial",
+  "style": "../styles/cheesys-editorial-v1.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 11.8,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 3,
+      "text": "¿Qué se te antoja hoy?"
+    },
+    {
+      "start": 6,
+      "end": 9.3,
+      "text": "Elige tu favorito."
+    }
+  ],
+  "voice_filter": "volume=0,aresample=48000",
+  "music": {
+    "source": "../media/cheesys/antojo-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Backbeat.provenance.json"
+  },
+  "outro": {
+    "source": "../media/cheesys/brand/outro-antojo-v1.mp4",
+    "in": 0,
+    "out": 2.333333,
+    "gain": 1
+  },
+  "source_parts": [
+    {
+      "source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825184915_0202_D.MP4",
+      "in": 0.35,
+      "out": 3.35,
+      "kind": "food_broll",
+      "original_source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825184915_0202_D.MP4"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185330_0212_D.MP4",
+      "in": 2.1,
+      "out": 5.1,
+      "kind": "food_broll",
+      "original_source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185330_0212_D.MP4"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185258_0211_D.MP4",
+      "in": 0.2,
+      "out": 3.5,
+      "kind": "food_broll",
+      "original_source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185258_0211_D.MP4"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185330_0212_D.MP4",
+      "in": 6.25,
+      "out": 8.75,
+      "kind": "food_broll",
+      "original_source": "/Users/ericperez/Nate Media/cheesys-video/source/DJI_20260825185330_0212_D.MP4"
+    }
+  ],
+  "references": {
+    "product": "../cheesys-video/reference/Cheesy3.mp4",
+    "editorial_titles": "../cheesys-video/reference/Cheesy5.mp4",
+    "official_outro": "../cheesys-video/source/outro.mp4"
+  },
+  "review_notes": [
+    "Montaje sin narración: texto editorial, no subtítulos de voz. Audio ambiente de crudos silenciado.",
+    "Cortes directos; no repite rangos. Dos rangos distintos de 0212 muestran alitas y bebida.",
+    "Fecha de grabación por nombres DJI: 2026-08-25; subidos 2026-08-27.",
+    "Escucha crítica y revisión del usuario pendientes."
+  ]
+}

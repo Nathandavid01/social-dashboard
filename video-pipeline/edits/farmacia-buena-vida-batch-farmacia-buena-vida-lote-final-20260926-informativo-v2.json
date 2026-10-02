@@ -1,0 +1,211 @@
+{
+  "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe",
+  "title": "Visítanos En Maunabo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/informativo.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/informativo-corrected.json",
+  "style": "../styles/farmacia-buena-vida.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 6.3,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.65,
+      "out": 8.95,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.45,
+      "out": 10.95,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.18,
+      "out": 11.85,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.2,
+      "out": 13.45,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 13.87,
+      "out": 15.7,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.08,
+      "out": 17.55,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 18.03,
+      "out": 20.8,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.82,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.18,
+      "out": 31.1,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.66,
+      "end": 1.25,
+      "text": "Hola."
+    },
+    {
+      "start": 1.42,
+      "end": 2.32,
+      "text": "Farmacia Buena Vida"
+    },
+    {
+      "start": 2.42,
+      "end": 3.48,
+      "text": "queda ubicado en la calle"
+    },
+    {
+      "start": 3.52,
+      "end": 4.24,
+      "text": "Muñoz Rivera,"
+    },
+    {
+      "start": 4.4,
+      "end": 5.12,
+      "text": "número 24,"
+    },
+    {
+      "start": 5.3,
+      "end": 6.3,
+      "text": "en el pueblo de Maunabo."
+    },
+    {
+      "start": 6.37,
+      "end": 7.66,
+      "text": "Contamos con servicio de"
+    },
+    {
+      "start": 7.71,
+      "end": 8.6,
+      "text": "Western Union,"
+    },
+    {
+      "start": 8.69,
+      "end": 10.1,
+      "text": "sellos de colecturía digital,"
+    },
+    {
+      "start": 10.18,
+      "end": 10.77,
+      "text": "fax,"
+    },
+    {
+      "start": 10.87,
+      "end": 12.02,
+      "text": "impresión de emails,"
+    },
+    {
+      "start": 12.11,
+      "end": 13.85,
+      "text": "delivery gratis de medicamentos,"
+    },
+    {
+      "start": 13.93,
+      "end": 15.32,
+      "text": "refills automáticos,"
+    },
+    {
+      "start": 15.43,
+      "end": 17.26,
+      "text": "certificados de ASUME,"
+    },
+    {
+      "start": 17.67,
+      "end": 18.09,
+      "text": "PAN,"
+    },
+    {
+      "start": 18.22,
+      "end": 19.66,
+      "text": "antecedentes penales."
+    },
+    {
+      "start": 19.76,
+      "end": 20.68,
+      "text": "También imprimimos"
+    },
+    {
+      "start": 20.68,
+      "end": 22.17,
+      "text": "licencias de automóvil."
+    },
+    {
+      "start": 22.28,
+      "end": 23.61,
+      "text": "Podemos pagar tus multas"
+    },
+    {
+      "start": 23.61,
+      "end": 25.42,
+      "text": "de CESCO y de AutoExpreso,"
+    },
+    {
+      "start": 25.42,
+      "end": 27.58,
+      "text": "entre otros servicios."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Retirar pausas largas conservando frases; alternar planos moderados, captions del cliente, música única CC0 y cierre publicado limpio. Sin B-roll genérico. Escucha humana pendiente. Revisión: agrupar nombres completos de servicios y frases naturales; licencia CC0 enlazada en receta."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  }
+}

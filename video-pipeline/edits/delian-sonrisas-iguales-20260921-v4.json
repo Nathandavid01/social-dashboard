@@ -1,0 +1,204 @@
+{
+  "idea_id": "sonrisas-iguales-20260921",
+  "title": "¿Todos Los Diseños De Sonrisa Se Ven Iguales?",
+  "source": "/Volumes/Extreme SSD/Nate Media/delian-loyola-video/source-2026-09-21/dji_mimo_20260921_160544_20260921160529_1790125103709_video.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/transcript-turbo.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 2.62,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.62,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 2.62,
+      "out": 13.08,
+      "zoom": 1.015,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.008,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 10.46,
+          "zoom": 1.05
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.68,
+      "text": "Oye, doctora,",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 0.74,
+      "end": 1.8,
+      "text": "¿y todos los diseños de sonrisa",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 1.8,
+      "end": 2.36,
+      "text": "se ven igual?",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 2.78,
+      "end": 4.58,
+      "text": "No deberían verse iguales."
+    },
+    {
+      "start": 4.82,
+      "end": 5.84,
+      "text": "Cada individuo, ¿verdad?"
+    },
+    {
+      "start": 5.96,
+      "end": 7.0,
+      "text": "Tiene sus rasgos:"
+    },
+    {
+      "start": 7.1,
+      "end": 7.64,
+      "text": "labios,"
+    },
+    {
+      "start": 7.8,
+      "end": 8.32,
+      "text": "mentón,"
+    },
+    {
+      "start": 8.44,
+      "end": 8.98,
+      "text": "la nariz."
+    },
+    {
+      "start": 9.2,
+      "end": 10.26,
+      "text": "Debemos llevarnos más o menos"
+    },
+    {
+      "start": 10.26,
+      "end": 10.84,
+      "text": "al mismo nivel"
+    },
+    {
+      "start": 10.84,
+      "end": 11.86,
+      "text": "para que sea acorde"
+    },
+    {
+      "start": 11.86,
+      "end": 12.68,
+      "text": "a cada persona."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v4/mosaico-sonrisas.mp4",
+      "in": 0,
+      "out": 1.9,
+      "at": 0.72,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Ocho sonrisas distintas visibles simultáneamente durante pregunta; mosaico conceptual exclusivo con keyframes, no casos ni resultados de DML.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v4/asset-provenance.json",
+      "asset_family": "iguales-v4-ocho-sonrisas"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/rasgos.mp4",
+      "in": 0,
+      "out": 3.04,
+      "at": 6.08,
+      "fade_in": 0,
+      "fade_out": 0,
+      "eof_action": "repeat",
+      "reason": "Rasgos de rostro conceptual con callouts labios, mentón y nariz sincronizados; preserva gestos de la doctora antes y después.",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/asset-provenance.json",
+      "asset_family": "iguales-v1-rasgos"
+    }
+  ],
+  "graphics": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 0.57,
+      "duration": 0.3,
+      "intensity": 0.45
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 5.93,
+      "duration": 0.3,
+      "intensity": 0.45
+    }
+  ],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 0.72,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 2.62,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 6.08,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 9.12,
+      "gain_db": -23
+    }
+  ],
+  "review_notes": [
+    "Pregunta y respuesta completas del crudo 160544, sin inventar cierre. Recorte solo al final tras la frase completa.",
+    "v4: Eric pide muchas sonrisas en primer B-roll. Mosaico de ocho sonrisas generado exclusivamente, animación suave por celda y espacio para captions. Segundo apoyo conservado.",
+    "ASR small y turbo cotejadas; normalizadas doctora, rasgos y sea acorde. Escucha crítica pendiente.",
+    "53 entradas de scheduler y 23 reels de Instagram consultados, sin coincidencia de esta pregunta/respuesta; rango documentado en metricool-review.json. No se sube a Metricool."
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/music-continuous.wav",
+    "title": "Try Me - Arulo",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/Try Me - Arulo.provenance.json",
+    "source_offset": 8
+  }
+}

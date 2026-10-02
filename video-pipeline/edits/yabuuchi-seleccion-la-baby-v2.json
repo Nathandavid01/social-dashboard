@@ -1,0 +1,83 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "la-baby",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "La Baby Para Dos",
+  "source": "../media/yabuuchi/derived/la-baby-selection-v1.mp4",
+  "transcript": "../runs/yabuuchi-la-baby-selection-mapped.json",
+  "style": "../styles/yabuuchi-reference-v3.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 5.9,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.36,
+      "text": "Aquí en Yabuuchi Levittown"
+    },
+    {
+      "start": 1.46,
+      "end": 3.16,
+      "text": "tenemos la cajita de La Baby,"
+    },
+    {
+      "start": 3.38,
+      "end": 4.84,
+      "text": "que es perfecto para dos personas."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 2.5
+  },
+  "music": {
+    "source": "../media/yabuuchi/la-baby-selection-music-v1.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "in": 4,
+      "out": 8.44,
+      "at": 1.46,
+      "eof_action": "repeat",
+      "reason": "Caja real La Baby al nombrarla, seguida de la mención de dos personas y cierre de producto."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914133949_0023_D.MP4",
+      "in": 3.32,
+      "out": 8.22
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Se retira la apertura de transcripción dudosa; comienza con ubicación y producto.",
+    "Caption conserva perfecto como está transcrito; no sustituye el audio por una corrección gramatical.",
+    "El B-roll de la caja completa llega hasta el outro, sin retorno fugaz a la presentadora.",
+    "Captions Arial Black 52px y cierre de video 1.2.mp4; comparación visual realizada. Escucha crítica pendiente.",
+    "V2: elevar solo el audio del cierre +7.96 dB, de -32.95 a aproximadamente -25 LUFS, para suavizar la caída respecto a la voz. Misma imagen, captions y B-roll."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 1.46,
+      "duration": 0.18,
+      "gain_db": -29
+    }
+  ],
+  "effects": []
+}

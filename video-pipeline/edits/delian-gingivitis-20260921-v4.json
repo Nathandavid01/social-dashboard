@@ -1,0 +1,472 @@
+{
+  "idea_id": "gingivitis-20260921",
+  "title": "¿Te Sangran Las Encías?",
+  "source": "/Volumes/Extreme SSD/Nate Media/delian-sept-missing/dji_mimo_20260921_170626_20260921170534_1790125034456_video.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/delian-sept-missing/gingivitis-second-pass.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 0.48,
+      "out": 10.16,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 9.68,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 10.75,
+      "out": 19.12,
+      "zoom": 1.045,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 8.37,
+          "zoom": 1.0
+        }
+      ]
+    },
+    {
+      "in": 19.52,
+      "out": 31.99,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 12.47,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 32.1,
+      "out": 36.93,
+      "zoom": 1.045,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 4.83,
+          "zoom": 1.0
+        }
+      ]
+    },
+    {
+      "in": 37.5,
+      "out": 44.5,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 7.0,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 44.98,
+      "out": 50.3,
+      "zoom": 1.045,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 5.32,
+          "zoom": 1.0
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 1.24,
+      "text": "Hoy les quiero hablar un poquito"
+    },
+    {
+      "start": 1.24,
+      "end": 2.52,
+      "text": "de lo que es la gingivitis."
+    },
+    {
+      "start": 2.78,
+      "end": 3.48,
+      "text": "La gingivitis,"
+    },
+    {
+      "start": 3.48,
+      "end": 5.14,
+      "text": "la señal primordial es"
+    },
+    {
+      "start": 5.14,
+      "end": 6.1,
+      "text": "sangrado en las encías."
+    },
+    {
+      "start": 6.44,
+      "end": 7.58,
+      "text": "¿Qué es lo primero que me preguntan?"
+    },
+    {
+      "start": 7.98,
+      "end": 9.5,
+      "text": "Doctora, me paso el hilo y sangro."
+    },
+    {
+      "start": 9.83,
+      "end": 10.87,
+      "text": "Esa es la primera señal."
+    },
+    {
+      "start": 11.27,
+      "end": 12.51,
+      "text": "No debe haber sangrado."
+    },
+    {
+      "start": 12.79,
+      "end": 13.58,
+      "text": "¿Qué significa?"
+    },
+    {
+      "start": 13.61,
+      "end": 15.13,
+      "text": "Hay inflamación de las encías."
+    },
+    {
+      "start": 15.43,
+      "end": 16.77,
+      "text": "La respuesta de la encía"
+    },
+    {
+      "start": 16.77,
+      "end": 17.89,
+      "text": "es sangrar."
+    },
+    {
+      "start": 18.21,
+      "end": 20.03,
+      "text": "¿Y cómo resolvemos eso?"
+    },
+    {
+      "start": 20.15,
+      "end": 21.18,
+      "text": "Visitando al dentista."
+    },
+    {
+      "start": 21.33,
+      "end": 22.19,
+      "text": "Hay veces que podemos verlo"
+    },
+    {
+      "start": 22.19,
+      "end": 23.03,
+      "text": "cada seis meses,"
+    },
+    {
+      "start": 23.17,
+      "end": 24.11,
+      "text": "otras veces cada tres."
+    },
+    {
+      "start": 24.59,
+      "end": 26.35,
+      "text": "Pasarnos el hilo dental todos los días,"
+    },
+    {
+      "start": 26.35,
+      "end": 28.09,
+      "text": "porque si eso no se resuelve,"
+    },
+    {
+      "start": 28.37,
+      "end": 30.33,
+      "text": "se convierte en periodontitis."
+    },
+    {
+      "start": 30.68,
+      "end": 32.04,
+      "text": "Y ya ahí vamos a ver"
+    },
+    {
+      "start": 32.04,
+      "end": 33.22,
+      "text": "una pérdida de hueso."
+    },
+    {
+      "start": 33.68,
+      "end": 35.16,
+      "text": "Podemos perder hasta los dientes."
+    },
+    {
+      "start": 35.51,
+      "end": 37.15,
+      "text": "Vamos a tratar de hacer"
+    },
+    {
+      "start": 37.15,
+      "end": 38.13,
+      "text": "una evaluación completa,"
+    },
+    {
+      "start": 38.93,
+      "end": 39.97,
+      "text": "ver lo que usted necesita."
+    },
+    {
+      "start": 40.25,
+      "end": 41.39,
+      "text": "Hacemos limpieza profunda"
+    },
+    {
+      "start": 41.39,
+      "end": 42.17,
+      "text": "si es necesario."
+    },
+    {
+      "start": 42.51,
+      "end": 43.45,
+      "text": "Y lo más importante"
+    },
+    {
+      "start": 43.45,
+      "end": 44.73,
+      "text": "es comunicarse con nosotros al"
+    },
+    {
+      "start": 44.73,
+      "end": 47.43,
+      "text": "787-230-7573"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-05-28/DJI_20260528173806_0105_D.MP4",
+      "in": 0.2,
+      "out": 2.9,
+      "at": 1.1,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Atención real en clínica al presentar gingivitis; sin afirmar diagnóstico del paciente mostrado.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.7,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4",
+      "in": 2,
+      "out": 4.2,
+      "at": 7.98,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Uso real de hilo dental al decir me paso el hilo; adelantado al inicio sin repetir esta toma.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.05
+        },
+        {
+          "time": 2.2,
+          "zoom": 1.0
+        }
+      ]
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/visita-clinica-silent.mp4",
+      "in": 0,
+      "out": 1.65,
+      "at": 19.65,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Visita real a la clínica al mencionar al dentista; no se presenta como procedimiento de limpieza.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.65,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_164854_20260921164838_1790125084038_video.mp4",
+      "in": 4.7,
+      "out": 6.52,
+      "at": 24.58,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Manos preparando hilo dental al recomendar uso diario; toma real distinta al espejo inicial.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.05
+        },
+        {
+          "time": 1.82,
+          "zoom": 1.0
+        }
+      ]
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4",
+      "in": 4.5,
+      "out": 6,
+      "at": 37.15,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Evaluación real durante invitación a evaluación completa.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.06
+        }
+      ]
+    }
+  ],
+  "graphics": [],
+  "effects": [],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.1,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3.8,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 7.98,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.18,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 18.05,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 19.65,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 21.3,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 24.58,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 26.4,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 30.52,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 35.35,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 37.15,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 38.65,
+      "gain_db": -24
+    },
+    {
+      "preset": "mouse_click",
+      "time": 42.35,
+      "gain_db": -24
+    }
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1/music-continuous.wav",
+    "title": "Baileys - Diego Nava",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1/Baileys - Diego Nava.provenance.json",
+    "source_offset": 4
+  },
+  "review_notes": [
+    "v2: Correcciones de captions cotejando Whisper small y turbo, puntuación y sincronía de la frase sobre visitas. No se alteran voz, música ni cortes.",
+    "Transcripción automática es evidencia auxiliar, no escucha crítica. Escucha y aprobación humana pendientes.",
+    "Eric confirma literalmente: sangrado en las encías. Corrección v3; prevalece sobre ASR.",
+    "v4: Eric pide más B-roll al principio y keyframes profesionales. Dos apoyos en primeros 10.2 s; cinco apoyos distintos totales. Movimientos smoothstep suaves, cortes opacos y clicks solo en cambios visibles. Caption sangrado en las encías conservado."
+  ]
+}

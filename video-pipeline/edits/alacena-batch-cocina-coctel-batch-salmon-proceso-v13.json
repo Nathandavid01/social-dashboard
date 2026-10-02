@@ -1,0 +1,101 @@
+{
+  "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+  "title": "No vas a creer cómo suena este salmón",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5/editorial-titles.json",
+  "style": "../styles/alacena-salmon-pov-v1.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 17.567,
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 20.166667,
+      "text": "POV: Emplatando Salmon"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 4.05,
+      "duration": 0.035,
+      "gain_db": -34
+    },
+    {
+      "kind": "click",
+      "time": 8.05,
+      "duration": 0.035,
+      "gain_db": -34
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Raise each original scrape to -19 dBFS target RMS with smooth -5 dBFS peak limiting; maintain six visible-only windows and 8ms edges. Preserve complete continuous music, opening fade, full green overlay and picture."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0.2,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "caption_mode": "editorial",
+  "audio_master": {
+    "mode": "music"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-v5-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-music-provenance.json"
+  },
+  "render_method": "Sample-continuous full-duration PCM mix from original music, effects, and separated knife sound; copy unchanged v12 picture; normalize",
+  "audio_source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-cuchillo-presente-v13/continuous-mix.wav",
+  "audio_stream_copy": false,
+  "overlay": {
+    "text": "POV: Emplatando Salmon",
+    "box_colour": "#163F2C",
+    "x": 60,
+    "y": 145,
+    "width": 960,
+    "height": 138,
+    "text_colour": "#FCFCFC",
+    "duration": "entire_video_including_outro"
+  },
+  "audio_edit": {
+    "source_take_head_muted": [
+      0,
+      0.78
+    ],
+    "remaining_original_sound": [
+      0.78,
+      4.333333
+    ],
+    "original_timeline_in": 10.666667,
+    "separation_model": "model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-sin-conteo-v8",
+    "opening": {
+      "silence_until": 0.45,
+      "fade_end": 1.2,
+      "curve": "hsin",
+      "rest": "unchanged before master"
+    }
+  }
+}

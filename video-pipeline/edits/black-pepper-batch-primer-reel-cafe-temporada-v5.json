@@ -1,0 +1,132 @@
+{
+  "idea_id": "ef195e9f-dace-4a56-aff9-ac5ced557c9f",
+  "title": "Café de temporada, disponible todo el año",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929090039_0315_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/0315-transcript-corrected-v1.json",
+  "style": "../styles/black-pepper-v4.json",
+  "clips": [
+    {
+      "in": 1.84,
+      "out": 19.78,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.08,
+      "text": "Este cafecito,"
+    },
+    {
+      "start": 1.08,
+      "end": 1.72,
+      "text": "familia, es el"
+    },
+    {
+      "start": 1.72,
+      "end": 2.38,
+      "text": "favorito"
+    },
+    {
+      "start": 2.38,
+      "end": 3.38,
+      "text": "de la temporada"
+    },
+    {
+      "start": 3.38,
+      "end": 4.74,
+      "text": "de todos los"
+    },
+    {
+      "start": 4.74,
+      "end": 5.54,
+      "text": "comensales de aquí"
+    },
+    {
+      "start": 5.54,
+      "end": 6.1,
+      "text": "en Black Pepper."
+    },
+    {
+      "start": 6.2,
+      "end": 7.58,
+      "text": "Es un cafecito"
+    },
+    {
+      "start": 7.58,
+      "end": 8.34,
+      "text": "que está decorado"
+    },
+    {
+      "start": 8.34,
+      "end": 9.22,
+      "text": "con borde de Nutella,"
+    },
+    {
+      "start": 9.32,
+      "end": 9.92,
+      "text": "tiene las walnuts"
+    },
+    {
+      "start": 9.92,
+      "end": 10.64,
+      "text": "caramelizadas,"
+    },
+    {
+      "start": 10.72,
+      "end": 11.36,
+      "text": "whipped cream, caramel"
+    },
+    {
+      "start": 11.36,
+      "end": 11.94,
+      "text": "y coronado"
+    },
+    {
+      "start": 11.94,
+      "end": 13.0,
+      "text": "con un poquito de canela."
+    },
+    {
+      "start": 13.48,
+      "end": 14.76,
+      "text": "Es importante que sepan"
+    },
+    {
+      "start": 14.76,
+      "end": 15.7,
+      "text": "que este café está"
+    },
+    {
+      "start": 15.7,
+      "end": 17.14,
+      "text": "durante todo el año"
+    },
+    {
+      "start": 17.14,
+      "end": 17.86,
+      "text": "disponible."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "V2: captions agrupados por frase; retirar repetición posterior a disponible conservando disponibilidad anual. Mantener movimiento de cámara original y outro oficial. Fuente Montserrat Bold inferida visualmente, provisional y pendiente de validación. Voz original sin pista musical añadida. Cobertura de asociados parcial: 0316 revisada por transcripción, no utilizada; 0311 pendiente de autorización de descarga. Escucha crítica pendiente. V3 corrige tamaño, peso y posición de captions según comparación a resolución nativa. Mantener reconstrucción provisional identificada. V4 corrige frases multilínea detectadas en hoja visual; nueva comprobación requerida. V5 separa la última frase larga para mantener captions en una línea."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75"
+}

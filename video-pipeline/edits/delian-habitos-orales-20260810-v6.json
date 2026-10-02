@@ -1,0 +1,216 @@
+{
+  "idea_id": "habitos-orales-20260810",
+  "title": "¿Qué afecta más tu salud oral?",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810151517_0293_D.MP4",
+  "transcript": "../runs/delian-transcripts/0293-small-transcript-silence-fixed.json",
+  "style": "../styles/delian-reference-v5-habitos.json",
+  "clips": [
+    {
+      "in": 1.84,
+      "out": 3.4,
+      "zoom": 1.1,
+      "focus_y": 0.55,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.56,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 4.64,
+      "out": 6.82,
+      "zoom": 1.3,
+      "focus_y": 0.62,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.18,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 7.12,
+      "out": 8.06,
+      "zoom": 1.5,
+      "focus_y": 0.7,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.25,
+      "out": 12.75,
+      "zoom": 1.1,
+      "focus_y": 0.55,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 13.75,
+      "out": 14.54,
+      "zoom": 1.5,
+      "focus_y": 0.7,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.25,
+      "out": 18.64,
+      "zoom": 1.1,
+      "focus_y": 0.55,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.39,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 18.64,
+      "out": 20.42,
+      "zoom": 1.5,
+      "focus_y": 0.7,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.78,
+          "zoom": 1.05
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.94,
+      "text": "Cepillarte los dientes"
+    },
+    {
+      "start": 0.94,
+      "end": 1.52,
+      "text": "muy fuerte."
+    },
+    {
+      "start": 1.6,
+      "end": 2.62,
+      "text": "Yo la pondría"
+    },
+    {
+      "start": 2.62,
+      "end": 4.58,
+      "text": "en el último lugar.",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 4.73,
+      "end": 5.95,
+      "text": "Comer mucho dulce."
+    },
+    {
+      "start": 6.31,
+      "end": 6.91,
+      "text": "Segundo.",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 7.02,
+      "end": 8.49,
+      "text": "Y no visitar a tu dentista"
+    },
+    {
+      "start": 8.49,
+      "end": 8.92,
+      "text": "en años."
+    },
+    {
+      "start": 9.72,
+      "end": 11.02,
+      "text": "Definitivamente es la primera.",
+      "primary_colour": "&H00E560EB"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 4.54,
+      "duration": 0.28,
+      "gain_db": -28
+    }
+  ],
+  "music": {
+    "source": "../media/delian/music/habitos-backbeat.m4a",
+    "license": "CC0 1.0"
+  },
+  "effects": [],
+  "review_notes": [
+    "Reedición local de una intervención que aparece en Publicados/28 agosto; no es contenido inédito ni una nueva publicación.",
+    "Se omite la claqueta inicial y la frase final incompleta «lo que podemos hacer».",
+    "La transcripción Whisper small se cotejó con un segundo pase orientado al vocabulario del diálogo; «Cepillarte los dientes muy fuerte» requiere escucha humana crítica antes de entregar.",
+    "No hay B-roll del tema en la carpeta ✅5; se preserva la toma real y se usan cambios sutiles de encuadre entre respuestas.",
+    "Subtítulos blancos con sombra violeta y outro oficial según referencia de marca; confirmar lectura y posición en el render.",
+    "V2: aumentar LRA a 10 LU en esta receta para evitar cola de 94 ms de loudnorm dinámico en AAC; no se cambió el normalizador global.",
+    "V3: placa editorial original «¿Qué daña más tu salud oral?» en el área superior durante el primer enunciado; replica la función del gancho del publicado/28 agosto sin cubrir rostro ni subtítulos.",
+    "V3: bajar captions al torso (`bottom_margin=350`) porque en 0293 la doctora se inclina y la posición v4 estándar roza barbilla/cuello.",
+    "V4: encuadre moderadamente más cercano a la referencia publicada, movimiento suave con keyframes, cama musical con licencia CC0 y un efecto discreto en cambio real de plano.",
+    "V5: registrar CC0 1.0 de la pista en metadatos para la validación técnica; imagen y mezcla de V4 intactas.",
+    "V6 (2026-09-23, pedido de Eric «más profesionales»): ritmo del Publicado 28 agosto — cada opción en plano medio (1.1) y cada veredicto en primer plano (1.5, focus_y 0.7 para dejar el rostro sobre los captions), veredictos en violeta; pausas 0.6→0.3 s (6.82–7.12) y 1.36→0.49 s antes de «Segundo» (cortes dentro de silencios medidos); captions 100 px (v5-habitos)."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-habitos-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-28-agosto.mp4",
+    "published_contact": "../delian-loyola-video/review/publicados-28ago-contact.jpg",
+    "editorial_title": "media/delian/graphics/habitos-title.png"
+  },
+  "audio_master": {
+    "lra_lu": 10
+  },
+  "graphics": [
+    {
+      "source": "../media/delian/graphics/habitos-title.png",
+      "start": 0,
+      "end": 1.58,
+      "x": 180,
+      "y": 150,
+      "width": 720,
+      "enter": 0.12,
+      "reason": "Contexto del ranking, inspirado por la placa del publicado 28 agosto; conserva captions literales sobre el habla."
+    }
+  ]
+}

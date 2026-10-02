@@ -1,0 +1,40 @@
+{
+  "name": "La Mia Pizza · POV legible v2",
+  "font_file": "../media/mia-pizzeria/brand/Impact.ttf",
+  "font_family": "Impact",
+  "font_size": 112,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00100088",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 3,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 330,
+  "fixed_size": true,
+  "wrap_width": 900,
+  "max_words": 5,
+  "max_chars": 30,
+  "caption_animation": "none",
+  "status": "visual_reference_matched_font_identity_unconfirmed",
+  "notes": [
+    "Referencia: reels publicados 22, 23 y 25 septiembre de 2026, confirmados PUBLISHED en Metricool.",
+    "Texto blanco, mayúsculas, sans serif condensada gruesa, borde rojo oscuro, 1-2 líneas centradas en la zona baja-media.",
+    "Impact es una aproximación visual reutilizable. No hay archivo ni nombre de fuente oficial en Recursos de Drive; identidad exacta pendiente.",
+    "82 px ASS a 1080x1920 es una traducción de la altura observada, no un valor recuperado del editor original.",
+    "Rojo #880010 aproximado de fotogramas comprimidos. Posición ajustable para no cubrir caras ni producto; ejemplos usan zonas entre 72 y 80 por ciento de altura.",
+    "Frases cortas sincronizadas, sin karaoke ni caja de fondo permanente. Rótulos de situación pueden ir en caja burdeos como el ejemplo de julio.",
+    "Los tres reels de septiembre cierran con animación oficial de logo/fuego. Aplicar este cierre reciente; los ejemplos anteriores sin logo son históricos.",
+    "Correccion expresa Eric29sept: POV mas grande, contraste burdeos solido, frases cortas y mas tiempo. Solo rotulos POV, dialogo conserva v1."
+  ],
+  "caption_box": {
+    "colour": "&H00100088",
+    "padding_x": 32,
+    "padding_y": 22,
+    "radius": 24,
+    "line_height": 120,
+    "alpha": "00"
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "la-baby",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "La Baby Para Dos",
+  "source": "../media/yabuuchi/derived/la-baby-complete-v8.mp4",
+  "transcript": "../runs/yabuuchi-la-baby-count-corrected-v11-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 9.4,
+      "zoom": 1,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 15.35,
+      "out": 17.75,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 1.15,
+      "text": "Si tienes hambre,"
+    },
+    {
+      "start": 1.19,
+      "end": 2.35,
+      "text": "tú y tu pareja de sushi,"
+    },
+    {
+      "start": 2.55,
+      "end": 3.85,
+      "text": "aquí en Yabuuchi Levittown"
+    },
+    {
+      "start": 3.93,
+      "end": 5.65,
+      "text": "tenemos la cajita de La Baby,"
+    },
+    {
+      "start": 5.85,
+      "end": 6.54,
+      "text": "que es perfecto"
+    },
+    {
+      "start": 6.54,
+      "end": 7.3,
+      "text": "para dos personas."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/la-baby-v11-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/derived/la-baby-product-sequence-v10.mp4",
+      "in": 0,
+      "out": 5.6,
+      "at": 3.8,
+      "eof_action": "repeat",
+      "reason": "Secuencia continua de caja completa y detalle central; sin regreso de un fotograma al presentador en el corte interno.",
+      "source_segments": [
+        {
+          "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+          "in": 4,
+          "out": 6.6,
+          "at": 3.8
+        },
+        {
+          "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+          "in": 8.5,
+          "out": 11.7,
+          "at": 6.4
+        }
+      ]
+    }
+  ],
+  "source_parts": [
+    {
+      "code": "0023",
+      "start": 0.85,
+      "end": 8.45,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Apertura y presentación originales completas",
+      "source": "media/yabuuchi/source/DJI_20260914133949_0023_D.MP4",
+      "at": 0,
+      "duration": 7.6
+    },
+    {
+      "code": "0021",
+      "start": 9.7,
+      "end": 11.5,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Continuidad de producto; cubierta por el B-roll 6.4–10.1",
+      "source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "at": 7.6,
+      "duration": 1.8
+    },
+    {
+      "code": "0021",
+      "start": 13.4,
+      "end": 15.8,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Cierre de producto con recorrido a los rolls, sin repetir el rango anterior",
+      "source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "at": 9.4,
+      "duration": 2.4
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "review_notes": [
+    "Eric indicó que el video 09 todavía requería mejor edición; v7 no está aprobado.",
+    "Se conservan las dos intervenciones completas: apertura de 0023 e invitación de 0002.",
+    "Anybody Expanded Black 72 y entrada reference_soft_in del perfil vigente.",
+    "Caja completa, detalle central y recorrido final: tres rangos distintos del producto real.",
+    "El detalle cubre el inicio movido de 0002; la voz continúa completa debajo.",
+    "Pausa final de producto de 2.4 s antes del logo; ningún plano se repite ni congela.",
+    "Cinco cambios editoriales con sonido contenido; se conserva el outro profesional de piano.",
+    "Audio Kit nivela presentación e invitación por separado y mide el AAC final. Escucha crítica pendiente.",
+    "V9: se divide la frase para dos personas en dos captions para respetar el máximo de dos líneas a tamaño 72 fijo.",
+    "V10: unidos los dos planos de producto en una capa continua para evitar un fotograma del presentador entre apoyos contiguos; mismos rangos, voz, duraciones y sonidos.",
+    "V11: se retiran los primeros 0.50s de 0002 identificados por Eric como y tres, manteniendo completa la invitación desde su entrada real. Captions y transiciones reubicados; transcripción original preservada.",
+    "Eric: retirar de La Baby la invitación y dirección trasladadas a El Mejor Sushi Para Compartir. v13 conserva presentación completa y cierre de producto; Compartir v5 permanece intacto. v12 sin receta disponible se conserva.",
+    "Eric identifica ruido/golpe al comienzo. v14: filtro de graves reforzado solo en primeros 400 ms y entrada de voz de 60 ms, sin recortar la primera palabra ni cambiar imagen/captions. Confirmación auditiva pendiente de Eric.",
+    "v15: Eric precisa ruido entre 0 y 1s. Sustituye filtro limitado a 400ms por reducción de ruido y de clicks aplicada únicamente a 0–1.05s de la voz. No recorta ni silencia palabras. Escucha del usuario pendiente.",
+    "v16: Eric describe ruido como roce de micrófono o viento en 0–1s. Tratamiento de graves hasta 250Hz y reducción de ruido únicamente 0–1.2s; bajar ambiente inicial con recuperación gradual antes de voz fuerte. Mantener frase completa; valoración auditiva pendiente, no afirmar eliminación por mediciones."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 3.686,
+      "duration": 0.32,
+      "gain_db": -20,
+      "reason": "Entrada a la caja completa"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 6.286,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Cambio al detalle de producto"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 9.286,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Cierre de producto"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 11.6,
+      "duration": 0.2,
+      "gain_db": -22,
+      "reason": "Entrada al outro"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 3.7,
+      "duration": 0.2,
+      "intensity": 0.45,
+      "reason": "Entrada a la caja completa"
+    }
+  ],
+  "effects_reference": {
+    "request": "Mejorar efectos y sonidos para hacer el swoosh de la referencia",
+    "reference_audit": "runs/yabuuchi-swoosh-reference-qa/reference-audit.json",
+    "sound": "whoosh_sweep: síntesis original, ataque rápido y cola breve",
+    "visual": "whip_pan: barrido lateral con bordes reflejados, captions estables",
+    "total_cues": 5,
+    "sound_duration": 0.32,
+    "sound_peak_lead": 0.05,
+    "listening": "pending; no se afirma identidad auditiva"
+  },
+  "voice_filter": "highpass=f=75,highpass=f=250:p=2:enable='lt(t,1.2)',afftdn=nr=16:nf=-34:tn=0:gs=8:enable='lt(t,1.2)',volume='if(lt(t,0.38),0.25,if(lt(t,0.5),0.25+0.75*(t-0.38)/0.12,1))':eval=frame,afade=t=in:st=0:d=0.04",
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0,
+        "end": 7.3,
+        "role": "presentacion"
+      }
+    ]
+  },
+  "count_correction": {
+    "original_source": "DJI_20260914125108_0002_D.MP4",
+    "user_identified": "y tres",
+    "discarded_source_range": [
+      0,
+      0.5
+    ],
+    "invitation_onset": 0.6,
+    "reason": "Separate recording count from the invitation; retain Y si aún and preserve original transcripts."
+  },
+  "removed_invitation": {
+    "source": "DJI_20260914125108_0002_D.MP4",
+    "range": [
+      0.5,
+      5.95
+    ],
+    "moved_to": "yabuuchi-compartir-v5.mp4"
+  }
+}

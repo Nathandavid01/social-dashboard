@@ -34,3 +34,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Pipeline local de edición
+
+Las herramientas, reglas, fichas por cliente y recetas están en [video-pipeline](video-pipeline/README.md). Consultar [instalación y restauración de medios](video-pipeline/PORTABILITY.md). Los renders se ejecutan en el equipo del editor; no se ejecutan en Vercel. Los videos, credenciales y recursos licenciados permanecen fuera de Git.

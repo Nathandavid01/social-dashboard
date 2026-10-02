@@ -1,0 +1,55 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v1.json",
+  "idea_id": "mondays-te-verde",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Un té verde",
+  "source": "../runs/mondays-src/0443.mp4",
+  "transcript": "../runs/mondays-src/0443.small.json",
+  "clips": [
+    {
+      "in": 5.9,
+      "out": 12.2
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Ukulele Song.mp3",
+    "title": "Ukulele Song",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Ukulele%20Song.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.22,
+      "end": 1.7,
+      "text": "Un té verde, por favor."
+    },
+    {
+      "start": 2.14,
+      "end": 3.0,
+      "text": "Si no lo tienen."
+    },
+    {
+      "start": 3.18,
+      "end": 3.8,
+      "text": "¿No tienen?"
+    },
+    {
+      "start": 4.02,
+      "end": 5.7,
+      "text": "Ah, pues, un Cosmo, please."
+    }
+  ],
+  "review_notes": [
+    "Se quita el arranque en falso («espera, que digo»).",
+    "Pide té verde y, al no haber, pide un Cosmo. No se cambia el trago por el de la ficha."
+  ]
+}

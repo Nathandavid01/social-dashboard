@@ -1,0 +1,24 @@
+{
+  "current_style": "styles/frida-v3.json",
+  "approval": "pending",
+  "rules": [
+    "Usar referencias propias de Frida, no otros clientes.",
+    "Cuatro pistas distintas dentro del lote; reutilizacion entre clientes autorizada por biblioteca compartida.",
+    "No editar otra vez originales vinculados a publicaciones o pendientes en Metricool."
+  ],
+  "latest_user_instruction": "Utiliza su mismo caption, estilo y efectos",
+  "visual_rules": [
+    "Texto blanco con borde rosa, palabras clave amarillas, frases completas sin rebote",
+    "Fundidos suaves de planos de apoyo y cierre oficial",
+    "Fuente Bree Serif sigue siendo aproximación; no afirmar fuente idéntica",
+    "No afirmar identidad de efectos sonoros sin escucha"
+  ],
+  "girls_night_audio": {
+    "instruction": "Eliminar fondo y dejar solo su voz",
+    "music": false,
+    "added_sounds": false,
+    "outro_audio": false,
+    "scope": "Girls Night",
+    "status": "exported_v6"
+  }
+}

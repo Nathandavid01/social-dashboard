@@ -1,0 +1,144 @@
+{
+  "idea_id": "fbc5df7f-1071-4ead-9e81-9a2a8ff631a2",
+  "title": "Trabajas o estudias desde casa",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929102554_0362_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929102554_0362_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 0.64,
+      "out": 16.1,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 1.36,
+      "text": "Si tú estás trabajando"
+    },
+    {
+      "start": 1.36,
+      "end": 2.72,
+      "text": "o estudiando desde tu"
+    },
+    {
+      "start": 2.72,
+      "end": 3.66,
+      "text": "casa y quieres un"
+    },
+    {
+      "start": 3.66,
+      "end": 4.98,
+      "text": "espacio como este,"
+    },
+    {
+      "start": 5.18,
+      "end": 6.48,
+      "text": "que te brinde una"
+    },
+    {
+      "start": 6.48,
+      "end": 7.7,
+      "text": "buena comida,"
+    },
+    {
+      "start": 8.12,
+      "end": 8.76,
+      "text": "un buen brunch"
+    },
+    {
+      "start": 8.76,
+      "end": 9.52,
+      "text": "y, por supuesto,"
+    },
+    {
+      "start": 9.52,
+      "end": 10.16,
+      "text": "un buen café para"
+    },
+    {
+      "start": 10.16,
+      "end": 11.58,
+      "text": "que te mantenga despierto,"
+    },
+    {
+      "start": 11.58,
+      "end": 12.12,
+      "text": "¿Sabes dónde"
+    },
+    {
+      "start": 12.12,
+      "end": 12.6,
+      "text": "tienes que venir?"
+    },
+    {
+      "start": 12.6,
+      "end": 13.18,
+      "text": "¿Dónde más?"
+    },
+    {
+      "start": 13.18,
+      "end": 14.38,
+      "text": "Black Pepper, corillo,"
+    },
+    {
+      "start": 14.42,
+      "end": 15.46,
+      "text": "Así que dale para acá."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 0.02,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Si tú estás trabajando"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 9.52,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "un buen café para"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 13.18,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Black Pepper,"
+    }
+  ],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Corrección final Eric: cuando él empieza hablando. Entrar0.64 justo antes del Si0.66; conservar Si tú estás trabajando completo. Esta precisión sustituye comenzar en Trabajando y Tú. Mantener nueva música Chill Beat y resto del montaje. Autocrítica solicitada: corregir tarjetas fugaces de0.26/0.28/0.34s. Reagrupadas frases de brunch, pregunta, marca y CTA sin cambiar texto hablado. Conserva entrada0.64, música, cámara, efectos y outro."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "audio_master": {
+    "music_below_voice_lu": 16
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Chill Beat - Seth Makes Sounds.mp3",
+    "title": "Chill Beat — Seth_Makes_Sounds",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://freesound.org/people/Seth_Makes_Sounds/sounds/678003/"
+  }
+}

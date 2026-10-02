@@ -1,0 +1,103 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "historia",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Por Qué Yabuuchi?",
+  "source": "../media/yabuuchi/derived/historia-reference-graphic-v2.mp4",
+  "transcript": "../runs/yabuuchi-historia-mapped.json",
+  "style": "../styles/yabuuchi-reference.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 11.96,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.26,
+      "text": "Cuéntame, ¿por qué Yabuuchi?"
+    },
+    {
+      "start": 1.5,
+      "end": 3.18,
+      "text": "Pues mira, nuestro nombre es Yabuuchi"
+    },
+    {
+      "start": 3.2,
+      "end": 4.28,
+      "text": "en honor a Keiko Yabuuchi,"
+    },
+    {
+      "start": 4.3,
+      "end": 7.16,
+      "text": "quien fue la mujer pionera en sushi aquí en Puerto Rico,"
+    },
+    {
+      "start": 7.24,
+      "end": 8.5,
+      "text": "quien le enseñó a Carlos Santiago,"
+    },
+    {
+      "start": 8.6,
+      "end": 9.42,
+      "text": "el dueño de la marca,"
+    },
+    {
+      "start": 9.76,
+      "end": 11.86,
+      "text": "durante 14 años el arte de hacer sushi."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/historia-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914130626_0004_D.MP4",
+      "in": 1.44,
+      "out": 13.4
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "graphic": "media/yabuuchi/graphics/years.png"
+  },
+  "review_notes": [
+    "Historia y nombres conservados como testimonio de la persona grabada; revisión del cliente pendiente.",
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes.",
+    "V2: referencia principal del usuario video 1.2.mp4; captions 54px bajos con sombra; apoyos, acercamientos y efectos contenidos; cierre extraído de la referencia.",
+    "No se afirma coincidencia auditiva exacta."
+  ],
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 9.78,
+      "duration": 0.13,
+      "gain_db": -26
+    }
+  ],
+  "graphics": [
+    {
+      "source": "media/yabuuchi/graphics/years.png",
+      "start": 9.78,
+      "end": 11.84,
+      "original_source": "media/yabuuchi/derived/historia-source-v1.mp4",
+      "kind": "original_vector_graphic",
+      "reason": "Gráfica pequeña y semántica según video 1.2.mp4, bajo el rostro y sobre captions."
+    }
+  ]
+}

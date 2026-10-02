@@ -1,0 +1,23 @@
+{
+  "name": "Arecibo Lab · Montserrat caja verde (v18 aprobado 2026-09-15)",
+  "reference": "Referencia explícita del usuario: AreciboLab_DesdeCero_v18.mp4. Montserrat Bold 70, blanco sobre caja verde #9CE608, margen inferior 430.",
+  "font_file": "../media/arecibo/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 70,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H0008E69C",
+  "back_colour": "&H0008E69C",
+  "border_style": 3,
+  "outline": 14,
+  "shadow": 0,
+  "margin_x": 60,
+  "bottom_margin": 430,
+  "fixed_size": true,
+  "wrap_width": 950,
+  "max_words": 4,
+  "max_chars": 24,
+  "caption_animation": "none",
+  "status": "approved_by_eric_2026-09-15_v18",
+  "user_caption_reference": "/Users/ericperez/Downloads/AreciboLab_DesdeCero_v18.mp4"
+}

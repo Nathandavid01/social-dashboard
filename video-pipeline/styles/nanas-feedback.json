@@ -1,0 +1,69 @@
+{
+  "client": "Nana’s Playhouse",
+  "status_note": "Solicitudes del usuario; las nuevas exportaciones siguen pendientes de su aprobación.",
+  "videos": {
+    "practico": {
+      "title": "Tres Cosas Menos De Qué Preocuparte",
+      "latest_version": 14,
+      "avoid": [
+        {
+          "asset": "media/6fdc1ad9-34dc-41af-ab19-0b8f951683ab.mp4",
+          "scope": "opening_of_this_video",
+          "reason": "Recorrido de cumpleaños repetido en otros videos."
+        },
+        {
+          "asset": "media/d28ffd8e-6204-4629-85e1-c1aec6eeb139.mp4",
+          "scope": "opening_of_this_video",
+          "reason": "Piscina genérica; usuario consideró raras las tomas."
+        },
+        {
+          "asset": "media/cleaning-detail-v2.mp4",
+          "scope": "illustrating_cleaning",
+          "reason": "Plano de bloques no demuestra limpieza y recorte poco natural."
+        }
+      ],
+      "current_approach": "Gancho animado con 3 visible desde el primer fotograma; presentador continuo; tarjetas semánticas animadas para limpieza/casa; toma de cocinita #7 sin uso anterior y números/clicks al inicio de cada punto.",
+      "review_status": "V14: decodificación completa, fotogramas y reproducción del MP4 hasta el outro verificados; escucha crítica y aprobación pendientes.",
+      "motion_request": "Más atractivo para redes, B-roll pertinente y gráficas profesionales animadas; no interpretar como autorización para cortar palabras o saturar efectos.",
+      "motion_spec": "edits/practico-motion-v14.json"
+    },
+    "indoor": {
+      "title": "Tres Razones Para Celebrar En Nana’s",
+      "avoid": "Mostrar al dueño leyendo el teléfono o guion.",
+      "current_approach": "Tarjeta con logo oficial, teléfono y redes sincronizados antes del outro."
+    },
+    "padres": {
+      "title": "Un Plan Para Mamá Y Papá",
+      "disliked_track": "Lovely Piano Song",
+      "replacement": "Happy Whistling Ukulele",
+      "review_status": "Reemplazo entregado; gusto musical no confirmado."
+    },
+    "seguridad": {
+      "request": "Más B-roll demostrando reglas",
+      "approach": "Supervisión, alimentos con prohibición explícita y uso de escalones; presentador cuando falta material demostrativo.",
+      "derived_sources": {
+        "security-no-food.mp4": "c24fefc0-43f4-4c68-a152-079d3611d90c.mp4",
+        "security-correct-stairs.mp4": "4d7d93f7-fdc4-4814-959d-763c84f81252.mp4"
+      },
+      "review_status": "Nueva revisión pendiente de usuario",
+      "rule": "Cuando narración prohíbe mal uso y B-roll demuestra buen uso, rotular explícitamente la conducta correcta."
+    }
+  },
+  "batch_broll_review": {
+    "scope": "Current eight-video batch",
+    "protected": [
+      "padres",
+      "snacks",
+      "cumpleanos"
+    ],
+    "review_targets": [
+      "practico",
+      "fin-de-semana",
+      "seguridad",
+      "indoor",
+      "parque"
+    ],
+    "rule": "Reserve each support source to one current reel; compare scenes as well as hashes; use relevant graphics or presenter when no unique suitable footage exists.",
+    "reservations": "nanas-broll-reservations.json"
+  }
+}

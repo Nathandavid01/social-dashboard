@@ -1,0 +1,187 @@
+{
+  "idea_id": "330bec24-119a-4a30-b0a0-90664981fbe9",
+  "title": "POV: Navidad en septiembre",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-silent-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-editorial-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 16.582633,
+      "out": 19.282633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.7,
+          "zoom": 1.03
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 3.6,
+      "out": 8,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.4,
+          "zoom": 1.07
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 22.282633,
+      "out": 27.082633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.8,
+          "zoom": 1.05
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 27.794633,
+      "out": 29.344633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.55,
+          "zoom": 1.02
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12,
+      "out": 14.1,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 2.1,
+          "zoom": 1.08
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 30.894633,
+      "out": 32.644633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.01
+        },
+        {
+          "time": 1.75,
+          "zoom": 1.1
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 17.3,
+      "text": "POV: Llega septiembre\ny ya suena Navidad\nen la farmacia"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/broll/medicamentos-navidad-v1.mp4",
+      "in": 0,
+      "out": 4.4,
+      "at": 2.7,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.4,
+          "zoom": 1.06
+        }
+      ],
+      "reason": "Pharmacy shelves; fully cover first occurrence of excluded person"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/broll/refills-navidad-v1.mp4",
+      "in": 0,
+      "out": 2.1,
+      "at": 13.45,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.1,
+          "zoom": 1.04
+        }
+      ],
+      "reason": "Dispensing area; fully cover second occurrence of excluded person"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/fachada-fullbleed-v1.mp4",
+      "in": 0.4,
+      "out": 2.15,
+      "at": 15.55,
+      "reason": "Own pharmacy facade replaces external party"
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Latest request supersedes party B-roll. Exclude pictured take1 person from all visible intervals. Cover2.7–7.1,13.45–15.55 and15.55–17.3 with own pharmacy imagery; no fades to reveal excluded person. Retain other staff and Christmas headband,22.5s duration, same song through5.2s logo."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/outro-5.2s-music-continuity.mp4",
+    "in": 0,
+    "out": 5.2,
+    "gain": 0
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/music/navidad-music-through-logo-v3.wav",
+    "title": "Aires Navidenos",
+    "artist": "Decimania",
+    "license": "Commercial recording; synchronization/publication rights not verified",
+    "url": "https://www.youtube.com/watch?v=9iSTd0_H2XE",
+    "gain": 1,
+    "extend_through_outro": true
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial",
+  "graphics": []
+}

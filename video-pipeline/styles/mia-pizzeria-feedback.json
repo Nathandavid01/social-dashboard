@@ -1,0 +1,149 @@
+{
+  "client": "Mia Pizzeria",
+  "current_style": "styles/mia-pizzeria-v1.json",
+  "updated_at": "2026-09-29",
+  "user_request": "Edita los de Mia Pizza, crea su perfil de editaje basado en los videos que se han subido, captions, font, color, estilos, etc.",
+  "rules": [
+    "Conservar el estilo de sus propios reels publicados; no trasladar perfiles de otros clientes.",
+    "Retirar cuenta regresiva, preparación y tomas fallidas; conservar diálogo completo y reacción del sketch.",
+    "Priorizar cortes directos y ritmo de conversación. B-roll de comida solo cuando ilustre el diálogo.",
+    "Voz al frente; sonidos puntuales solo cuando apoyen un cambio visual o remate.",
+    "Música distinta por reel si se añade; procedencia y licencia documentadas. En escenas breves conservar sonido directo si funciona mejor.",
+    "Los tres reels publicados en septiembre cierran con la animación oficial de logo/fuego de 3 segundos; usarla al final, después del remate completo.",
+    "Publicación y programación verificadas antes de seleccionar una pieza. No reeditar automáticamente Happy Hour, almuerzos o sangría ya publicados."
+  ],
+  "reference_directory": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current",
+  "font_identity": "approximate_Impact_official_font_not_found",
+  "approval": "pending",
+  "reel_specific_requests": {
+    "mia-20260919-02": {
+      "date": "2026-09-27",
+      "request": "Eric pide reeditar porque los sonidos no concuerdan. Corregir sentido y sincronía conservando royalty-free y voz limpia.",
+      "music": "Propuesta V8: Have Funk Your Way — Vitality, Motion Array.",
+      "cuts": "Cortes directos más ágiles, conservar palabras y remate completos; mezcla continua por debajo del diálogo.",
+      "previous_request": {
+        "date": "2026-09-27",
+        "request": "Música de fondo con canción trending en Instagram; cortes más limpios.",
+        "music": "Ring My Bell — Anita Ward. Vista previa local; entregar también master de voz para añadir audio nativo en Instagram. Disponibilidad en cuenta de Mia pendiente.",
+        "cuts": "Cortes directos más ágiles, conservar palabras y remate completos; mezcla continua por debajo del diálogo."
+      },
+      "sound_effects": "Propuesta V11: efectos según frase completa, respetar negación. Cha-ching solo en tienes dinero y pago, golpe principal a 6.57/9.03 s. Acentos cortos negativos en carencias y positivos en resolución. Retiradas campanillas de cocina/público. Estos acentos nuevos son propuesta editorial, no elección explícita de Eric.",
+      "motion_array_request": "Eric autorizó usar su suscripción y confirmó sesión lista.",
+      "previous_audio_v7": {
+        "music": "God Mode — Konstantin Garbuzyuk, Motion Array. Descarga autorizada con suscripción el 27 septiembre 2026.",
+        "sound_effects": "Cash Register — Beison (Motion Array) en intercambio. Clicks/pop/impacto locales discretos en cortes y cierre."
+      },
+      "approval": "V11 exacta aprobada por Eric, entregada en Recibo el 2026-09-27",
+      "voice_cleanup": {
+        "request": "La voz de la muchacha se escucha con eco; quitar sonido de fondo.",
+        "version": "V9",
+        "treatment": "Voz mono centrada del canal izquierdo; WPE por toma y reducción moderada de ruido FFT. Compensación de latencia de 25 ms.",
+        "scope": "Solo este reel y estas fuentes; no aplicar ciegamente a todos.",
+        "critical_listening": "pending",
+        "approval": "pending"
+      },
+      "previous_sound_effects_v8": "Propuesta V8: un pop suave al remate; se retiran caja registradora, clicks por corte e impacto del cierre.",
+      "effects_timeline": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-dinero-v11/efectos.json",
+      "rejected_v10_sound_effects": "V10: Cha Ching Cash Register — Tuttkile en negocio/dinero; Kitchen Timer Dings — Woozle en pizza; People Cheering — Tuttkile en todos contentos. Sincronizar palabras, voz al frente. Reemplaza reducción de V8 a un único pop."
+    },
+    "mia-20260919-13": {
+      "request": "Eric pide mas efectos en Yo Soy La Jefa. V4 propone cinco acentos sincronizados; no implica obligacion de misma densidad para todos los clientes.",
+      "version": "V4",
+      "approval": "V4 exacta aprobada por Eric y entregada en Recibo",
+      "recipe": "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-jefa-v2-video-13-v1.json",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/jefa-v4/delivery.json"
+    },
+    "mia-20260919-10": {
+      "request": "Voz limpia, efectos Motion Array y musica de fondo; usar graph engineering loop para editarlo.",
+      "version": "V3",
+      "treatment": "WPE por toma y reduccion de ruido FFT, alternando canal principal segun interlocutora. Sin retraso medido por correlacion.",
+      "approval": "V3 exacta aprobada por Eric y entregada en Recibo",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/cubiertos-v3/delivery.json",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/cubiertos-v3/cubiertos-v3-motion-array.review.json"
+    },
+    "mia-20260919-06": {
+      "request": "Eric pide rewind al decir no/Nah antes del remate pizza",
+      "version": "V5",
+      "approval": "V5 exacta aprobada por Eric y entregada a Recibo",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-fabuloso-v5/delivery.json",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-fabuloso-v5/pizza-o-un-hombre-fabuloso-v5.review.json",
+      "rewind": {
+        "asset": "1221415",
+        "variant": "MA_Tuttkile_DeeJayRewind_5.wav",
+        "start": 14.48,
+        "end": 15.047,
+        "peak_dbfs": -18
+      }
+    },
+    "mia-20260919-11": {
+      "version": "V2",
+      "approval": "V2 exacta aprobada por Eric y entregada a Recibo",
+      "request": "Continuar siguiente reel conservando voz limpia, musica Motion Array y efectos mas presentes",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/bienvenida-v2/recibo-receipts.json"
+    },
+    "mia-20260919-05": {
+      "request": "Sigue editando estos videos en el loop",
+      "version": "pov-v4",
+      "approval": "V4 exacta aprobada por Eric y entregada a Recibo",
+      "treatment": "Texto editorial, acercamiento al bocado y acento en «uno más». Fuente sin diálogo.",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/solo-uno-v3/solo-uno-pov-v3.review.json",
+      "latest_request": "Dejar ultimo clip un poco mas: +1.5s de toma real, total4.2s antes del logo.",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/solo-uno-v4/recibo-receipts.json"
+    },
+    "mia-20260919-07": {
+      "request": "Sigue editando estos videos en el loop",
+      "version": "V3",
+      "approval": "V3 exacta aprobada por Eric y entregada a Recibo",
+      "treatment": "Voz tratada; scratch en «¿con quién tú hablas?» y rewind en «ay, mami».",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-07-loop-v2.review.json",
+      "caption_correction": {
+        "from": "AY, MAMI,",
+        "to": "AY, MALA MÍA.",
+        "source": "Correccion expresa Eric2026-09-29",
+        "range": [
+          11.97,
+          12.47
+        ]
+      },
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/chicharrones-v3/recibo-receipts.json"
+    },
+    "mia-20260919-09": {
+      "request": "Sigue editando estos videos en el loop",
+      "version": "V3",
+      "approval": "V3 exacta aprobada por Eric y entregada a Recibo",
+      "treatment": "Reducción de ruido conservando la voz directa y acento en la invitación al público.",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-09-loop-v2.review.json",
+      "latest_request": "tiene que haber mas contenido seguido aqui",
+      "finding": "Toma0907 sigue a0906 en exterior y muestra grabacion/baile; agregar6s antes del logo.",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/redes-v3/recibo-receipts.json"
+    },
+    "mia-20260919-12": {
+      "request": "utiliza otro tipo de efecto en vez de estos b rolls",
+      "version": "V4",
+      "approval": "V4 exacta aprobada por Eric y entregada a Recibo",
+      "treatment": "Acercamientos sobre toma original; sin B-roll",
+      "graph": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/chicharrones-efecto-v4/aqui-tambien-hay-chicharrones-v4.review.json",
+      "rejected_treatment": "B-roll de V3 con detalle central y fondo desenfocado; rechazo limitado a este reel",
+      "delivery": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/chicharrones-efecto-v4/recibo-receipts.json"
+    }
+  },
+  "sound_effect_level": {
+    "request": "Para la proxima los sonidos de efectos tienen que estar un poco mas altos",
+    "date": "2026-09-27",
+    "scope": "Proximas ediciones de Mia Pizza",
+    "starting_adjustment_db": 3,
+    "rule": "Ajustar cada efecto por sentido y conservar voz inteligible; Cubiertos V3 aprobado se entrega sin cambiar mezcla."
+  },
+  "pov_readability": {
+    "request": "Cuando sea POV hazlo mas claro por que no lo leo bien",
+    "profile": "mia-pizzeria-pov-v2.json",
+    "scope": "POV solamente",
+    "approval": "requested_direction_render_pending"
+  },
+  "associated_sources_rule": "Antes de editar revisar Drive, dashboard y SSD: otras tomas, continuaciones, duplicados y remates. Documentar alcance y pendientes.",
+  "music_variety": {
+    "request": "always go about changing the music for the next video",
+    "date": "2026-09-29",
+    "rule": "Cada reel nuevo lleva una composicion distinta. Consultar music-usage.json y biblioteca Motion Array antes de seleccionar. Cambiar offset o variante de la misma composicion no cuenta como cancion distinta. Las revisiones del mismo reel conservan su musica salvo nueva peticion."
+  }
+}

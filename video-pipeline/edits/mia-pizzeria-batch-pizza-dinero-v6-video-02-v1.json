@@ -1,0 +1,168 @@
+{
+  "idea_id": "mia-20260919-02",
+  "title": "Tú Tienes Dinero, Yo Tengo Pizza",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/masters/mia-02.mov",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/masters/mia-02-transcript-v2.json",
+  "style": "../styles/mia-pizzeria-v1.json",
+  "clips": [
+    {
+      "in": 1.62,
+      "out": 3.32,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    },
+    {
+      "in": 5.497067,
+      "out": 7.887067,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    },
+    {
+      "in": 14.8558,
+      "out": 16.6558,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    },
+    {
+      "in": 24.494667,
+      "out": 26.454667,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    },
+    {
+      "in": 28.043467,
+      "out": 30.983467,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    },
+    {
+      "in": 33.107467,
+      "out": 38.857467,
+      "zoom": 1,
+      "audio_edge_fade": 0.018
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.66,
+      "text": "YO TE TENGO UN NEGOCIO."
+    },
+    {
+      "start": 1.7,
+      "end": 2.9,
+      "text": "YO SÉ QUE TÚ QUIERES"
+    },
+    {
+      "start": 2.9,
+      "end": 4.07,
+      "text": "PIZZA DE LA MÍA PIZZA."
+    },
+    {
+      "start": 4.15,
+      "end": 4.95,
+      "text": "YO TENGO PIZZA,"
+    },
+    {
+      "start": 4.95,
+      "end": 5.87,
+      "text": "PERO NO TENGO DINERO."
+    },
+    {
+      "start": 5.89,
+      "end": 6.81,
+      "text": "Y TÚ TIENES DINERO,"
+    },
+    {
+      "start": 6.81,
+      "end": 7.82,
+      "text": "PERO NO TIENES PIZZA."
+    },
+    {
+      "start": 7.85,
+      "end": 9.19,
+      "text": "TÚ ME DAS TU DINERO"
+    },
+    {
+      "start": 9.57,
+      "end": 10.79,
+      "text": "Y YO TE DOY PIZZA."
+    },
+    {
+      "start": 10.85,
+      "end": 12.16,
+      "text": "¡Y TODOS CONTENTOS!"
+    },
+    {
+      "start": 12.27,
+      "end": 13.03,
+      "text": "NO TE OLVIDES QUE ESTAMOS"
+    },
+    {
+      "start": 13.03,
+      "end": 14.36,
+      "text": "AQUÍ EN LA MÍA PIZZA, BAYAMÓN."
+    },
+    {
+      "start": 14.49,
+      "end": 15.33,
+      "text": "CERCA DEL PUENTE DE RÍO HONDO,"
+    },
+    {
+      "start": 15.37,
+      "end": 16.44,
+      "text": "AL FRENTE DE SWEET ANN CAKES."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.7,
+      "gain_db": -29
+    },
+    {
+      "preset": "mouse_click",
+      "time": 4.1,
+      "gain_db": -29
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.9,
+      "gain_db": -29
+    },
+    {
+      "preset": "mouse_click",
+      "time": 7.8667,
+      "gain_db": -29
+    },
+    {
+      "preset": "ding",
+      "time": 9.1,
+      "gain_db": -25,
+      "duration": 0.4
+    },
+    {
+      "preset": "pop",
+      "time": 10.8,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "V6: música royalty-free Pickled Pink, CC0, en mezcla continua posterior al render; efectos originales del kit local sincronizados con cortes, dinero y remate. Mantener montaje/captions V5. No usar audio de Instagram."
+  ],
+  "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+  "catalog": "runs/mia-pizzeria-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "references": {
+    "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+    "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+  }
+}

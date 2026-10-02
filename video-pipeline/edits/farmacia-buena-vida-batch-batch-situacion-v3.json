@@ -1,0 +1,139 @@
+{
+  "idea_id": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+  "title": "Situación",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/source/situacion-original.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-situacion-20260926/review/transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0.55,
+      "out": 10.85,
+      "zoom": 1.22,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 10.3,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.13,
+      "end": 1.22,
+      "text": "En esta época"
+    },
+    {
+      "start": 1.22,
+      "end": 2.21,
+      "text": "de mucha bruma,"
+    },
+    {
+      "start": 2.43,
+      "end": 3.63,
+      "text": "cambio de temperatura,"
+    },
+    {
+      "start": 4.25,
+      "end": 5.85,
+      "text": "si estás estornudando"
+    },
+    {
+      "start": 5.85,
+      "end": 6.91,
+      "text": "con congestión,"
+    },
+    {
+      "start": 7.05,
+      "end": 7.67,
+      "text": "dolor de cabeza"
+    },
+    {
+      "start": 7.67,
+      "end": 8.37,
+      "text": "por congestión,"
+    },
+    {
+      "start": 8.89,
+      "end": 9.33,
+      "text": "echa para acá."
+    },
+    {
+      "start": 9.47,
+      "end": 10.12,
+      "text": "Aquí te ayudamos."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/bruma.mp4",
+      "in": 1,
+      "out": 4.07,
+      "at": 1.18,
+      "reason": "Plano ilustrativo de bruma entre montañas; no se presenta como grabación de Maunabo.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.07,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/motion-array/seasonal-allergies-vertical-v1.mp4",
+      "in": 0,
+      "out": 2.66,
+      "at": 4.25,
+      "reason": "Motion Array Seasonal Allergies (476132), original licenciado; accion real de estornudo en pañuelo sincronizada a estornudos y congestion; fuente 1.25–3.91s, stock escenificado."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 1.18,
+      "gain_db": -32,
+      "duration": 0.16
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 4.25,
+      "gain_db": -32,
+      "duration": 0.16
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Revisión Motion Array: Seasonal Allergies original con licencia local, recorte vertical y acción sincronizada 4.25–6.91s. Captions originales conservados. Bruma y música previa permanecen mientras las otras descargas no están disponibles localmente. Escucha y aprobación pendientes."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-bruma-profesional-20260927/house-02-bed-v1.wav",
+    "title": "House 02 - Lily J",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/House 02 - Lily J.provenance.json",
+    "license": "Mixkit Stock Music Free License"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  }
+}

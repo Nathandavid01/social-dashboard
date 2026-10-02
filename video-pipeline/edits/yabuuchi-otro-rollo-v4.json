@@ -1,0 +1,96 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "otro-rollo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Y Si Pedimos Otro Rollo?",
+  "source": "../media/yabuuchi/derived/otro-rollo-complete-v4.mp4",
+  "transcript": "../runs/yabuuchi-otro-rollo-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 9.67,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 0.95,
+      "text": "¿Quieres otro rollo?"
+    },
+    {
+      "start": 1.13,
+      "end": 2.03,
+      "text": "No tenemos tiempo."
+    },
+    {
+      "start": 2.19,
+      "end": 2.87,
+      "text": "¿Tiempo pa’ qué?"
+    },
+    {
+      "start": 3.19,
+      "end": 4.39,
+      "text": "Para preguntas innecesarias."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/otro-rollo-complete-music-v4.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131647_0007_D.MP4",
+      "in": 1.23,
+      "out": 9.3,
+      "purpose": "Conversación y desplazamiento al mostrador completos"
+    },
+    {
+      "source": "media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0328-02-vista-cercana-de-coberturas-e6728ed7d6.mp4",
+      "in": 0.3,
+      "out": 1.9,
+      "at": 8.07,
+      "mute": true,
+      "purpose": "Producto después del desenlace"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "PDF página 2: otro rollo; versión previa local existente, nueva edición completa, no idea inédita.",
+    "Se recupera desplazamiento al mostrador hasta fin del original; apoyo después de actuación.",
+    "Último caption coincide con guion PDF; escucha crítica pendiente por discrepancia del reconocimiento.",
+    "Caption Anybody Expanded Black 72 y cierre de piano."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 7.956,
+      "duration": 0.32,
+      "gain_db": -20
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 7.97,
+      "duration": 0.2,
+      "intensity": 0.6
+    }
+  ],
+  "idea_page": 2
+}

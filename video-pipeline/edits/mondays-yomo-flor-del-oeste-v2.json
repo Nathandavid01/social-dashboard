@@ -1,0 +1,71 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v2.json",
+  "idea_id": "mondays-yomo-flor-del-oeste",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Yomo: qué no puede faltar en tu cóctel",
+  "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/vids/DJI_20260929160454_0412_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/transcripts/0412.small.json",
+  "clips": [
+    {
+      "in": 1.1,
+      "out": 8.05
+    }
+  ],
+  "broll": [],
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg",
+    "published_outline": "runs/metricool-tomorrow/style/mondays-aguadilla/v1-4.jpg",
+    "published_host": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg"
+  },
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.46,
+      "text": "Oye, Yomo,",
+      "behind_camera": true
+    },
+    {
+      "start": 0.5,
+      "end": 1.1,
+      "text": "¿Qué cosas",
+      "behind_camera": true
+    },
+    {
+      "start": 1.1,
+      "end": 2.02,
+      "text": "no pueden faltar\nen tu cóctel?",
+      "behind_camera": true
+    },
+    {
+      "start": 2.12,
+      "end": 3.62,
+      "text": "Para mí no le puede\nfaltar el mezcal."
+    },
+    {
+      "start": 3.86,
+      "end": 4.28,
+      "text": "Y por eso"
+    },
+    {
+      "start": 4.28,
+      "end": 5.1,
+      "text": "cuando yo vengo\na Mondays,"
+    },
+    {
+      "start": 5.18,
+      "end": 6.9,
+      "text": "pido la Flor\ndel Oeste."
+    }
+  ],
+  "review_notes": [
+    "Borrador de montaje y captions; transcripción small corregida costel -> cóctel por contexto, pendiente de escucha crítica. Flor del Oeste también requiere escucha de confirmación.",
+    "Tomas 0411 y 0412 son distintas, no proxies: se selecciona 0412 por cierre acercando el cóctel a cámara; 0411 termina hablando sin ese cierre.",
+    "Drive consultado 2026-10-02: 39 archivos coinciden en nombres con inventario; dashboard sin raw asociado a Yomo. SSD revisado por cuadros de ambas tomas. No se afirma cobertura de otros folders de Drive.",
+    "Claqueta excluida. Sin B-roll, zoom ni efectos añadidos: el movimiento grabado lleva al trago. Sin tarjeta artificial.",
+    "Biblioteca Motion Array consultada; selección musical pendiente de audición. Este borrador de diálogo no tiene música añadida.",
+    "V2: se dividen las dos tarjetas que producían tres líneas en v1, conservando tamaño fijo y paleta."
+  ]
+}

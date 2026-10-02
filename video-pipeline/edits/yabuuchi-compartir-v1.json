@@ -1,0 +1,120 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "compartir",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "El Mejor Sushi Para Compartir",
+  "source": "../media/yabuuchi/derived/compartir-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-compartir-v1-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 9.433,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {"time": 0, "zoom": 1},
+        {"time": 9.433, "zoom": 1.04}
+      ]
+    }
+  ],
+  "captions": [
+    {"start": 0.12, "end": 1.16, "text": "Nuestros mejores rollos"},
+    {"start": 1.16, "end": 1.8, "text": "para compartir"},
+    {"start": 1.8, "end": 2.98, "text": "aquí en Yabuuchi"},
+    {"start": 2.98, "end": 4.7, "text": "son nuestras especialidades."},
+    {"start": 4.907, "end": 5.487, "text": "La Baby,"},
+    {"start": 5.687, "end": 6.067, "text": "La Madre"},
+    {"start": 6.067, "end": 6.827, "text": "y La Rocky."},
+    {"start": 7.327, "end": 8.587, "text": "Entre dos hasta"},
+    {"start": 8.587, "end": 9.3, "text": "cuatro personas."}
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/music/Funshine.mp3",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Funshine.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "in": 3.3,
+      "out": 3.98,
+      "at": 4.867,
+      "reason": "Caja abierta de La Baby, rango anterior al ya usado en La Baby Para Dos, solo mientras se nombra La Baby.",
+      "eof_action": "pass",
+      "original_source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "original_in": 3.3,
+      "original_out": 3.98
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914124936_0998_D.MP4",
+      "in": 1.1,
+      "out": 5.95,
+      "purpose": "Gancho: mejores rollos para compartir son las especialidades. Sin claqueta."
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914124954_0999_D.MP4",
+      "in": 0.88,
+      "out": 5.45,
+      "purpose": "Nombra La Baby, La Madre y La Rocky, y dice de dos a cuatro personas. Sin claqueta. Toma alternativa 0001 no usada."
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "runs/yabuuchi-catalog.json"
+  },
+  "review_notes": [
+    "Idea del PDF que no tenía montaje: el mejor sushi para compartir. Tomas 0998 y 0999, fuera de los diez videos ya editados.",
+    "Se conserva el arco completo: gancho, los tres nombres y para cuántas personas. La toma alternativa 0001 queda sin usar.",
+    "La tercera especialidad se rotula La Rocky: el menú publicado usa ese nombre y la transcripción de 0999 dice Rocky con poca confianza. La toma 0001 lo oyó como rogui. Escucha crítica pendiente; no se afirma que se escuchó.",
+    "rollos se deja como lo transcribió Whisper (confianza baja). No se convirtió a roll.",
+    "B-roll solo de la caja abierta de La Baby en el instante de ese nombre, rango 3.30–3.98 s de 0021, anterior al tramo de La Baby Para Dos. La Madre y La Rocky siguen en la presentadora: no hay caja abierta confirmada para esos nombres.",
+    "Sin iconos dibujados. Captions Anybody Expanded Black 72, outro de piano y música Funshine CC0, distinta de Be Chillin, Backbeat y Downtown Boogie.",
+    "Audio Kit en el render. Escucha crítica y revisión de Eric pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.753,
+      "duration": 0.32,
+      "gain_db": -20,
+      "transition_at": 4.867,
+      "reason": "Entrada de la caja abierta al nombrar La Baby"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 5.433,
+      "duration": 0.32,
+      "gain_db": -21,
+      "transition_at": 5.547,
+      "reason": "Regreso a la presentadora para La Madre y La Rocky"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 9.233,
+      "duration": 0.2,
+      "gain_db": -22,
+      "transition_at": 9.433,
+      "reason": "Entrada al outro; cola completa antes del piano"
+    }
+  ],
+  "effects": [
+    {"preset": "whip_pan", "time": 4.767, "duration": 0.2, "intensity": 0.65},
+    {"preset": "whip_pan", "time": 5.447, "duration": 0.2, "intensity": 0.55},
+    {"preset": "whip_pan", "time": 9.233, "duration": 0.2, "intensity": 0.5}
+  ],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto"
+  }
+}

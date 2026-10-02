@@ -1,0 +1,415 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "a23c2cc2-c1e9-431b-b00a-6c0915513c4f",
+  "source_idea_id": "424ff708-5bcb-47e4-9c73-be574641bf0b",
+  "title": "¿Cómo funciona un apiario?",
+  "source": "/Volumes/Extreme SSD/Nate Media/apiario-utensilios-20261002/assets/sequence-v6.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/apiario-utensilios-20261002/assets/sequence-v6-transcript.json",
+  "style": "../styles/apiario-countdown-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 82.833333,
+      "zoom": 1,
+      "audio_edge_fade": 0
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.4,
+      "text": "¿Te has preguntado"
+    },
+    {
+      "start": 1.4,
+      "end": 2.18,
+      "text": "cómo funciona"
+    },
+    {
+      "start": 2.18,
+      "end": 2.78,
+      "text": "un apiario?"
+    },
+    {
+      "start": 2.96,
+      "end": 3.9,
+      "text": "Aquí le vamos a dar"
+    },
+    {
+      "start": 3.9,
+      "end": 4.76,
+      "text": "una explicación breve"
+    },
+    {
+      "start": 5.32,
+      "end": 6.2,
+      "text": "con algunos"
+    },
+    {
+      "start": 6.2,
+      "end": 7.36,
+      "text": "de los utensilios"
+    },
+    {
+      "start": 7.36,
+      "end": 7.92,
+      "text": "que utilizamos"
+    },
+    {
+      "start": 7.92,
+      "end": 8.86,
+      "text": "para la abeja."
+    },
+    {
+      "start": 9.38,
+      "end": 10.38,
+      "text": "Por ejemplo,"
+    },
+    {
+      "start": 10.38,
+      "end": 11.46,
+      "text": "aquí tenemos una caja"
+    },
+    {
+      "start": 11.46,
+      "end": 12.2,
+      "text": "con su tapa,"
+    },
+    {
+      "start": 12.74,
+      "end": 13.82,
+      "text": "con sus cuadros,"
+    },
+    {
+      "start": 14.04,
+      "end": 17.12,
+      "text": "cuadros que ya tienen"
+    },
+    {
+      "start": 17.12,
+      "end": 19.46,
+      "text": "una lámina de cera"
+    },
+    {
+      "start": 19.46,
+      "end": 20.4,
+      "text": "que se ha puesto"
+    },
+    {
+      "start": 20.4,
+      "end": 21.18,
+      "text": "anteriormente"
+    },
+    {
+      "start": 21.18,
+      "end": 22.04,
+      "text": "para que las abejas"
+    },
+    {
+      "start": 22.04,
+      "end": 22.7,
+      "text": "puedan trabajar"
+    },
+    {
+      "start": 22.7,
+      "end": 24.22,
+      "text": "un poquito más rápido."
+    },
+    {
+      "start": 24.413,
+      "end": 26.493,
+      "text": "Tenemos el traje,"
+    },
+    {
+      "start": 26.953,
+      "end": 27.973,
+      "text": "el mameluco"
+    },
+    {
+      "start": 27.973,
+      "end": 28.973,
+      "text": "para protegernos"
+    },
+    {
+      "start": 28.973,
+      "end": 29.593,
+      "text": "de las picaduras"
+    },
+    {
+      "start": 29.593,
+      "end": 30.253,
+      "text": "de las abejas."
+    },
+    {
+      "start": 30.693,
+      "end": 31.733,
+      "text": "Tenemos los guantes."
+    },
+    {
+      "start": 32.433,
+      "end": 33.673,
+      "text": "Tenemos ahumador,"
+    },
+    {
+      "start": 33.743,
+      "end": 34.293,
+      "text": "que es para"
+    },
+    {
+      "start": 34.293,
+      "end": 34.853,
+      "text": "tranquilizar"
+    },
+    {
+      "start": 34.853,
+      "end": 35.813,
+      "text": "las abejas."
+    },
+    {
+      "start": 36.0,
+      "end": 38.293,
+      "text": "Tenemos la feromona,"
+    },
+    {
+      "start": 38.613,
+      "end": 39.553,
+      "text": "que esto le llaman"
+    },
+    {
+      "start": 39.553,
+      "end": 40.213,
+      "text": "lemongrass,"
+    },
+    {
+      "start": 40.213,
+      "end": 41.033,
+      "text": "que se utiliza"
+    },
+    {
+      "start": 41.033,
+      "end": 42.113,
+      "text": "para traer las abejas"
+    },
+    {
+      "start": 42.113,
+      "end": 43.553,
+      "text": "a nuestro apiario."
+    },
+    {
+      "start": 43.933,
+      "end": 45.233,
+      "text": "Estos son otros"
+    },
+    {
+      "start": 45.233,
+      "end": 46.033,
+      "text": "utensilios que se"
+    },
+    {
+      "start": 46.033,
+      "end": 47.353,
+      "text": "utilizan para poder"
+    },
+    {
+      "start": 47.353,
+      "end": 48.473,
+      "text": "sacar los cuadros"
+    },
+    {
+      "start": 48.473,
+      "end": 49.033,
+      "text": "cuando están"
+    },
+    {
+      "start": 49.033,
+      "end": 50.013,
+      "text": "llenos de miel."
+    },
+    {
+      "start": 50.713,
+      "end": 52.113,
+      "text": "El cepillo"
+    },
+    {
+      "start": 52.113,
+      "end": 52.973,
+      "text": "para no maltratar"
+    },
+    {
+      "start": 52.973,
+      "end": 53.413,
+      "text": "las abejas,"
+    },
+    {
+      "start": 53.413,
+      "end": 53.673,
+      "text": "que son"
+    },
+    {
+      "start": 53.673,
+      "end": 54.373,
+      "text": "bien importantes."
+    },
+    {
+      "start": 55.833,
+      "end": 56.593,
+      "text": "El excluidor,"
+    },
+    {
+      "start": 56.853,
+      "end": 57.993,
+      "text": "que este excluidor"
+    },
+    {
+      "start": 57.993,
+      "end": 59.233,
+      "text": "es para evitar"
+    },
+    {
+      "start": 59.233,
+      "end": 61.473,
+      "text": "que la reina suba"
+    },
+    {
+      "start": 61.473,
+      "end": 62.633,
+      "text": "a la segunda caja"
+    },
+    {
+      "start": 63.153,
+      "end": 64.753,
+      "text": "y pueda tener postura"
+    },
+    {
+      "start": 64.753,
+      "end": 65.593,
+      "text": "en los cuadros"
+    },
+    {
+      "start": 65.593,
+      "end": 66.913,
+      "text": "y poder obtener"
+    },
+    {
+      "start": 66.913,
+      "end": 69.153,
+      "text": "sólo miel de esa caja."
+    },
+    {
+      "start": 69.473,
+      "end": 71.893,
+      "text": "Si quieres saber más"
+    },
+    {
+      "start": 71.893,
+      "end": 72.633,
+      "text": "de Apiario,"
+    },
+    {
+      "start": 72.993,
+      "end": 73.733,
+      "text": "puedes visitarnos"
+    },
+    {
+      "start": 73.733,
+      "end": 75.573,
+      "text": "en Apiario Coffee Shop,"
+    },
+    {
+      "start": 75.873,
+      "end": 76.533,
+      "text": "situado"
+    },
+    {
+      "start": 76.533,
+      "end": 78.613,
+      "text": "carretera 149,"
+    },
+    {
+      "start": 78.813,
+      "end": 80.573,
+      "text": "km 18.5,"
+    },
+    {
+      "start": 81.213,
+      "end": 81.953,
+      "text": "sector La Línea,"
+    },
+    {
+      "start": 81.953,
+      "end": 82.613,
+      "text": "Ciales."
+    }
+  ],
+  "voice_filter": "pan=stereo|c0=c0|c1=c0,highpass=f=75,afftdn=nr=5:nf=-40",
+  "audio_master": {
+    "mode": "dialogue"
+  },
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-utensilios-20261002/assets/music-bed-v6.wav",
+    "extend_through_outro": true,
+    "title": "Clever Girl",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/clever-girl-860888/",
+    "evidence": "Licensing Info consultado: suscriptores cubiertos, Identifyy Content ID, BMI"
+  },
+  "broll": [],
+  "review_notes": [
+    "Reedición completa autorizada por Eric tras encontrar la toma0997. Inicia con pregunta original aprobada como dirección, sin inventar gancho.",
+    "Orden: pregunta, caja/tapa/cuadros, traje/guantes/ahumador, feromona/utensilios/cepillo/excluidor, invitación.",
+    "Se excluye lista de productos25-38 de0997 para concentrar en explicación de herramientas, y la repetición de cuadros16.67-21.67 de0999 ya ilustrados al inicio.",
+    "Mismos captions hablados Apiario; no overlay editorial fijo añadido ni inversión de pregunta, porque la dice el presentador a cámara.",
+    "Audio L centrado: dos entradas poco correlacionadas y nivel L mayor en ambas fuentes; no mezclar micrófonos. Evidencia channel-check-v6.json. Escucha crítica pendiente.",
+    "Montaje sin zoom innecesario para conservar utensilios. Cortes solo entre frases completas.",
+    "Términos ASR corregidos ahumador, lemongrass, excluidor y Coffee Shop; confirmación literal auditiva pendiente.",
+    "Caption grouping authored into semantic one-line phrases; numeric18.5joined correctly."
+  ],
+  "catalog": "runs/a5d7705e-catalog.json",
+  "references": {
+    "countdown_same_client": "media/a5d7705e/d7a089db-db85-4e01-92cb-3a93ae8739da.mp4",
+    "official_outro": "media/apiario/brand/outro.mp4",
+    "published_gastronomia": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/published-386775273.mp4",
+    "published_concepto": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/published-385324626.mp4"
+  },
+  "source_segments": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9785f62-8833-4816-952c-22626093c8f0.mp4",
+      "in": 0,
+      "out": 24.4,
+      "reason": "Pregunta original y explicación completa de caja, tapa y cuadros con cera",
+      "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-0997-first58.json",
+      "at": 0
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/2b88b9e0-7cac-403f-9bdd-d0d5f9f34a28.mp4",
+      "in": 5.066666667,
+      "out": 16.666666667,
+      "reason": "Traje, guantes y ahumador, ahora con introducción completa",
+      "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-utensilios-L-small.json",
+      "at": 24.4
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/2b88b9e0-7cac-403f-9bdd-d0d5f9f34a28.mp4",
+      "in": 21.666666667,
+      "out": 55,
+      "reason": "Feromona, utensilios para extraer cuadros, cepillo y excluidor, manteniendo recorrido de cámara y explicación",
+      "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-utensilios-L-small.json",
+      "at": 36.0
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9785f62-8833-4816-952c-22626093c8f0.mp4",
+      "in": 98.7,
+      "out": 112.2,
+      "reason": "Cierre original completo para visitar Apiario con ubicación, excluye OK anterior y ensayos",
+      "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-0997-full-L-small.json",
+      "at": 69.333333333
+    }
+  ]
+}

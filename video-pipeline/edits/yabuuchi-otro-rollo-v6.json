@@ -1,0 +1,130 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "otro-rollo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Y Si Pedimos Otro Rollo?",
+  "source": "../media/yabuuchi/derived/otro-rollo-inspiracion-v5.mp4",
+  "transcript": "../runs/yabuuchi-otro-rollo-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 8.07,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 0.95,
+      "text": "¿Quieres otro rollo?"
+    },
+    {
+      "start": 1.13,
+      "end": 2.03,
+      "text": "No tenemos tiempo."
+    },
+    {
+      "start": 2.19,
+      "end": 2.87,
+      "text": "¿Tiempo pa’ qué?"
+    },
+    {
+      "start": 3.19,
+      "end": 4.39,
+      "text": "Para preguntas innecesarias."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/otro-rollo-inspiracion-music-v5.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914132349_0014_D.MP4",
+      "in": 2.65,
+      "out": 3.55,
+      "at": 7.17,
+      "eof_action": "pass",
+      "reason": "Cierre solicitado por Eric: misma empleada del mostrador sonriendo y acercando botella Ramune a cámara, como inspiración TikTok. Sin audio de la toma."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131647_0007_D.MP4",
+      "in": 1.23,
+      "out": 9.3,
+      "purpose": "Conversación y desplazamiento al mostrador completos"
+    },
+    {
+      "source": "media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0328-02-vista-cercana-de-coberturas-e6728ed7d6.mp4",
+      "in": 0.3,
+      "out": 1.9,
+      "at": 8.07,
+      "mute": true,
+      "purpose": "Producto después del desenlace"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "tiktok_inspiration": "https://www.tiktok.com/@mariamejiaspr/video/7678999845792763167"
+  },
+  "review_notes": [
+    "Reedición solicitada según TikTok: cortes entre interlocutoras, remate seguido de acción.",
+    "Diálogo intacto; se acorta desplazamiento intermedio sin eliminar llegada al mostrador.",
+    "Apoyo de producto reducido a 0.9s; se quita barrido al final para conservar tono de sketch.",
+    "Caption de marca y piano se conservan. Último caption según guion, escucha crítica pendiente.",
+    "v6: reemplazo del plano de sushi final por gesto con Ramune, autorizado por Eric. No se cambia el diálogo ni la duración."
+  ],
+  "sounds": [],
+  "effects": [],
+  "idea_page": 2,
+  "inspiration_shots": [
+    {
+      "in": 0,
+      "out": 1.1,
+      "crop_x": 0
+    },
+    {
+      "in": 1.1,
+      "out": 2.15,
+      "crop_x": 140
+    },
+    {
+      "in": 2.15,
+      "out": 3.1,
+      "crop_x": 0
+    },
+    {
+      "in": 3.1,
+      "out": 4.55,
+      "crop_x": 140
+    },
+    {
+      "in": 4.55,
+      "out": 5.2,
+      "crop_x": null
+    },
+    {
+      "in": 6.1,
+      "out": 8.07,
+      "crop_x": null
+    },
+    {
+      "in": 8.07,
+      "out": 8.97,
+      "crop_x": null
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "idea_id": "factor1-0290",
+  "title": "Nos Encuentras En Factor 1",
+  "source": "../media/arecibo/DJI_20260909095712_0290_D.MP4",
+  "transcript": "../runs/arecibo-0290-transcript.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 1.55,
+      "out": 5.36,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.81,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 6.29,
+      "out": 8.08,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 1.79,
+          "zoom": 1.04
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.15,
+      "end": 1.49,
+      "text": "ESTAMOS UBICADOS"
+    },
+    {
+      "start": 1.49,
+      "end": 2.43,
+      "text": "EN ARECIBO"
+    },
+    {
+      "start": 2.89,
+      "end": 3.79,
+      "text": "EN FACTOR 1"
+    },
+    {
+      "start": 3.92,
+      "end": 4.48,
+      "text": "FRENTE A LA"
+    },
+    {
+      "start": 4.48,
+      "end": 5.38,
+      "text": "FARMACIA VÉLEZ"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/DJI_20260909100214_0299_D.MP4",
+      "in": 0.6,
+      "out": 3.85,
+      "at": 0.95,
+      "reason": "Llegada real desde la calle hasta la fachada de Arecibo Lab sobre en Arecibo/en Factor 1. Toma distinta a 0300 del reel 0292; una sola inserción y audio original silenciado. No representa la Farmacia Vélez."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 0.95,
+      "duration": 0.18,
+      "gain_db": -29
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Nuevo reel con toma hablada original 0290; no es otra versión del corte 0292.",
+    "Se conserva Estamos ubicados en Arecibo, en Factor 1. Se retira solo en Garo Chales (5.60–6.24s), frase con baja confianza de ASR y topónimo ambiguo. El B-roll cubre el empalme visual sin añadir voz.",
+    "Frente a la farmacia Vélez se conserva hablado; la grafía Vélez se cotejó con la ficha de Farmacia Vélez en Factor 1, Carr. 683. No se muestra la fachada del laboratorio como si fuera la farmacia.",
+    "B-roll 0299: llegada por la calle y fachada real; una sola inserción, distinto del 0300 usado en la versión 0292. Zoom discreto y whoosh único al entrar la toma.",
+    "Estilo Montserrat blanco en caja verde aprobado; música Be Chillin CC0 con licencia enlazada; outro oficial sonorizado. Escucha crítica y aprobación del usuario pendientes."
+  ],
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "catalog": "runs/arecibo-catalog.json",
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "voice_filter": "highpass=f=75,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-nuevo-lab-be-chillin-v10.wav",
+    "title": "Be Chillin",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Be%20Chillin.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28.5
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  }
+}

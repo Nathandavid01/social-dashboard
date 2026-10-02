@@ -1,0 +1,133 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "la-baby",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "La Baby Para Dos",
+  "source": "../media/yabuuchi/derived/la-baby-complete-v4.mp4",
+  "transcript": "../runs/yabuuchi-la-baby-complete-v4-mapped.json",
+  "style": "../styles/yabuuchi-reference-v4.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 15.35,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 1.15,
+      "text": "Si tienes hambre,"
+    },
+    {
+      "start": 1.19,
+      "end": 2.35,
+      "text": "tú y tu pareja de sushi,"
+    },
+    {
+      "start": 2.55,
+      "end": 3.85,
+      "text": "aquí en Yabuuchi Levittown"
+    },
+    {
+      "start": 3.93,
+      "end": 5.65,
+      "text": "tenemos la cajita de La Baby,"
+    },
+    {
+      "start": 5.85,
+      "end": 7.3,
+      "text": "que es perfecto para dos personas."
+    },
+    {
+      "start": 9.4,
+      "end": 11.25,
+      "text": "Y si aún no lo has probado,"
+    },
+    {
+      "start": 11.34,
+      "end": 12.66,
+      "text": "puedes venir aquí a Yabuuchi"
+    },
+    {
+      "start": 12.66,
+      "end": 15.08,
+      "text": "en Dos Palmas, en Levittown, Toa Baja."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/la-baby-complete-v4-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "in": 4,
+      "out": 7.8,
+      "at": 3.8,
+      "eof_action": "repeat",
+      "reason": "Caja real durante su nombre, porción y continuación de producto."
+    }
+  ],
+  "source_parts": [
+    {
+      "code": "0023",
+      "start": 0.85,
+      "end": 8.45,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Apertura y presentación completas de La Baby",
+      "source": "media/yabuuchi/source/DJI_20260914133949_0023_D.MP4",
+      "at": 0,
+      "duration": 7.6
+    },
+    {
+      "code": "0021",
+      "start": 7.8,
+      "end": 9.6,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Continuación del recorrido por la caja",
+      "source": "media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "at": 7.6,
+      "duration": 1.8
+    },
+    {
+      "code": "0002",
+      "start": 0,
+      "end": 5.95,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Invitación completa y ubicación en Dos Palmas, Levittown, Toa Baja",
+      "source": "media/yabuuchi/source/DJI_20260914125108_0002_D.MP4",
+      "at": 9.4,
+      "duration": 5.95
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "review_notes": [
+    "Se recupera íntegra la apertura registrada en 0023; no se sustituye por otro gancho.",
+    "Después del recorrido por La Baby se añade la invitación grabada en 0002 y su ubicación.",
+    "Captions conservados: Arial Black, tamaño ASS 72 fijo; referencia visual v4.",
+    "Outro: se sustituye todo el audio anterior por Elegant Piano Logo de Universfield, con volumen moderado y caída final. Escucha crítica y aprobación del usuario pendientes."
+  ],
+  "sounds": [],
+  "effects": []
+}

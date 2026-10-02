@@ -1,0 +1,30 @@
+{
+  "name": "Mondays Aguadilla · borde rojo",
+  "font_file": "../media/mondays/brand/AvenirNext-DemiBold.ttf",
+  "font_family": "Avenir Next Demi Bold",
+  "font_size": 106,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H000030D0",
+  "back_colour": "&H00000000",
+  "border_style": 1,
+  "outline": 5,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 80,
+  "bottom_margin": 460,
+  "fixed_size": true,
+  "wrap_width": 1000,
+  "max_words": 6,
+  "max_chars": 32,
+  "caption_animation": "none",
+  "caption_case": "natural",
+  "status": "matched_to_published_outline",
+  "reference": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+  "notes": [
+    "Comida y anfitrión publicados: texto blanco, borde #D03000, sin caja, caso natural, tercio bajo. Medido en el frame completo de «en la carretera 459.» (tinta 684×59, y 1375–1433). Este estilo da 687×58 en y 1374–1431.",
+    "Avenir Next Demi Bold es el face del Mac que calza esa tinta. No es un archivo que Mondays haya entregado.",
+    "La pastilla naranja y la segunda línea en mayúsculas son solo el sketch de la tela roja (v2-2.jpg). No van en estos reels.",
+    "La pregunta detrás de cámara no cambia estos colores en la receta: el renderer invierte texto y borde con behind_camera."
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "idea_id": "prevencion-caries-20260921",
+  "title": "¿Sabías Que Podemos Prevenir Las Caries?",
+  "source": "/Volumes/Extreme SSD/Nate Media/delian-sept-missing/dji_mimo_20260921_164420_20260921164255_1790125081670_video.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/delian-sept-missing/dji_mimo_20260921_164420_20260921164255_1790125081670_video.transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 5.54,
+      "out": 7.48,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.94,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 8.5,
+      "out": 9.67,
+      "zoom": 1.055,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.045
+        },
+        {
+          "time": 1.17,
+          "zoom": 1
+        }
+      ]
+    },
+    {
+      "in": 10.35,
+      "out": 24.65,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 14.3,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 72.34,
+      "out": 74.99,
+      "zoom": 1.055,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.045
+        },
+        {
+          "time": 2.65,
+          "zoom": 1
+        }
+      ]
+    },
+    {
+      "in": 75.13,
+      "out": 83.93,
+      "zoom": 1,
+      "focus_y": 0.25,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 8.8,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.16,
+      "end": 1.82,
+      "text": "¿Sabías que podemos prevenir"
+    },
+    {
+      "start": 2.06,
+      "end": 3.04,
+      "text": "las caries?"
+    },
+    {
+      "start": 3.28,
+      "end": 5.16,
+      "text": "Las caries no deben molestarte,"
+    },
+    {
+      "start": 5.3,
+      "end": 6.6,
+      "text": "a menos que lleguen al nervio."
+    },
+    {
+      "start": 6.7,
+      "end": 7.38,
+      "text": "Si llegan al nervio,"
+    },
+    {
+      "start": 7.38,
+      "end": 8.66,
+      "text": "tenemos que hacer un root canal"
+    },
+    {
+      "start": 8.66,
+      "end": 9.79,
+      "text": "o tenemos que hacer una extracción."
+    },
+    {
+      "start": 9.92,
+      "end": 11.36,
+      "text": "Son procedimientos más costosos,"
+    },
+    {
+      "start": 11.5,
+      "end": 12.24,
+      "text": "más tediosos."
+    },
+    {
+      "start": 12.26,
+      "end": 13.86,
+      "text": "Lo más importante es la prevención."
+    },
+    {
+      "start": 13.98,
+      "end": 15.56,
+      "text": "Visitar al dentista cada seis meses"
+    },
+    {
+      "start": 15.56,
+      "end": 17.3,
+      "text": "y por lo menos hacer la limpieza dental."
+    },
+    {
+      "start": 17.59,
+      "end": 19.22,
+      "text": "Yo soy la doctora Delian Loyola,"
+    },
+    {
+      "start": 19.22,
+      "end": 20.02,
+      "text": "dentista."
+    },
+    {
+      "start": 20.23,
+      "end": 21.35,
+      "text": "Si llevas más de seis meses"
+    },
+    {
+      "start": 21.35,
+      "end": 22.53,
+      "text": "sin visitar a tu dentista"
+    },
+    {
+      "start": 22.63,
+      "end": 23.75,
+      "text": "o hacerte una limpieza dental,"
+    },
+    {
+      "start": 23.97,
+      "end": 25.78,
+      "text": "se puede comunicar con nosotros al"
+    },
+    {
+      "start": 25.78,
+      "end": 28.73,
+      "text": "787-230-7573"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4",
+      "in": 3.8,
+      "out": 6.0,
+      "at": 1.15,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Atención real en clínica durante el gancho preventivo, una sola aparición de la familia de escena del sillón; no representa diagnóstico del paciente.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 2.2,
+          "zoom": 1.075
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/xray-vertical.mp4",
+      "in": 0,
+      "out": 3.36,
+      "at": 5.3,
+      "fade_in": 0,
+      "fade_out": 0,
+      "original_source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/pexels-6502008-xray.mp4",
+      "source_in": 1,
+      "source_out": 4.36,
+      "reason": "Radiografía dental genérica al mencionar nervio y tratamiento; no se afirma diagnóstico de esta radiografía ni caso de la clínica.",
+      "license": "Pexels License",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/stock-provenance.json",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.075
+        },
+        {
+          "time": 3.36,
+          "zoom": 1.015
+        }
+      ]
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4",
+      "in": 2,
+      "out": 3.65,
+      "at": 12.26,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Uso real de hilo dental durante la frase sobre prevención; termina antes de mencionar visitas y limpieza profesional.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 1.65,
+          "zoom": 1.075
+        }
+      ]
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/cleaning-vertical-extended.mp4",
+      "in": 0,
+      "out": 3.5,
+      "at": 13.91,
+      "fade_in": 0,
+      "fade_out": 0,
+      "original_source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/pexels-5099636-cleaning.mp4",
+      "source_in": 2,
+      "source_out": 5.5,
+      "reason": "Primer plano real de limpieza profesional durante recomendación de visita y limpieza dental. Material de archivo externo, no paciente identificado como DML.",
+      "license": "Pexels License",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v2/stock-provenance.json",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.075
+        },
+        {
+          "time": 3.5,
+          "zoom": 1.015
+        }
+      ]
+    }
+  ],
+  "graphics": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 0.98,
+      "duration": 0.34,
+      "intensity": 0.65
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 5.13,
+      "duration": 0.34,
+      "intensity": 0.65
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 13.74,
+      "duration": 0.34,
+      "intensity": 0.65
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 17.24,
+      "duration": 0.34,
+      "intensity": 0.65
+    }
+  ],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.15,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3.35,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.3,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.66,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.26,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 13.91,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 17.41,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 20.06,
+      "gain_db": -23
+    }
+  ],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v1/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v1/music-continuous.wav",
+    "title": "Basketball Training - Arulo",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v1/Basketball Training - Arulo.provenance.json",
+    "source_offset": 3
+  },
+  "review_notes": [
+    "Montaje de explicación 5.54–24.65 y último cierre correcto 72.34–83.93; fuera conteos, intentos y conversación de rodaje.",
+    "Dos escenas de B-roll diferentes una vez cada una. No repetir familia del sillón. Movimientos smoothstep, clicks, Shoika y outro oficiales.",
+    "Pista nueva registrada, no reutilizada en otros reels. Escucha crítica y aprobación pendientes.",
+    "Cotejo de Whisper small y turbo; puntuación y errores evidentes normalizados. Verificar por escucha las frases de prevención y cierre.",
+    "v2: Cuatro apoyos / 10.60 s, antes dos / 3.85 s. Añadidos radiografía y limpieza de archivo con licencia Pexels. Transiciones de acercamiento breve antes de captions, clicks secos y cortes opacos; sin alpha ni blur. Una aparición por escena.",
+    "v3: Extender limpieza hasta el corte del cierre (17.41 s), evitando regreso de tres fotogramas al plano anterior."
+  ]
+}

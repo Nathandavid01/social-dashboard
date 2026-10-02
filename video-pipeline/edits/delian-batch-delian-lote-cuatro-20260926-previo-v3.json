@@ -1,0 +1,290 @@
+{
+  "idea_id": "previo-diseno-20260921",
+  "title": "Qué Necesito Antes De Un Diseño De Sonrisa",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-loyola-video/source-2026-09-21/dji_mimo_20260921_171912_20260921171823_1790125047747_video.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/previo-transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.76,
+      "out": 4.92,
+      "zoom": 1.03,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.03
+        },
+        {
+          "time": 3.16,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 5.04,
+      "out": 11.8,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.1
+        },
+        {
+          "time": 6.76,
+          "zoom": 1.135
+        }
+      ]
+    },
+    {
+      "in": 20.96,
+      "out": 21.8,
+      "zoom": 1.03,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.03
+        },
+        {
+          "time": 0.84,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 22.94,
+      "out": 32.0,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.1
+        },
+        {
+          "time": 9.06,
+          "zoom": 1.135
+        }
+      ]
+    },
+    {
+      "in": 41.4,
+      "out": 47.22,
+      "zoom": 1.03,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.03
+        },
+        {
+          "time": 5.82,
+          "zoom": 1.065
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 1.74,
+      "text": "Oye, doctora, ¿qué yo necesito",
+      "back_colour": "&H00252525",
+      "bottom_margin": 230
+    },
+    {
+      "start": 1.74,
+      "end": 3.04,
+      "text": "previo a un diseño de sonrisa?",
+      "back_colour": "&H00252525",
+      "bottom_margin": 230
+    },
+    {
+      "start": 3.24,
+      "end": 5.08,
+      "text": "Lo primero es una buena salud oral.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 5.26,
+      "end": 6.46,
+      "text": "Si hay inflamación de las encías,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 6.68,
+      "end": 7.94,
+      "text": "tenemos primero que trabajar eso",
+      "bottom_margin": 230
+    },
+    {
+      "start": 7.94,
+      "end": 9.78,
+      "text": "para entonces hacer un diseño de sonrisa.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 9.92,
+      "end": 10.66,
+      "text": "Dos:",
+      "bottom_margin": 230
+    },
+    {
+      "start": 10.86,
+      "end": 11.54,
+      "text": "y bien importante,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 11.94,
+      "end": 12.98,
+      "text": "la posición de los dientes.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 13.1,
+      "end": 13.84,
+      "text": "Hay apiñamiento,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 14.0,
+      "end": 15.16,
+      "text": "mi recomendación es que primero",
+      "bottom_margin": 230
+    },
+    {
+      "start": 15.16,
+      "end": 17.28,
+      "text": "trabajemos con braces o con Invisalign",
+      "bottom_margin": 230
+    },
+    {
+      "start": 17.28,
+      "end": 19.7,
+      "text": "y luego entonces hacer el diseño de sonrisa.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 19.94,
+      "end": 21.18,
+      "text": "Para cualquiera de estos servicios",
+      "bottom_margin": 230
+    },
+    {
+      "start": 21.18,
+      "end": 22.94,
+      "text": "se puede comunicar con nosotros al",
+      "bottom_margin": 230
+    },
+    {
+      "start": 22.94,
+      "end": 25.64,
+      "text": "787-230-7573",
+      "bottom_margin": 230
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/previo-salud-v3.mp4",
+      "in": 0,
+      "out": 3.5,
+      "at": 5.25,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Inflamación de encías en el primer requisito.",
+      "asset_family": "previo-salud-20260926",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/motion-provenance.json"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/previo-posicion-v3.mp4",
+      "in": 0,
+      "out": 3.0,
+      "at": 13.4,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Posición y apiñamiento durante el segundo requisito.",
+      "asset_family": "previo-posicion-20260926",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/motion-provenance.json"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 3.16,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.25,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.75,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 9.92,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.76,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 13.4,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 16.4,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 19.82,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "User-requested animation refinement: shaded enamel, continuous scalloped gums, localized highlight, tracked fine callouts and eased movement. Preserve interviewer questions. Existing idea revision, not a new reel."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/previo-music.wav",
+    "title": "Sweet September",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Sweet September.provenance.json"
+  },
+  "graphics": []
+}

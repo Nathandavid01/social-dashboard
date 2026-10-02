@@ -1,0 +1,175 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "a23c2cc2-c1e9-431b-b00a-6c0915513c4f",
+  "source_idea_id": "424ff708-5bcb-47e4-9c73-be574641bf0b",
+  "title": "Herramientas del apicultor",
+  "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/2b88b9e0-7cac-403f-9bdd-d0d5f9f34a28.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/apiario-apicultor-full.json",
+  "style": "../styles/apiario-countdown-v2.json",
+  "clips": [
+    {
+      "in": 4.95,
+      "out": 11.1,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.45,
+      "out": 16.65,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 36.4,
+      "out": 40.35,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 203,
+      "out": 211.55,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.15,
+      "end": 2.17,
+      "text": "Tenemos el traje"
+    },
+    {
+      "start": 2.69,
+      "end": 3.93,
+      "text": "el mameluco, ¿verdad?"
+    },
+    {
+      "start": 3.93,
+      "end": 4.81,
+      "text": "para protegernos"
+    },
+    {
+      "start": 4.81,
+      "end": 5.46,
+      "text": "de las picaduras"
+    },
+    {
+      "start": 5.46,
+      "end": 6.1,
+      "text": "de las abejas"
+    },
+    {
+      "start": 6.2,
+      "end": 7.35,
+      "text": "Tenemos los guantes"
+    },
+    {
+      "start": 7.88,
+      "end": 9.02,
+      "text": "Tenemos el ahumador"
+    },
+    {
+      "start": 9.02,
+      "end": 10.24,
+      "text": "que es para tranquilizar"
+    },
+    {
+      "start": 10.24,
+      "end": 11.3,
+      "text": "las abejas"
+    },
+    {
+      "start": 11.37,
+      "end": 12.73,
+      "text": "El cepillo"
+    },
+    {
+      "start": 12.73,
+      "end": 13.45,
+      "text": "para no maltratar"
+    },
+    {
+      "start": 13.45,
+      "end": 14.01,
+      "text": "a las abejas"
+    },
+    {
+      "start": 14.01,
+      "end": 14.45,
+      "text": "que son"
+    },
+    {
+      "start": 14.45,
+      "end": 15.25,
+      "text": "bien importantes"
+    },
+    {
+      "start": 15.3,
+      "end": 16.78,
+      "text": "Si quieres conocer más"
+    },
+    {
+      "start": 16.78,
+      "end": 17.8,
+      "text": "de nuestro proceso"
+    },
+    {
+      "start": 18.02,
+      "end": 19.36,
+      "text": "puedes visitarnos aquí"
+    },
+    {
+      "start": 19.36,
+      "end": 20.4,
+      "text": "en Apiario Coffee Shop"
+    },
+    {
+      "start": 20.4,
+      "end": 21.62,
+      "text": "que ofrecemos"
+    },
+    {
+      "start": 21.62,
+      "end": 23.8,
+      "text": "tours educativos"
+    }
+  ],
+  "voice_filter": "highpass=f=75,afftdn=nr=5:nf=-40",
+  "audio_master": {
+    "mode": "dialogue"
+  },
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-utensilios-20261002/assets/music-bed-v4.wav",
+    "extend_through_outro": true,
+    "title": "Clever Girl",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/clever-girl-860888/",
+    "evidence": "Licensing Info consultado: suscriptores cubiertos, Identifyy Content ID, BMI"
+  },
+  "broll": [],
+  "review_notes": [
+    "Propuesta educativa: traje, guantes, ahumador y cepillo; cierre real sobre tours educativos.",
+    "Fuente muestra directamente cada herramienta; no se añade B-roll ajeno.",
+    "Se eliminan ensayos e instrucciones detrás de cámara.",
+    "Captions hablados: perfil de Apiario. Regla de overlay fijo se conserva para rótulos editoriales, no se aplica a subtítulos hablados.",
+    "Fondo a contraluz en toma original; conservar encuadre para mostrar objetos.",
+    "Transcripción automática corregida en términos evidentes; escucha crítica y verificación literal final pendientes.",
+    "V2: frases largas repartidas por tiempos de palabra para conservar una sola línea; catálogo y referencias explícitos añadidos.",
+    "V3: última frase dividida para mantener una sola línea en todos los subtítulos.",
+    "V4 corrección expresa Eric: comienza picado. Se retira la frase incompleta inicial. Nueva entrada original4.95s,150ms antes de Tenemos el traje. Resto del montaje conservado; no se inventa introducción."
+  ],
+  "catalog": "runs/a5d7705e-catalog.json",
+  "references": {
+    "countdown_same_client": "media/a5d7705e/d7a089db-db85-4e01-92cb-3a93ae8739da.mp4",
+    "official_outro": "media/apiario/brand/outro.mp4",
+    "published_gastronomia": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/published-386775273.mp4",
+    "published_concepto": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/published-385324626.mp4"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "2a9747d8-bda2-4087-80bc-8a36cafa69b8",
+  "title": "Pregunta · Nana's Playhouse",
+  "source": "../media/fd3ece8d-bc59-4247-a2ad-c98d1363fb31.mp4",
+  "transcript": "../runs/pregunta-transcript-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.48,
+      "out": 4.22,
+      "zoom": 1.08,
+      "reason": "Pregunta inicial; retirar la cuenta de grabación."
+    },
+    {
+      "in": 4.86,
+      "out": 10.44,
+      "zoom": 1.0,
+      "reason": "Respuesta completa; reducir la pausa anterior."
+    },
+    {
+      "in": 10.47,
+      "out": 14.3,
+      "zoom": 1.08,
+      "reason": "Beneficio adicional; retirar espera final."
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -18
+    },
+    {
+      "time": 2.74,
+      "kind": "click",
+      "gain_db": -18
+    },
+    {
+      "time": 7.9,
+      "kind": "click",
+      "gain_db": -18
+    },
+    {
+      "time": 5.25,
+      "kind": "whoosh",
+      "gain_db": -20,
+      "duration": 0.2
+    },
+    {
+      "time": 9,
+      "kind": "whoosh",
+      "gain_db": -20,
+      "duration": 0.2
+    }
+  ],
+  "review_notes": [
+    "Borrador para revisar estilo y ritmo con Eric.",
+    "Transcripción local Whisper small; grafía de Nana's ajustada a marca.",
+    "Fuente DTMF y outro de la carpeta de Drive suministrada por Eric.",
+    "B-roll seleccionado visualmente desde la idea Broll, no por nombre de archivo.",
+    "Clics y barridos recreados; el audio de Instagram está mezclado y no permite confirmar los archivos de efectos originales.",
+    "Cambio solicitado: QUARTZO en el primer reel Pregunta."
+  ],
+  "broll": [
+    {
+      "source": "../media/010c6074-b36d-4bbd-bf02-37d7a63acc17.mp4",
+      "in": 1.0,
+      "out": 3.65,
+      "at": 5.25,
+      "reason": "Niño en el trampolín: ilustra lugar seguro y diseñado para que no se aburran."
+    },
+    {
+      "source": "../media/09609fa6-ca6e-4239-86ff-4f78dd3c03f6.mp4",
+      "in": 0.4,
+      "out": 3.45,
+      "at": 9.0,
+      "reason": "Nachos y bebidas: corresponde al concesionario con snacks."
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 5.25,
+      "duration": 0.2
+    },
+    {
+      "time": 9,
+      "duration": 0.2
+    }
+  ],
+  "music": {
+    "source": "../media/music/carefree-bed.wav",
+    "title": "Carefree",
+    "artist": "Kevin MacLeod",
+    "license": "CC BY 4.0",
+    "provenance": "Descarga directa de incompetech.com; ver media/music/Carefree.provenance.json",
+    "source_in": 0,
+    "source_out": 12.15,
+    "target_lufs": -29,
+    "credit": "runs/CREDITO-MUSICA.txt"
+  },
+  "previous_version": "../runs/nanas-pregunta-v6.mp4"
+}

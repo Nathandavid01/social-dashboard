@@ -1,0 +1,38 @@
+{
+  "title": "Así Se Prepara El Churrasco Roll",
+  "version": "v9",
+  "base": "runs/yabuuchi-seleccion-churrasco-roll-v8.mp4",
+  "method": "Insertar toma real en exportación existente para conservar sus captions, montaje y outro.",
+  "timeline": [
+    {
+      "source": "runs/yabuuchi-seleccion-churrasco-roll-v8.mp4",
+      "in": 0,
+      "out": 33.1
+    },
+    {
+      "source": "media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0991-01-detalle-del-roll-desde-un-angulo-alto-b5d052fe6d.mp4",
+      "in": 0,
+      "out": 3.3,
+      "mute": true
+    },
+    {
+      "source": "runs/yabuuchi-seleccion-churrasco-roll-v8.mp4",
+      "in": 33.1,
+      "out": 36.02
+    }
+  ],
+  "music_insert": {
+    "source": "media/music/Backbeat.mp3",
+    "in": 33.1,
+    "out": 36.4,
+    "gain_db": -26,
+    "provenance": "media/music/Backbeat.provenance.json"
+  },
+  "review": "pending",
+  "transition_sound": {
+    "preset": "mouse_click",
+    "time": 33.1,
+    "gain_db": -20,
+    "duration": 0.06
+  }
+}
