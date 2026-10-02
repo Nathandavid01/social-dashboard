@@ -97,7 +97,7 @@ export function ReciboBoard({
 
   async function fillCaptions() {
     const missing = ideas.filter(
-      (idea) => idea.status !== 'descartada' && ideaTieneEditadoEntregas(idea) && !captionOf(idea, captionOverrides),
+      (idea) => idea.status !== 'descartada' && !!editedEntregasVideoId(idea) && !captionOf(idea, captionOverrides),
     )
     if (missing.length === 0) {
       toast({ title: 'Todos los videos ya tienen caption' })
@@ -231,7 +231,7 @@ export function ReciboBoard({
                     <h2 className="text-sm font-semibold">{graphic ? 'Gráficos' : 'Videos'} · {sectionIdeas.length}</h2>
                     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
                     {sectionIdeas.map((idea) => {
-                      const hasEdit = ideaTieneEditadoEntregas(idea)
+                      const hasEdit = !!editedEntregasVideoId(idea)
                       const editedVideoId = editedEntregasVideoId(idea)
                       const caption = captionOf(idea, captionOverrides)
                       const approved = idea.staff_client_approval === 'approved' || idea.client_review_status === 'approved'

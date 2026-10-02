@@ -67,7 +67,7 @@ export function ReciboVideoPreview({
         <Film className="h-7 w-7 opacity-50" aria-hidden="true" />
         <p className="text-xs font-medium">Sin video editado</p>
         <p className="px-5 text-center text-[10px] leading-snug opacity-80">
-          El corte aparecerá aquí cuando esté en Entregas.
+          El video aparecerá aquí cuando subas un archivo editado.
         </p>
       </div>
     )

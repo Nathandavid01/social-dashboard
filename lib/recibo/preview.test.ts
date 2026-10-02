@@ -55,3 +55,11 @@ it('classifies the current image and ignores archived graphic versions', () => {
   expect(isReciboGraphic({ videos: [vid(file)] })).toBe(true)
   expect(isReciboGraphic({ videos: [vid({ ...file, status: 'archived' }), vid({ ...file, id: 'video', mime_type: 'video/mp4' })] })).toBe(false)
 })
+
+it('prefers the newest usable edit across both storage providers', () => {
+  expect(editedEntregasVideoId({ videos: [
+    vid({ id: 'old', kind: 'edited', storage_provider: 'entregas-r2', status: 'uploaded', drive_file_id: 'old', uploaded_at: '2026-09-01' }),
+    vid({ id: 'new', kind: 'edited', storage_provider: 'r2', status: 'uploaded', drive_file_id: 'new', uploaded_at: '2026-10-01' }),
+    vid({ id: 'failed', kind: 'edited', storage_provider: 'r2', status: 'failed', drive_file_id: 'failed', uploaded_at: '2026-10-02' }),
+  ] })).toBe('new')
+})

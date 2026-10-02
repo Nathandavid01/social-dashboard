@@ -4,13 +4,25 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v5.121 — 2026-09-27
+## v5.122 — 2026-10-02
 
 **Recibo separa los gráficos y los videos de cada cliente.**
 - Nueva sección Gráficos con imágenes estáticas y el nombre de cada arte.
 - Cada gráfico conserva su caption editable y descarga individual.
 - Los videos mantienen su sección y sus controles habituales.
 - Las imágenes quedan en revisión; no se publican automáticamente.
+
+## v5.121 — 2026-10-01
+
+**Los videos editados que sube Eric aparecen en Recibo, también para clientes sin AI.**
+- Los cortes editados se muestran tanto si se subieron por el dashboard como por Entregas, respetando los filtros de Recibo.
+- Puedes ver y bajar el corte que aparece en la tarjeta desde su ubicación correspondiente.
+- El conteo incluye los videos editados de ambas rutas de subida y Recibo se actualiza al registrar una nueva subida.
+- La tarjeta sin archivo aclara que el video aparecerá al subir un archivo editado.
+
+[Ver el antes y después](/previews/v5.121-recibo-storage.html)
+
+![Alacena en Recibo](/changelog/v5.121-recibo-storage.png)
 
 ## v5.120 — 2026-09-25
 
