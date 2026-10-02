@@ -279,3 +279,15 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
     expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
   })
 })
+
+it('separates a client graphic from videos and renders its image with caption', async () => {
+  vi.mocked(getReciboIdeaPreviewUrl).mockResolvedValue({ url: 'https://signed.example/graphic.png' })
+  const graphic = { ...editedIdea, id: 'graphic-1', title: 'Encías', content_type: 'P', generated_caption: 'Cuida tus encías.', videos: [{ ...editedIdea.videos[0], id: 'g1', mime_type: 'image/png' }] }
+  render(<ReciboBoard ideas={[editedIdea, graphic] as any} aiClients={[{ id: 'c1', name: 'Arecibo Lab' }]} />)
+  expect(screen.getByRole('region', { name: 'Arecibo Lab · Gráficos' })).toBeTruthy()
+  expect(screen.getByRole('region', { name: 'Arecibo Lab · Videos' })).toBeTruthy()
+  await waitFor(() => expect(screen.getByRole('img', { name: 'Encías' })).toBeTruthy())
+  const card = screen.getByTestId('recibo-idea-graphic-1')
+  expect(card.querySelector('video')).toBeNull()
+  expect(card.textContent).not.toContain('Publicar en Metricool')
+})

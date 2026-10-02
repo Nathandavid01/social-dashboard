@@ -15,7 +15,7 @@ import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
-import { editedEntregasVideoId } from '@/lib/recibo/preview'
+import { editedEntregasVideoId, isReciboGraphic } from '@/lib/recibo/preview'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
@@ -143,7 +143,7 @@ export function ReciboBoard({
   // Human-client deliveries are individual reviews: bulk actions affect whole
   // ideas, including their other cuts. Keep them in the client's editing workflow.
   const actionableIdeas = useMemo(
-    () => ideas.filter((idea) => aiClients.some((client) => client.id === idea.client_id)),
+    () => ideas.filter((idea) => !isReciboGraphic(idea) && aiClients.some((client) => client.id === idea.client_id)),
     [ideas, aiClients],
   )
   const semanaIdeas = useMemo(
@@ -161,7 +161,7 @@ export function ReciboBoard({
             Recibo
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Aquí están los videos por aprobar y los que faltan por postear o programar en Metricool.
+            Aquí están los videos y gráficos por revisar, organizados por cliente.
             El caption imita lo ya publicado. Sin auto-post.
           </p>
           {showUploadCounts ? (
@@ -223,8 +223,14 @@ export function ReciboBoard({
                     No hay videos editados en el filtro actual.
                   </p>
                 ) : (
-                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
-                    {clientIdeas.map((idea) => {
+                  <div className="space-y-6">
+                  {[false, true].map((graphic) => {
+                    const sectionIdeas = clientIdeas.filter((idea) => isReciboGraphic(idea) === graphic)
+                    if (!sectionIdeas.length) return null
+                    return <section key={String(graphic)} aria-label={`${client.name} · ${graphic ? 'Gráficos' : 'Videos'}`} className="space-y-3">
+                    <h2 className="text-sm font-semibold">{graphic ? 'Gráficos' : 'Videos'} · {sectionIdeas.length}</h2>
+                    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+                    {sectionIdeas.map((idea) => {
                       const hasEdit = !!editedEntregasVideoId(idea)
                       const editedVideoId = editedEntregasVideoId(idea)
                       const caption = captionOf(idea, captionOverrides)
@@ -236,8 +242,9 @@ export function ReciboBoard({
                           className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/80 shadow-md shadow-black/20"
                         >
                           <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
+                            {graphic && <p className="mb-2 text-xs font-semibold text-violet-300">Gráfico · {ideaTitle(idea)}</p>}
                             <div className="mx-auto w-full max-w-[min(100%,280px)]">
-                              <ReciboVideoPreview ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedVideoId ?? undefined} />
+                              <ReciboVideoPreview image={graphic} title={ideaTitle(idea)} ideaId={idea.id} hasEdited={hasEdit} expectedVideoId={editedVideoId ?? undefined} />
                             </div>
                             {editedVideoId && (
                               <ReciboDownloadButton ideaId={idea.id} videoId={editedVideoId} title={ideaTitle(idea)} />
@@ -252,16 +259,18 @@ export function ReciboBoard({
                             {client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                           </div>
                           <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
-                          <ReciboPublishButton
+                          {!graphic && <ReciboPublishButton
                             ideaId={idea.id}
                             approved={approved}
                             todayISO={todayISO ?? ''}
                             cadence={cadenceByClient[idea.client_id] ?? {}}
-                          />
+                          />}
                         </li>
                       )
                     })}
-                  </ul>
+                  </ul></section>
+                  })}
+                  </div>
                 )}
               </li>
             ))}
