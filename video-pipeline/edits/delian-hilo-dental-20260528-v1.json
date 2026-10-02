@@ -1,0 +1,101 @@
+{
+  "idea_id": "hilo-dental-20260528",
+  "title": "Por Qué Usar Hilo Dental",
+  "source": "../../delian-loyola-video/media/source-2026-05-28/DJI_20260528173806_0105_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-05-28/0105-small-transcript.json",
+  "style": "../styles/delian-reference-v4.json",
+  "clips": [
+    {
+      "in": 7.38,
+      "out": 19.9,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.74,
+      "text": "El uso del hilo dental"
+    },
+    {
+      "start": 1.74,
+      "end": 2.7,
+      "text": "definitivamente"
+    },
+    {
+      "start": 2.7,
+      "end": 4.16,
+      "text": "es lo más importante"
+    },
+    {
+      "start": 4.16,
+      "end": 5.18,
+      "text": "porque el cepillo no"
+    },
+    {
+      "start": 5.18,
+      "end": 6.66,
+      "text": "llega dentro, ¿verdad?"
+    },
+    {
+      "start": 6.66,
+      "end": 7.48,
+      "text": "entre medio de los"
+    },
+    {
+      "start": 7.48,
+      "end": 8.58,
+      "text": "dientes y el hilo"
+    },
+    {
+      "start": 8.58,
+      "end": 9.62,
+      "text": "dental es el único"
+    },
+    {
+      "start": 9.62,
+      "end": 10.16,
+      "text": "que va a poder"
+    },
+    {
+      "start": 10.16,
+      "end": 10.86,
+      "text": "accesar"
+    },
+    {
+      "start": 10.86,
+      "end": 11.72,
+      "text": "para poder limpiar"
+    },
+    {
+      "start": 11.72,
+      "end": 12.52,
+      "text": "bien esos dientes."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "El clip empieza en la frase de la doctora, sin claqueta ni pregunta del entrevistador; la respuesta conserva su argumento completo.",
+    "Captions segmentados con tiempos de Whisper small. La palabra 'accesar' al final es incierta entre ASR small y base; se escribió como variante oral y requiere cotejo auditivo humano antes de publicar.",
+    "Perfil de referencia v4 basado en Publicados/14 agosto: Montserrat Bold provisional porque falta el archivo Shoika; comprobar que captions no tapen manos ni rostro."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-hilo-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  }
+}

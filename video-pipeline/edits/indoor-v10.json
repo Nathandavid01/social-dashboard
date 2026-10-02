@@ -1,0 +1,283 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "3a5a8614-3199-4be2-9fb3-c77fc8af5e5f",
+  "title": "Tres Razones Para Celebrar En Nana’s",
+  "source": "../media/assembled-indoor.mp4",
+  "transcript": "../runs/indoor-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 18.72,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 11.26,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 3.94,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    },
+    {
+      "time": 7.14,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    },
+    {
+      "time": 8.4,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Encuadres ajustados para excluir caras hablando de tomas de apoyo. Teléfono legible con fuente numérica de respaldo a los mismos 85px.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original.",
+    "Audio: música diferente por reel a -34 LUFS; reducción moderada de ambiente; clicks por punto de lista. Escucha final pendiente.",
+    "Outro: whoosh de estrella, aterrizaje suave y campanillas de ensamblaje con cola hasta el final.",
+    "CTA visual sustituye completamente al dueño leyendo el teléfono, desde 11.26 hasta outro.",
+    "Tarjeta de CTA renovada usando el logo oficial; entrada animada sincronizada con whoosh existente.",
+    "Tarjeta de CTA renovada usando el logo oficial; entrada animada sincronizada con whoosh existente.",
+    "Regla común Nana’s: voz -16 LUFS, música -27 LUFS, ambiente reducido. Escucha crítica pendiente.",
+    "Auditoría de exclusividad del lote: tomas reservadas por video, tres videos excluidos intactos. Priorizar pertinencia y evitar recortes extraños para inventar tomas nuevas."
+  ],
+  "broll": [
+    {
+      "source": "../media/assembled-indoor.mp4",
+      "in": 0,
+      "out": 18.72,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 18.72,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/c581c160-ad65-4b7d-a3b8-c8ec8917b403.mp4",
+      "in": 1,
+      "out": 4.9,
+      "at": 0,
+      "reason": "Recorrido de mesa de bloques y supermercado hacia chorrera y piscina",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.9,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "../media/f90dfde8-0fe4-47e7-b5c0-cfeb4925a699.mp4",
+      "in": 1,
+      "out": 4.12,
+      "at": 3.9,
+      "reason": "Adulta espera junto a escalones del trampolín mientras niños entran y salen",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.12,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "../media/8ed1af63-e93c-4250-a57f-1491cb0a92f2.mp4",
+      "in": 0.5,
+      "out": 1.88,
+      "at": 7.02,
+      "reason": "Plano amplio de varios niños entre bolas frente a chorrera con logo Nana’s",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.38,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "source": "../media/indoor-private-event.mp4",
+      "in": 0,
+      "out": 2.86,
+      "at": 8.4,
+      "reason": "Gráfica de evento privado durante cerrado para tu actividad: elimina B-roll reservado a Dónde Celebrar Su Cumpleaños.",
+      "eof_action": "repeat"
+    },
+    {
+      "source": "../media/indoor-logo-contact-synced.mp4",
+      "in": 0,
+      "out": 7.46,
+      "at": 11.26,
+      "eof_action": "repeat",
+      "reason": "Logo oficial con entrada de rebote suave y contacto durante el CTA."
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro-with-star-sfx.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 1
+  },
+  "transitions": [],
+  "music": {
+    "source": "../media/music/nanas-indoor-v9-bed.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "sha256": "a254227da398809c79a0c753073a3a92c7341672abc92bb0166b6326e126f0b4",
+    "target_lufs": -27,
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "source_in": 3
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.82,
+      "text": "AQUÍ TE DEJO"
+    },
+    {
+      "start": 0.82,
+      "end": 1.48,
+      "text": "TRES RAZONES"
+    },
+    {
+      "start": 1.48,
+      "end": 2.44,
+      "text": "PARA CELEBRAR EL"
+    },
+    {
+      "start": 2.44,
+      "end": 3.18,
+      "text": "CUMPLEAÑOS DE TU"
+    },
+    {
+      "start": 3.18,
+      "end": 3.54,
+      "text": "NIÑO."
+    },
+    {
+      "start": 3.94,
+      "end": 4.32,
+      "text": "UN LUGAR"
+    },
+    {
+      "start": 4.32,
+      "end": 4.9,
+      "text": "DISEÑADO,"
+    },
+    {
+      "start": 4.9,
+      "end": 5.72,
+      "text": "PENSADO EN LA"
+    },
+    {
+      "start": 5.72,
+      "end": 6.4,
+      "text": "SEGURIDAD DE LOS"
+    },
+    {
+      "start": 6.4,
+      "end": 6.82,
+      "text": "NIÑOS."
+    },
+    {
+      "start": 7.14,
+      "end": 7.62,
+      "text": "DIVERSIÓN"
+    },
+    {
+      "start": 7.62,
+      "end": 8.319999999999999,
+      "text": "INFINITA."
+    },
+    {
+      "start": 8.4,
+      "end": 9.38,
+      "text": "Y CERRADO PARA"
+    },
+    {
+      "start": 9.38,
+      "end": 10.08,
+      "text": "TU ACTIVIDAD"
+    },
+    {
+      "start": 10.08,
+      "end": 11.18,
+      "text": "ESPECÍFICAMENTE."
+    },
+    {
+      "start": 11.38,
+      "end": 12.3,
+      "text": "COMUNÍCATE AL"
+    },
+    {
+      "start": 12.3,
+      "end": 15.14,
+      "text": "939-299-2969",
+      "font_family": "Arial",
+      "font_file": "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+    },
+    {
+      "start": 15.14,
+      "end": 16.4,
+      "text": "O A TRAVÉS"
+    },
+    {
+      "start": 16.4,
+      "end": 16.7,
+      "text": "DE NUESTRAS"
+    },
+    {
+      "start": 16.7,
+      "end": 17.52,
+      "text": "REDES SOCIALES"
+    },
+    {
+      "start": 17.52,
+      "end": 18.62,
+      "text": "NANA’S PLAYHOUSE."
+    }
+  ],
+  "previous_version": "../runs/nanas-indoor-v9.mp4",
+  "voice_filter": "highpass=f=110,afftdn=nr=18:nf=-28:tn=1,agate=threshold=0.035:ratio=3:range=0.12:attack=10:release=150,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000"
+}

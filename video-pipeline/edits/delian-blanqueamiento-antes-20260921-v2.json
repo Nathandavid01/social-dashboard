@@ -1,0 +1,110 @@
+{
+  "idea_id": "blanqueamiento-antes-20260921",
+  "title": "¿Blanqueamiento Antes O Después?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_171950_20260921171935_1790125022521_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/delian-loyola-video/review/sept/dji_mimo_20260921_171950_20260921171935_1790125022521_video.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 2.87,
+      "out": 6.5,
+      "zoom": 1.02
+    },
+    {
+      "in": 6.68,
+      "out": 8.6,
+      "zoom": 1.2
+    },
+    {
+      "in": 8.7,
+      "out": 13.7,
+      "zoom": 1.07
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.11,
+      "end": 0.79,
+      "text": "Oye, doctora,"
+    },
+    {
+      "start": 0.79,
+      "end": 1.63,
+      "text": "blanqueamiento dental."
+    },
+    {
+      "start": 1.73,
+      "end": 2.67,
+      "text": "Antes o después del"
+    },
+    {
+      "start": 2.67,
+      "end": 3.51,
+      "text": "diseño de sonrisa?"
+    },
+    {
+      "start": 3.77,
+      "end": 4.27,
+      "text": "Antes.",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 4.69,
+      "end": 5.53,
+      "text": "Bien importante."
+    },
+    {
+      "start": 5.63,
+      "end": 5.93,
+      "text": "¿Por qué?"
+    },
+    {
+      "start": 5.93,
+      "end": 6.67,
+      "text": "Porque tenemos que coger"
+    },
+    {
+      "start": 6.67,
+      "end": 7.27,
+      "text": "el color de los"
+    },
+    {
+      "start": 7.27,
+      "end": 8.75,
+      "text": "dientes y así macharlo"
+    },
+    {
+      "start": 8.75,
+      "end": 9.91,
+      "text": "con el diseño de"
+    },
+    {
+      "start": 9.91,
+      "end": 10.45,
+      "text": "sonrisa."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/music/Inspiration.mp3",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Inspiration.provenance.json"
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Idea 8 PDF. Se elimina cuenta de rodaje. Pregunta y explicación completas."
+  ]
+}

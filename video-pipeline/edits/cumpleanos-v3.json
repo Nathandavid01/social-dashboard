@@ -1,0 +1,160 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "ddc34783-0520-4bd8-826c-a535f0072714",
+  "title": "Dónde Celebrar Su Cumpleaños",
+  "source": "../media/e7f4afea-7cce-4ad6-addb-097b575680aa.mp4",
+  "transcript": "../runs/cumpleanos-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.22,
+      "out": 6.8,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 1.24,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 2.79,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Duración mínima de captions corregida a 300ms; tamaño fijo conservado.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original.",
+    "Audio: música diferente por reel a -34 LUFS; reducción moderada de ambiente; clicks por punto de lista. Escucha final pendiente."
+  ],
+  "broll": [
+    {
+      "source": "../media/e7f4afea-7cce-4ad6-addb-097b575680aa.mp4",
+      "in": 1.22,
+      "out": 6.8,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.58,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/6fdc1ad9-34dc-41af-ab19-0b8f951683ab.mp4",
+      "in": 0.5,
+      "out": 2.05,
+      "at": 1.24,
+      "reason": "Recorrido de celebración: decoración Happy Birthday, regalos, mesas con familias y área de juegos",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.55,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 1.24,
+      "duration": 0.08
+    },
+    {
+      "time": 2.79,
+      "duration": 0.08
+    }
+  ],
+  "music": {
+    "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Funshine.mp3",
+    "title": "Funshine",
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "sha256": "b98b226927367a977377fe4f75d1cf59e4366ca2f444c2c7d23d13e7f506f532",
+    "target_lufs": -34
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.86,
+      "text": "¿ESTÁS PENSANDO"
+    },
+    {
+      "start": 0.86,
+      "end": 1.24,
+      "text": "EN DONDE"
+    },
+    {
+      "start": 1.24,
+      "end": 1.84,
+      "text": "CELEBRAR EL"
+    },
+    {
+      "start": 1.84,
+      "end": 2.42,
+      "text": "CUMPLEAÑOS DE TU"
+    },
+    {
+      "start": 2.42,
+      "end": 2.7600000000000002,
+      "text": "NIÑO?"
+    },
+    {
+      "start": 3.08,
+      "end": 3.62,
+      "text": "AQUÍ EN NANA’S"
+    },
+    {
+      "start": 3.62,
+      "end": 4.0,
+      "text": "PLAYHOUSE,"
+    },
+    {
+      "start": 4.0,
+      "end": 4.3,
+      "text": "EN PLAZA"
+    },
+    {
+      "start": 4.3,
+      "end": 4.88,
+      "text": "MONSERRATE,"
+    },
+    {
+      "start": 4.88,
+      "end": 5.48,
+      "text": "HORMIGUEROS."
+    }
+  ],
+  "previous_version": "../runs/nanas-cumpleanos-v2.mp4",
+  "voice_filter": "highpass=f=90,afftdn=nr=10:nf=-35:tn=1,agate=threshold=0.025:ratio=2:range=0.2:attack=15:release=180,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000"
+}

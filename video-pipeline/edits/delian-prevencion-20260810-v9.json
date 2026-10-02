@@ -1,0 +1,185 @@
+{
+  "idea_id": "prevencion-20260810",
+  "title": "La Prevención Antes Del Dolor",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810144428_0282_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-08-10/0282-small-transcript.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 6.9,
+      "out": 9.83,
+      "zoom": 1.15,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.93,
+          "zoom": 1.03
+        }
+      ]
+    },
+    {
+      "in": 9.83,
+      "out": 13.65,
+      "zoom": 1.5,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 3.82,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 13.65,
+      "out": 15.58,
+      "zoom": 1.2,
+      "focus_y": 0.36,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.93,
+          "zoom": 1.12
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.84,
+      "text": "Desde el principio"
+    },
+    {
+      "start": 0.84,
+      "end": 1.88,
+      "text": "no debemos presentar"
+    },
+    {
+      "start": 1.88,
+      "end": 2.66,
+      "text": "dolor de muelas."
+    },
+    {
+      "start": 2.96,
+      "end": 4.04,
+      "text": "Si tenemos una carie"
+    },
+    {
+      "start": 4.04,
+      "end": 4.72,
+      "text": "y la carie llegó"
+    },
+    {
+      "start": 4.72,
+      "end": 5.36,
+      "text": "hasta el nervio,"
+    },
+    {
+      "start": 5.64,
+      "end": 6.56,
+      "text": "vamos a presentar dolor."
+    },
+    {
+      "start": 6.86,
+      "end": 7.8,
+      "text": "Así que lo más importante"
+    },
+    {
+      "start": 7.8,
+      "end": 8.58,
+      "text": "es la prevención.",
+      "primary_colour": "&H00E560EB"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810144428_0282_D.MP4",
+      "in": 0.4,
+      "out": 1.8,
+      "at": 2.96,
+      "fade_in": 0.12,
+      "fade_out": 0.12,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.4,
+          "zoom": 1.025
+        }
+      ],
+      "reason": "Diagrama dental y sala real durante la explicación de la caries; audio del apoyo silenciado."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 2.96,
+      "duration": 0.24,
+      "gain_db": -29
+    }
+  ],
+  "music": {
+    "source": "../media/delian/music/prevencion-inspiration.m4a",
+    "title": "Inspiration (fragmento a partir de 2 s)",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Inspiration.provenance.json",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Captions borrador del Edit Kit; corregir transcripción antes de quemar.",
+    "Revisión editorial: corte 6.90-15.58 s conserva solo la explicación de la doctora; claqueta, pregunta dudosa y CTA hablado se excluyen.",
+    "Subtítulos divididos por frase. Las palabras carie y llegó requieren cotejo auditivo humano; el texto sigue el pase Whisper small más probable.",
+    "V3: aumentar captions para acercar la escala a Ejemplo.jpg; se conserva el corte y la transcripción revisada.",
+    "V4: estilo a 96 px para evitar tres líneas y proteger el rostro, manteniendo mayor lectura que v1.",
+    "V5: comparacion directa con Publicados/14 agosto; captions al torso y encuadre mas cercano.",
+    "V5: referencia audiovisual Publicados/14 agosto; acercamiento 1.3x y captions cortos sobre torso, sombra violeta. Mismo contenido ya publicado, reedicion local.",
+    "V6: movimiento suave, cama musical CC0 y apoyo clínico real sobre caries/nervio.",
+    "V9 (2026-09-23, pedido de Eric «más profesionales»): encuadre como Publicados 14 agosto (misma toma 0282): plano medio 1.15 → primer plano 1.5 (focus_y 0.3, resolución nativa del DJI 1728×3072) → empuje lento en la conclusión; cortes en silencios medidos 9.83/13.65 s; captions 100 px (estilo v5); placa de título; conclusión en violeta."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "graphics": [
+    {
+      "source": "../media/delian/graphics/prevencion-title.png",
+      "start": 0,
+      "end": 2.66,
+      "x": 180,
+      "y": 150,
+      "width": 720,
+      "enter": 0.12,
+      "kind": "brand_graphic",
+      "reason": "Gancho de apertura con el tema, estilo de la placa de Hábitos (publicado 28 agosto)."
+    }
+  ]
+}

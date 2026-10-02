@@ -1,0 +1,267 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-muestra-backbeat-v1.wav",
+    "title": "Backbeat",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Electronic/Backbeat.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -29
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-antes-de-la-muestra",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Antes De Una Toma De Muestra",
+  "source": "../media/arecibo/DJI_20260909092729_0278_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0278.json",
+  "clips": [
+    {
+      "in": 3.403,
+      "out": 5.806,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.403,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 6.073,
+      "out": 9.61,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 3.537,
+          "zoom": 1.04
+        }
+      ]
+    },
+    {
+      "in": 9.843,
+      "out": 12.613,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 2.77,
+          "zoom": 1.035
+        }
+      ]
+    },
+    {
+      "in": 12.913,
+      "out": 15.783,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 2.87,
+          "zoom": 1.04
+        }
+      ]
+    },
+    {
+      "in": 16.216,
+      "out": 18.719,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 2.503,
+          "zoom": 1.055
+        }
+      ]
+    },
+    {
+      "in": 46.313,
+      "out": 52.619,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.015
+        },
+        {
+          "time": 6.306,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/0285-muestra-crop.mp4",
+      "in": 0.25,
+      "out": 2.5,
+      "at": 0.08,
+      "original_source": "../media/arecibo/DJI_20260909094109_0285_D.MP4",
+      "source_in": 0.85,
+      "source_out": 3.1,
+      "reason": "Toma real y silenciosa de extracción de sangre durante el gancho sobre toma de muestra; encuadre derivado ya protege el monitor.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.25,
+          "zoom": 1.04
+        }
+      ],
+      "fade_in": 0.14,
+      "fade_out": 0.18
+    },
+    {
+      "source": "../media/arecibo/muestra-tips-graphics-v1.mov",
+      "in": 0,
+      "out": 20.39,
+      "at": 0,
+      "kind": "brand_graphic",
+      "reason": "Cuatro ilustraciones animadas, nativas a 1080x1920 y sincronizadas con consejos grabados. No añaden afirmaciones médicas."
+    }
+  ],
+  "transitions": [
+    {
+      "time": 2.403,
+      "duration": 0.1
+    },
+    {
+      "time": 5.94,
+      "duration": 0.1
+    },
+    {
+      "time": 11.58,
+      "duration": 0.08
+    },
+    {
+      "time": 14.083,
+      "duration": 0.1
+    }
+  ],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 0.08,
+      "duration": 0.28,
+      "gain_db": -23
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 2.45,
+      "duration": 0.09,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 6.02,
+      "duration": 0.09,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 8.78,
+      "duration": 0.09,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.13,
+      "duration": 0.09,
+      "gain_db": -14
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.077,
+      "end": 1.18,
+      "text": "¿QUÉ NO DEBES HACER"
+    },
+    {
+      "start": 1.18,
+      "end": 2.337,
+      "text": "ANTES DE UNA TOMA DE MUESTRA?"
+    },
+    {
+      "start": 2.45,
+      "end": 4.2,
+      "text": "EVITA EJERCICIOS INTENSOS"
+    },
+    {
+      "start": 4.2,
+      "end": 5.87,
+      "text": "24 HORAS ANTES"
+    },
+    {
+      "start": 6.017,
+      "end": 7.24,
+      "text": "NO TOMES CAFÉ"
+    },
+    {
+      "start": 7.24,
+      "end": 8.657,
+      "text": "NI BEBIDAS AZUCARADAS"
+    },
+    {
+      "start": 8.777,
+      "end": 9.2,
+      "text": "¿POR QUÉ?"
+    },
+    {
+      "start": 9.2,
+      "end": 11.477,
+      "text": "LA MAYORÍA DE LAS PRUEBAS"
+    },
+    {
+      "start": 11.624,
+      "end": 14.004,
+      "text": "SON EN ESTADO DE AYUNAS"
+    },
+    {
+      "start": 14.13,
+      "end": 17.1,
+      "text": "POR ÚLTIMO, HIDRÁTATE BIEN"
+    },
+    {
+      "start": 18.003,
+      "end": 20.349,
+      "text": "Y EVITA ALCOHOL EL DÍA ANTES"
+    }
+  ],
+  "review_notes": [
+    "Cortes verificados por palabra y fotogramas: 3.403–5.806, 6.073–9.610, 9.843–12.613, 12.913–15.783, 16.216–18.719 y 46.313–52.619. Se excluyen cuenta regresiva, errores, indicaciones y ensayos.",
+    "El cierre conserva hidrátese bien y no alcohol el día antes. No se presentan los consejos como universales fuera de la voz grabada.",
+    "B-roll 0285 se usa solo durante el gancho y no se repite. Los demás puntos usan ilustraciones profesionales porque no existe B-roll real pertinente.",
+    "Cuatro clicks mecánicos fuertes, uno por punto. Música Backbeat CC0, distinta a Inspiration, reducida bajo la voz.",
+    "Gráficas a 1080x1920 con rasterización interna 2x. Captions Montserrat 70 fijos, outro oficial sonorizado y zooms suaves.",
+    "Escucha crítica y aprobación del usuario pendientes."
+  ]
+}

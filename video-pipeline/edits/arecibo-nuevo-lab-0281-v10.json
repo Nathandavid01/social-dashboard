@@ -1,0 +1,368 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "anull,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-nuevo-lab-be-chillin-v10.wav",
+    "title": "Be Chillin",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Be%20Chillin.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28.5
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-nuevo-laboratorio",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Nuevo Laboratorio En Arecibo",
+  "source": "../media/arecibo/nuevo-lab-natural-join-v10.mov",
+  "transcript": "../runs/arecibo-nuevo-lab-v10-transcript.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 11.92,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.92,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 11.92,
+      "out": 17.3,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.055
+        },
+        {
+          "time": 5.38,
+          "zoom": 1.035
+        }
+      ]
+    },
+    {
+      "in": 17.3,
+      "out": 20.5
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/nuevo-lab-sample-detail-v5.mp4",
+      "in": 0,
+      "out": 2.866666,
+      "at": 4.34,
+      "original_source": "media/arecibo/DJI_20260909094109_0285_D.MP4",
+      "source_in": 0.95,
+      "source_out": 3.816666,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.866666,
+          "zoom": 1.025
+        }
+      ],
+      "reason": "Detalle real de la toma de muestra sobre la mención exacta. Única acción pertinente del archivo; reutilización entre reels justificada. Recorte desde original, sin monitor ni conversación a cámara; audio de apoyo silenciado."
+    },
+    {
+      "source": "../media/arecibo/nuevo-lab-services-v7.mov",
+      "in": 0,
+      "out": 5.38,
+      "at": 11.92,
+      "kind": "brand_graphic",
+      "reason": "Numeración animada 01/02/03 acumulativa sobre captions aprobados, sin duplicar sus palabras. Montserrat y verde conservados; números por encima de captions y bajo la cara."
+    },
+    {
+      "source": "../media/arecibo/nuevo-lab-location-v6.mp4",
+      "in": 0,
+      "out": 3.2,
+      "at": 17.3,
+      "kind": "brand_graphic",
+      "original_source": "media/arecibo/DJI_20260909100140_0296_D.JPG",
+      "reason": "Fachada real a todo el ancho con composición editorial, números sincronizados con ubicación y sin anuncio fechado. Se mantiene hasta el outro sin regreso al presentador."
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 4.34,
+      "duration": 0.09,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 12.72,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.66,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 15.9,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 17.3,
+      "duration": 0.24,
+      "gain_db": -25
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.98,
+      "text": "¿SABÍAS QUE EN ARECIBO"
+    },
+    {
+      "start": 0.98,
+      "end": 1.74,
+      "text": "HAY UN NUEVO LABORATORIO?"
+    },
+    {
+      "start": 1.74,
+      "end": 2.5,
+      "text": "LLAMADO ARECIBO LAB"
+    },
+    {
+      "start": 2.74,
+      "end": 3.18,
+      "text": "PUES, MIRA"
+    },
+    {
+      "start": 3.18,
+      "end": 4.36,
+      "text": "EN ARECIBO LAB OFRECEMOS"
+    },
+    {
+      "start": 4.36,
+      "end": 5.82,
+      "text": "SERVICIO DE TOMA DE MUESTRA"
+    },
+    {
+      "start": 5.82,
+      "end": 7.24,
+      "text": "PARA LAS PRUEBAS DE CERNIMIENTO"
+    },
+    {
+      "start": 7.24,
+      "end": 11.56,
+      "text": "QUE EL MÉDICO\nLE ENVÍA EN 3 A 6 MESES"
+    },
+    {
+      "start": 11.92,
+      "end": 12.72,
+      "text": "TAMBIÉN OFRECEMOS"
+    },
+    {
+      "start": 12.72,
+      "end": 14.45,
+      "text": "PRUEBAS DE PATERNIDAD"
+    },
+    {
+      "start": 14.66,
+      "end": 15.5,
+      "text": "PRUEBAS DE DOPAJE"
+    },
+    {
+      "start": 15.9,
+      "end": 17.05,
+      "text": "CULTIVOS"
+    },
+    {
+      "start": 17.4,
+      "end": 18.16,
+      "text": "ESTAMOS UBICADOS EN"
+    },
+    {
+      "start": 18.16,
+      "end": 19.04,
+      "text": "CARRETERA 683"
+    },
+    {
+      "start": 19.04,
+      "end": 20.47,
+      "text": "FRENTE A HQJ"
+    }
+  ],
+  "review_notes": [
+    "Reedición profesional solicitada: mantener 22.4 s y mejorar la estructura visual, sin volver a la versión corta.",
+    "Gancho completo con presentador y fachada; corte a la doctora al empezar su explicación. Se elimina el mostrador vacío del gancho.",
+    "Detalle real de toma de muestra a 3.74–6.61 s sobre la frase exacta; fuente 0285 reutilizada de forma explícita porque no hay otra acción literal disponible.",
+    "Unir en un mismo caption que el médico le envía en 3 a 6 meses, evitando que el tiempo parezca una promesa aislada de resultados.",
+    "Lista de servicios acumulativa, keyframes discretos y clicks por servicio. Cierre fotográfico editorial sin recuadro gigante ni anuncio fechado.",
+    "Se mantienen voz normalizada por toma, música CC0 y outro oficial ya sonorizado. No se duplican efectos en el outro.",
+    "Revisión visual y reproducción se documentan en el grafo. La escucha crítica y la aprobación final se mantienen pendientes hasta verificarse.",
+    "v7 conserva exactamente el render ASS de los captions y usa solo numeración animada para los servicios. Se eliminan todas las palabras duplicadas de la gráfica; PIL y libass tenían tamaños ópticos distintos en v6.",
+    "Usuario señala demasiado viento. v8 selecciona el canal FL de 0281, reduce viento desde el original con filtro de graves y RNNoise, compensa 474 muestras de retraso y normaliza por toma antes de música/efectos. Interior y montaje visual conservados; escucha crítica pendiente.",
+    "Usuario señala demasiado viento. v9 selecciona el canal FL de 0281, reduce viento desde el original con filtro de graves y RNNoise, compensa 474 muestras de retraso y normaliza por toma antes de música/efectos. Interior y montaje visual conservados; escucha crítica pendiente.",
+    "v10 restaura Pues, mira y su entrada natural. Pausa entre voces de0.26s, disolvencia6fotogramas en el cambio, sin whoosh. Zoom continuo sobre la unión. Desplazar captions/B-roll/efectos0.60s y extender música. Conservar voz exterior corregida de v9."
+  ],
+  "previous_version": "../runs/arecibo-nuevo-lab-0281-v9.mp4",
+  "source_segments": [
+    {
+      "source": "media/arecibo/DJI_20260909093310_0281_D.MP4",
+      "in": 1.78,
+      "out": 4.26,
+      "timeline_start": 0,
+      "timeline_duration": 2.5,
+      "source_sha256": "61d43e8aedad92941ebc8737115fecbe48a45c3411293c7f8dc5940b2259898e",
+      "voice_measurement": {
+        "input_i": "-20.66",
+        "input_tp": "-6.74",
+        "input_lra": "0.00",
+        "input_thresh": "-30.66",
+        "output_i": "-16.01",
+        "output_tp": "-2.09",
+        "output_lra": "0.00",
+        "output_thresh": "-26.01",
+        "normalization_type": "linear",
+        "target_offset": "0.01"
+      },
+      "wind_reduction": {
+        "channel": "FL",
+        "filter": "pan=mono|c0=FL,aresample=48000,highpass=f=140:p=2,arnndn=m=media/audio-models/sh.rnnn:mix=0.96",
+        "delay_compensation_samples": 474
+      }
+    },
+    {
+      "source": "media/arecibo/DJI_20260909092343_0277_D.MP4",
+      "in": 6.7,
+      "out": 21.5,
+      "timeline_start": 2.5,
+      "timeline_duration": 14.8,
+      "source_sha256": "db307f3168779ee83ab1fd3ed1768191e9f604e1194f5366f8032abfc71b4beb",
+      "voice_measurement": {
+        "input_i": "-24.81",
+        "input_tp": "-6.69",
+        "input_lra": "4.70",
+        "input_thresh": "-35.01",
+        "output_i": "-17.18",
+        "output_tp": "-2.00",
+        "output_lra": "3.30",
+        "output_thresh": "-27.30",
+        "normalization_type": "dynamic",
+        "target_offset": "1.18"
+      }
+    },
+    {
+      "source": "media/arecibo/DJI_20260909093310_0281_D.MP4",
+      "in": 10.28,
+      "out": 13.45,
+      "timeline_start": 17.3,
+      "timeline_duration": 3.2,
+      "source_sha256": "61d43e8aedad92941ebc8737115fecbe48a45c3411293c7f8dc5940b2259898e",
+      "voice_measurement": {
+        "input_i": "-23.59",
+        "input_tp": "-6.41",
+        "input_lra": "0.10",
+        "input_thresh": "-33.91",
+        "output_i": "-16.71",
+        "output_tp": "-2.00",
+        "output_lra": "0.00",
+        "output_thresh": "-27.02",
+        "normalization_type": "dynamic",
+        "target_offset": "0.71"
+      },
+      "wind_reduction": {
+        "channel": "FL",
+        "filter": "pan=mono|c0=FL,aresample=48000,highpass=f=140:p=2,arnndn=m=media/audio-models/sh.rnnn:mix=0.96",
+        "delay_compensation_samples": 474
+      }
+    }
+  ],
+  "audio_revision": {
+    "scope": "Outdoor 0281 hook and location only",
+    "filter": "pan=mono|c0=FL,aresample=48000,highpass=f=140:p=2,arnndn=m=media/audio-models/sh.rnnn:mix=0.96",
+    "model": "media/audio-models/sh.rnnn",
+    "model_sha256": "70bb6685eb0c2a1d18e2918dca3fbfbd39317010b1802eb1b6ea73a92f3fdec0",
+    "source_sha256": "61d43e8aedad92941ebc8737115fecbe48a45c3411293c7f8dc5940b2259898e",
+    "delay_compensation_samples": 474,
+    "rate": 48000,
+    "segments": [
+      {
+        "source_in": 1.78,
+        "source_out": 4.26,
+        "timeline_duration": 2.5,
+        "delay_compensation_samples": 474,
+        "normalization": {
+          "input_i": "-20.66",
+          "input_tp": "-6.74",
+          "input_lra": "0.00",
+          "input_thresh": "-30.66",
+          "output_i": "-16.01",
+          "output_tp": "-2.09",
+          "output_lra": "0.00",
+          "output_thresh": "-26.01",
+          "normalization_type": "linear",
+          "target_offset": "0.01"
+        }
+      },
+      {
+        "source_in": 10.28,
+        "source_out": 13.45,
+        "timeline_duration": 3.2,
+        "delay_compensation_samples": 474,
+        "normalization": {
+          "input_i": "-23.59",
+          "input_tp": "-6.41",
+          "input_lra": "0.10",
+          "input_thresh": "-33.91",
+          "output_i": "-16.71",
+          "output_tp": "-2.00",
+          "output_lra": "0.00",
+          "output_thresh": "-27.02",
+          "normalization_type": "dynamic",
+          "target_offset": "0.71"
+        }
+      }
+    ],
+    "interior": "Existing v4 voice retained without additional denoising",
+    "hook_transient_control": "3ms lookahead peak limiter at0.46, latency compensated, before normalization; corrects v8 hook level shortfall",
+    "voice_sha256": "d5cd24e03cd5cbd60581a368091a905849eb1ea77cfaff89ce7e25b32b8a9468",
+    "measurements_are_not_critical_listening": true
+  },
+  "speaker_handoff": {
+    "requested": "El cambio hombre a mujer es muy abrupto",
+    "restored_words": "Pues, mira",
+    "doctor_source_start": 6.7,
+    "spoken_gap_seconds": 0.26,
+    "visual_dissolve": [
+      2.4,
+      2.6
+    ],
+    "transition_sound": "removed",
+    "body_duration": 20.5,
+    "total_duration": 23.0,
+    "outdoor_audio": "Exact PCM voice reused from v9; wind correction retained"
+  }
+}

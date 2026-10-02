@@ -1,0 +1,27 @@
+{
+  "name": "Dra. Delian Loyola · referencia de caption v2",
+  "font_file": "../media/delian/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 116,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H008B2D8B",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 6,
+  "shadow": 2,
+  "alignment": 8,
+  "margin_x": 70,
+  "bottom_margin": 240,
+  "fixed_size": true,
+  "wrap_width": 910,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "notes": [
+    "Referencia Ejemplo.jpg: texto blanco grande y grueso centrado arriba, sombra o contorno violeta suave, sin caja.",
+    "Aumentado de 80 a 116 tras inspeccionar la exportacion v1 a resolucion completa; la escala anterior era menor que la referencia.",
+    "Tipografia.jpg nombra Shoika; no se entrego archivo de fuente. Montserrat Bold con licencia OFL es una aproximacion provisional.",
+    "La imagen no establece animacion ni aprobacion del estilo."
+  ]
+}

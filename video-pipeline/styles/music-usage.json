@@ -1,0 +1,1422 @@
+{
+  "rule": "Unique composition per distinct reel. No alternate offsets or renamed files to bypass reuse. Historical repeats retained as usage evidence; all previously used tracks unavailable for new reels.",
+  "scope": "all clients",
+  "tracks": {
+    "Funshine": {
+      "title": "Funshine",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-proceso-sonrisa-20260921-v5-preparation/funshine-continuous.wav",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Funshine.provenance.json",
+      "recipes": [
+        "edits/delian-proceso-sonrisa-20260921-v6.json",
+        "edits/cumpleanos-v3.json",
+        "edits/delian-proceso-sonrisa-20260921-v7.json",
+        "edits/cumpleanos-v5.json",
+        "edits/delian-diseno-sonrisa-20260921-v7.json",
+        "edits/cumpleanos-v4.json",
+        "edits/delian-proceso-sonrisa-20260921-v5.json"
+      ]
+    },
+    "../media/yabuuchi/calidad-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/calidad-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-calidad-v3.json",
+        "edits/yabuuchi-calidad-v2.json",
+        "edits/yabuuchi-calidad-v5.json",
+        "edits/yabuuchi-calidad-v4.json",
+        "edits/yabuuchi-calidad-v1.json"
+      ]
+    },
+    "Backbeat": {
+      "title": "Backbeat",
+      "source": "../media/music/nanas-fin-de-semana-v6-bed.wav",
+      "provenance": null,
+      "recipes": [
+        "edits/fin-de-semana-v6.json",
+        "edits/delian-ultima-limpieza-20260921-v4.json",
+        "edits/fin-de-semana-v7.json",
+        "edits/delian-ultima-limpieza-20260921-v3.json",
+        "edits/arecibo-muestra-0278-v1.json",
+        "edits/arecibo-muestra-0278-v2.json",
+        "edits/arecibo-muestra-0278-v3.json",
+        "edits/fin-de-semana-v4.json",
+        "edits/arecibo-muestra-0278-v4.json",
+        "edits/arecibo-muestra-0278-v5.json",
+        "edits/fin-de-semana-v5.json"
+      ]
+    },
+    "../media/yabuuchi/la-baby-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/la-baby-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-la-baby-v4.json",
+        "edits/yabuuchi-la-baby-v2.json",
+        "edits/yabuuchi-la-baby-v3.json",
+        "edits/yabuuchi-la-baby-v1.json"
+      ]
+    },
+    "Inspiration": {
+      "title": "Inspiration",
+      "source": "../media/music/arecibo-resultados-bed-v1.wav",
+      "provenance": null,
+      "recipes": [
+        "edits/arecibo-resultados-0271-v10.json",
+        "edits/indoor-v8.json",
+        "edits/arecibo-resultados-0271-v6.json",
+        "edits/arecibo-domicilio-0274-v5.json",
+        "edits/arecibo-presentacion-0278-v5.json",
+        "edits/indoor-v4.json",
+        "edits/arecibo-presentacion-0278-v4.json",
+        "edits/indoor-v5.json",
+        "edits/arecibo-domicilio-0274-v4.json",
+        "edits/arecibo-resultados-0271-v7.json",
+        "edits/indoor-v9.json",
+        "edits/arecibo-resultados-0271-v11.json",
+        "edits/arecibo-domicilio-0274-v3.json",
+        "edits/arecibo-presentacion-0278-v3.json",
+        "edits/indoor-v11.json",
+        "edits/arecibo-resultados-0271-v16.json",
+        "edits/arecibo-resultados-0271-v1.json",
+        "edits/arecibo-ubicacion-0292-v1.json",
+        "edits/indoor-v10.json",
+        "edits/arecibo-presentacion-0278-v2.json",
+        "edits/arecibo-domicilio-0274-v2.json",
+        "edits/arecibo-presentacion-0278-v1.json",
+        "edits/arecibo-domicilio-0274-v1.json",
+        "edits/arecibo-resultados-0271-v2.json",
+        "edits/arecibo-ubicacion-0292-v2.json",
+        "edits/arecibo-resultados-0271-v14.json",
+        "edits/delian-proceso-sonrisa-20260921-v3.json",
+        "edits/arecibo-resultados-0271-v15.json",
+        "edits/arecibo-ubicacion-0292-v3.json",
+        "edits/arecibo-resultados-0271-v3.json",
+        "edits/arecibo-resultados-0271-v4.json",
+        "edits/arecibo-resultados-0271-v12.json",
+        "edits/delian-proceso-sonrisa-20260921-v4.json",
+        "edits/arecibo-resultados-0271-v8.json",
+        "edits/indoor-v6.json",
+        "edits/indoor-v7.json",
+        "edits/arecibo-resultados-0271-v9.json",
+        "edits/arecibo-resultados-0271-v13.json",
+        "edits/arecibo-resultados-0271-v5.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v2.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v2.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v2.json",
+        "edits/yabuuchi-sashimi-nigiri-v3.json"
+      ]
+    },
+    "../media/yabuuchi/primer-sushi-selection-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/primer-sushi-selection-music-v1.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-primer-sushi-v7.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v6.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v1.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v3.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v2.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v8.json",
+        "edits/yabuuchi-seleccion-primer-sushi-v4.json"
+      ]
+    },
+    "../media/yabuuchi/churrasco-roll-complete-v4-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/churrasco-roll-complete-v4-music.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-churrasco-roll-v4.json"
+      ]
+    },
+    "../media/delian/music/habitos-backbeat.m4a": {
+      "title": null,
+      "source": "../media/delian/music/habitos-backbeat.m4a",
+      "provenance": null,
+      "recipes": [
+        "edits/delian-habitos-orales-20260810-v6.json",
+        "edits/delian-habitos-orales-20260810-v4.json",
+        "edits/delian-habitos-orales-20260810-v5.json"
+      ]
+    },
+    "Happy Whistling Ukulele": {
+      "title": "Happy Whistling Ukulele",
+      "source": "../media/music/padres-bed.wav",
+      "provenance": "media/music/Happy-Whistling-Ukulele.provenance.json",
+      "recipes": [
+        "edits/padres-v1.json",
+        "edits/snacks-v3.json",
+        "edits/seguridad-v1.json",
+        "edits/tour-v2.json",
+        "edits/cumpleanos-v2.json",
+        "edits/snacks-v2.json",
+        "edits/clima-v6.json",
+        "edits/parque-v1.json",
+        "edits/indoor-v2.json",
+        "edits/clima-v1.json",
+        "edits/practico-v1.json",
+        "edits/snacks-v4.json",
+        "edits/fin-de-semana-v1.json",
+        "edits/indoor-v3.json",
+        "edits/parque-v3.json",
+        "edits/practico-v2.json",
+        "edits/clima-v3.json",
+        "edits/fin-de-semana-v2.json",
+        "edits/fin-de-semana-v3.json",
+        "edits/padres-v4.json",
+        "edits/clima-v2.json",
+        "edits/practico-v3.json",
+        "edits/parque-v2.json",
+        "edits/indoor-v1.json",
+        "edits/padres-v8.json",
+        "edits/practico-v4.json",
+        "edits/snacks-v1.json",
+        "edits/clima-v5.json",
+        "edits/padres-v3.json",
+        "edits/cumpleanos-v1.json",
+        "edits/tour-v1.json",
+        "edits/parque-v5.json",
+        "edits/parque-v4.json",
+        "edits/seguridad-v2.json",
+        "edits/padres-v2.json",
+        "edits/clima-v4.json"
+      ]
+    },
+    "../media/yabuuchi/la-baby-selection-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/la-baby-selection-music-v1.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-la-baby-v1.json",
+        "edits/yabuuchi-seleccion-la-baby-v3.json",
+        "edits/yabuuchi-seleccion-la-baby-v2.json"
+      ]
+    },
+    "../media/yabuuchi/elige-tu-favorito-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/elige-tu-favorito-music.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-elige-tu-favorito-v2.json",
+        "edits/yabuuchi-elige-tu-favorito-v3.json",
+        "edits/yabuuchi-elige-tu-favorito-v8.json",
+        "edits/yabuuchi-elige-tu-favorito-v4.json",
+        "edits/yabuuchi-elige-tu-favorito-v5.json",
+        "edits/yabuuchi-elige-tu-favorito-v6.json",
+        "edits/yabuuchi-elige-tu-favorito-v7.json",
+        "edits/yabuuchi-elige-tu-favorito-v1.json"
+      ]
+    },
+    "../media/yabuuchi/historia-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/historia-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-historia-v5.json",
+        "edits/yabuuchi-historia-v9.json",
+        "edits/yabuuchi-historia-v8.json",
+        "edits/yabuuchi-historia-v4.json",
+        "edits/yabuuchi-historia-v3.json",
+        "edits/yabuuchi-historia-v2.json",
+        "edits/yabuuchi-historia-v1.json",
+        "edits/yabuuchi-historia-v7.json",
+        "edits/yabuuchi-historia-v6.json"
+      ]
+    },
+    "Compy Jazz": {
+      "title": "Compy Jazz",
+      "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Miscellaneous/Compy%20Jazz.mp3",
+      "provenance": null,
+      "recipes": [
+        "edits/practico-v6.json",
+        "edits/practico-v13.json",
+        "edits/practico-v12.json",
+        "edits/practico-v7.json",
+        "edits/effectkit-roundtrip-check.json",
+        "edits/practico-v14.json",
+        "edits/delian-blanqueamiento-antes-20260921-v3.json",
+        "edits/toolkit-demo.json",
+        "edits/practico-v8.json",
+        "edits/practico-v11.json",
+        "edits/practico-v10.json",
+        "edits/practico-v9.json",
+        "edits/delian-blanqueamiento-antes-20260921-v4.json",
+        "edits/practico-v5.json"
+      ]
+    },
+    "Be Chillin": {
+      "title": "Be Chillin",
+      "source": "../media/music/arecibo-nuevo-lab-be-chillin-v1.wav",
+      "provenance": null,
+      "recipes": [
+        "edits/arecibo-nuevo-lab-0281-v1.json",
+        "edits/delian-hilo-correcto-20260921-v5.json",
+        "edits/delian-hilo-correcto-20260921-v4.json",
+        "edits/seguridad-v7.json",
+        "edits/arecibo-nuevo-lab-0281-v7.json",
+        "edits/arecibo-nuevo-lab-0281-v6.json",
+        "edits/seguridad-v6.json",
+        "edits/arecibo-factor1-0290-v1.json",
+        "edits/arecibo-nuevo-lab-0281-v9.json",
+        "edits/seguridad-v5.json",
+        "edits/arecibo-nuevo-lab-0281-v5.json",
+        "edits/arecibo-nuevo-lab-0281-v10.json",
+        "edits/seguridad-v8.json",
+        "edits/arecibo-nuevo-lab-0281-v4.json",
+        "edits/arecibo-nuevo-lab-0281-v8.json",
+        "edits/seguridad-v4.json",
+        "edits/arecibo-nuevo-lab-0281-v3.json",
+        "edits/seguridad-v3.json",
+        "edits/arecibo-nuevo-lab-0281-v2.json"
+      ]
+    },
+    "../media/yabuuchi/sin-pescado-crudo-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sin-pescado-crudo-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sin-pescado-crudo-v1.json",
+        "edits/yabuuchi-sin-pescado-crudo-v5.json",
+        "edits/yabuuchi-sin-pescado-crudo-v4.json",
+        "edits/yabuuchi-sin-pescado-crudo-v3.json",
+        "edits/yabuuchi-sin-pescado-crudo-v2.json"
+      ]
+    },
+    "../media/yabuuchi/otro-rollo-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/otro-rollo-music.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-otro-rollo-v1.json",
+        "edits/yabuuchi-otro-rollo-v3.json",
+        "edits/yabuuchi-otro-rollo-v2.json"
+      ]
+    },
+    "../media/music/Funshine.mp3": {
+      "title": null,
+      "source": "../media/music/Funshine.mp3",
+      "provenance": "media/music/Funshine.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-compartir-v3.json",
+        "edits/yabuuchi-compartir-v2.json",
+        "edits/yabuuchi-compartir-v5.json",
+        "edits/yabuuchi-compartir-v4.json",
+        "edits/yabuuchi-compartir-v1.json"
+      ]
+    },
+    "Busybody": {
+      "title": "Busybody",
+      "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Busybody.mp3",
+      "provenance": null,
+      "recipes": [
+        "edits/parque-v7.json",
+        "edits/parque-v6.json",
+        "edits/parque-v9.json",
+        "edits/parque-v8.json"
+      ]
+    },
+    "../media/yabuuchi/toa-baja-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/toa-baja-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-toa-baja-v2.json",
+        "edits/yabuuchi-toa-baja-v3.json",
+        "edits/yabuuchi-toa-baja-v1.json"
+      ]
+    },
+    "../media/yabuuchi/quiero-dos-complete-v4-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/quiero-dos-complete-v4-music.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-quiero-dos-v9.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v8.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v4.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v7.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v6.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v12.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v12.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v15.json",
+        "edits/yabuuchi-sashimi-nigiri-v14.json",
+        "edits/yabuuchi-sashimi-nigiri-v13.json",
+        "edits/yabuuchi-sashimi-nigiri-v12.json"
+      ]
+    },
+    "../media/yabuuchi/quiero-dos-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/quiero-dos-music.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-quiero-dos-v4.json",
+        "edits/yabuuchi-quiero-dos-v3.json",
+        "edits/yabuuchi-quiero-dos-v2.json",
+        "edits/yabuuchi-quiero-dos-v1.json"
+      ]
+    },
+    "../media/delian/music/cinco-opciones-be-chillin.m4a": {
+      "title": null,
+      "source": "../media/delian/music/cinco-opciones-be-chillin.m4a",
+      "provenance": "../media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/delian-cinco-opciones-20260810-v3.json",
+        "edits/delian-cinco-opciones-20260810-v4.json",
+        "edits/delian-cinco-opciones-20260810-v5.json"
+      ]
+    },
+    "../media/cheesys/pina-music.wav": {
+      "title": null,
+      "source": "../media/cheesys/pina-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/cheesys-pina-colada-v1.json",
+        "edits/cheesys-pina-colada-v2.json"
+      ]
+    },
+    "../media/music/Lovely Piano Song.mp3": {
+      "title": null,
+      "source": "../media/music/Lovely Piano Song.mp3",
+      "provenance": "media/music/Lovely Piano Song.provenance.json",
+      "recipes": [
+        "edits/delian-diseno-sonrisa-20260921-v1.json",
+        "edits/delian-ultima-limpieza-20260921-v2.json",
+        "edits/delian-ultima-limpieza-20260921-v1.json",
+        "edits/delian-diseno-sonrisa-20260921-v2.json"
+      ]
+    },
+    "../media/yabuuchi/churrasco-roll-complete-v5-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/churrasco-roll-complete-v5-music.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-churrasco-roll-v5.json",
+        "edits/yabuuchi-seleccion-churrasco-roll-v6.json",
+        "edits/yabuuchi-seleccion-churrasco-roll-v7.json"
+      ]
+    },
+    "../media/yabuuchi/churrasco-roll-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/churrasco-roll-music.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-churrasco-roll-v4.json",
+        "edits/yabuuchi-churrasco-roll-v3.json",
+        "edits/yabuuchi-churrasco-roll-v2.json",
+        "edits/yabuuchi-churrasco-roll-v1.json"
+      ]
+    },
+    "../media/yabuuchi/otro-rollo-inspiracion-music-v5.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/otro-rollo-inspiracion-music-v5.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-otro-rollo-v7.json",
+        "edits/yabuuchi-otro-rollo-v6.json",
+        "edits/yabuuchi-otro-rollo-v5.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v8.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v8.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v8.json",
+        "edits/yabuuchi-sashimi-nigiri-v9.json"
+      ]
+    },
+    "../media/yabuuchi/primer-sushi-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/primer-sushi-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-primer-sushi-v3.json",
+        "edits/yabuuchi-primer-sushi-v2.json",
+        "edits/yabuuchi-primer-sushi-v1.json"
+      ]
+    },
+    "Carefree": {
+      "title": "Carefree",
+      "source": "../media/music/carefree-bed.wav",
+      "provenance": "Descarga directa de incompetech.com; ver media/music/Carefree.provenance.json",
+      "recipes": [
+        "edits/pregunta-v8.json",
+        "edits/pregunta-v6.json",
+        "edits/pregunta-v7.json"
+      ]
+    },
+    "Inspiration (fragmento a partir de 2 s)": {
+      "title": "Inspiration (fragmento a partir de 2 s)",
+      "source": "../media/delian/music/prevencion-inspiration.m4a",
+      "provenance": "media/music/Inspiration.provenance.json",
+      "recipes": [
+        "edits/delian-prevencion-20260810-v9.json",
+        "edits/delian-prevencion-20260810-v8.json",
+        "edits/delian-prevencion-20260810-v7.json",
+        "edits/delian-prevencion-20260810-v6.json"
+      ]
+    },
+    "../media/music/Inspiration.mp3": {
+      "title": null,
+      "source": "../media/music/Inspiration.mp3",
+      "provenance": "media/music/Inspiration.provenance.json",
+      "recipes": [
+        "edits/delian-blanqueamiento-antes-20260921-v1.json",
+        "edits/delian-proceso-sonrisa-20260921-v1.json",
+        "edits/delian-proceso-sonrisa-20260921-v2.json",
+        "edits/delian-blanqueamiento-antes-20260921-v2.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v4.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v4.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v4.json",
+        "edits/yabuuchi-sashimi-nigiri-v5.json",
+        "edits/yabuuchi-sashimi-nigiri-v7.json"
+      ]
+    },
+    "../media/yabuuchi/churrasco-roll-selection-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/churrasco-roll-selection-music-v1.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-churrasco-roll-v2.json",
+        "edits/yabuuchi-seleccion-churrasco-roll-v3.json",
+        "edits/yabuuchi-seleccion-churrasco-roll-v1.json"
+      ]
+    },
+    "../media/yabuuchi/quiero-dos-selection-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/quiero-dos-selection-music-v1.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-quiero-dos-v3.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v2.json",
+        "edits/yabuuchi-seleccion-quiero-dos-v1.json"
+      ]
+    },
+    "Lovely Piano Song": {
+      "title": "Lovely Piano Song",
+      "source": "../media/music/nanas-padres-v7-bed.wav",
+      "provenance": null,
+      "recipes": [
+        "edits/padres-v7.json",
+        "edits/delian-diseno-sonrisa-20260921-v6.json",
+        "edits/padres-v6.json",
+        "edits/delian-diseno-sonrisa-20260921-v4.json",
+        "edits/padres-v5.json",
+        "edits/delian-diseno-sonrisa-20260921-v5.json",
+        "edits/delian-visita-seis-meses-20260528-v4.json",
+        "edits/delian-visita-seis-meses-20260528-v5.json",
+        "edits/delian-diseno-sonrisa-20260921-v3.json"
+      ]
+    },
+    "../media/yabuuchi/la-baby-complete-v4-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/la-baby-complete-v4-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-la-baby-v7.json",
+        "edits/yabuuchi-seleccion-la-baby-v6.json",
+        "edits/yabuuchi-seleccion-la-baby-v4.json"
+      ]
+    },
+    "Downtown Boogie": {
+      "title": "Downtown Boogie",
+      "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Miscellaneous/Downtown%20Boogie.mp3",
+      "provenance": null,
+      "recipes": [
+        "edits/snacks-v5.json",
+        "edits/snacks-v7.json",
+        "edits/snacks-v6.json"
+      ]
+    },
+    "../media/music/Be Chillin.mp3": {
+      "title": null,
+      "source": "../media/music/Be Chillin.mp3",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/delian-hilo-correcto-20260921-v3.json",
+        "edits/delian-hilo-correcto-20260921-v2.json",
+        "edits/delian-hilo-correcto-20260921-v1.json"
+      ]
+    },
+    "../media/yabuuchi/sin-pescado-crudo-music-v6.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sin-pescado-crudo-music-v6.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sin-pescado-crudo-v7.json",
+        "edits/yabuuchi-sin-pescado-crudo-v6.json"
+      ]
+    },
+    "../media/brand/reference-music-bed.wav": {
+      "title": null,
+      "source": "../media/brand/reference-music-bed.wav",
+      "provenance": "Fondo lateral L-R de la referencia proporcionada, tramo 8.5–17.5 s, repetición con fundido de 350 ms",
+      "recipes": [
+        "edits/pregunta-v5.json"
+      ]
+    },
+    "../media/yabuuchi/la-baby-v8-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/la-baby-v8-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-la-baby-v9.json",
+        "edits/yabuuchi-seleccion-la-baby-v8.json",
+        "edits/yabuuchi-seleccion-la-baby-v10.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v10.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v10.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v11.json",
+        "edits/yabuuchi-sashimi-nigiri-v10.json"
+      ]
+    },
+    "Lovely Piano Song (fragmento a partir de 14 s)": {
+      "title": "Lovely Piano Song (fragmento a partir de 14 s)",
+      "source": "../media/delian/music/hilo-compy-jazz.m4a",
+      "provenance": "media/music/Lovely Piano Song.provenance.json",
+      "recipes": [
+        "edits/delian-hilo-dental-20260528-v3.json",
+        "edits/delian-hilo-dental-20260528-v4.json"
+      ]
+    },
+    "../media/yabuuchi/otro-roll-entrega-v8-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/otro-roll-entrega-v8-music.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-otro-rollo-v8.json"
+      ]
+    },
+    "../media/yabuuchi/historia-location-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/historia-location-music-v1.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-historia-v10.json"
+      ]
+    },
+    "../media/yabuuchi/otro-rollo-complete-music-v4.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/otro-rollo-complete-music-v4.wav",
+      "provenance": "media/music/Downtown Boogie.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-otro-rollo-v4.json"
+      ]
+    },
+    "../media/yabuuchi/la-baby-v11-music.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/la-baby-v11-music.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-seleccion-la-baby-v11.json"
+      ]
+    },
+    "City Sunshine": {
+      "title": "City Sunshine",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-proceso-sonrisa-20260921-v8-preparation/city-sunshine-continuous.wav",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/City Sunshine.provenance.json",
+      "recipes": [
+        "edits/delian-proceso-sonrisa-20260921-v8.json",
+        "edits/delian-proceso-sonrisa-20260921-v9.json"
+      ]
+    },
+    "../media/cheesys/antojo-music.wav": {
+      "title": null,
+      "source": "../media/cheesys/antojo-music.wav",
+      "provenance": "media/music/Backbeat.provenance.json",
+      "recipes": [
+        "edits/cheesys-antojo-v1.json"
+      ]
+    },
+    "../media/yabuuchi/sashimi-nigiri-music-v1.wav": {
+      "title": null,
+      "source": "../media/yabuuchi/sashimi-nigiri-music-v1.wav",
+      "provenance": "media/music/Be Chillin.provenance.json",
+      "recipes": [
+        "edits/yabuuchi-sashimi-nigiri-v1.json"
+      ]
+    },
+    "../media/music/Happy-Whistling-Ukulele.mp3": {
+      "title": null,
+      "source": "../media/music/Happy-Whistling-Ukulele.mp3",
+      "provenance": null,
+      "recipes": [
+        "edits/arecibo-desde-cero-v1.json"
+      ]
+    },
+    "Beat One": {
+      "title": "Beat One",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/Beat One.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Beat One.provenance.json",
+      "sha256": "930dd4c6c88a2abb153f52e56a7c74bd041008f5afa4835602469dba3676aed8",
+      "recipes": [
+        "edits/delian-proceso-sonrisa-20260921-v10.json"
+      ],
+      "reserved_idea": "proceso-sonrisa-20260921"
+    },
+    "Young Trizzy 02 - Arulo": {
+      "title": "Young Trizzy 02 - Arulo",
+      "source": "media/music/Young Trizzy 02 - Arulo.mp3",
+      "provenance": "media/music/Young Trizzy 02 - Arulo.provenance.json",
+      "recipes": [
+        "edits/delian-proceso-sonrisa-20260921-v11.json"
+      ],
+      "reserved_idea": "proceso-sonrisa-20260921"
+    },
+    "Vlog Hip-Hop - ProducesPlatinum": {
+      "title": "Vlog Hip-Hop - ProducesPlatinum",
+      "source": "media/music/Vlog Hip-Hop - ProducesPlatinum.mp3",
+      "provenance": "media/music/Vlog Hip-Hop - ProducesPlatinum.provenance.json",
+      "recipes": [
+        "edits/delian-proceso-sonrisa-20260921-v12.json"
+      ],
+      "reserved_idea": "proceso-sonrisa-20260921"
+    },
+    "Hip Hop 02 - Lily J": {
+      "title": "Hip Hop 02 - Lily J",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/Hip Hop 02 - Lily J.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/Hip Hop 02 - Lily J.provenance.json",
+      "recipes": [
+        "edits/delian-hilo-correcto-20260921-v6.json"
+      ],
+      "reserved_idea": "hilo-correcto-20260921"
+    },
+    "Hip Hop 03 - Lily J": {
+      "title": "Hip Hop 03 - Lily J",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/Hip Hop 03 - Lily J.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-blanqueamiento-v5/Hip Hop 03 - Lily J.provenance.json",
+      "recipes": [
+        "edits/delian-blanqueamiento-antes-20260921-v5.json"
+      ],
+      "reserved_idea": "blanqueamiento-antes-20260921"
+    },
+    "CBPD - Arulo": {
+      "title": "C.B.P.D - Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-v5/CBPD - Arulo.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-limpieza-v5/CBPD - Arulo.provenance.json",
+      "reserved_idea": "ultima-limpieza-20260921",
+      "recipes": [
+        "edits/delian-ultima-limpieza-20260921-v5.json",
+        "edits/delian-batch-delian-limpieza-20260927-limpieza-v2.json"
+      ]
+    },
+    "Baileys - Diego Nava": {
+      "title": "Baileys - Diego Nava",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1/Baileys - Diego Nava.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1/Baileys - Diego Nava.provenance.json",
+      "reserved_idea": "gingivitis-20260921",
+      "recipes": [
+        "edits/delian-gingivitis-20260921-v1.json"
+      ]
+    },
+    "Basketball Training - Arulo": {
+      "title": "Basketball Training - Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v1/Basketball Training - Arulo.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-prevencion-v1/Basketball Training - Arulo.provenance.json",
+      "reserved_idea": "prevencion-caries-20260921",
+      "recipes": [
+        "edits/delian-prevencion-caries-20260921-v1.json"
+      ]
+    },
+    "Try Me - Arulo": {
+      "title": "Try Me - Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/Try Me - Arulo.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-iguales-v1/Try Me - Arulo.provenance.json",
+      "sha256": "096f1b23933f473343f2c66842235059528dad96e0bb2bbced1b1adf8fb3bb4b",
+      "reserved_idea": "sonrisas-iguales-20260921",
+      "recipes": [
+        "edits/delian-sonrisas-iguales-20260921-v1.json"
+      ]
+    },
+    "Alianza - Karen Requisitos 20260924": {
+      "title": "Alianza — original nylon-style guitar in 6/8",
+      "source": "/Volumes/Extreme SSD/Nate Media/karen-cardona-video/requisitos-casarse-20260924/Karen-Cardona-Requisitos-Para-Casarse-v1-render/music.wav",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/karen-cardona-video/requisitos-casarse-20260924/Karen-Cardona-Requisitos-Para-Casarse-v1-render/music.json",
+      "sha256": "280e4fce03008a8160cec70cd90dd9be13b3f83d1d5346069eaf65e171acbe74",
+      "recipes": [
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-24/video5/spec-v1.json",
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-24/video5/spec-v2.json"
+      ],
+      "reserved_idea": "karen-requisitos-casarse-20260924"
+    },
+    "Trap Hamza - Arulo": {
+      "title": "Trap Hamza - Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/Trap Hamza - Arulo.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-criterios-v1/Trap Hamza - Arulo.provenance.json",
+      "sha256": "fee2b1db0bef29ae319749016833f5593006c65f4f310e805b9aff3fd4531e36",
+      "reserved_idea": "criterios-sonrisa-20260921",
+      "recipes": [
+        "edits/delian-criterios-sonrisa-20260921-v1.json",
+        "edits/delian-criterios-sonrisa-20260921-v2.json",
+        "edits/delian-criterios-sonrisa-20260921-v3.json"
+      ]
+    },
+    "Legado Sereno - Karen Testamentos 20260925": {
+      "title": "Legado Sereno",
+      "source": "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/Karen-Cardona-Testamentos-v1-render/music.wav",
+      "provenance": "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/Karen-Cardona-Testamentos-v1-render/music.json",
+      "sha256": "a07ffab7ffed9be31a07f5f79aec803c8dab334ff8663d647d2d10df07a1dcbf",
+      "recipes": [
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/spec-v1.json",
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/spec-v2.json",
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/spec-v3.json"
+      ],
+      "reserved_idea": "karen-video7-testamentos"
+    },
+    "My Little Prince - Michael Ramir C.": {
+      "title": "My Little Prince",
+      "artist": "Michael Ramir C.",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/My Little Prince - Michael Ramir C.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/My Little Prince - Michael Ramir C.provenance.json",
+      "sha256": "0b8f63e076aa7c6e6d24f0b518ec6f5bb97bb031041b9a762b0c31b192bd3e2b",
+      "reserved_idea": "karen-video7-testamentos",
+      "recipes": [
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/spec-v4.json",
+        "/Users/ericperez/Nate Media/karen-cardona-video/new-2026-09-25/video7/spec-v5.json"
+      ]
+    },
+    "Advertime": {
+      "title": "Advertime",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+      "sha256": "6f0d4433cf788304d60add551cc460dd877865e6d84a2ab3fa7d15ba3f55d6ce",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-informativo-v2.json",
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-informativo-v3.json"
+      ],
+      "client": "Farmacia Buena Vida",
+      "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe"
+    },
+    "From Page to Practice": {
+      "title": "From Page to Practice",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/From Page to Practice.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/From Page to Practice.provenance.json",
+      "sha256": "dd20cb51c948a14e45d71b9a03b9d6afc48a4b7fd7b5020da623fbd86390b519",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-botiquin-v2.json",
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-botiquin-v3.json"
+      ],
+      "client": "Farmacia Buena Vida",
+      "idea_id": "6edecb89-0294-4556-be3d-543a64e83813"
+    },
+    "Fancy Family": {
+      "title": "Fancy Family",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/Fancy Family.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Fancy Family.provenance.json",
+      "sha256": "91e7fa30e7cf18955bf3ea07353fe5e978f5483267a99b92f52a58e726246d2f",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-todo-bello-v1.json",
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-batch-farmacia-buena-vida-lote-final-20260926-todo-bello-v2.json"
+      ],
+      "client": "Farmacia Buena Vida",
+      "idea_id": "5839ad9b-3502-4904-866b-11523a1bdcfd"
+    },
+    "Complicated": {
+      "title": "Complicated",
+      "artist": "Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Complicated.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Complicated.provenance.json",
+      "sha256": "f0ef745dcf71f9795f3d69126b3b112e2854083470a644a036afe9639d3e126f",
+      "reserved_idea": "perdida-diente-20260921",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-delian-lote-cuatro-20260926-perdida-v2.json"
+      ]
+    },
+    "Sweet September": {
+      "title": "Sweet September",
+      "artist": "Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Sweet September.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Sweet September.provenance.json",
+      "sha256": "6ad6db61c4c9018cb9dfc99ed5c3b72f3143d3a5db31920e4f1f6b01d2f1b4a1",
+      "reserved_idea": "previo-diseno-20260921",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-delian-lote-cuatro-20260926-previo-v2.json"
+      ]
+    },
+    "Like a Loop Machine": {
+      "title": "Like a Loop Machine",
+      "artist": "Michael Ramir C.",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Like a Loop Machine.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Like a Loop Machine.provenance.json",
+      "sha256": "912ad6af128798ff4f4cde4be6ffbd462e1a49c33c16bdf27a4ec89a6711c648",
+      "reserved_idea": "invisalign-demo-20260921",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-delian-lote-cuatro-20260926-invisalign-v2.json"
+      ]
+    },
+    "Find Me Outside": {
+      "title": "Find Me Outside",
+      "artist": "Arulo",
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Find Me Outside.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Find Me Outside.provenance.json",
+      "sha256": "f40fbb5e4d01d67e961dc833c548b70777955319fc73019bd5fa041e8d679b0c",
+      "reserved_idea": "invisalign-antes-20260921",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-delian-lote-cuatro-20260926-bad-bunny-v3.json"
+      ]
+    },
+    "Llama in Pajama": {
+      "title": "Llama in Pajama",
+      "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/music/Llama in Pajama.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/music/Llama in Pajama.provenance.json",
+      "sha256": "3016ae15b98ea952cd0ccc1bd42c9596d4e78968fed8dc96c6ee6d375c1ed988",
+      "client": "mia-pizzeria",
+      "reel": "mia-20260919-05",
+      "recipes": [
+        "edits/mia-pizzeria-batch-mia-pizza-20260927-video-05-v1.json",
+        "edits/mia-pizzeria-batch-mia-pizza-20260927-video-05-v2.json"
+      ]
+    },
+    "Ring My Bell — Anita Ward": {
+      "title": "Ring My Bell",
+      "artist": "Anita Ward",
+      "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-dinero-musica/music/ring-my-bell-instagram-preview.mp4",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-dinero-v5/musica-y-revision.json",
+      "recipes": [
+        "edits/mia-pizzeria-batch-pizza-dinero-v5-video-02-v1.json"
+      ],
+      "reel": "mia-20260919-02",
+      "status": "superseded_by_user_royalty_free_request",
+      "sha256": "0f8b7fe3c426db90229eb5ca0ff0919e1ddcfd0d5533dcd1a3dc337e67fe240c"
+    },
+    "House 02 - Lily J": {
+      "title": "House 02",
+      "artist": "Lily J",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/House 02 - Lily J.mp3",
+      "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/House 02 - Lily J.provenance.json",
+      "recipes": [
+        "edits/farmacia-buena-vida-batch-batch-situacion-v1.json",
+        "edits/farmacia-buena-vida-batch-batch-situacion-v2.json"
+      ],
+      "reel": "a457cddc-174e-4dba-aea4-cf9d3ca09342",
+      "status": "licensed_preview_trending_selection_pending"
+    },
+    "Pickled Pink": {
+      "title": "Pickled Pink",
+      "artist": "Kevin MacLeod",
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/music/Pickled Pink.mp3",
+      "provenance": "media/music/Pickled Pink.provenance.json",
+      "license": "CC0 1.0",
+      "recipes": [
+        "edits/mia-pizzeria-batch-pizza-dinero-v6-video-02-v1.json"
+      ],
+      "reel": "mia-20260919-02",
+      "sha256": "3eacbde6e5322792cec71bc4942c4f7bff86f6b33e1836a1520db198c475b904",
+      "status": "superseded_by_motion_array_version"
+    },
+    "God Mode — Konstantin Garbuzyuk": {
+      "title": "God Mode",
+      "artist": "Konstantin Garbuzyuk",
+      "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/motion-array-downloads/God Mode - Konstantin Garbuzyuk.wav",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/motion-array-downloads/provenance.json",
+      "license": "Motion Array paid subscription license",
+      "recipes": [
+        "edits/mia-pizzeria-batch-pizza-dinero-v7-video-02-v1.json"
+      ],
+      "reel": "mia-20260919-02",
+      "sha256": "965562c507a0e2f614cc778c221e63be255feb458b6de27341a20cfd9b471ccd",
+      "status": "superseded_audio_rejected_for_mia-20260919-02"
+    },
+    "Have Funk Your Way — Vitality": {
+      "title": "Have Funk Your Way — Vitality",
+      "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/motion-array-downloads/have-funk-your-way/MA_Vitality_HaveFunkYourWay_Main.wav",
+      "source_sha256": "af46eb9ad0b5734017bf390a04d3c8f4afba8014065f2068639c5cfc4975ebbd",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-dinero-v8/licencia-y-procedencia.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-pizza-dinero-v8-video-02-v1.json",
+        "edits/mia-pizzeria-batch-pizza-dinero-v10-video-02-v1.json"
+      ],
+      "reel": "mia-20260919-02",
+      "client": "mia-pizzeria",
+      "status": "approved_by_eric_delivered_recibo"
+    },
+    "Upbeat Classy Hip Hop — Frequently Asked Music": {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-proceso-motionarray-20260927/assets/Upbeat Classy Hip Hop.wav",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-proceso-motionarray-20260927/assets/provenance.json",
+      "reserved_idea": "proceso-sonrisa-20260921",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/delian-batch-batch-proceso-v1.json"
+      ]
+    },
+    "Big Boss Groove — kiwi audio": {
+      "title": "Big Boss Groove",
+      "artist": "kiwi audio",
+      "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/motion-array-downloads/big-boss-groove/MA_KiwiAudio_BigBossGroove__Main.wav",
+      "sha256": "173c8e1c9f438cd9d0063ed7c4148f10ba936e4f0eeaf39946d6454b11e4bc3f",
+      "url": "https://motionarray.com/royalty-free-music/big-boss-groove-1398533/",
+      "license": "Motion Array paid subscription license",
+      "download_authorized": true,
+      "download_date": "2026-09-27",
+      "account_page_confirmed_download": true,
+      "content_id": "Identifyy",
+      "bpm": 130,
+      "use": "mia-20260919-13 only",
+      "reserved_idea": "mia-20260919-13",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-jefa-v2-video-13-v1.json"
+      ],
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/jefa-v2/music-provenance.json",
+      "status": "local_draft_review_pending"
+    },
+    "Feel You Up — kiwi audio": {
+      "title": "Feel You Up",
+      "artist": "kiwi audio",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/67/67671c5b1a54ddf321811332e5e2fcf91d4d69448ff9c49faa99f40eda8ac2eb.wav",
+      "sha256": "67671c5b1a54ddf321811332e5e2fcf91d4d69448ff9c49faa99f40eda8ac2eb",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/cubiertos-v3/music-provenance.json",
+      "reel": "mia-20260919-10",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-cubiertos-v3-video-10-v1.json"
+      ],
+      "status": "local_draft_review_pending"
+    },
+    "Misterioso — Alon Peretz": {
+      "title": "Misterioso",
+      "artist": "Alon Peretz",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/49/491650dcef31d1833096d8306b9bf246de6997b45afd388f7c787b8737f7cbef.wav",
+      "sha256": "491650dcef31d1833096d8306b9bf246de6997b45afd388f7c787b8737f7cbef",
+      "reel": "cda93a3a-71fb-47e1-b1a8-034ec3a714b0",
+      "client": "Farmacia Buena Vida",
+      "status": "propuesta_local",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-siguiente-20260927/music-provenance.json"
+    },
+    "Little Dancer — kiwi audio": {
+      "title": "Little Dancer",
+      "artist": "kiwi audio",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/ac/ac89c740fa2a152d05b2464239b127e5b3f01e2d0eb3f468c1dc54b29496f138.wav",
+      "sha256": "ac89c740fa2a152d05b2464239b127e5b3f01e2d0eb3f468c1dc54b29496f138",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/pizza-fabuloso-v4/music-provenance.json",
+      "reel": "mia-20260919-06",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-pizza-fabuloso-v4-video-06-v1.json"
+      ],
+      "status": "local_draft_review_pending"
+    },
+    "Clever Girl — kiwi audio": {
+      "title": "Clever Girl",
+      "artist": "kiwi audio",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/da/da3fbfe3663d87f866c7235652af46a6268cdea54517de57b52a6d2e10bef20f.wav",
+      "sha256": "da3fbfe3663d87f866c7235652af46a6268cdea54517de57b52a6d2e10bef20f",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/bienvenida-v2/music-provenance.json",
+      "reel": "mia-20260919-11",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-bienvenida-v2-video-11-v1.json"
+      ],
+      "status": "local_draft_review_pending"
+    },
+    "Groovy Thing": {
+      "title": "Groovy Thing",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/37/37241a434e7d7f4c1f4cfbb8ddc091c02f850cc8fb1d1031191c15ec8b4e1a3c.wav",
+      "motion_array_id": "1172914",
+      "url": "https://motionarray.com/royalty-free-music/groovy-thing-1172914/",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/05-assets.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-loop-20260929-video-05-v2.json"
+      ],
+      "reel": "mia-20260919-05",
+      "client": "mia-pizzeria",
+      "output": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-05-loop-v2.mp4",
+      "status": "reserved_local_draft"
+    },
+    "Funky Wrapper": {
+      "title": "Funky Wrapper",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/96/9619606835e60facaf772072c666c04c016a2035af3efb9375cc1f8b840cc56f.wav",
+      "motion_array_id": "1126707",
+      "url": "https://motionarray.com/royalty-free-music/funky-wrapper-1126707/",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/07-assets.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-loop-20260929-video-07-v1.json"
+      ],
+      "reel": "mia-20260919-07",
+      "client": "mia-pizzeria",
+      "output": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-07-loop-v2.mp4",
+      "status": "reserved_local_draft"
+    },
+    "Orange Groove": {
+      "title": "Orange Groove",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/fd/fd7ae09d1340cd65153b3190754c3bc5db3e63d559b1b3641091cf83380e0042.wav",
+      "motion_array_id": "1257016",
+      "url": "https://motionarray.com/royalty-free-music/orange-groove-1257016/",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/09-assets.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-loop-20260929-video-09-v1.json"
+      ],
+      "reel": "mia-20260919-09",
+      "client": "mia-pizzeria",
+      "output": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-09-loop-v2.mp4",
+      "status": "reserved_local_draft"
+    },
+    "Funky Lizard": {
+      "title": "Funky Lizard",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/87/871b617e7ea7eecaf025f2caea39f333328148c58623df12ddc3dd28345d8cbc.wav",
+      "motion_array_id": "1350188",
+      "url": "https://motionarray.com/royalty-free-music/funky-lizard-1350188/",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/12-assets.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-loop-20260929-video-12-v1.json"
+      ],
+      "reel": "mia-20260919-12",
+      "client": "mia-pizzeria",
+      "output": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/mia-12-loop-v2.mp4",
+      "status": "reserved_local_draft"
+    },
+    "Purple Cabbage": {
+      "title": "Purple Cabbage",
+      "asset_id": "896867",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/85/850fb1a720c6d6ba4ae119a411b5700ef955e45aaaadd2f6f76074b2beadb421.wav",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/bebidas-v1/music-provenance.json",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/mia-pizzeria-batch-bebidas-batch-v1-bebidas-v1.json"
+      ],
+      "reel": "mia-20260919-14"
+    },
+    "Secret Garden — Eugenio Mininni": {
+      "title": "Secret Garden",
+      "artist": "Eugenio Mininni",
+      "provider": "Mixkit",
+      "asset_id": "595",
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/music/Secret Garden - Eugenio Mininni.mp3",
+      "sha256": "fda04cb4597c1ffd80d14ce82a74f6938c657952647dc50889138cd3e4903034",
+      "url": "https://mixkit.co/free-stock-music/tag/comedy/",
+      "license": "Mixkit Stock Music Free License",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/music/Secret Garden.provenance.json",
+      "reel": "45bafd67-5264-4b8a-894b-d7eff5dfa1bb",
+      "client": "Farmacia Buena Vida",
+      "recipes": [
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-45bafd67-5264-4b8a-894b-d7eff5dfa1bb-v1.json",
+        "/Users/ericperez/Nate Media/video-pipeline/edits/farmacia-buena-vida-45bafd67-5264-4b8a-894b-d7eff5dfa1bb-v2.json"
+      ],
+      "output": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/farmacia-lo-que-oye-un-farmaceutico-v2.mp4",
+      "status": "local_draft_review_pending",
+      "critical_listening": "pending",
+      "exports": [
+        "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/farmacia-lo-que-oye-un-farmaceutico-v1.mp4",
+        "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/farmacia-lo-que-oye-un-farmaceutico-v2.mp4"
+      ],
+      "output_sha256": "462e1a4d14ad40b9aea8ecabfc557c3d99b575215f5b1581e77bb4b4f706ef2a",
+      "support_bus_provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-farmaceutico-20260930/music/support-bed-v2-tight.provenance.json"
+    },
+    "Aires Navidenos — Decimania": {
+      "title": "Aires Navidenos",
+      "artist": "Decimania",
+      "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/music/aires-navidenos-decimania.wav",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/music/provenance.json",
+      "recipes": [
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v3.json",
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v4.json",
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v5.json",
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v6.json",
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v7.json",
+        "edits/farmacia-buena-vida-batch-batch-navidad-septiembre-v9.json"
+      ],
+      "status": "local_draft_user_requested_song_version_and_publication_rights_pending"
+    },
+    "Flutey Jazz": {
+      "title": "Flutey Jazz",
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/decoracion-batch/music/Flutey Jazz.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/decoracion-batch/music/provenance.json",
+      "recipes": [
+        "edits/alacena-batch-decoracion-batch-decoracion-v3.json"
+      ],
+      "client": "Alacena",
+      "reel": "b7282284-57d3-4b37-84b3-d31e8822e436"
+    },
+    "Meditating Beat": {
+      "title": "Meditating Beat",
+      "source": "media/music/Meditating Beat.mp3",
+      "provenance": "media/music/Meditating Beat.provenance.json",
+      "sha256": "e498c2015a413e6cba5ab8dbef2a60cdebf7c4d4a97f9edd84851752ff49d3b6",
+      "reserved_idea": "mondays-oye-gaby-horario",
+      "recipes": [
+        "edits/mondays-oye-gaby-horario-v1.json",
+        "edits/mondays-oye-gaby-horario-v2.json"
+      ]
+    },
+    "Barroom Ballet": {
+      "title": "Barroom Ballet",
+      "source": "media/music/Barroom Ballet.mp3",
+      "provenance": "media/music/Barroom Ballet.provenance.json",
+      "sha256": "f2679ace3c1756ee30392e625f89ba5d0a57b8a5e95ec43744b7d13c2fbd9d53",
+      "reserved_idea": "mondays-ladies-night",
+      "recipes": [
+        "edits/mondays-ladies-night-v1.json",
+        "edits/mondays-ladies-night-v2.json"
+      ]
+    },
+    "Relaxing Ballad": {
+      "title": "Relaxing Ballad",
+      "source": "media/music/Relaxing Ballad.mp3",
+      "provenance": "media/music/Relaxing Ballad.provenance.json",
+      "sha256": "b3be475ce26a71b61c0282f955bb53335ff146cf9712d8fab77f3c7a8defd6d3",
+      "reserved_idea": "mondays-plan-tranquilo",
+      "recipes": [
+        "edits/mondays-plan-tranquilo-v1.json",
+        "edits/mondays-plan-tranquilo-v2.json"
+      ]
+    },
+    "Silly Boy": {
+      "title": "Silly Boy",
+      "source": "media/music/Silly Boy.mp3",
+      "provenance": "media/music/Silly Boy.provenance.json",
+      "sha256": "c6b4f91b7fe6c2e61c0cf98149d7c7173d65cfd85d685bbbbd8131d7f11238c8",
+      "reserved_idea": "mondays-decir-que-no",
+      "recipes": [
+        "edits/mondays-decir-que-no-v1.json",
+        "edits/mondays-decir-que-no-v2.json"
+      ]
+    },
+    "Ukulele Song": {
+      "title": "Ukulele Song",
+      "source": "media/music/Ukulele Song.mp3",
+      "provenance": "media/music/Ukulele Song.provenance.json",
+      "sha256": "ad54684b7dffd48dcc09c12a0093d375ea1edcaa418bad714d4f54b16a95c81d",
+      "reserved_idea": "mondays-te-verde",
+      "recipes": [
+        "edits/mondays-te-verde-v1.json",
+        "edits/mondays-te-verde-v2.json"
+      ]
+    },
+    "Wakka Wakka": {
+      "title": "Wakka Wakka",
+      "source": "media/music/Wakka Wakka.mp3",
+      "provenance": "media/music/Wakka Wakka.provenance.json",
+      "sha256": "de261ef809e92732806ebd51534da59b1dda8aee9c9f8bd062c4234aa30eb10c",
+      "reserved_idea": "mondays-te-bloqueo",
+      "recipes": [
+        "edits/mondays-te-bloqueo-v1.json",
+        "edits/mondays-te-bloqueo-v2.json"
+      ]
+    },
+    "And Just Like That": {
+      "title": "And Just Like That",
+      "source": "media/music/And Just Like That.mp3",
+      "provenance": "media/music/And Just Like That.provenance.json",
+      "sha256": "75e6438a8d6d1dcb54dd42cc02f4944b484e73dac48502eb78514c438cada914",
+      "reserved_idea": "mondays-sabores-mimosa",
+      "recipes": [
+        "edits/mondays-sabores-mimosa-v1.json",
+        "edits/mondays-sabores-mimosa-v2.json"
+      ]
+    },
+    "Still Pickin": {
+      "title": "Still Pickin",
+      "source": "media/music/Still Pickin.mp3",
+      "provenance": "media/music/Still Pickin.provenance.json",
+      "sha256": "12e9061971fb64798468d54c27b3a0b762bda15a8898b8b5b7ee9efa706f5db3",
+      "reserved_idea": "mondays-chillo",
+      "recipes": [
+        "edits/mondays-chillo-v1.json",
+        "edits/mondays-chillo-v2.json"
+      ]
+    },
+    "Foam Rubber": {
+      "title": "Foam Rubber",
+      "source": "media/music/Foam Rubber.mp3",
+      "provenance": "media/music/Foam Rubber.provenance.json",
+      "sha256": "a37a8ebe274af25eddd0fdbffe99b4e3f4ebcb2afe84b33fb6115ff64787f7e5",
+      "reserved_idea": "mondays-mofongo",
+      "recipes": [
+        "edits/mondays-mofongo-v1.json",
+        "edits/mondays-mofongo-v2.json"
+      ]
+    },
+    "Motions": {
+      "title": "Motions",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Motions.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Motions.provenance.json",
+      "sha256": "af6380fde14f41dc4762a0a69c558bfd03a8a88c10cb5c8f578a6d0bcb4750be",
+      "license": "CC0 1.0",
+      "reserved_idea": "ef195e9f-dace-4a56-aff9-ac5ced557c9f",
+      "recipes": [
+        "edits/black-pepper-batch-primer-reel-cafe-temporada-v7.json"
+      ]
+    },
+    "Take the Ride": {
+      "title": "Take the Ride",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Take the Ride.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Take the Ride.provenance.json",
+      "sha256": "f33874ce6030f2b92f462c0072b029dd2a9509bb0c836d05bb52068202322740",
+      "license": "CC0 1.0",
+      "reserved_idea": "fbc5df7f-1071-4ead-9e81-9a2a8ff631a2",
+      "recipes": [
+        "edits/black-pepper-batch-estudiantes-0362-v1.json",
+        "edits/black-pepper-batch-estudiantes-0362-v2.json"
+      ]
+    },
+    "Village Tarantella": {
+      "title": "Village Tarantella",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Village Tarantella.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Village Tarantella.provenance.json",
+      "sha256": "d0daa7fdfd629e8dc2b9efcde93dbc2fb4c7cc1c05bf501f523b729582a46b06",
+      "license": "CC0 1.0",
+      "reserved_idea": "6dc5583c-ebb2-4f22-a127-09adb9fdcf32",
+      "recipes": [
+        "edits/black-pepper-batch-horario-0339-v1.json"
+      ]
+    },
+    "Spring Chicken": {
+      "title": "Spring Chicken",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Spring Chicken.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Spring Chicken.provenance.json",
+      "sha256": "cb6e536674d7cade8631977cd7edc3c56940e3646f542502d3648756b65340e9",
+      "license": "CC0 1.0",
+      "reserved_idea": "ea51f4bb-6f42-4561-a00e-ff03aa70b3c8",
+      "recipes": [
+        "edits/black-pepper-batch-pancakes-0327-v1.json",
+        "edits/black-pepper-batch-pancakes-0327-v2.json"
+      ]
+    },
+    "Inventing Flight": {
+      "title": "Inventing Flight",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Inventing Flight.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Inventing Flight.provenance.json",
+      "sha256": "916e736efa3caed4ea8534e727670dbac41af0fb44f00fa667aebaab9b2b6407",
+      "license": "CC0 1.0",
+      "reserved_idea": "aa857024-1c00-4ede-863e-e940d80b0eb8",
+      "recipes": [
+        "edits/black-pepper-batch-frappe-0394-v1.json"
+      ]
+    },
+    "Sunny Rasta": {
+      "title": "Sunny Rasta",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Sunny Rasta.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Sunny Rasta.provenance.json",
+      "sha256": "88e1a20549701be20204e98aedc1635a8f8acf7760bc561235c1f921a75b9d2c",
+      "license": "CC0 1.0",
+      "reserved_idea": "62e0e749-d06d-4881-9dbc-86b4d2645a24",
+      "recipes": [
+        "edits/black-pepper-batch-omelette-0384-v1.json",
+        "edits/black-pepper-batch-omelette-0384-v2.json"
+      ]
+    },
+    "Cumbish": {
+      "title": "Cumbish",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Cumbish.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Cumbish.provenance.json",
+      "sha256": "d8b688a0e2f26ae620195f3d538ee9915450a15f1d5576b685405ec23f905bb3",
+      "license": "CC0 1.0",
+      "reserved_idea": "1ef03add-faa1-4c69-9773-8637b081e1dd",
+      "recipes": [
+        "edits/black-pepper-batch-dulce-salado-0373-v1.json",
+        "edits/black-pepper-batch-dulce-salado-0373-v2.json"
+      ]
+    },
+    "Screen Saver": {
+      "title": "Screen Saver",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Screen Saver.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Screen Saver.provenance.json",
+      "sha256": "b37bded5c858af6220ed513fdd0d6bba476d71c3a2aacc9746433f51354d33f7",
+      "license": "CC0 1.0",
+      "reserved_idea": "4f291068-5884-4b50-9865-d00b47183ca5",
+      "recipes": [
+        "edits/black-pepper-batch-eventos-0329-v1.json"
+      ]
+    },
+    "Bonfire": {
+      "title": "Bonfire",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Bonfire.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Bonfire.provenance.json",
+      "sha256": "219c20ed99a7f1fd3f3aec8be7584eb82879b100ba003baa03cd01873534a57b",
+      "license": "CC0 1.0",
+      "reserved_idea": "extra-brunch-grupos-0333",
+      "recipes": [
+        "edits/black-pepper-batch-brunch-grupos-0333-v1.json"
+      ]
+    },
+    "Vintage Party": {
+      "title": "Vintage Party",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Vintage Party.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Vintage Party.provenance.json",
+      "sha256": "a1177d3d36e13236d0499113aa08e986136a1a98b8a1cec427e7f3d8492c1d4f",
+      "license": "CC0 1.0",
+      "reserved_idea": "644568a5-2753-4e77-afe0-c28fa69eb7ce",
+      "recipes": [
+        "edits/black-pepper-batch-noche-0379-v1.json"
+      ]
+    },
+    "Be Jammin": {
+      "title": "Be Jammin",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Be Jammin.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Be Jammin.provenance.json",
+      "sha256": "139cde03b105145029821b40567f97e3a973c2c5e2b4fce59b68a08a5b9485c3",
+      "license": "CC0 1.0",
+      "reserved_idea": "bbf88fa1-ca1f-4986-8c79-320ed031c937",
+      "recipes": [
+        "edits/black-pepper-batch-mallorca-0347-v1.json"
+      ]
+    },
+    "Going Bananas": {
+      "title": "Going Bananas",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Going Bananas.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Going Bananas.provenance.json",
+      "sha256": "7bc328be13de6d0c275f5344529c14aff6f5bde3d1fb1e9f64503343e1fdaeb0",
+      "license": "CC0 1.0",
+      "reserved_idea": "261cea86-d943-4424-a9f1-91e78f491dcd",
+      "recipes": [
+        "edits/black-pepper-batch-cocina-0326-v1.json"
+      ]
+    },
+    "Fright Night Twist": {
+      "title": "Fright Night Twist",
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Fright Night Twist.mp3",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Fright Night Twist.provenance.json",
+      "sha256": "4031356b83cb5043f2614d39892acd8a14023f7e6694ba2cff5395fd9a298806",
+      "license": "CC0 1.0",
+      "reserved_idea": "ef195e9f-dace-4a56-aff9-ac5ced557c9f",
+      "recipes": [
+        "edits/black-pepper-batch-primer-reel-cafe-temporada-v8.json",
+        "edits/black-pepper-batch-primer-reel-cafe-temporada-v9.json"
+      ]
+    },
+    "Chill Beat - Seth Makes Sounds": {
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Chill Beat - Seth Makes Sounds.mp3",
+      "sha256": "ae441648034c9f85e569e603ab3d2f50cfb5c9ac12f7a15159ec848876494c36",
+      "reserved_idea": "fbc5df7f-1071-4ead-9e81-9a2a8ff631a2",
+      "license": "CC0 1.0",
+      "status": "proposed_local_revision",
+      "listening": "pending"
+    },
+    "Inspector Ratchet — Ty Simon": {
+      "title": "Inspector Ratchet",
+      "author": "Ty Simon",
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/2f/2f1719c60162b487a8a011ce4343adbca122aa0e69ca90dc689426b6f9935184.wav",
+      "sha256": "2f1719c60162b487a8a011ce4343adbca122aa0e69ca90dc689426b6f9935184",
+      "reserved_idea": "90e85d58-bf55-4eaf-8e92-b61da82df669",
+      "status": "local_draft",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/music-servicios-provenance.json"
+    },
+    "Double Espresso — The Original Orchestra": {
+      "source": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/archivos/d1/d13c932e3274e9a108073372fd8279e7c566baddc7c26ca3870852df205c54b2.wav",
+      "sha256": "d13c932e3274e9a108073372fd8279e7c566baddc7c26ca3870852df205c54b2",
+      "reserved_idea": "0cb8133f-763a-40e0-90bf-03c02bd63790",
+      "status": "local_draft"
+    },
+    "Eyes On The Prize": {
+      "title": "Eyes On The Prize",
+      "author": "Rewind Kid",
+      "asset_id": "3263918",
+      "source": "Motion Array",
+      "reel": "dd0d8cfe-ce0f-4d53-b3fd-2e8fb15f9745",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-batch-audit-20261002/veinte/music-new-provenance.json",
+      "status": "propuesta_local"
+    }
+  }
+}

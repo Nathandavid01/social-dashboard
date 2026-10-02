@@ -1,0 +1,31 @@
+{
+  "client": "Lenel Restaurant",
+  "idea_id": "732ba78c-3064-498b-baa7-3a29cad59aa9",
+  "catalog": "runs/79bb2505-catalog.json",
+  "title": "El plato",
+  "source": "../media/lenel/source/DJI_20260918135908_0798_D.MP4",
+  "transcript": "../runs/lenel-transcripts/DJI_20260918135908_0798_D.json",
+  "style": "../styles/lenel.json",
+  "clips": [
+    {"in": 0.8, "out": 22.2, "zoom": 1.12, "focus_y": 0.46, "audio_edge_fade": 0.015}
+  ],
+  "captions": [
+    {"start": 5.7, "end": 9.5, "text": "Una salsa de crema."},
+    {"start": 10.38, "end": 14.0, "text": "Este plato lo pueden conseguir\nsiempre aquí en Lenel."},
+    {"start": 14.26, "end": 16.9, "text": "En la calle Palma, en Arecibo."},
+    {"start": 17.46, "end": 21.1, "text": "Para que nos visiten.\nRico, sabroso y fresquecito."}
+  ],
+  "broll": [
+    {
+      "source": "../media/lenel/source/DJI_20260918140056_0801_D.MP4",
+      "in": 2.0,
+      "out": 4.3,
+      "at": 18.5,
+      "original_source": "../media/lenel/source/DJI_20260918140056_0801_D.MP4",
+      "source_in": 2.0,
+      "source_out": 4.3,
+      "note": "Plato terminado en el cierre, el mismo emplatado que arma el chef."
+    }
+  ],
+  "editorial_note": "No se nombra el pescado en la voz. Whisper dijo «crema de abajo»; el caption no inventa ajo ni rodaballo. 0799 y 0800 son el mismo emplatado y quedan de apoyo, no como reel aparte."
+}

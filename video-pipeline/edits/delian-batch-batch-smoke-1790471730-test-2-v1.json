@@ -1,0 +1,37 @@
+{
+  "idea_id": "smoke-2",
+  "title": "Prueba técnica 2",
+  "source": "../runs/batch-smoke-1790471730/synthetic.mp4",
+  "transcript": "../runs/batch-smoke-1790471730/synthetic.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 1.8,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.8,
+      "text": "Prueba técnica"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Prueba sintética sin voz humana; no aprobar contenido."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "/Users/ericperez/Nate Media/video-pipeline/runs/batch-smoke-1790471730/catalog.json",
+  "references": {
+    "synthetic_reference": "/Users/ericperez/Nate Media/video-pipeline/runs/batch-smoke-1790471730/synthetic.mp4"
+  },
+  "audio_master": {
+    "voice_mode": "preserve"
+  }
+}

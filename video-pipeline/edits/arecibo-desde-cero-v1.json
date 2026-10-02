@@ -1,0 +1,213 @@
+{
+ "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+ "idea_id": "arecibo-servicios",
+ "catalog": "runs/arecibo-catalog.json",
+ "title": "Arecibo Lab · Servicios (Desde Cero)",
+ "source": "../media/arecibo/DJI_20260909092343_0277_D.MP4",
+ "transcript": "../runs/arecibo-0277-transcript.json",
+ "style": "../styles/arecibo.json",
+ "clips": [
+  {
+   "in": 4.1,
+   "out": 15.85,
+   "zoom": 1.0
+  },
+  {
+   "in": 16.05,
+   "out": 21.5,
+   "zoom": 1.05
+  },
+  {
+   "in": 38.55,
+   "out": 42.02,
+   "zoom": 1.0
+  },
+  {
+   "in": 47.34,
+   "out": 56.266667,
+   "zoom": 1.05
+  }
+ ],
+ "captions": [
+  {
+   "start": 0.267,
+   "end": 1.567,
+   "text": "DOCTORA, ¿QUÉ SERVICIOS"
+  },
+  {
+   "start": 1.567,
+   "end": 2.967,
+   "text": "OFRECEMOS EN ARECIBO LAB?"
+  },
+  {
+   "start": 2.967,
+   "end": 3.267,
+   "text": "PUES MIRA"
+  },
+  {
+   "start": 3.267,
+   "end": 4.567,
+   "text": "EN ARECIBO LAB OFRECEMOS"
+  },
+  {
+   "start": 4.567,
+   "end": 6.033,
+   "text": "SERVICIO DE TOMA DE MUESTRA"
+  },
+  {
+   "start": 6.167,
+   "end": 7.8,
+   "text": "PARA LAS PRUEBAS DE CERNIMIENTO"
+  },
+  {
+   "start": 7.8,
+   "end": 8.5,
+   "text": "QUE EL MÉDICO"
+  },
+  {
+   "start": 8.833,
+   "end": 9.9,
+   "text": "LE ENVÍA, ¿VERDAD?"
+  },
+  {
+   "start": 10.067,
+   "end": 11.667,
+   "text": "EN TRES A SEIS MESES."
+  },
+  {
+   "start": 11.75,
+   "end": 13.167,
+   "text": "TAMBIÉN OFRECEMOS"
+  },
+  {
+   "start": 13.267,
+   "end": 14.3,
+   "text": "PRUEBAS DE PATERNIDAD"
+  },
+  {
+   "start": 14.433,
+   "end": 15.5,
+   "text": "PRUEBAS DE DOPAJE"
+  },
+  {
+   "start": 15.967,
+   "end": 17.2,
+   "text": "CULTIVOS."
+  },
+  {
+   "start": 17.55,
+   "end": 18.417,
+   "text": "ASÍ QUE SI NECESITA"
+  },
+  {
+   "start": 18.583,
+   "end": 20.05,
+   "text": "REALIZARSE ALGUNA PRUEBA"
+  },
+  {
+   "start": 20.05,
+   "end": 20.67,
+   "text": "DE CERNIMIENTO"
+  },
+  {
+   "start": 21.23,
+   "end": 22.563,
+   "text": "AQUÍ ESTAMOS UBICADOS"
+  },
+  {
+   "start": 22.563,
+   "end": 23.863,
+   "text": "EN EL BARRIO FACTOR 1"
+  },
+  {
+   "start": 23.93,
+   "end": 25.263,
+   "text": "FRENTE A HQJ"
+  },
+  {
+   "start": 25.33,
+   "end": 26.863,
+   "text": "Y SE PUEDE COMUNICAR CON NOSOTROS"
+  },
+  {
+   "start": 26.863,
+   "end": 29.597,
+   "text": "787-817-2270"
+  }
+ ],
+ "broll": [
+  {
+   "source": "../media/arecibo/0285-muestra-crop.mp4",
+   "in": 0,
+   "out": 3.3,
+   "at": 4.56,
+   "eof_action": "repeat",
+   "original_source": "../media/arecibo/DJI_20260909094109_0285_D.MP4",
+   "source_in": 0.6,
+   "source_out": 3.9,
+   "reason": "Toma de muestra mientras dice 'servicio de toma de muestra'; recorte 540x960 oculta el monitor con datos."
+  },
+  {
+   "source": "../media/arecibo/DJI_20260909100214_0299_D.MP4",
+   "in": 1,
+   "out": 5.066667,
+   "at": 20.71,
+   "eof_action": "repeat",
+   "reason": "Fachada y estacionamiento en 'aquí estamos ubicados'."
+  }
+ ],
+ "transitions": [
+  {
+   "time": 4.56,
+   "duration": 0.12
+  },
+  {
+   "time": 7.86,
+   "duration": 0.12
+  },
+  {
+   "time": 20.71,
+   "duration": 0.12
+  },
+  {
+   "time": 25.263,
+   "duration": 0.12
+  }
+ ],
+ "sounds": [
+  {
+   "kind": "preset",
+   "preset": "whoosh_soft",
+   "time": 4.56,
+   "duration": 0.18,
+   "gain_db": -26
+  },
+  {
+   "kind": "preset",
+   "preset": "whoosh_soft",
+   "time": 20.71,
+   "duration": 0.18,
+   "gain_db": -26
+  }
+ ],
+ "music": {
+  "source": "../media/music/Happy-Whistling-Ukulele.mp3",
+  "license": "CC0 1.0"
+ },
+ "outro": {
+  "source": "../media/arecibo/brand/outro.mp4",
+  "in": 0,
+  "out": 2.5,
+  "gain": 0.5
+ },
+ "references": {
+  "outro": "media/arecibo/brand/outro.mp4",
+  "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4"
+ },
+ "review_notes": [
+  "v1 por pipeline.py: réplica de AreciboLab_DesdeCero_v18 (captions blanco sobre caja verde, Montserrat 70 fijo). Cortes, captions y B-roll idénticos a la receta v18.",
+  "Cortes ajustados a huecos entre palabras según Whisper (4.10, 16.05, 38.55, 42.02, 47.34): el pipeline rechaza cortar dentro de una palabra. Habla 29.60s + outro 2.5s.",
+  "Zoom por clip es estático en el pipeline (v18 usaba push-in animado); revisar si se echa en falta.",
+  "Escucha crítica y aprobación de Eric pendientes."
+ ]
+}

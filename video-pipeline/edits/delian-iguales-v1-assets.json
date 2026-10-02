@@ -1,0 +1,27 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": [
+    [
+      "rostros",
+      "Use case: stylized-concept. Create a sophisticated 3D dental education visual, portrait 9:16. Two DISTINCT adult sculptural faces side by side, one female with a gently rounded face and one male with a longer angular face, both shown from crown of head to upper neck, natural relaxed smiles with plausible individual tooth proportions. They must clearly be two different people, NOT before and after. Matte ivory porcelain sculptural material for both faces and teeth, subtle realistic human facial anatomy but obviously artistic 3D models, no real patient photography. No hair textures, minimal sculpted hair silhouettes. High-end gallery-quality digital sculpture against rich dark plum #201329, soft lavender rim lighting, gentle warm front light. Faces balanced symmetrically, heads entirely visible inside x8%-92%, y20%-62%, lower 30% dark empty for subtitles. No text, annotations, arrows, chart lines, watermark, logo, exaggerated perfect veneers or uncanny huge teeth. Beautiful subtle smiles, credible anatomy. Single integrated scene, not a collage."
+    ],
+    [
+      "rasgos",
+      "Use case: scientific-educational. A single premium 3D adult female head sculpture for a dental facial-harmony explainer, vertical 9:16. Matte ivory porcelain, graceful realistic adult facial anatomy, front-facing with a slight three-quarter turn only 5 degrees, subtle relaxed smile showing natural front teeth, whole head and upper neck visible, nose lips chin clearly defined. Sculptural hair tied smoothly behind head; no human skin texture, clearly an educational 3D model rather than a patient photo. Framed centered, head spans x23%-77%, y18%-62%, face nose at about y39%, lips about y46%, chin at y53%. Dark plum #201329 studio background, lavender rim illumination and soft ivory front key light, high-end editorial medical motion-design art direction. Leave clear dark space on both sides for callout lines added later, and lower 30% dark empty for video subtitles. No text, no labels, no arrows, no diagrams, no grid, no before-after, no visible skin pores, no watermark. Elegant realistic proportions."
+    ]
+  ],
+  "assets": [
+    {
+      "name": "rostros",
+      "generated_path": "/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-b0f91fad-345c-4e8c-8e6b-9e34e9fb371d.png",
+      "reserved_for": "sonrisas-iguales-20260921",
+      "type": "generated_3d_style_illustration_not_patient_or_editable_3d_model"
+    },
+    {
+      "name": "rasgos",
+      "generated_path": "/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-37491d28-f533-471a-9f34-fbd16c2185ef.png",
+      "reserved_for": "sonrisas-iguales-20260921",
+      "type": "generated_3d_style_illustration_not_patient_or_editable_3d_model"
+    }
+  ]
+}

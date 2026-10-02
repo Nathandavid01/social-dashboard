@@ -1,0 +1,198 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "cc0b603b-4115-400c-bd85-0cb6a13ada06",
+  "title": "Tres Cosas Menos De Qué Preocuparte",
+  "source": "../media/81d4110f-a7dd-4ad4-8223-5fa407ca8a03.mp4",
+  "transcript": "../runs/practico-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.04,
+      "out": 9.4,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 4.64,
+      "gain_db": -12,
+      "duration": 0.09,
+      "reason": "List number appears on exact phrase onset"
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 5.36,
+      "gain_db": -12,
+      "duration": 0.09,
+      "reason": "List number appears on exact phrase onset"
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 7.24,
+      "gain_db": -12,
+      "duration": 0.09,
+      "reason": "List number appears on exact phrase onset"
+    },
+    {
+      "kind": "preset",
+      "preset": "pop",
+      "time": 0.06,
+      "duration": 0.13,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 1.28,
+      "duration": 0.18,
+      "gain_db": -26
+    }
+  ],
+  "review_notes": [
+    "V12: animated hook, custom cleaning/home cards, and unused relevant kitchen B-roll #7; numbers and mechanical clicks at 4.64, 5.36 and 7.24 seconds.",
+    "Continuous original speech 1.04–9.40; no cut between syllables, no tiny presenter return between list points. Caption font remains QUARTZO 85px.",
+    "Music Compy Jazz CC0 at prior -27 LUFS mix, voice -16 LUFS processing, source ambience reduced. Official sonorized outro unchanged.",
+    "Graphics are stylized icons, not claimed recorded footage. B-roll source identity/range retained for uniqueness audit.",
+    "Visual review and browser playback pending. Critical listening and user approval pending."
+  ],
+  "broll": [
+    {
+      "source": "../media/practico-hook-v12.mp4",
+      "in": 0,
+      "out": 1.4,
+      "at": 0,
+      "eof_action": "repeat",
+      "fade_out": 0.1,
+      "kind": "brand_graphic",
+      "reason": "Animated headline covers preparatory expression; number is legible from frame one."
+    },
+    {
+      "source": "../media/practico-clean-v12.mp4",
+      "in": 0,
+      "out": 0.72,
+      "at": 4.64,
+      "eof_action": "repeat",
+      "kind": "brand_graphic",
+      "reason": "Original animated broom illustrates cleaning; no misleading substitute footage."
+    },
+    {
+      "source": "../media/practico-play-v12.mp4",
+      "in": 0,
+      "out": 1.88,
+      "at": 5.36,
+      "eof_action": "repeat",
+      "original_source": "../media/9d2d72ec-0a64-4878-83bb-aea3392dafcd.mp4",
+      "source_in": 11.5,
+      "source_out": 13.38,
+      "reason": "Previously unused cooking-play shot; real action without presentation; animated number stays away from faces."
+    },
+    {
+      "source": "../media/practico-home-v12.mp4",
+      "in": 0,
+      "out": 1.12,
+      "at": 7.24,
+      "eof_action": "repeat",
+      "kind": "brand_graphic",
+      "reason": "House illustration matches ni prestar tu casa and holds through the end of voice."
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro-with-star-sfx.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 1
+  },
+  "transitions": [],
+  "music": {
+    "source": "../media/music/nanas-practico-v11-bed.wav",
+    "title": "Compy Jazz",
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "sha256": "bd7e017374891f01dc5ffad74880ecb773131ffe3706f60c49c1aa79cc2e3f24",
+    "target_lufs": -27,
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Miscellaneous/Compy%20Jazz.mp3",
+    "source_in": 3
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.18,
+      "text": "TRES COSAS DE"
+    },
+    {
+      "start": 1.18,
+      "end": 1.5,
+      "text": "LAS QUE NO"
+    },
+    {
+      "start": 1.5,
+      "end": 1.9,
+      "text": "TE TIENES QUE"
+    },
+    {
+      "start": 1.9,
+      "end": 2.4,
+      "text": "PREOCUPAR SI"
+    },
+    {
+      "start": 2.4,
+      "end": 2.7,
+      "text": "HACES"
+    },
+    {
+      "start": 2.7,
+      "end": 3.3600000000000003,
+      "text": "CUMPLEAÑOS,"
+    },
+    {
+      "start": 3.46,
+      "end": 4.2,
+      "text": "EN NANA’S\nPLAYHOUSE"
+    },
+    {
+      "start": 4.64,
+      "end": 5.2,
+      "text": "LIMPIAR,"
+    },
+    {
+      "start": 5.36,
+      "end": 5.66,
+      "text": "BUSCAR"
+    },
+    {
+      "start": 5.66,
+      "end": 6.2,
+      "text": "ENTRETENIMIENTO"
+    },
+    {
+      "start": 6.2,
+      "end": 7.14,
+      "text": "PARA LOS NIÑOS,"
+    },
+    {
+      "start": 7.24,
+      "end": 7.68,
+      "text": "NI PRESTAR"
+    },
+    {
+      "start": 7.68,
+      "end": 8.1,
+      "text": "TU CASA."
+    }
+  ],
+  "previous_version": "../runs/nanas-practico-v11.mp4",
+  "voice_filter": "highpass=f=110,afftdn=nr=18:nf=-28:tn=1,agate=threshold=0.035:ratio=3:range=0.12:attack=10:release=150,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "list_markers": [],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 1.55,
+      "duration": 2.65,
+      "intensity": 0.25
+    }
+  ]
+}

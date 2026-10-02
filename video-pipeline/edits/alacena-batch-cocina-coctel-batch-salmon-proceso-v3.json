@@ -1,0 +1,87 @@
+{
+  "idea_id": "a09caccc-3639-4259-9d70-102ce2112360",
+  "title": "El chef emplata el salmón",
+  "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-v3-source.mkv",
+  "transcript": null,
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.8,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 2.5,
+      "text": "Emplatamos el salmón"
+    },
+    {
+      "start": 3.1,
+      "end": 5.9,
+      "text": "El toque del chef"
+    },
+    {
+      "start": 7.8,
+      "end": 9.5,
+      "text": "Listo para tu mesa"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 1.15,
+      "duration": 0.04,
+      "gain_db": -32
+    },
+    {
+      "kind": "click",
+      "time": 2.783,
+      "duration": 0.04,
+      "gain_db": -32
+    },
+    {
+      "kind": "click",
+      "time": 4.883,
+      "duration": 0.04,
+      "gain_db": -32
+    },
+    {
+      "kind": "click",
+      "time": 7.95,
+      "duration": 0.04,
+      "gain_db": -32
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "User-requested editing improvement: action-led 5-shot montage, tighter vegetable framing, gentle speed changes, brief dissolves, clean nonrepeated dish reveal. Same approved Alacena caption typography and official outro.",
+    "Keep the recorded instruction: no sauce touching the salmon. Knife close-up and previously reused hero omitted. Distinct source ranges, original production chatter muted.",
+    "Six dashboard originals checked against SSD copies. Drive searches empty and metadata read unavailable; current complete Drive coverage is not claimed. Critical listening and human approval pending."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-v3-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/salmon-proceso-music-provenance.json"
+  },
+  "transitions": []
+}

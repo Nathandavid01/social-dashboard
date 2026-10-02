@@ -1,0 +1,259 @@
+{
+  "idea_id": "diseno-sonrisa-20260921",
+  "title": "¿Qué Es Un Diseño De Sonrisa?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_160340_20260921160319_1790125109070_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/diseno-sonrisa-20260921-editorial.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 2.6,
+      "out": 4.4,
+      "zoom": 1.6,
+      "focus_y": 0.08,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.2
+        },
+        {
+          "time": 1.8,
+          "zoom": 1.2
+        }
+      ]
+    },
+    {
+      "in": 4.4,
+      "out": 10.9,
+      "zoom": 1.24,
+      "focus_y": 0.32,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.5,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 11.13,
+      "out": 17.83,
+      "zoom": 1.14,
+      "focus_y": 0.32,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.7,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 17.97,
+      "out": 20.37,
+      "zoom": 1.42,
+      "focus_y": 0.32,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.4,
+          "zoom": 1.015
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.101,
+      "end": 0.7,
+      "text": "¿Qué realmente es",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 0.72,
+      "end": 1.76,
+      "text": "un diseño de sonrisa?",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 2.086,
+      "end": 2.74,
+      "text": "Cuando pensamos en"
+    },
+    {
+      "start": 2.76,
+      "end": 3.5,
+      "text": "un diseño de sonrisa,"
+    },
+    {
+      "start": 3.52,
+      "end": 4.5,
+      "text": "pensamos rápidamente"
+    },
+    {
+      "start": 4.52,
+      "end": 6.01,
+      "text": "en hacernos los dientes,"
+    },
+    {
+      "start": 6.1,
+      "end": 7.1,
+      "text": "en carillas,"
+    },
+    {
+      "start": 7.12,
+      "end": 8.3,
+      "text": "en laminados,"
+    },
+    {
+      "start": 8.449,
+      "end": 9.61,
+      "text": "y va mucho más que eso."
+    },
+    {
+      "start": 9.63,
+      "end": 10.51,
+      "text": "Tenemos que mirar"
+    },
+    {
+      "start": 10.538,
+      "end": 11.43,
+      "text": "todo el rostro,"
+    },
+    {
+      "start": 11.45,
+      "end": 12.27,
+      "text": "los labios,"
+    },
+    {
+      "start": 12.29,
+      "end": 13.32,
+      "text": "las encías,"
+    },
+    {
+      "start": 13.35,
+      "end": 15.0,
+      "text": "sobre todo la mordida,"
+    },
+    {
+      "start": 15.074,
+      "end": 15.89,
+      "text": "para entonces poder crear"
+    },
+    {
+      "start": 15.91,
+      "end": 17.4,
+      "text": "una sonrisa armoniosa."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-sept-enriched/evaluacion-escaneo-real-v2.mp4",
+      "in": 0,
+      "out": 2.7,
+      "at": 12.29,
+      "fade_in": 0.1,
+      "fade_out": 0,
+      "original_source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_170124_20260921170045_1790125040771_video.mp4",
+      "source_in": 25.1,
+      "source_out": 27.81,
+      "reason": "Escaneo real de arcada y encía durante la evaluación integral y la mordida; no se presenta como carillas ni como resultado de tratamiento."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.7950000000000002,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.295,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.284999999999998,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 14.995,
+      "duration": 0.06,
+      "gain_db": -20
+    }
+  ],
+  "effects": [
+    {
+      "preset": "blur_pass",
+      "time": 1.75,
+      "duration": 0.1,
+      "intensity": 0.2
+    },
+    {
+      "preset": "blur_pass",
+      "time": 12.24,
+      "duration": 0.1,
+      "intensity": 0.2
+    },
+    {
+      "preset": "blur_pass",
+      "time": 14.95,
+      "duration": 0.1,
+      "intensity": 0.2
+    }
+  ],
+  "outro": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-diseno-sonrisa-20260921-v7-preparation/official-outro-funshine-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-diseno-sonrisa-20260921-v7-preparation/funshine-continuous.wav",
+    "title": "Funshine",
+    "license": "CC0 1.0",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Funshine.provenance.json",
+    "source_offset": 0,
+    "fade_in": 0.08,
+    "fade_out": 0.8,
+    "fade_out_scope": "End of official outro; continuous bed across join"
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "published_reel_28_august": "../delian-loyola-video/media/reference/publicados-28-agosto.mp4",
+    "published_reel_14_september": "../delian-loyola-video/media/reference/publicados-14-septiembre.mp4",
+    "caption_comparison": "runs/delian-published-caption-audit/caption-comparison.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Grabación nueva 21 septiembre; PDF idea 2. Mantener manos y explicación visible. ASR pendiente de cotejo auditivo; no aprobación humana.",
+    "Professional revision: second ASR against original audio; manual semantic caption groups, measured pause cuts, subtle keyframes, restrained synchronized sound accents, faded independent CC0 bed. Critical listening remains pending.",
+    "Eric requested transition effects, sounds, video B-roll, image B-roll and background music. Generated educational images explicitly labeled; new per-reel music balance 9 LU below voice. Critical listening pending.",
+    "Reference-led v5: phrase-aligned framing, measured silence trims, readable complete thoughts, direct illustration exit, restrained transitions. Original branded outro imagery preserved with continuous licensed music and final fade. Shoika unavailable: existing Montserrat remains provisional. Listening and approval pending.",
+    "v6: tipografía Shoika SemiBold original descargada de CapCut y calibrada contra Publicados 14 agosto; 72 ASS, sombra desplazada violeta, texto blanco; pregunta con sombra negra. Sustituye ilustración generada por movimiento real de escaneo de su consulta, recortado sin información identificadora. Audio/outro y diálogo conservados. Escucha crítica pendiente.",
+    "Eric: música anterior triste; transiciones deben ser clicks. Reemplazo completo por Funshine (catálogo Upbeat, CC0) y clicks secos de 60ms. Un solo click en entrada al outro, incorporado a su pista. Imagen, cortes, voz y captions de v6 conservados.",
+    "Eric 2026-09-30: explicitly authorizes opening-only revision of v7. First 1.8 seconds reframed closer on face and upper body (1.6 base crop, 1.2 static keyframes, focus_y 0.08); remaining visuals, captions, timing, music and outro preserved. User review pending."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 10
+  }
+}

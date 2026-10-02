@@ -1,0 +1,208 @@
+{
+  "idea_id": "cinco-opciones-20260810",
+  "title": "Cinco Opciones Que Valen La Pena",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810160536_0315_D.MP4",
+  "transcript": "../runs/delian-transcripts/0315-small-transcript-silence-snapped.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 1.77,
+      "out": 5.48,
+      "zoom": 1.2,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 3.71,
+          "zoom": 1.03
+        }
+      ]
+    },
+    {
+      "in": 5.48,
+      "out": 6.71,
+      "zoom": 1.5,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.71,
+      "out": 8.25,
+      "zoom": 1.25,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 8.25,
+      "out": 9.96,
+      "zoom": 1.45,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.96,
+      "out": 11.8,
+      "zoom": 1.25,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.45,
+      "out": 14.7,
+      "zoom": 1.45,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.1,
+      "out": 21.45,
+      "zoom": 1.25,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.95,
+      "out": 23.05,
+      "zoom": 1.5,
+      "focus_y": 0.3,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.1,
+          "zoom": 1.03
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.9,
+      "text": "5 cosas que",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 0.9,
+      "end": 1.88,
+      "text": "definitivamente"
+    },
+    {
+      "start": 1.88,
+      "end": 3.28,
+      "text": "are worth your money"
+    },
+    {
+      "start": 3.7,
+      "end": 4.93,
+      "text": "Dental edition",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 4.97,
+      "end": 6.47,
+      "text": "1. Invisalign"
+    },
+    {
+      "start": 6.72,
+      "end": 8.18,
+      "text": "2. Diseño de sonrisa"
+    },
+    {
+      "start": 8.39,
+      "end": 10.02,
+      "text": "3. Blanqueamiento dental"
+    },
+    {
+      "start": 10.07,
+      "end": 12.27,
+      "text": "4. Veneers o laminados"
+    },
+    {
+      "start": 12.29,
+      "end": 13.72,
+      "text": "5. Coronas"
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "duration": 0.09,
+      "gain_db": -25,
+      "time": 5.01
+    },
+    {
+      "preset": "mouse_click",
+      "duration": 0.09,
+      "gain_db": -25,
+      "time": 6.75
+    },
+    {
+      "preset": "mouse_click",
+      "duration": 0.09,
+      "gain_db": -25,
+      "time": 8.41
+    },
+    {
+      "preset": "mouse_click",
+      "duration": 0.09,
+      "gain_db": -25,
+      "time": 10.12
+    },
+    {
+      "preset": "mouse_click",
+      "duration": 0.09,
+      "gain_db": -25,
+      "time": 12.32
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_flash",
+      "time": 3.66,
+      "duration": 0.3,
+      "intensity": 0.6
+    }
+  ],
+  "review_notes": [
+    "Reedicion local del tema que aparece en Publicados/14 septiembre; no implica nueva publicacion ni aprobacion.",
+    "El corte excluye claqueta, pausas, instrucciones del rodaje y la busqueda de la quinta opcion. Se conserva la enumeracion hablada completa.",
+    "No se fuerza B-roll: las tomas cercanas de tour e hilo dental no ilustran la lista completa.",
+    "Whisper small duda del primer anglicismo; el subtitulo sigue el texto visible en la pieza publicada. Verificar escuchando la voz antes de entrega.",
+    "V2: acercamiento moderado a 1.23 para corresponder mejor al encuadre de Publicados/14 septiembre, con manos dentro del marco.",
+    "V3: keyframes suaves (hasta 1.5%) sobre los tres planos; encuadre mantiene los dedos enumerados.",
+    "V3: cinco clicks discretos, uno por opcion nombrada; sin whoosh simultaneo ni B-roll ajeno a la lista.",
+    "V3: cama Be Chillin, fuente FreePD CC0 documentada en media/delian/music/manifest.json; mezcla y escucha critica por revisar.",
+    "V4 (2026-09-23, pedido de Eric «más profesionales»): corrige cortes que mordían palabras en v3 («dental» seguía hasta 11.65 s y se cortaba en 11.42; «laminados» hasta 14.62 y se cortaba en 14.45; el «y» de «y coronas» empezaba en 21.15); quita 0.7 s muertos al inicio y acorta la pausa antes de «coronas»; cada punto con zoom alterno 1.25/1.45 y captions+click alineados al inicio real de la voz (antes aparecían ~0.5 s antes, en silencio); destello suave en «Dental edition» como en Publicados 14 septiembre; gancho y «Dental edition» en violeta; captions 100 px.",
+    "V5: «3. Blanqueamiento» en una línea (el número de lista ya no queda huérfano; regla en wrap_balanced)."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/review/published-14sep-contact.jpg"
+  },
+  "prior_published_edit_url": "https://drive.google.com/file/d/1lQE3jPfYEQdttg84QhfJ5XhqkN_S7RpA/view",
+  "music": {
+    "source": "../media/delian/music/cinco-opciones-be-chillin.m4a",
+    "license": "CC0 1.0",
+    "provenance": "../media/music/Be Chillin.provenance.json"
+  }
+}

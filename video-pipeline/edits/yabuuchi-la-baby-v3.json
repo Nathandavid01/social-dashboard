@@ -1,0 +1,109 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "la-baby",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "La Baby Para Dos",
+  "source": "../media/yabuuchi/derived/la-baby-reference-graphic-v2.mp4",
+  "transcript": "../runs/yabuuchi-la-baby-mapped.json",
+  "style": "../styles/yabuuchi-reference-v3.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.35,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 2.29,
+      "text": "Si tienen hambre tú y tu pareja de sushi,"
+    },
+    {
+      "start": 2.53,
+      "end": 3.81,
+      "text": "aquí en Yabuuchi Levittown"
+    },
+    {
+      "start": 3.91,
+      "end": 5.61,
+      "text": "tenemos la cajita de La Baby,"
+    },
+    {
+      "start": 5.83,
+      "end": 7.23,
+      "text": "que es perfecta para dos personas."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/la-baby-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914133907_0021_D.MP4",
+      "in": 4,
+      "out": 6.95,
+      "at": 3.55,
+      "reason": "Mostrar la caja real al nombrar La Baby; sin repetir planos del Churrasco Roll."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914133949_0023_D.MP4",
+      "in": 0.87,
+      "out": 8.22
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "graphic": "media/yabuuchi/graphics/people2.png"
+  },
+  "review_notes": [
+    "Escucha pendiente de la primera frase.",
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes.",
+    "V2: referencia principal del usuario video 1.2.mp4; captions 54px bajos con sombra; apoyos, acercamientos y efectos contenidos; cierre extraído de la referencia.",
+    "No se afirma coincidencia auditiva exacta.",
+    "V3: se corrige peso de captions a Arial Black 52px, sin borde duro, sombra gris."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 3.55,
+      "duration": 0.18,
+      "gain_db": -29
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 6.5,
+      "duration": 0.18,
+      "gain_db": -29
+    },
+    {
+      "preset": "pop",
+      "time": 5.83,
+      "duration": 0.13,
+      "gain_db": -26
+    }
+  ],
+  "graphics": [
+    {
+      "source": "media/yabuuchi/graphics/people2.png",
+      "start": 5.83,
+      "end": 7.25,
+      "original_source": "media/yabuuchi/derived/la-baby-source-v1.mp4",
+      "kind": "original_vector_graphic",
+      "reason": "Gráfica pequeña y semántica según video 1.2.mp4, bajo el rostro y sobre captions."
+    }
+  ]
+}

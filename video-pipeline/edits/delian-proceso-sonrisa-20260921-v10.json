@@ -1,0 +1,291 @@
+{
+  "idea_id": "proceso-sonrisa-20260921",
+  "title": "Así Diseñamos Tu Sonrisa",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_161636_20260921161619_1790125101272_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/proceso-sonrisa-20260921-editorial.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 0.25,
+      "out": 3.62,
+      "zoom": 1.06,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.37,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 4.0,
+      "out": 8.3,
+      "zoom": 1.2,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.065
+        },
+        {
+          "time": 4.3,
+          "zoom": 1
+        }
+      ]
+    },
+    {
+      "in": 8.6,
+      "out": 11.9,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.3,
+          "zoom": 1.075
+        }
+      ]
+    },
+    {
+      "in": 11.9,
+      "out": 15.72,
+      "zoom": 1.22,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.055
+        },
+        {
+          "time": 3.82,
+          "zoom": 1
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.065,
+      "end": 0.525,
+      "text": "¿Y cómo lo hacemos",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 0.55,
+      "end": 1.45,
+      "text": "aquí en la clínica?",
+      "back_colour": "&H00000000"
+    },
+    {
+      "start": 1.865,
+      "end": 2.325,
+      "text": "Lo primero es"
+    },
+    {
+      "start": 2.35,
+      "end": 3.17,
+      "text": "una evaluación."
+    },
+    {
+      "start": 3.549,
+      "end": 4.605,
+      "text": "Segundo, podemos hacer"
+    },
+    {
+      "start": 4.63,
+      "end": 5.27,
+      "text": "un mock-up,"
+    },
+    {
+      "start": 5.33,
+      "end": 5.805,
+      "text": "que es básicamente"
+    },
+    {
+      "start": 5.83,
+      "end": 7.45,
+      "text": "un encerado de los dientes."
+    },
+    {
+      "start": 7.999,
+      "end": 8.425,
+      "text": "Vamos a hacer"
+    },
+    {
+      "start": 8.45,
+      "end": 9.525,
+      "text": "los dientitos como queremos"
+    },
+    {
+      "start": 9.55,
+      "end": 10.89,
+      "text": "que el paciente luzca."
+    },
+    {
+      "start": 11.09,
+      "end": 12.37,
+      "text": "Si el paciente le gusta,"
+    },
+    {
+      "start": 12.59,
+      "end": 13.665,
+      "text": "entonces el laboratorio"
+    },
+    {
+      "start": 13.69,
+      "end": 14.65,
+      "text": "nos hace un caso final."
+    },
+    {
+      "start": 0,
+      "end": 1.62,
+      "text": "Diseño de sonrisa:\npaso a paso",
+      "bottom_margin": 1550,
+      "back_colour": "&H00000000"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4",
+      "in": 4.5,
+      "out": 6.0,
+      "at": 1.87,
+      "fade_in": 0,
+      "fade_out": 0,
+      "zoom": 1.0,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.035
+        }
+      ],
+      "reason": "Toma real de consulta junto al sillón al decir evaluación; tramo sin presentación a cámara, audio silenciado.",
+      "eof_action": "repeat"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v6/encerado-macro-keyframes.mp4",
+      "in": 0,
+      "out": 3.0,
+      "at": 4.67,
+      "fade_in": 0,
+      "fade_out": 0,
+      "original_source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v6/encerado-macro.png",
+      "reason": "Fotografía editorial generada de encerado diagnóstico, con acercamiento y desplazamiento; no caso real del cliente.",
+      "eof_action": "repeat"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v7/paciente-espejo-keyframes.mp4",
+      "in": 0,
+      "out": 1.62,
+      "at": 10.97,
+      "fade_in": 0,
+      "fade_out": 0,
+      "original_source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v7/paciente-espejo.png",
+      "reason": "Paciente genérica mirando su sonrisa en espejo al hablar de su preferencia; fotografía editorial generada, no testimonio ni resultado real del cliente.",
+      "eof_action": "repeat"
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v6/laboratorio-ceramica-keyframes.mp4",
+      "in": 0,
+      "out": 2.2,
+      "at": 12.59,
+      "fade_in": 0,
+      "fade_out": 0,
+      "original_source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-delian-proceso-sonrisa-20260921-v6/laboratorio-ceramica.png",
+      "reason": "Fotografía editorial generada de trabajo de laboratorio durante su mención, con retroceso y desplazamiento; no resultado real del cliente.",
+      "eof_action": "repeat"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.86,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3.365,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 4.665,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 7.665,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.965,
+      "duration": 0.06,
+      "gain_db": -20
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.585,
+      "duration": 0.06,
+      "gain_db": -20
+    }
+  ],
+  "effects": [],
+  "outro": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-proceso-sonrisa-20260921-v10-preparation/official-outro-beat-one-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-proceso-sonrisa-20260921-v10-preparation/beat-one-continuous.wav",
+    "title": "Beat One",
+    "license": "CC0 1.0",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Beat One.provenance.json",
+    "source_offset": 8,
+    "fade_in": 0.08,
+    "fade_out": 0.8,
+    "fade_out_scope": "End of official outro; continuous music through the join"
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "caption_comparison": "runs/delian-published-caption-audit/caption-comparison.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Grabación 21 septiembre. Cortes de pausas sin suprimir respuestas; captions requieren revisión auditiva.",
+    "Professional revision: second ASR against original audio; manual semantic caption groups, measured pause cuts, subtle keyframes, restrained synchronized sound accents, faded independent CC0 bed. Critical listening remains pending.",
+    "Eric requested transition effects, sounds, video B-roll, image B-roll and background music. Generated educational images explicitly labeled; new per-reel music balance 9 LU below voice. Critical listening pending.",
+    "Aplicar aprendizajes de Diseño de Sonrisa v7: Shoika72 blanca/sombra violeta, pregunta sombra negra, música alegre continua y clicks secos. Se conserva íntegra la voz de v4. Título contextual explícito para que la pregunta inicial se entienda sola; retirar placas repetitivas. Encerado ilustrativo identificado, sin presentar Invisalign como mock-up; apoyo termina en cambio de plano sin retorno fugaz. Escucha crítica y aprobación pendientes.",
+    "Eric rechazó el B-roll anterior, pidió quitar Imagen ilustrativa y añadir keyframes. Sustitución completa por dos fotografías editoriales generadas de encerado y laboratorio, sin texto integrado, animadas con acercamiento/retroceso 12–13% y desplazamiento lateral suave. Keyframes de la doctora aumentados a 5.5–7.5%, alternando entrada/salida y conservando gestos. Procedencia conservada fuera de pantalla; no son casos reales del cliente. Captions Shoika, voz, música alegre y outro de v5 conservados; nuevo click al entrar laboratorio.",
+    "Eric pide más B-rolls: cuatro apoyos, 8.32 s de cobertura frente a 5.2 s en v6. Añadidos consulta real durante evaluación y fotografía editorial animada de espejo durante preferencia del paciente. Gestos 7.67–10.97 conservados. Sin cambiar voz, captions, música ni outro.",
+    "Eric: música distinta por reel, sin repetir canciones ni usar otro segmento como alternativa. City Sunshine no usada en recetas locales anteriores; reemplaza Funshine hasta el outro. Visuales y clicks conservados.",
+    "Eric detectó transparencia de la doctora entre espejo y laboratorio. v9 elimina fundidos alfa y blur en todas las entradas/salidas B-roll: cortes directos opacos. eof_action repeat conserva último fotograma hasta límite exacto de capa, evitando huecos subfotograma. Voz, música City Sunshine, clicks y keyframes conservados.",
+    "Eric autorizó escoger otra instrumental tras rechazar City Sunshine. Nueva pista Beat One, sin usos previos en recetas locales; conserva cuatro B-rolls, cortes opacos, keyframes, captions, voz y clicks de v9. Música nueva continua hasta el cierre. Escucha crítica pendiente."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 10
+  }
+}

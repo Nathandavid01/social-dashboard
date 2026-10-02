@@ -1,0 +1,100 @@
+{
+  "idea_id": "cinco-opciones-20260810",
+  "title": "Cinco Opciones Que Valen La Pena",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810160536_0315_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-08-10/0315-small-transcript.json",
+  "style": "../styles/delian-reference-v4.json",
+  "clips": [
+    {
+      "in": 1.18,
+      "out": 11.42,
+      "zoom": 1.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.6,
+      "out": 14.45,
+      "zoom": 1.12,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.95,
+      "zoom": 1.12,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.03,
+      "end": 1.5,
+      "text": "5 cosas que",
+      "primary_colour": "&H00C000C8"
+    },
+    {
+      "start": 1.5,
+      "end": 2.48,
+      "text": "definitivamente"
+    },
+    {
+      "start": 2.48,
+      "end": 3.88,
+      "text": "are worth your money"
+    },
+    {
+      "start": 3.88,
+      "end": 5.32,
+      "text": "Dental edition"
+    },
+    {
+      "start": 5.32,
+      "end": 6.36,
+      "text": "1. Invisalign"
+    },
+    {
+      "start": 6.36,
+      "end": 8.44,
+      "text": "2. Diseño de sonrisa"
+    },
+    {
+      "start": 8.44,
+      "end": 10.2,
+      "text": "3. Blanqueamiento dental"
+    },
+    {
+      "start": 10.27,
+      "end": 12.1,
+      "text": "4. Veneers o laminados"
+    },
+    {
+      "start": 12.16,
+      "end": 13.78,
+      "text": "5. Coronas"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Reedicion local del tema que aparece en Publicados/14 septiembre; no implica nueva publicacion ni aprobacion.",
+    "El corte excluye claqueta, pausas, instrucciones del rodaje y la busqueda de la quinta opcion. Se conserva la enumeracion hablada completa.",
+    "No se fuerza B-roll: las tomas cercanas de tour e hilo dental no ilustran la lista completa.",
+    "Whisper small duda del primer anglicismo; el subtitulo sigue el texto visible en la pieza publicada. Verificar escuchando la voz antes de entrega."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/review/published-14sep-contact.jpg"
+  },
+  "prior_published_edit_url": "https://drive.google.com/file/d/1lQE3jPfYEQdttg84QhfJ5XhqkN_S7RpA/view"
+}

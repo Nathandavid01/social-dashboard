@@ -1,0 +1,184 @@
+{
+  "idea_id": "bbf88fa1-ca1f-4986-8c79-320ed031c937",
+  "title": "La Mallorca gigante — versión corta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929101120_0347_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929101120_0347_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 12.26,
+      "out": 15.18,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 17.66,
+      "out": 22.56,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 52.3,
+      "out": 54.86,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 58.5,
+      "out": 62.24,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 70.82,
+      "out": 73.5,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.14,
+      "text": "Y no cualquier Mallorca,"
+    },
+    {
+      "start": 1.16,
+      "end": 2.34,
+      "text": "la Mallorca Gigante de"
+    },
+    {
+      "start": 2.34,
+      "end": 2.92,
+      "text": "Black Pepper."
+    },
+    {
+      "start": 2.92,
+      "end": 4.06,
+      "text": "la Mallorca no le"
+    },
+    {
+      "start": 4.06,
+      "end": 5.34,
+      "text": "puede faltar su azúcar,"
+    },
+    {
+      "start": 5.74,
+      "end": 6.58,
+      "text": "pero esto es bastante,"
+    },
+    {
+      "start": 6.7,
+      "end": 7.24,
+      "text": "porque así es que"
+    },
+    {
+      "start": 7.24,
+      "end": 7.82,
+      "text": "sabe buena."
+    },
+    {
+      "start": 7.92,
+      "end": 8.68,
+      "text": "Con lo mejor,"
+    },
+    {
+      "start": 8.82,
+      "end": 9.66,
+      "text": "con la salsita de"
+    },
+    {
+      "start": 9.66,
+      "end": 10.38,
+      "text": "queso de la casa."
+    },
+    {
+      "start": 10.48,
+      "end": 11.26,
+      "text": "Pero no solo con"
+    },
+    {
+      "start": 11.26,
+      "end": 12.1,
+      "text": "salsa de queso,"
+    },
+    {
+      "start": 12.14,
+      "end": 13.04,
+      "text": "con el favorito."
+    },
+    {
+      "start": 13.72,
+      "end": 14.12,
+      "text": "Bacon."
+    },
+    {
+      "start": 14.2,
+      "end": 15.18,
+      "text": "La Mallorca Gigante,"
+    },
+    {
+      "start": 15.18,
+      "end": 15.92,
+      "text": "la del Alcalde,"
+    },
+    {
+      "start": 15.92,
+      "end": 16.74,
+      "text": "pregunta por ella."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929101120_0347_D.MP4",
+      "in": 66.1,
+      "out": 69.02,
+      "at": 0,
+      "reason": "Gancho: mismo plato terminado con azúcar, queso y bacon antes de mostrar proceso. Plano revisado, audio de apoyo silenciado."
+    }
+  ],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 0,
+      "duration": 2.8,
+      "intensity": 0.2,
+      "reason": "Acercamiento suave al plato terminado"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 13.75,
+      "duration": 0.35,
+      "intensity": 0.25,
+      "reason": "Énfasis al añadir bacon"
+    }
+  ],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Revisión corta del mismo reel Mallorca: producto terminado desde primer fotograma; quitar introducción y repeticiones; azúcar, queso y bacon sincronizados; cerrar pregunta por ella y outro oficial. Conservar Be Jammin de este mismo reel, ninguna música duplicada entre reels nuevos. Fuente tipográfica provisional. Escucha crítica y aprobación pendientes."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Be Jammin.mp3",
+    "title": "Be Jammin",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "primer-sushi",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Tu Primer Sushi",
+  "source": "../media/yabuuchi/derived/primer-sushi-selection-v1.mp4",
+  "transcript": "../runs/yabuuchi-primer-sushi-selection-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 8.87,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 8.87,
+          "zoom": 1.04
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.92,
+      "text": "Si fuera mi primera vez"
+    },
+    {
+      "start": 0.92,
+      "end": 1.84,
+      "text": "probando el sushi,"
+    },
+    {
+      "start": 2.06,
+      "end": 3,
+      "text": "¿qué tú me recomendarías?"
+    },
+    {
+      "start": 3.2,
+      "end": 4,
+      "text": "Yo te diría que el"
+    },
+    {
+      "start": 4,
+      "end": 4.78,
+      "text": "Churrasco Roll."
+    },
+    {
+      "start": 4.84,
+      "end": 5.68,
+      "text": "El que lleva churrasco,"
+    },
+    {
+      "start": 5.72,
+      "end": 6.7,
+      "text": "queso crema, cebollín,"
+    },
+    {
+      "start": 6.8,
+      "end": 7.5,
+      "text": "arriba amarillito"
+    },
+    {
+      "start": 7.5,
+      "end": 8.23,
+      "text": "y salsa anguila."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/primer-sushi-selection-music-v1.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0990-01-recorrido-lateral-a-nivel-de-las-piezas-95c832d961.mp4",
+      "in": 0.03,
+      "out": 4.06,
+      "at": 4.84,
+      "eof_action": "pass",
+      "reason": "Churrasco Roll terminado durante la enumeración de sus ingredientes; toma limpia y sin audio, distinta de los videos 1 y 3."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123008_0985_D.MP4",
+      "in": 1.78,
+      "out": 10.05
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "Video 4; idea confirmada en página 1 del PDF Content Ideas-Yabuuchi.",
+    "Pregunta, recomendación e ingredientes conservados; pausa final antes del outro.",
+    "Anybody Expanded Black 72, entrada suave y cierre de piano vigente.",
+    "Plano lateral del producto diferente del detalle utilizado en video 3.",
+    "Revisión del usuario y escucha crítica pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.726,
+      "duration": 0.32,
+      "gain_db": -18,
+      "reason": "Entrada al Churrasco Roll"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 4.74,
+      "duration": 0.2,
+      "intensity": 0.65,
+      "reason": "Entrada al Churrasco Roll"
+    }
+  ],
+  "effects_reference": {
+    "request": "Mejorar efectos y sonidos para hacer el swoosh de la referencia",
+    "reference_audit": "runs/yabuuchi-swoosh-reference-qa/reference-audit.json",
+    "sound": "whoosh_sweep: síntesis original, ataque rápido y cola breve",
+    "visual": "whip_pan: barrido lateral con bordes reflejados, captions estables",
+    "total_cues": 7,
+    "sound_duration": 0.32,
+    "sound_peak_lead": 0.05,
+    "listening": "pending; no se afirma identidad auditiva"
+  },
+  "delivery_sequence": 4,
+  "idea_page": 1
+}

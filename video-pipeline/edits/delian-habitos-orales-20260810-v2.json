@@ -1,0 +1,109 @@
+{
+  "idea_id": "habitos-orales-20260810",
+  "title": "¿Qué afecta más tu salud oral?",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810151517_0293_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-08-10/0293-small-transcript.json",
+  "style": "../styles/delian-reference-v4.json",
+  "clips": [
+    {
+      "in": 1.84,
+      "out": 3.4,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 4.64,
+      "out": 8.06,
+      "zoom": 1.05,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.25,
+      "out": 14.54,
+      "zoom": 1.03,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.25,
+      "out": 20.42,
+      "zoom": 1.07,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.94,
+      "text": "Cepillarte los dientes"
+    },
+    {
+      "start": 0.94,
+      "end": 1.52,
+      "text": "muy fuerte."
+    },
+    {
+      "start": 1.6,
+      "end": 2.62,
+      "text": "Yo la pondría"
+    },
+    {
+      "start": 2.62,
+      "end": 4.88,
+      "text": "en el último lugar."
+    },
+    {
+      "start": 5.03,
+      "end": 6.25,
+      "text": "Comer mucho dulce."
+    },
+    {
+      "start": 7.61,
+      "end": 8.21,
+      "text": "Segundo."
+    },
+    {
+      "start": 8.32,
+      "end": 9.79,
+      "text": "Y no visitar a tu dentista"
+    },
+    {
+      "start": 9.79,
+      "end": 10.22,
+      "text": "en años."
+    },
+    {
+      "start": 11.02,
+      "end": 12.32,
+      "text": "Definitivamente es la primera."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Reedición local de una intervención que aparece en Publicados/28 agosto; no es contenido inédito ni una nueva publicación.",
+    "Se omite la claqueta inicial y la frase final incompleta «lo que podemos hacer».",
+    "La transcripción Whisper small se cotejó con un segundo pase orientado al vocabulario del diálogo; «Cepillarte los dientes muy fuerte» requiere escucha humana crítica antes de entregar.",
+    "No hay B-roll del tema en la carpeta ✅5; se preserva la toma real y se usan cambios sutiles de encuadre entre respuestas.",
+    "Subtítulos blancos con sombra violeta y outro oficial según referencia de marca; confirmar lectura y posición en el render.",
+    "V2: aumentar LRA a 10 LU en esta receta para evitar cola de 94 ms de loudnorm dinámico en AAC; no se cambió el normalizador global."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-habitos-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-28-agosto.mp4",
+    "published_contact": "../delian-loyola-video/review/publicados-28ago-contact.jpg"
+  },
+  "audio_master": {
+    "lra_lu": 10
+  }
+}

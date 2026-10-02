@@ -1,0 +1,53 @@
+{
+  "client": "Lenel Restaurant",
+  "idea_id": "aa3cbeaa-816b-45f2-b7f3-eca9d7361a1d",
+  "catalog": "runs/79bb2505-catalog.json",
+  "title": "Cava y salón",
+  "source": "../media/lenel/source/DJI_20260918134610_0783_D.MP4",
+  "transcript": "../runs/lenel-transcripts/DJI_20260918134610_0783_D.json",
+  "style": "../styles/lenel.json",
+  "clips": [
+    {"in": 2.6, "out": 23.48, "zoom": 1.08, "focus_y": 0.42, "audio_edge_fade": 0.015}
+  ],
+  "captions": [
+    {"start": 0.18, "end": 2.26, "text": "Amantes del vino,\nesta es nuestra cava de vino."},
+    {"start": 2.82, "end": 4.14, "text": "Aquí tenemos una selección de vinos."},
+    {"start": 4.24, "end": 6.28, "text": "Tenemos franceses,\ncalifornianos e italianos."},
+    {"start": 7.18, "end": 11.66, "text": "Y aparte de los vinos, este salón\nse utiliza para actividades privadas."},
+    {"start": 12.2, "end": 14.66, "text": "Tiene capacidad de 20 a 25 personas."},
+    {"start": 15.32, "end": 20.7, "text": "También tiene cócteles,\nque se preparan en la barra."}
+  ],
+  "broll": [
+    {
+      "source": "../media/lenel/source/DJI_20260918134931_0790_D.MP4",
+      "in": 1.5,
+      "out": 3.5,
+      "at": 4.24,
+      "original_source": "../media/lenel/source/DJI_20260918134931_0790_D.MP4",
+      "source_in": 1.5,
+      "source_out": 3.5,
+      "note": "Pared de vinos mientras nombra franceses, californianos e italianos."
+    },
+    {
+      "source": "../media/lenel/source/DJI_20260918135059_0795_D.MP4",
+      "in": 1.2,
+      "out": 3.0,
+      "at": 9.86,
+      "original_source": "../media/lenel/source/DJI_20260918135059_0795_D.MP4",
+      "source_in": 1.2,
+      "source_out": 3.0,
+      "note": "Comedor durante actividades privadas."
+    },
+    {
+      "source": "../media/lenel/source/DJI_20260918135131_0797_D.MP4",
+      "in": 2.0,
+      "out": 4.34,
+      "at": 16.26,
+      "original_source": "../media/lenel/source/DJI_20260918135131_0797_D.MP4",
+      "source_in": 2.0,
+      "source_out": 4.34,
+      "note": "Barra mientras habla de los cócteles."
+    }
+  ],
+  "editorial_note": "Se quita el arranque poco claro y «sí, bueno». 0784 y 0785 repiten solo la capacidad y no se publican aparte. Sin outro oficial y sin música nueva disponible."
+}

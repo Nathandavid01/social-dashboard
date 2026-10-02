@@ -1,0 +1,10 @@
+{
+  "client": "Los Cheesys",
+  "scope": "current_spoken_reel_request",
+  "user_correction": "Necesito un video de verdad con uno de los videos",
+  "rule": "Usar una toma original hablada con persona, voz real e idea completa; retirar claqueta, editar captions y cerrar con outro oficial. El montaje de comida anterior no satisface este encargo.",
+  "reference_analysis": "../cheesys-video/ESTILO-HECHOS.md",
+  "approval": "pending",
+  "broll_rule": "Incorporar B-roll real y pertinente sobre la voz continua. Para ubicacion usar el local correcto; para producto usar el producto exacto. No considerar suficiente entregar solo presentadora cuando existe apoyo pertinente.",
+  "latest_correction": "no tiene B rolls"
+}

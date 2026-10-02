@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-02",
+  "scope": "Brand folders, referenced assets, current profile/fonts, Delian graphics and shared music/effects; excludes raw recording libraries. Historical files may be present; consult client guide for current approved version.",
+  "packages": [
+    {
+      "client": "nanas",
+      "filename": "nanas-20261002.zip",
+      "file_count": 14,
+      "size": 129133240,
+      "sha256": "e20ca2b5cff82a61f36cd35959e84df6f136882f3a4f48f66fcd3cf220d3512f"
+    },
+    {
+      "client": "arecibo",
+      "filename": "arecibo-20261002.zip",
+      "file_count": 7,
+      "size": 34069598,
+      "sha256": "50e844c3117a4a0e5f63f3b4910c41ffa3b4a69b6e83c174aab29f25c0429779"
+    },
+    {
+      "client": "yabuuchi",
+      "filename": "yabuuchi-20261002.zip",
+      "file_count": 25,
+      "size": 49632629,
+      "sha256": "fb761f0012dbb9be85d868fe7c74bce80e60953a646cd270ec2c390692723463"
+    },
+    {
+      "client": "truco",
+      "filename": "truco-20261002.zip",
+      "file_count": 8,
+      "size": 68171162,
+      "sha256": "9ad894d75a7831777429fe958e02c268612d611ccf61d8cd400a998569e6d73b"
+    },
+    {
+      "client": "cheesys",
+      "filename": "cheesys-20261002.zip",
+      "file_count": 8,
+      "size": 29885846,
+      "sha256": "47c44dfb2cee4344987014d320cdd916def097402eb91cdef4fd75a02c6b60ef"
+    },
+    {
+      "client": "delian",
+      "filename": "delian-20261002.zip",
+      "file_count": 60,
+      "size": 59665578,
+      "sha256": "2742494bea1e794f9e67a9bc08a386c544a429a7788df9352dd4bd2a0ea8b57e"
+    },
+    {
+      "client": "farmacia-buena-vida",
+      "filename": "farmacia-buena-vida-20261002.zip",
+      "file_count": 13,
+      "size": 19810099,
+      "sha256": "7a17c1c805880c81a7c9077508af4aa4ee9afcb70ae9357b8b31907b6265c8a9"
+    },
+    {
+      "client": "mia-pizzeria",
+      "filename": "mia-pizzeria-20261002.zip",
+      "file_count": 9,
+      "size": 7162106,
+      "sha256": "d96861507c637f469ddb1673b22a076bb7720cda8c8d08b330d68a2c5c0bc5a7"
+    },
+    {
+      "client": "frida",
+      "filename": "frida-20261002.zip",
+      "file_count": 7,
+      "size": 35230008,
+      "sha256": "c1923b3d7ef5512a9ec522172291ac529539f90c94a6e69031e78a28a5a6aa06"
+    },
+    {
+      "client": "drop-coffee",
+      "filename": "drop-coffee-20261002.zip",
+      "file_count": 4,
+      "size": 138069,
+      "sha256": "43926de7a79b566348cedc3a0b0746db64203cffb4b374d07185c538c1b03efe"
+    },
+    {
+      "client": "alacena",
+      "filename": "alacena-20261002.zip",
+      "file_count": 12,
+      "size": 47692358,
+      "sha256": "df5031c605236c89e9482117274a3c1dfac6c61392156a96b52962b2d4cd36ed"
+    },
+    {
+      "client": "black-pepper",
+      "filename": "black-pepper-20261002.zip",
+      "file_count": 10,
+      "size": 48053497,
+      "sha256": "f4b3254d61e2020faca1dd960de46596e7f9bbeb00afc42625ec110b357a2d7c"
+    },
+    {
+      "client": "mondays-aguadilla",
+      "filename": "mondays-aguadilla-20261002.zip",
+      "file_count": 226,
+      "size": 35518007,
+      "sha256": "c3a7e1949f682db41a77cf8909bac66239ee6800922f5b39f5f2f153a41f1d06"
+    },
+    {
+      "client": "apiario",
+      "filename": "apiario-20261002.zip",
+      "file_count": 6,
+      "size": 6217456,
+      "sha256": "c2ea6e9eec3d3c94d6ec041ba8632058890384144a8f15c1356a3f8fb42670fd"
+    },
+    {
+      "client": "recursos-compartidos",
+      "filename": "recursos-compartidos-20261002.zip",
+      "file_count": 237,
+      "size": 1229062557,
+      "sha256": "82a24eeb688aeddc07e3e5f2b598dade350686faba0e285a1d98de972dc91235"
+    },
+    {
+      "client": "otros-recursos-marca",
+      "filename": "otros-recursos-marca-20261002.zip",
+      "file_count": 3,
+      "size": 6910521,
+      "sha256": "238d1690e77776430d9b60e21368bed162944e729e3bf28bcba9fd5d135f1100"
+    }
+  ],
+  "missing": [],
+  "storage": {
+    "provider": "Google Drive",
+    "folder_url": "https://drive.google.com/drive/u/0/folders/1NvsQafeE5Te0HNN1c9UdK7O-f0T9iNLt",
+    "status": "uploading",
+    "access": "Cuenta de Drive autorizada; no se ampliaron permisos."
+  },
+  "verification": {
+    "local": "CRC ZIP y SHA256 de todos los archivos empaquetados verificados",
+    "cloud": "Pendiente de completar subida y descarga de muestra"
+  },
+  "approved_masters": {
+    "mondays-aguadilla": {
+      "filename": "mondays-outro-standalone-v10.mp4",
+      "sha256": "770a776ede0699b0387996e46163f7c30b5c72825a0fb2e5eb82fcb061317268",
+      "note": "Versiones anteriores en el ZIP son históricas; consultar aprobación v10."
+    }
+  },
+  "resolved_references": [
+    {
+      "client": "delian",
+      "role": "font",
+      "path_in_zip": "workspace/video-pipeline/media/delian/brand/Shoika-SemiBold.otf",
+      "note": "Incluida en el ZIP; la referencia original del perfil requiere adaptar la ruta al restaurar."
+    }
+  ]
+}

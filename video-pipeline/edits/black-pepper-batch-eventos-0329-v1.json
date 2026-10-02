@@ -1,0 +1,223 @@
+{
+  "idea_id": "4f291068-5884-4b50-9865-d00b47183ca5",
+  "title": "Espacio para actividades",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929092036_0329_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929092036_0329_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.82,
+      "out": 5.4,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 7.92,
+      "out": 14.9,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 21.75,
+      "out": 23.75,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 31.1,
+      "out": 35.06,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 37.74,
+      "out": 42.32,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.26,
+      "text": "¿Sabías que Black Pepper"
+    },
+    {
+      "start": 1.26,
+      "end": 3.32,
+      "text": "tiene este espacio para"
+    },
+    {
+      "start": 3.32,
+      "end": 3.58,
+      "text": "ti?"
+    },
+    {
+      "start": 3.58,
+      "end": 4.78,
+      "text": "celebramos cumpleaños,"
+    },
+    {
+      "start": 4.88,
+      "end": 5.84,
+      "text": "actividades privadas,"
+    },
+    {
+      "start": 5.9,
+      "end": 7.32,
+      "text": "corporativas y tenemos"
+    },
+    {
+      "start": 7.32,
+      "end": 9.6,
+      "text": "esta barra disponible para"
+    },
+    {
+      "start": 9.6,
+      "end": 10.63,
+      "text": "los comensales"
+    },
+    {
+      "start": 10.63,
+      "end": 11.71,
+      "text": "tenemos esta área aquí"
+    },
+    {
+      "start": 11.71,
+      "end": 12.55,
+      "text": "que es nuestra sala,"
+    },
+    {
+      "start": 12.62,
+      "end": 14.0,
+      "text": "mucha gente se viene"
+    },
+    {
+      "start": 14.0,
+      "end": 14.94,
+      "text": "aquí los viernes en"
+    },
+    {
+      "start": 14.94,
+      "end": 15.42,
+      "text": "la noche,"
+    },
+    {
+      "start": 15.56,
+      "end": 16.58,
+      "text": "tienen la musiquita,"
+    },
+    {
+      "start": 16.58,
+      "end": 17.58,
+      "text": "miras como en casa"
+    },
+    {
+      "start": 17.58,
+      "end": 18.36,
+      "text": "y vivir una experiencia"
+    },
+    {
+      "start": 18.36,
+      "end": 19.14,
+      "text": "única que te lo"
+    },
+    {
+      "start": 19.14,
+      "end": 19.58,
+      "text": "regala,"
+    },
+    {
+      "start": 19.74,
+      "end": 20.22,
+      "text": "¿sabes quién?"
+    },
+    {
+      "start": 20.64,
+      "end": 21.1,
+      "text": "Black Pepper."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 3.58,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.56,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 12.56,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 16.52,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 1.26,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "tiene este espacio para"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 3.58,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "celebramos cumpleaños,"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 17.58,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "y vivir una experiencia"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Screen Saver.mp3",
+    "title": "Screen Saver",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea eventos. 0328 es la toma corta, no usada.",
+    "Se sacan bien realizados, pegas y artes/dreams: no están claros.",
+    "bienes→viernes en la noche. Hang out no entra. Raúl a cámara. Escucha crítica pendiente."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0274-domicilio",
+  "catalog": "runs/arecibo-0274-catalog.json",
+  "title": "Servicios A Domicilio",
+  "source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "original_source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0274.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 6.98,
+      "out": 17.4,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 0.4,
+      "text": "REALIZAMOS"
+    },
+    {
+      "start": 0.4,
+      "end": 1.32,
+      "text": "SERVICIOS A LUGAR"
+    },
+    {
+      "start": 1.44,
+      "end": 2.0,
+      "text": "LO QUE SON"
+    },
+    {
+      "start": 2.0,
+      "end": 3.48,
+      "text": "PACIENTES ENCAMADOS"
+    },
+    {
+      "start": 3.6,
+      "end": 4.24,
+      "text": "TAMBIÉN VISITAMOS"
+    },
+    {
+      "start": 4.24,
+      "end": 5.52,
+      "text": "CENTROS DE ENVEJECIENTES"
+    },
+    {
+      "start": 5.82,
+      "end": 7.5,
+      "text": "REALIZAMOS CULTIVOS\nDE ÚLCERA"
+    },
+    {
+      "start": 7.74,
+      "end": 8.98,
+      "text": "REALIZAMOS TOMAS"
+    },
+    {
+      "start": 8.98,
+      "end": 10.27,
+      "text": "DE CULTIVOS DE ORINA"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/domicilio-pro-v4.mp4",
+      "in": 0,
+      "out": 10.42,
+      "at": 0,
+      "eof_action": "repeat",
+      "kind": "brand_graphic",
+      "reason": "Original presenter with dimensional service illustrations and redesigned opening; no stock or synthetic human footage."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 2.03,
+      "duration": 0.09,
+      "gain_db": -17
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 4.2299999999999995,
+      "duration": 0.09,
+      "gain_db": -17
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 5.93,
+      "duration": 0.09,
+      "gain_db": -17
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 8.510000000000002,
+      "duration": 0.09,
+      "gain_db": -17
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 0.12,
+      "duration": 0.25,
+      "gain_db": -25
+    },
+    {
+      "kind": "preset",
+      "preset": "swipe",
+      "time": 5.8,
+      "duration": 0.16,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-domicilio-bed-v4.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "V4: opens on actual statement Realizamos servicios a lugar; no exterior opening, interviewer, or dependent sí.",
+    "Dimensional orthographic illustrations with lighting, shadows, subtle camera motion and four numbered service panels replace small outline badges.",
+    "Caption font remains fixed Montserrat70. Original continuous voice 6.98–17.40, no invented medical claim.",
+    "Graphics only over original presenter; clinical scenes clearly illustrative. Critical listening and user approval pending."
+  ],
+  "previous_version": "../runs/arecibo-domicilio-0274-v3.mp4"
+}

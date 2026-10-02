@@ -1,0 +1,103 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "424ff708-5bcb-47e4-9c73-be574641bf0b",
+  "catalog": "runs/a5d7705e-catalog.json",
+  "title": "Un cafecito en Apiario · Preparación",
+  "source": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/process-sequence-v3.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/no-dialogue.json",
+  "style": "../styles/apiario-overlays-rectangle-v4.json",
+  "caption_mode": "editorial",
+  "clips": [
+    {
+      "in": 0,
+      "out": 15.0,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 3.6,
+      "text": "Esto merece una pausa."
+    }
+  ],
+  "voice_filter": "volume=0",
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/orange-groove-bed-v3.wav",
+    "extend_through_outro": true,
+    "title": "Orange Groove",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/orange-groove-1257016/",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/music-selection.json"
+  },
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "same_client_hot_coffee": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/4315a45e-f4e9-4a28-9ad8-398a174a4816.mp4",
+    "same_client_cold_coffee": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/8e8a782f-7542-406e-ba1f-be1f07e13464.mp4",
+    "official_outro": "media/apiario/brand/outro.mp4"
+  },
+  "source_segments": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/f86e0033-431d-4aa2-99ff-d2dffaf87779.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/f86e0033-431d-4aa2-99ff-d2dffaf87779.mp4",
+      "source_in": 0.5,
+      "source_out": 3.5,
+      "speed": 1,
+      "at": 0,
+      "duration": 3.0,
+      "reason": "Gancho: espresso cayendo",
+      "sha256": "6ad9eea65ad1875a4e1292c0938aa505589abda62c6b67ca1f4faea477d21aa2"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "source_in": 0.6,
+      "source_out": 6.6,
+      "speed": 3,
+      "at": 3.0,
+      "duration": 2.0,
+      "reason": "Inicio del vertido acelerado3x",
+      "sha256": "eaa7cbc209669c34f3a05e76f4ecc5d8c758559e11924fea81bada701e727aae"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "source_in": 6.6,
+      "source_out": 14.6,
+      "speed": 1,
+      "at": 5.0,
+      "duration": 8.0,
+      "reason": "Dibujo de latte art a velocidad real, continuación sin repetir fotogramas",
+      "sha256": "eaa7cbc209669c34f3a05e76f4ecc5d8c758559e11924fea81bada701e727aae"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/3ad59132-1d72-4d96-925e-ee9f5c82ab81.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/3ad59132-1d72-4d96-925e-ee9f5c82ab81.mp4",
+      "source_in": 0.4,
+      "source_out": 2.4,
+      "speed": 1,
+      "at": 13.0,
+      "duration": 2.0,
+      "reason": "Taza terminada limpia",
+      "sha256": "b580b64b02ab0700c5c4c7f3316a2712e68561a5d96dbe624cb2727f3741faef"
+    }
+  ],
+  "review_notes": [
+    "Revisión solicitada por Eric2026-10-02: gancho superpuesto y duración ampliada con latte art normal. Comparte fuentes con Cafés calientes.",
+    "Sin fecha de apertura ni promesa de disponibilidad.",
+    "Gancho en zona superior con tipografía y colores Apiario; excepción de posición solo para esta pieza, petición texto encima.",
+    "Inicio3x, latte art1x; rangos consecutivos sin repetición. Audio natural pendiente de comprobación; no se simulan efectos.",
+    "Fuente exacta de captions y escucha crítica pendientes.",
+    "Eric2026-10-02: rectángulo de fondo para todos los overlays Apiario de este estilo. Montaje, música, texto y duración preservados."
+  ]
+}

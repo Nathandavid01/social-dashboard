@@ -1,0 +1,138 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "sin-pescado-crudo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Sushi Sin Pescado Crudo?",
+  "source": "../media/yabuuchi/derived/sin-pescado-crudo-base-v6.mp4",
+  "transcript": "../runs/yabuuchi-sin-pescado-crudo-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 12.3,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 0.82,
+      "text": "Chef, ¿y el sushi"
+    },
+    {
+      "start": 0.82,
+      "end": 1.7,
+      "text": "siempre tiene que llevar"
+    },
+    {
+      "start": 1.7,
+      "end": 2.46,
+      "text": "pescado crudo?"
+    },
+    {
+      "start": 2.54,
+      "end": 3.48,
+      "text": "No. Tenemos variedad"
+    },
+    {
+      "start": 3.48,
+      "end": 4.86,
+      "text": "de churrasco con amarillo."
+    },
+    {
+      "start": 4.9,
+      "end": 5.8,
+      "text": "Al igual, tenemos"
+    },
+    {
+      "start": 5.8,
+      "end": 6.62,
+      "text": "los onigiris"
+    },
+    {
+      "start": 6.62,
+      "end": 7.72,
+      "text": "que tenemos de pollo."
+    },
+    {
+      "start": 7.72,
+      "end": 9.32,
+      "text": "Y tenemos igualmente"
+    },
+    {
+      "start": 9.32,
+      "end": 10.32,
+      "text": "dumplings de pollo."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/sin-pescado-crudo-music-v6.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0364-01-caja-abierta-y-detalle-del-roll-fa4b7fd021.mp4",
+      "in": 0.35,
+      "out": 2.01,
+      "at": 3.2,
+      "eof_action": "pass",
+      "reason": "Churrasco Roll con amarillo durante la mención exacta; toma distinta de las ediciones vigentes."
+    },
+    {
+      "source": "../media/yabuuchi/source/DJI_20260909131711_0370_D.MP4",
+      "in": 13.5,
+      "out": 16.5,
+      "at": 9.3,
+      "eof_action": "repeat",
+      "reason": "Mordida completa y reacción de degustación, ampliadas a 3 segundos por solicitud de Eric. Audio silenciado. Reacción final después de concluir la voz de la chef."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914122012_0984_D.MP4",
+      "in": 1.1,
+      "out": 11.55
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "Pregunta literal del PDF, página 1. Actualiza borrador v3; no es una idea nunca editada.",
+    "Se conserva la respuesta completa y su voz real, incluida la lista de alternativas.",
+    "Dos B-rolls pertinentes sin reutilizar fuentes de apoyo de los reels vigentes; onigiris conserva chef por no tener plano literal identificado.",
+    "Anybody Expanded Black 72 y entrada suave vigente. Un barrido al revelar producto. Outro de piano vigente.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Evitar retorno de un fotograma a chef al terminar B-roll final.",
+    "Eric pide alargar el B-roll final de dumplings: de 1.13 a 3 segundos con mordida y reacción.",
+    "Se alarga la imagen 1.85s después de la voz para completar el bocado; extensión cubierta íntegramente por B-roll en movimiento. Música con nueva salida suave antes del mismo outro."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 3.086,
+      "duration": 0.32,
+      "gain_db": -21
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 3.1,
+      "duration": 0.2,
+      "intensity": 0.55
+    }
+  ],
+  "idea_page": 1
+}

@@ -1,0 +1,55 @@
+{
+  "idea_id": "dfe4e076-d084-4442-be0b-55188438061c",
+  "title": "plato",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-v7-source.mkv",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 15.103,
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {"start": 0.15, "end": 2.25, "text": "POV: tu picaña"},
+    {"start": 2.55, "end": 4.85, "text": "El término"},
+    {"start": 5.15, "end": 7.15, "text": "La cortamos"},
+    {"start": 7.45, "end": 9.95, "text": "Con vegetales"},
+    {"start": 10.25, "end": 14.9, "text": "Lista para tu mesa"}
+  ],
+  "broll": [],
+  "sounds": [
+    {"kind": "click", "time": 2.4, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 5.0, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 7.3, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 10.1, "duration": 0.045, "gain_db": -29},
+    {"kind": "click", "time": 15.1, "duration": 0.045, "gain_db": -29}
+  ],
+  "effects": [],
+  "review_notes": [
+    "v7 holds the finished plate 1.75s longer than v6 so God Mode can finish the phrase that was cut at 16.13s. The edit now ends at 17.88s, on the next downbeat. Same POV title, same music, same idea."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/cocina-coctel-batch/picana-proceso-music-provenance.json"
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial"
+}

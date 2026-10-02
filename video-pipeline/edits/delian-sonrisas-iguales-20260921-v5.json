@@ -1,0 +1,13 @@
+{
+  "idea_id": "sonrisas-iguales-20260921",
+  "title": "¿Todos Los Diseños De Sonrisa Se Ven Iguales?",
+  "source": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sonrisas-iguales-20260921-v4.mp4",
+  "source_sha256": "f0da3a9fdd5ccda87e8d4a0f7fe7bb464738eb0d10bb6de7c4abd1ffad8be50f",
+  "revision_method": "Opening-only reframing of delivered v4; first 22 frames cropped 540x960 at x300 y300 and scaled to1080x1920; opening caption re-applied with original Shoika profile; all later frames retain existing montage; AAC audio stream copied unchanged.",
+  "filter": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sonrisas-iguales-20260921-v5-render/filter.txt",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "request": "Eric 2026-09-30: edit the Oye doctora reel, more face and less full body in entry",
+  "previous_recipe": "edits/delian-sonrisas-iguales-20260921-v4.json",
+  "original_assets_availability": "External SSD unmounted; verified delivered v4 recovered from existing R2 receipt",
+  "user_review": "pending"
+}

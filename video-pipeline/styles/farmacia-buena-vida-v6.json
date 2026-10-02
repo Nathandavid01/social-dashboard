@@ -1,0 +1,29 @@
+{
+  "name": "Farmacia Buena Vida · Captions Habituales · DdjYVF1iRvv",
+  "font_file": "../media/farmacia-buena-vida/brand/Montserrat-Bold.ttf",
+  "font_family": "Montserrat",
+  "font_size": 96,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H003D8987",
+  "back_colour": "&H003D8987",
+  "border_style": 1,
+  "outline": 2,
+  "shadow": 3,
+  "alignment": 2,
+  "margin_x": 85,
+  "bottom_margin": 690,
+  "fixed_size": true,
+  "wrap_width": 850,
+  "max_words": 4,
+  "max_chars": 24,
+  "caption_animation": "none",
+  "status": "user_reference_visual_match_font_approximation_review_pending",
+  "reference": "https://www.instagram.com/reel/DdjYVF1iRvv/",
+  "notes": [
+    "Referencia expresa de Eric: DdjYVF1iRvv, captions habituales; caja oliva reservada para POV/mira esto.",
+    "Texto blanco, acento oliva, centrado sobre torso, frases de una o dos líneas.",
+    "Montserrat Bold es aproximación visual: identidad exacta de fuente y parámetros originales no confirmados por este reel.",
+    "Tamaño96 en ASS ajustado a la proporción observada; no es un valor leído del editor original."
+  ]
+}

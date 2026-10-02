@@ -1,0 +1,113 @@
+{
+  "client": "Apiario Coffee",
+  "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+  "idea_id": "424ff708-5bcb-47e4-9c73-be574641bf0b",
+  "catalog": "runs/a5d7705e-catalog.json",
+  "title": "Un cafecito en Apiario · Preparación",
+  "source": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/process-sequence-v1.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/no-dialogue.json",
+  "style": "../styles/apiario-countdown-v2.json",
+  "caption_mode": "editorial",
+  "clips": [
+    {
+      "in": 0,
+      "out": 15.3,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.1,
+      "end": 1.3,
+      "text": "Un cafecito"
+    },
+    {
+      "start": 1.3,
+      "end": 2.6,
+      "text": "en Apiario",
+      "emphasis": [
+        {
+          "text": "Apiario",
+          "colour": "&H000799CB"
+        }
+      ]
+    }
+  ],
+  "voice_filter": "volume=0",
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/assets/orange-groove-bed-v1.wav",
+    "extend_through_outro": true,
+    "title": "Orange Groove",
+    "license": "Motion Array paid subscription",
+    "url": "https://motionarray.com/royalty-free-music/orange-groove-1257016/",
+    "evidence": "/Volumes/Extreme SSD/Nate Media/apiario-preparacion-cafe-20261002/music-selection.json"
+  },
+  "outro": {
+    "source": "../media/apiario/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "same_client_hot_coffee": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/4315a45e-f4e9-4a28-9ad8-398a174a4816.mp4",
+    "same_client_cold_coffee": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/8e8a782f-7542-406e-ba1f-be1f07e13464.mp4",
+    "official_outro": "media/apiario/brand/outro.mp4"
+  },
+  "source_segments": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/e50f1f20-9952-4a9a-b8b8-8751d4feec76.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/e50f1f20-9952-4a9a-b8b8-8751d4feec76.mp4",
+      "source_in": 5.2,
+      "source_out": 7.8,
+      "speed": 1,
+      "at": 0,
+      "duration": 2.6,
+      "reason": "Colocar portafiltro y activar extracción",
+      "sha256": "a91c5d22c9e80b5461fa4811785cbeb1a96970f9bfe686f1fecc0dc0415b4af1"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/f86e0033-431d-4aa2-99ff-d2dffaf87779.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/f86e0033-431d-4aa2-99ff-d2dffaf87779.mp4",
+      "source_in": 0.5,
+      "source_out": 3.5,
+      "speed": 1,
+      "at": 2.6,
+      "duration": 3.0,
+      "reason": "Extracción en la misma taza marrón",
+      "sha256": "6ad9eea65ad1875a4e1292c0938aa505589abda62c6b67ca1f4faea477d21aa2"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/b9c41e75-b071-4a0c-ac99-c18a833325f0.mp4",
+      "source_in": 0.6,
+      "source_out": 22.2,
+      "speed": 3,
+      "at": 5.6,
+      "duration": 7.2,
+      "reason": "Vertido y dibujo; acelerado3x manteniendo continuidad",
+      "sha256": "eaa7cbc209669c34f3a05e76f4ecc5d8c758559e11924fea81bada701e727aae"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/3ad59132-1d72-4d96-925e-ee9f5c82ab81.mp4",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e/3ad59132-1d72-4d96-925e-ee9f5c82ab81.mp4",
+      "source_in": 0.3,
+      "source_out": 2.8,
+      "speed": 1,
+      "at": 12.8,
+      "duration": 2.5,
+      "reason": "Latte art terminado",
+      "sha256": "b580b64b02ab0700c5c4c7f3316a2712e68561a5d96dbe624cb2727f3741faef"
+    }
+  ],
+  "review_notes": [
+    "Reel nuevo de proceso; comparte parte del material con el video explicativo Cafés calientes, no es contenido crudo nunca usado.",
+    "Sin fecha de apertura ni promesa de disponibilidad.",
+    "Rótulo breve con perfil Apiario; manos y latte art quedan sin textos.",
+    "Vertido acelerado3x, sin repetir plano. No se usa el close-up de taza blanca porque rompe continuidad.",
+    "Fuente exacta de captions y escucha crítica pendientes."
+  ]
+}

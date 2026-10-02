@@ -1,0 +1,196 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-presentacion-bed-v2.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-presentacion-doctora",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Conoce A La Doctora",
+  "source": "../media/arecibo/DJI_20260909092729_0278_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0278.json",
+  "clips": [
+    {
+      "in": 66.9,
+      "out": 73.55,
+      "zoom": 1.12,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.65,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 74.08,
+      "out": 81.0,
+      "zoom": 1.16,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.92,
+          "zoom": 1.025
+        }
+      ]
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/presentacion-graphics-v3.mov",
+      "in": 0,
+      "out": 6.65,
+      "at": 0,
+      "kind": "brand_graphic",
+      "reason": "Transparent medical illustration and location marker synchronized with spoken concepts; presenter remains visible."
+    },
+    {
+      "source": "../media/arecibo/presentacion-location-v4.mov",
+      "in": 0,
+      "out": 4.1,
+      "at": 9.47,
+      "kind": "brand_graphic",
+      "original_source": "media/arecibo/DJI_20260909100214_0299_D.MP4",
+      "source_in": 2.7,
+      "source_out": 6.8,
+      "reason": "Real façade in cinematic photographic location inset; no fictional map. Presenter and captions remain clear."
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 3.57,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 4.98,
+      "duration": 0.09,
+      "gain_db": -19
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 9.47,
+      "duration": 0.32,
+      "gain_db": -25
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 9.89,
+      "duration": 0.09,
+      "gain_db": -21
+    },
+    {
+      "kind": "preset",
+      "preset": "swipe",
+      "time": 13.2,
+      "duration": 0.23,
+      "gain_db": -27
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.88,
+      "text": "SOY LA DOCTORA"
+    },
+    {
+      "start": 0.88,
+      "end": 1.68,
+      "text": "KARENÍ PÉREZ"
+    },
+    {
+      "start": 1.98,
+      "end": 2.96,
+      "text": "MI EXPERTISE ES"
+    },
+    {
+      "start": 2.96,
+      "end": 3.88,
+      "text": "EN EL DESARROLLO"
+    },
+    {
+      "start": 3.88,
+      "end": 4.96,
+      "text": "DE PRUEBAS MOLECULARES"
+    },
+    {
+      "start": 4.96,
+      "end": 6.5,
+      "text": "Y SEROLÓGICAS"
+    },
+    {
+      "start": 6.85,
+      "end": 7.99,
+      "text": "ESTAMOS AQUÍ"
+    },
+    {
+      "start": 7.99,
+      "end": 8.49,
+      "text": "EN EL LABORATORIO"
+    },
+    {
+      "start": 8.49,
+      "end": 9.45,
+      "text": "ARECIBO LAB"
+    },
+    {
+      "start": 9.47,
+      "end": 10.21,
+      "text": "UBICADO EN"
+    },
+    {
+      "start": 10.21,
+      "end": 11.02,
+      "text": "BARRIO FACTOR"
+    },
+    {
+      "start": 11.47,
+      "end": 12.61,
+      "text": "FRENTE A HQJ"
+    },
+    {
+      "start": 12.61,
+      "end": 13.57,
+      "text": "EN ARECIBO"
+    }
+  ],
+  "review_notes": [
+    "Nueva idea desde 0278: presentación y experiencia. Se omiten claqueta, ensayos y recomendaciones médicas.",
+    "Montserrat 70 fijo; color y outro de referencia v18; sin B-roll ajeno a la narración.",
+    "Fuente del nombre: transcripción disponible, ortografía pendiente de confirmación. Escucha crítica y aprobación pendientes.",
+    "Corrección del usuario: conservar continuación de ubicación del mismo original 0278 hasta 81.0; outro después de terminar la frase. Barrio Factor y Arecibo corrigen errores del reconocimiento automático.",
+    "v3: ADN y anticuerpo animados ilustran pruebas moleculares y serológicas, sin inventar resultados. Marcador de Barrio Factor en ubicación. Sin tapar rostro ni captions verdes. Sonidos en entradas. Aprobación de esta revisión pendiente.",
+    "v4 location: photographic architectural inset using actual façade0299 2.7–6.8s, cinematic title, restrained depth, smooth entrance/exit and gentle audio cues. No fabricated geographic claims."
+  ],
+  "previous_version": "../runs/arecibo-presentacion-0278-v3.mp4"
+}

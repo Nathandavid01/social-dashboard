@@ -1,0 +1,230 @@
+{
+  "idea_id": "6bb111ea-bed4-4b8a-a03a-5cee53e29ef5",
+  "title": "Catering: ¿llevan hasta el personal?",
+  "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/0f66800b-bab5-4ea5-b223-b379c45da5a2.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/catering-small.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 1.44,
+      "out": 5.76,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 4.32,
+          "zoom": 1.08
+        }
+      ]
+    },
+    {
+      "in": 6.1,
+      "out": 11.48,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.12
+        },
+        {
+          "time": 5.38,
+          "zoom": 1.16
+        }
+      ]
+    },
+    {
+      "in": 12.1,
+      "out": 16.5,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.05
+        },
+        {
+          "time": 4.4,
+          "zoom": 1.1
+        }
+      ]
+    },
+    {
+      "in": 18.46,
+      "out": 23.6,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.14
+        },
+        {
+          "time": 5.14,
+          "zoom": 1.1
+        }
+      ]
+    },
+    {
+      "in": 24.8,
+      "out": 31.44,
+      "zoom": 1,
+      "audio_edge_fade": 0.02,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 6.64,
+          "zoom": 1.13
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 0.54,
+      "text": "Oye, Karen,"
+    },
+    {
+      "start": 0.8,
+      "end": 1.54,
+      "text": "hablamos un poquito más"
+    },
+    {
+      "start": 1.54,
+      "end": 2.24,
+      "text": "de los catering."
+    },
+    {
+      "start": 2.3,
+      "end": 3.12,
+      "text": "¿Ustedes llevan todo?"
+    },
+    {
+      "start": 3.12,
+      "end": 4.26,
+      "text": "¿Hasta el personal?"
+    },
+    {
+      "start": 4.34,
+      "end": 5.22,
+      "text": "Sí, nos ajustamos"
+    },
+    {
+      "start": 5.22,
+      "end": 6.76,
+      "text": "a la necesidad del cliente"
+    },
+    {
+      "start": 6.76,
+      "end": 7.42,
+      "text": "y dependiendo"
+    },
+    {
+      "start": 7.42,
+      "end": 8.56,
+      "text": "del tipo de servicio"
+    },
+    {
+      "start": 8.56,
+      "end": 9.64,
+      "text": "que él solicite."
+    },
+    {
+      "start": 9.72,
+      "end": 10.9,
+      "text": "Llevamos a los"
+    },
+    {
+      "start": 10.9,
+      "end": 12.18,
+      "text": "meseros o bartender"
+    },
+    {
+      "start": 12.18,
+      "end": 14.04,
+      "text": "a solicitud del cliente."
+    },
+    {
+      "start": 14.1,
+      "end": 15.16,
+      "text": "Contamos con servicios de"
+    },
+    {
+      "start": 15.16,
+      "end": 16.04,
+      "text": "chef privado en vivo,"
+    },
+    {
+      "start": 16.26,
+      "end": 16.72,
+      "text": "en Airbnb,"
+    },
+    {
+      "start": 17.06,
+      "end": 18.16,
+      "text": "atendemos desde"
+    },
+    {
+      "start": 18.16,
+      "end": 19.18,
+      "text": "dos personas."
+    },
+    {
+      "start": 19.26,
+      "end": 20.7,
+      "text": "O si gustan"
+    },
+    {
+      "start": 20.7,
+      "end": 22.38,
+      "text": "el servicio entregado,"
+    },
+    {
+      "start": 22.64,
+      "end": 23.64,
+      "text": "cualquiera que sea"
+    },
+    {
+      "start": 23.64,
+      "end": 24.38,
+      "text": "su necesidad,"
+    },
+    {
+      "start": 24.6,
+      "end": 25.82,
+      "text": "nosotros los complacemos."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Nuevo reel de catering de grabación Sep30. Montaje de cinco planos con keyframes suaves; retirar repetición También tenemos y pausas. Sin B-roll ajeno. Fuente, blanco y sombra aprobados en familias v7."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/catering-v1/music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/descargas/896867"
+  }
+}

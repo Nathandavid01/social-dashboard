@@ -1,0 +1,302 @@
+{
+  "idea_id": "4f291068-5884-4b50-9865-d00b47183ca5",
+  "title": "Raul hablando a cámara Eventos",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929092036_0329_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929092036_0329_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.5,
+      "out": 5.42,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 5.86,
+      "out": 28.24,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 28.34,
+      "out": 35.18,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 35.5,
+      "out": 42.7,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.012
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.2,
+      "end": 1.56,
+      "text": "¿Sabías que Black Pepper"
+    },
+    {
+      "start": 1.56,
+      "end": 2.64,
+      "text": "tiene este espacio"
+    },
+    {
+      "start": 2.64,
+      "end": 3.84,
+      "text": "para ti?"
+    },
+    {
+      "start": 4.02,
+      "end": 5.58,
+      "text": "Nosotros los viernes"
+    },
+    {
+      "start": 5.58,
+      "end": 6.44,
+      "text": "y sábados celebramos"
+    },
+    {
+      "start": 6.44,
+      "end": 7.12,
+      "text": "cumpleaños,"
+    },
+    {
+      "start": 7.28,
+      "end": 8.18,
+      "text": "actividades privadas,"
+    },
+    {
+      "start": 8.3,
+      "end": 8.98,
+      "text": "corporativas"
+    },
+    {
+      "start": 8.98,
+      "end": 10.62,
+      "text": "y tenemos esta barra"
+    },
+    {
+      "start": 10.62,
+      "end": 12.0,
+      "text": "disponible para"
+    },
+    {
+      "start": 12.0,
+      "end": 12.96,
+      "text": "los comensales"
+    },
+    {
+      "start": 12.96,
+      "end": 13.8,
+      "text": "y todas las actividades"
+    },
+    {
+      "start": 13.8,
+      "end": 14.45,
+      "text": "que quieras hacer,"
+    },
+    {
+      "start": 14.66,
+      "end": 15.66,
+      "text": "igual que este espacio."
+    },
+    {
+      "start": 15.66,
+      "end": 17.18,
+      "text": "Tenemos ya el área"
+    },
+    {
+      "start": 17.18,
+      "end": 17.86,
+      "text": "de la barra,"
+    },
+    {
+      "start": 18.14,
+      "end": 18.98,
+      "text": "que es esta zona"
+    },
+    {
+      "start": 18.98,
+      "end": 19.66,
+      "text": "que está por aquí."
+    },
+    {
+      "start": 20.04,
+      "end": 20.94,
+      "text": "Tenemos esta área aquí"
+    },
+    {
+      "start": 20.94,
+      "end": 21.7,
+      "text": "que es nuestra sala,"
+    },
+    {
+      "start": 21.96,
+      "end": 22.64,
+      "text": "que es la favorita"
+    },
+    {
+      "start": 22.64,
+      "end": 23.08,
+      "text": "de muchos."
+    },
+    {
+      "start": 23.08,
+      "end": 23.48,
+      "text": "En esta sala"
+    },
+    {
+      "start": 23.48,
+      "end": 24.13,
+      "text": "la gente mira,"
+    },
+    {
+      "start": 24.52,
+      "end": 26.2,
+      "text": "se tira a janguear."
+    },
+    {
+      "start": 26.5,
+      "end": 27.54,
+      "text": "Aquí tú puedes janguear,"
+    },
+    {
+      "start": 27.64,
+      "end": 28.29,
+      "text": "pasar tu noche,"
+    },
+    {
+      "start": 28.3,
+      "end": 28.95,
+      "text": "darte los drinks."
+    },
+    {
+      "start": 29.12,
+      "end": 30.52,
+      "text": "Mucha gente se viene"
+    },
+    {
+      "start": 30.52,
+      "end": 31.28,
+      "text": "aquí los viernes"
+    },
+    {
+      "start": 31.28,
+      "end": 31.93,
+      "text": "en la noche,"
+    },
+    {
+      "start": 32.06,
+      "end": 33.0,
+      "text": "tienen la musiquita,"
+    },
+    {
+      "start": 33.34,
+      "end": 34.4,
+      "text": "ahí tienen la mesita"
+    },
+    {
+      "start": 34.4,
+      "end": 35.56,
+      "text": "para sentirnos, mira,"
+    },
+    {
+      "start": 35.7,
+      "end": 36.5,
+      "text": "como en casa"
+    },
+    {
+      "start": 36.5,
+      "end": 36.96,
+      "text": "y vivir una"
+    },
+    {
+      "start": 36.96,
+      "end": 37.66,
+      "text": "experiencia única"
+    },
+    {
+      "start": 37.66,
+      "end": 38.36,
+      "text": "que te lo regala."
+    },
+    {
+      "start": 38.5,
+      "end": 39.15,
+      "text": "¿Sabes quién?"
+    },
+    {
+      "start": 39.26,
+      "end": 39.98,
+      "text": "Black Pepper."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929092036_0329_D.MP4",
+      "in": 20.0,
+      "out": 21.2,
+      "at": 3.88,
+      "reason": "Eliminar mirada identificada5.7–6.1 sin cortar Nosotros. Plano del mismo espacio sin boca hablando; voz principal conservada."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 3.8,
+      "duration": 0.24,
+      "gain_db": -26,
+      "reason": "Entrada al plano de la barra3.88"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.08,
+      "duration": 0.07,
+      "gain_db": -25,
+      "reason": "Regreso al presentador"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 26.3,
+      "duration": 0.07,
+      "gain_db": -25,
+      "reason": "Jump cut en pausa tras janguear"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 33.06,
+      "duration": 0.24,
+      "gain_db": -27,
+      "reason": "Jump cut33.14 en pausa antes de ahí tienen la mesita"
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Eric precisa jump cuts en pausas con palabras completas, eliminar mirada de screenshot. Tres cortes5.42/5.86,28.24/28.34,35.18/35.50 entre palabras según small+turbo; conservar márgenes. Apoyo20–21.2 cubre salida de mirada y principio de Nosotros sin cortar voz. No acelerar ni recortar frases. Misma música y outro; grafo nuevo, audición pendiente. Eric solicita clicks o swoosh en cambios de escena. Cuatro acentos alternados, sin acumular click+swoosh en un corte ni duplicar audio del outro. Presets de síntesis local del kit, no descarga Motion Array ni identidad de sonidos de terceros. Misma imagen, voz, cortes y música."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "audio_master": {
+    "music_below_voice_lu": 16
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Screen Saver.mp3",
+    "title": "Screen Saver",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  }
+}

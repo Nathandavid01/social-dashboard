@@ -1,0 +1,202 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "sashimi-nigiri",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Nigiri Y Sashimi",
+  "source": "../media/yabuuchi/derived/nigiri-sashimi-rebuild-v7.mkv",
+  "transcript": "../runs/yabuuchi-sashimi-v7-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.34,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.14,
+      "text": "Chef, ¿cuál es la diferencia"
+    },
+    {
+      "start": 1.14,
+      "end": 2.4,
+      "text": "entre nigiri y sashimi?"
+    },
+    {
+      "start": 2.5,
+      "end": 3.46,
+      "text": "Es el pescado solito."
+    },
+    {
+      "start": 3.52,
+      "end": 4.38,
+      "text": "Una bolita de arroz"
+    },
+    {
+      "start": 4.38,
+      "end": 5.6,
+      "text": "con la proteína por encimita."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "in": 0,
+    "out": 2.92,
+    "gain": 1,
+    "provenance": "https://www.instagram.com/reel/DcCZF8YEtzV/",
+    "audio_range": [
+      16.1,
+      19.09
+    ]
+  },
+  "music": {
+    "source": "../media/yabuuchi/sashimi-nigiri-music-v4.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [],
+  "graphics": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 1.02,
+      "out": 3.5,
+      "at": 0,
+      "purpose": "Pregunta en cámara, sin el conteo",
+      "use": "voice_and_picture"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 7.08,
+      "out": 8.1,
+      "at": 2.48,
+      "purpose": "Es el pescado solito, en cámara, sin el nombre invertido",
+      "use": "voice_and_picture"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 9.36,
+      "out": 11.7,
+      "at": 3.5,
+      "purpose": "Una bolita de arroz con el gesto, en cámara, sin el nombre invertido",
+      "use": "voice_and_picture"
+    },
+    {
+      "source": "media/yabuuchi/graphics/nigiri-sashimi-v7/card.png",
+      "in": 0,
+      "out": 1.5,
+      "at": 5.84,
+      "purpose": "Una sola foto ilustrativa con SASHIMI y NIGIRI. No es un plato del local.",
+      "use": "illustrative_still"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "v7: la chef permanece en cámara en la pregunta y en las dos respuestas, incluido el gesto de la bolita.",
+    "Se retiran las atribuciones invertidas de la voz. Los nombres SASHIMI y NIGIRI viven solo en una foto.",
+    "La foto es ilustrativa, no un plato fotografiado de Yabuuchi.",
+    "Sin la serie Sushi en un minuto y sin ¿Cuál prefieres?.",
+    "Outro del reel de Instagram, no el de piano.",
+    "Escucha crítica de empalmes y visto de Eric pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.366,
+      "duration": 0.32,
+      "gain_db": -19,
+      "reason": "De la pregunta a es el pescado solito"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 3.386,
+      "duration": 0.32,
+      "gain_db": -19,
+      "reason": "A la bolita de arroz"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 5.726,
+      "duration": 0.32,
+      "gain_db": -19,
+      "reason": "A la única foto, con los nombres"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 7.14,
+      "duration": 0.2,
+      "gain_db": -24,
+      "reason": "Entrada del outro"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 2.38,
+      "duration": 0.2,
+      "intensity": 0.65,
+      "reason": "De la pregunta a es el pescado solito"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 3.4,
+      "duration": 0.2,
+      "intensity": 0.65,
+      "reason": "A la bolita de arroz"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 5.74,
+      "duration": 0.2,
+      "intensity": 0.65,
+      "reason": "A la única foto, con los nombres"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 7.14,
+      "duration": 0.2,
+      "intensity": 0.55,
+      "reason": "Entrada del outro"
+    }
+  ],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0.04,
+        "end": 2.4,
+        "role": "pregunta"
+      },
+      {
+        "start": 2.5,
+        "end": 3.46,
+        "role": "descripcion-pescado"
+      },
+      {
+        "start": 3.52,
+        "end": 5.6,
+        "role": "descripcion-arroz"
+      }
+    ]
+  },
+  "idea_page": 1,
+  "visual_assets": [
+    {
+      "asset": "media/yabuuchi/graphics/nigiri-sashimi-v7/card.png",
+      "kind": "ai_generated_educational_illustration",
+      "not_client_food": true,
+      "on_screen_disclosure": "Imagen ilustrativa"
+    }
+  ],
+  "body_seconds": 7.34
+}

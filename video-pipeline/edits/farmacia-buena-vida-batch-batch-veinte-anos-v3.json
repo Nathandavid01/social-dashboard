@@ -1,0 +1,54 @@
+{
+  "idea_id": "dd0d8cfe-ce0f-4d53-b3fd-2e8fb15f9745",
+  "title": "Cuando Ya No Tienes 20 Años",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/buena-vida-20-anos-20260927/source/assembly-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/buena-vida-20-anos-20260927/editorial.json",
+  "style": "../styles/farmacia-buena-vida-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.4,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 10.4,
+      "text": "Cuando te das cuenta\nde que ya no tienes\n20 años",
+      "bottom_margin": 1490
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "pop",
+      "time": 7.7,
+      "duration": 0.12,
+      "gain_db": -25
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Restaurar estilo del cliente v2: Montserrat Bold claro con borde verde/lima; conservar montaje y audio."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "caption_mode": "editorial",
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve"
+  }
+}

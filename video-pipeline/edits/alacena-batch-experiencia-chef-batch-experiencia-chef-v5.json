@@ -1,0 +1,58 @@
+{
+  "idea_id": "7d93e8c8-f933-45d8-9a0a-d0b88811bb3e",
+  "title": "experiencia",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/experiencia-v5-source.mkv",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {"in": 0, "out": 14.714, "audio_edge_fade": 0.02, "zoom": 1}
+  ],
+  "captions": [
+    {"start": 0.1, "end": 0.62, "text": "Alacena"},
+    {"start": 0.62, "end": 1.16, "text": "no es un"},
+    {"start": 1.16, "end": 1.77, "text": "restaurante más,"},
+    {"start": 1.94, "end": 2.75, "text": "es una experiencia."},
+    {"start": 3.08, "end": 3.48, "text": "Oye chef,"},
+    {"start": 3.76, "end": 4.28, "text": "¿qué pueden esperar"},
+    {"start": 4.28, "end": 4.82, "text": "las personas"},
+    {"start": 4.82, "end": 5.48, "text": "de la"},
+    {"start": 5.48, "end": 6.58, "text": "experiencia culinaria"},
+    {"start": 6.58, "end": 7.4, "text": "aquí en Alacena?"},
+    {"start": 7.62, "end": 7.92, "text": "Mira,"},
+    {"start": 7.98, "end": 8.42, "text": "las personas"},
+    {"start": 8.42, "end": 8.9, "text": "no solamente"},
+    {"start": 8.9, "end": 9.8, "text": "vienen a comer,"},
+    {"start": 10.24, "end": 11.1, "text": "vienes a vivir"},
+    {"start": 11.1, "end": 11.6, "text": "una experiencia"},
+    {"start": 11.6, "end": 12.39, "text": "culinaria."},
+    {"start": 12.42, "end": 13.02, "text": "En un ambiente"},
+    {"start": 13.02, "end": 14.48, "text": "acogedor y familiar."}
+  ],
+  "broll": [],
+  "sounds": [
+    {"kind": "click", "time": 3.0, "duration": 0.045, "gain_db": -27},
+    {"kind": "click", "time": 14.7, "duration": 0.045, "gain_db": -25}
+  ],
+  "effects": [],
+  "review_notes": [
+    "v5 is not approved on Recibo, so it can be re-edited. The sofa line Alacena no es un restaurante más, es una experiencia now opens the chef explanation. Same Have Funk Your Way song, longer slice. v4 stays on Recibo until Eric asks to replace it."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/motion-array-downloads/have-funk-your-way/MA_Vitality_HaveFunkYourWay_Short.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/experiencia-chef-batch/music-provenance.json"
+  },
+  "caption_mode": "editorial"
+}

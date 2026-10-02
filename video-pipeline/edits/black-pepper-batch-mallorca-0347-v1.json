@@ -1,0 +1,321 @@
+{
+  "idea_id": "bbf88fa1-ca1f-4986-8c79-320ed031c937",
+  "title": "La mallorca gigante",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929101120_0347_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929101120_0347_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 10.55,
+      "out": 22.56,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 25.9,
+      "out": 28.36,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 41.65,
+      "out": 44.86,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 52.3,
+      "out": 54.86,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 58.5,
+      "out": 62.24,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 70.82,
+      "out": 77.52,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 1.17,
+      "text": "La Mallorca de Black"
+    },
+    {
+      "start": 1.17,
+      "end": 1.59,
+      "text": "Pepper,"
+    },
+    {
+      "start": 1.71,
+      "end": 2.85,
+      "text": "y no cualquier Mallorca,"
+    },
+    {
+      "start": 2.87,
+      "end": 4.05,
+      "text": "la Mallorca Gigante de"
+    },
+    {
+      "start": 4.05,
+      "end": 4.63,
+      "text": "Black Pepper."
+    },
+    {
+      "start": 4.97,
+      "end": 7.11,
+      "text": "Y tú sabes que"
+    },
+    {
+      "start": 7.11,
+      "end": 8.25,
+      "text": "la Mallorca no le"
+    },
+    {
+      "start": 8.25,
+      "end": 9.53,
+      "text": "puede faltar su azúcar,"
+    },
+    {
+      "start": 9.93,
+      "end": 10.77,
+      "text": "pero esto es bastante,"
+    },
+    {
+      "start": 10.89,
+      "end": 11.43,
+      "text": "porque así es que"
+    },
+    {
+      "start": 11.43,
+      "end": 12.01,
+      "text": "sabe buena."
+    },
+    {
+      "start": 12.01,
+      "end": 12.47,
+      "text": "Esa es la del"
+    },
+    {
+      "start": 12.47,
+      "end": 12.89,
+      "text": "Alcalde,"
+    },
+    {
+      "start": 12.89,
+      "end": 13.51,
+      "text": "pero también es la"
+    },
+    {
+      "start": 13.51,
+      "end": 13.79,
+      "text": "mía,"
+    },
+    {
+      "start": 13.79,
+      "end": 14.54,
+      "text": "porque es mi favorita."
+    },
+    {
+      "start": 14.54,
+      "end": 15.0,
+      "text": "De verdad que ha"
+    },
+    {
+      "start": 15.0,
+      "end": 15.58,
+      "text": "sido uno de los"
+    },
+    {
+      "start": 15.58,
+      "end": 15.94,
+      "text": "best sellers,"
+    },
+    {
+      "start": 15.94,
+      "end": 16.68,
+      "text": "está en los"
+    },
+    {
+      "start": 16.68,
+      "end": 17.76,
+      "text": "dulce y salado."
+    },
+    {
+      "start": 17.78,
+      "end": 18.54,
+      "text": "Con lo mejor,"
+    },
+    {
+      "start": 18.68,
+      "end": 19.52,
+      "text": "con la salsita de"
+    },
+    {
+      "start": 19.52,
+      "end": 20.32,
+      "text": "queso de la casa."
+    },
+    {
+      "start": 20.34,
+      "end": 21.12,
+      "text": "Pero no solo con"
+    },
+    {
+      "start": 21.12,
+      "end": 21.96,
+      "text": "salsa de queso,"
+    },
+    {
+      "start": 22.0,
+      "end": 22.9,
+      "text": "con el favorito."
+    },
+    {
+      "start": 23.58,
+      "end": 24.06,
+      "text": "Bacon."
+    },
+    {
+      "start": 24.06,
+      "end": 25.04,
+      "text": "La Mallorca Gigante,"
+    },
+    {
+      "start": 25.04,
+      "end": 25.78,
+      "text": "la del Alcalde,"
+    },
+    {
+      "start": 25.78,
+      "end": 26.6,
+      "text": "pregunta por ella,"
+    },
+    {
+      "start": 26.86,
+      "end": 27.24,
+      "text": "y ya tú sabes"
+    },
+    {
+      "start": 27.24,
+      "end": 28.02,
+      "text": "que el equipo de"
+    },
+    {
+      "start": 28.02,
+      "end": 29.16,
+      "text": "Black Pepper va a"
+    },
+    {
+      "start": 29.16,
+      "end": 29.88,
+      "text": "estar más que listo,"
+    },
+    {
+      "start": 29.88,
+      "end": 30.28,
+      "text": "porque es uno de"
+    },
+    {
+      "start": 30.28,
+      "end": 30.68,
+      "text": "los best sellers."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 12.01,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 14.47,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 17.68,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 20.24,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 23.98,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 2.87,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "la Mallorca Gigante de"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 25.04,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "la del Alcalde,"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 23.58,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Bacon."
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Be Jammin.mp3",
+    "title": "Be Jammin",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea los más pedidos. Mallorca gigante, la del alcalde, dulce y salada, salsa de queso y bacon.",
+    "Se sacan Zuli y Chesis Papeles: el nombre no está seguro.",
+    "0352-0355 son tomas cortas de la misma mallorca, no usadas. Escucha crítica pendiente."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  }
+}

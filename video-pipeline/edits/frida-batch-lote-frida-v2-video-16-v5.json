@@ -1,0 +1,124 @@
+{
+  "idea_id": "frida-20260903-16",
+  "title": "Girls’ Night En Frida",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/VIDEO-16/DJI_20260903175444_0732_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/transcripts/DJI_20260903175444_0732_D.json",
+  "style": "../styles/frida-v3.json",
+  "clips": [
+    {
+      "in": 4.25,
+      "out": 12.18,
+      "zoom": 1,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.93,
+          "zoom": 1.02
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.15,
+      "end": 1.61,
+      "text": "Si estás planificando",
+      "emphasis": []
+    },
+    {
+      "start": 1.61,
+      "end": 2.79,
+      "text": "un girls’ night de chicas,",
+      "emphasis": [
+        {
+          "text": "girls’ night",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 2.79,
+      "end": 3.93,
+      "text": "ven a Frida Food and Bar,",
+      "emphasis": [
+        {
+          "text": "Frida Food and Bar",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 3.93,
+      "end": 5.69,
+      "text": "donde tienes comida deliciosa,",
+      "emphasis": [
+        {
+          "text": "comida deliciosa",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 5.89,
+      "end": 6.55,
+      "text": "tragos creativos",
+      "emphasis": [
+        {
+          "text": "tragos creativos",
+          "colour": "&H0000CCFF"
+        }
+      ]
+    },
+    {
+      "start": 6.55,
+      "end": 7.8,
+      "text": "y una experiencia única.",
+      "emphasis": []
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/VIDEO-16/DJI_20260903174947_0731_D.MP4",
+      "in": 6,
+      "out": 7.73,
+      "at": 6.2,
+      "fade_in": 0.3,
+      "zoom": 1.0,
+      "reason": "Brindis de las mismas amigas durante tragos creativos y experiencia unica."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Conservar la toma hablada 0732 con voz sincronizada, sin conteo ni espera inicial. Mantener a ambas amigas y sus tragos en cuadro; movimiento muy leve. Revisión estilo V2: énfasis amarillo y fundidos de apoyo propios de Frida.",
+    "Graph loop: corregir escala y posición de caption frente a referencia 379560044; conservar fuente como no confirmada.",
+    "Música provisional repetida de Mia; reemplazo pendiente de sesión Motion Array. No aprobar publicación.",
+    "Graph iteration 3: conservar énfasis de Frida Food and Bar al partir caption en dos líneas."
+  ],
+  "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+  "catalog": "runs/frida-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0
+  },
+  "references": {
+    "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+  },
+  "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters/music-16.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array subscription — provenance/reuse verification pending"
+  },
+  "audio_master": {
+    "lra_lu": 13
+  }
+}

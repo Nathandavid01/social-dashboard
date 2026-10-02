@@ -1,0 +1,237 @@
+{
+  "idea_id": "previo-diseno-20260921",
+  "title": "Qué Necesito Antes De Un Diseño De Sonrisa",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-loyola-video/source-2026-09-21/dji_mimo_20260921_171912_20260921171823_1790125047747_video.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/previo-transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.76,
+      "out": 11.82,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 10.06,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 22.25,
+      "out": 32.1,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 9.85,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 41.36,
+      "out": 47.22,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 5.86,
+          "zoom": 1.065
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 1.74,
+      "text": "Oye, doctora, ¿qué yo necesito",
+      "bottom_margin": 230,
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 1.74,
+      "end": 3.04,
+      "text": "previo a un diseño de sonrisa?",
+      "bottom_margin": 230,
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 3.36,
+      "end": 5.2,
+      "text": "Lo primero es una buena salud oral.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 5.38,
+      "end": 6.58,
+      "text": "Si hay inflamación de las encías,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 6.8,
+      "end": 8.06,
+      "text": "tenemos primero que trabajar eso",
+      "bottom_margin": 230
+    },
+    {
+      "start": 8.06,
+      "end": 9.9,
+      "text": "para entonces hacer un diseño de sonrisa.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 10.18,
+      "end": 10.84,
+      "text": "Segundo:",
+      "bottom_margin": 230
+    },
+    {
+      "start": 10.85,
+      "end": 11.53,
+      "text": "y bien importante,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 11.93,
+      "end": 12.97,
+      "text": "la posición de los dientes.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 13.09,
+      "end": 13.83,
+      "text": "Hay apiñamiento,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 13.99,
+      "end": 15.15,
+      "text": "mi recomendación es que primero",
+      "bottom_margin": 230
+    },
+    {
+      "start": 15.15,
+      "end": 17.27,
+      "text": "trabajemos con braces o con Invisalign",
+      "bottom_margin": 230
+    },
+    {
+      "start": 17.27,
+      "end": 19.69,
+      "text": "y luego entonces hacer el diseño de sonrisa.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 20.07,
+      "end": 21.31,
+      "text": "Para cualquiera de estos servicios",
+      "bottom_margin": 230
+    },
+    {
+      "start": 21.31,
+      "end": 23.07,
+      "text": "se puede comunicar con nosotros al",
+      "bottom_margin": 230
+    },
+    {
+      "start": 23.07,
+      "end": 25.77,
+      "text": "787-230-7573",
+      "bottom_margin": 230
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/realismo-3d/salud.mp4",
+      "in": 0,
+      "out": 3.5,
+      "at": 5.38,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Inflamación de encías en el primer requisito.",
+      "asset_family": "delian-3d-salud-20260927",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/realismo-3d/provenance.json",
+      "license": "CC BY 4.0; adaptation by Nate Media"
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/realismo-3d/posicion.mp4",
+      "in": 0,
+      "out": 3.0,
+      "at": 11.55,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Posición y apiñamiento durante el segundo requisito.",
+      "asset_family": "delian-3d-posicion-20260927",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/realismo-3d/provenance.json",
+      "license": "CC BY 4.0; adaptation by Nate Media"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 5.38,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.88,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 11.55,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 14.55,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Revision autorizada: escenas dentales 3D anatomicas con materiales, iluminacion y movimiento interno. Conservar dialogo/cortes de la ultima revision, captions, musica y outro. CC BY 4.0 atribuido en caption y creditos."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/revision-segundo-20260926/previo-music-v4.wav",
+    "title": "Sweet September",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Sweet September.provenance.json"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  }
+}

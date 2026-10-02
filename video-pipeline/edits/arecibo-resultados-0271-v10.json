@@ -1,0 +1,177 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0271-resultados",
+  "catalog": "runs/arecibo-0271-catalog.json",
+  "title": "¿Cuánto tardan los resultados?",
+  "source": "/Users/ericperez/Downloads/DJI_20260909091327_0271_D.LRF",
+  "original_source": "/Users/ericperez/Downloads/DJI_20260909091327_0271_D.LRF",
+  "transcript": "../runs/arecibo-0271-reviewed.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 1.7,
+      "out": 11.95,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 0.94,
+      "text": "OYE, DOCTORA"
+    },
+    {
+      "start": 1.22,
+      "end": 1.94,
+      "text": "¿Y CUÁNTO TARDAN"
+    },
+    {
+      "start": 1.94,
+      "end": 2.54,
+      "text": "LOS RESULTADOS"
+    },
+    {
+      "start": 2.54,
+      "end": 3.5,
+      "text": "AQUÍ EN ARECIBO LAB?"
+    },
+    {
+      "start": 4,
+      "end": 5.35,
+      "text": "BUENO, ESO DEPENDERÍA."
+    },
+    {
+      "start": 5.94,
+      "end": 7.12,
+      "text": "ESO PUEDE VARIAR"
+    },
+    {
+      "start": 7.12,
+      "end": 7.42,
+      "text": "DE UNOS QUINCE MINUTOS"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/0271-clock-cinematic-v10.mp4",
+      "in": 0,
+      "out": 2.83,
+      "at": 7.42,
+      "eof_action": "repeat",
+      "kind": "brand_graphic",
+      "fade_in": 0,
+      "reason": "Real workstation B-roll 0278 source 0.3-1.56 seconds, before turn and speech; slowed, clock with numerals only. No reused shot within reel."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 1.22,
+      "duration": 0.09,
+      "gain_db": -18
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 7.6,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tock",
+      "time": 8.0,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 8.4,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tock",
+      "time": 8.8,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 9.2,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tock",
+      "time": 9.6,
+      "duration": 0.1,
+      "gain_db": -14
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 7.42,
+      "duration": 0.3,
+      "gain_db": -26
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 9.85,
+      "duration": 0.35,
+      "gain_db": -26
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 4,
+      "duration": 2.8,
+      "intensity": 0.15
+    }
+  ],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-resultados-bed-v1.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "User-provided LRF source is native 720x1280. Export at1080x1920 is upscaled, not recovered native detail.",
+    "Remove count-in; preserve continuous question, qualifier eso dependería and response, with no speech splice.",
+    "Screen privacy treatment precedes captions. Review coverage frame by frame before release.",
+    "No suitable analyzer/results B-roll in current catalog; keep doctor and use factual clock graphic.",
+    "Montserrat70 fixed, white on green boxes per current client profile.",
+    "Audio listening and user approval pending.",
+    "V2: narrow moving screen mask to preserve surrounding wall and shelves at the opening.",
+    "V3: remove graphic text, clock dial advances in uniform five-minute steps with frame-aligned ticks. Captions preserve qualification; animation is illustrative, not a real countdown.",
+    "V4: usuario pide quitar el desenfoque rectangular del monitor; usar grabación original sin máscara.",
+    "V5: alternating mechanical clock tic-tac every 400ms throughout clock graphic, replaces faint generic clicks.",
+    "V6: replace empty graphic background with unique pre-speech workstation B-roll; graphic has only 15 and 30 with clock and tic-tac, no words or speech captions during graphic.",
+    "V7: reusable Motion Kit clock, easing, depth, luminous progress arc, animated numerals only and shared sound cue sheet.",
+    "V8: clock enters with zoom/slide/fade .38s and exits with shrink/lift/fade .4s; subtle whoosh for each, background continuous.",
+    "V9: user requested minute unit; clock displays 15 min then 30 min.",
+    "V10: range reads 15 min then a 30 min."
+  ],
+  "previous_version": "../runs/arecibo-resultados-0271-v9.mp4"
+}

@@ -1,0 +1,69 @@
+{
+  "idea_id": "c75fbecc-c1a4-43d1-818e-f41c0c99e510",
+  "title": "experiencia",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/6a429662-3064-4312-abae-0bf75db60c52.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/6a429662-3064-4312-abae-0bf75db60c52.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0.84,
+      "out": 3.84,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.0,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.85,
+      "text": "Alacena no es un restaurante más,"
+    },
+    {
+      "start": 1.94,
+      "end": 2.9,
+      "text": "es una experiencia."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.99,
+      "duration": 0.045,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "v2 keeps the only recorded line and shows it as two whole clauses, not the fragment no es un. The chef reel stays untouched."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/experiencia-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/experiencia-music-provenance.json"
+  },
+  "caption_mode": "editorial"
+}

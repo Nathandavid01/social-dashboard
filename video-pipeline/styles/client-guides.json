@@ -1,0 +1,761 @@
+{
+  "updated": "2026-10-02",
+  "source": "client-guide-inventory-20261002.json",
+  "clients": [
+    {
+      "client_id": "1d3c70ab-ddd1-4007-80c5-10dc3c10869a",
+      "name": "AA Real Estate",
+      "slug": "aa-real-estate",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/aa-real-estate.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+      "name": "Alacena",
+      "slug": "alacena",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/alacena.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "165b8416-5316-43e1-b6d6-f23caaa57b0c",
+      "name": "Anibal Fuentes PNP",
+      "slug": "anibal-fuentes-pnp",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/anibal-fuentes-pnp.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+      "name": "Apiario Coffee",
+      "slug": "apiario",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/apiario.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "afd0b9e9-efaa-45ac-96c0-d5ee6664c8a8",
+      "name": "Arasibo Steakhouse",
+      "slug": "arasibo-steakhouse",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/arasibo-steakhouse.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+      "name": "Arecibo Lab",
+      "slug": "arecibo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/arecibo.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "2474df99-7088-41b6-b3c5-00714e8d7b94",
+      "name": "Arte Digital Online",
+      "slug": "arte-digital-online",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/arte-digital-online.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "d0ed1ba9-9b59-4f3c-9242-858fd676b648",
+      "name": "Beyond Performance 5K",
+      "slug": "beyond-performance-5k",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/beyond-performance-5k.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "5651c1b1-068f-4bc4-836f-d2486e9e8228",
+      "name": "Beyond PVC Cabinets and Closets",
+      "slug": "beyond-pvc-cabinets-and-closets",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/beyond-pvc-cabinets-and-closets.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+      "name": "Black Pepper",
+      "slug": "black-pepper",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/black-pepper.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "bb54f625-cee2-4f00-8715-a9e726c08fa9",
+      "name": "Blend Salon",
+      "slug": "blend-salon",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/blend-salon.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "cf4dd365-2987-4a76-bb2e-29dc87946401",
+      "name": "Blue Chiropractic",
+      "slug": "blue-chiropractic",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/blue-chiropractic.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "0760e278-1ca7-4d97-b838-9e1e20f06000",
+      "name": "Brisas del Mar",
+      "slug": "brisas-del-mar",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/brisas-del-mar.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "94c9b664-8133-4511-b40a-ec8a8cc4320e",
+      "name": "Cafe Don Rogelio",
+      "slug": "cafe-don-rogelio",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/cafe-don-rogelio.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "b42f8a4c-5d18-4c7b-bb97-e2de4b3f526e",
+      "name": "Café El Bosque",
+      "slug": "cafe-el-bosque",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/cafe-el-bosque.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "297fce35-3c1b-46ac-8419-6a73245be5fb",
+      "name": "Casa Playa",
+      "slug": "casa-playa",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/casa-playa.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "aaf395d4-d8e6-4860-9728-4a00b91db025",
+      "name": "Casita Vieja",
+      "slug": "casita-vieja",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/casita-vieja.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "5b6240d3-03d6-47cf-ae3b-4ce178773719",
+      "name": "Centro de Inspeccion Colombo",
+      "slug": "centro-de-inspeccion-colombo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/centro-de-inspeccion-colombo.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "94c17451-0465-45de-8502-0ec5532d5495",
+      "name": "Cheesy",
+      "slug": "cheesys",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/cheesys.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "3117c12f-0421-460f-a7e8-3d9b30414809",
+      "name": "Codepola",
+      "slug": "codepola",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/codepola.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "9bd72748-868e-47fe-bb49-5d5d4473f4c3",
+      "name": "Dabel Brand",
+      "slug": "dabel-brand",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dabel-brand.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "5fd3c15a-1bc0-4f81-b44b-cbb1f62ed793",
+      "name": "Danny Mudanzas",
+      "slug": "danny-mudanzas",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/danny-mudanzas.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "e16297ff-52c4-459c-b410-ee4c806d46b5",
+      "name": "Del Mar Construction and Development",
+      "slug": "del-mar-construction-and-development",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/del-mar-construction-and-development.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "64cd9cab-23e1-4025-a952-ecae672e5bd6",
+      "name": "Dorado del Mar Club",
+      "slug": "dorado-del-mar-club",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dorado-del-mar-club.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "9f50b29a-7ae2-4f17-b361-c7a0fb5fe447",
+      "name": "Dorta Pizza",
+      "slug": "dorta-pizza",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dorta-pizza.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "803bd107-87be-4b2e-be69-d98ed1a9b340",
+      "name": "Dr. Normandia",
+      "slug": "dr-normandia",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dr-normandia.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "816f31b0-e12c-43c2-8277-87aa90d59e0d",
+      "name": "Dr. Rodriguez Caribbean Shoulder and Elbow Institute",
+      "slug": "dr-rodriguez-caribbean-shoulder-and-elbow-institute",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dr-rodriguez-caribbean-shoulder-and-elbow-institute.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "eda4736a-6023-4dac-9220-e0aab981e371",
+      "name": "Dr.Soler UltraFit Wellness Clinics",
+      "slug": "dr-soler-ultrafit-wellness-clinics",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dr-soler-ultrafit-wellness-clinics.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+      "name": "Dra. Delian Loyola",
+      "slug": "delian",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/delian.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "06d47cf4-642b-42c8-9249-0f1ec4846dea",
+      "name": "Drop Coffee",
+      "slug": "drop-coffee",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/drop-coffee.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "97ca949f-5bc2-4296-b946-4f2edcd06b8d",
+      "name": "DumpPink LLC",
+      "slug": "dumppink-llc",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/dumppink-llc.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "7dd62e83-acc5-45eb-aba1-237987e9f4ff",
+      "name": "El Truco de Guin",
+      "slug": "truco",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/truco.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "e5d28988-66d3-4f9f-88e0-83de2125c2b9",
+      "name": "Ely Rosa Sportwear",
+      "slug": "ely-rosa-sportwear",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/ely-rosa-sportwear.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "4cdf156b-c2a7-48d1-8c07-7abdb2e24f8e",
+      "name": "Equipo De Mercadeo NMedia",
+      "slug": "equipo-de-mercadeo-nmedia",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/equipo-de-mercadeo-nmedia.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "772dba20-6db2-4e3c-a1d9-37a4d05ca47b",
+      "name": "Familia Pelaez",
+      "slug": "familia-pelaez",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/familia-pelaez.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+      "name": "Farmacia Buena Vida",
+      "slug": "farmacia-buena-vida",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/farmacia-buena-vida.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "bc55a5fb-ccff-4576-a7ec-316ed39978cd",
+      "name": "Farmacia Tierras Nuevas",
+      "slug": "farmacia-tierras-nuevas",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/farmacia-tierras-nuevas.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+      "name": "Frida",
+      "slug": "frida",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/frida.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "8ac99fec-a919-4640-9598-84fd29f7d036",
+      "name": "Futones Por Sangit",
+      "slug": "futones-por-sangit",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/futones-por-sangit.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "55e46bf2-f7e5-446b-bbdd-a5b341a1099c",
+      "name": "Geovanny Alamo",
+      "slug": "geovanny-alamo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/geovanny-alamo.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "1c1aea9a-0188-4ce2-a622-ea0032195589",
+      "name": "Go-Kart",
+      "slug": "go-kart",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/go-kart.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "b5695755-35ba-4b79-8269-fb49435e51b6",
+      "name": "Karen Licenciada",
+      "slug": "karen-licenciada",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/karen-licenciada.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "c510a48c-e69a-4736-a108-83f528323d32",
+      "name": "Kikiriki BBQ",
+      "slug": "kikiriki-bbq",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/kikiriki-bbq.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "bc82993b-6a7d-488b-8138-838a952f82f3",
+      "name": "La Guarapera",
+      "slug": "la-guarapera",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/la-guarapera.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "a53a66cc-fda0-43c6-9397-a14533fab44c",
+      "name": "La Guira",
+      "slug": "la-guira",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/la-guira.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "851c2a63-f656-4048-9ba4-eb8f4ad80d7e",
+      "name": "La Herencia by Familia Pelaez",
+      "slug": "la-herencia-by-familia-pelaez",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/la-herencia-by-familia-pelaez.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "efa744fa-c12a-4c1e-b455-c4cff2c53643",
+      "name": "La Rambla Tapas y Vino",
+      "slug": "la-rambla-tapas-y-vino",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/la-rambla-tapas-y-vino.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "a6705cc5-af08-492d-a1a4-a027f23488cf",
+      "name": "La Rotonda",
+      "slug": "la-rotonda",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/la-rotonda.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "86cbac75-43a8-492b-bd71-46deb38249a6",
+      "name": "Laboratorios Toledo",
+      "slug": "laboratorios-toledo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/laboratorios-toledo.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "0ab1ec30-b2a9-47ce-b166-ad251b487e0d",
+      "name": "Laut",
+      "slug": "laut",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/laut.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "79bb2505-d04d-47d4-a97b-623ce0fc04e3",
+      "name": "Lenel",
+      "slug": "lenel",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/lenel.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "8f85b032-348f-490b-ae65-f1967e9cbf93",
+      "name": "Lucas",
+      "slug": "lucas",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/lucas.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "e6e840ae-4619-4d06-9957-36b6b8b14a36",
+      "name": "Lucky Pet",
+      "slug": "lucky-pet",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/lucky-pet.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "fd68b1de-1b91-4f47-9d26-dd628cf1cded",
+      "name": "Lumavi Properties",
+      "slug": "lumavi-properties",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/lumavi-properties.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "1c25f7c1-33c8-49e7-8017-4e64d0948340",
+      "name": "Magic 97.3 FM",
+      "slug": "magic-97-3-fm",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/magic-97-3-fm.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+      "name": "Mia Pizzeria",
+      "slug": "mia-pizzeria",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/mia-pizzeria.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "739d0b87-69b1-42f9-b93e-fc0b12063ac8",
+      "name": "Miti Miti",
+      "slug": "miti-miti",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/miti-miti.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "91a876dc-746c-4c08-96eb-97b6d80f8a15",
+      "name": "Mojito Mojito",
+      "slug": "mojito-mojito",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/mojito-mojito.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+      "name": "Mondays Aguadilla",
+      "slug": "mondays-aguadilla",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/mondays-aguadilla.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true,
+      "outro_status": "v10 aprobado por Eric; másteres con música y visual guardados y verificados en Drive 2026-10-02",
+      "outro_drive_folder": "https://drive.google.com/drive/folders/1IBQPOB9d-iWvXUnqLmPPLZz_lOOMm9OJ",
+      "caption_rule": "Siempre una línea; perfil mondays-aguadilla-v3.json"
+    },
+    {
+      "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+      "name": "Nanas Playhouse",
+      "slug": "nanas",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/nanas.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "b7f932b9-7276-4020-bddd-fe35b81547be",
+      "name": "Nathandavidts._",
+      "slug": "nathandavidts",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/nathandavidts.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "70242737-d9e2-4b14-b5f1-03a9f82d9c00",
+      "name": "Neumaticos PR",
+      "slug": "neumaticos-pr",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/neumaticos-pr.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "6f58cfef-2c93-4b57-bde3-d94c07d4cd25",
+      "name": "New York",
+      "slug": "new-york",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/new-york.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "71f43bee-c444-478e-adaf-6095d72de1fb",
+      "name": "New York Restaurant",
+      "slug": "new-york-restaurant",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/new-york-restaurant.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "64745824-b86f-4b35-bf8f-d87828a73674",
+      "name": "Nordwave",
+      "slug": "nordwave",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/nordwave.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "0ff514d3-bea0-47c7-bdec-31ba192ec875",
+      "name": "NutriMed",
+      "slug": "nutrimed",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/nutrimed.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "e818fef9-e96e-4b54-ac6b-a7dc768b068e",
+      "name": "Pa' Ya Auto Parts Inc.",
+      "slug": "pa-ya-auto-parts-inc",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/pa-ya-auto-parts-inc.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "64052100-4667-45fc-a947-6043b6fcf33c",
+      "name": "Pa' ya Pal Barrio",
+      "slug": "pa-ya-pal-barrio",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/pa-ya-pal-barrio.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "a85506be-7a93-4c45-9919-dfef9925d3cb",
+      "name": "Panaderia La Nueva Modelo",
+      "slug": "panaderia-la-nueva-modelo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/panaderia-la-nueva-modelo.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "f4bb3e4d-0326-400e-b2eb-76ce79eba0e5",
+      "name": "Picaros",
+      "slug": "picaros",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/picaros.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "77c56562-6943-499a-a6d2-4a79f1810c0d",
+      "name": "Pizzeria San Lazaro",
+      "slug": "pizzeria-san-lazaro",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/pizzeria-san-lazaro.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "ab64a8c5-312e-48e4-afbf-c52c0d0fa005",
+      "name": "Post Lucky Pet",
+      "slug": "post-lucky-pet",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/post-lucky-pet.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "20b12701-ca67-4a3c-9ce0-cf888f33bc1a",
+      "name": "Post Sanguit",
+      "slug": "post-sanguit",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/post-sanguit.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "2f343153-6ec8-4e49-b41e-7c047ae6b6f7",
+      "name": "Post VSS",
+      "slug": "post-vss",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/post-vss.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "ef40737d-babe-4938-a2a1-b9127a697507",
+      "name": "PR SURF",
+      "slug": "pr-surf",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/pr-surf.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "cfae7f0c-c301-4ed6-a37e-0c5a8e22973f",
+      "name": "Predator Gaming Center",
+      "slug": "predator-gaming-center",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/predator-gaming-center.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "7f4a8757-7811-4fb4-afc0-87dc0c50c56d",
+      "name": "Primer Round Oficial",
+      "slug": "primer-round-oficial",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/primer-round-oficial.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "fe13e02d-90f4-4595-bbc0-e39099aad175",
+      "name": "Profamilias",
+      "slug": "profamilias",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/profamilias.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "6f0ed5af-96ef-4bc9-9554-7d0b44f320f8",
+      "name": "Puerto Rico Cardiology",
+      "slug": "puerto-rico-cardiology",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/puerto-rico-cardiology.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "cc2411a3-9904-4c1e-b165-ce648d3caa39",
+      "name": "Quantika",
+      "slug": "quantika",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/quantika.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "5c875adb-a919-462e-8b21-b18b05f1e974",
+      "name": "Restauco Leather and Tops",
+      "slug": "restauco-leather-and-tops",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/restauco-leather-and-tops.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "834db959-bb9a-451e-85a9-50ff89333104",
+      "name": "Restaurante Kseros Fusion Caribena",
+      "slug": "restaurante-kseros-fusion-caribena",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/restaurante-kseros-fusion-caribena.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "2d974994-3056-4659-9325-cb50ca89f813",
+      "name": "Ricky Tattoo",
+      "slug": "ricky-tattoo",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/ricky-tattoo.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "83e53a6d-fa07-4aa2-b1bc-8cc736e6593b",
+      "name": "RP Sports",
+      "slug": "rp-sports",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/rp-sports.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "f24d85b4-989f-4bae-8092-2562fc42577f",
+      "name": "Sal y Brisa",
+      "slug": "sal-y-brisa",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/sal-y-brisa.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "4b3fd780-7ba9-4ab7-bcee-4ef5d0239712",
+      "name": "Shooters Sports Armory",
+      "slug": "shooters-sports-armory",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/shooters-sports-armory.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "12984c76-aad4-4ea5-96dc-f21790495004",
+      "name": "Speedy Net",
+      "slug": "speedy-net",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/speedy-net.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "c32682f4-f785-419a-b84d-ef20e676ee9c",
+      "name": "Style by Joeline",
+      "slug": "style-by-joeline",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/style-by-joeline.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "517ff00c-65aa-4532-ba3e-cf825f4b33e1",
+      "name": "Tito Rios",
+      "slug": "tito-rios",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/tito-rios.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "47de984f-33e2-418b-8a97-eddd0022731d",
+      "name": "Tu Cerrajero Puerto Rico",
+      "slug": "tu-cerrajero-puerto-rico",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/tu-cerrajero-puerto-rico.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "8a8f2355-f7e3-403d-96bd-2f1ea1cbd6a6",
+      "name": "VSS Properties",
+      "slug": "vss-properties",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/vss-properties.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "877289aa-4f1d-412c-a700-4c8dae1a9e4a",
+      "name": "White Point Esthetic",
+      "slug": "white-point-esthetic",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/white-point-esthetic.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    },
+    {
+      "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+      "name": "YabushiSushi",
+      "slug": "yabuuchi",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/yabuuchi.md",
+      "status": "ficha previa ampliada; consultar pendientes",
+      "existing_profile": true
+    },
+    {
+      "client_id": "b7e1e44a-dded-4dae-936e-fbc38120f15f",
+      "name": "Yan Seguros",
+      "slug": "yan-seguros",
+      "guide": "/Users/ericperez/Nate Media/video-pipeline/styles/editor-guides/yan-seguros.md",
+      "status": "ficha base; referencias pendientes",
+      "existing_profile": false
+    }
+  ]
+}

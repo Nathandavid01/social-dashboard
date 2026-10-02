@@ -1,0 +1,234 @@
+{
+  "idea_id": "bbf88fa1-ca1f-4986-8c79-320ed031c937",
+  "title": "La Mallorca gigante — versión corta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929101120_0347_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929101120_0347_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 10.55,
+      "out": 22.64,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 41.65,
+      "out": 54.95,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 58.5,
+      "out": 62.32,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 70.82,
+      "out": 73.5,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 1.21,
+      "text": "La Mallorca de Black"
+    },
+    {
+      "start": 1.17,
+      "end": 2.17,
+      "text": "Pepper, y no cualquier"
+    },
+    {
+      "start": 2.13,
+      "end": 3.49,
+      "text": "Mallorca, la Mallorca"
+    },
+    {
+      "start": 3.45,
+      "end": 4.59,
+      "text": "Gigante de Black Pepper."
+    },
+    {
+      "start": 4.97,
+      "end": 7.16,
+      "text": "Y tú sabes que"
+    },
+    {
+      "start": 7.11,
+      "end": 8.3,
+      "text": "la Mallorca no le"
+    },
+    {
+      "start": 8.25,
+      "end": 9.5,
+      "text": "puede faltar su azúcar,"
+    },
+    {
+      "start": 9.93,
+      "end": 10.73,
+      "text": "pero esto es bastante,"
+    },
+    {
+      "start": 10.89,
+      "end": 11.48,
+      "text": "porque así es que"
+    },
+    {
+      "start": 11.43,
+      "end": 12.05,
+      "text": "sabe buena."
+    },
+    {
+      "start": 12.16,
+      "end": 12.67,
+      "text": "De verdad que ha"
+    },
+    {
+      "start": 12.62,
+      "end": 13.25,
+      "text": "sido uno de los"
+    },
+    {
+      "start": 13.2,
+      "end": 14.14,
+      "text": "best sellers, está en"
+    },
+    {
+      "start": 14.1,
+      "end": 15.35,
+      "text": "los dulces y salados."
+    },
+    {
+      "start": 15.74,
+      "end": 17.89,
+      "text": "Así que, Corillo, si"
+    },
+    {
+      "start": 17.84,
+      "end": 18.91,
+      "text": "tú quieres tener un"
+    },
+    {
+      "start": 18.86,
+      "end": 19.95,
+      "text": "plato dulcisalado,"
+    },
+    {
+      "start": 20.0,
+      "end": 20.51,
+      "text": "diles a Zuli que",
+      "behind_camera": true
+    },
+    {
+      "start": 20.46,
+      "end": 21.21,
+      "text": "lo tiene que coronar",
+      "behind_camera": true
+    },
+    {
+      "start": 21.16,
+      "end": 22.03,
+      "text": "y terminar con qué?",
+      "behind_camera": true
+    },
+    {
+      "start": 22.84,
+      "end": 23.89,
+      "text": "Con lo mejor, con"
+    },
+    {
+      "start": 23.84,
+      "end": 24.83,
+      "text": "la salsita de queso"
+    },
+    {
+      "start": 24.78,
+      "end": 25.35,
+      "text": "de la casa."
+    },
+    {
+      "start": 25.49,
+      "end": 26.32,
+      "text": "Pero no solo con"
+    },
+    {
+      "start": 26.27,
+      "end": 27.28,
+      "text": "salsa de queso, con"
+    },
+    {
+      "start": 27.23,
+      "end": 28.02,
+      "text": "el favorito."
+    },
+    {
+      "start": 28.73,
+      "end": 29.18,
+      "text": "Bacon."
+    },
+    {
+      "start": 29.29,
+      "end": 30.5,
+      "text": "La Mallorca Gigante, la"
+    },
+    {
+      "start": 30.45,
+      "end": 31.58,
+      "text": "del Alcalde, pregunta por"
+    },
+    {
+      "start": 31.53,
+      "end": 31.8,
+      "text": "ella,"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929101120_0347_D.MP4",
+      "in": 66.1,
+      "out": 69.02,
+      "at": 0,
+      "reason": "Gancho: mismo plato terminado con azúcar, queso y bacon antes de mostrar proceso. Plano revisado, audio de apoyo silenciado."
+    }
+  ],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 0,
+      "duration": 2.8,
+      "intensity": 0.2,
+      "reason": "Mismo acercamiento suave de versión anterior"
+    }
+  ],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Corrección explícita Eric: narración lógica. Restituye presentación completa, frase del azúcar, best sellers, contexto dulce/salado y pregunta completa antes de respuesta del queso. Conserva continuación del bacon e invitación final. Duración subordinada a coherencia. Mismo estilo, música, outro y apertura visual; sin afirmar aprobación auditiva."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "voice_filter": "highpass=f=75",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Be Jammin.mp3",
+    "title": "Be Jammin",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  }
+}

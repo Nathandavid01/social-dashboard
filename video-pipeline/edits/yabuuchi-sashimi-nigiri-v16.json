@@ -1,0 +1,281 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "sashimi-nigiri",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Nigiri Y Sashimi",
+  "source": "../media/yabuuchi/derived/nigiri-sashimi-clean-v15.mkv",
+  "transcript": "../runs/yabuuchi-sashimi-v12-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0.4,
+      "out": 9.628,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.74,
+      "text": "¿Cuál es la diferencia"
+    },
+    {
+      "start": 0.74,
+      "end": 2.0,
+      "text": "entre nigiri y sashimi?"
+    },
+    {
+      "start": 2.08,
+      "end": 2.728,
+      "text": "El sashimi es"
+    },
+    {
+      "start": 2.728,
+      "end": 3.608,
+      "text": "el pescado solito."
+    },
+    {
+      "start": 3.68,
+      "end": 4.388,
+      "text": "Y el nigiri es"
+    },
+    {
+      "start": 4.388,
+      "end": 5.268,
+      "text": "una bolita de arroz"
+    },
+    {
+      "start": 5.268,
+      "end": 6.608,
+      "text": "con la proteína por encimita."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "in": 0,
+    "out": 2.92,
+    "gain": 1,
+    "provenance": "https://www.instagram.com/reel/DcCZF8YEtzV/",
+    "audio_range": [
+      16.1,
+      19.09
+    ]
+  },
+  "music": {
+    "source": "../media/yabuuchi/sashimi-nigiri-music-v12.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/graphics/nigiri-sashimi-v13/sashimi-motion.mp4",
+      "in": 0,
+      "out": 1.6,
+      "at": 2.08,
+      "zoom": 1,
+      "reason": "Apoyo ilustrativo animado: sashimi; no es grabación real del restaurante."
+    },
+    {
+      "source": "../media/yabuuchi/graphics/nigiri-sashimi-v13/nigiri-motion.mp4",
+      "in": 0,
+      "out": 3.0479999999999996,
+      "at": 3.68,
+      "zoom": 1,
+      "reason": "Apoyo ilustrativo animado: nigiri; no es grabación real del restaurante."
+    },
+    {
+      "source": "../media/yabuuchi/graphics/nigiri-sashimi-v13/comparison-motion.mp4",
+      "in": 0,
+      "out": 2.5,
+      "at": 6.728,
+      "zoom": 1,
+      "reason": "Apoyo ilustrativo animado: comparison; no es grabación real del restaurante."
+    }
+  ],
+  "graphics": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 1.02,
+      "out": 3.5,
+      "at": 0,
+      "purpose": "Pregunta continua",
+      "use": "voice_and_picture"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 8.7,
+      "out": 9.36,
+      "at": 2.48,
+      "purpose": "El sashimi es: frase original continua",
+      "use": "edited_original_voice_under_illustration"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 7.22,
+      "out": 8.1,
+      "at": 3.128,
+      "purpose": "el pescado solito",
+      "use": "edited_original_voice_under_illustration"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 5.76,
+      "out": 6.48,
+      "at": 4.08,
+      "purpose": "Y el nigiri es: frase original continua",
+      "use": "edited_original_voice_under_illustration"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 9.36,
+      "out": 11.7,
+      "at": 4.788,
+      "purpose": "una bolita de arroz con la proteína por encimita",
+      "use": "edited_original_voice_under_illustration"
+    },
+    {
+      "source": "media/yabuuchi/graphics/nigiri-sashimi-v13/sashimi-motion.mp4",
+      "in": 0,
+      "out": 1.6,
+      "at": 2.48,
+      "use": "animated_illustration"
+    },
+    {
+      "source": "media/yabuuchi/graphics/nigiri-sashimi-v13/nigiri-motion.mp4",
+      "in": 0,
+      "out": 3.0479999999999996,
+      "at": 4.08,
+      "use": "animated_illustration"
+    },
+    {
+      "source": "media/yabuuchi/graphics/nigiri-sashimi-v13/comparison-motion.mp4",
+      "in": 0,
+      "out": 2.5,
+      "at": 7.128,
+      "use": "animated_illustration"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "v15: eliminado Imagen ilustrativa de todos los apoyos y del fotograma de transición heredado; apertura reconstruida del crudo. Audio y captions conservados.",
+    "Procedencia de imágenes generadas conservada en la receta; escucha crítica del montaje de voz aún pendiente.",
+    "v16: el arranque 0.00–0.40 s era una sílaba corta y más fuerte (Whisper la oyó como Chef, probabilidad 0.53) antes de ¿cuál. Se entra en la pregunta. El conteo Y tres del crudo ya estaba fuera."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 1.966,
+      "duration": 0.32,
+      "gain_db": -26,
+      "reason": "Cambio visual; por debajo del nombre hablado"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 3.566,
+      "duration": 0.32,
+      "gain_db": -26,
+      "reason": "Cambio visual; por debajo del nombre hablado"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 6.614,
+      "duration": 0.32,
+      "gain_db": -26,
+      "reason": "Cambio visual; por debajo del nombre hablado"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 9.028,
+      "duration": 0.2,
+      "gain_db": -24,
+      "reason": "Outro"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 2.02,
+      "duration": 0.12,
+      "intensity": 0.25,
+      "reason": "Cambio visual"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 3.62,
+      "duration": 0.12,
+      "intensity": 0.25,
+      "reason": "Cambio visual"
+    },
+    {
+      "preset": "whip_pan",
+      "time": 6.668,
+      "duration": 0.12,
+      "intensity": 0.25,
+      "reason": "Cambio visual"
+    }
+  ],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0.06,
+        "end": 2.0,
+        "role": "pregunta"
+      },
+      {
+        "start": 2.08,
+        "end": 3.608,
+        "role": "sashimi-frase"
+      },
+      {
+        "start": 3.68,
+        "end": 6.728,
+        "role": "nigiri-frase"
+      }
+    ]
+  },
+  "idea_page": 1,
+  "visual_assets": [
+    {
+      "asset": "media/yabuuchi/graphics/nigiri-sashimi-v9/sashimi.png",
+      "kind": "ai_generated_educational_illustration",
+      "tool": "image_gen built-in",
+      "not_client_food": true,
+      "on_screen_disclosure": null,
+      "source_copy": "/Users/ericperez/.codex/generated_images/01a0d0f9-14ba-7491-a7ef-b59ea5dd91f0/exec-d6cb8c52-d40f-4d12-8678-d100c7a834d0.png",
+      "prompt": "Photorealistic vertical macro of three salmon sashimi slices with no rice on charcoal ceramic plate, dark forest green background, warm editorial lighting, no logos or text."
+    },
+    {
+      "asset": "media/yabuuchi/graphics/nigiri-sashimi-v9/nigiri.png",
+      "kind": "ai_generated_educational_illustration",
+      "tool": "image_gen built-in",
+      "not_client_food": true,
+      "on_screen_disclosure": null,
+      "source_copy": "/Users/ericperez/.codex/generated_images/01a0d0f9-14ba-7491-a7ef-b59ea5dd91f0/exec-473f2c79-754e-4e51-a74c-9acfff9e25e4.png",
+      "prompt": "Photorealistic vertical macro of two authentic salmon nigiri with rice clearly visible on charcoal ceramic plate, dark forest green background, warm editorial lighting, no logos or text."
+    }
+  ],
+  "body_seconds": 9.228,
+  "opening_mic": {
+    "source": "DJI_20260914121706_0983_D.MP4",
+    "derived_trim": [
+      0,
+      0.4
+    ],
+    "raw_equivalent": [
+      1.02,
+      1.42
+    ],
+    "removed": "sílaba inicial de micrófono pegado",
+    "kept_from": "¿cuál"
+  }
+}

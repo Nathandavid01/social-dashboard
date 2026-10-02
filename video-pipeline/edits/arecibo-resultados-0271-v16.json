@@ -1,0 +1,367 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0271-resultados",
+  "catalog": "runs/arecibo-0271-catalog.json",
+  "title": "¿Cuánto tardan los resultados?",
+  "source": "../media/arecibo/resultados-0271-0272-0273-base-v11.mp4",
+  "original_source": "../media/arecibo/resultados-0271-0272-0273-base-v11.mp4",
+  "transcript": "../runs/arecibo-resultados-v14-transcript.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 3.6,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.6,
+          "zoom": 1.025
+        }
+      ]
+    },
+    {
+      "in": 4.3,
+      "out": 16.8,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 12.5,
+          "zoom": 1.045
+        }
+      ]
+    },
+    {
+      "in": 17.35,
+      "out": 28.85,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.5,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 0.94,
+      "text": "OYE, DOCTORA"
+    },
+    {
+      "start": 1.22,
+      "end": 1.94,
+      "text": "¿Y CUÁNTO TARDAN"
+    },
+    {
+      "start": 1.94,
+      "end": 2.54,
+      "text": "LOS RESULTADOS"
+    },
+    {
+      "start": 2.54,
+      "end": 3.5,
+      "text": "AQUÍ EN ARECIBO LAB?"
+    },
+    {
+      "start": 3.6,
+      "end": 4.68,
+      "text": "ESTO VA A DEPENDER"
+    },
+    {
+      "start": 4.68,
+      "end": 5.66,
+      "text": "DE QUÉ TIPO"
+    },
+    {
+      "start": 5.66,
+      "end": 7.2,
+      "text": "DE PRUEBAS EL MÉDICO LE ENVIÓ"
+    },
+    {
+      "start": 7.66,
+      "end": 8.24,
+      "text": "POR EJEMPLO"
+    },
+    {
+      "start": 8.24,
+      "end": 9.1,
+      "text": "SI LE ENVIARON A HACER"
+    },
+    {
+      "start": 9.1,
+      "end": 9.95,
+      "text": "UNA PRUEBA DE DOPAJE"
+    },
+    {
+      "start": 11.1,
+      "end": 11.92,
+      "text": "SI LE ENVIARON"
+    },
+    {
+      "start": 11.92,
+      "end": 13.24,
+      "text": "PRUEBA DE CERNIMIENTO"
+    },
+    {
+      "start": 13.48,
+      "end": 14.9,
+      "text": "PUES SERÍA YA BÁSICAMENTE"
+    },
+    {
+      "start": 16.1,
+      "end": 17.22,
+      "text": "ASÍ QUE SI NECESITAS"
+    },
+    {
+      "start": 17.22,
+      "end": 18.4,
+      "text": "REALIZARTE ALGUNA PRUEBA"
+    },
+    {
+      "start": 18.4,
+      "end": 19.22,
+      "text": "DE LABORATORIO"
+    },
+    {
+      "start": 19.38,
+      "end": 20.5,
+      "text": "PUEDEN LLAMARNOS AL"
+    },
+    {
+      "start": 20.5,
+      "end": 23.3,
+      "text": "787-817-2270"
+    },
+    {
+      "start": 23.52,
+      "end": 24.4,
+      "text": "ESTAMOS UBICADOS"
+    },
+    {
+      "start": 24.4,
+      "end": 25.9,
+      "text": "EN EL BARRIO FACTOR"
+    },
+    {
+      "start": 25.9,
+      "end": 27.6,
+      "text": "FRENTE A HQJ"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/results-v12-clock-15.mp4",
+      "in": 0,
+      "out": 1.1,
+      "at": 9.95,
+      "kind": "brand_graphic",
+      "reason": "Reloj 15 min sobre la misma toma y tiempo original; no es B-roll ni otra respuesta.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.023
+        },
+        {
+          "time": 1.1,
+          "zoom": 1.023
+        }
+      ]
+    },
+    {
+      "source": "../media/arecibo/results-v14-clock-24.mp4",
+      "in": 0,
+      "out": 1.2,
+      "at": 14.9,
+      "kind": "brand_graphic",
+      "reason": "Reloj 24 h sobre la misma toma y tiempo original; no es B-roll ni otra respuesta.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.044
+        },
+        {
+          "time": 1.2,
+          "zoom": 1.044
+        }
+      ]
+    },
+    {
+      "source": "../media/arecibo/DJI_20260909100150_0298_D.MP4",
+      "in": 1,
+      "out": 5.08,
+      "at": 23.52,
+      "reason": "Fachada única al describir ubicación, continua hasta outro.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.08,
+          "zoom": 1.035
+        }
+      ]
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 10.13,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tock",
+      "time": 10.53,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 10.93,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 15.08,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tock",
+      "time": 15.48,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "clock_tick",
+      "time": 15.88,
+      "duration": 0.1,
+      "gain_db": -22
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 3.6,
+      "duration": 0.09,
+      "gain_db": -15
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 9.95,
+      "duration": 0.09,
+      "gain_db": -15
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.9,
+      "duration": 0.09,
+      "gain_db": -15
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 16.1,
+      "duration": 0.09,
+      "gain_db": -15
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 23.52,
+      "duration": 0.09,
+      "gain_db": -15
+    }
+  ],
+  "effects": [
+    {
+      "preset": "blur_pass",
+      "time": 3.6,
+      "duration": 0.1,
+      "intensity": 0.25
+    },
+    {
+      "preset": "blur_pass",
+      "time": 16.1,
+      "duration": 0.1,
+      "intensity": 0.25
+    },
+    {
+      "preset": "blur_pass",
+      "time": 23.52,
+      "duration": 0.1,
+      "intensity": 0.25
+    }
+  ],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/resultados-bed-v11.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "Pedido del usuario: 0271 solo pregunta (1.70–5.30), respuesta 0272 (0–13.20), cierre 0273 (8.55–20.60).",
+    "Relojes 15 min y 24 h ilustran la respuesta nueva. Se elimina rango 15–30 de la respuesta anterior.",
+    "0271 es proxy 720p; respuestas originales a mayor resolución.",
+    "Sin escucha crítica ni aprobación final; revisión visual y técnica por separado.",
+    "v12: números fijos de reloj sin transición del número consigo mismo; conservan entrada/salida y tic-tac.",
+    "v13: quitar 0.70s de espera al inicio de 0272. Alineación localizada sitúa Esto en 0.86s; se conservan 0.16s de margen. Captions, relojes y sonidos desplazados 0.70s.",
+    "v14: 0273 comienza en 9.10s después del conteo 8.70–8.92 y antes de Así 9.26s. Esfera horas usa 24 divisiones/círculo completo y texto 24 horas; sin 30 min.",
+    "v15: clicks mecánicos secos -15dB en 3.60/9.95/14.90/16.10/23.52; transición blur suave de 100ms solo al cambiar de toma. Se conserva tic-tac de los relojes y se reemplaza whoosh de fachada para evitar acumulación.",
+    "v16: keyframes suaves 1–1.025 en pregunta, 1–1.045 en respuestas y 1–1.035 fachada. Captions se componen después del movimiento para conservar tamaño y posición."
+  ],
+  "previous_version": "../runs/arecibo-resultados-0271-v15.mp4",
+  "source_segments": [
+    {
+      "source": "/Users/ericperez/Downloads/DJI_20260909091327_0271_D.LRF",
+      "in": 1.7,
+      "out": 5.3,
+      "timeline_start": 0
+    },
+    {
+      "source": "/Users/ericperez/Downloads/DJI_20260909091347_0272_D (1).MP4",
+      "in": 0.7,
+      "out": 13.2,
+      "timeline_start": 3.6
+    },
+    {
+      "source": "/Users/ericperez/Downloads/DJI_20260909091538_0273_D.MP4",
+      "in": 9.1,
+      "out": 20.6,
+      "timeline_start": 16.1
+    }
+  ]
+}

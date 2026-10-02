@@ -1,0 +1,248 @@
+{
+  "fetched": "2026-09-20",
+  "window": "clients with posting_days including Monday 2026-09-21 (Puerto Rico)",
+  "source": "Metricool last 10 published + contact sheets in runs/metricool-tomorrow/style",
+  "house": {
+    "format": "1080x1920",
+    "fps": 30,
+    "structure": "voz real o proceso + B-roll literal + outro de logo 2–3s. Nunca mezclar paleta entre clientes.",
+    "captions_default": {
+      "case": "natural",
+      "position": "lower-third, never over eyes",
+      "lines": "1-2",
+      "font_family": "Arial",
+      "font_size": 64,
+      "primary_colour": "&H00FFFFFF",
+      "outline_colour": "&H00000000",
+      "outline": 4,
+      "alignment": 2,
+      "bottom_margin": 420,
+      "caption_animation": "none",
+      "fixed_size": true
+    },
+    "broll": "Literal to the spoken line or nothing. Food/product close-ups when named. Clinic/shop B-roll when showing the place.",
+    "outro": "Last 2–3s brand card. Do not put captions on the outro."
+  },
+  "families": {
+    "white_sentence": "White sentence-case, black outline, lower third. Default Nate talking-head.",
+    "white_upper": "WHITE UPPERCASE, black outline, chest/mid.",
+    "yellow_upper": "YELLOW UPPERCASE, black outline; hook can sit at the top.",
+    "brand_color": "White or brand-color captions matching logo (cyan, orange, pink, gold).",
+    "process_silent": "No captions on process B-roll; logo outro only."
+  },
+  "clients": [
+    {
+      "slug": "blue-chiropractic",
+      "name": "Blue Chiropractic",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Doctor talking-head in clinic. White captions with cyan outline. Phone CTA. Outro: white card, light-blue B mark.",
+      "primary_colour": "&H00FFFFFF",
+      "outline_colour": "&H00E8C000",
+      "bottom_margin": 480
+    },
+    {
+      "slug": "cafe-el-bosque",
+      "name": "Café El Bosque",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Presenter + food/drink B-roll. White captions. Green on food close-ups sometimes. Outro: flag/brick El Bosque logo.",
+      "bottom_margin": 400
+    },
+    {
+      "slug": "casita-vieja",
+      "name": "Casita Vieja",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Chef on location + kitchen/food B-roll. White captions mid-low. Outro every time: green circle Casita Vieja on wood.",
+      "bottom_margin": 430
+    },
+    {
+      "slug": "codepola",
+      "name": "Codepola",
+      "family": "white_upper",
+      "caption_case": "upper",
+      "notes": "Podcast talking-head. WHITE UPPERCASE with red outline, 2 lines. Graphic cover + scales logo outro. Mix of cafe B-roll and studio.",
+      "primary_colour": "&H00FFFFFF",
+      "outline_colour": "&H000000C8",
+      "font_size": 56,
+      "bottom_margin": 360
+    },
+    {
+      "slug": "dr-rodriguez-caribbean-shoulder-and-elbow-institute",
+      "name": "Dr. Rodriguez Caribbean Shoulder and Elbow Institute",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Longer clinic talking-head (60–110s). Prefer white sentence captions; keep medical B-roll of the named procedure."
+    },
+    {
+      "slug": "dr-soler-ultrafit-wellness-clinics",
+      "name": "Dr.Soler UltraFit Wellness Clinics",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Doctor + clinic equipment B-roll. White captions. Phone in captions. Outro: red R Soler on white. Some clips have no captions, only rooms then logo."
+    },
+    {
+      "slug": "drop-coffee",
+      "name": "Drop Coffee",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Barista talking-head at the truck. White captions. Numbers (order 493) in captions. Outro: Drop Coffee drop logo on beige.",
+      "bottom_margin": 450
+    },
+    {
+      "slug": "truco",
+      "name": "El Truco de Guin",
+      "family": "yellow_upper",
+      "caption_case": "upper",
+      "style": "styles/truco.json",
+      "notes": "Confirmed live: yellow uppercase. POV hook stays at TOP. Dialogue yellow at chest. Circular yellow logo + Un juego de sabores. Location chip Arecibo y Hatillo on some reels."
+    },
+    {
+      "slug": "equipo-de-mercadeo-nmedia",
+      "name": "Equipo De Mercadeo NMedia",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Street talking-head. White then yellow captions, no outro card in sampled clips. Occasional B&W beat. Do not add another client's logo."
+    },
+    {
+      "slug": "farmacia-buena-vida",
+      "name": "Farmacia Buena Vida",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Skits + meme cuts. Persistent green or white caption bar at top on trends. In-store dialogue captions lower. Outro: neon Buena Vida Farmacia."
+    },
+    {
+      "slug": "frida",
+      "name": "Frida",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Host + plated food. Pink/white captions. One clip 720x1280 — prefer 1080x1920. Outro: Frida red-flower logo on black.",
+      "primary_colour": "&H00FFFFFF",
+      "outline_colour": "&H00B14C8B"
+    },
+    {
+      "slug": "kikiriki-bbq",
+      "name": "Kikiriki BBQ",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Counter talking-head + rotisserie B-roll. Orange/yellow captions, prices in captions. Outro: sunburst Kikiriki logo every time.",
+      "primary_colour": "&H0000D0FF",
+      "outline_colour": "&H00000000"
+    },
+    {
+      "slug": "la-guira",
+      "name": "La Guira",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Chef + plated food. White captions. WhatsApp/menu graphics allowed as B-roll when spoken. Outro: red LA GÜIRA wordmark on white."
+    },
+    {
+      "slug": "laut",
+      "name": "Laut",
+      "family": "process_silent",
+      "caption_case": "natural",
+      "notes": "Kitchen process, no burned captions on the last videos. Outro: circular LAUT on pink marble. Do not invent captions unless a talking-head take exists."
+    },
+    {
+      "slug": "lucky-pet",
+      "name": "Lucky Pet",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Presenter holding the named product. White text on a brown bar (not free-floating). Outro: sage Lucky Pet shamrock. Product package must match the line.",
+      "bottom_margin": 380
+    },
+    {
+      "slug": "lumavi-properties",
+      "name": "Lumavi Properties",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "On-site talking-head + construction B-roll. White captions. Outro: navy card, lime LUMAVI mark."
+    },
+    {
+      "slug": "mia-pizzeria",
+      "name": "Mia Pizzeria",
+      "family": "white_upper",
+      "caption_case": "upper",
+      "notes": "Two-person sketches. WHITE UPPERCASE with red outline, often 2 lines. Pizza/eating B-roll. No separate logo outro in sampled clips.",
+      "outline_colour": "&H000000C8"
+    },
+    {
+      "slug": "mondays-aguadilla",
+      "name": "Mondays Aguadilla",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Food and host: white sentence case, red outline #D03000, no box, lower third (styles/mondays-aguadilla-v2.json). The orange pill is only the red-cloth sketch. Carretera 459 when the place is spoken. Some clips have no outro card."
+    },
+    {
+      "slug": "nanas",
+      "name": "Nanas Playhouse",
+      "family": "white_upper",
+      "caption_case": "upper",
+      "style": "styles/nanas-quartzo.json",
+      "notes": "Confirmed live: WHITE UPPERCASE, magenta outline, QUARTZO. Indoor play B-roll. Phone in captions uses Arial. Outro: Nana’s Playhouse house logo on orange."
+    },
+    {
+      "slug": "neumaticos-pr",
+      "name": "Neumaticos PR",
+      "family": "white_upper",
+      "caption_case": "upper",
+      "notes": "Owner talking-head + shop B-roll. WHITE UPPERCASE, thick black outline, mid-chest. Outro: black tires + red N.",
+      "font_size": 70,
+      "bottom_margin": 520
+    },
+    {
+      "slug": "nutrimed",
+      "name": "NutriMed",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Clinic talking-head. Prefer white sentence captions; keep medical product B-roll literal."
+    },
+    {
+      "slug": "pa-ya-auto-parts",
+      "name": "Pa' Ya Auto Parts Inc.",
+      "family": "brand_color",
+      "caption_case": "natural",
+      "notes": "Short reels 4–13s. White captions with red outline. POV hook can sit mid. Product (oil/coolant) in frame. Outro: red card Pa'Ya! logo.",
+      "outline_colour": "&H000000C8"
+    },
+    {
+      "slug": "pa-ya-pal-barrio",
+      "name": "Pa' ya Pal Barrio",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Bartender + drinks/live music B-roll. White captions. Outro: sunset illustration + Pal Barrio seal."
+    },
+    {
+      "slug": "profamilias",
+      "name": "Profamilias",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Talking-head / mixed stills. Many Metricool posts are images; for video keep white sentence captions."
+    },
+    {
+      "slug": "puerto-rico-cardiology",
+      "name": "Puerto Rico Cardiology",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Clinic talking-head. Some 720p posts — prefer 1080x1920."
+    },
+    {
+      "slug": "restauco-leather-and-tops",
+      "name": "Restauco Leather and Tops",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Shop/process talking-head, longer cuts (14–94s). White captions. Product B-roll of the named repair."
+    },
+    {
+      "slug": "yan-seguros",
+      "name": "Yan Seguros",
+      "family": "white_sentence",
+      "caption_case": "natural",
+      "notes": "Street talking-head. White captions; phone 787-433-1338 in gold at the end of the clip, not a logo outro. Occasional staged B-roll.",
+      "accent": "gold phone end-card"
+    }
+  ],
+  "not_video": ["Speedy Net — last 10 are static images"],
+  "no_metricool": ["Alacena", "Dorado del Mar Club", "Dra. Delian Loyola", "Ely Rosa Sportwear", "Miti Miti"]
+}

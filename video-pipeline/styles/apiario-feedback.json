@@ -1,0 +1,61 @@
+{
+  "current_style": "styles/apiario-countdown-v2.json",
+  "user_authorization": "2026-10-02: editar anuncio de tres semanas usando el estilo existente de Apiario.",
+  "approval": "draft_pending",
+  "audio_rule": "Use the dry left microphone for these countdown sources; raw stereo has two different microphones. Confirm independently on new sources.",
+  "references": [
+    "media/a5d7705e/d7a089db-db85-4e01-92cb-3a93ae8739da.mp4",
+    "runs/apiario-countdown-outro/03-countdown-2-semanas-v4.json"
+  ],
+  "pending": [
+    "Human visual approval and critical listening",
+    "Exact caption font identity"
+  ],
+  "piece_corrections": {
+    "preparacion-cafe": {
+      "date": "2026-10-02",
+      "user_confirmed_direction": [
+        "Espresso al inicio",
+        "Duración ampliable; sustituye límite anterior12–15segundos",
+        "Inicio rápido y latte art normal",
+        "Gancho superpuesto llamativo",
+        "Audio natural solo si limpio",
+        "Overlay persistente hasta inicio del outro"
+      ],
+      "recipe": "edits/apiario-preparacion-cafe-v6.json",
+      "export_approval": "pending",
+      "piece_style": "styles/apiario-overlays-yellow-v5.json",
+      "latest_request": "Overlay todo el video hasta antes del outro"
+    },
+    "herramientas-del-apicultor": {
+      "date": "2026-10-02",
+      "user_confirmed_direction": [
+        "Inicio original de0997: ¿Te has preguntado cómo funciona un apiario?",
+        "Reeditar todo el reel usando estilo del cliente",
+        "No abrir con una continuación ni resolver quitando más contexto"
+      ],
+      "rejected_versions": [
+        "v3",
+        "v5"
+      ],
+      "recipe": "edits/apiario-utensilios-v6.json",
+      "selected_sources": [
+        "b9785f62-8833-4816-952c-22626093c8f0",
+        "2b88b9e0-7cac-403f-9bdd-d0d5f9f34a28"
+      ],
+      "scope": "Esta pieza educativa; no sustituye perfil de captions ni reglas de overlay",
+      "editorial_proposal": "Pregunta y caja/cuadros, equipo y función de cada utensilio, cierre0997 con ubicación.",
+      "export_approval": "pending",
+      "critical_listening": "pending"
+    }
+  },
+  "current_overlay_style": "styles/apiario-overlays-yellow-v5.json",
+  "overlay_rule": {
+    "date": "2026-10-02",
+    "scope": "Todos los overlays editoriales Apiario que tengan el estilo del gancho de preparación",
+    "request": "Rectángulo amarillo Apiario; usar siempre los colores del cliente para backgrounds",
+    "profile": "styles/apiario-overlays-yellow-v5.json",
+    "background": "#CB9907",
+    "timing": "Desde0 hasta inicio del outro, durante todo el contenido; outro sin overlay"
+  }
+}

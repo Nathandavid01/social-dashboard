@@ -1,0 +1,147 @@
+{
+  "idea_id": "invisalign-antes-20260921",
+  "title": "¿Invisalign Antes Del Diseño De Sonrisa?",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/bad-bunny-source.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/bad-bunny-transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.62,
+      "out": 4.5,
+      "zoom": 1.03,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.03
+        },
+        {
+          "time": 2.88,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "in": 11.522767,
+      "out": 23.322767,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.1
+        },
+        {
+          "time": 11.8,
+          "zoom": 1.135
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.58,
+      "text": "Doctora, ¿Invisalign antes",
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 1.58,
+      "end": 2.76,
+      "text": "del diseño de sonrisa?",
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 2.96,
+      "end": 4.14,
+      "text": "Si tenemos los dientes apiñados,"
+    },
+    {
+      "start": 4.48,
+      "end": 5.38,
+      "text": "la recomendación es que"
+    },
+    {
+      "start": 5.38,
+      "end": 7.7,
+      "text": "primero nos enderecemos con Invisalign"
+    },
+    {
+      "start": 7.7,
+      "end": 9.84,
+      "text": "y luego el diseño de sonrisa."
+    },
+    {
+      "start": 10.2,
+      "end": 11.9,
+      "text": "Se pueden comunicar con nosotros al"
+    },
+    {
+      "start": 11.9,
+      "end": 14.52,
+      "text": "787-230-7573"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/alinear-diseno-v2.mp4",
+      "in": 0,
+      "out": 3.5,
+      "at": 5.0,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Secuencia alinear primero y diseño después, como explica la doctora.",
+      "asset_family": "alinear-diseno-20260926",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/motion-provenance.json"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 2.88,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.0,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.5,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Conservar pregunta Invisalign antes del diseño y respuesta dental completa con cierre. Retirar invitación a escuchar clip de Bad Bunny y Pues sí Bad Bunny tiene razón porque ese clip no está en los archivos. No fabricar cita, imagen ni endorsement. Gráfico exclusivo alinear antes de diseñar."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/bad-bunny-music.wav",
+    "title": "Find Me Outside",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Find Me Outside.provenance.json"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "graphics": []
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Los Cheesys · Títulos de producto",
+  "font_file": "../media/cheesys/brand/Arial-Bold.ttf",
+  "font_family": "Arial",
+  "font_size": 64,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00101010",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 3,
+  "shadow": 2,
+  "alignment": 8,
+  "margin_x": 70,
+  "bottom_margin": 355,
+  "fixed_size": true,
+  "wrap_width": 910,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "notes": [
+    "Arial Bold es aproximación visual; fuente oficial no identificada.",
+    "Títulos editoriales en zona alta siguiendo Cheesy5; no son transcripción de diálogo."
+  ]
+}

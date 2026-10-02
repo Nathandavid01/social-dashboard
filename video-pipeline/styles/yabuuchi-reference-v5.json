@@ -1,0 +1,27 @@
+{
+  "name": "Yabuuchi Sushi · Referencia local",
+  "font_file": "../media/yabuuchi/brand/Anybody-Expanded-Black.ttf",
+  "font_family": "Anybody Expanded Black",
+  "font_size": 72,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00202020",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 3,
+  "alignment": 2,
+  "margin_x": 75,
+  "bottom_margin": 300,
+  "fixed_size": true,
+  "wrap_width": 1000,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "status": "visual_approximation_to_brand_heading_user_review_pending",
+  "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+  "notes": [
+    "Corrección: aproximar Un sushi de fantasía con Anybody peso 900, ancho 125; no es la fuente oficial Knockout.",
+    "Tamaño 72 fijo, blanco con sombra, máximo dos líneas."
+  ]
+}

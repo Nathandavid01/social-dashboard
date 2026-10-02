@@ -1,0 +1,148 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "quiero-dos",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Aprende A Decir Que No",
+  "source": "../media/yabuuchi/derived/quiero-dos-complete-v4.mp4",
+  "transcript": "../runs/yabuuchi-quiero-dos-complete-v4-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.2,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.16,
+      "end": 1.05,
+      "text": "Tenemos que aprender"
+    },
+    {
+      "start": 1.05,
+      "end": 2.1,
+      "text": "a decir que no."
+    },
+    {
+      "start": 2.28,
+      "end": 3.7,
+      "text": "Si la mesera viene y dice:"
+    },
+    {
+      "start": 4.26,
+      "end": 5.18,
+      "text": "¿Quieres un roll?"
+    },
+    {
+      "start": 5.56,
+      "end": 5.95,
+      "text": "No."
+    },
+    {
+      "start": 6.04,
+      "end": 6.65,
+      "text": "¡Quiero dos!"
+    },
+    {
+      "start": 7.1,
+      "end": 7.65,
+      "text": "Aquí está."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/quiero-dos-complete-v4-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0368-01-roll-con-toppings-verdes-b041e065d7.mp4",
+      "in": 0.3,
+      "out": 1.9,
+      "at": 8.6,
+      "eof_action": "pass",
+      "reason": "Producto real después de entrega y reacción; sustituye el plano lateral ya usado en video 4."
+    }
+  ],
+  "source_parts": [
+    {
+      "code": "0006",
+      "start": 0.6,
+      "end": 9.2,
+      "mute": false,
+      "speed": 1,
+      "purpose": "Sketch íntegro: entrada, pregunta, remate, Aquí está y entrega",
+      "source": "media/yabuuchi/source/DJI_20260914131311_0006_D.MP4",
+      "at": 0,
+      "duration": 8.6
+    },
+    {
+      "code": "0990",
+      "start": 2.6,
+      "end": 4.2,
+      "mute": true,
+      "speed": 1,
+      "purpose": "Plano antiguo del derivado totalmente cubierto por B-roll nuevo 0368",
+      "source": "media/yabuuchi/source/DJI_20260914123732_0990_D.MP4",
+      "at": 8.6,
+      "duration": 1.6
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "Video 5; sketch del PDF página 2.",
+    "Se conservan entrada, pregunta, No quiero dos, Aquí está, entrega y reacción.",
+    "Caption vigente Anybody Expanded Black 72 con entrada suave.",
+    "B-roll posterior al desenlace, distinto de videos 1, 3 y 4.",
+    "Escucha crítica y revisión del usuario pendientes.",
+    "Corrección literal de Eric: la mesera dice ¿Quieres un roll?"
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 8.486,
+      "duration": 0.32,
+      "gain_db": -19,
+      "reason": "Producto después de completar el sketch"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 8.5,
+      "duration": 0.2,
+      "intensity": 0.65,
+      "reason": "Producto después de completar el sketch"
+    }
+  ],
+  "effects_reference": {
+    "request": "Mejorar efectos y sonidos para hacer el swoosh de la referencia",
+    "reference_audit": "runs/yabuuchi-swoosh-reference-qa/reference-audit.json",
+    "sound": "whoosh_sweep: síntesis original, ataque rápido y cola breve",
+    "visual": "whip_pan: barrido lateral con bordes reflejados, captions estables",
+    "total_cues": 7,
+    "sound_duration": 0.32,
+    "sound_peak_lead": 0.05,
+    "listening": "pending; no se afirma identidad auditiva"
+  },
+  "delivery_sequence": 5,
+  "idea_page": 2
+}

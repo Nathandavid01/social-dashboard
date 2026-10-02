@@ -1,0 +1,175 @@
+{
+  "idea_id": "blanqueamiento-antes-20260921",
+  "title": "¿Blanqueamiento Antes O Después?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_171950_20260921171935_1790125022521_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/blanqueamiento-antes-20260921-editorial.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 2.72,
+      "out": 6.53,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012
+    },
+    {
+      "in": 6.78,
+      "out": 13.7,
+      "zoom": 1.18,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.92,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.302,
+      "end": 0.895,
+      "text": "Oye, doctora,"
+    },
+    {
+      "start": 0.92,
+      "end": 1.76,
+      "text": "blanqueamiento dental,"
+    },
+    {
+      "start": 1.84,
+      "end": 2.575,
+      "text": "¿antes o después"
+    },
+    {
+      "start": 2.6,
+      "end": 3.68,
+      "text": "del diseño de sonrisa?"
+    },
+    {
+      "start": 3.997,
+      "end": 5.67,
+      "text": "Antes. Bien importante.",
+      "primary_colour": "&H00E560EB"
+    },
+    {
+      "start": 5.79,
+      "end": 6.065,
+      "text": "¿Por qué?"
+    },
+    {
+      "start": 6.09,
+      "end": 6.805,
+      "text": "Porque tenemos que coger"
+    },
+    {
+      "start": 6.83,
+      "end": 7.905,
+      "text": "el color de los dientes"
+    },
+    {
+      "start": 7.93,
+      "end": 8.965,
+      "text": "y así macharlo"
+    },
+    {
+      "start": 8.99,
+      "end": 10.61,
+      "text": "con el diseño de sonrisa."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/broll-sept-enriched/color-animated.mp4",
+      "in": 0,
+      "out": 2.65,
+      "at": 6.5,
+      "fade_in": 0.12,
+      "fade_out": 0.12,
+      "reason": "Imagen educativa generada e identificada como ilustrativa: color"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "swipe",
+      "time": 6.41,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 9.06,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 3.72,
+      "gain_db": -23
+    },
+    {
+      "preset": "swipe",
+      "time": 10.46,
+      "gain_db": -23
+    }
+  ],
+  "effects": [
+    {
+      "preset": "blur_pass",
+      "time": 6.41,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "soft_flash",
+      "time": 9.06,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "whip_pan",
+      "time": 3.72,
+      "duration": 0.18,
+      "intensity": 0.6
+    },
+    {
+      "preset": "blur_pass",
+      "time": 10.46,
+      "duration": 0.18,
+      "intensity": 0.6
+    }
+  ],
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/music/sept-polish-blanqueamiento-antes.m4a",
+    "title": "Compy Jazz",
+    "license": "CC0 1.0",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Compy Jazz.provenance.json",
+    "source_offset": 5,
+    "fade_in": 0.15,
+    "fade_out": 0.5
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Idea 8 PDF. Se elimina cuenta de rodaje. Pregunta y explicación completas.",
+    "Professional revision: second ASR against original audio; manual semantic caption groups, measured pause cuts, subtle keyframes, restrained synchronized sound accents, faded independent CC0 bed. Critical listening remains pending.",
+    "Eric requested transition effects, sounds, video B-roll, image B-roll and background music. Generated educational images explicitly labeled; new per-reel music balance 9 LU below voice. Critical listening pending."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 9
+  }
+}

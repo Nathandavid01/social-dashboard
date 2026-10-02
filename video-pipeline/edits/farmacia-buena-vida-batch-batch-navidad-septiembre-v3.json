@@ -1,0 +1,128 @@
+{
+  "idea_id": "330bec24-119a-4a30-b0a0-90664981fbe9",
+  "title": "POV: Navidad en septiembre",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-silent-v1.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/source-editorial-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 16.582633,
+      "out": 18.382633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.8,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 4.0,
+      "out": 6.55,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.01
+        },
+        {
+          "time": 2.55,
+          "zoom": 1.07
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.132633,
+      "out": 25.832633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 2.7,
+          "zoom": 1.045
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 27.794633,
+      "out": 29.044633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.0
+        },
+        {
+          "time": 1.25,
+          "zoom": 1.02
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 30.944633,
+      "out": 32.494633,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.01
+        },
+        {
+          "time": 1.55,
+          "zoom": 1.1
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 9.85,
+      "text": "POV: Llega septiembre\ny ya suena Navidad\nen la farmacia"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Five-shot comedy montage: desk setup, upward reaction as Christmas chorus starts, headband reveal, crossing and Lili reaction. Original crew directions removed only in silent derivative. Decimania version is a local draft pending user song confirmation. Original clips preserved."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "graphics": [],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-navidad-septiembre-20260930/music/navidad-music-bus-v1.wav",
+    "title": "Aires Navidenos",
+    "artist": "Decimania",
+    "license": "Commercial recording; synchronization/publication rights not verified",
+    "url": "https://www.youtube.com/watch?v=9iSTd0_H2XE",
+    "gain": 1
+  },
+  "audio_master": {
+    "mode": "music"
+  },
+  "caption_mode": "editorial"
+}

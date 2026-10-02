@@ -1,0 +1,37 @@
+{
+  "client": "Lenel Restaurant",
+  "client_id": "79bb2505-d04d-47d4-a97b-623ce0fc04e3",
+  "drive_folder": "https://drive.google.com/drive/folders/1_RgEpK8T64aI4eHjjLK0WwxHCEIlCvV_",
+  "drive_location": "NATE MEDIA / LAB TOLEDO / LENEL",
+  "shoot": "2026-09-18",
+  "publication_check": {
+    "checked_at": "2026-09-29",
+    "metricool": "Sin marca. El cliente no tiene metricool_blog_id y simpleProfiles no lista Lenel.",
+    "instagram": "https://www.instagram.com/lenel_restaurant/",
+    "result": "No hay reels editados de este rodaje publicados. El reel reciente de cocina no trae caption quemado visible al inicio."
+  },
+  "takes": {
+    "use": {
+      "0783": "Toma completa de cava, salón privado (20 a 25) y cócteles.",
+      "0788": "Ubicación completa: Calle Palma, pueblo de Arecibo. Corta.",
+      "0798": "Chef emplatando y diciendo que el plato se consigue en Lenel, calle Palma, Arecibo."
+    },
+    "do_not_ship_as_own_reel": {
+      "0784": "Repite solo la capacidad de la cava, peor que 0783.",
+      "0785": "Claqueta y la misma línea de capacidad.",
+      "0786": "Arranque fallido.",
+      "0787": "Ubicación cortada en «frente al».",
+      "0789": "Arranque fallido.",
+      "0802": "Solo proxy LRF, sin MP4."
+    },
+    "broll_only": ["0790", "0791", "0792", "0793", "0794", "0795", "0796", "0797", "0799", "0800", "0801"]
+  },
+  "caption_corrections_unconfirmed_by_ear": [
+    "0783: «cama» se escribió cava; «califionanos» californianos; «Mantés Albino» amantes del vino; «corteles» cócteles; «barita» barra. Hace falta escucha.",
+    "0798: no se nombra el pescado ni se afirma «ajo». La salsa queda como «salsa de crema» porque Whisper dijo «abajo»."
+  ],
+  "missing_assets": [
+    "No hay outro oficial en la carpeta.",
+    "El SSD de Motion Array no estaba montado. En la biblioteca local la única cama larga sin usar es Meditating Beat, y el piano sobrante dura 3 s. Estos v1 van sin música para no repetir una canción ya usada."
+  ]
+}

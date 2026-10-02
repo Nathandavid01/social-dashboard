@@ -1,0 +1,262 @@
+{
+  "idea_id": "extra-brunch-grupos-0333",
+  "title": "Brunch para grupos",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929092627_0333_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929092627_0333_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 0.62,
+      "out": 14.54,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 28.08,
+      "out": 38.7,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 39.7,
+      "out": 49.44,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.24,
+      "text": "Estás buscando un brunch"
+    },
+    {
+      "start": 1.24,
+      "end": 1.82,
+      "text": "para el grupo."
+    },
+    {
+      "start": 2.1,
+      "end": 3.36,
+      "text": "Lo tenemos el espacio"
+    },
+    {
+      "start": 3.36,
+      "end": 4.44,
+      "text": "también familia."
+    },
+    {
+      "start": 4.6,
+      "end": 5.8,
+      "text": "Si tú deseas tener"
+    },
+    {
+      "start": 5.8,
+      "end": 7.78,
+      "text": "un brunch viernes,"
+    },
+    {
+      "start": 7.9,
+      "end": 8.24,
+      "text": "sábado,"
+    },
+    {
+      "start": 8.4,
+      "end": 8.9,
+      "text": "domingo,"
+    },
+    {
+      "start": 8.98,
+      "end": 9.76,
+      "text": "días de semana,"
+    },
+    {
+      "start": 9.88,
+      "end": 10.94,
+      "text": "con un grupo de"
+    },
+    {
+      "start": 10.94,
+      "end": 11.38,
+      "text": "5,"
+    },
+    {
+      "start": 11.46,
+      "end": 11.72,
+      "text": "10,"
+    },
+    {
+      "start": 11.76,
+      "end": 12.12,
+      "text": "15,"
+    },
+    {
+      "start": 12.34,
+      "end": 13.92,
+      "text": "20 hasta 25 personas,"
+    },
+    {
+      "start": 13.92,
+      "end": 15.0,
+      "text": "¿Qué tienes que hacer?"
+    },
+    {
+      "start": 15.58,
+      "end": 16.14,
+      "text": "Sencillo."
+    },
+    {
+      "start": 16.26,
+      "end": 17.28,
+      "text": "Das una llamada,"
+    },
+    {
+      "start": 17.48,
+      "end": 19.48,
+      "text": "nos dices el día,"
+    },
+    {
+      "start": 19.64,
+      "end": 20.32,
+      "text": "la hora,"
+    },
+    {
+      "start": 20.46,
+      "end": 21.4,
+      "text": "la cantidad de personas"
+    },
+    {
+      "start": 21.4,
+      "end": 22.44,
+      "text": "y nosotros con gusto"
+    },
+    {
+      "start": 22.44,
+      "end": 24.08,
+      "text": "te vamos a separar"
+    },
+    {
+      "start": 24.08,
+      "end": 24.62,
+      "text": "el espacio."
+    },
+    {
+      "start": 24.66,
+      "end": 25.14,
+      "text": "¿sabes qué?"
+    },
+    {
+      "start": 25.42,
+      "end": 26.42,
+      "text": "Si eres más de"
+    },
+    {
+      "start": 26.42,
+      "end": 27.46,
+      "text": "15 personas en el"
+    },
+    {
+      "start": 27.46,
+      "end": 27.72,
+      "text": "grupo,"
+    },
+    {
+      "start": 27.98,
+      "end": 28.74,
+      "text": "te damos una botella"
+    },
+    {
+      "start": 28.74,
+      "end": 30.42,
+      "text": "de champán con juguito"
+    },
+    {
+      "start": 30.42,
+      "end": 31.6,
+      "text": "por la casa."
+    },
+    {
+      "start": 32.1,
+      "end": 32.48,
+      "text": "¿Qué tal?"
+    },
+    {
+      "start": 33.02,
+      "end": 33.62,
+      "text": "Dale para acá,"
+    },
+    {
+      "start": 33.76,
+      "end": 34.28,
+      "text": "te esperamos."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 13.92,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 24.54,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 1.24,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "para el grupo."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 15.58,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "Sencillo."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 28.74,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "de champán con juguito"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Bonfire.mp3",
+    "title": "Bonfire",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Toma extra: no hay tarjeta de brunch para grupos. La de eventos ya está en 0329.",
+    "Oferta de 5 a 25, llamada, y champán si son más de 15. El teléfono de 0334 no entra: los dígitos no están confirmados.",
+    "bienes→viernes. Se deja fuera despedida de soltera y baby shower para no alargar. Escucha crítica pendiente."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  }
+}

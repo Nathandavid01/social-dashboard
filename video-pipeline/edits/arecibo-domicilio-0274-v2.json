@@ -1,0 +1,189 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0274-domicilio",
+  "catalog": "runs/arecibo-0274-catalog.json",
+  "title": "Servicios A Domicilio",
+  "source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "original_source": "../media/arecibo/DJI_20260909092001_0274_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0274.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 2.92,
+      "out": 17.4,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.18,
+      "text": "ES CIERTO QUE"
+    },
+    {
+      "start": 1.18,
+      "end": 2.94,
+      "text": "REALIZAN SERVICIOS"
+    },
+    {
+      "start": 2.94,
+      "end": 3.43,
+      "text": "A LUGAR?"
+    },
+    {
+      "start": 3.82,
+      "end": 4.46,
+      "text": "SÍ, REALIZAMOS"
+    },
+    {
+      "start": 4.46,
+      "end": 5.38,
+      "text": "SERVICIOS A LUGAR"
+    },
+    {
+      "start": 5.5,
+      "end": 6.06,
+      "text": "LO QUE SON"
+    },
+    {
+      "start": 6.06,
+      "end": 7.54,
+      "text": "PACIENTES ENCAMADOS"
+    },
+    {
+      "start": 7.66,
+      "end": 8.3,
+      "text": "TAMBIÉN VISITAMOS"
+    },
+    {
+      "start": 8.3,
+      "end": 9.58,
+      "text": "CENTROS DE ENVEJECIENTES"
+    },
+    {
+      "start": 9.88,
+      "end": 11.56,
+      "text": "REALIZAMOS CULTIVOS\nDE ÚLCERA"
+    },
+    {
+      "start": 11.8,
+      "end": 13.04,
+      "text": "REALIZAMOS TOMAS"
+    },
+    {
+      "start": 13.04,
+      "end": 14.33,
+      "text": "DE CULTIVOS DE ORINA"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/domicilio-motion-v2.mp4",
+      "in": 0,
+      "out": 14.48,
+      "at": 0,
+      "kind": "brand_graphic",
+      "reason": "Original presenter composited with service-specific animated icons; no unrelated speaking B-roll."
+    },
+    {
+      "source": "../media/arecibo/DJI_20260909100150_0298_D.MP4",
+      "in": 0.3,
+      "out": 1.5,
+      "at": 0,
+      "fade_out": 0.18,
+      "reason": "Establish Arecibo Lab during opening question; unique exterior shot, not used to illustrate home visits."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 4.35,
+      "duration": 0.09,
+      "gain_db": -16
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 6.06,
+      "duration": 0.09,
+      "gain_db": -16
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 8.3,
+      "duration": 0.09,
+      "gain_db": -16
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 10.05,
+      "duration": 0.09,
+      "gain_db": -16
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 12.6,
+      "duration": 0.09,
+      "gain_db": -16
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 1.02,
+      "duration": 0.22,
+      "gain_db": -25
+    },
+    {
+      "kind": "preset",
+      "preset": "swipe",
+      "time": 10.0,
+      "duration": 0.18,
+      "gain_db": -27
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 3.82,
+      "duration": 2,
+      "intensity": 0.35
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 6.06,
+      "duration": 0.7,
+      "intensity": 0.25
+    }
+  ],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-domicilio-bed-v2.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "V2: remove name and long opening pause; continuous question and answer retained.",
+    "One genuine establishing B-roll, five semantic animated icon inserts with eased entrances/exits, controlled zooms and sound accents.",
+    "No local home-visit footage; do not misrepresent office or waiting room as patient homes.",
+    "Critical listening and user review pending."
+  ],
+  "previous_version": "../runs/arecibo-domicilio-0274-v1.mp4"
+}

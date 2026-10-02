@@ -1,0 +1,454 @@
+{
+  "note": "Bindings for editkit.py. Editorial rules stay in AGENTS.md and styles/*-feedback.json. Do not mix clients.",
+  "clients": [
+    {
+      "slug": "nanas",
+      "aliases": [
+        "nana",
+        "nana's",
+        "nanas-playhouse"
+      ],
+      "name": "Nana’s Playhouse",
+      "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+      "style": "styles/nanas-quartzo.json",
+      "feedback": "styles/nanas-feedback.json",
+      "audio": "styles/nanas-audio.json",
+      "catalog": "runs/catalog.json",
+      "media": "media",
+      "recipe_prefix": "",
+      "caption_case": "upper",
+      "whoosh_on_broll": true,
+      "voice_filter": "highpass=f=110,afftdn=nr=18:nf=-28:tn=1,agate=threshold=0.035:ratio=3:range=0.12:attack=10:release=150,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+      "outro": {
+        "source": "../media/brand/outro-with-star-sfx.mov",
+        "in": 0,
+        "out": 3.3,
+        "gain": 1
+      },
+      "resource_indexes": [
+        "media/broll-index.json",
+        "styles/nanas-broll-reservations.json"
+      ],
+      "editor_guide": "styles/editor-guides/nanas.md"
+    },
+    {
+      "slug": "arecibo",
+      "aliases": [
+        "arecibo-lab",
+        "arecibo lab"
+      ],
+      "name": "Arecibo Lab",
+      "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+      "style": "styles/arecibo.json",
+      "feedback": "styles/arecibo-feedback.json",
+      "catalog": "runs/arecibo-catalog.json",
+      "media": "media/arecibo",
+      "source_dir": "media/arecibo",
+      "transcript_dir": "../arecibo-lab-video/transcripts",
+      "recipe_prefix": "arecibo",
+      "caption_case": "upper",
+      "whoosh_on_broll": false,
+      "outro": {
+        "source": "../media/arecibo/brand/outro.mp4",
+        "in": 0,
+        "out": 2.5,
+        "gain": 0.5
+      },
+      "references": {
+        "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+        "official_outro": "edits/../media/arecibo/brand/outro.mp4"
+      },
+      "editor_guide": "styles/editor-guides/arecibo.md"
+    },
+    {
+      "slug": "yabuuchi",
+      "aliases": [
+        "yabushi",
+        "yabushisushi",
+        "yabuuchi-sushi"
+      ],
+      "name": "Yabuuchi Sushi",
+      "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+      "style": "styles/yabuuchi-reference-v6.json",
+      "feedback": "styles/yabuuchi-feedback.json",
+      "catalog": "runs/yabuuchi-catalog.json",
+      "media": "media/yabuuchi",
+      "source_dir": "media/yabuuchi/source",
+      "recipe_prefix": "yabuuchi",
+      "caption_case": "natural",
+      "whoosh_on_broll": true,
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "outro": {
+        "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+        "in": 0,
+        "out": 2.99,
+        "gain": 1
+      },
+      "transition_sounds_required": true,
+      "transition_sound_policy": "styles/yabuuchi-feedback.json#transition_sound_rule",
+      "references": {
+        "style_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+        "official_outro": "edits/../media/yabuuchi/brand/outro-elegant-piano-v1.mp4"
+      },
+      "editor_guide": "styles/editor-guides/yabuuchi.md"
+    },
+    {
+      "slug": "truco",
+      "aliases": [
+        "el-truco",
+        "truco-de-guin",
+        "el truco de guin"
+      ],
+      "name": "El Truco de Guin",
+      "client_id": "7dd62e83-acc5-45eb-aba1-237987e9f4ff",
+      "style": "styles/truco.json",
+      "feedback": "styles/truco-feedback.json",
+      "catalog": "runs/truco-catalog.json",
+      "media": "media/truco",
+      "recipe_prefix": "truco",
+      "caption_case": "upper",
+      "whoosh_on_broll": true,
+      "outro": {
+        "source": "../media/truco/brand/outro.mp4",
+        "in": 0,
+        "out": 3,
+        "gain": 1
+      },
+      "references": {
+        "style_reference": "media/truco/TrucoReel53.mp4",
+        "official_outro": "edits/../media/truco/brand/outro.mp4"
+      },
+      "editor_guide": "styles/editor-guides/truco.md"
+    },
+    {
+      "slug": "cheesys",
+      "aliases": [
+        "cheesy",
+        "los-cheesys",
+        "los cheesys"
+      ],
+      "name": "Los Cheesys",
+      "style": "styles/cheesys-spoken-v1.json",
+      "feedback": "styles/cheesys-feedback.json",
+      "catalog": "runs/cheesys-catalog.json",
+      "media": "media/cheesys",
+      "source_dir": "../cheesys-video/source",
+      "transcript_dir": "../cheesys-video/analysis",
+      "recipe_prefix": "cheesys",
+      "caption_case": "natural",
+      "whoosh_on_broll": true,
+      "voice_filter": "highpass=f=80,afftdn=nr=7:nf=-35,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+      "defaults": {
+        "zoom": 1.04,
+        "audio_edge_fade": 0.015
+      },
+      "outro": {
+        "source": "../media/cheesys/brand/outro-pina-v1.mp4",
+        "in": 0,
+        "out": 2.333333,
+        "gain": 1
+      },
+      "references": {
+        "spoken_reference": "../cheesys-video/reference/Cheesy2.mp4",
+        "product_reference": "../cheesys-video/reference/Cheesy3.mp4",
+        "official_outro": "edits/../media/cheesys/brand/outro-pina-v1.mp4"
+      },
+      "editor_guide": "styles/editor-guides/cheesys.md"
+    },
+    {
+      "slug": "delian",
+      "aliases": [
+        "dra. delian loyola",
+        "delian loyola",
+        "dr. loyola"
+      ],
+      "name": "Dra. Delian Loyola",
+      "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+      "style": "styles/delian-reference-v6-shoika.json",
+      "feedback": "styles/delian-feedback.json",
+      "catalog": "runs/delian-catalog.json",
+      "media": "media/delian",
+      "source_dir": "media/delian/source",
+      "transcript_dir": "runs/delian-transcripts",
+      "recipe_prefix": "delian",
+      "caption_case": "natural",
+      "whoosh_on_broll": false,
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "references": {
+        "brand_example": "media/delian/brand/ejemplo.jpg",
+        "font_reference": "media/delian/brand/tipografia.jpg",
+        "official_outro": "media/delian/brand/outro-loyola.mp4",
+        "brand_logo": "media/delian/brand/logo-dml.jpg",
+        "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+      },
+      "outro": {
+        "source": "../media/delian/brand/outro-loyola.mp4",
+        "in": 0,
+        "out": 3.366667,
+        "gain": 1
+      },
+      "extra_catalogs": [
+        "runs/delian-sept-catalog.json"
+      ],
+      "resource_indexes": [
+        "media/delian/broll-index.json",
+        "runs/delian-sept-source-usage.json"
+      ],
+      "source_dirs": [
+        "media/delian/source",
+        "../delian-loyola-video/media/source-2026-09-21",
+        "../delian-loyola-video/media/source-2026-08-10"
+      ],
+      "editor_guide": "styles/editor-guides/delian.md"
+    },
+    {
+      "slug": "farmacia-buena-vida",
+      "aliases": [
+        "buena vida",
+        "farmacia buena vida"
+      ],
+      "name": "Farmacia Buena Vida",
+      "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+      "style": "styles/farmacia-buena-vida-v7.json",
+      "feedback": "styles/farmacia-buena-vida-feedback.json",
+      "catalog": "runs/9732f038-catalog.json",
+      "media": "media/farmacia-buena-vida",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source",
+      "recipe_prefix": "farmacia-buena-vida",
+      "caption_case": "natural",
+      "whoosh_on_broll": false,
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "references": {
+        "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+        "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+      },
+      "outro": {
+        "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+        "in": 0,
+        "out": 2.2,
+        "gain": 1
+      },
+      "editor_guide": "styles/editor-guides/farmacia-buena-vida.md",
+      "caption_variants": {
+        "habitual": "styles/farmacia-buena-vida-v7.json",
+        "pov": "styles/farmacia-buena-vida-v5.json"
+      },
+      "caption_variant_rule": "2026-09-30: POV usa v5 con caja oliva; habitual v7. Última instrucción de Eric prevalece."
+    },
+    {
+      "slug": "mia-pizzeria",
+      "aliases": [
+        "mia pizza",
+        "mia",
+        "la mía pizza",
+        "mia pizzeria"
+      ],
+      "name": "Mia Pizzeria",
+      "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+      "style": "styles/mia-pizzeria-v1.json",
+      "feedback": "styles/mia-pizzeria-feedback.json",
+      "catalog": "runs/mia-pizzeria-catalog.json",
+      "media": "media/mia-pizzeria",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/source",
+      "recipe_prefix": "mia-pizzeria",
+      "caption_case": "upper",
+      "whoosh_on_broll": false,
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "references": {
+        "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+        "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+      },
+      "editor_guide": "styles/editor-guides/mia-pizzeria.md",
+      "outro": {
+        "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+        "in": 0,
+        "out": 3,
+        "gain": 0.5
+      }
+    },
+    {
+      "slug": "frida",
+      "aliases": [
+        "Frida Food & Bar"
+      ],
+      "name": "Frida",
+      "client_id": "1a28b0c8-05a3-4ba2-9dbc-013ab98c438f",
+      "style": "styles/frida-v3.json",
+      "feedback": "styles/frida-feedback.json",
+      "editor_guide": "styles/editor-guides/frida.md",
+      "catalog": "runs/frida-catalog.json",
+      "source_dirs": [
+        "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/masters",
+        "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/VIDEO-16"
+      ],
+      "transcript_dir": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/transcripts",
+      "recipe_prefix": "frida",
+      "caption_case": "natural",
+      "whoosh_on_broll": false,
+      "voice_filter": "highpass=f=85,afftdn=nr=8:nf=-35",
+      "outro": {
+        "source": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4",
+        "in": 0,
+        "out": 3,
+        "gain": 0
+      },
+      "references": {
+        "approved_style_example": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/published/378605739.mp4",
+        "official_outro": "/Volumes/Extreme SSD/Nate Media/frida-pendientes-20260927/sources/brand/Frida Outro.mp4"
+      }
+    },
+    {
+      "slug": "drop-coffee",
+      "name": "Drop Coffee",
+      "client_id": "06d47cf4-642b-42c8-9249-0f1ec4846dea",
+      "style": "styles/drop-coffee-v1.json",
+      "editor_guide": "styles/editor-guides/drop-coffee.md",
+      "status": "caption_parameters_pending"
+    },
+    {
+      "slug": "alacena",
+      "name": "Alacena",
+      "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+      "style": "styles/alacena-v2.json",
+      "feedback": "styles/alacena-feedback.json",
+      "editor_guide": "styles/editor-guides/alacena.md",
+      "catalog": "runs/alacena-catalog.json",
+      "media": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source",
+      "recipe_prefix": "alacena",
+      "caption_case": "natural",
+      "whoosh_on_broll": false,
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "outro": {
+        "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+        "in": 0,
+        "out": 2.78,
+        "gain": 0
+      },
+      "references": {
+        "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+        "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+      }
+    },
+    {
+      "slug": "black-pepper",
+      "name": "Black Pepper",
+      "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+      "style": "styles/black-pepper-v5.json",
+      "feedback": "styles/black-pepper-feedback.json",
+      "editor_guide": "styles/editor-guides/black-pepper.md",
+      "catalog": "runs/7e42d8f4-catalog.json",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales",
+      "transcript_dir": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002",
+      "recipe_prefix": "black-pepper",
+      "caption_case": "natural",
+      "status": "provisional_visual_reconstruction",
+      "defaults": {
+        "zoom": 1,
+        "audio_edge_fade": 0.015
+      },
+      "voice_filter": "highpass=f=75",
+      "outro": {
+        "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+        "in": 0,
+        "out": 3,
+        "gain": 0.6
+      },
+      "references": {
+        "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+        "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+      }
+    },
+    {
+      "slug": "mondays-aguadilla",
+      "aliases": [
+        "mondays",
+        "monday",
+        "Monday’s"
+      ],
+      "name": "Mondays Aguadilla",
+      "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+      "style": "styles/mondays-aguadilla-v3.json",
+      "editor_guide": "styles/editor-guides/mondays-aguadilla.md",
+      "catalog": "runs/mondays-catalog.json",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/vids",
+      "transcript_dir": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/transcripts",
+      "recipe_prefix": "mondays",
+      "caption_case": "natural",
+      "whoosh_on_broll": false,
+      "status": "published_visual_match_font_provenance_pending",
+      "outro": {
+        "source": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-visual-v10.mp4",
+        "in": 0,
+        "out": 5.8,
+        "gain": 0
+      },
+      "outro_music_policy": "Continuar música distinta del reel durante el outro; asset visual sin audio o variante musical específica. No reutilizar automáticamente la pista standalone.",
+      "outro_status": "v10_approved_by_eric_2026-10-02",
+      "brand_palette_reference": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-brand-orange-reference.jpeg",
+      "public_phone": "(787) 659-0122",
+      "outro_approval": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/outro-v10-approval.json",
+      "outro_rule": "Usar el diseño v10 aprobado como cierre vigente de Mondays; conservar logo, fondo, movimiento, lema y contacto. Música distinta por reel. Cualquier cambio requiere versión nueva y grafo de la exportación exacta.",
+      "outro_approved_master": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/mondays-outro-standalone-v10.mp4",
+      "outro_approved_sha256": "770a776ede0699b0387996e46163f7c30b5c72825a0fb2e5eb82fcb061317268",
+      "outro_visual_sha256": "d7159c9906f809ce3a81a86fcdc27d7fd4546a6a4c5c77d538ae687d0788b1eb",
+      "outro_drive": {
+        "folder": "https://drive.google.com/drive/folders/1IBQPOB9d-iWvXUnqLmPPLZz_lOOMm9OJ",
+        "approved_master": "https://drive.google.com/file/d/1P5vpic6bBgNdw0m-wEBF52P0R-XRgIfM/view",
+        "visual_master": "https://drive.google.com/file/d/1-MwdwwgqHcb8FfqlkTNFTMJb0vq-qjMU/view",
+        "uploaded_at": "2026-10-02",
+        "verified": true,
+        "evidence": "/Volumes/Extreme SSD/Nate Media/mondays-rec-sept28/brand/outro-v10-drive-delivery.json"
+      },
+      "delivery_policy": {
+        "destination": "Recibo",
+        "authorization": "standing_user_instruction_2026-10-02",
+        "upload_each_edit": true,
+        "edit_mode": "ai",
+        "pending_checks": "upload_as_draft_with_explicit_pending_review",
+        "publication": "not_authorized"
+      },
+      "caption_line_policy": "Siempre una línea; dividir frases por tiempo sin reducir tamaño. Corrección Eric2026-10-02."
+    },
+    {
+      "slug": "apiario",
+      "aliases": [
+        "apiario coffee",
+        "cafe apiario",
+        "apiario coffee shop"
+      ],
+      "name": "Apiario Coffee",
+      "client_id": "a5d7705e-978c-4da7-b9df-c7be8d913c4c",
+      "style": "styles/apiario-countdown-v2.json",
+      "feedback": "styles/apiario-feedback.json",
+      "editor_guide": "styles/editor-guides/apiario.md",
+      "catalog": "runs/a5d7705e-catalog.json",
+      "source_dir": "/Volumes/Extreme SSD/Nate Media/video-pipeline/media/a5d7705e",
+      "recipe_prefix": "apiario",
+      "caption_case": "natural",
+      "status": "same_client_visual_reference_font_identity_pending",
+      "outro": {
+        "source": "../media/apiario/brand/outro.mp4",
+        "in": 0,
+        "out": 3,
+        "gain": 0
+      },
+      "overlay_style": "styles/apiario-overlays-yellow-v5.json"
+    }
+  ]
+}

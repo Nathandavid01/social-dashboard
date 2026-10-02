@@ -1,0 +1,99 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-ubicacion-bed-v1.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-ubicacion",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Dónde Está Arecibo Lab",
+  "source": "../media/arecibo/DJI_20260909100050_0292_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0292.json",
+  "clips": [
+    {
+      "in": 8.3,
+      "out": 17.35,
+      "zoom": 1.03
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/DJI_20260909100237_0300_D.MP4",
+      "in": 2,
+      "out": 8.55,
+      "at": 2.5,
+      "reason": "Fachada real durante dirección; una toma única y continua hasta el outro. No representa la farmacia ni HQJ.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.55,
+          "zoom": 1.06
+        }
+      ]
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 2.5,
+      "duration": 0.18,
+      "gain_db": -25
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 3.14,
+      "text": "ESTAMOS UBICADOS EN"
+    },
+    {
+      "start": 3.14,
+      "end": 4.34,
+      "text": "BARRIO FACTOR 1"
+    },
+    {
+      "start": 4.4,
+      "end": 5.72,
+      "text": "CARRETERA 683"
+    },
+    {
+      "start": 6.0,
+      "end": 7.52,
+      "text": "FRENTE A HQJ"
+    },
+    {
+      "start": 7.52,
+      "end": 9.05,
+      "text": "Y LA FARMACIA VÉLEZ"
+    }
+  ],
+  "review_notes": [
+    "Segunda toma completa de ubicación; conservar presentación y frase final.",
+    "Transcripción automática C83/Belés corregida a 683/Vélez. Apoyo: https://es.infopaginas.com/b/arecibo/farmacia-velez-1 y directorio MMM.",
+    "Un único B-roll de fachada 0300 de 2 a 8.55s; no vuelve fugazmente al presentador antes del outro.",
+    "Escucha crítica y aprobación final pendientes.",
+    "Caption inicial agrupado para no dejar EN solo durante la pausa natural."
+  ]
+}

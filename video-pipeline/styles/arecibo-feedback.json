@@ -1,0 +1,145 @@
+{
+  "client": "Arecibo Lab",
+  "latest_resultados": {
+    "version": 16,
+    "export": "runs/arecibo-resultados-0271-v16.mp4",
+    "edit": "edits/arecibo-resultados-0271-v16.json",
+    "status": "local_user_review_pending",
+    "sources": [
+      "0271 pregunta",
+      "0272 respuesta",
+      "0273 cierre"
+    ]
+  },
+  "rules": [
+    "Remove recording countdown and preserve continuous speech where possible.",
+    "Keep qualifiers together with result time graphics.",
+    "Mask visible monitor information before captions and verify in moving frames.",
+    "No irrelevant B-roll for turnaround-time explanations."
+  ],
+  "resultados_0271_verification": {
+    "output": "runs/arecibo-resultados-0271-v2.mp4",
+    "full_decode": "pass",
+    "sampled_visual_review": "pass",
+    "browser_playback_through_outro": "pass",
+    "critical_audio_listening": "pending",
+    "user_approval": "pending"
+  },
+  "clock_graphics_rule": "Usar relojes visuales para ilustrar tiempos, sin sustituirlos por tarjetas de texto. Movimiento regular y efectos de tic sincronizados con cada avance. Mantener captions de voz y sus calificadores; no presentar una animación acelerada como un timer real.",
+  "monitor_blur_feedback": "2026-09-16: usuario rechaza desenfoque rectangular grande del monitor en 0271. Quitar máscara de esta edición. Evitar aplicar bloques de blur por defecto; evaluar encuadre discreto cuando haga falta.",
+  "clock_audio_rule": "Reloj en pantalla: tic-tac mecánico alternado reconocible durante toda su aparición; no clicks genéricos aislados. Mantener voz inteligible.",
+  "time_graphic_layout": "Reloj con números y efectos; quitar palabras y captions durante la gráfica. Evitar cierre vacío: usar B-roll relacionado, único y anterior al habla, con gráfico superpuesto. Mantener captions en la intervención de la doctora.",
+  "motion_tool": {
+    "entrypoint": "motionkit.py",
+    "config": "motion/arecibo-clock.json",
+    "docs": "docs/MOTION-KIT.md",
+    "rule": "Usar Motion Kit para relojes: profundidad, movimiento suavizado, números animados y cue sheet compartido para sonido/imagen; B-roll real y sin texto en gráfica.",
+    "latest_export": "runs/arecibo-resultados-0271-v7.mp4",
+    "user_approval": "pending"
+  },
+  "clock_transitions": "Reloj: entrada visible con zoom/ascenso suave y fade-in; salida con reducción/desplazamiento/fade-out completos antes del logo. Whooshes discretos, detener tic-tac antes de salir. Mantener B-roll hasta outro.",
+  "clock_units": "Mostrar 15 min y luego a 30 min para expresar rango. min y a son excepciones explícitas a solo números.",
+  "domicilio_engagement": "Abrir con la pregunta directamente, evitando nombre y pausa inicial larga. Fachada solo para establecer laboratorio, nunca como si fuera visita a domicilio. Ilustrar servicios sin metraje pertinente mediante iconos animados sobre presentador, sincronizados con clicks; no usar B-roll de otra persona hablando.",
+  "domicilio_visual_direction": {
+    "opening": "Usuario rechazó el inicio con fachada/pregunta. Abrir con la declaración grabada Realizamos servicios a lugar y un título breve.",
+    "graphics": "Usuario rechazó los iconos de línea en badges pequeños. Usar escenas con volumen, iluminación, sombras, composición amplia y entradas/salidas suaves; conservar captions de tamaño fijo.",
+    "latest_recipe": "edits/arecibo-domicilio-0274-v5.json",
+    "approval": "pending"
+  },
+  "presentacion_continuity": "En presentación 0278 conservar la continuación grabada de ubicación antes del outro; no terminar en Arecibo Lab mientras la frase sigue. Mantener unidades completas de sentido al seleccionar cierres.",
+  "broll_default_policy": {
+    "requested": "2026-09-19",
+    "scope": "Todos los videos de Arecibo Lab",
+    "rule": "Siempre buscar e integrar B-roll pertinente cuando exista material adecuado. Revisar el catálogo antes del montaje; relacionar cada toma con la frase exacta, no repetir tomas dentro del video y priorizar las menos usadas entre videos. No usar personas hablando bajo narración ajena. Si no hay una toma pertinente, conservar al presentador y registrar el motivo."
+  },
+  "ubicacion_latest": {
+    "export": "runs/arecibo-ubicacion-0292-v3.mp4",
+    "source": "0292",
+    "broll": "0300, una aparición",
+    "approval": "pending",
+    "caption_corrections": "C83 -> 683; Belés -> Vélez; no heredar errores de ASR sin verificar."
+  },
+  "resultados_source_correction": {
+    "rule": "Usar 0271 únicamente para la pregunta Oye doctora. Respuesta de 0272 y cierre de 0273, archivos proporcionados por el usuario. No reinsertar la respuesta anterior de 0271.",
+    "graphics": "Ajustar tiempos ilustrados a la nueva respuesta: 15 min y 24 h. Conservar depende del tipo de prueba.",
+    "version": "v12",
+    "approval": "pending"
+  },
+  "response_edit_rule": "Al unir pregunta y respuesta, retirar la espera de preparación antes de la primera palabra con margen natural de unos 0.15s y verificar inicio de voz; no confiar en timestamps iniciales 0.0 de Whisper. Reajustar captions, gráficos y sonidos.",
+  "countdown_review_rule": "Revisar por separado el audio antes de cada entrada de toma: la transcripción completa puede omitir claquetas intermedias. En 0273 excluir hasta 9.10s (conteo termina 8.92; Así empieza 9.26).",
+  "clock_units_rule": "Escala del reloj coherente con unidad: 24 divisiones para horas y 60 para minutos. Mostrar 24 horas explícitamente; no reutilizar esfera de minutos para duración de un día.",
+  "click_transition_style": "Usar clicks mecánicos marcados y breves en cambios significativos de toma y entradas de gráficas, con transición visual breve. No en cada palabra. Mantener voz al frente, no apilar whoosh y click, conservar tic-tac propio del reloj.",
+  "keyframe_rule": "Incluir keyframes de zoom suaves y motivados en tomas habladas y B-roll cuando ayuden al ritmo. Usar acercamientos discretos 2.5–4.5%, entradas/salidas suavizadas; conservar captions fijos y no cortar caras ni causar saltos en gráficas.",
+  "presentacion_graphics_rule": "En presentaciones con plano hablado vacío, añadir ilustraciones recortadas o gráficas animadas pertinentes a lo dicho (ADN, anticuerpos, ubicación). Conservar rostro libre y captions verdes fijos; entradas/salidas suaves y clicks discretos. No inventar credenciales ni resultados médicos.",
+  "location_graphic_direction": {
+    "scope": "Gráfica de ubicación de presentación; reutilizable en otros videos de ubicación",
+    "request": "Tratamiento profesional y cinematográfico",
+    "rule": "Usar una toma real de la fachada como recuadro fotográfico con profundidad discreta, tipografía jerárquica, acercamiento lento y entradas/salidas suavizadas. Evitar pines genéricos como recurso principal. Conservar rostro y captions despejados, sin mapas ni coordenadas inventadas. Sonidos de transición bajos y sincronizados.",
+    "recipe": "edits/arecibo-presentacion-0278-v4.json",
+    "approval": "pending"
+  },
+  "motion_graphic_resolution_rule": {
+    "scope": "Todas las gráficas de Arecibo Lab",
+    "request": "Las gráficas iniciales se ven pixeladas",
+    "cause": "Overlay de540x960 ampliado a1080x1920 en el video final.",
+    "rule": "Generar overlays a1080x1920 como mínimo, rasterizar texto y trazos a2x del tamaño final y reducir con antialiasing. No ampliar gráficas raster pequeñas. Revisar recortes al100% de los fotogramas finales antes de entregar.",
+    "fixed_recipe": "edits/arecibo-presentacion-0278-v5.json",
+    "approval": "pending"
+  },
+  "realistic_object_graphics": {
+    "scope": "Gráficas ilustrativas de objetos para Arecibo Lab; introducido en Antes De Una Toma De Muestra",
+    "request": "Necesito que estas gráficas sean más reales",
+    "rule": "Preferir objetos con apariencia fotográfica, materiales y luz natural, volumen discreto y movimiento suave. Evitar iconos planos o de caricatura como recurso principal. Mantener el rostro y los captions despejados. Registrar las imágenes generadas como ilustraciones, sin presentarlas como metraje real del laboratorio.",
+    "latest_recipe": "edits/arecibo-muestra-0278-v5.json",
+    "assets_and_prompts": "media/arecibo/muestra-photo-v5/provenance.json",
+    "approval": "pending"
+  },
+  "sample_prep_reel_rule": {
+    "scope": "Consejos antes de una toma de muestra",
+    "source": "0278",
+    "rule": "Excluir claqueta, ensayos, instrucciones del equipo y tomas fallidas. Mantener cada recomendación completa y presentar ejercicio, café/bebidas, ayuno e hidratación/alcohol como cuatro puntos con un click fuerte por entrada. Usar B-roll clínico real únicamente en el gancho; ilustrar los otros puntos con gráficas nativas 1080x1920, sin inventar recomendaciones ni ocultar el rostro o los captions.",
+    "broll": "0285-muestra-crop.mp4; reutilización justificada porque es la única toma real pertinente y se limita al gancho.",
+    "music": "Backbeat CC0, cama mono normalizada a -27.5 LUFS bajo la voz; medición final del cuerpo -16.3 LUFS.",
+    "latest_recipe": "edits/arecibo-muestra-0278-v5.json",
+    "revision_note": "Reedición solicitada sin nueva preferencia global. Cubrir el gancho desde el fotograma inicial hasta la toma estable, sin regresos fugaces al plano de preparación. Quitar relleno verbal de cierre manteniendo el consejo; recalcular captions por frase, no copiar tiempos anteriores. Mantener etiquetas grandes, movimiento de entrada y salida completo y cuatro clicks. Evitar flashes entre cada corte.",
+    "verification": "Exportación 19.97s decodificada completa. Fotogramas revisados hasta el outro; escucha crítica y aprobación pendientes.",
+    "audio_revision": "Normalizar la voz después de la conversión de canales que realmente usa el montaje; comprobar el loudness de la mezcla exportada. v4 evita la pérdida de nivel detectada en v3. Microfundidos de 8 ms en bordes de diálogo.",
+    "approval": "pending"
+  },
+  "speaker_handoff_rule": {
+    "scope": "Montajes que pasan entre dos presentadores",
+    "request": "El corte del hombre a la mujer es muy abrupto.",
+    "rule": "Conservar una entrada natural de la respuesta, incluidos conectores grabados como Pues, mira cuando mejoren la continuidad. Revisar el último fonema del primer hablante y el primer gesto/palabra del segundo. Dejar respirar la unión y evitar que coincidan un salto de encuadre, reinicio de zoom y whoosh. Una disolvencia breve puede acompañar la pausa; mantener sincronía y no superponer voces ni alargar congelados sobre el habla.",
+    "example": "Nuevo Laboratorio v10: restaurar 0277 desde6.70s, pausa de0.26s entre voces, disolvencia de6fotogramas entre2.40–2.60s y zoom continuo. Retirar whoosh del cambio; desplazar captions, apoyos y música0.60s.",
+    "latest_recipe": "edits/arecibo-nuevo-lab-0281-v10.json"
+  },
+  "outdoor_wind_rule": {
+    "scope": "Tomas exteriores de Arecibo Lab con viento audible",
+    "request": "Eric señala mucho viento en Nuevo Laboratorio.",
+    "rule": "Comparar los canales antes de convertir a mono; no mezclar automáticamente el micrófono principal con un canal ambiental más ruidoso. Limpiar la voz original antes de música, clicks y outro. Aplicar corte de graves y reducción de ruido de voz por toma, conservando las tomas interiores que ya funcionan. Medir y compensar la latencia del denoiser. Tras limpiar, comprobar nivel de voz entre planos y controlar picos breves antes de normalizar; no confundir menos ruido con una voz suficientemente audible. Conservar evidencia antes/después y dejar escucha crítica pendiente si no se realizó.",
+    "implementation": "prepare_nuevo_wind_v9.py; 0281 canal FL, highpass140Hz, RNNoise sh mix0.96, avance474 muestras a48kHz. Estos parámetros son de0281, no un filtro obligatorio para todas las grabaciones.",
+    "evidence": "runs/wind-audit/candidate-arnndn-audit.md"
+  },
+  "nuevo_laboratorio_reel_rule": {
+    "scope": "Promoción del nuevo laboratorio en Arecibo",
+    "source": "0281 gancho y ubicación; 0277 explicación de servicios",
+    "rule": "Excluir claqueta y frases que no puedan confirmarse. Dar desarrollo al mensaje entre gancho y cierre: usar la explicación grabada de los servicios antes de la ubicación. Usar 683 en captions. Priorizar B-roll real, pertinente y no repetido; cubrir cualquier anuncio antiguo visible en la fachada.",
+    "broll": "0285 detalle real de toma de muestra sobre la frase exacta, sin monitores ni rostros hablando; reutilización entre reels justificada por ser la única acción literal disponible. 0296 foto real de fachada a todo el ancho, recortando el anuncio fechado. Gancho completo con presentador; evitar recepción genérica.",
+    "music": "Be Chillin CC0 a -28.5 LUFS bajo la voz.",
+    "latest_recipe": "edits/arecibo-nuevo-lab-0281-v10.json",
+    "professional_revision": "Eric pidió rehacer la v4 para que quedara profesional. En estas piezas, conservar el gancho hablado completo y usar planos de acciones al mencionar el servicio. Evitar tarjetas grandes vacías y textos duplicados entre animación y captions. Usar números animados y un click por servicio, dejando las palabras en los captions aprobados. Reutilizar el mismo renderer ASS, fuente y tamaño para uniformidad óptica; no asumir que 70px en PIL equivale visualmente a fs70 de libass. Keyframes discretos y cierre fotográfico. Mantener el contexto del médico junto al intervalo de 3 a 6 meses para que no parezca un tiempo de entrega de resultados.",
+    "duration_feedback": "Eric indicó que v3 de 8.17 s era demasiado corta. Para piezas de presentación similares, desarrollar gancho, explicación y cierre; referencia inicial 20–30 s cuando exista diálogo pertinente. No alargar con silencios, ralentización o tomas repetidas. Esta duración es una guía para este tipo de pieza, no una obligación para todos los reels.",
+    "verification": "v10 exportada: 23.0s, 1080x1920, decodificación completa. Unión suave y Pues, mira restaurado; 16 fotogramas revisados hasta el outro y revisión visual independiente aprobada. Voz exterior corregida conservada con identidad PCM. Mezcla del cuerpo -16.24 LUFS/-1.00 dBTP. Reproducción completa en QuickTime confirmada hasta 23.00s y outro; escucha crítica y aprobación del cliente pendientes.",
+    "approval": "pending"
+  },
+  "ubicacion_alterna_0290": {
+    "export": "runs/arecibo-factor1-0290-v1.mp4",
+    "source": "0290",
+    "broll": "0299, 0.6–3.85s, una aparición",
+    "edit": "edits/arecibo-factor1-0290-v1.json",
+    "playback": "QuickTime completo hasta 8.10s y cierre oficial",
+    "critical_audio_listening": "pending",
+    "approval": "pending",
+    "publication": "Metricool no verificado"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": [
+    [
+      "caries",
+      "Use case: scientific-educational. Create a premium 3D medical visualization for a vertical 9:16 dental education reel. One anatomically plausible molar with a small localized dark carious pit on its occlusal chewing surface, intact glossy ivory enamel elsewhere, three-quarter macro view from slightly above. Photoreal materials but clearly a standalone educational 3D render, NOT a patient photo. Tooth floats against sophisticated very dark plum background (#201329), soft lavender rim light, warm ivory key light, subtle atmospheric depth. Tooth occupies upper-middle composition between 20% and 60% height, with ample dark negative space below for subtitles that will be added later. Elegant Octane/Cinema4D medical advertising quality, crisp realistic molar anatomy with two roots, natural surface grooves, no face, no text, no labels, no watermark, no dental tools. Single view, no collage."
+    ],
+    [
+      "nervio",
+      "Use case: scientific-educational. Create a premium anatomically coherent 3D cutaway of a human two-root mandibular molar for a vertical 9:16 dental explainer. Front three-quarter view, sliced longitudinally to reveal thin white enamel ONLY covering the crown, thicker pale warm yellow dentin beneath it, and a small central coral-red pulp chamber connecting to narrow root canals down both roots. A localized brown carious lesion runs from the occlusal pit through dentin toward the pulp. Pulp is contained INSIDE the dentin, never on outside of tooth. Clear medically legible nesting. Elegant realistic dental-school model, non-gory, no blood, not a patient photo. Dark plum (#201329) studio background with soft lavender rim light and warm ivory key light. Whole tooth occupies x20-80%, y18-62%; leave lower 30% empty dark background for video subtitles. Rendered sculptural medical advertising quality. No words, labels, numbers, arrows, tools, logos, or watermarks. Single tooth, single view."
+    ],
+    [
+      "limpieza",
+      "Use case: scientific-educational. Premium 3D educational visualization of professional dental cleaning for a vertical 9:16 reel. Three anatomically realistic white molar/premolar crowns in a small clean sculpted pink gum section, close three-quarter macro view. A single stainless-steel ultrasonic scaler tip enters from upper right and gently contacts a small yellowish calculus deposit near the gumline of the central tooth. Precise plausible slender curved scaler, intact tooth, no drilling, no extraction, no blood, no humans. Clear educational studio model, not a clinical patient or outcome photo. Dark plum (#201329) studio backdrop, soft lavender rim lighting and warm ivory highlights. Main visual occupies upper-middle y25-60%, ample lower dark negative space for captions added later. Very polished 3D medical advertising rendering, realistic enamel and tool materials, tasteful non-graphic view. No text, labels, watermark or logo."
+    ]
+  ],
+  "anatomy_reference": "https://www.nidcr.nih.gov/health-info/tooth-decay",
+  "assets": [
+    {
+      "name": "caries",
+      "path": "/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-f5a23ccc-91de-409b-875c-d7938215ce62.png"
+    },
+    {
+      "name": "nervio",
+      "path": "/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-c3273848-a653-4aab-a5f7-054b42fb76ae.png"
+    },
+    {
+      "name": "limpieza",
+      "path": "/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-4c53b389-d94f-475b-a577-1e09d172ccf8.png"
+    }
+  ]
+}

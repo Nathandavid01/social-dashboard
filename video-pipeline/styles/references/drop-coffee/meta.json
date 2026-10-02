@@ -1,0 +1,77 @@
+{
+  "name": "Drop Coffee",
+  "id": "06d47cf4-642b-42c8-9249-0f1ec4846dea",
+  "slug": "drop-coffee",
+  "contact": "runs/metricool-tomorrow/style/drop-coffee/contact.jpg",
+  "captions": {
+    "samples": 9,
+    "avg_chars": 372,
+    "emoji_rate": 1.0,
+    "hashtag_rate": 0.56,
+    "mostly_uppercase": 0.0,
+    "examples": [
+      "☕️ ¿Es tu primera vez en Drop Coffee? ¡Te tengo las recomendaciones que TIENES que probar! 👀✨\n\nComienza con un lattesito preparado con Café Don Rogelio, nuestro café favorito. 🤎\n\nS",
+      "Cuando el café está irresistible… hasta el de las redes quiere el suyo. 😂☕️\n\nPorque grabar contenido está bien, pero hacerlo con un buen café en mano está mejor. 🤎👀\n\n⏰ Horario:\nLun",
+      "En Drop Coffee encontrarás opciones deliciosas para acompañar tu día, preparadas con mucho cariño y sabor. 🤎\n\n🍪 Galletas y empanadas horneadas, elaboradas desde casa con ese toque "
+    ]
+  },
+  "clips": [
+    {
+      "url": "https://static.metricool.com/video/4817583/202609/5f9a6fd55fe643b2.mp4",
+      "date": "2026-09-07T12:06:00",
+      "networks": [
+        "facebook",
+        "instagram"
+      ],
+      "text": "☕️ ¿Es tu primera vez en Drop Coffee? ¡Te tengo las recomendaciones que TIENES que probar! 👀✨\n\nComienza con un lattesito preparado con Café Don Rogelio, nuestro café favorito. 🤎\n\nSi eres amante de lo frío, prueba uno de nuestros cafés fríos",
+      "duration": 64.389002,
+      "bytes": 65499854,
+      "width": 1080,
+      "height": 1920,
+      "frames": [
+        "runs/metricool-tomorrow/style/drop-coffee/v1-1.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v1-2.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v1-3.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v1-4.jpg"
+      ]
+    },
+    {
+      "url": "https://static.metricool.com/video/4817583/202609/1f41a2ef8b514dd2.mp4",
+      "date": "2026-09-04T09:14:00",
+      "networks": [
+        "facebook",
+        "instagram"
+      ],
+      "text": "Cuando el café está irresistible… hasta el de las redes quiere el suyo. 😂☕️\n\nPorque grabar contenido está bien, pero hacerlo con un buen café en mano está mejor. 🤎👀\n\n⏰ Horario:\nLunes a viernes | 7:00 AM – 5:30 PM\nSábados | 8:00 AM – 8:00 PM",
+      "duration": 12.84,
+      "bytes": 13101245,
+      "width": 1080,
+      "height": 1920,
+      "frames": [
+        "runs/metricool-tomorrow/style/drop-coffee/v2-1.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v2-2.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v2-3.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v2-4.jpg"
+      ]
+    },
+    {
+      "url": "https://static.metricool.com/video/4817583/202609/be07a371b47f475a.mp4",
+      "date": "2026-09-02T11:04:00",
+      "networks": [
+        "facebook",
+        "instagram"
+      ],
+      "text": "En Drop Coffee encontrarás opciones deliciosas para acompañar tu día, preparadas con mucho cariño y sabor. 🤎\n\n🍪 Galletas y empanadas horneadas, elaboradas desde casa con ese toque especial que nos caracteriza.\n🧁 Muffins de esta semana: maíz",
+      "duration": 36.316009,
+      "bytes": 36167860,
+      "width": 1080,
+      "height": 1920,
+      "frames": [
+        "runs/metricool-tomorrow/style/drop-coffee/v3-1.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v3-2.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v3-3.jpg",
+        "runs/metricool-tomorrow/style/drop-coffee/v3-4.jpg"
+      ]
+    }
+  ]
+}

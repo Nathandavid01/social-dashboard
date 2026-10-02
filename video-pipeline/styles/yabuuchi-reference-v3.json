@@ -1,0 +1,30 @@
+{
+  "name": "Yabuuchi Sushi · Referencia local",
+  "font_file": "../media/yabuuchi/brand/Arial-Black.ttf",
+  "font_family": "Arial Black",
+  "font_size": 52,
+  "bold": -1,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00202020",
+  "back_colour": "&H80000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 3,
+  "alignment": 2,
+  "margin_x": 75,
+  "bottom_margin": 300,
+  "fixed_size": true,
+  "wrap_width": 900,
+  "max_words": 6,
+  "max_chars": 34,
+  "caption_animation": "none",
+  "status": "matched_visually_pending_audio_review",
+  "reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+  "notes": [
+    "Referencia principal: video 1.2.mp4 aportado por Eric el 2026-09-20. Prevalece sobre el ejemplo anterior.",
+    "Frases blancas en negrita, mayúsculas/minúsculas naturales, sombra gris, tamaño fijo aproximado 54px y zona baja, sin cubrir ojos.",
+    "Acercamientos suaves, B-roll pertinente, gráficas pequeñas al nombrar conceptos, pop/whoosh contenidos.",
+    "Efectos originales sintetizados: similitud auditiva exacta pendiente. Música CC0 seleccionada; no se afirma identidad de pista.",
+    "V3: Arial Black 52px tras comparar grosor visual a 1080p. Posición baja igual a referencia; sombra sin contorno marcado."
+  ]
+}

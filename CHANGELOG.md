@@ -4,6 +4,13 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.123 — 2026-10-02
+
+**Las herramientas de edición y guías de clientes ahora viven en el repositorio del dashboard.**
+- Incluye el pipeline local, perfiles de captions, recetas y reglas compartidas de edición.
+- Añade instrucciones para restaurar medios en otro equipo y conectar con el dashboard.
+- Los videos y recursos licenciados permanecen en su almacenamiento; no se incluyen en Git ni se renderizan en Vercel.
+
 ## v5.122 — 2026-10-02
 
 **Recibo separa los gráficos y los videos de cada cliente.**

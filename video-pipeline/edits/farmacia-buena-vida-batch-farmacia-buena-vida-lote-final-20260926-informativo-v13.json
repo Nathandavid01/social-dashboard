@@ -1,0 +1,351 @@
+{
+  "idea_id": "d3819941-90e6-4aad-b568-534715e68ebe",
+  "title": "Visítanos En Maunabo",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/source/informativo.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-20260926/informativo-corrected.json",
+  "style": "../styles/farmacia-buena-vida-v7.json",
+  "clips": [
+    {
+      "in": 1.35,
+      "out": 6.3,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.65,
+      "out": 8.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 9.45,
+      "out": 10.95,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.18,
+      "out": 11.85,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 12.2,
+      "out": 13.45,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 13.87,
+      "out": 15.7,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.08,
+      "out": 17.55,
+      "zoom": 1.1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 18.03,
+      "out": 20.8,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 21.25,
+      "out": 22.82,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 23.18,
+      "out": 31.1,
+      "zoom": 1.04,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.07,
+      "end": 1.05,
+      "text": "Farmacia\nBuena Vida"
+    },
+    {
+      "start": 1.07,
+      "end": 1.69,
+      "text": "queda ubicado"
+    },
+    {
+      "start": 1.69,
+      "end": 2.17,
+      "text": "en la calle"
+    },
+    {
+      "start": 2.17,
+      "end": 3.05,
+      "text": "Muñoz Rivera"
+    },
+    {
+      "start": 3.05,
+      "end": 3.91,
+      "text": "número 24"
+    },
+    {
+      "start": 3.95,
+      "end": 4.95,
+      "text": "en el pueblo\nde Maunabo"
+    },
+    {
+      "start": 5.02,
+      "end": 6.36,
+      "text": "Contamos con\nservicio de"
+    },
+    {
+      "start": 6.36,
+      "end": 7.3,
+      "text": "Western Union"
+    },
+    {
+      "start": 7.34,
+      "end": 8.2,
+      "text": "sello de\ncolecturía"
+    },
+    {
+      "start": 8.2,
+      "end": 8.8,
+      "text": "digital"
+    },
+    {
+      "start": 8.83,
+      "end": 9.48,
+      "text": "fax"
+    },
+    {
+      "start": 9.52,
+      "end": 10.72,
+      "text": "impresión\nde emails"
+    },
+    {
+      "start": 10.76,
+      "end": 11.72,
+      "text": "delivery\ngratis de"
+    },
+    {
+      "start": 11.72,
+      "end": 12.56,
+      "text": "medicamentos"
+    },
+    {
+      "start": 12.58,
+      "end": 14.04,
+      "text": "refills\nautomáticos"
+    },
+    {
+      "start": 14.08,
+      "end": 16.22,
+      "text": "certificados\nde ASUME"
+    },
+    {
+      "start": 16.32,
+      "end": 16.85,
+      "text": "PAN"
+    },
+    {
+      "start": 16.87,
+      "end": 18.37,
+      "text": "antecedentes\npenales"
+    },
+    {
+      "start": 18.41,
+      "end": 19.29,
+      "text": "También\nimprimimos"
+    },
+    {
+      "start": 19.29,
+      "end": 20.89,
+      "text": "licencias de\nautomóvil"
+    },
+    {
+      "start": 20.93,
+      "end": 22.25,
+      "text": "podemos pagar\ntus multas"
+    },
+    {
+      "start": 22.25,
+      "end": 22.89,
+      "text": "de CESCO"
+    },
+    {
+      "start": 22.89,
+      "end": 24.07,
+      "text": "y de\nAutoExpreso"
+    },
+    {
+      "start": 24.07,
+      "end": 26.23,
+      "text": "Entre otros\nservicios"
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/fachada-v2.mp4",
+      "at": 0,
+      "in": 0,
+      "out": 5.24,
+      "fade_in": 0,
+      "reason": "Foto real del cliente: fachada, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/fachada-clean.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/introduccion-v2.mp4",
+      "at": 5.02,
+      "in": 0,
+      "out": 1.52,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: introduccion, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/refills.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/western-v2.mp4",
+      "at": 6.32,
+      "in": 0,
+      "out": 1.2,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: western, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/western.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/sellos-v2.mp4",
+      "at": 7.3,
+      "in": 0,
+      "out": 1.72,
+      "fade_in": 0.22,
+      "reason": "Apoyo de sellos, movimiento suave; identidad oficial contextualizada",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/fax-email-v2.mp4",
+      "at": 8.8,
+      "in": 0,
+      "out": 2.14,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: fax-email, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/medicamentos-v2.mp4",
+      "at": 10.72,
+      "in": 0,
+      "out": 2.06,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: medicamentos, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/medicamentos.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/refills-v2.mp4",
+      "at": 12.56,
+      "in": 0,
+      "out": 1.72,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: refills, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/refills.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/asume-v2.mp4",
+      "at": 14.06,
+      "in": 0,
+      "out": 2.48,
+      "fade_in": 0.22,
+      "reason": "Apoyo de asume, movimiento suave; identidad oficial contextualizada",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/certificados-v2.mp4",
+      "at": 16.32,
+      "in": 0,
+      "out": 2.28,
+      "fade_in": 0.22,
+      "reason": "Apoyo de certificados, movimiento suave; identidad oficial contextualizada",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/cesco-v2.mp4",
+      "at": 18.38,
+      "in": 0,
+      "out": 5.0,
+      "fade_in": 0.22,
+      "reason": "Apoyo de cesco, movimiento suave; identidad oficial contextualizada",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/autoexpreso-v2.mp4",
+      "at": 23.16,
+      "in": 0,
+      "out": 1.14,
+      "fade_in": 0.22,
+      "reason": "Apoyo de autoexpreso, movimiento suave; identidad oficial contextualizada",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/email-pc.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    },
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/servicios-profesional-20260927/assets/cierre-v2.mp4",
+      "at": 24.08,
+      "in": 0,
+      "out": 2.15,
+      "fade_in": 0.22,
+      "reason": "Foto real del cliente: cierre, movimiento suave",
+      "original_source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-20260926/fullscreen-services/fachada-clean.png",
+      "reuse_reason": "Imagen real del mismo servicio o contexto farmacia; identidad oficial de agencia sin datos personales."
+    }
+  ],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Reedicion profesional de Servicios y Ubicacion: perfil unico v7, frases cortas legibles, logos oficiales moderados sobre fotografia real del local, cobertura completa, panes suaves y fundidos220ms. Fax/impresion y CESCO continuos; PAN sin imagen de tarjeta de beneficios; sin circulos. Voz y cierre completos, musica propia del reel conservada."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-buena-vida-lote-final-20260926/informativo-music-reedit.wav",
+    "title": "Advertime",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Advertime.provenance.json",
+    "license": "CC0 1.0"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "graphics": []
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Frida · Referencia Publicada V3",
+  "font_file": "../media/frida/brand/BreeSerif-Regular.ttf",
+  "font_family": "Bree Serif",
+  "font_size": 95,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H006624AD",
+  "back_colour": "&H806624AD",
+  "border_style": 1,
+  "outline": 5,
+  "shadow": 1,
+  "alignment": 2,
+  "margin_x": 85,
+  "bottom_margin": 380,
+  "fixed_size": true,
+  "wrap_width": 910,
+  "max_words": 7,
+  "max_chars": 38,
+  "caption_animation": "none",
+  "status": "visual_reference_font_approximation_user_review_pending",
+  "references": [
+    "https://www.instagram.com/reel/DdeS1NJjA46/",
+    "https://www.instagram.com/reel/DdwbANsk8S8/"
+  ],
+  "notes": [
+    "Bree Serif es aproximacion visual; archivo original no localizado en recursos ni Brand Kits.",
+    "Texto blanco, borde rosa, sin caja, frases de una o dos lineas. Valores reconstruidos a 1080x1920.",
+    "Fuente OFL de https://github.com/google/fonts/tree/main/ofl/breeserif; licencia en media/frida/brand/OFL.txt.",
+    "Corrección Eric: usar captions, estilo y efectos propios. Énfasis amarillo en palabras clave; fundido suave en planos de apoyo observado en 379560044.",
+    "Graph loop Girls Night: caption V3 exportado 57px de altura frente a 83px referencia. Ajuste ASS95 margen380; fuente sigue no identificada."
+  ],
+  "emphasis_colour": "&H0000CCFF"
+}

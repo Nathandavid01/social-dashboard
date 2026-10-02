@@ -1,0 +1,47 @@
+{
+  "name": "Apiario Coffee — countdown referencia v1",
+  "status": "visual_reference_reconstruction_font_identity_pending",
+  "font_file": "../media/apiario/brand/Montserrat-ExtraBold.ttf",
+  "font_family": "Montserrat ExtraBold",
+  "font_size": 83,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H000F0C2A",
+  "back_colour": "&H000F0C2A",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "margin_x": 80,
+  "bottom_margin": 690,
+  "alignment": 2,
+  "fixed_size": true,
+  "wrap_width": 1300,
+  "max_words": 5,
+  "max_chars": 30,
+  "caption_animation": "none",
+  "caption_shadow": {
+    "colour": "&H000F0C2A",
+    "alpha": "10",
+    "offset_x": 1,
+    "offset_y": 7,
+    "spread": 4,
+    "blur": 5
+  },
+  "reference": "/Volumes/Extreme SSD/Nate Media/apiario-countdown-3-semanas-20261002/reference/countdown-2-semanas-dashboard.mp4",
+  "font_provenance": {
+    "file_source": "/Users/ericperez/Nate Media/video-pipeline/media/black-pepper/brand/Montserrat-ExtraBold.ttf",
+    "basis": "Visual glyph comparison against Apiario countdown reference; OFL font file, not a transfer of Black Pepper caption settings.",
+    "official_identity_confirmed": false
+  },
+  "observed": {
+    "case": "natural",
+    "box": false,
+    "white_caption": "short centered phrases with dark brown soft shadow",
+    "brand_emphasis": "gold",
+    "position": "near y=1200 on 1080x1920 reference"
+  },
+  "unverified": [
+    "Exact caption font not supplied in Drive; Times New Roman and Antrokasdemo listed in brand PDF refer to brand typography and do not match observed sans-serif captions.",
+    "Exact animation and design size reconstructed from existing same-client reference."
+  ]
+}

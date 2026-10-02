@@ -1,0 +1,33 @@
+from pathlib import Path
+import json,sys,subprocess,shutil
+R=Path(__file__).resolve().parents[1];sys.path.insert(0,str(R));import pipeline,audiokit
+w=Path('/Volumes/Extreme SSD/Nate Media/delian-gingivitis-v1');raw=Path('/Volumes/Extreme SSD/Nate Media/delian-sept-missing');source=next(raw.glob('dji*170626*.mp4'));trans=raw/'gingivitis-second-pass.json';dest=R/'edits/delian-gingivitis-20260921-v1.json';assert not dest.exists()
+ranges=[(.48,10.16),(10.75,19.12),(19.52,31.99),(32.10,36.93),(37.50,44.50),(44.98,50.30)]
+clips=[{'in':a,'out':b,'zoom':1 if i%2==0 else 1.045,'focus_y':.25,'audio_edge_fade':.012,'zoom_keyframes':[{'time':0,'zoom':1},{'time':round(b-a,6),'zoom':1.012}]} for i,(a,b) in enumerate(ranges)]
+def tm(t):
+ acc=0
+ for a,b in ranges:
+  if a<=t<=b:return round(acc+t-a,3)
+  acc+=b-a
+ raise ValueError(t)
+phrases=[(.62,1.72,'Hoy les quiero hablar un poquito'),(1.72,3.0,'de lo que es la gingivitis.'),(3.26,3.96,'La gingivitis,'),(3.96,5.62,'la señal primordial es'),(5.62,6.58,'sangrado en la encía.'),(6.92,8.06,'¿Qué es lo primero que me preguntan?'),(8.46,9.98,'Doctora, me paso el hilo y sangro.'),(10.9,11.94,'Esa es la primera señal.'),(12.34,13.58,'No debe haber sangrado.'),(13.9,15.36,'¿Qué significa? Inflamación'),(15.36,16.06,'de la encía.'),(16.5,17.84,'La respuesta de la encía'),(17.84,18.96,'es sangrar.'),(19.68,21.12,'¿Y cómo resolvemos eso?'),(21.12,22.62,'Visitando al dentista.'),(22.82,23.58,'Hay veces que podemos verlos'),(23.58,24.32,'cada seis meses,'),(24.64,25.58,'otras veces cada tres.'),(26.06,27.82,'Pasamos el hilo dental todos los días,'),(27.82,29.56,'porque si eso no se resuelve,'),(29.84,31.8,'se convierte en periodontitis.'),(32.26,33.62,'Y ya ahí vamos a ver'),(33.62,34.8,'una pérdida de hueso.'),(35.26,36.74,'Podemos perder hasta los dientes.'),(37.66,39.3,'Vamos a tratar de hacer'),(39.3,40.28,'una evaluación completa,'),(41.08,42.12,'ver lo que usted necesita.'),(42.4,43.54,'Hacemos limpieza profunda'),(43.54,44.32,'si es necesario.'),(45.14,46.08,'Y lo más importante'),(46.08,47.36,'es comunicarse con nosotros al'),(47.36,50.06,'787-230-7573')]
+caps=[{'start':tm(a),'end':tm(b),'text':t} for a,b,t in phrases]
+body=round(sum(b-a for a,b in ranges),6);tail=3.366667;total=body+tail
+broll=[{'source':str(R/'runs/delian-sept-polish/visita-clinica-silent.mp4'),'in':0,'out':1.65,'at':tm(21.12),'fade_in':0,'fade_out':0,'reason':'Visita real a la clínica al mencionar al dentista; no se presenta como procedimiento de limpieza.'},{'source':'/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4','in':2,'out':4,'at':tm(26.06),'fade_in':0,'fade_out':0,'reason':'Uso real de hilo dental en la recomendación diaria.'},{'source':'/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4','in':4.5,'out':6,'at':tm(39.3),'fade_in':0,'fade_out':0,'reason':'Evaluación real durante invitación a evaluación completa.'}]
+e={'idea_id':'gingivitis-20260921','title':'¿Te Sangran Las Encías?','source':str(source),'transcript':str(trans),'style':'../styles/delian-reference-v6-shoika.json','clips':clips,'captions':caps,'broll':broll,'graphics':[],'effects':[],'audio_master':{'music_below_voice_lu':11},'references':{'published_reel':'../delian-loyola-video/media/reference/publicados-14-agosto.mp4','official_outro':'media/delian/brand/outro-loyola.mp4','font_reference':'media/delian/brand/tipografia.jpg'},'catalog':'runs/delian-sept-catalog.json'}
+e['sounds']=[{'preset':'mouse_click','time':round(t,3),'gain_db':-24} for t in sorted(set([tm(a) for a,b in ranges[1:]]+[b['at'] for b in broll]+[b['at']+b['out']-b['in'] for b in broll]))]
+cfg=audiokit.settings(e);words=[x for s in json.loads(trans.read_text())['segments'] for x in s['words']];prep=w/'voice-preparation';prep.mkdir(exist_ok=True)
+voicefile,voice=audiokit.prepare_voice(dest,e,pipeline.cut_words(words,clips),prep,cfg)
+def ff(*a):subprocess.run([pipeline.FFMPEG,'-v','error','-n',*map(str,a)],check=True)
+track=w/'Baileys - Diego Nava.mp3';assert not any('Baileys' in p.read_text() for p in (R/'edits').glob('*.json'))
+prov={'title':'Baileys','author':'Diego Nava','source':'https://mixkit.co/free-stock-music/hip-hop/','download_url':'https://assets.mixkit.co/music/476/476.mp3','license':'Mixkit Stock Music Free License','license_evidence':'https://mixkit.co/license/modal/musicFree/','sha256':audiokit.digest(track)};track.with_suffix('.provenance.json').write_text(json.dumps(prov,indent=2))
+rawmusic=w/'music-raw.wav';ff('-ss',4,'-i',track,'-t',total,'-vn','-af',f'afade=t=in:d=0.12,afade=t=out:st={total-.7}:d=0.7','-ar',48000,'-ac',2,'-c:a','pcm_s24le',rawmusic)
+level=audiokit.measure(rawmusic,cfg,prefilter=f'atrim=end={body}')['input_i'];gain=voice['measurement']['input_i']-11-level
+music=w/'music-continuous.wav';ff('-i',rawmusic,'-af',f'volume={gain}dB','-c:a','pcm_s24le',music)
+click=w/'outro-click.wav';pipeline.synth_sounds(click,tail,[{'preset':'mouse_click','time':0,'duration':.06,'gain_db':-20}]);outro=w/'outro-music-click.mov'
+ff('-i',R/'media/delian/brand/outro-loyola.mp4','-i',music,'-i',click,'-filter_complex',f'[1:a]atrim=start={body}:end={total},asetpts=PTS-STARTPTS[bed];[bed][2:a]amix=inputs=2:duration=first:normalize=0[a]','-map','0:v:0','-map','[a]','-t',tail,'-c:v','copy','-c:a','pcm_s24le',outro)
+e['outro']={'source':str(outro),'in':0,'out':tail,'gain':1};e['music']={'source':str(music),'title':'Baileys - Diego Nava','license':prov['license'],'provenance':str(track.with_suffix('.provenance.json')),'source_offset':4}
+e['review_notes']=['Original completo recuperado de Drive, 51.02 s. Retiradas pausas sin cortar las explicaciones ni el teléfono.','Shoika, tres apoyos reales con cortes opacos, clicks y keyframes sutiles. Pista única por reel.','Dos transcripciones small cotejadas y vocabulario dental corregido. Verificar por escucha la frase de frecuencia de visitas 22.82–25.58 del original; no se elimina del diálogo.','No se encontró este reel en Metricool en el rango consultado. No subido a Metricool.','Escucha crítica, captions y aprobación humana pendientes.']
+dest.write_text(json.dumps(e,ensure_ascii=False,indent=2)+'\n')
+(w/'caption.txt').write_text('¿Te sangran las encías cuando usas el hilo dental? 🦷\n\nLa Dra. Delian Loyola explica qué es la gingivitis y por qué es importante evaluar el sangrado de encías. Una evaluación permite conocer qué cuidados necesita tu sonrisa. ✨\n\n¡Agenda tu evaluación en DML Cosmetic Dentistry!\n📞 787-230-7573\n\n#dentistapr #dentistapuertorico #gingivitis #saludbucal #puertorico\n')
+print(dest,body,total)

@@ -1,0 +1,136 @@
+{
+  "idea_id": "6dc5583c-ebb2-4f22-a127-09adb9fdcf32",
+  "title": "Horario de Black Pepper",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929093431_0339_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929093431_0339_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 0.0,
+      "out": 14.95,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.44,
+      "text": "Muchos invitados de"
+    },
+    {
+      "start": 1.44,
+      "end": 3.2,
+      "text": "nosotros nos preguntan y"
+    },
+    {
+      "start": 3.2,
+      "end": 4.34,
+      "text": "aún tienen duda de"
+    },
+    {
+      "start": 4.34,
+      "end": 5.26,
+      "text": "cuál es nuestro horario."
+    },
+    {
+      "start": 5.58,
+      "end": 7.18,
+      "text": "Así que Lory,"
+    },
+    {
+      "start": 7.22,
+      "end": 8.04,
+      "text": "¿cuál es nuestro horario?"
+    },
+    {
+      "start": 8.42,
+      "end": 8.72,
+      "text": "Sí,"
+    },
+    {
+      "start": 8.72,
+      "end": 9.92,
+      "text": "estamos aquí de lunes"
+    },
+    {
+      "start": 9.92,
+      "end": 11.1,
+      "text": "a viernes de ocho"
+    },
+    {
+      "start": 11.1,
+      "end": 11.8,
+      "text": "de la mañana a"
+    },
+    {
+      "start": 11.8,
+      "end": 12.34,
+      "text": "tres de la tarde"
+    },
+    {
+      "start": 12.34,
+      "end": 13.46,
+      "text": "y sábado y domingo"
+    },
+    {
+      "start": 13.46,
+      "end": 14.42,
+      "text": "de ocho a dos"
+    },
+    {
+      "start": 14.42,
+      "end": 14.95,
+      "text": "de la tarde."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 4.34,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "cuál es nuestro horario."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 11.1,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "de la mañana a"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 12.34,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "y sábado y domingo"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Village Tarantella.mp3",
+    "title": "Village Tarantella",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea horario. Se conserva lunes a viernes 8 a 3 y sábado y domingo 8 a 2.",
+    "Se corta el tramo de las gorras: el medio no se entiende y no es el gancho.",
+    "Raúl pregunta a Lory en cámara. Escucha crítica pendiente. No publicar."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75"
+}

@@ -1,0 +1,268 @@
+{
+  "idea_id": "invisalign-demo-20260921",
+  "title": "Así Se Planifica Tu Sonrisa Con Invisalign",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-loyola-video/source-2026-09-21/dji_mimo_20260921_170124_20260921170045_1790125040771_video.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/invisalign-transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 0.12,
+      "out": 2.72,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 2.6,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 3.52,
+      "out": 4.8,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 1.28,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 5.46,
+      "out": 14.98,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 9.52,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 15.16,
+      "out": 22.18,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 7.02,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 22.5,
+      "out": 28.86,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 6.36,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 31.96,
+      "out": 38.8,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 6.84,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 2.56,
+      "text": "Doctora? ¿Estás jugando el diseño de dientes?",
+      "bottom_margin": 230,
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 2.72,
+      "end": 5.66,
+      "text": "Algo parecido. Aquí estamos trabajando con",
+      "bottom_margin": 230
+    },
+    {
+      "start": 5.66,
+      "end": 7.56,
+      "text": "Invisalign. Invisalign, ¿verdad?",
+      "bottom_margin": 230
+    },
+    {
+      "start": 7.8,
+      "end": 10.08,
+      "text": "vamos a lograr que este movimiento",
+      "bottom_margin": 230
+    },
+    {
+      "start": 10.08,
+      "end": 12.96,
+      "text": "de los dientes se convierta en",
+      "bottom_margin": 230
+    },
+    {
+      "start": 12.96,
+      "end": 14.9,
+      "text": "esto. Ahí cambia completamente la arcada.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 14.98,
+      "end": 16.2,
+      "text": "Vemos un poquito de apiñamiento.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 16.28,
+      "end": 17.2,
+      "text": "Esta es la parte de arriba",
+      "bottom_margin": 230
+    },
+    {
+      "start": 17.2,
+      "end": 19.26,
+      "text": "y aquí se ve cómo están",
+      "bottom_margin": 230
+    },
+    {
+      "start": 19.26,
+      "end": 21.88,
+      "text": "todos alineados. Lo mismo pasa abajo.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 22.6,
+      "end": 24.24,
+      "text": "Mira cómo ellos están bien apiñados.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 24.24,
+      "end": 25.76,
+      "text": "Por eso también se ven que",
+      "bottom_margin": 230
+    },
+    {
+      "start": 25.76,
+      "end": 27.56,
+      "text": "están fracturados esto lo lograba en",
+      "bottom_margin": 230
+    },
+    {
+      "start": 27.56,
+      "end": 29.48,
+      "text": "cuestión de meses con Invisalign.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 29.58,
+      "end": 31.04,
+      "text": "Así que se pueden comunicar al",
+      "bottom_margin": 230
+    },
+    {
+      "start": 31.04,
+      "end": 33.56,
+      "text": "787-230-7573",
+      "bottom_margin": 230
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 2.6,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3.88,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 13.4,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 20.42,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 26.78,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Demostración original del escaneo conservada como contenido principal; tramo usado antes como B-roll pertenece aquí a la explicación original. Quitar pausas largas y frase ambigua ya aquí caen su arcada (29–31.48), sin cambiar explicación ni prometer resultado. Subtítulos más bajos durante el monitor. ASR small focal confirmó cambia completamente la arcada."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/invisalign-music.wav",
+    "title": "Like a Loop Machine",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Like a Loop Machine.provenance.json"
+  },
+  "graphics": []
+}

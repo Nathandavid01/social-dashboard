@@ -1,0 +1,104 @@
+{
+  "idea_id": "0cb8133f-763a-40e0-90bf-03c02bd63790",
+  "title": "No todo es trabajo de dos",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-assembly-muted.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-muted-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0.65,
+      "out": 3.5,
+      "zoom": 1.03,
+      "focus_y": 0.4,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.85,
+          "zoom": 1.03
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.778334,
+      "out": 14.628333999999999,
+      "zoom": 1.02,
+      "focus_y": 0.4,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.85,
+          "zoom": 1.03
+        }
+      ],
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 6.4371670000000005,
+      "out": 10.437166999999999,
+      "zoom": 1.025,
+      "focus_y": 0.4,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.0,
+          "zoom": 1.03
+        }
+      ],
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 2.85,
+      "text": "POV: La doctora dice"
+    },
+    {
+      "start": 2.85,
+      "end": 5.7,
+      "text": "«No todo es\ntrabajo de dos»"
+    },
+    {
+      "start": 5.7,
+      "end": 9.7,
+      "text": "Nosotras:"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Tres tomas únicas: juntas, una se marcha, ambas en puestos separados. Montaje POV v5 de cliente confirmado. Música única Double Espresso Motion Array. Sin B-roll ajeno; zooms suaves. Audio ambiente silenciado en derivado para no incorporar conversación incidental. Captions editoriales del brief, no transcripción atribuida. Drive parcial y escucha crítica pendiente."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "caption_mode": "editorial",
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-music.wav",
+    "title": "Double Espresso — The Original Orchestra",
+    "license": "Motion Array paid subscription license",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/music-pov-provenance.json",
+    "extend_through_outro": true
+  }
+}

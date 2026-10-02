@@ -1,0 +1,15 @@
+{
+  "source": "media/arecibo/DJI_20260909092729_0278_D.MP4",
+  "source_in": 0.3,
+  "source_speed": 0.45,
+  "duration": 2.83,
+  "center": [540, 1310],
+  "radius": 290,
+  "values": [15, 30],
+  "change_at": 1.2,
+  "accent": "#9CE608",
+  "secondary": "#62CCE6",
+  "font": "media/arecibo/brand/Montserrat-Bold.ttf",
+  "tick_interval": 0.4,
+  "tick_gain_db": -14
+}

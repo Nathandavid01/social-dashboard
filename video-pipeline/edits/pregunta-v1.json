@@ -1,0 +1,47 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "2a9747d8-bda2-4087-80bc-8a36cafa69b8",
+  "title": "Pregunta · Nana's Playhouse",
+  "source": "../media/fd3ece8d-bc59-4247-a2ad-c98d1363fb31.mp4",
+  "transcript": "../runs/pregunta-transcript-reviewed.json",
+  "style": "../styles/nanas.json",
+  "clips": [
+    {
+      "in": 1.48,
+      "out": 4.22,
+      "zoom": 1.08,
+      "reason": "Pregunta inicial; retirar la cuenta de grabación."
+    },
+    {
+      "in": 4.86,
+      "out": 10.44,
+      "zoom": 1.0,
+      "reason": "Respuesta completa; reducir la pausa anterior."
+    },
+    {
+      "in": 10.47,
+      "out": 14.3,
+      "zoom": 1.08,
+      "reason": "Beneficio adicional; retirar espera final."
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0.0,
+      "gain_db": -29
+    },
+    {
+      "time": 2.74,
+      "gain_db": -29
+    },
+    {
+      "time": 8.32,
+      "gain_db": -30
+    }
+  ],
+  "review_notes": [
+    "Borrador de estilo: pendiente de revisión de Eric.",
+    "Sonidos sintetizados de prueba; no extraídos de Instagram.",
+    "Comprobar transcripción con modelo small antes de exportar revisión final."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "client_id": "2b66e7f6-6993-4c12-9ff4-0279da4bf637",
+  "style": "../styles/mondays-aguadilla-v1.json",
+  "idea_id": "mondays-te-bloqueo",
+  "catalog": "runs/mondays-catalog.json",
+  "title": "Te bloqueo a tu ex",
+  "source": "../runs/mondays-src/0450.mp4",
+  "transcript": "../runs/mondays-src/0450.small.json",
+  "clips": [
+    {
+      "in": 0.0,
+      "out": 7.5
+    }
+  ],
+  "broll": [],
+  "music": {
+    "source": "../media/music/Wakka Wakka.mp3",
+    "title": "Wakka Wakka",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Comedy/Wakka%20Wakka.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27
+  },
+  "references": {
+    "published_dialogue": "runs/metricool-tomorrow/style/mondays-aguadilla/v2-2.jpg",
+    "published_close": "runs/metricool-tomorrow/style/mondays-aguadilla/v3-4.jpg",
+    "contact": "runs/metricool-tomorrow/style/mondays-aguadilla/contact.jpg"
+  },
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 1.7,
+      "text": "Te bloqueo a tu ex."
+    },
+    {
+      "start": 1.86,
+      "end": 3.3,
+      "text": "Aquí en Mondays Aguadilla."
+    },
+    {
+      "start": 3.46,
+      "end": 5.1,
+      "text": "Si nos compras una mimosa,"
+    },
+    {
+      "start": 5.32,
+      "end": 7.2,
+      "text": "te vamos a stalkearlo de gratis."
+    }
+  ],
+  "review_notes": [
+    "Dijeron mimosa. La ficha dice mojito. Se deja mimosa.",
+    "Whisper oyó «toquerlo». En pantalla queda stalkearlo, que es el chiste de la ficha. Escucha pendiente."
+  ]
+}

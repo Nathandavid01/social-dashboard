@@ -1,0 +1,130 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "idea_id": "arecibo-0271-resultados",
+  "catalog": "runs/arecibo-0271-catalog.json",
+  "title": "¿Cuánto tardan los resultados?",
+  "source": "../media/arecibo/0271-screen-private-v1.mp4",
+  "original_source": "/Users/ericperez/Downloads/DJI_20260909091327_0271_D.LRF",
+  "transcript": "../runs/arecibo-0271-reviewed.json",
+  "style": "../styles/arecibo.json",
+  "clips": [
+    {
+      "in": 1.7,
+      "out": 11.95,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 0.94,
+      "text": "OYE, DOCTORA"
+    },
+    {
+      "start": 1.22,
+      "end": 1.94,
+      "text": "¿Y CUÁNTO TARDAN"
+    },
+    {
+      "start": 1.94,
+      "end": 2.54,
+      "text": "LOS RESULTADOS"
+    },
+    {
+      "start": 2.54,
+      "end": 3.5,
+      "text": "AQUÍ EN ARECIBO LAB?"
+    },
+    {
+      "start": 4,
+      "end": 5.35,
+      "text": "BUENO, ESO DEPENDERÍA."
+    },
+    {
+      "start": 5.94,
+      "end": 7.12,
+      "text": "ESO PUEDE VARIAR"
+    },
+    {
+      "start": 7.12,
+      "end": 8.28,
+      "text": "DE UNOS QUINCE MINUTOS"
+    },
+    {
+      "start": 8.28,
+      "end": 9.95,
+      "text": "A MEDIA HORA."
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/0271-resultados-card-v2.mp4",
+      "in": 0,
+      "out": 2.83,
+      "at": 7.42,
+      "eof_action": "repeat",
+      "kind": "brand_graphic",
+      "fade_in": 0.1,
+      "reason": "Clearly graphic clock and qualified time range; no unrelated clinical B-roll or waiting room."
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 1.22,
+      "duration": 0.09,
+      "gain_db": -18
+    },
+    {
+      "kind": "preset",
+      "preset": "whoosh_soft",
+      "time": 7.42,
+      "duration": 0.18,
+      "gain_db": -26
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 8.82,
+      "duration": 0.09,
+      "gain_db": -18
+    }
+  ],
+  "effects": [
+    {
+      "preset": "soft_zoom",
+      "time": 4,
+      "duration": 2.8,
+      "intensity": 0.15
+    }
+  ],
+  "transitions": [],
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-resultados-bed-v1.wav",
+    "title": "Inspiration",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Upbeat/Inspiration.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -28
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "review_notes": [
+    "User-provided LRF source is native 720x1280. Export at1080x1920 is upscaled, not recovered native detail.",
+    "Remove count-in; preserve continuous question, qualifier eso dependería and response, with no speech splice.",
+    "Screen privacy treatment precedes captions. Review coverage frame by frame before release.",
+    "No suitable analyzer/results B-roll in current catalog; keep doctor and use factual clock graphic.",
+    "Montserrat70 fixed, white on green boxes per current client profile.",
+    "Audio listening and user approval pending."
+  ]
+}

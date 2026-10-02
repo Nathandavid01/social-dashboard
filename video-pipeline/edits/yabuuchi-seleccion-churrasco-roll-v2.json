@@ -1,0 +1,134 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "churrasco-roll",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Así Se Prepara El Churrasco Roll",
+  "source": "../media/yabuuchi/derived/churrasco-roll-selection-v1.mp4",
+  "transcript": "../runs/yabuuchi-churrasco-roll-selection-mapped.json",
+  "style": "../styles/yabuuchi-reference-v3.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 12.17,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.84,
+      "text": "Por aquí vamos a estar preparando"
+    },
+    {
+      "start": 1.84,
+      "end": 3.08,
+      "text": "el Churrasco Roll,"
+    },
+    {
+      "start": 3.16,
+      "end": 5.88,
+      "text": "que es buenísimo para los principiantes."
+    },
+    {
+      "start": 6.05,
+      "end": 7.18,
+      "text": "Va a llevar queso crema,"
+    },
+    {
+      "start": 7.27,
+      "end": 8.0,
+      "text": "cebollín,"
+    },
+    {
+      "start": 8.35,
+      "end": 10.51,
+      "text": "churrasco y amarillito por encima."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 2.5
+  },
+  "music": {
+    "source": "../media/yabuuchi/churrasco-roll-selection-music-v1.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Backbeat.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 19.7,
+      "out": 20.77,
+      "at": 6.2,
+      "eof_action": "repeat",
+      "reason": "Queso crema al nombrarlo."
+    },
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 23.5,
+      "out": 24.58,
+      "at": 7.27,
+      "eof_action": "repeat",
+      "reason": "Cebollín al nombrarlo; montaje continuo sin flashes de presentadora."
+    },
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 29,
+      "out": 30.26,
+      "at": 8.35,
+      "eof_action": "repeat",
+      "reason": "Churrasco durante su mención."
+    },
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 55,
+      "out": 55.96,
+      "at": 9.61,
+      "eof_action": "repeat",
+      "reason": "Amarillito sobre el roll al nombrarlo."
+    },
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914123448_0987_D.MP4",
+      "in": 9.5,
+      "out": 11.1,
+      "at": 10.57,
+      "eof_action": "repeat",
+      "reason": "Hero final del Churrasco Roll terminado, antes del cierre de marca."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 1.2,
+      "out": 7.17
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914123252_0986_D.MP4",
+      "in": 10.7,
+      "out": 15.3
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Ingredientes sincronizados a las palabras y planos continuos.",
+    "Se elimina la frase final dudosa y se cierra con el roll terminado, sin conversación incidental.",
+    "Captions Arial Black 52px y cierre de video 1.2.mp4; comparación visual realizada. Escucha crítica pendiente.",
+    "V2: elevar solo el audio del cierre +7.96 dB, de -32.95 a aproximadamente -25 LUFS, para suavizar la caída respecto a la voz. Misma imagen, captions y B-roll."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 6.2,
+      "duration": 0.18,
+      "gain_db": -30
+    }
+  ],
+  "effects": []
+}

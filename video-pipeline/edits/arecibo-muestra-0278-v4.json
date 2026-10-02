@@ -1,0 +1,266 @@
+{
+  "client_id": "cd02f509-4e1d-49f2-aee7-e59942b16ffd",
+  "style": "../styles/arecibo.json",
+  "voice_filter": "highpass=f=85,afftdn=nr=10:nf=-32:tn=1,aformat=channel_layouts=mono,loudnorm=I=-16:TP=-2:LRA=7:measured_I=-24.90:measured_TP=-5.86:measured_LRA=2.80:measured_thresh=-35.03:offset=1.37:linear=false,aresample=48000",
+  "music": {
+    "source": "../media/music/arecibo-muestra-backbeat-v4.wav",
+    "title": "Backbeat",
+    "license": "CC0 1.0",
+    "source_url": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Electronic/Backbeat.mp3",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "target_lufs": -27.5
+  },
+  "outro": {
+    "source": "../media/arecibo/brand/outro-sonorizado-v18.mp4",
+    "in": 0,
+    "out": 2.5,
+    "gain": 1
+  },
+  "references": {
+    "approved_style_example": "media/arecibo/AreciboLab_DesdeCero_v18.mp4",
+    "outro": "media/arecibo/brand/outro-sonorizado-v18.mp4"
+  },
+  "idea_id": "arecibo-antes-de-la-muestra",
+  "catalog": "runs/arecibo-catalog.json",
+  "title": "Antes De Una Toma De Muestra",
+  "source": "../media/arecibo/DJI_20260909092729_0278_D.MP4",
+  "transcript": "../../arecibo-lab-video/transcripts/0278.json",
+  "clips": [
+    {
+      "in": 3.403,
+      "out": 5.806,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.403,
+          "zoom": 1.025
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 6.073,
+      "out": 9.61,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 3.537,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 9.843,
+      "out": 12.613,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 2.77,
+          "zoom": 1.045
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 12.913,
+      "out": 15.783,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.045
+        },
+        {
+          "time": 2.87,
+          "zoom": 1.045
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 16.216,
+      "out": 18.719,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.045
+        },
+        {
+          "time": 2.503,
+          "zoom": 1.045
+        }
+      ],
+      "audio_edge_fade": 0.008
+    },
+    {
+      "in": 49.25,
+      "out": 52.619,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.025
+        },
+        {
+          "time": 3.369,
+          "zoom": 1.045
+        }
+      ],
+      "audio_edge_fade": 0.008
+    }
+  ],
+  "broll": [
+    {
+      "source": "../media/arecibo/0285-muestra-crop.mp4",
+      "in": 0.25,
+      "out": 2.82,
+      "at": 0,
+      "original_source": "../media/arecibo/DJI_20260909094109_0285_D.MP4",
+      "source_in": 0.85,
+      "source_out": 3.42,
+      "reason": "Gancho cubierto desde el primer fotograma; salida sobre la toma estable de la doctora, sin destello del plano de preparación.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.57,
+          "zoom": 1.035
+        }
+      ],
+      "fade_in": 0,
+      "fade_out": 0.13
+    },
+    {
+      "source": "../media/arecibo/muestra-tips-graphics-v3.mov",
+      "in": 0,
+      "out": 17.452,
+      "at": 0,
+      "kind": "brand_graphic",
+      "reason": "Cuatro puntos con ilustraciones legibles, entrada y salida de todo el panel, resolución nativa y sin cubrir ojos o subtítulos."
+    }
+  ],
+  "transitions": [],
+  "effects": [],
+  "sounds": [
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 2.45,
+      "duration": 0.09,
+      "gain_db": -12
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 6.02,
+      "duration": 0.09,
+      "gain_db": -12
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 8.9,
+      "duration": 0.09,
+      "gain_db": -12
+    },
+    {
+      "kind": "preset",
+      "preset": "mouse_click",
+      "time": 14.23,
+      "duration": 0.09,
+      "gain_db": -12
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.077,
+      "end": 1.197,
+      "text": "¿QUÉ NO DEBES HACER"
+    },
+    {
+      "start": 1.197,
+      "end": 2.337,
+      "text": "ANTES DE UNA TOMA DE MUESTRA?"
+    },
+    {
+      "start": 2.45,
+      "end": 3.45,
+      "text": "NO DEBERÍAS DE HACER"
+    },
+    {
+      "start": 3.45,
+      "end": 4.75,
+      "text": "EJERCICIOS INTENSOS"
+    },
+    {
+      "start": 4.75,
+      "end": 5.87,
+      "text": "24 HORAS ANTES"
+    },
+    {
+      "start": 6.017,
+      "end": 7.557,
+      "text": "RECUERDEN NO TOMAR CAFÉ"
+    },
+    {
+      "start": 7.557,
+      "end": 8.657,
+      "text": "NI BEBIDAS AZUCARADAS"
+    },
+    {
+      "start": 8.777,
+      "end": 9.117,
+      "text": "¿POR QUÉ?"
+    },
+    {
+      "start": 9.197,
+      "end": 10.317,
+      "text": "PORQUE LA MAYORÍA DE LAS PRUEBAS"
+    },
+    {
+      "start": 10.317,
+      "end": 11.477,
+      "text": "QUE LES REALIZA EL MÉDICO"
+    },
+    {
+      "start": 11.624,
+      "end": 14.004,
+      "text": "SON EN ESTADO DE AYUNAS"
+    },
+    {
+      "start": 14.233,
+      "end": 14.993,
+      "text": "HIDRÁTESE BIEN"
+    },
+    {
+      "start": 14.993,
+      "end": 16.333,
+      "text": "SIN ALCOHOL"
+    },
+    {
+      "start": 16.333,
+      "end": 17.333,
+      "text": "EL DÍA ANTES"
+    }
+  ],
+  "review_notes": [
+    "Reedición solicitada por Eric: gancho cubierto completo y cortes sin flashes; planos consecutivos de ayuno con el mismo encuadre.",
+    "Cierre directo desde 49.25s: se retira la muletilla y por último y no menos importante, conservando hidratación y alcohol.",
+    "Captions reconstruidos por frase con tiempos del crudo. SIN ALCOHOL resume la prohibición grabada sin atribuirle un verbo que el ASR no pudo resolver; escucha crítica pendiente.",
+    "Cuatro clicks mecánicos a -12 dBFS de pico, sincronizados con entradas. Música Backbeat CC0 ajustada a la duración nueva; outro oficial ya sonorizado.",
+    "B-roll clínico 0285 solo una vez, sin su audio original. No hay material literal alternativo para ejercicio, café, ayuno o hidratación en el catálogo revisado.",
+    "Gráficas nativas 1080x1920 con supersampling; captions Montserrat 70px sobre verde. Aprobación del usuario pendiente.",
+    "Microfundidos de audio de 8 ms por borde reducen discontinuidades sin acortar palabras.",
+    "v4 conserva imagen y timing v3; voz normalizada después de convertir a mono para evitar la pérdida de nivel al mezclar. Música medida en el mismo formato."
+  ]
+}

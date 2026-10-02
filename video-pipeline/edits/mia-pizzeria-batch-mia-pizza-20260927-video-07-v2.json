@@ -1,0 +1,113 @@
+{
+  "idea_id": "mia-20260919-07",
+  "title": "Chicharrones Y Una Promoción Para Las Redes",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/masters/mia-07-complete-v1.mov",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/masters/mia-07-complete-transcript.json",
+  "style": "../styles/mia-pizzeria-v1.json",
+  "clips": [
+    {
+      "in": 2.5,
+      "out": 3.75,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 4.52,
+      "out": 13.38,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 16.6543,
+      "out": 21.0143,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.15,
+      "text": "¿QUÉ ES ESO?"
+    },
+    {
+      "start": 1.33,
+      "end": 2.31,
+      "text": "ESTOS SON LOS FAMOSOS"
+    },
+    {
+      "start": 2.31,
+      "end": 3.27,
+      "text": "CHICHARRONES DE POLLO"
+    },
+    {
+      "start": 3.27,
+      "end": 4.11,
+      "text": "CON TOSTONES."
+    },
+    {
+      "start": 4.37,
+      "end": 5.29,
+      "text": "MIS AMORES, NO TE OLVIDES"
+    },
+    {
+      "start": 5.29,
+      "end": 6.31,
+      "text": "QUE TENEMOS EL ESPECIAL"
+    },
+    {
+      "start": 6.31,
+      "end": 7.41,
+      "text": "DE ALMUERZOS, LUNES A VIERNES,"
+    },
+    {
+      "start": 7.41,
+      "end": 8.67,
+      "text": "DE 11 A 3 DE LA TARDE,"
+    },
+    {
+      "start": 8.67,
+      "end": 9.88,
+      "text": "AQUÍ EN LA MÍA PIZZA."
+    },
+    {
+      "start": 10.11,
+      "end": 11.32,
+      "text": "¿CON QUIÉN TÚ HABLAS?"
+    },
+    {
+      "start": 11.97,
+      "end": 12.47,
+      "text": "AY, MAMI,"
+    },
+    {
+      "start": 12.49,
+      "end": 13.11,
+      "text": "YO PENSÉ QUE ERA"
+    },
+    {
+      "start": 13.11,
+      "end": 14.24,
+      "text": "UNA PROMOCIÓN PARA LAS REDES."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Conservar pregunta, plato visible y horario expresado. Retirar pausa antes de respuesta. No usar apoyos que oculten la demostración del plato. Integrar remate de toma 0900, omitir cuenta de rodaje. El intercambio completa el sketch."
+  ],
+  "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+  "catalog": "runs/mia-pizzeria-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "references": {
+    "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+    "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+  }
+}

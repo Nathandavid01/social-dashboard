@@ -1,0 +1,82 @@
+{
+  "idea_id": "prevencion-20260810",
+  "title": "La Prevención Antes Del Dolor",
+  "source": "../../delian-loyola-video/media/source-2026-08-10/DJI_20260810144428_0282_D.MP4",
+  "transcript": "../../delian-loyola-video/media/source-2026-08-10/0282-small-transcript.json",
+  "style": "../styles/delian-reference-v3.json",
+  "clips": [
+    {
+      "in": 6.9,
+      "out": 15.58,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.84,
+      "text": "Desde el principio"
+    },
+    {
+      "start": 0.84,
+      "end": 1.88,
+      "text": "no debemos presentar"
+    },
+    {
+      "start": 1.88,
+      "end": 2.66,
+      "text": "dolor de muelas."
+    },
+    {
+      "start": 2.96,
+      "end": 4.04,
+      "text": "Si tenemos una carie"
+    },
+    {
+      "start": 4.04,
+      "end": 5.36,
+      "text": "y la carie llegó\nhasta el nervio,"
+    },
+    {
+      "start": 5.64,
+      "end": 6.56,
+      "text": "vamos a presentar dolor."
+    },
+    {
+      "start": 6.86,
+      "end": 7.8,
+      "text": "Así que lo más importante"
+    },
+    {
+      "start": 7.8,
+      "end": 8.58,
+      "text": "es la prevención."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Captions borrador del Edit Kit; corregir transcripción antes de quemar.",
+    "Revisión editorial: corte 6.90-15.58 s conserva solo la explicación de la doctora; claqueta, pregunta dudosa y CTA hablado se excluyen.",
+    "Subtítulos divididos por frase. Las palabras carie y llegó requieren cotejo auditivo humano; el texto sigue el pase Whisper small más probable.",
+    "V3: aumentar captions para acercar la escala a Ejemplo.jpg; se conserva el corte y la transcripción revisada.",
+    "V4: estilo a 96 px para evitar tres líneas y proteger el rostro, manteniendo mayor lectura que v1."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg"
+  }
+}

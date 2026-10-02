@@ -1,0 +1,71 @@
+{
+  "idea_id": "mia-20260919-09",
+  "title": "Detrás De Las Redes",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/loop-20260929/09-voz-limpia.mov",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/word-checks/DJI_20260919120131_0906_D.json",
+  "style": "../styles/mia-pizzeria-v1.json",
+  "clips": [
+    {
+      "in": 0.75,
+      "out": 6.6,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.09,
+      "end": 0.95,
+      "text": "ESTO ES LO QUE PASA"
+    },
+    {
+      "start": 0.95,
+      "end": 1.69,
+      "text": "CUANDO GRABO AQUÍ"
+    },
+    {
+      "start": 1.69,
+      "end": 3.09,
+      "text": "LAS REDES DE LA MÍA PIZZA."
+    },
+    {
+      "start": 3.25,
+      "end": 3.79,
+      "text": "VENGAN PARA ACÁ"
+    },
+    {
+      "start": 3.79,
+      "end": 4.43,
+      "text": "PARA QUE ME AYUDEN"
+    },
+    {
+      "start": 4.43,
+      "end": 5.15,
+      "text": "A HACER MÁS CONTENIDO"
+    },
+    {
+      "start": 5.15,
+      "end": 5.72,
+      "text": "CON USTEDES."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Revision 29sept: preservar dialogo y producto real; voz limpia, encuadres moderados por sentido. Mezcla musical y efectos licenciados se adjunta con grafo final. No aprobacion automatica."
+  ],
+  "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+  "catalog": "runs/mia-pizzeria-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "references": {
+    "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+    "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+  }
+}

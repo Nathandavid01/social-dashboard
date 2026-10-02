@@ -1,0 +1,86 @@
+{
+  "idea_id": "mia-20260919-13",
+  "title": "Yo Soy La Jefa",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/source/DJI_20260919123724_0947_D.MP4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/word-checks/DJI_20260919123724_0947_D.json",
+  "style": "../styles/mia-pizzeria-v1.json",
+  "clips": [
+    {
+      "in": 9.0,
+      "out": 18.4,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 1.02,
+      "text": "YO SOY LA JEFA."
+    },
+    {
+      "start": 1.18,
+      "end": 2.25,
+      "text": "SOY MANDONA Y SÍ,"
+    },
+    {
+      "start": 2.32,
+      "end": 3.0,
+      "text": "ME CREO SU MAMÁ."
+    },
+    {
+      "start": 3.04,
+      "end": 3.8,
+      "text": "PERO TODO POR USTEDES,"
+    },
+    {
+      "start": 3.8,
+      "end": 4.92,
+      "text": "PORQUE USTEDES SE LO MERECEN."
+    },
+    {
+      "start": 5.1,
+      "end": 5.8,
+      "text": "NO TE OLVIDES QUE ESTAMOS"
+    },
+    {
+      "start": 5.8,
+      "end": 6.95,
+      "text": "CERCA DEL PUENTE DE RÍO HONDO,"
+    },
+    {
+      "start": 7.02,
+      "end": 7.75,
+      "text": "AL FRENTE DE SWEET ANN CAKES."
+    },
+    {
+      "start": 7.82,
+      "end": 8.66,
+      "text": "AQUÍ EN LA MÍA PIZZA."
+    },
+    {
+      "start": 8.72,
+      "end": 9.29,
+      "text": "¡TE ESPERAMOS!"
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Elegir última toma completa después del segundo conteo; conservar humor de la jefa e invitación final. Nombres de marca y ubicación cotejados con publicaciones recientes."
+  ],
+  "client_id": "0c725724-f65b-48a6-9bd4-504bb9d04391",
+  "catalog": "runs/mia-pizzeria-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.5
+  },
+  "references": {
+    "published_style": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/metricool-current/style/mia-pizzeria/contact.jpg",
+    "optional_official_outro": "/Volumes/Extreme SSD/Nate Media/mia-pizza-20260927/brand/outro.mp4"
+  }
+}

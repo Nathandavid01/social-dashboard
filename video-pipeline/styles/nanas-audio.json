@@ -1,0 +1,19 @@
+{
+  "client": "Nana’s Playhouse",
+  "voice_filter": "highpass=f=110,afftdn=nr=18:nf=-28:tn=1,agate=threshold=0.035:ratio=3:range=0.12:attack=10:release=150,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "voice_target_lufs": -16,
+  "music_target_lufs": -27,
+  "fade_in_seconds": 0.06,
+  "fade_out_seconds": 0.45,
+  "music_variety": true,
+  "critical_listening_required": true,
+  "disliked_tracks": [
+    "Lovely Piano Song"
+  ],
+  "list_click": {
+    "kind": "click",
+    "timbre": "mouse",
+    "gain_db": -12,
+    "duration": 0.09
+  }
+}

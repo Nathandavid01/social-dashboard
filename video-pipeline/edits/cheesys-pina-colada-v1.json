@@ -1,0 +1,79 @@
+{
+  "client": "Los Cheesys",
+  "idea_id": "cheesys-pina-colada",
+  "catalog": "runs/cheesys-catalog.json",
+  "title": "Refréscate Con Una Piña Colada",
+  "source": "../../cheesys-video/source/DJI_20260821191520_0926_D.MP4",
+  "transcript": "../../cheesys-video/analysis/0926.json",
+  "style": "../styles/cheesys-spoken-v1.json",
+  "clips": [
+    {
+      "in": 3.44,
+      "out": 10.34,
+      "zoom": 1.04,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.2,
+      "text": "Si te estás escapando\nde la calor,"
+    },
+    {
+      "start": 1.3,
+      "end": 1.99,
+      "text": "ven y refréscate"
+    },
+    {
+      "start": 1.99,
+      "end": 2.8,
+      "text": "con una piña colada"
+    },
+    {
+      "start": 2.8,
+      "end": 3.73,
+      "text": "a Los Cheesy Aguadilla."
+    },
+    {
+      "start": 3.87,
+      "end": 4.65,
+      "text": "Barrio Borinquen,"
+    },
+    {
+      "start": 4.7,
+      "end": 5.65,
+      "text": "Avenida Albizu Campos,"
+    },
+    {
+      "start": 5.67,
+      "end": 6.42,
+      "text": "carretera 107."
+    }
+  ],
+  "voice_filter": "highpass=f=80,afftdn=nr=7:nf=-35,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "music": {
+    "source": "../media/cheesys/pina-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "outro": {
+    "source": "../media/cheesys/brand/outro-pina-v1.mp4",
+    "in": 0,
+    "out": 2.333333,
+    "gain": 1
+  },
+  "broll": [],
+  "references": {
+    "spoken_reference": "../cheesys-video/reference/Cheesy2.mp4",
+    "product_reference": "../cheesys-video/reference/Cheesy3.mp4",
+    "official_outro": "../cheesys-video/source/outro.mp4"
+  },
+  "review_notes": [
+    "Corrección de alcance: toma hablada real con mensaje completo; no collage de comida.",
+    "Se elimina preparación y cuenta hasta 3.44 s. Se conserva voz, ubicación y gesto final.",
+    "Presentadora sostiene la piña colada: no se reemplaza con B-roll de otra bebida o sucursal.",
+    "Captions contrastados con segunda transcripción del rango. Escucha crítica pendiente; nombres normalizados con referencia Cheesy2.",
+    "Grabación Aguadilla 21 de agosto; las tomas más nuevas de Arecibo revisadas no dieron explicación hablada completa."
+  ]
+}

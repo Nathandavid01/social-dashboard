@@ -1,0 +1,9 @@
+{
+  "style": "Nana’s · Animated List",
+  "scenes": [
+    {"template":"hook","duration":1.4,"output":"media/practico-hook-v12.mp4"},
+    {"template":"clean","number":1,"duration":0.72,"output":"media/practico-clean-v12.mp4"},
+    {"template":"broll","number":2,"duration":1.88,"source":"media/9d2d72ec-0a64-4878-83bb-aea3392dafcd.mp4","source_in":11.5,"output":"media/practico-play-v12.mp4"},
+    {"template":"home","number":3,"duration":1.12,"output":"media/practico-home-v12.mp4"}
+  ]
+}

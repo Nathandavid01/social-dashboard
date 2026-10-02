@@ -1,0 +1,338 @@
+{
+  "idea_id": "hilo-correcto-20260921",
+  "title": "Cómo Usar El Hilo Dental",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_165000_20260921164916_1790125066337_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/hilo-correcto-20260921-editorial.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.12,
+      "out": 11.7,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 10.58,
+          "zoom": 1.035
+        }
+      ]
+    },
+    {
+      "in": 11.7,
+      "out": 19.3,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.6,
+          "zoom": 1.015
+        }
+      ]
+    },
+    {
+      "in": 19.3,
+      "out": 28.9,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 9.6,
+          "zoom": 1.015
+        }
+      ]
+    },
+    {
+      "in": 29.55,
+      "out": 34.3,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 4.75,
+          "zoom": 1.015
+        }
+      ]
+    },
+    {
+      "in": 34.6,
+      "out": 40.78,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 6.18,
+          "zoom": 1.015
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.169,
+      "end": 0.515,
+      "text": "Vamos a hablar"
+    },
+    {
+      "start": 0.54,
+      "end": 1.995,
+      "text": "un poquito de cómo"
+    },
+    {
+      "start": 2.02,
+      "end": 3.14,
+      "text": "pasarnos el hilo dental."
+    },
+    {
+      "start": 3.32,
+      "end": 4.655,
+      "text": "Lo primero es la cantidad"
+    },
+    {
+      "start": 4.68,
+      "end": 5.755,
+      "text": "que vamos a necesitar"
+    },
+    {
+      "start": 5.78,
+      "end": 6.5,
+      "text": "del hilo dental."
+    },
+    {
+      "start": 6.62,
+      "end": 7.215,
+      "text": "Básicamente va a ser"
+    },
+    {
+      "start": 7.24,
+      "end": 8.36,
+      "text": "el largo de tu brazo."
+    },
+    {
+      "start": 9.08,
+      "end": 10.18,
+      "text": "Vamos a cogerlo"
+    },
+    {
+      "start": 10.935,
+      "end": 11.555,
+      "text": "con el corazón",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 11.58,
+      "end": 13.42,
+      "text": "y lo vamos a enrollar",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 13.737,
+      "end": 14.295,
+      "text": "hasta que tengamos",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 14.32,
+      "end": 16.76,
+      "text": "básicamente esto de espacio.",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 17.08,
+      "end": 17.78,
+      "text": "Bien poquito.",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 18.6,
+      "end": 19.925,
+      "text": "Y ahí vamos a bajar",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 20.797,
+      "end": 21.46,
+      "text": "y vamos a llegar",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 21.838,
+      "end": 23.195,
+      "text": "por debajo de la encía",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 23.22,
+      "end": 24.235,
+      "text": "a ambos lados",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 24.26,
+      "end": 25.76,
+      "text": "y a este lado también.",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 25.86,
+      "end": 26.355,
+      "text": "Lo que queremos es",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 26.38,
+      "end": 27.64,
+      "text": "abrazar el diente.",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 28.0,
+      "end": 29.87,
+      "text": "Limpiamos bien, removemos,",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 30.014,
+      "end": 31.205,
+      "text": "el sucio lo guardamos",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 31.23,
+      "end": 32.31,
+      "text": "y liberamos nuevo.",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 32.714,
+      "end": 34.085,
+      "text": "Y volvemos otra vez",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 34.11,
+      "end": 36.29,
+      "text": "y bajamos a ambos lados,",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 36.37,
+      "end": 37.065,
+      "text": "abrazamos",
+      "bottom_margin": 1260
+    },
+    {
+      "start": 37.09,
+      "end": 38.575,
+      "text": "y así es que funciona.",
+      "bottom_margin": 1260
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-08-10/DJI_20260810154449_0305_D.MP4",
+      "in": 2,
+      "out": 4.2,
+      "at": 1.05,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Uso real de hilo dental al presentar el tema, antes de la demostración en modelo."
+    },
+    {
+      "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_164854_20260921164838_1790125084038_video.mp4",
+      "in": 4.7,
+      "out": 6.52,
+      "at": 4.68,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Plano alternativo real de las manos midiendo hilo durante la cantidad necesaria; no cubre explicación del largo del brazo."
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.05,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 3.25,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 4.68,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 6.5,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 27.78,
+      "gain_db": -22
+    },
+    {
+      "preset": "mouse_click",
+      "time": 32.53,
+      "gain_db": -22
+    }
+  ],
+  "effects": [],
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/outro-music-click.mov",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/music-continuous.wav",
+    "title": "Hip Hop 02 - Lily J",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-hilo-v6/Hip Hop 02 - Lily J.provenance.json",
+    "source_offset": 6,
+    "fade_out_scope": "End of outro"
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Demostración completa conservada. Shoika SemiBold blanca, sombra violeta; captions superiores durante manos/modelo. Dos B-rolls reales y cortes opacos; sin blur/fundidos. Clicks en cambios reales y outro. Keyframes discretos para no perder manos.",
+    "Música nueva Hip Hop 02 — Lily J, no usada en otras recetas; licencia Mixkit. Continúa hasta el outro.",
+    "Metricool brand 6354086 verificado en vivo: no coincide en borradores, programados o publicaciones consultados desde septiembre. No subir a Metricool.",
+    "Render guardado en SSD externo por falta de espacio interno. Aprobación y escucha crítica pendientes."
+  ],
+  "graphics": [],
+  "audio_master": {
+    "music_below_voice_lu": 11
+  }
+}

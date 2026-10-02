@@ -1,0 +1,21 @@
+{
+  "case": "natural",
+  "position": "lower-third, never over eyes",
+  "lines": "1-2",
+  "font_family": "Bree Serif",
+  "font_size": 64,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00000000",
+  "outline": 4,
+  "alignment": 2,
+  "bottom_margin": 400,
+  "caption_animation": "none",
+  "fixed_size": true,
+  "font_file": "../../media/frida/brand/BreeSerif-Regular.ttf",
+  "max_words": 4,
+  "max_chars": 28,
+  "family": "white_sentence",
+  "notes": [
+    "Presenter + food/drink B-roll. White captions. Green on food close-ups sometimes. Outro: flag/brick El Bosque logo."
+  ]
+}

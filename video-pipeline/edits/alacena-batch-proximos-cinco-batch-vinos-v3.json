@@ -1,0 +1,205 @@
+{
+  "idea_id": "0cdadb85-8d82-4c4e-aaf1-95635b9aee89",
+  "title": "vinos",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/vinos-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/vinos-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 21.82,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 21.82,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.14,
+      "end": 0.42,
+      "text": "Andrea,"
+    },
+    {
+      "start": 0.52,
+      "end": 1.18,
+      "text": "cuéntame sobre los"
+    },
+    {
+      "start": 1.18,
+      "end": 1.82,
+      "text": "vinos de Alacena."
+    },
+    {
+      "start": 1.94,
+      "end": 2.68,
+      "text": "Pues claro que sí"
+    },
+    {
+      "start": 2.68,
+      "end": 3.22,
+      "text": "Por aquí tenemos"
+    },
+    {
+      "start": 3.22,
+      "end": 4.88,
+      "text": "nuestra estación de"
+    },
+    {
+      "start": 4.88,
+      "end": 5.86,
+      "text": "vino de etiqueta."
+    },
+    {
+      "start": 6.4,
+      "end": 7.04,
+      "text": "Por aquí tengo"
+    },
+    {
+      "start": 7.04,
+      "end": 7.54,
+      "text": "uno de los"
+    },
+    {
+      "start": 7.54,
+      "end": 8.22,
+      "text": "vinos que más"
+    },
+    {
+      "start": 8.22,
+      "end": 8.68,
+      "text": "se vende."
+    },
+    {
+      "start": 9.14,
+      "end": 10.28,
+      "text": "El Edizione es"
+    },
+    {
+      "start": 10.28,
+      "end": 10.72,
+      "text": "un blend."
+    },
+    {
+      "start": 10.92,
+      "end": 11.56,
+      "text": "actualmente no"
+    },
+    {
+      "start": 11.56,
+      "end": 12.36,
+      "text": "tenemos una carta"
+    },
+    {
+      "start": 12.36,
+      "end": 12.96,
+      "text": "de vinos,"
+    },
+    {
+      "start": 13.02,
+      "end": 13.6,
+      "text": "ya que los"
+    },
+    {
+      "start": 13.6,
+      "end": 14.2,
+      "text": "vinos están en"
+    },
+    {
+      "start": 14.2,
+      "end": 15.1,
+      "text": "rotación continua,"
+    },
+    {
+      "start": 15.34,
+      "end": 15.86,
+      "text": "Si no ves"
+    },
+    {
+      "start": 15.86,
+      "end": 16.8,
+      "text": "tu etiqueta favorita"
+    },
+    {
+      "start": 16.8,
+      "end": 17.58,
+      "text": "en nuestra estación"
+    },
+    {
+      "start": 17.58,
+      "end": 17.96,
+      "text": "de vinos,"
+    },
+    {
+      "start": 18.16,
+      "end": 19.08,
+      "text": "comenta aquí abajo"
+    },
+    {
+      "start": 19.08,
+      "end": 20.06,
+      "text": "que etiqueta te"
+    },
+    {
+      "start": 20.06,
+      "end": 20.84,
+      "text": "gustaría ver en"
+    },
+    {
+      "start": 20.84,
+      "end": 21.6,
+      "text": "Alacena Restaurant."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 10.8,
+      "duration": 0.045,
+      "gain_db": -28
+    },
+    {
+      "kind": "click",
+      "time": 15.24,
+      "duration": 0.045,
+      "gain_db": -28
+    },
+    {
+      "kind": "click",
+      "time": 21.81,
+      "duration": 0.045,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "v3 replaces Es claro que sí with Pues claro que sí, the line Eric asked for. v2 preserved."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/vinos-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/vinos-music-provenance.json"
+  }
+}

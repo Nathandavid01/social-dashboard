@@ -1,0 +1,149 @@
+{
+  "idea_id": "b40a4770-a05e-4b4c-8afd-14ff515817f4",
+  "title": "Pregunta",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/cf0bfead-201b-46cc-9efb-309e00e0a32b.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/familias-small.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 1.26,
+      "out": 3.4,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 2.14,
+          "zoom": 1.1
+        }
+      ],
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 3.65,
+      "out": 6.15,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.16
+        },
+        {
+          "time": 2.5,
+          "zoom": 1.12
+        }
+      ],
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 6.44,
+      "out": 12.2,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.05
+        },
+        {
+          "time": 5.76,
+          "zoom": 1.14
+        }
+      ],
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.08,
+      "end": 0.66,
+      "text": "¿Por qué tú crees"
+    },
+    {
+      "start": 0.66,
+      "end": 1.18,
+      "text": "que las familias"
+    },
+    {
+      "start": 1.18,
+      "end": 2.04,
+      "text": "prefieren Alacena?"
+    },
+    {
+      "start": 2.17,
+      "end": 2.51,
+      "text": "Pues mira,"
+    },
+    {
+      "start": 2.57,
+      "end": 3.01,
+      "text": "yo creo que"
+    },
+    {
+      "start": 3.01,
+      "end": 3.87,
+      "text": "las personas se sienten"
+    },
+    {
+      "start": 3.87,
+      "end": 4.55,
+      "text": "en casa,"
+    },
+    {
+      "start": 4.72,
+      "end": 5.88,
+      "text": "porque nos"
+    },
+    {
+      "start": 5.88,
+      "end": 6.64,
+      "text": "destacamos mucho"
+    },
+    {
+      "start": 6.64,
+      "end": 7.3,
+      "text": "en el servicio,"
+    },
+    {
+      "start": 7.48,
+      "end": 7.96,
+      "text": "en un ambiente"
+    },
+    {
+      "start": 7.96,
+      "end": 8.7,
+      "text": "acogedor"
+    },
+    {
+      "start": 8.7,
+      "end": 10.3,
+      "text": "y bastante familiar."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Mismo montaje v6 sin B-roll, tres planos y seis keyframes. Sustituir Times New Roman por Belleza Regular identificada en A1/A3/A4. Blanco #FCFCFC y sombra verde oscura difusa reconstruida. Tamaño y posicion calibrados por comparación."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/music-familias-dinamico.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/descargas/780925/fresh-coffee-and-sunshine-780925-License-780925-11942310.pdf"
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "client_id": "db697a50-56af-49b4-a002-1cf75f7e4560",
+  "idea_id": "cc0b603b-4115-400c-bd85-0cb6a13ada06",
+  "title": "Tres Cosas Menos De Qué Preocuparte",
+  "source": "../media/81d4110f-a7dd-4ad4-8223-5fa407ca8a03.mp4",
+  "transcript": "../runs/practico-reviewed.json",
+  "style": "../styles/nanas-quartzo.json",
+  "clips": [
+    {
+      "in": 1.04,
+      "out": 4.9,
+      "zoom": 1.02
+    },
+    {
+      "in": 5.56,
+      "out": 9.2,
+      "zoom": 1.02
+    }
+  ],
+  "sounds": [
+    {
+      "time": 0,
+      "kind": "click",
+      "gain_db": -20,
+      "duration": 0.045
+    },
+    {
+      "time": 4.88,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 4.93,
+      "kind": "whoosh",
+      "gain_db": -25,
+      "duration": 0.12
+    },
+    {
+      "time": 3.98,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    },
+    {
+      "time": 4.7,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    },
+    {
+      "time": 6.58,
+      "kind": "click",
+      "duration": 0.045,
+      "gain_db": -17,
+      "reason": "Inicio de punto enumerado"
+    }
+  ],
+  "review_notes": [
+    "Idea y grabaciones del dashboard; selección de rangos revisada.",
+    "B-roll vinculado al diálogo; tomas de apoyo sin repetir dentro del reel.",
+    "QUARTZO 85px: frases breves para conservar tamaño. Zooms suaves y música CC0.",
+    "Escucha crítica y aprobación del usuario pendientes.",
+    "Duración mínima de captions corregida a 300ms; tamaño fijo conservado.",
+    "V2: recorte de limpieza a manos y mesa para excluir caras hablando.",
+    "Encuadres ajustados para excluir caras hablando de tomas de apoyo. Teléfono legible con fuente numérica de respaldo a los mismos 85px.",
+    "Reedición con catálogo completo: asignación por frase y variedad entre los ocho reels; B-roll sin audio original.",
+    "Audio: música diferente por reel a -34 LUFS; reducción moderada de ambiente; clicks por punto de lista. Escucha final pendiente."
+  ],
+  "broll": [
+    {
+      "source": "../media/81d4110f-a7dd-4ad4-8223-5fa407ca8a03.mp4",
+      "in": 1.04,
+      "out": 4.9,
+      "at": 0,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.86,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/81d4110f-a7dd-4ad4-8223-5fa407ca8a03.mp4",
+      "in": 5.56,
+      "out": 9.2,
+      "at": 3.86,
+      "reason": "A-roll original con zoom suave",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.64,
+          "zoom": 1.065
+        }
+      ]
+    },
+    {
+      "source": "../media/cleaning-detail-v2.mp4",
+      "in": 2,
+      "out": 2.9,
+      "at": 3.98,
+      "reason": "Limpieza al mencionar limpiar",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 0.9,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "source": "../media/2ff43f37-3ae9-4cd9-b86c-f53c0d4c3ccf.mp4",
+      "in": 0.2,
+      "out": 1.7,
+      "at": 4.93,
+      "reason": "Niño montado en carrito rojo avanza junto a caballito y otros niños",
+      "eof_action": "repeat",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.5,
+          "zoom": 1.045
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "source": "../media/brand/outro.mov",
+    "in": 0,
+    "out": 3.3,
+    "gain": 0.5
+  },
+  "transitions": [
+    {
+      "time": 3.98,
+      "duration": 0.08
+    },
+    {
+      "time": 4.88,
+      "duration": 0.08
+    },
+    {
+      "time": 4.93,
+      "duration": 0.08
+    },
+    {
+      "time": 6.43,
+      "duration": 0.08
+    }
+  ],
+  "music": {
+    "source": "https://raw.githubusercontent.com/0lhi/FreePD/stream/Miscellaneous/Compy%20Jazz.mp3",
+    "title": "Compy Jazz",
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE",
+    "sha256": "bd7e017374891f01dc5ffad74880ecb773131ffe3706f60c49c1aa79cc2e3f24",
+    "target_lufs": -34
+  },
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 1.18,
+      "text": "TRES COSAS DE"
+    },
+    {
+      "start": 1.18,
+      "end": 1.5,
+      "text": "LAS QUE NO"
+    },
+    {
+      "start": 1.5,
+      "end": 1.9,
+      "text": "TE TIENES QUE"
+    },
+    {
+      "start": 1.9,
+      "end": 2.4,
+      "text": "PREOCUPAR SI"
+    },
+    {
+      "start": 2.4,
+      "end": 2.7,
+      "text": "HACES"
+    },
+    {
+      "start": 2.7,
+      "end": 3.3600000000000003,
+      "text": "CUMPLEAÑOS,"
+    },
+    {
+      "start": 3.46,
+      "end": 3.7800000000000002,
+      "text": "EN NANA’S."
+    },
+    {
+      "start": 3.98,
+      "end": 4.54,
+      "text": "LIMPIAR,"
+    },
+    {
+      "start": 4.7,
+      "end": 5.0,
+      "text": "BUSCAR"
+    },
+    {
+      "start": 5.0,
+      "end": 5.54,
+      "text": "ENTRETENIMIENTO"
+    },
+    {
+      "start": 5.54,
+      "end": 6.48,
+      "text": "PARA LOS NIÑOS,"
+    },
+    {
+      "start": 6.58,
+      "end": 7.02,
+      "text": "NI PRESTAR"
+    },
+    {
+      "start": 7.02,
+      "end": 7.44,
+      "text": "TU CASA."
+    }
+  ],
+  "previous_version": "../runs/nanas-practico-v4.mp4",
+  "voice_filter": "highpass=f=90,afftdn=nr=10:nf=-35:tn=1,agate=threshold=0.025:ratio=2:range=0.2:attack=15:release=180,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000"
+}

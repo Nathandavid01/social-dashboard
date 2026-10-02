@@ -1,0 +1,26 @@
+{
+  "name": "Delian - Shoika y sombra violeta - referencia publicada",
+  "font_file": "../media/delian/brand/Shoika-SemiBold.otf",
+  "font_family": "Shoika SemiBold",
+  "font_size": 72,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00C000C8",
+  "back_colour": "&H00FF00CD",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 5,
+  "alignment": 2,
+  "margin_x": 70,
+  "bottom_margin": 517,
+  "fixed_size": true,
+  "wrap_width": 980,
+  "max_words": 6,
+  "max_chars": 36,
+  "caption_animation": "none",
+  "notes": [
+    "Shoika SemiBold encontrada y descargada desde CapCut; visible bajo filtro Commercial.",
+    "Escala cotejada con el caption de Publicados 14 agosto a 6 segundos; no reutilizar el tamaño ASS 100 de Montserrat.",
+    "Texto blanco y sombra violeta desplazada; sin contorno rosa grueso."
+  ]
+}

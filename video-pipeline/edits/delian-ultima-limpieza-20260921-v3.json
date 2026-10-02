@@ -1,0 +1,168 @@
+{
+  "idea_id": "ultima-limpieza-20260921",
+  "title": "¿Cuándo Fue Tu Última Limpieza?",
+  "source": "/Users/ericperez/Nate Media/delian-loyola-video/media/source-2026-09-21/dji_mimo_20260921_163338_20260921163324_1790125086406_video.mp4",
+  "transcript": "/Users/ericperez/Nate Media/video-pipeline/runs/delian-sept-polish/transcripts/ultima-limpieza-20260921-editorial.json",
+  "style": "../styles/delian-reference-v5.json",
+  "clips": [
+    {
+      "in": 1.64,
+      "out": 4.25,
+      "zoom": 1,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 2.61,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 5.08,
+      "out": 8.08,
+      "zoom": 1.12,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 3.0,
+          "zoom": 1.02
+        }
+      ]
+    },
+    {
+      "in": 8.35,
+      "out": 13.72,
+      "zoom": 1.05,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.012,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 5.37,
+          "zoom": 1.03
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.755,
+      "text": "¿Y tú te acuerdas"
+    },
+    {
+      "start": 0.78,
+      "end": 1.535,
+      "text": "cuándo fue tu última"
+    },
+    {
+      "start": 1.56,
+      "end": 2.3,
+      "text": "limpieza dental?"
+    },
+    {
+      "start": 2.83,
+      "end": 4.045,
+      "text": "¿No te acuerdas?"
+    },
+    {
+      "start": 4.07,
+      "end": 5.37,
+      "text": "¿Uno, dos años?"
+    },
+    {
+      "start": 5.74,
+      "end": 6.195,
+      "text": "Yo creo que es"
+    },
+    {
+      "start": 6.22,
+      "end": 7.095,
+      "text": "tiempo de visitarnos."
+    },
+    {
+      "start": 7.12,
+      "end": 8.075,
+      "text": "Se puede comunicar al"
+    },
+    {
+      "start": 8.1,
+      "end": 10.76,
+      "text": "787-230-7573",
+      "primary_colour": "&H00E560EB"
+    }
+  ],
+  "broll": [
+    {
+      "source": "../runs/delian-sept-polish/visita-clinica-silent.mp4",
+      "in": 0,
+      "out": 1.9,
+      "at": 5.74,
+      "fade_in": 0.1,
+      "fade_out": 0.12,
+      "reason": "Visita real al consultorio durante tiempo de visitarnos; sin boca presentando ni diálogo ajeno.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 1.9,
+          "zoom": 1.02
+        }
+      ]
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_soft",
+      "time": 5.74,
+      "gain_db": -32
+    },
+    {
+      "preset": "pop",
+      "time": 8.1,
+      "gain_db": -31
+    }
+  ],
+  "effects": [],
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "music": {
+    "source": "/Users/ericperez/Nate Media/video-pipeline/media/delian/music/sept-polish-ultima-limpieza.m4a",
+    "title": "Backbeat",
+    "license": "CC0 1.0",
+    "provenance": "/Users/ericperez/Nate Media/video-pipeline/media/music/Backbeat.provenance.json",
+    "source_offset": 12,
+    "fade_in": 0.15,
+    "fade_out": 0.5
+  },
+  "references": {
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "font_reference": "media/delian/brand/tipografia.jpg"
+  },
+  "catalog": "runs/delian-sept-catalog.json",
+  "review_notes": [
+    "Grabación 21 septiembre. Cortes de pausas sin suprimir respuestas; captions requieren revisión auditiva.",
+    "Professional revision: second ASR against original audio; manual semantic caption groups, measured pause cuts, subtle keyframes, restrained synchronized sound accents, faded independent CC0 bed. Critical listening remains pending."
+  ],
+  "graphics": []
+}

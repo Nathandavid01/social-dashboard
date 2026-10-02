@@ -1,0 +1,208 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "otro-rollo",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Y Si Pedimos Otro Rollo?",
+  "source": "../media/yabuuchi/derived/otro-rollo-inspiracion-v5.mp4",
+  "transcript": "../runs/yabuuchi-otro-rollo-mapped-v7.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 8.07,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.05,
+      "end": 0.95,
+      "text": "¿Quieres otro roll?"
+    },
+    {
+      "start": 1.13,
+      "end": 2.03,
+      "text": "No tenemos tiempo."
+    },
+    {
+      "start": 2.19,
+      "end": 2.87,
+      "text": "¿Tiempo pa’ qué?"
+    },
+    {
+      "start": 3.19,
+      "end": 4.39,
+      "text": "Para preguntas innecesarias."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/otro-rollo-inspiracion-music-v5.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Downtown Boogie.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/source/DJI_20260914132349_0014_D.MP4",
+      "in": 2.65,
+      "out": 3.55,
+      "at": 7.17,
+      "eof_action": "pass",
+      "reason": "Cierre de v6 conservado para esta corrección de captions. Eric había rechazado el cierre; sigue pendiente de revisión."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131647_0007_D.MP4",
+      "in": 1.23,
+      "out": 9.3,
+      "purpose": "Conversación y desplazamiento al mostrador completos"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "tiktok_inspiration": "https://www.tiktok.com/@mariamejiaspr/video/7678999845792763167"
+  },
+  "review_notes": [
+    "Reedición solicitada según TikTok: cortes entre interlocutoras, remate seguido de acción.",
+    "Diálogo intacto; se acorta desplazamiento intermedio sin eliminar llegada al mostrador.",
+    "Apoyo de producto reducido a 0.9s; se quita barrido al final para conservar tono de sketch.",
+    "Caption de marca y piano se conservan. Último caption según guion, escucha crítica pendiente.",
+    "v6: reemplazo del plano de sushi final por gesto con Ramune, autorizado por Eric. No se cambia el diálogo ni la duración.",
+    "V7: caption inicial corregido literalmente por Eric a ¿Quieres otro roll?; la transcripción automática decía rollo. Se conserva el resto del montaje; el cierre rechazado sigue pendiente y esta corrección no constituye aprobación.",
+    "Se aplica Audio Kit y la regla vigente de sonidos breves en las transiciones, contenidos debajo del diálogo."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 0.986,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.036,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.986,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.436,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 5.086,
+      "duration": 0.32,
+      "gain_db": -27,
+      "reason": "Cambio de interlocutora o encuadre"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 7.056,
+      "duration": 0.32,
+      "gain_db": -23,
+      "reason": "Entrada al plano final"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 7.87,
+      "duration": 0.2,
+      "gain_db": -22,
+      "reason": "Entrada al outro"
+    }
+  ],
+  "effects": [],
+  "idea_page": 2,
+  "inspiration_shots": [
+    {
+      "in": 0,
+      "out": 1.1,
+      "crop_x": 0
+    },
+    {
+      "in": 1.1,
+      "out": 2.15,
+      "crop_x": 140
+    },
+    {
+      "in": 2.15,
+      "out": 3.1,
+      "crop_x": 0
+    },
+    {
+      "in": 3.1,
+      "out": 4.55,
+      "crop_x": 140
+    },
+    {
+      "in": 4.55,
+      "out": 5.2,
+      "crop_x": null
+    },
+    {
+      "in": 6.1,
+      "out": 8.07,
+      "crop_x": null
+    },
+    {
+      "in": 8.07,
+      "out": 8.97,
+      "crop_x": null
+    }
+  ],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0.05,
+        "end": 0.95,
+        "role": "1"
+      },
+      {
+        "start": 1.13,
+        "end": 2.03,
+        "role": "2"
+      },
+      {
+        "start": 2.19,
+        "end": 2.87,
+        "role": "3"
+      },
+      {
+        "start": 3.19,
+        "end": 4.39,
+        "role": "4"
+      }
+    ]
+  },
+  "user_corrections": [
+    {
+      "source": "Corrección literal de Eric, 2026-09-21",
+      "phrase": "¿Quieres otro roll?",
+      "rule": "Respetar roll o rollo según la pronunciación de cada intervención; no sustituir globalmente."
+    }
+  ]
+}

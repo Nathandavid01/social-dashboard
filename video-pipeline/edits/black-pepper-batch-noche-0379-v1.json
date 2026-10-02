@@ -1,0 +1,319 @@
+{
+  "idea_id": "644568a5-2753-4e77-afe0-c28fa69eb7ce",
+  "title": "Viernes en la noche",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929105525_0379_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929105525_0379_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 1.88,
+      "out": 5.76,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 6.05,
+      "out": 7.52,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 10.42,
+      "out": 13.94,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 16.48,
+      "out": 17.8,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 17.9,
+      "out": 29.1,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 29.1,
+      "out": 32.94,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 39.6,
+      "out": 43.18,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.06,
+      "end": 0.7,
+      "text": "Mucha gente en la"
+    },
+    {
+      "start": 0.7,
+      "end": 2.52,
+      "text": "semana me pregunta qué"
+    },
+    {
+      "start": 2.52,
+      "end": 3.38,
+      "text": "se hace los viernes"
+    },
+    {
+      "start": 3.38,
+      "end": 3.93,
+      "text": "aquí en la noche."
+    },
+    {
+      "start": 3.93,
+      "end": 4.53,
+      "text": "Pues mira, Lory,"
+    },
+    {
+      "start": 4.57,
+      "end": 5.17,
+      "text": "los viernes en la"
+    },
+    {
+      "start": 5.17,
+      "end": 5.43,
+      "text": "noche"
+    },
+    {
+      "start": 5.43,
+      "end": 6.39,
+      "text": "por el día es"
+    },
+    {
+      "start": 6.39,
+      "end": 7.29,
+      "text": "brunch y por la"
+    },
+    {
+      "start": 7.29,
+      "end": 8.21,
+      "text": "noche se convierte en"
+    },
+    {
+      "start": 8.21,
+      "end": 8.95,
+      "text": "una discoteca."
+    },
+    {
+      "start": 8.95,
+      "end": 9.37,
+      "text": "Lo más que hacemos"
+    },
+    {
+      "start": 9.37,
+      "end": 10.25,
+      "text": "son cumpleaños."
+    },
+    {
+      "start": 10.25,
+      "end": 11.05,
+      "text": "Así que si tú"
+    },
+    {
+      "start": 11.05,
+      "end": 11.65,
+      "text": "quieres pasar una"
+    },
+    {
+      "start": 11.65,
+      "end": 12.91,
+      "text": "experiencia única en un"
+    },
+    {
+      "start": 12.91,
+      "end": 13.71,
+      "text": "viernes en la noche,"
+    },
+    {
+      "start": 13.75,
+      "end": 14.43,
+      "text": "solamente tienes que"
+    },
+    {
+      "start": 14.43,
+      "end": 15.15,
+      "text": "llegarle aquí."
+    },
+    {
+      "start": 15.15,
+      "end": 16.23,
+      "text": "Después de las 8"
+    },
+    {
+      "start": 16.23,
+      "end": 16.71,
+      "text": "o 9 de la"
+    },
+    {
+      "start": 16.71,
+      "end": 17.01,
+      "text": "noche,"
+    },
+    {
+      "start": 17.27,
+      "end": 17.99,
+      "text": "tenemos DJ,"
+    },
+    {
+      "start": 18.23,
+      "end": 19.29,
+      "text": "tenemos pista de baile,"
+    },
+    {
+      "start": 19.37,
+      "end": 20.45,
+      "text": "tenemos esta barra llena"
+    },
+    {
+      "start": 20.45,
+      "end": 21.39,
+      "text": "de variedad de productos."
+    },
+    {
+      "start": 21.39,
+      "end": 22.15,
+      "text": "Tenemos lo que son"
+    },
+    {
+      "start": 22.15,
+      "end": 23.03,
+      "text": "los whisky,"
+    },
+    {
+      "start": 23.49,
+      "end": 24.17,
+      "text": "tenemos lo que son"
+    },
+    {
+      "start": 24.17,
+      "end": 25.31,
+      "text": "los tequilas,"
+    },
+    {
+      "start": 25.31,
+      "end": 26.03,
+      "text": "Tenemos variedad de"
+    },
+    {
+      "start": 26.03,
+      "end": 27.19,
+      "text": "productos para que tengas"
+    },
+    {
+      "start": 27.19,
+      "end": 28.27,
+      "text": "una experiencia única un"
+    },
+    {
+      "start": 28.27,
+      "end": 28.81,
+      "text": "viernes en la noche."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 3.88,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.35,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.87,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 10.19,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 21.39,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 25.23,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 3.38,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "aquí en la noche."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 8.21,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "una discoteca."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 18.23,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "tenemos pista de baile,"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Vintage Party.mp3",
+    "title": "Vintage Party",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea de la barra de noche: brunch de día, discoteca de noche, DJ, pista, whisky y tequila, después de las 8 o 9.",
+    "No se quema Batman, bosca ni Don Q: el apodo y esas dos botellas no quedaron seguros.",
+    "bienes→viernes. No es el horario de abrir la barra. Escucha crítica pendiente. No publicar."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  }
+}

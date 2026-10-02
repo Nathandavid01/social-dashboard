@@ -1,0 +1,12 @@
+import json,shutil,subprocess
+from pathlib import Path
+R=Path(__file__).resolve().parents[1];name='delian-proceso-sonrisa-20260921-v7'; folder=R/'media/delian'/('broll-'+name);folder.mkdir(exist_ok=False)
+e=json.loads((R/'edits/delian-proceso-sonrisa-20260921-v6.json').read_text())
+image=folder/'paciente-espejo.png';shutil.copy2('/Users/ericperez/.codex/generated_images/01a0d0d0-e473-7ad3-81c4-dd92ddf421ed/exec-6ed1b328-662a-4880-9817-2a2dd3de2ae9.png',image)
+video=folder/'paciente-espejo-keyframes.mp4';frames=49;u='min(on/48,1)';ease=f'(({u})*({u})*(3-2*({u})))';vf=f"scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='1.02+0.09*{ease}':x='(iw-iw/zoom)*0.5':y='(ih-ih/zoom)*0.30':d={frames}:s=1080x1920:fps=30,setsar=1,format=yuv420p"
+subprocess.run(['/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg','-v','error','-n','-i',str(image),'-vf',vf,'-frames:v',str(frames),'-an','-c:v','libx264','-crf','17','-preset','fast',str(video)],check=True)
+e['broll'] += [{'source':str(R.parent/'delian-loyola-video/media/source-2026-05-28/DJI_20260528174408_0111_D.MP4'),'in':4.5,'out':6.0,'at':1.87,'fade_in':0.08,'fade_out':0,'zoom':1.0,'zoom_keyframes':[{'time':0,'zoom':1},{'time':1.5,'zoom':1.035}],'reason':'Toma real de consulta junto al sillón al decir evaluación; tramo sin presentación a cámara, audio silenciado.'},{'source':str(video),'in':0,'out':1.62,'at':10.97,'fade_in':0.08,'fade_out':0,'original_source':str(image),'reason':'Paciente genérica mirando su sonrisa en espejo al hablar de su preferencia; fotografía editorial generada, no testimonio ni resultado real del cliente.'}]
+e['broll'].sort(key=lambda x:x['at']);e['effects'].append({'preset':'blur_pass','time':1.82,'duration':.1,'intensity':.2});e['effects'].append({'preset':'blur_pass','time':10.92,'duration':.1,'intensity':.2});e['review_notes'].append('Eric pide más B-rolls: cuatro apoyos, 8.32 s de cobertura frente a 5.2 s en v6. Añadidos consulta real durante evaluación y fotografía editorial animada de espejo durante preferencia del paciente. Gestos 7.67–10.97 conservados. Sin cambiar voz, captions, música ni outro.')
+(R/'edits'/f'{name}.json').write_text(json.dumps(e,ensure_ascii=False,indent=2)+'\n')
+(folder/'paciente-espejo.provenance.json').write_text(json.dumps({'kind':'generated_editorial_photograph','not_actual_client_case':True,'image':str(image),'video':str(video),'timeline':[10.97,12.59],'on_screen_label':None,'keyframes':{'zoom':[1.02,1.11],'easing':'smoothstep'}},indent=2)+'\n')
+print(name)

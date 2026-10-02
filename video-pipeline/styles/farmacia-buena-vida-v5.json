@@ -1,0 +1,37 @@
+{
+  "name": "Farmacia Buena Vida · Brand Kit Original",
+  "font_file": "../media/farmacia-buena-vida/brand/Montserrat-SemiBold.otf",
+  "font_family": "Montserrat SemiBold",
+  "font_size": 65,
+  "bold": 0,
+  "primary_colour": "&H00FFFFFF",
+  "outline_colour": "&H00202018",
+  "back_colour": "&H50000000",
+  "border_style": 1,
+  "outline": 0,
+  "shadow": 0,
+  "alignment": 2,
+  "margin_x": 85,
+  "bottom_margin": 480,
+  "fixed_size": true,
+  "wrap_width": 925,
+  "max_words": 4,
+  "max_chars": 26,
+  "caption_animation": "none",
+  "status": "brand_kit_verified_export_review_pending",
+  "reference": "media/farmacia-buena-vida/brand/caption-reference-original.png",
+  "notes": [
+    "Guía original Drive: Montserrat SemiBold 65, texto blanco centrado sobre caja oliva redondeada. Fuente OTF original descargada.",
+    "Caja oliva muestreada visualmente de referencia con transparencia; tamaño de fuente confirmado por panel Premiere.",
+    "Conversión ASS 1.545 = (usWinAscent1205 + usWinDescent340) / unitsPerEm1000; conserva tamaño de diseño65."
+  ],
+  "caption_box": {
+    "colour": "&H00009890",
+    "alpha": "25",
+    "radius": 28,
+    "padding_x": 28,
+    "padding_y": 12,
+    "line_height": 65,
+    "ass_font_scale": 1.545
+  }
+}

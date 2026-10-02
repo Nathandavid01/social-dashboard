@@ -1,0 +1,192 @@
+{
+  "idea_id": "f8f809bb-4e05-4543-bfc5-10088917f159",
+  "title": "Alacena: el lugar para tu próxima ocasión",
+  "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/source/e7f25ef5-2658-4fc9-a0e8-2d0bfea97bd1.mp4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/transcripts/ambiente-small.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 1.24,
+      "out": 6.56,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.04
+        },
+        {
+          "time": 5.32,
+          "zoom": 1.11
+        }
+      ],
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 6.65,
+      "out": 8.1,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.14
+        },
+        {
+          "time": 1.45,
+          "zoom": 1.16
+        }
+      ],
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 8.46,
+      "out": 14.36,
+      "zoom": 1,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.06
+        },
+        {
+          "time": 5.9,
+          "zoom": 1.13
+        }
+      ],
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 0.54,
+      "text": "Alacena"
+    },
+    {
+      "start": 0.54,
+      "end": 1.48,
+      "text": "es el lugar perfecto,"
+    },
+    {
+      "start": 1.48,
+      "end": 2.32,
+      "text": "ya bien sea para tu"
+    },
+    {
+      "start": 2.32,
+      "end": 3.16,
+      "text": "cena romántica,"
+    },
+    {
+      "start": 3.24,
+      "end": 3.84,
+      "text": "cena familiar"
+    },
+    {
+      "start": 3.84,
+      "end": 5.28,
+      "text": "o evento corporativo."
+    },
+    {
+      "start": 5.35,
+      "end": 6.05,
+      "text": "Estamos aquí"
+    },
+    {
+      "start": 6.05,
+      "end": 6.71,
+      "text": "a tu orden."
+    },
+    {
+      "start": 6.81,
+      "end": 7.41,
+      "text": "Comunícate al"
+    },
+    {
+      "start": 7.41,
+      "end": 10.41,
+      "text": "787-675-8407"
+    },
+    {
+      "start": 10.41,
+      "end": 11.31,
+      "text": "y con gusto"
+    },
+    {
+      "start": 11.31,
+      "end": 12.57,
+      "text": "tomaremos tu reserva."
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/source/DJI_20260818150754_0719_D.MP4",
+      "in": 1.2,
+      "out": 3.0,
+      "at": 2.3,
+      "reason": "Cena romántica y familiar: plato y vino reales, diferente toma a catering.",
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.02
+        },
+        {
+          "time": 1.8,
+          "zoom": 1.08
+        }
+      ]
+    }
+  ],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 2.3,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 4.1,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 5.32,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 6.77,
+      "duration": 0.045,
+      "gain_db": -24
+    },
+    {
+      "kind": "click",
+      "time": 12.62,
+      "duration": 0.045,
+      "gain_db": -24
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Nuevo reel de ambiente Sep30. Se conserva recorrido visible del salón. Tres bloques, keyframes suaves, B-roll de plato y vino, clicks en cambios. Belleza blanca con sombra verde aprobada. Teléfono conservado completo sin punto. Revisión de Eric pendiente."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/ambiente-v1/music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/Biblioteca Motion Array/catalogo.json"
+  }
+}

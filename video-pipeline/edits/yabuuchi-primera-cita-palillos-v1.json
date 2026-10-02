@@ -1,0 +1,115 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "primera-cita-palillos",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "POV: Primera Cita Con Palillos",
+  "source": "../media/yabuuchi/derived/palillos-date-v1.mkv",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.066667,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "caption_mode": "editorial",
+  "captions": [
+    {
+      "start": 0,
+      "end": 1.9,
+      "text": "POV: Primera cita."
+    },
+    {
+      "start": 1.9,
+      "end": 3.4,
+      "text": "Pediste sushi…"
+    },
+    {
+      "start": 3.4,
+      "end": 5.55,
+      "text": "y no sabes usar los palillos."
+    },
+    {
+      "start": 5.55,
+      "end": 7.03,
+      "text": "Disimula."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-ig-reel-v1.mp4",
+    "in": 0,
+    "out": 2.92,
+    "gain": 1,
+    "provenance": "https://www.instagram.com/reel/DcCZF8YEtzV/",
+    "audio_range": [
+      16.1,
+      19.09
+    ]
+  },
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 1.9,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Cambio de plano"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 4.966667,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Cambio de plano"
+    },
+    {
+      "preset": "mouse_click",
+      "time": 7.0,
+      "duration": 0.06,
+      "gain_db": -20,
+      "reason": "Cambio de plano"
+    }
+  ],
+  "effects": [],
+  "voice_filter": "anull",
+  "audio_master": {
+    "mode": "music",
+    "voice_mode": "preserve",
+    "target_lufs": -18
+  },
+  "references": {
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "style_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-ig-reel-v1.mp4"
+  },
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914125546_0003_D.MP4",
+      "in": 4.2,
+      "out": 6.1,
+      "mute": true
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914125546_0003_D.MP4",
+      "in": 8.95,
+      "out": 12,
+      "mute": true
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914125546_0003_D.MP4",
+      "in": 14.1,
+      "out": 16.2,
+      "mute": true
+    }
+  ],
+  "music_provenance": "media/music/Busybody.provenance.json",
+  "review_notes": [
+    "Sketch inspirado en el PDF con la escena realmente grabada. Texto editorial, no transcripción ni cita de los actores.",
+    "Audio de rodaje silenciado para retirar instrucciones. Busybody CC0 y clicks discretos.",
+    "Mantiene secuencia de abrir palillos, intentar tomar sushi y reacción. Revisión del usuario pendiente."
+  ],
+  "idea_reference": {
+    "page": 1,
+    "concept": "POV primera cita y no sabes usar palillos"
+  }
+}

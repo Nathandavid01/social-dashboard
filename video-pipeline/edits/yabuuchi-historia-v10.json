@@ -1,0 +1,243 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "historia",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Por Qué Yabuuchi?",
+  "source": "../media/yabuuchi/derived/historia-location-source-v1.mov",
+  "transcript": "../runs/yabuuchi-historia-location-mapped-v1.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 11.966667,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 11.966667,
+          "zoom": 1.06
+        }
+      ]
+    },
+    {
+      "in": 11.966667,
+      "out": 19.866667,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.9,
+          "zoom": 1.03
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.3,
+      "text": "Cuéntame, ¿por qué Yabuuchi?"
+    },
+    {
+      "start": 1.5,
+      "end": 2.16,
+      "text": "Pues mira,"
+    },
+    {
+      "start": 2.18,
+      "end": 3.18,
+      "text": "nuestro nombre es Yabuuchi"
+    },
+    {
+      "start": 3.2,
+      "end": 4.28,
+      "text": "en honor a Keiko Yabuuchi,"
+    },
+    {
+      "start": 4.3,
+      "end": 6.13,
+      "text": "quien fue la mujer pionera"
+    },
+    {
+      "start": 6.13,
+      "end": 7.16,
+      "text": "en sushi aquí en Puerto Rico,"
+    },
+    {
+      "start": 7.24,
+      "end": 8.5,
+      "text": "quien le enseñó a Carlos Santiago,"
+    },
+    {
+      "start": 8.6,
+      "end": 9.42,
+      "text": "el dueño de la marca,"
+    },
+    {
+      "start": 9.76,
+      "end": 10.86,
+      "text": "durante 14 años"
+    },
+    {
+      "start": 10.86,
+      "end": 11.96,
+      "text": "el arte de hacer sushi."
+    },
+    {
+      "start": 11.966667,
+      "end": 14.166667,
+      "text": "Y por si no lo sabías,"
+    },
+    {
+      "start": 14.366667,
+      "end": 15.146667,
+      "text": "estamos en la avenida"
+    },
+    {
+      "start": 15.146667,
+      "end": 15.806667,
+      "text": "Dos Palmas,"
+    },
+    {
+      "start": 15.846667,
+      "end": 16.606667,
+      "text": "aquí en Levittown,"
+    },
+    {
+      "start": 16.766667,
+      "end": 17.286667,
+      "text": "y contamos con"
+    },
+    {
+      "start": 17.286667,
+      "end": 18.066667,
+      "text": "amplio estacionamiento"
+    },
+    {
+      "start": 18.066667,
+      "end": 19.746667,
+      "text": "al frente y atrás para los clientes."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/historia-location-music-v1.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0996-01-logo-y-barrido-de-la-fachada-verde-e78a99944b.mp4",
+      "in": 0.3,
+      "out": 1.7,
+      "at": 0,
+      "reason": "Logo real durante la pregunta sobre el nombre; rango limpio sin presentador.",
+      "eof_action": "pass"
+    },
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0322-01-primer-corte-desde-el-extremo-47efc88212.mp4",
+      "in": 0.3,
+      "out": 2.8,
+      "at": 9.46,
+      "reason": "Manos cortando sushi para ilustrar aprendizaje y arte de preparación; sin atribuir identidad histórica al cocinero.",
+      "eof_action": "pass"
+    },
+    {
+      "source": "../media/yabuuchi/derived/keiko-photo-card-v1.mp4",
+      "in": 0,
+      "out": 3.96,
+      "at": 3.2,
+      "eof_action": "pass",
+      "reason": "Fotografía histórica de Keiko y Carlos publicada junto a la historia oficial; visible durante la mención de Keiko y su trayectoria."
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914130626_0004_D.MP4",
+      "in": 1.44,
+      "out": 13.406667
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132858_0018_D.MP4",
+      "in": 0,
+      "out": 7.9
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf",
+    "keiko_photo": "media/yabuuchi/brand/keiko-historia-web.jpg"
+  },
+  "review_notes": [
+    "Historia completa de la toma 0004, retirando únicamente conteo y cola sin diálogo.",
+    "Captions 72 fijos; B-roll físico limpio, no repetido; narración conserva los nombres y testimonio original.",
+    "Dos barridos breves y cierre de piano vigente. Revisión del usuario y escucha crítica pendientes.",
+    "Separar frase para mantener captions de máximo dos líneas",
+    "Caption semejante a Un sushi de fantasía: Anybody Expanded Black 900, ancho 125",
+    "Entrada de captions recreada de la referencia: aparición suave y leve crecimiento",
+    "Reducción suave del viento sólo en la voz, conservando música y efectos",
+    "Foto histórica de Keiko desde el sitio oficial durante su mención",
+    "Añadir ubicación Dos Palmas Levittown y estacionamiento antes del outro"
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 1.286,
+      "duration": 0.32,
+      "gain_db": -19
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 9.346,
+      "duration": 0.32,
+      "gain_db": -19
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 11.852667,
+      "duration": 0.32,
+      "gain_db": -20
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 1.3,
+      "duration": 0.2,
+      "intensity": 0.65
+    },
+    {
+      "preset": "whip_pan",
+      "time": 9.36,
+      "duration": 0.2,
+      "intensity": 0.65
+    },
+    {
+      "preset": "whip_pan",
+      "time": 11.866667,
+      "duration": 0.2,
+      "intensity": 0.65
+    }
+  ],
+  "idea_page": 2,
+  "voice_filter": "highpass=f=120:p=2,equalizer=f=180:t=o:w=2:g=-3,afftdn=nr=4:nf=-40:tn=1:gs=8,loudnorm=I=-16:TP=-2:LRA=7,aresample=48000",
+  "wind_treatment": {
+    "scope": "Solo voz original, antes de mezclar música y swooshes",
+    "strength": "light",
+    "goal": "Reducir rumble de viento sin intentar borrarlo por completo",
+    "critical_listening": "pending"
+  }
+}

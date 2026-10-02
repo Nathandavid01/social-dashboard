@@ -1,0 +1,141 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "calidad",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "¿Qué Hace Distinto A Yabuuchi?",
+  "source": "../media/yabuuchi/derived/calidad-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-calidad-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 7.06,
+      "audio_edge_fade": 0.015,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 7.06,
+          "zoom": 1.04
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 0.86,
+      "text": "¿Qué hace que Yabuuchi"
+    },
+    {
+      "start": 0.86,
+      "end": 1.5,
+      "text": "sea distinto?"
+    },
+    {
+      "start": 1.72,
+      "end": 2.15,
+      "text": "Pues mira,"
+    },
+    {
+      "start": 2.15,
+      "end": 3.44,
+      "text": "la calidad de los productos,"
+    },
+    {
+      "start": 3.64,
+      "end": 5,
+      "text": "lo fresco de los ingredientes"
+    },
+    {
+      "start": 5,
+      "end": 5.58,
+      "text": "y sobre todo"
+    },
+    {
+      "start": 5.58,
+      "end": 6.98,
+      "text": "el enfoque en el\nservicio al cliente."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/calidad-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0365-02-detalle-del-roll-en-su-caja-7c07cfefd8.mp4",
+      "in": 0.3,
+      "out": 1.73,
+      "at": 2.15,
+      "reason": "Producto terminado durante calidad de los productos; detalle limpio sin rostro hablando.",
+      "eof_action": "pass"
+    },
+    {
+      "source": "../media/yabuuchi/broll-clean/v1/tramos/Yabuuchi-0986-03-anadir-cebollin-al-relleno-464275fc1a.mp4",
+      "in": 0.4,
+      "out": 1.82,
+      "at": 3.58,
+      "reason": "Manos añadiendo ingrediente real durante frescura de ingredientes; audio silenciado.",
+      "eof_action": "pass"
+    }
+  ],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914124206_0996_D.MP4",
+      "in": 5.58,
+      "out": 12.64
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Video 3: Por Qué Yabuuchi cuenta como primero; muestra del usuario como segundo.",
+    "Respuesta completa conservada: producto, ingredientes y servicio.",
+    "Misma tipografía Anybody Expanded Black 72, entrada suave y piano vigente.",
+    "Dos apoyos distintos sobre la voz real; regresa a la presentadora durante servicio al cliente.",
+    "Escucha crítica y revisión del usuario pendientes; no se afirma igualdad auditiva al ejemplo.",
+    "V5: pregunta separada para corregir tercera línea sin reducir la fuente."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.036,
+      "duration": 0.32,
+      "gain_db": -20
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.886,
+      "duration": 0.32,
+      "gain_db": -21
+    }
+  ],
+  "effects": [
+    {
+      "preset": "whip_pan",
+      "time": 2.05,
+      "duration": 0.2,
+      "intensity": 0.65
+    },
+    {
+      "preset": "whip_pan",
+      "time": 4.9,
+      "duration": 0.2,
+      "intensity": 0.55
+    }
+  ],
+  "delivery_sequence": 3
+}

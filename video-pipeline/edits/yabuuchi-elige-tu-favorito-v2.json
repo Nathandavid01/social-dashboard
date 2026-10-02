@@ -1,0 +1,176 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "elige-tu-favorito",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Elige Tu Favorito",
+  "source": "../media/yabuuchi/derived/elige-tu-favorito-source-v1.mp4",
+  "transcript": "../runs/yabuuchi-elige-tu-favorito-mapped.json",
+  "style": "../styles/yabuuchi-reference.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 21.43,
+      "zoom": 1,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 2.04,
+      "text": "¿Cuál prefieres: el Borrachito o el Sushi Burrito?"
+    },
+    {
+      "start": 2.1,
+      "end": 2.8,
+      "text": "El Borrachito."
+    },
+    {
+      "start": 2.9,
+      "end": 4.42,
+      "text": "¿Qué prefieres: La Jefa o El Boss?"
+    },
+    {
+      "start": 4.62,
+      "end": 5.14,
+      "text": "La Jefa."
+    },
+    {
+      "start": 5.24,
+      "end": 7.72,
+      "text": "¿Cuál prefieres: el cheesecake frito o el lava cake?"
+    },
+    {
+      "start": 7.9,
+      "end": 9.68,
+      "text": "El cheesecake frito con guayaba."
+    },
+    {
+      "start": 9.8,
+      "end": 11.28,
+      "text": "¿El crab rangoon o los dumplings?"
+    },
+    {
+      "start": 11.46,
+      "end": 12.04,
+      "text": "Los dumplings."
+    },
+    {
+      "start": 12.1,
+      "end": 14.7,
+      "text": "¿Prefieres el lychee o el de strawberry?"
+    },
+    {
+      "start": 14.88,
+      "end": 15.52,
+      "text": "El de lychee."
+    },
+    {
+      "start": 15.63,
+      "end": 16.75,
+      "text": "¿Onigiri o edamame?"
+    },
+    {
+      "start": 16.89,
+      "end": 17.43,
+      "text": "Edamame."
+    },
+    {
+      "start": 17.69,
+      "end": 18.97,
+      "text": "¿Todo eso lo tienen aquí?"
+    },
+    {
+      "start": 19.25,
+      "end": 21.33,
+      "text": "Sí, aquí en la avenida Dos Palmas, Levittown."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/reference-outro.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1
+  },
+  "music": {
+    "source": "../media/yabuuchi/elige-tu-favorito-music.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Backbeat.provenance.json"
+  },
+  "broll": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914131935_0008_D.MP4",
+      "in": 0.62,
+      "out": 3.48
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132100_0010_D.MP4",
+      "in": 0.62,
+      "out": 2.96
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132207_0012_D.MP4",
+      "in": 1.02,
+      "out": 5.58
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132247_0013_D.MP4",
+      "in": 0.52,
+      "out": 2.86
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132349_0014_D.MP4",
+      "in": 0,
+      "out": 3.49
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914132741_0017_D.MP4",
+      "in": 1.06,
+      "out": 6.9
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/reference-outro.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4"
+  },
+  "review_notes": [
+    "Se omite 0011 por nombre de plato no confirmado. Revisar nombres de menú y escucha de preguntas.",
+    "Fuente Arial Bold aproximada desde referencia disponible. Escucha crítica y aprobación del usuario pendientes.",
+    "V2: referencia principal del usuario video 1.2.mp4; captions 54px bajos con sombra; apoyos, acercamientos y efectos contenidos; cierre extraído de la referencia.",
+    "No se afirma coincidencia auditiva exacta."
+  ],
+  "sounds": [
+    {
+      "preset": "swipe",
+      "time": 2.86,
+      "duration": 0.13,
+      "gain_db": -32
+    },
+    {
+      "preset": "swipe",
+      "time": 5.2,
+      "duration": 0.13,
+      "gain_db": -32
+    },
+    {
+      "preset": "swipe",
+      "time": 9.76,
+      "duration": 0.13,
+      "gain_db": -32
+    },
+    {
+      "preset": "swipe",
+      "time": 12.1,
+      "duration": 0.13,
+      "gain_db": -32
+    },
+    {
+      "preset": "swipe",
+      "time": 15.59,
+      "duration": 0.13,
+      "gain_db": -32
+    }
+  ]
+}

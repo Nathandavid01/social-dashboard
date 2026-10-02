@@ -1,0 +1,69 @@
+{
+  "idea_id": "0cb8133f-763a-40e0-90bf-03c02bd63790",
+  "title": "No todo es trabajo de dos",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-assembly-muted.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-muted-transcript.json",
+  "style": "../styles/farmacia-buena-vida-v5.json",
+  "clips": [
+    {
+      "in": 0.75,
+      "out": 3.05,
+      "zoom": 1.03,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 11.778334,
+      "out": 13.578334,
+      "zoom": 1.02,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    },
+    {
+      "in": 8.987167,
+      "out": 11.587167,
+      "zoom": 1.02,
+      "focus_y": 0.4,
+      "audio_edge_fade": 0.015
+    }
+  ],
+  "captions": [
+    {
+      "start": 0,
+      "end": 4.1,
+      "text": "POV: Un día en\nFarmacia Buena Vida"
+    },
+    {
+      "start": 4.1,
+      "end": 6.7,
+      "text": "Cada una en lo suyo.\nSiempre en equipo."
+    }
+  ],
+  "broll": [],
+  "sounds": [],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "v4: propuesta cotidiana del equipo tras crítica de humor. Elimina orden atribuida a doctora y supuesto remate. Tres planos más cortos: colaboración, desplazamiento, puestos separados. Mismos originales auditados; no se encontró reacción marcada en muestras conocidas, Drive sigue parcial. Perfil POV v5 intacto. Cierre oficial recortado a1.5s manteniendo logo final; música de la misma pieza reutilizada. Revisión y escucha pendientes."
+  ],
+  "client_id": "9732f038-05a3-4d0d-a755-6019c04bec7d",
+  "catalog": "runs/9732f038-catalog.json",
+  "outro": {
+    "source": "../media/farmacia-buena-vida/brand/outro-sfx-v1.mp4",
+    "in": 0.7,
+    "out": 2.2,
+    "gain": 1
+  },
+  "references": {
+    "published_style": "media/farmacia-buena-vida/brand/published-reference.mp4",
+    "official_outro": "media/farmacia-buena-vida/brand/outro-clean-v1.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/pov-music-v4.wav",
+    "title": "Double Espresso — The Original Orchestra",
+    "license": "Motion Array paid subscription license",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/farmacia-dos-pendientes-20261002/music-pov-provenance.json",
+    "extend_through_outro": true
+  },
+  "caption_mode": "editorial"
+}

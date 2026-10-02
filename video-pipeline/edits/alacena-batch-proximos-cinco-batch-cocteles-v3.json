@@ -1,0 +1,286 @@
+{
+  "idea_id": "c75c88b4-5a75-44e5-ae7c-227173252b5a",
+  "title": "Coctelería",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/cocteles-source.mkv",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/cocteles-transcript.json",
+  "style": "../styles/alacena-v2.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 34.21,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1
+        },
+        {
+          "time": 34.21,
+          "zoom": 1.035
+        }
+      ],
+      "audio_edge_fade": 0.02,
+      "zoom": 1
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.12,
+      "end": 0.6,
+      "text": "Oye,"
+    },
+    {
+      "start": 0.64,
+      "end": 0.92,
+      "text": "Andrea,"
+    },
+    {
+      "start": 0.94,
+      "end": 1.32,
+      "text": "si fuera mi"
+    },
+    {
+      "start": 1.32,
+      "end": 1.92,
+      "text": "primera vez en"
+    },
+    {
+      "start": 1.92,
+      "end": 2.3,
+      "text": "Alacena,"
+    },
+    {
+      "start": 2.36,
+      "end": 2.62,
+      "text": "¿qué tú me"
+    },
+    {
+      "start": 2.62,
+      "end": 3.24,
+      "text": "recomendarías?"
+    },
+    {
+      "start": 3.52,
+      "end": 3.8,
+      "text": "Bueno,"
+    },
+    {
+      "start": 3.98,
+      "end": 4.8,
+      "text": "todo dependiendo."
+    },
+    {
+      "start": 5.0,
+      "end": 5.44,
+      "text": "Si te gusta"
+    },
+    {
+      "start": 5.44,
+      "end": 6.78,
+      "text": "un cóctel más"
+    },
+    {
+      "start": 6.78,
+      "end": 7.7,
+      "text": "cítrico,"
+    },
+    {
+      "start": 8.06,
+      "end": 8.98,
+      "text": "te recomiendo el"
+    },
+    {
+      "start": 8.98,
+      "end": 9.6,
+      "text": "mezcal indá."
+    },
+    {
+      "start": 9.7,
+      "end": 10.2,
+      "text": "Que a base"
+    },
+    {
+      "start": 10.2,
+      "end": 11.42,
+      "text": "del mezcal,"
+    },
+    {
+      "start": 11.88,
+      "end": 12.78,
+      "text": "tiene también un"
+    },
+    {
+      "start": 12.78,
+      "end": 13.72,
+      "text": "toque de tamarindo"
+    },
+    {
+      "start": 13.72,
+      "end": 14.28,
+      "text": "hecha aquí en"
+    },
+    {
+      "start": 14.28,
+      "end": 14.92,
+      "text": "la casa y"
+    },
+    {
+      "start": 14.92,
+      "end": 15.7,
+      "text": "tiene lima."
+    },
+    {
+      "start": 15.97,
+      "end": 16.43,
+      "text": "Si te gusta"
+    },
+    {
+      "start": 16.43,
+      "end": 17.91,
+      "text": "algo más suave,"
+    },
+    {
+      "start": 18.19,
+      "end": 18.79,
+      "text": "más dulce,"
+    },
+    {
+      "start": 18.93,
+      "end": 19.51,
+      "text": "te recomiendo lo"
+    },
+    {
+      "start": 19.51,
+      "end": 19.91,
+      "text": "que es el"
+    },
+    {
+      "start": 19.91,
+      "end": 20.37,
+      "text": "BLG,"
+    },
+    {
+      "start": 20.45,
+      "end": 20.87,
+      "text": "que va a"
+    },
+    {
+      "start": 20.87,
+      "end": 21.41,
+      "text": "ser de nuestros"
+    },
+    {
+      "start": 21.41,
+      "end": 22.33,
+      "text": "jarabe de blueberry,"
+    },
+    {
+      "start": 22.55,
+      "end": 22.97,
+      "text": "que es natural"
+    },
+    {
+      "start": 22.97,
+      "end": 23.43,
+      "text": "también,"
+    },
+    {
+      "start": 23.85,
+      "end": 24.85,
+      "text": "tiene lima también"
+    },
+    {
+      "start": 24.85,
+      "end": 25.61,
+      "text": "y viene con"
+    },
+    {
+      "start": 25.61,
+      "end": 26.19,
+      "text": "un toque de"
+    },
+    {
+      "start": 26.19,
+      "end": 27.59,
+      "text": "ginebra de fresa."
+    },
+    {
+      "start": 27.81,
+      "end": 28.77,
+      "text": "Está riquísimo."
+    },
+    {
+      "start": 28.89,
+      "end": 29.49,
+      "text": "Cualquiera de los"
+    },
+    {
+      "start": 29.49,
+      "end": 29.95,
+      "text": "dos está"
+    },
+    {
+      "start": 29.95,
+      "end": 30.67,
+      "text": "espectacular."
+    },
+    {
+      "start": 30.77,
+      "end": 31.85,
+      "text": "Puedes probarlo aquí"
+    },
+    {
+      "start": 31.85,
+      "end": 32.95,
+      "text": "en Alacena Restaurant"
+    },
+    {
+      "start": 32.95,
+      "end": 33.99,
+      "text": "de Arecibo."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "kind": "click",
+      "time": 15.85,
+      "duration": 0.045,
+      "gain_db": -28
+    },
+    {
+      "kind": "click",
+      "time": 30.77,
+      "duration": 0.045,
+      "gain_db": -28
+    },
+    {
+      "kind": "click",
+      "time": 34.2,
+      "duration": 0.045,
+      "gain_db": -27
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Retirar claquetas e intentos fallidos; conservar diálogo y cierre grabados. Movimiento suave y fundidos breves entre tomas asociadas. Captions Belleza blancos con sombra verde. Música distinta por reel, clicks solo en cambios. Sin B-roll genérico repetido: picaña y cócteles ya tienen primeros planos en sus originales. Escucha crítica y publicación independientes pendientes. Revision: ampliar captions breves para lectura; confirmar nombres de cocteles con usuario."
+  ],
+  "client_id": "12594096-5bc6-4d43-9dea-11cbd7892771",
+  "catalog": "runs/alacena-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/brand/outro-from-A1.mp4",
+    "in": 0,
+    "out": 2.78,
+    "gain": 0
+  },
+  "references": {
+    "A1": "/Volumes/Extreme SSD/Nate Media/alacena-audit-20260930/edited/A1.mov",
+    "visual_comparison": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/reference.jpg"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/cocteles-music.wav",
+    "extend_through_outro": true,
+    "license": "Motion Array paid subscription",
+    "license_evidence": "/Volumes/Extreme SSD/Nate Media/alacena-dashboard-20261001/proximos-cinco-batch/cocteles-music-provenance.json"
+  }
+}

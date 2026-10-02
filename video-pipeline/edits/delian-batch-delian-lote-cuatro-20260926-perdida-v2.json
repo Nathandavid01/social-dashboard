@@ -1,0 +1,349 @@
+{
+  "idea_id": "perdida-diente-20260921",
+  "title": "¿Qué Pasa Si Pierdo Un Diente De Adulto?",
+  "source": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/perdida-source.mp4",
+  "transcript": "../../../../../Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/perdida-transcript.json",
+  "style": "../styles/delian-reference-v6-shoika.json",
+  "clips": [
+    {
+      "in": 1.4,
+      "out": 3.74,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 2.34,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 4.12,
+      "out": 9.86,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 5.74,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 10.1,
+      "out": 15.84,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 5.74,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 16.98,
+      "out": 25.82,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 8.84,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 25.82,
+      "out": 32.98,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 7.16,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 33.06,
+      "out": 37.86,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 4.8,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    },
+    {
+      "in": 42.0386,
+      "out": 48.1386,
+      "zoom": 1.035,
+      "focus_y": 0.35,
+      "audio_edge_fade": 0.01,
+      "zoom_keyframes": [
+        {
+          "time": 0,
+          "zoom": 1.035
+        },
+        {
+          "time": 6.1,
+          "zoom": 1.0699999999999998
+        }
+      ]
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.02,
+      "end": 1.06,
+      "text": "Doctora, ¿qué pasa si",
+      "bottom_margin": 230,
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 1.06,
+      "end": 2.22,
+      "text": "pierdo un diente de adulto?",
+      "bottom_margin": 230,
+      "back_colour": "&H00252525"
+    },
+    {
+      "start": 2.46,
+      "end": 3.76,
+      "text": "Bueno, lo más importante es tratar",
+      "bottom_margin": 230
+    },
+    {
+      "start": 3.76,
+      "end": 4.86,
+      "text": "de reemplazar, ¿verdad?",
+      "bottom_margin": 230
+    },
+    {
+      "start": 5.1,
+      "end": 6.72,
+      "text": "Ese diente que hemos perdido,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 6.94,
+      "end": 7.9,
+      "text": "porque los dientes se van a mover.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 8.22,
+      "end": 10.76,
+      "text": "Podemos ver aquí un caso",
+      "bottom_margin": 230
+    },
+    {
+      "start": 10.76,
+      "end": 13.68,
+      "text": "en donde ya la paciente tuvo Invisalign.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 13.82,
+      "end": 16.18,
+      "text": "Estas piezas estaban bien inclinadas.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 16.48,
+      "end": 17.54,
+      "text": "Al estar bien inclinadas,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 17.68,
+      "end": 18.9,
+      "text": "no tengo suficiente espacio",
+      "bottom_margin": 230
+    },
+    {
+      "start": 18.9,
+      "end": 20.14,
+      "text": "para poderlos reemplazar.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 20.48,
+      "end": 22.66,
+      "text": "Y hacer un puente o un implante.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 22.66,
+      "end": 26.46,
+      "text": "Aquí ya preparamos",
+      "bottom_margin": 230
+    },
+    {
+      "start": 26.46,
+      "end": 28.12,
+      "text": "para colocar entonces",
+      "bottom_margin": 230
+    },
+    {
+      "start": 28.12,
+      "end": 29.7,
+      "text": "un puente fijo.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 29.92,
+      "end": 31.72,
+      "text": "La otra opción sería un implante,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 31.8,
+      "end": 32.64,
+      "text": "que es el tornillo",
+      "bottom_margin": 230
+    },
+    {
+      "start": 32.64,
+      "end": 34.48,
+      "text": "o algo removible.",
+      "bottom_margin": 230
+    },
+    {
+      "start": 34.74,
+      "end": 36.46,
+      "text": "Todos esos servicios los brindamos aquí,",
+      "bottom_margin": 230
+    },
+    {
+      "start": 36.56,
+      "end": 38.08,
+      "text": "así que se pueden comunicar al",
+      "bottom_margin": 230
+    },
+    {
+      "start": 38.08,
+      "end": 40.54,
+      "text": "787-230-7573",
+      "bottom_margin": 230
+    }
+  ],
+  "broll": [
+    {
+      "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/perdida-espacio-v2.mp4",
+      "in": 0,
+      "out": 2.3,
+      "at": 5.7,
+      "fade_in": 0,
+      "fade_out": 0,
+      "reason": "Señalar el espacio y el posible movimiento de dientes vecinos durante esa frase; no representa medición clínica.",
+      "asset_family": "perdida-espacio-20260926",
+      "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/motion-provenance.json"
+    }
+  ],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 2.34,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 5.7,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.0,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 8.08,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 13.82,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 22.66,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 29.82,
+      "gain_db": -23
+    },
+    {
+      "preset": "mouse_click",
+      "time": 34.62,
+      "gain_db": -23
+    }
+  ],
+  "effects": [],
+  "review_notes": [
+    "Borrador del Edit Kit. Revisar cortes, captions y B-roll antes de renderizar. Aprobación pendiente.",
+    "Pregunta, explicación completa del caso en pantalla, opciones y cierre unidos. Conteo fuera; se quita Estamos buscando antes de estas piezas. Diagrama exclusivo del espacio ausente."
+  ],
+  "client_id": "9d512070-9c6e-4cce-8398-53cca0076287",
+  "catalog": "runs/delian-sept-catalog.json",
+  "outro": {
+    "source": "../media/delian/brand/outro-loyola.mp4",
+    "in": 0,
+    "out": 3.366667,
+    "gain": 1
+  },
+  "references": {
+    "brand_example": "media/delian/brand/ejemplo.jpg",
+    "font_reference": "media/delian/brand/tipografia.jpg",
+    "official_outro": "media/delian/brand/outro-loyola.mp4",
+    "brand_logo": "media/delian/brand/logo-dml.jpg",
+    "published_reel": "../delian-loyola-video/media/reference/publicados-14-agosto.mp4"
+  },
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/perdida-music.wav",
+    "title": "Complicated",
+    "license": "Mixkit Stock Music Free License",
+    "provenance": "/Volumes/Extreme SSD/Nate Media/delian-lote-cuatro-20260926/assets/Complicated.provenance.json"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 11
+  },
+  "graphics": []
+}

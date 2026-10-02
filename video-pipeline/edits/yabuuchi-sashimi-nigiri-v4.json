@@ -1,0 +1,174 @@
+{
+  "client_id": "0b870c21-70f0-44ad-8319-352e55cf377f",
+  "idea_id": "sashimi-nigiri",
+  "catalog": "runs/yabuuchi-catalog.json",
+  "title": "Nigiri Y Sashimi",
+  "source": "../media/yabuuchi/derived/nigiri-sashimi-rebuild-v4.mkv",
+  "transcript": "../runs/yabuuchi-sashimi-v4-mapped.json",
+  "style": "../styles/yabuuchi-reference-v6.json",
+  "clips": [
+    {
+      "in": 0,
+      "out": 10.6,
+      "zoom": 1,
+      "audio_edge_fade": 0.01
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.04,
+      "end": 1.16,
+      "text": "Chef, ¿cuál es la diferencia"
+    },
+    {
+      "start": 1.16,
+      "end": 2.4,
+      "text": "entre nigiri y sashimi?"
+    },
+    {
+      "start": 3.0,
+      "end": 4.22,
+      "text": "Es el pescado solito."
+    },
+    {
+      "start": 5.12,
+      "end": 6.18,
+      "text": "Es una bolita de arroz"
+    },
+    {
+      "start": 6.18,
+      "end": 7.43,
+      "text": "con la proteína por encimita."
+    }
+  ],
+  "outro": {
+    "source": "../media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "in": 0,
+    "out": 2.99,
+    "gain": 1,
+    "music_title": "Elegant Piano Logo",
+    "music_author": "Universfield",
+    "license": "Pixabay Content License",
+    "provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json"
+  },
+  "music": {
+    "source": "../media/yabuuchi/sashimi-nigiri-music-v4.wav",
+    "license": "CC0 1.0",
+    "provenance": "media/music/Be Chillin.provenance.json"
+  },
+  "broll": [],
+  "graphics": [],
+  "source_parts": [
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 1.02,
+      "out": 3.62,
+      "at": 0,
+      "purpose": "Pregunta original completa, sin conteo",
+      "use": "voice_and_question"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 7.08,
+      "out": 8.1,
+      "at": 3.0,
+      "purpose": "Fragmento literal: es el pescado solito; sin el nombre invertido",
+      "use": "voice_only"
+    },
+    {
+      "source": "media/yabuuchi/source/DJI_20260914121706_0983_D.MP4",
+      "in": 9.18,
+      "out": 11.5,
+      "at": 5.12,
+      "purpose": "Fragmento literal: es una bolita de arroz con la proteína por encimita; sin nombre invertido",
+      "use": "voice_only"
+    }
+  ],
+  "references": {
+    "style_reference": "media/yabuuchi/brand/style-reference.mp4",
+    "outro": "media/yabuuchi/brand/outro-elegant-piano-v1.mp4",
+    "primary_edit_reference": "media/yabuuchi/brand/primary-edit-reference.mp4",
+    "outro_music_provenance": "media/music/Elegant Piano Logo - Universfield.provenance.json",
+    "idea_document": "/Users/ericperez/Downloads/Content Ideas-Yabuuchi (1).pdf"
+  },
+  "review_notes": [
+    "Reedición completa solicitada para el antiguo video 11, ahora número 10 tras separar el demo.",
+    "PDF p.1: Oye Chef, cuál es la diferencia entre sashimi y nigiri.",
+    "La toma invierte los nombres. Se retiran las dos atribuciones erróneas; no se sustituyen palabras ni se genera una voz nueva.",
+    "Se conserva pregunta completa y dos descripciones literales neutras, cubiertas por tarjetas editoriales con etiquetas correctas.",
+    "Imágenes explicativas generadas con IA y marcadas Imagen ilustrativa; no son B-roll ni platos fotografiados de Yabuuchi.",
+    "Los recortes anteriores representaban un aderezo y un roll relleno; se retiran. No se identificó B-roll real confirmado de nigiri y sashimi en el índice local.",
+    "Anybody Expanded Black 72, entrada suave, cuatro transiciones sonorizadas, Audio Kit y outro de piano.",
+    "Escucha crítica de empalmes y aprobación del usuario pendientes."
+  ],
+  "sounds": [
+    {
+      "preset": "whoosh_sweep",
+      "time": 2.486,
+      "duration": 0.32,
+      "gain_db": -24,
+      "reason": "Pregunta a comparación ilustrativa de sashimi"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 4.686,
+      "duration": 0.32,
+      "gain_db": -24,
+      "reason": "Cambio a nigiri"
+    },
+    {
+      "preset": "whoosh_sweep",
+      "time": 8.186,
+      "duration": 0.32,
+      "gain_db": -24,
+      "reason": "Comparación final"
+    },
+    {
+      "preset": "whoosh_soft",
+      "time": 10.4,
+      "duration": 0.2,
+      "gain_db": -24,
+      "reason": "Entrada del outro"
+    }
+  ],
+  "effects": [],
+  "audio_master": {
+    "mode": "dialogue",
+    "voice_mode": "auto",
+    "target_lufs": -20,
+    "speech_regions": [
+      {
+        "start": 0.04,
+        "end": 2.4,
+        "role": "pregunta"
+      },
+      {
+        "start": 3.0,
+        "end": 4.02,
+        "role": "descripcion-sashimi"
+      },
+      {
+        "start": 5.12,
+        "end": 7.44,
+        "role": "descripcion-nigiri"
+      }
+    ]
+  },
+  "idea_page": 1,
+  "visual_assets": [
+    {
+      "asset": "media/yabuuchi/graphics/nigiri-sashimi-v4/comparison-illustration.png",
+      "kind": "ai_generated_educational_illustration",
+      "tool": "image_gen built-in",
+      "not_client_food": true,
+      "prompt": "Transparent photorealistic educational comparison: salmon sashimi slices without rice on the left; authentic salmon nigiri with clearly visible rice on the right. No plates, logos, text, nori, garnish or roll fillings.",
+      "on_screen_disclosure": "Imagen ilustrativa",
+      "source_copy": "/Users/ericperez/.codex/generated_images/01a0bfd8-ecd0-7e43-bacc-7c6348d73668/exec-27d031c4-49d1-4595-a480-c161599dee0a.png",
+      "fact_sources": [
+        "https://www.maff.go.jp/e/policies/market/k_ryouri/search_menu/1121/index.html",
+        "https://www.japan.travel/en/guide/sushi-in-japan/"
+      ],
+      "finding": "Old cutout lonja is garnish, and pieza-arroz is a filled roll; neither illustrates the concepts accurately. Removed from this edit."
+    }
+  ]
+}

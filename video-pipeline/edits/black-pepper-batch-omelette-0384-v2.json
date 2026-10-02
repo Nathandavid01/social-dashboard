@@ -1,0 +1,202 @@
+{
+  "idea_id": "62e0e749-d06d-4881-9dbc-86b4d2645a24",
+  "title": "Omelette pionono nuevo",
+  "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/originales/DJI_20260929111008_0384_D.MP4",
+  "transcript": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/transcripts-small/DJI_20260929111008_0384_D.json",
+  "style": "../styles/black-pepper-v5.json",
+  "clips": [
+    {
+      "in": 4.76,
+      "out": 26.95,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    },
+    {
+      "in": 31.2,
+      "out": 35.85,
+      "zoom": 1.0,
+      "audio_edge_fade": 0.02
+    }
+  ],
+  "captions": [
+    {
+      "start": 0.0,
+      "end": 0.84,
+      "text": "uno de los platos"
+    },
+    {
+      "start": 0.84,
+      "end": 1.78,
+      "text": "que se han convertido,"
+    },
+    {
+      "start": 2.06,
+      "end": 3.02,
+      "text": "bestseller también,"
+    },
+    {
+      "start": 3.38,
+      "end": 3.86,
+      "text": "y es un plato"
+    },
+    {
+      "start": 3.86,
+      "end": 6.2,
+      "text": "nuevo que está en"
+    },
+    {
+      "start": 6.2,
+      "end": 7.16,
+      "text": "el menú y es"
+    },
+    {
+      "start": 7.16,
+      "end": 8.72,
+      "text": "el omelette pionono."
+    },
+    {
+      "start": 9.26,
+      "end": 10.74,
+      "text": "Este omelette pionono es"
+    },
+    {
+      "start": 10.74,
+      "end": 11.58,
+      "text": "bastante grande,"
+    },
+    {
+      "start": 11.76,
+      "end": 13.84,
+      "text": "viene relleno de amarillo,"
+    },
+    {
+      "start": 13.86,
+      "end": 14.46,
+      "text": "escúchate bien,"
+    },
+    {
+      "start": 14.58,
+      "end": 15.42,
+      "text": "omelette pionono bien"
+    },
+    {
+      "start": 15.42,
+      "end": 15.96,
+      "text": "boricua,"
+    },
+    {
+      "start": 16.04,
+      "end": 17.24,
+      "text": "viene relleno de amarillo,"
+    },
+    {
+      "start": 17.56,
+      "end": 18.54,
+      "text": "de carne molida,"
+    },
+    {
+      "start": 18.74,
+      "end": 19.76,
+      "text": "queso rallado por dentro,"
+    },
+    {
+      "start": 19.76,
+      "end": 21.48,
+      "text": "acompañado de la salsa"
+    },
+    {
+      "start": 21.48,
+      "end": 22.12,
+      "text": "de la casa,"
+    },
+    {
+      "start": 22.27,
+      "end": 23.17,
+      "text": "Así que dale pa'"
+    },
+    {
+      "start": 23.17,
+      "end": 24.09,
+      "text": "Black Pepper y vive"
+    },
+    {
+      "start": 24.09,
+      "end": 24.83,
+      "text": "la experiencia del"
+    },
+    {
+      "start": 24.83,
+      "end": 26.13,
+      "text": "omelette pionono bien"
+    },
+    {
+      "start": 26.13,
+      "end": 26.81,
+      "text": "boricua."
+    }
+  ],
+  "broll": [],
+  "sounds": [
+    {
+      "preset": "mouse_click",
+      "time": 22.19,
+      "duration": 0.09,
+      "gain_db": -22,
+      "reason": "Corte real"
+    }
+  ],
+  "effects": [
+    {
+      "preset": "punch_zoom",
+      "time": 3.86,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "nuevo que está en"
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 7.16,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "el omelette pionono."
+    },
+    {
+      "preset": "punch_zoom",
+      "time": 17.56,
+      "duration": 0.38,
+      "intensity": 0.46,
+      "reason": "de carne molida,"
+    }
+  ],
+  "music": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/music/Sunny Rasta.mp3",
+    "title": "Sunny Rasta",
+    "extend_through_outro": true,
+    "license": "CC0 1.0",
+    "license_evidence": "https://github.com/0lhi/FreePD/blob/stream/LICENSE"
+  },
+  "audio_master": {
+    "music_below_voice_lu": 14
+  },
+  "review_notes": [
+    "Idea updates. Plato nuevo: omelette pionono, amarillo, carne molida, queso rallado, salsa de la casa.",
+    "Se saca papa saqueada / la presidencia: no está claro y no se inventa el acompañamiento.",
+    "Bexel→bestseller, boricua, Black Pepper, experiencia. Click seco en el corte. Escucha crítica pendiente."
+  ],
+  "client_id": "7e42d8f4-0d12-43cb-ac00-e8b449abde38",
+  "catalog": "runs/7e42d8f4-catalog.json",
+  "outro": {
+    "source": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4",
+    "in": 0,
+    "out": 3,
+    "gain": 0.6
+  },
+  "voice_filter": "highpass=f=75",
+  "references": {
+    "published_style_example": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/referencias-metricool/video black octubre 2.mp4",
+    "official_outro": "/Volumes/Extreme SSD/Nate Media/black-pepper-20261002/brand/Outro Black Pepper.mp4"
+  },
+  "notes": [
+    "V2: acento en escúchate. Mismos cortes, música y efectos que v1."
+  ]
+}
