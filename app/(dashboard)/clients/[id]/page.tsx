@@ -21,7 +21,8 @@ import { AssetsTab } from '@/components/clients/profile/tabs/assets-tab'
 import { VideoBufferCard } from '@/components/clients/video-buffer-card'
 import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-button'
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
-import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
+import type { Client, ClientPayment, ClientAsset, ContentIdea, ClientSuggestion } from '@/lib/supabase/types'
+import { listClientSuggestions } from '@/lib/actions/client-suggestions'
 
 const VALID_TABS: ClientTabKey[] = ['overview', 'schedule', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
 
@@ -46,6 +47,7 @@ export default async function ClientDetailPage({
     { data: payments },
     { data: assets },
     pipeline,
+    suggestionsResult,
   ] = await Promise.all([
     supabase
       .from('tasks')
@@ -70,7 +72,10 @@ export default async function ClientDetailPage({
       .eq('client_id', id)
       .order('uploaded_at', { ascending: false }),
     getClientPipeline(id, client.posting_days ?? []),
+    listClientSuggestions(id),
   ])
+
+  const suggestionsList = (suggestionsResult.suggestions ?? []) as ClientSuggestion[]
 
   const paymentsList = (payments ?? []) as ClientPayment[]
   const assetsList = (assets ?? []) as ClientAsset[]
@@ -267,7 +272,7 @@ export default async function ClientDetailPage({
 
       <ClientTabs
         defaultTab={defaultTab}
-        overview={<OverviewTab client={client} pipeline={pipeline} />}
+        overview={<OverviewTab client={client} pipeline={pipeline} suggestions={suggestionsList} />}
         schedule={<ScheduleTab client={client} />}
         brand={<BrandTab client={client} />}
         contract={<ContractTab client={client} />}

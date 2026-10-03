@@ -3,6 +3,8 @@ import { requirePermission } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
 import { getWrittenIdeas } from '@/lib/actions/ideas-batch'
 import { IdeaBatchTable } from '@/components/ideas/idea-batch-table'
+import { ClientSaidPanel } from '@/components/ideas/client-said-panel'
+import { listClientSuggestions } from '@/lib/actions/client-suggestions'
 import { PenLine, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -41,14 +43,16 @@ export default async function EscribirIdeasPage({
     ? { data: [] }
     : await supabase
         .from('clients')
-        .select('id, name')
+        .select('id, name, brand_voice')
         .eq('status', 'active')
         .in('id', Array.from(agendados))
         .order('name')
 
   const lista = clients ?? []
   const activo = lista.find((x) => x.id === clientId) ?? lista[0]
-  const { ideas } = activo ? await getWrittenIdeas(activo.id) : { ideas: [] }
+  const [{ ideas }, suggestionsResult] = activo
+    ? await Promise.all([getWrittenIdeas(activo.id), listClientSuggestions(activo.id)])
+    : [{ ideas: [] }, { suggestions: [] }]
 
   return (
     <div className="space-y-4">
@@ -102,11 +106,18 @@ export default async function EscribirIdeasPage({
           </nav>
 
           {activo && (
-            <IdeaBatchTable
-              clientId={activo.id}
-              clientName={activo.name}
-              existing={ideas ?? []}
-            />
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <IdeaBatchTable
+                clientId={activo.id}
+                clientName={activo.name}
+                existing={ideas ?? []}
+              />
+              <ClientSaidPanel
+                clientId={activo.id}
+                brandVoice={activo.brand_voice ?? null}
+                suggestions={suggestionsResult.suggestions ?? []}
+              />
+            </div>
           )}
         </>
       )}
