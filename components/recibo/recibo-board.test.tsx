@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 
 vi.mock('@/components/auth/role-gate', () => ({
@@ -44,6 +44,10 @@ import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
 import { getReciboIdeaDownloadUrl, getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
 import { ReciboBoard } from './recibo-board'
 
+async function expandClient(name: string) {
+  await userEvent.click(screen.getByRole('button', { name: new RegExp(name) }))
+}
+
 /** Dated inside the current week so the week filter still includes the card. */
 const publishThisWeek = rangoSemana().desde
 
@@ -79,16 +83,107 @@ const bareIdea = {
 } as any
 
 describe('ReciboBoard', () => {
+  beforeEach(() => {
+    window.location.hash = ''
+    vi.mocked(getReciboIdeaPreviewUrl).mockClear()
+  })
+
+  it('abre con todos los clientes cerrados y solo monta videos al expandir', async () => {
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, farmacia]}
+      />,
+    )
+    const arecibo = screen.getByRole('button', { name: /Arecibo Lab/ })
+    const farmaciaBtn = screen.getByRole('button', { name: /Farmacia Buena Vida/ })
+    expect(arecibo).toHaveAttribute('aria-expanded', 'false')
+    expect(farmaciaBtn).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-farm')).not.toBeInTheDocument()
+    expect(getReciboIdeaPreviewUrl).not.toHaveBeenCalled()
+
+    await userEvent.click(arecibo)
+    expect(arecibo).toHaveAttribute('aria-expanded', 'true')
+    expect(farmaciaBtn).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-farm')).not.toBeInTheDocument()
+    await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1', 'v1'))
+
+    await userEvent.click(farmaciaBtn)
+    expect(farmaciaBtn).toHaveAttribute('aria-expanded', 'true')
+    expect(arecibo).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+
+    await userEvent.click(arecibo)
+    expect(arecibo).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+  })
+
+  it('un deep link abre solo ese cliente', async () => {
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        initialOpenClientId="farmacia"
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, farmacia]}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /Arecibo Lab/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('button', { name: /Farmacia Buena Vida/ })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('farm', 'v1'))
+    expect(getReciboIdeaPreviewUrl).not.toHaveBeenCalledWith('i1', 'v1')
+  })
+
+  it('un hash de URL abre solo ese cliente', async () => {
+    window.location.hash = '#c1'
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, farmacia]}
+      />,
+    )
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Arecibo Lab/ })).toHaveAttribute('aria-expanded', 'true')
+    })
+    expect(screen.getByRole('button', { name: /Farmacia Buena Vida/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-farm')).not.toBeInTheDocument()
+    window.location.hash = ''
+  })
+
   it('limita la entrega puntual al archivo mostrado y evita acciones de toda la idea', async () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    await expandClient('Arecibo Lab')
     await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1', 'v1'))
     expect(screen.queryByTestId('enviar')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /borrar/i })).not.toBeInTheDocument()
   })
-  it('identifica una entrega puntual sin etiquetar al cliente humano como AI', () => {
+  it('identifica una entrega puntual sin etiquetar al cliente humano como AI', async () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
     expect(screen.getByText('Entrega puntual')).toBeInTheDocument()
     expect(screen.queryByTestId('recibo-ai-badge')).not.toBeInTheDocument()
+    await expandClient('Arecibo Lab')
     expect(screen.getByLabelText('Caption')).toHaveValue(editedIdea.generated_caption)
   })
 
@@ -101,6 +196,7 @@ describe('ReciboBoard', () => {
     )
     expect(screen.getByTestId('recibo-board')).toBeInTheDocument()
     expect(screen.getByTestId('recibo-ai-badge')).toHaveTextContent('AI')
+    await expandClient('Arecibo Lab')
     expect(screen.queryByRole('button', { name: 'Ya se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'No se posteó' })).not.toBeInTheDocument()
     expect(screen.queryByText('Publicación')).not.toBeInTheDocument()
@@ -122,13 +218,14 @@ describe('ReciboBoard', () => {
     })
   })
 
-  it('muestra Sin video editado cuando no hay archivo', () => {
+  it('muestra Sin video editado cuando no hay archivo', async () => {
     render(
       <ReciboBoard
         aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
         ideas={[bareIdea]}
       />,
     )
+    await expandClient('Arecibo Lab')
     expect(screen.getByTestId('recibo-video-empty')).toHaveTextContent('Sin video editado')
   })
 
@@ -140,6 +237,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
+    await expandClient('Arecibo Lab')
     const field = screen.getByLabelText('Caption')
     expect(field).toHaveValue('El laboratorio ya abrió en Arecibo.')
     await user.clear(field)
@@ -159,6 +257,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea, sinCaption]}
       />,
     )
+    await expandClient('Arecibo Lab')
     await user.click(screen.getByRole('button', { name: 'Poner captions' }))
     await waitFor(() => {
       expect(fillReciboCaption).toHaveBeenCalledTimes(1)
@@ -198,7 +297,6 @@ describe('ReciboBoard', () => {
         ideas={[nathan, eric, editedIdea, yabu]}
       />,
     )
-    await screen.findAllByTestId('recibo-video-player')
     expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Total 4 · Nathan 1 · Eric 2 · Sin autor 1')
     expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Publicados 0')
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('Total 3 · Nathan 1 · Eric 1 · Sin autor 1 · Publicados 0')
@@ -213,7 +311,6 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
-    await screen.findByTestId('recibo-video-player')
     expect(screen.queryByTestId('recibo-upload-counts')).not.toBeInTheDocument()
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('1 video')
     expect(screen.queryByTestId('recibo-uploader-i1')).not.toBeInTheDocument()
@@ -227,6 +324,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
+    await expandClient('Arecibo Lab')
     await user.click(screen.getByRole('button', { name: 'Borrar Reel playa' }))
     expect(discardEntregaVideos).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -259,23 +357,27 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
   it('cada tarjeta con corte tiene «Bajar» y baja ese mismo archivo', async () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    await expandClient('Arecibo Lab')
     await userEvent.click(screen.getByRole('button', { name: 'Bajar Reel playa' }))
     await waitFor(() => expect(getReciboIdeaDownloadUrl).toHaveBeenCalledWith('i1', 'v1'))
     await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
     click.mockRestore()
   })
 
-  it('la entrega puntual (cliente humano) también se puede bajar', () => {
+  it('la entrega puntual (cliente humano) también se puede bajar', async () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    await expandClient('Arecibo Lab')
     expect(screen.getByRole('button', { name: 'Bajar Reel playa' })).toBeInTheDocument()
   })
 
-  it('sin corte editado no hay nada que bajar', () => {
+  it('sin corte editado no hay nada que bajar', async () => {
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[bareIdea]} />)
+    await expandClient('Arecibo Lab')
     expect(screen.queryByRole('button', { name: /^Bajar/ })).not.toBeInTheDocument()
   })
-  it('cada tarjeta trae la marca Publicado junto a Enviado y Aprobado', () => {
+  it('cada tarjeta trae la marca Publicado junto a Enviado y Aprobado', async () => {
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    await expandClient('Arecibo Lab')
     expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
   })
 })
@@ -284,6 +386,7 @@ it('separates a client graphic from videos and renders its image with caption', 
   vi.mocked(getReciboIdeaPreviewUrl).mockResolvedValue({ url: 'https://signed.example/graphic.png' })
   const graphic = { ...editedIdea, id: 'graphic-1', title: 'Encías', content_type: 'P', generated_caption: 'Cuida tus encías.', videos: [{ ...editedIdea.videos[0], id: 'g1', mime_type: 'image/png' }] }
   render(<ReciboBoard ideas={[editedIdea, graphic] as any} aiClients={[{ id: 'c1', name: 'Arecibo Lab' }]} />)
+  await expandClient('Arecibo Lab')
   expect(screen.getByRole('region', { name: 'Arecibo Lab · Gráficos' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Arecibo Lab · Videos' })).toBeTruthy()
   await waitFor(() => expect(screen.getByRole('img', { name: 'Encías' })).toBeTruthy())

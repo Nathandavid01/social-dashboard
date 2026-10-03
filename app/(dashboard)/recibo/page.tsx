@@ -6,6 +6,7 @@ import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
 import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
+import { reciboDeepLinkClientId } from '@/lib/recibo/open-clients'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
 import { ReciboPublishedSync } from '@/components/recibo/recibo-published-sync'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
@@ -17,8 +18,13 @@ export const revalidate = 0
  * Recibo — videos waiting for approval, or approved and still waiting
  * to be posted or scheduled in Metricool. No Metricool auto-post.
  */
-export default async function ReciboPage() {
+export default async function ReciboPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cliente?: string; client?: string; c?: string }>
+}) {
   await requirePermission('entregas.read')
+  const openFromUrl = reciboDeepLinkClientId(await searchParams)
 
   const supabase = await createClient()
   const [ideas, aiClientsRes] = await Promise.all([
@@ -76,6 +82,7 @@ export default async function ReciboPage() {
         publishedTotal={published.total}
         publishedByClient={published.byClient}
         showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
+        initialOpenClientId={openFromUrl}
       />
     </>
   )

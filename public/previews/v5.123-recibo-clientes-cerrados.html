@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>v5.123 · Recibo con clientes cerrados</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0a0a0a;--panel:#121212;--card:#161616;--border:#292929;--text:#fafafa;--muted:#a6a6a6;--gold:#d4af37;--violet:#c4b5fd}
+    *{box-sizing:border-box}body{margin:0;padding:40px 20px;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+    main{max-width:1100px;margin:auto}h1{font-size:28px;line-height:1.2;margin:12px 0}
+    .lead,.muted{color:var(--muted)}.lead{max-width:760px;margin-bottom:28px}
+    .version{color:var(--gold);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    section{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:22px}
+    h2{font-size:13px;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin:0 0 16px}
+    h3{font-size:18px;margin:0 0 4px}.desc{font-size:13px;color:var(--muted);margin:0 0 16px}
+    .client{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--border);background:var(--card);border-radius:16px;padding:12px;text-align:left;color:inherit}
+    .avatar{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--gold);border-radius:10px;color:var(--gold);font-weight:700;flex-shrink:0}
+    .client strong{display:block}.meta{font-size:12px;color:var(--muted)}
+    .badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#8b5cf633;color:var(--violet);font-size:10px;font-weight:700;letter-spacing:.04em}
+    .chev{margin-left:auto;color:var(--muted);font-size:18px}
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .card{overflow:hidden;border:1px solid var(--border);border-radius:13px;background:#0b0b0b}
+    .video{aspect-ratio:9/16;max-height:220px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:28px;background:linear-gradient(155deg,#28262c,#09090b)}
+    .caption{padding:10px;font-size:12px;color:#ddd}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .mobile{max-width:360px}
+    .note{font-size:12px;color:var(--muted);margin-top:18px}
+    footer{font-size:12px;color:var(--muted);margin-top:24px}
+    @media(max-width:800px){body{padding:24px 14px}h1{font-size:24px}.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main>
+  <span class="version">Nate Media · v5.123</span>
+  <h1>En Recibo los clientes salen cerrados</h1>
+  <p class="lead">Al abrir Recibo solo ves el encabezado de cada cliente. Abres el que quieres revisar. Un enlace <code>?cliente=</code> abre solo ese.</p>
+
+  <div class="grid">
+    <section aria-label="Antes">
+      <h2>Antes</h2>
+      <h3>Recibo</h3>
+      <p class="desc">Todos los clientes venían abiertos, con todas las tarjetas y videos cargados.</p>
+      <div class="stack">
+        <div class="client"><span class="avatar">AL</span><div><strong>Arecibo Lab <span class="badge">AI</span></strong><span class="meta">3 videos</span></div></div>
+        <div class="cards">
+          <article class="card"><div class="video">▷</div><div class="caption">El laboratorio ya abrió.</div></article>
+          <article class="card"><div class="video">▷</div><div class="caption">Nuevo trend de la semana.</div></article>
+        </div>
+        <div class="client"><span class="avatar">FB</span><div><strong>Farmacia Buena Vida</strong><span class="meta">Entrega puntual · 1 video</span></div></div>
+        <div class="cards">
+          <article class="card"><div class="video">▷</div><div class="caption">Pregunta para todas.</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Después · clientes cerrados" id="despues">
+      <h2>Después · v5.123</h2>
+      <h3>Recibo</h3>
+      <p class="desc">Todo cerrado. El encabezado sigue mostrando logo, nombre y cuántos videos hay.</p>
+      <div class="stack" id="cerrados-stack">
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">AL</span><div><strong>Arecibo Lab <span class="badge">AI</span></strong><span class="meta">3 videos</span></div><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">FB</span><div><strong>Farmacia Buena Vida</strong><span class="meta">Entrega puntual · 1 video</span></div><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">YS</span><div><strong>YabushiSushi <span class="badge">AI</span></strong><span class="meta">2 videos</span></div><span class="chev" aria-hidden="true">›</span></button>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid" style="margin-top:20px">
+    <section aria-label="Un cliente abierto" id="abierto">
+      <h2>Un cliente abierto</h2>
+      <div class="stack">
+        <button type="button" class="client" aria-expanded="true"><span class="avatar">AL</span><div><strong>Arecibo Lab <span class="badge">AI</span></strong><span class="meta">3 videos</span></div><span class="chev" aria-hidden="true">⌄</span></button>
+        <div class="cards">
+          <article class="card"><div class="video">▷</div><div class="caption">El laboratorio ya abrió.</div></article>
+          <article class="card"><div class="video">▷</div><div class="caption">Nuevo trend de la semana.</div></article>
+        </div>
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">FB</span><div><strong>Farmacia Buena Vida</strong><span class="meta">Entrega puntual · 1 video</span></div><span class="chev" aria-hidden="true">›</span></button>
+      </div>
+    </section>
+
+    <section aria-label="Vista móvil" id="movil">
+      <h2>Móvil</h2>
+      <div class="mobile stack">
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">AL</span><div><strong>Arecibo Lab <span class="badge">AI</span></strong><span class="meta">3 videos</span></div><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">FB</span><div><strong>Farmacia Buena Vida</strong><span class="meta">Entrega puntual · 1 video</span></div><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="client" aria-expanded="false"><span class="avatar">YS</span><div><strong>YabushiSushi <span class="badge">AI</span></strong><span class="meta">2 videos</span></div><span class="chev" aria-hidden="true">›</span></button>
+      </div>
+      <p class="note">El encabezado es un botón de toda la fila, con área táctil grande. Las tarjetas 9:16 siguen igual al abrir.</p>
+    </section>
+  </div>
+
+  <footer>Vista ilustrativa con clientes de prueba (Arecibo Lab, Farmacia Buena Vida, YabushiSushi). No usa datos vivos ni reproduce videos reales. Deep link: <code>/recibo?cliente=…</code>.</footer>
+</main>
+</body>
+</html>
