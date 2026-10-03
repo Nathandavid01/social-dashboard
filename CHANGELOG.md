@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.123 — 2026-10-03
+
+**En Recibo los clientes salen cerrados; abres solo los que quieres ver.**
+- Al entrar, cada cliente muestra solo el encabezado (logo, nombre, cuántos videos) — las tarjetas no se cargan todavía.
+- Un clic (o Enter/Espacio) abre o cierra ese cliente. Puedes tener varios abiertos a la vez.
+- Al volver a Recibo todo empieza cerrado otra vez. Un enlace `?cliente=` o `#id` abre solo ese cliente.
+- Aprobar, Enviar al cliente, captions y el player 9:16 siguen igual cuando el cliente está abierto.
+
+[Ver el antes y después](/previews/v5.123-recibo-clientes-cerrados.html)
+
+![Recibo con clientes cerrados](/changelog/v5.123-recibo-clientes-cerrados.png)
+
 ## v5.122 — 2026-10-02
 
 **Recibo separa los gráficos y los videos de cada cliente.**

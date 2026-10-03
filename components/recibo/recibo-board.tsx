@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Bot, Loader2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Bot, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
@@ -13,6 +13,7 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { fillReciboCaption } from '@/lib/actions/recibo-captions'
 import { ideaTieneEditadoEntregas } from '@/lib/entregas/enviar-al-cliente'
 import { rangoSemana } from '@/lib/entregas/dias'
+import { reciboDeepLinkClientId } from '@/lib/recibo/open-clients'
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { editedEntregasVideoId, isReciboGraphic } from '@/lib/recibo/preview'
@@ -55,6 +56,7 @@ export function ReciboBoard({
   todayISO,
   publishedTotal = 0,
   publishedByClient = {},
+  initialOpenClientId = null,
 }: {
   ideas: IdeaWithPipeline[]
   aiClients: { id: string; name: string; logo_url?: string | null }[]
@@ -64,12 +66,32 @@ export function ReciboBoard({
   todayISO?: string
   publishedTotal?: number
   publishedByClient?: Record<string, number>
+  initialOpenClientId?: string | null
 }) {
   const sent = new Set(sentIdeaIds)
   const { toast } = useToast()
   const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
   const [filling, setFilling] = useState(false)
   const [fillLabel, setFillLabel] = useState<string | null>(null)
+  const [openClientIds, setOpenClientIds] = useState<Set<string>>(() => {
+    const id = initialOpenClientId?.trim()
+    return id ? new Set([id]) : new Set()
+  })
+
+  useEffect(() => {
+    const id = reciboDeepLinkClientId({ hash: window.location.hash })
+    if (!id) return
+    setOpenClientIds((prev) => (prev.size > 0 ? prev : new Set([id])))
+  }, [])
+
+  function toggleClient(id: string) {
+    setOpenClientIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const filtered = ideas
 
@@ -192,9 +214,18 @@ export function ReciboBoard({
           {actionableIdeas.length > 0 && <EnviarAlCliente ideas={semanaIdeas.length ? semanaIdeas : actionableIdeas} />}
 
           <ul className="space-y-8">
-            {byClient.map(({ client, ideas: clientIdeas }) => (
-              <li key={client.id} className="space-y-4">
-                <div className="flex items-center gap-3 px-1">
+            {byClient.map(({ client, ideas: clientIdeas }) => {
+              const open = openClientIds.has(client.id)
+              const panelId = `recibo-cliente-panel-${client.id}`
+              return (
+              <li key={client.id} id={`recibo-cliente-${client.id}`} className="space-y-4">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-controls={panelId}
+                  onClick={() => toggleClient(client.id)}
+                  className="flex min-h-11 w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-card/60 px-3 py-3 text-left transition hover:bg-muted/40"
+                >
                   <ClientLogo name={client.name} logoUrl={client.logo_url} className="h-11 w-11 ring-2 ring-border" />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -216,14 +247,17 @@ export function ReciboBoard({
                           : `${clientIdeas.length} video${clientIdeas.length === 1 ? '' : 's'}`}
                     </p>
                   </div>
-                </div>
+                  {open
+                    ? <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    : <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />}
+                </button>
 
-                {clientIdeas.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-xs text-muted-foreground">
+                {open && (clientIdeas.length === 0 ? (
+                  <p id={panelId} className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-xs text-muted-foreground">
                     No hay videos editados en el filtro actual.
                   </p>
                 ) : (
-                  <div className="space-y-6">
+                  <div id={panelId} className="space-y-6">
                   {[false, true].map((graphic) => {
                     const sectionIdeas = clientIdeas.filter((idea) => isReciboGraphic(idea) === graphic)
                     if (!sectionIdeas.length) return null
@@ -271,9 +305,10 @@ export function ReciboBoard({
                   </ul></section>
                   })}
                   </div>
-                )}
+                ))}
               </li>
-            ))}
+              )
+            })}
           </ul>
         </>
       )}

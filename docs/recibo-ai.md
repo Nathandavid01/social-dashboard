@@ -2,6 +2,7 @@
 
 ## Abrir
 - Staff: `/recibo` (menú Trabajo → Recibo). Requiere `entregas.read`.
+- Los clientes salen **cerrados** (v5.123). Eric abre los que quiere ver; el estado no se guarda. `?cliente=` / `?client=` / `?c=` o `#id` abre solo ese cliente.
 - Lista los cortes pendientes de clientes con `clients.edit_mode = 'ai'` **y** (v5.113) cualquier corte pendiente que haya
   subido Eric (`content_idea_videos.uploaded_by` en `ERIC_IDS`, `lib/recibo/board-ideas.ts`), aunque el cliente tenga
   editor humano: solo ese corte, el cliente no cambia de modo.
