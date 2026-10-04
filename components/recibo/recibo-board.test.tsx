@@ -111,7 +111,7 @@ describe('ReciboBoard', () => {
     expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
     expect(screen.getByRole('button', { name: 'Enviado' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'Aprobado' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText(/Márcalo aprobado para publicarlo/i)).toBeInTheDocument()
+    expect(screen.getByText(/Márcalo aprobado para programarlo/i)).toBeInTheDocument()
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
@@ -436,5 +436,6 @@ it('separates a client graphic from videos and renders its image with caption', 
   await waitFor(() => expect(screen.getByRole('img', { name: 'Encías' })).toBeTruthy())
   const card = screen.getByTestId('recibo-idea-graphic-1')
   expect(card.querySelector('video')).toBeNull()
-  expect(card.textContent).not.toContain('Publicar en Metricool')
+  expect(card.textContent).not.toContain('Programar en Metricool')
+  expect(card.textContent).not.toContain('Programar para')
 })

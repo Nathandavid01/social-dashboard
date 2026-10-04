@@ -420,6 +420,7 @@ export function ReciboBoard({
                                       ideaId={idea.id}
                                       approved={approved}
                                       todayISO={todayISO ?? ''}
+                                      spaceDateISO={space.dateISO ?? null}
                                       cadence={cadence}
                                     />
                                   )}

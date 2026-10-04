@@ -4,13 +4,17 @@ import { schedulePoolIdea } from '@/lib/actions/client-pool'
 import { createClient } from '@/lib/supabase/server'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
-import { nextCadenceSlot } from '@/lib/recibo/cadence-slot'
+import { reciboScheduleTarget } from '@/lib/recibo/cadence-slot'
 
 /**
- * Schedule this Recibo video in Metricool on the client's next cadence day and hour.
- * Does not pick a date of its own when the client has no cadence.
+ * Schedule this Recibo video in Metricool as a draft on the space date
+ * (or the next cadence day when the card has no space date).
+ * Reuses schedulePoolIdea — does not publish immediately.
  */
-export async function publishReciboOnCadence(ideaId: string): Promise<{ ok?: true; label?: string; error?: string }> {
+export async function publishReciboOnCadence(
+  ideaId: string,
+  spaceDateISO?: string | null,
+): Promise<{ ok?: true; label?: string; error?: string; reason?: 'pasado' }> {
   if (!ideaId) return { error: 'Falta el video' }
   const supabase = await createClient()
   const { data: idea, error } = await supabase
@@ -25,13 +29,21 @@ export async function publishReciboOnCadence(ideaId: string): Promise<{ ok?: tru
     posting_time?: string | null
     posting_schedule?: Record<string, string> | null
   } | null
-  const slot = nextCadenceSlot({
+  const todayISO = todayISOInTimeZone(POSTING_TZ)
+  const slot = reciboScheduleTarget({
+    spaceDateISO,
     postingDays: client?.posting_days,
     postingTime: client?.posting_time,
     postingSchedule: client?.posting_schedule,
-    todayISO: todayISOInTimeZone(POSTING_TZ),
+    todayISO,
   })
   if (!slot.ok) {
+    if (slot.reason === 'pasado') {
+      return {
+        error: `La fecha ${slot.label ?? spaceDateISO} ya pasó. Elige otra para programar.`,
+        reason: 'pasado',
+      }
+    }
     return {
       error: slot.reason === 'sin-hora'
         ? 'Este cliente tiene días, pero no tiene hora de publicación.'

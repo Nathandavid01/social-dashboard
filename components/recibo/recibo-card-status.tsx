@@ -7,7 +7,7 @@ import { ToastAction } from '@/components/ui/toast'
 import { setManualPostedStatus, setStaffClientApproval, type ManualPostedStatus } from '@/lib/actions/recibo'
 import { crearEnlaceCliente } from '@/lib/actions/entregas-client-review'
 import { publishReciboOnCadence } from '@/lib/actions/recibo-publish'
-import { nextCadenceSlot, type CadenceSlot } from '@/lib/recibo/cadence-slot'
+import { nextCadenceSlot, reciboScheduleTarget, type CadenceSlot } from '@/lib/recibo/cadence-slot'
 import { cn } from '@/lib/utils'
 
 export function ReciboStatusMarks({
@@ -135,6 +135,8 @@ export function ReciboPublishButton({
   approved,
   cadence,
   todayISO,
+  spaceDateISO = null,
+  nowMs,
 }: {
   ideaId: string
   approved: boolean
@@ -145,52 +147,91 @@ export function ReciboPublishButton({
     metricool?: boolean
   }
   todayISO: string
+  spaceDateISO?: string | null
+  nowMs?: number
 }) {
   const { toast } = useToast()
   const router = useRouter()
   const [pending, start] = useTransition()
-  const slot: CadenceSlot = nextCadenceSlot({
+  const [pickedDate, setPickedDate] = useState('')
+  const [scheduledLabel, setScheduledLabel] = useState<string | null>(null)
+  const target: CadenceSlot = reciboScheduleTarget({
+    spaceDateISO: pickedDate || spaceDateISO,
+    postingDays: cadence.postingDays,
+    postingTime: cadence.postingTime,
+    postingSchedule: cadence.postingSchedule,
+    todayISO,
+    nowMs,
+  })
+  const nextSlot = nextCadenceSlot({
     postingDays: cadence.postingDays,
     postingTime: cadence.postingTime,
     postingSchedule: cadence.postingSchedule,
     todayISO,
   })
+  const past = target.ok === false && target.reason === 'pasado'
 
-  let label = 'Publicar en Metricool'
   let hint = ''
-  if (!approved) hint = 'Márcalo aprobado para publicarlo.'
+  if (scheduledLabel) hint = ''
+  else if (!approved) hint = 'Márcalo aprobado para programarlo.'
   else if (!cadence.metricool) hint = 'A este cliente le falta Metricool.'
-  else if (!slot.ok && slot.reason === 'sin-dias') hint = 'Agrega los días de publicación en la cadencia del cliente.'
-  else if (!slot.ok) hint = 'Agrega la hora de publicación en la cadencia del cliente.'
-  else hint = slot.label
+  else if (past) hint = `El espacio era ${target.label ?? spaceDateISO}. Esa fecha ya pasó; no se programa en el pasado.`
+  else if (!target.ok && target.reason === 'sin-dias') hint = 'Agrega los días de publicación en la cadencia del cliente.'
+  else if (!target.ok) hint = 'Agrega la hora de publicación en la cadencia del cliente.'
 
-  if (slot.ok && approved && cadence.metricool) label = `Publicar en Metricool · ${slot.label}`
+  const dateToSend = target.ok ? target.dateISO : null
+  const canSchedule = Boolean(approved && cadence.metricool && target.ok && dateToSend)
+  const label = scheduledLabel
+    ? `Programado ${scheduledLabel}`
+    : target.ok
+      ? `Programar para ${target.label}`
+      : 'Programar en Metricool'
 
   function publish() {
-    if (!approved || !cadence.metricool || !slot.ok) return
+    if (!canSchedule || !dateToSend) return
     start(async () => {
-      const res = await publishReciboOnCadence(ideaId)
-      if (res.error) toast({ title: 'No se publicó', description: res.error, variant: 'destructive' })
+      const res = await publishReciboOnCadence(ideaId, dateToSend)
+      if (res.error) toast({ title: 'No se programó', description: res.error, variant: 'destructive' })
       else {
-        toast({ title: 'Quedó en Metricool', description: res.label })
+        setScheduledLabel(res.label ?? (target.ok ? target.label : dateToSend))
+        toast({ title: `Programado ${res.label ?? dateToSend}`, description: 'Quedó como borrador en Metricool. No se publica solo.' })
         router.refresh()
       }
     })
   }
 
-  const blocked = !approved || !cadence.metricool || !slot.ok
-
   return (
     <div className="px-3 pb-3">
+      {past ? (
+        <label className="mb-2 block text-[11px] text-amber-200">
+          Nueva fecha
+          <input
+            type="date"
+            min={todayISO}
+            value={pickedDate}
+            onChange={(event) => setPickedDate(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-amber-500/40 bg-black/40 px-2 py-1.5 text-xs text-foreground"
+          />
+        </label>
+      ) : null}
+      {past && nextSlot.ok ? (
+        <button
+          type="button"
+          onClick={() => setPickedDate(nextSlot.dateISO)}
+          className="mb-2 text-left text-[11px] font-medium text-violet-300"
+        >
+          Usar próximo de cadencia · {nextSlot.label}
+        </button>
+      ) : null}
       <button
         type="button"
-        disabled={pending || blocked}
+        disabled={pending || !canSchedule || Boolean(scheduledLabel)}
         onClick={publish}
         className="w-full rounded-xl bg-violet-500/15 px-3 py-2 text-left text-xs font-semibold text-violet-100 disabled:opacity-70"
       >
-        {pending ? 'Publicando…' : label}
+        {pending ? 'Programando…' : label}
       </button>
-      {blocked && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{hint}</p>}
+      {hint ? <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{hint}</p> : null}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 
 const setManualPostedStatus = vi.fn()
+const publishReciboOnCadence = vi.fn()
 const refresh = vi.fn()
 const toast = vi.fn((..._a: unknown[]) => ({ dismiss: vi.fn() }))
 
@@ -12,11 +13,13 @@ vi.mock('@/lib/actions/recibo', () => ({
   setStaffClientApproval: vi.fn(),
 }))
 vi.mock('@/lib/actions/entregas-client-review', () => ({ crearEnlaceCliente: vi.fn() }))
-vi.mock('@/lib/actions/recibo-publish', () => ({ publishReciboOnCadence: vi.fn() }))
+vi.mock('@/lib/actions/recibo-publish', () => ({
+  publishReciboOnCadence: (...a: unknown[]) => publishReciboOnCadence(...a),
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 
-import { ReciboStatusMarks } from './recibo-card-status'
+import { ReciboPublishButton, ReciboStatusMarks } from './recibo-card-status'
 
 function renderMarks(postedStatus: 'not_posted' | null = null) {
   render(<ReciboStatusMarks ideaId="i1" clientId="c1" approved={false} sent={false} postedStatus={postedStatus} />)
@@ -90,5 +93,80 @@ describe('ReciboStatusMarks — Publicado', () => {
     })))
     expect(refresh).not.toHaveBeenCalled()
     expect(mark).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+const cadence = {
+  postingDays: [3, 5],
+  postingTime: '18:00',
+  postingSchedule: null as Record<string, string> | null,
+  metricool: true,
+}
+
+describe('ReciboPublishButton — programar el espacio', () => {
+  it('dice Programar para la fecha del espacio', () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /Programar para/i })).toHaveTextContent(/miércoles 7 de octubre/i)
+  })
+
+  it('al confirmar llama a schedule con esa fecha y queda Programado', async () => {
+    publishReciboOnCadence.mockResolvedValue({ ok: true, label: 'miércoles 7 de octubre, 6:00 p.m.' })
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: /Programar para/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', '2026-10-07'))
+    expect(await screen.findByText(/Programado miércoles 7 de octubre/i)).toBeInTheDocument()
+  })
+
+  it('si el espacio ya pasó, avisa y no programa hasta que elijan otra fecha', async () => {
+    publishReciboOnCadence.mockResolvedValue({ ok: true, label: 'viernes 9 de octubre, 6:00 p.m.' })
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-04"
+        spaceDateISO="2026-09-28"
+        cadence={cadence}
+      />,
+    )
+    expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Programar/i })).toBeDisabled()
+    expect(publishReciboOnCadence).not.toHaveBeenCalled()
+    const field = screen.getByLabelText('Nueva fecha')
+    await userEvent.clear(field)
+    await userEvent.type(field, '2026-10-09')
+    await userEvent.click(screen.getByRole('button', { name: /Programar para/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', '2026-10-09'))
+  })
+
+  it('si el espacio es hoy y la hora ya pasó, avisa y pide otra fecha', () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-04"
+        nowMs={Date.parse('2026-10-04T20:00:00-04:00')}
+        cadence={{ ...cadence, postingDays: [0], postingTime: '09:00' }}
+      />,
+    )
+    expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Programar/i })).toBeDisabled()
+    expect(publishReciboOnCadence).not.toHaveBeenCalled()
   })
 })

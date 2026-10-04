@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.124 — 2026-10-04
+
+**En Recibo, Publicar programa el video en la fecha de ese espacio, no lo suelta ya.**
+- El botón dice **Programar para** la fecha (y hora de cadencia) del espacio. Al confirmar queda **Programado** esa fecha, como borrador en Metricool.
+- Si el espacio no tiene fecha, se usa el próximo hueco de cadencia, como antes. No se inventa una fecha.
+- Si esa fecha (o la hora de hoy) ya pasó, avisa y pide otra. No se programa en el pasado.
+
+[Ver el preview](/previews/v5.124-recibo-programar.html)
+
+![Programar Recibo en la fecha del espacio](/changelog/v5.124-recibo-programar.png)
+
 ## v5.123 — 2026-10-04
 
 **Recibo muestra los espacios de cadencia de cada cliente, no un listado suelto.**
