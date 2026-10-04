@@ -23,6 +23,7 @@ import {
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { formatCadenceDaysEs } from '@/lib/utils/client-cadence'
+import { RECIBO_HELD_CLIENT_IDS } from '@/lib/recibo/board-ideas'
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import { coverUrlForIdea } from '@/lib/pipeline/editor-history'
 import { editedEntregasVideoId, isReciboGraphic } from '@/lib/recibo/preview'
@@ -145,6 +146,7 @@ export function ReciboBoard({
     const known = new Map(aiClients.map((client) => [client.id, client]))
     const map = new Map<string, { client: { id: string; name: string; logo_url?: string | null; ai: boolean }; ideas: IdeaWithPipeline[] }>()
     for (const client of aiClients) {
+      if (RECIBO_HELD_CLIENT_IDS.has(client.id)) continue
       map.set(client.id, {
         client: {
           id: client.id,
@@ -288,6 +290,7 @@ export function ReciboBoard({
                 ideas: videoIdeas,
                 occupancyIdeas: occupancyForClient,
                 week,
+                padEmpty: client.ai,
               })
               const clientMonths = reciboMonthlyUploadCounts(
                 occupancy.filter((idea) => idea.client_id === client.id),
@@ -314,7 +317,7 @@ export function ReciboBoard({
                       <p className="text-xs text-muted-foreground" data-testid={`recibo-client-counts-${client.id}`}>
                         {showUploadCounts
                           ? `${formatUploadCounts(reciboUploadCounts(clientIdeas))} · Publicados ${publishedByClient[client.id] ?? 0}`
-                          : postingDays.length
+                          : client.ai && postingDays.length
                             ? `${postingDays.length} espacios esta semana · ${formatCadenceDaysEs(postingDays)} · ${filled} ocupados · ${pending} pendientes`
                             : clientIdeas.length === 0
                               ? 'Sin cadencia · sin videos'

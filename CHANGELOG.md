@@ -11,6 +11,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Los videos que se van subiendo (corte, crudo o subida del cliente) llenan esos espacios con portada y caption visible.
 - Verde = aprobado o ya publicado/programado en Metricool. Ámbar = todavía sin aprobar.
 - Contador de subidas por mes, con el mes actual destacado y los meses anteriores solo si hay datos. El número sale de los mismos videos que llenan los espacios.
+- Los huecos vacíos son solo de clientes AI activos. Aníbal, Arasibo, VSS y Primer Round no ganan columna. Un corte de Eric en un cliente humano no abre el cupo semanal de ese cliente.
 
 [Ver el preview](/previews/v5.123-recibo-espacios.html)
 

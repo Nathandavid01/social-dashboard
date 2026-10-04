@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyEntregasReviewStatus,
   buildReciboCadenceSpaces,
   occupyingVideo,
   reciboMonthlyUploadCounts,
   reciboOccupancyIdeas,
   reciboSpaceTone,
+  reciboVisibleAiClients,
+  reviewStatusByIdea,
   type ReciboSpaceIdea,
 } from './cadence-spaces'
 import { ERIC_IDS } from './upload-counts'
@@ -168,6 +171,18 @@ describe('buildReciboCadenceSpaces', () => {
     expect(spaces[0]).toMatchObject({ kind: 'occupied', idea: { id: 'cola' } })
   })
 
+  it('sin padEmpty no inventa huecos: un corte de Eric en cliente humano no abre cupo semanal', () => {
+    const spaces = buildReciboCadenceSpaces({
+      postingDays: [1, 3, 5],
+      ideas: [idea({ id: 'eric-cut', client_id: 'human' })],
+      occupancyIdeas: [idea({ id: 'eric-cut', client_id: 'human' })],
+      week: WEEK,
+      padEmpty: false,
+    })
+    expect(spaces).toHaveLength(1)
+    expect(spaces[0]).toMatchObject({ kind: 'occupied', idea: { id: 'eric-cut' } })
+  })
+
   it('un raw ocupa espacio aunque todavía no haya corte', () => {
     const raw = idea({ id: 'crudo', videos: [video({ kind: 'raw', id: 'r1' })] })
     const spaces = buildReciboCadenceSpaces({
@@ -220,6 +235,28 @@ describe('reciboMonthlyUploadCounts', () => {
     const counts = reciboMonthlyUploadCounts([idea({ videos: [] })], TODAY)
     expect(counts.total).toBe(0)
     expect(counts.months).toEqual([{ key: '2026-10', count: 0, current: true, label: expect.stringMatching(/octubre/i) }])
+  })
+})
+
+describe('reciboVisibleAiClients', () => {
+  it('saca de la columna vacía a Aníbal, Arasibo, VSS y Primer Round', () => {
+    const rows = [
+      { id: '165b8416-5316-43e1-b6d6-f23caaa57b0c', name: 'Aníbal' },
+      { id: 'ai', name: 'Arecibo Lab' },
+    ]
+    expect(reciboVisibleAiClients(rows).map((row) => row.id)).toEqual(['ai'])
+  })
+})
+
+describe('applyEntregasReviewStatus', () => {
+  it('pinta el voto de /aprobacion que vive en entregas_client_review_items, no en content_ideas', () => {
+    const byIdea = reviewStatusByIdea([
+      { idea_id: 'i1', status: 'approved' },
+      { idea_id: 'i1', status: 'pending' },
+    ])
+    const [hydrated] = applyEntregasReviewStatus([idea()], byIdea)
+    expect(hydrated.entregas_review_status).toBe('approved')
+    expect(reciboSpaceTone(hydrated)).toBe('approved')
   })
 })
 

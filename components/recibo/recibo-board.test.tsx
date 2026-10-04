@@ -363,6 +363,56 @@ describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
     expect(screen.queryByRole('button', { name: /publicar en metricool/i })).not.toBeInTheDocument()
   })
 
+  it('un cliente held no gana columna vacía aunque esté en la lista AI', () => {
+    render(
+      <ReciboBoard
+        aiClients={[
+          { id: '165b8416-5316-43e1-b6d6-f23caaa57b0c', name: 'Aníbal Fuentes PNP', logo_url: null },
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+        ]}
+        ideas={[]}
+        todayISO="2026-10-04"
+        cadenceByClient={{
+          '165b8416-5316-43e1-b6d6-f23caaa57b0c': { postingDays: [1, 3, 5] },
+          c1: { postingDays: [1] },
+        }}
+      />,
+    )
+    expect(screen.queryByText('Aníbal Fuentes PNP')).not.toBeInTheDocument()
+    expect(screen.getByText('Arecibo Lab')).toBeInTheDocument()
+  })
+
+  it('un corte de Eric en cliente humano no abre huecos de cadencia', () => {
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[]}
+        ideas={[farmacia]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ farmacia: { postingDays: [1, 3, 5] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-space-empty')).not.toBeInTheDocument()
+  })
+
+  it('un voto de /aprobacion pinta el espacio en verde', () => {
+    const voted = { ...editedIdea, id: 'voted', entregas_review_status: 'approved', videos: [{ ...editedIdea.videos[0], id: 'vv' }] }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[voted]}
+        todayISO={publishThisWeek}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-voted')).toHaveAttribute('data-tone', 'approved')
+  })
+
   it('muestra clientes AI sin video para que se vean los espacios pendientes', () => {
     render(
       <ReciboBoard

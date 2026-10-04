@@ -2,7 +2,12 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
-import { reciboOccupancyIdeas } from '@/lib/recibo/cadence-spaces'
+import {
+  applyEntregasReviewStatus,
+  reciboOccupancyIdeas,
+  reciboVisibleAiClients,
+  reviewStatusByIdea,
+} from '@/lib/recibo/cadence-spaces'
 import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
@@ -37,19 +42,27 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const aiIds = aiClients.map((client) => client.id)
+  const visibleAiClients = reciboVisibleAiClients(aiClients)
+  const aiIds = visibleAiClients.map((client) => client.id)
   const occupancyIdeas = await withUploaderNames(supabase, reciboOccupancyIdeas(ideas, aiIds))
   const boardIdeas = reciboBoardIdeas(occupancyIdeas, aiIds)
   const shownClientIds = [...new Set([...aiIds, ...occupancyIdeas.map((idea) => idea.client_id)])]
-  const ideaIds = boardIdeas.map((idea) => idea.id)
-  const [{ data: sentRows }, { data: cadenceRows }] = await Promise.all([
-    ideaIds.length
-      ? supabase.from('entregas_client_review_items').select('idea_id').in('idea_id', ideaIds)
-      : Promise.resolve({ data: [] as { idea_id: string }[] }),
+  const occupancyIds = occupancyIdeas.map((idea) => idea.id)
+  const [{ data: reviewRows }, { data: cadenceRows }] = await Promise.all([
+    occupancyIds.length
+      ? supabase
+          .from('entregas_client_review_items')
+          .select('idea_id, status, decided_at')
+          .in('idea_id', occupancyIds)
+          .order('decided_at', { ascending: false })
+      : Promise.resolve({ data: [] as { idea_id: string; status: string | null; decided_at: string | null }[] }),
     shownClientIds.length
       ? supabase.from('clients').select('id, posting_days, posting_time, posting_schedule, metricool_blog_id').in('id', shownClientIds)
       : Promise.resolve({ data: [] as { id: string; posting_days: number[] | null; posting_time: string | null; posting_schedule: Record<string, string> | null; metricool_blog_id: string | null }[] }),
   ])
+  const reviewByIdea = reviewStatusByIdea(reviewRows ?? [])
+  const occupancyWithReview = applyEntregasReviewStatus(occupancyIdeas, reviewByIdea)
+  const boardWithReview = applyEntregasReviewStatus(boardIdeas, reviewByIdea)
   const published = await loadPublishedVideoCounts(aiClients)
   const cadenceByClient = Object.fromEntries((cadenceRows ?? []).map((client) => [client.id, {
     postingDays: client.posting_days,
@@ -70,10 +83,10 @@ export default async function ReciboPage() {
     <>
       <ReciboPublishedSync />
       <ReciboBoard
-        ideas={boardIdeas}
-        occupancyIdeas={occupancyIdeas}
-        aiClients={aiClients}
-        sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
+        ideas={boardWithReview}
+        occupancyIdeas={occupancyWithReview}
+        aiClients={visibleAiClients}
+        sentIdeaIds={(reviewRows ?? []).map((row) => row.idea_id)}
         cadenceByClient={cadenceByClient}
         todayISO={todayISOInTimeZone(POSTING_TZ)}
         publishedTotal={published.total}

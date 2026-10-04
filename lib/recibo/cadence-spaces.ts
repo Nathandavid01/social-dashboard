@@ -78,6 +78,34 @@ export function reciboOccupancyIdeas<T extends ReciboSpaceIdea>(
   return ideas.filter((idea) => inReciboScope(idea, ids) && hasUsableUpload(idea))
 }
 
+/** Held clients stay off Recibo, including empty cadence columns. */
+export function reciboVisibleAiClients<T extends { id: string }>(clients: T[]): T[] {
+  return clients.filter((client) => !RECIBO_HELD_CLIENT_IDS.has(client.id))
+}
+
+/** First row per idea wins — caller must order decided_at desc. */
+export function reviewStatusByIdea(
+  rows: Array<{ idea_id?: string | null; status?: string | null }>,
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const row of rows) {
+    if (!row.idea_id || row.idea_id in out || !row.status) continue
+    out[row.idea_id] = row.status
+  }
+  return out
+}
+
+/** `/aprobacion` votes live on entregas_client_review_items, not content_ideas. */
+export function applyEntregasReviewStatus<T extends ReciboSpaceIdea>(
+  ideas: T[],
+  reviewByIdea: Record<string, string>,
+): T[] {
+  return ideas.map((idea) => ({
+    ...idea,
+    entregas_review_status: idea.entregas_review_status ?? reviewByIdea[idea.id] ?? null,
+  }))
+}
+
 export function reciboSpaceTone(idea: PoolStateInput): ReciboSpaceTone {
   if (isClientApproved(idea) || isPublishedIdea(idea) || isAgendadoIdea(idea)) return 'approved'
   return 'pending'
@@ -107,11 +135,13 @@ export function buildReciboCadenceSpaces<T extends ReciboSpaceIdea>(input: {
   ideas: T[]
   occupancyIdeas?: T[]
   week: { desde: string; hasta: string }
+  /** Empty cadence padding is only for AI clients. Eric cuts on a human client stay as cards. */
+  padEmpty?: boolean
 }): ReciboCadenceSpace<T>[] {
   const queue = input.ideas.filter((idea) => stillOnQueue(idea) && hasUsableUpload(idea))
   const occupancy = input.occupancyIdeas ?? input.ideas
   const cupoTaken = occupancy.filter((idea) => publishedThisWeek(idea, input.week)).length
-  const dates = weekCadenceDates(input.postingDays, input.week)
+  const dates = input.padEmpty === false ? [] : weekCadenceDates(input.postingDays, input.week)
   const slotCount = dates.length
 
   const spaces: ReciboCadenceSpace<T>[] = []
