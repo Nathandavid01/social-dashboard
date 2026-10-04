@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
+import { reciboOccupancyIdeas } from '@/lib/recibo/cadence-spaces'
 import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
@@ -36,9 +37,10 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const boardIdeas = await withUploaderNames(supabase, reciboBoardIdeas(ideas, aiClients.map((client) => client.id)))
-  const shownClientIds = [...new Set(boardIdeas.map((idea) => idea.client_id))]
-  const boardClients = aiClients.filter((client) => shownClientIds.includes(client.id))
+  const aiIds = aiClients.map((client) => client.id)
+  const occupancyIdeas = await withUploaderNames(supabase, reciboOccupancyIdeas(ideas, aiIds))
+  const boardIdeas = reciboBoardIdeas(occupancyIdeas, aiIds)
+  const shownClientIds = [...new Set([...aiIds, ...occupancyIdeas.map((idea) => idea.client_id)])]
   const ideaIds = boardIdeas.map((idea) => idea.id)
   const [{ data: sentRows }, { data: cadenceRows }] = await Promise.all([
     ideaIds.length
@@ -69,7 +71,8 @@ export default async function ReciboPage() {
       <ReciboPublishedSync />
       <ReciboBoard
         ideas={boardIdeas}
-        aiClients={boardClients}
+        occupancyIdeas={occupancyIdeas}
+        aiClients={aiClients}
         sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
         cadenceByClient={cadenceByClient}
         todayISO={todayISOInTimeZone(POSTING_TZ)}

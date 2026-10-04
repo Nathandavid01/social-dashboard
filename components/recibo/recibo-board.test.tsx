@@ -122,14 +122,18 @@ describe('ReciboBoard', () => {
     })
   })
 
-  it('muestra Sin video editado cuando no hay archivo', () => {
+  it('un idea sin archivo no ocupa espacio; con cadencia se ve el hueco pendiente', () => {
     render(
       <ReciboBoard
         aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
         ideas={[bareIdea]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5] } }}
       />,
     )
-    expect(screen.getByTestId('recibo-video-empty')).toHaveTextContent('Sin video editado')
+    expect(screen.queryByTestId('recibo-idea-i2')).not.toBeInTheDocument()
+    expect(screen.getAllByTestId('recibo-space-empty').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Pendiente').length).toBeGreaterThan(0)
   })
 
   it('muestra el caption y lo guarda al editarlo', async () => {
@@ -277,6 +281,99 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
   it('cada tarjeta trae la marca Publicado junto a Enviado y Aprobado', () => {
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
     expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
+  it('llena espacios con videos y deja huecos pendientes según la cadencia', () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getAllByTestId('recibo-space-empty').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent(/espacios esta semana/i)
+  })
+
+  it('marca en verde un espacio aprobado y en ámbar uno pendiente', () => {
+    const approved = {
+      ...editedIdea,
+      id: 'ok',
+      staff_client_approval: 'approved',
+      videos: [{ ...editedIdea.videos[0], id: 'v-ok' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, approved]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getByTestId('recibo-idea-ok')).toHaveAttribute('data-tone', 'approved')
+  })
+
+  it('cuenta por mes las mismas subidas que llenan los espacios, con el mes actual destacado', () => {
+    const older = {
+      ...editedIdea,
+      id: 'old',
+      videos: [{ ...editedIdea.videos[0], id: 'v-old', uploaded_at: '2026-09-04T10:00:00Z' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, older]}
+        occupancyIdeas={[editedIdea, older]}
+        todayISO="2026-10-04"
+      />,
+    )
+    const monthly = screen.getByTestId('recibo-monthly-counts')
+    expect(monthly.textContent).toMatch(/octubre/i)
+    expect(monthly.textContent).toMatch(/septiembre/i)
+    expect(monthly.textContent).toMatch(/Total 2/)
+    expect(monthly.querySelector('[data-current="true"]')?.textContent).toMatch(/octubre/i)
+    expect(screen.getByTestId('recibo-client-months-c1').textContent).toMatch(/Total 2/)
+  })
+
+  it('un crudo de cliente AI ocupa espacio sin aprobar ni borrar', () => {
+    const raw = {
+      ...editedIdea,
+      id: 'raw1',
+      generated_caption: '',
+      videos: [{ ...editedIdea.videos[0], id: 'rawv', kind: 'raw', drive_thumb_url: 'https://img.example/raw.jpg' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        occupancyIdeas={[raw]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-raw1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getByRole('img', { name: /portada/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Aprobado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /borrar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /publicar en metricool/i })).not.toBeInTheDocument()
+  })
+
+  it('muestra clientes AI sin video para que se vean los espacios pendientes', () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        todayISO="2026-10-04"
+        cadenceByClient={{ c1: { postingDays: [1, 4] } }}
+      />,
+    )
+    expect(screen.getByText('Arecibo Lab')).toBeInTheDocument()
+    expect(screen.getAllByTestId('recibo-space-empty')).toHaveLength(2)
   })
 })
 
