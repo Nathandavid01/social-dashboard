@@ -4,6 +4,41 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.125 — 2026-10-05
+
+**Si no te gusta el video después de programarlo en Recibo, puedes cambiar la fecha o cancelar.**
+- En un espacio ya programado aparecen **Cambiar fecha** y **Cancelar programación** (con confirmación).
+- Cambiar fecha mueve el mismo post en Metricool a otra fecha futura. No se programa en el pasado.
+- Cancelar quita el post agendado de Metricool y el espacio vuelve a Recibo para programarlo otra vez. Si Metricool no deja borrar, el post queda como borrador para revisión.
+
+[Ver el preview](/previews/v5.125-recibo-cambiar-cancelar.html)
+
+![Cambiar fecha o cancelar en Recibo](/changelog/v5.125-recibo-cambiar-cancelar.png)
+
+## v5.124 — 2026-10-04
+
+**En Recibo, Publicar programa el video en la fecha de ese espacio, no lo suelta ya.**
+- El botón dice **Programar para** la fecha (y hora de cadencia) del espacio. Al confirmar queda **Programado** esa fecha, como borrador en Metricool.
+- Si el espacio no tiene fecha, se usa el próximo hueco de cadencia, como antes. No se inventa una fecha.
+- Si esa fecha (o la hora de hoy) ya pasó, avisa y pide otra. No se programa en el pasado.
+
+[Ver el preview](/previews/v5.124-recibo-programar.html)
+
+![Programar Recibo en la fecha del espacio](/changelog/v5.124-recibo-programar.png)
+
+## v5.123 — 2026-10-04
+
+**Recibo muestra los espacios de cadencia de cada cliente, no un listado suelto.**
+- Cada cliente tiene N espacios según sus días de publicación (cadencia). Los huecos vacíos se ven como pendientes.
+- Los videos que se van subiendo (corte, crudo o subida del cliente) llenan esos espacios con portada y caption visible.
+- Verde = aprobado o ya publicado/programado en Metricool. Ámbar = todavía sin aprobar.
+- Contador de subidas por mes, con el mes actual destacado y los meses anteriores solo si hay datos. El número sale de los mismos videos que llenan los espacios.
+- Los huecos vacíos son solo de clientes AI activos. Aníbal, Arasibo, VSS y Primer Round no ganan columna. Un corte de Eric en un cliente humano no abre el cupo semanal de ese cliente.
+
+[Ver el preview](/previews/v5.123-recibo-espacios.html)
+
+![Recibo por espacios de cadencia](/changelog/v5.123-recibo-espacios.png)
+
 ## v5.122 — 2026-10-02
 
 **Recibo separa los gráficos y los videos de cada cliente.**

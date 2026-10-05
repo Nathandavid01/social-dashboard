@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.125 — Cambiar fecha o cancelar en Recibo</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --ok:#34d399; --amber:#fbbf24; --violet:#c4b5fd; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:980px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.45; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    @media (max-width:700px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+    .card.ok { border-color:rgba(52,211,153,.7); box-shadow:0 0 0 1px rgba(52,211,153,.25); }
+    .card.sch { border-color:rgba(167,139,250,.75); box-shadow:0 0 0 1px rgba(139,92,246,.35); }
+    .card.wait { border-color:rgba(251,191,36,.7); box-shadow:0 0 0 1px rgba(251,191,36,.25); }
+    .phone { aspect-ratio:9/16; max-height:180px; margin:10px auto 0; width:70%; border-radius:12px; background:linear-gradient(160deg,#2a2316,#050505); display:flex; align-items:flex-end; justify-content:center; padding:8px; font-size:10px; color:#e7e5e4; }
+    .caption { font-size:12px; line-height:1.4; padding:10px 12px 6px; flex:1; }
+    .btn { margin:0 12px 8px; width:calc(100% - 24px); border:0; border-radius:12px; background:rgba(139,92,246,.18); color:#ede9fe; font-size:12px; font-weight:700; padding:10px 12px; text-align:left; }
+    .btn.ghost { background:rgba(255,255,255,.06); color:#a1a1aa; font-weight:600; margin-bottom:12px; }
+    .status { margin:0 12px 6px; font-size:12px; font-weight:700; color:#ede9fe; }
+    .warn { margin:0 12px 10px; padding:8px; border-radius:10px; border:1px solid rgba(251,191,36,.4); background:rgba(251,191,36,.1); font-size:11px; color:#fde68a; }
+    .warn button { margin-top:6px; margin-right:6px; border:0; border-radius:8px; padding:5px 8px; font-size:11px; font-weight:700; background:rgba(251,191,36,.25); color:#fff7ed; }
+    .label { font-size:10px; color:var(--gold); letter-spacing:.04em; text-transform:uppercase; padding:10px 12px 0; }
+    h2 { font-size:12px; color:var(--gold); letter-spacing:.04em; text-transform:uppercase; margin:28px 0 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recibo · si no te gusta el video ya programado</h1>
+    <p class="sub">El espacio programado se queda visible. Puedes mover la fecha del mismo post en Metricool o cancelar y devolver el espacio.</p>
+
+    <div class="grid">
+      <article class="card sch">
+        <p class="label">Programado</p>
+        <div class="phone">Portada · laboratorio</div>
+        <p class="caption">El laboratorio ya abrió en Arecibo. Agenda tu cita esta semana.</p>
+        <p class="status">Programado miércoles 7 de octubre, 6:00 p.m.</p>
+        <button class="btn" type="button">Cambiar fecha</button>
+        <button class="btn ghost" type="button">Cancelar programación</button>
+      </article>
+      <article class="card sch">
+        <p class="label">Cancelar · confirmación</p>
+        <div class="phone">Portada · toma de muestra</div>
+        <p class="caption">Antes de una toma de muestra, hidrátate y llega 10 minutos antes.</p>
+        <p class="status">Programado viernes 9 de octubre, 6:00 p.m.</p>
+        <button class="btn" type="button">Cambiar fecha</button>
+        <div class="warn">¿Quitar este video de Metricool y devolver el espacio?<br /><button type="button">Sí, cancelar</button><button type="button">No</button></div>
+      </article>
+      <article class="card wait">
+        <p class="label">Después de cancelar</p>
+        <div class="phone">Portada · fila de la mañana</div>
+        <p class="caption">Evita la fila de la mañana. Te recibimos en el nuevo local.</p>
+        <button class="btn" type="button">Programar para lunes 5 de octubre, 6:00 p.m.</button>
+      </article>
+    </div>
+
+    <h2>Antes</h2>
+    <p class="sub">Al programar, el video desaparecía de Recibo. No había forma de cambiar la fecha ni de cancelar desde el dashboard. El id de Metricool sí se guardaba; el Panel podía reprogramar, Recibo no.</p>
+  </div>
+</body>
+</html>

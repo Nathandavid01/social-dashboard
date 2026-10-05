@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.123 — Recibo por espacios de cadencia</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --ok:#34d399; --amber:#fbbf24; --violet:#c4b5fd; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:980px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.45; }
+    .months { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 22px; }
+    .pill { font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; background:#1a1a1a; color:var(--muted); }
+    .pill.now { background:rgba(139,92,246,.22); color:#ede9fe; outline:1px solid rgba(167,139,250,.5); }
+    .client { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-weight:600; }
+    .logo { width:34px; height:34px; border-radius:50%; background:var(--gold); color:#111; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; }
+    .ai { font-size:10px; font-weight:700; color:var(--violet); background:rgba(139,92,246,.2); padding:2px 8px; border-radius:999px; }
+    .meta { font-size:12px; color:var(--muted); margin:0 0 12px; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    @media (max-width:700px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+    .card.ok { border-color:rgba(52,211,153,.7); box-shadow:0 0 0 1px rgba(52,211,153,.25); }
+    .card.wait { border-color:rgba(251,191,36,.7); box-shadow:0 0 0 1px rgba(251,191,36,.25); }
+    .card.empty { border-style:dashed; min-height:280px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--muted); padding:16px; }
+    .phone { aspect-ratio:9/16; max-height:220px; margin:10px auto 0; width:70%; border-radius:12px; background:linear-gradient(160deg,#2a2316,#050505); display:flex; align-items:flex-end; justify-content:center; padding:8px; font-size:10px; color:#e7e5e4; }
+    .caption { font-size:12px; line-height:1.4; padding:10px 12px 14px; }
+    .empty b { color:#d4d4d4; font-size:14px; }
+    h2 { font-size:12px; color:var(--gold); letter-spacing:.04em; text-transform:uppercase; margin:28px 0 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recibo · espacios según la cadencia</h1>
+    <p class="sub">Arecibo Lab publica 3 reels por semana (lun · mié · vie). Cada espacio se llena con un video subido. El hueco vacío queda pendiente. El caption se ve en la tarjeta.</p>
+
+    <div class="months">
+      <span class="pill now">octubre 2026 · 2</span>
+      <span class="pill">septiembre 2026 · 1</span>
+      <span class="pill">Total 3</span>
+    </div>
+
+    <div class="client"><div class="logo">AL</div>Arecibo Lab <span class="ai">AI</span></div>
+    <p class="meta">3 espacios esta semana · Lun · Mié · Vie · 2 ocupados · 1 pendiente</p>
+    <div class="grid">
+      <article class="card ok">
+        <div class="phone">Portada · laboratorio</div>
+        <p class="caption">El laboratorio ya abrió en Arecibo. Agenda tu cita esta semana y evitas la fila de la mañana.</p>
+      </article>
+      <article class="card wait">
+        <div class="phone">Portada · toma de muestra</div>
+        <p class="caption">Antes de una toma de muestra, hidrátate y llega 10 minutos antes. Te recibimos en el nuevo local.</p>
+      </article>
+      <article class="card empty">
+        <b>Pendiente</b>
+        <p>Espacio de cadencia sin video todavía</p>
+      </article>
+    </div>
+
+    <h2>Antes</h2>
+    <p class="sub">Recibo listaba los videos sueltos, sin mostrar cuántos espacios faltaban según la cadencia del cliente ni un conteo mensual de subidas.</p>
+  </div>
+</body>
+</html>
