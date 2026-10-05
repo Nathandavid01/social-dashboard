@@ -30,10 +30,6 @@ vi.mock('@/lib/actions/recibo-internal-notes', () => ({
   addReciboInternalNote: vi.fn(async () => ({ ok: true })),
   listReciboInternalNotes: vi.fn(async () => []),
 }))
-vi.mock('@/lib/actions/recibo-internal-notes', () => ({
-  addReciboInternalNote: vi.fn(async () => ({ ok: true })),
-  listReciboInternalNotes: vi.fn(async () => []),
-}))
 vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: vi.fn(async () => ({ token: 'abc' })),
 }))
