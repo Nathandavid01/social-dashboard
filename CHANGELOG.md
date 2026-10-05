@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.126 — 2026-10-05
+
+**En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**
+- Arriba del tablero hay un buscador: escribe cliente, título o texto del caption y las tarjetas se filtran al instante, también en el celular.
+- Si no hay coincidencias, Recibo lo dice. Si dejas el buscador vacío, vuelven a verse todos.
+- Debajo de cada video (y de cada gráfico) puedes escribir el motivo si el corte no sirve.
+- Ese motivo es **solo interno**: el cliente no lo ve en su link de revisión ni en el portal.
+
+[Ver el buscador y el motivo](/previews/v5.126-recibo-buscar-motivo.html)
+
+![Buscador y motivo en Recibo](/changelog/v5.126-recibo-buscar-motivo.png)
+
 ## v5.125 — 2026-10-05
 
 **Si no te gusta el video después de programarlo en Recibo, puedes cambiar la fecha o cancelar.**

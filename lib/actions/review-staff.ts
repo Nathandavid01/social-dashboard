@@ -139,11 +139,7 @@ export async function getReviewStaffView(ideaId: string): Promise<StaffReviewVie
     .single()
   if (error || !idea) return null
 
-  const { data: comments } = await supabase
-    .from('video_review_comments')
-    .select('id, author_kind, author_name, body, created_at')
-    .eq('content_idea_id', ideaId)
-    .order('created_at', { ascending: true })
+  const comments = await loadReviewComments(supabase, ideaId)
 
   return {
     review_token: (idea as StaffReviewView).review_token ?? null,
@@ -151,8 +147,31 @@ export async function getReviewStaffView(ideaId: string): Promise<StaffReviewVie
     client_review_status: (idea as StaffReviewView).client_review_status ?? 'pending',
     client_reviewer_name: (idea as StaffReviewView).client_reviewer_name ?? null,
     client_reviewed_at: (idea as StaffReviewView).client_reviewed_at ?? null,
-    comments: (comments as ReviewComment[]) ?? [],
+    comments,
   }
+}
+
+/** Recibo thread only — no review token. Staff with Recibo (entregas.read) can read. */
+export async function getReciboReviewComments(ideaId: string): Promise<ReviewComment[]> {
+  try {
+    await requirePermission('entregas.read')
+  } catch {
+    return []
+  }
+  const supabase = await createClient()
+  return loadReviewComments(supabase, ideaId)
+}
+
+async function loadReviewComments(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ideaId: string,
+): Promise<ReviewComment[]> {
+  const { data: comments } = await supabase
+    .from('video_review_comments')
+    .select('id, author_kind, author_name, body, created_at')
+    .eq('content_idea_id', ideaId)
+    .order('created_at', { ascending: true })
+  return (comments as ReviewComment[]) ?? []
 }
 
 /** Staff reply to the client's review thread (author_kind='staff'). */
@@ -189,5 +208,6 @@ export async function addStaffReviewComment(
   if (error) return { error: 'No se pudo enviar el comentario.' }
 
   revalidatePath('/clients')
+  revalidatePath('/recibo')
   return { ok: true }
 }

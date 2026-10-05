@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>v5.123 · Recibo: buscar y decir por qué no te gusta</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0a0a0a;--panel:#121212;--card:#161616;--border:#292929;--text:#fafafa;--muted:#a6a6a6;--gold:#d4af37;--violet:#c4b5fd;--amber:#fde68a}
+    *{box-sizing:border-box}body{margin:0;padding:32px 16px;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+    main{max-width:720px;margin:auto}
+    h1{font-size:26px;line-height:1.2;margin:8px 0 0}
+    .version{color:var(--gold);font-size:13px}
+    .lead{color:var(--muted);max-width:640px;margin:12px 0 28px}
+    .board{border:1px solid var(--border);border-radius:22px;background:var(--panel);padding:20px}
+    .head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#8b5cf6}
+    .muted{color:var(--muted);font-size:13px}
+    .pill{border:0;border-radius:999px;background:#8b5cf633;color:var(--violet);padding:10px 14px;font-size:12px;font-weight:700}
+    .search{margin:16px 0 20px;position:relative}
+    .search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+    .search input{width:100%;min-height:44px;border:1px solid var(--border);border-radius:16px;background:#1a1a1a;color:var(--text);padding:0 14px 0 38px;font:14px/1.4 system-ui}
+    .client{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;color:var(--gold);font-weight:700}
+    .badge{display:inline-block;margin-left:6px;border-radius:999px;background:#8b5cf633;color:#c4b5fd;font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px}
+    .card{overflow:hidden;border:1px solid var(--border);border-radius:18px;background:linear-gradient(#18181b,#121212);max-width:360px}
+    .video{aspect-ratio:9/12;background:linear-gradient(160deg,#2a2433,#09090b);padding:12px;display:flex;flex-direction:column;justify-content:space-between}
+    .marks{display:flex;gap:6px}
+    .mark{border-radius:999px;background:#00000073;color:#fff;font-size:10px;padding:3px 8px}
+    .caption{padding:12px 14px 6px;font-size:14px;line-height:1.45}
+    .feedback{border-top:1px solid var(--border);padding:12px 14px 14px}
+    .feedback h3{margin:0 0 10px;font-size:12px;display:flex;align-items:center;gap:6px}
+    .thread{background:#ffffff0d;border-radius:12px;padding:8px 10px;margin-bottom:10px;font-size:12px}
+    .meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px;margin-bottom:4px}
+    .tag{background:#ffffff14;border-radius:4px;padding:1px 5px}
+    textarea{width:100%;min-height:72px;border:1px solid var(--border);border-radius:12px;background:#0c0c0c;color:var(--text);padding:8px 10px;font:13px/1.4 system-ui;resize:vertical}
+    .save{margin-top:8px;min-height:44px;border:0;border-radius:12px;background:#f59e0b26;color:var(--amber);font-weight:700;font-size:12px;padding:0 14px}
+    .publish{margin:0 14px 14px;border-radius:12px;background:#8b5cf626;color:var(--violet);padding:10px 12px;font-size:12px;font-weight:700}
+    footer{color:var(--muted);font-size:12px;margin-top:20px}
+    @media(max-width:640px){body{padding:20px 12px}h1{font-size:22px}.card{max-width:none}}
+  </style>
+</head>
+<body>
+<main>
+  <span class="version">Nate Media · v5.123</span>
+  <h1>Busca un video y deja por qué no te gusta</h1>
+  <p class="lead">En Recibo, el buscador filtra al instante. Debajo de cada corte puedes guardar el motivo para el equipo, en el mismo hilo que ya usa el cliente.</p>
+  <section class="board" aria-label="Recibo">
+    <div class="head">
+      <div>
+        <div class="title"><span class="dot" aria-hidden="true"></span> Recibo</div>
+        <p class="muted">Aquí están los videos y gráficos por revisar, organizados por cliente.</p>
+      </div>
+      <button type="button" class="pill">Poner captions</button>
+    </div>
+    <div class="search">
+      <span aria-hidden="true">⌕</span>
+      <input type="search" value="arecibo" aria-label="Buscar cliente o idea" placeholder="Buscar cliente o idea…">
+    </div>
+    <div class="client">
+      <div class="avatar" aria-hidden="true">AL</div>
+      <div>
+        <strong>Arecibo Lab</strong><span class="badge">AI</span>
+        <div class="muted">1 video</div>
+      </div>
+    </div>
+    <article class="card">
+      <div class="video">
+        <div class="marks">
+          <span class="mark">Enviado</span>
+          <span class="mark">Aprobado</span>
+          <span class="mark">Publicado</span>
+        </div>
+        <div style="text-align:center;color:var(--gold);font-size:28px" aria-hidden="true">▷</div>
+        <div class="muted">Reel playa</div>
+      </div>
+      <p class="caption">El laboratorio ya abrió en Arecibo.</p>
+      <div class="feedback">
+        <h3>⚠ No me gusta · ¿por qué?</h3>
+        <div class="thread">
+          <div class="meta"><span><span class="tag">Equipo</span> Eric Perez</span><span>05/10/2026 13:20</span></div>
+          El hook no se entiende a la primera.
+        </div>
+        <label class="muted" for="motivo">Por qué no te gusta</label>
+        <textarea id="motivo" placeholder="El corte se ve oscuro, el hook no funciona…">El corte se ve oscuro</textarea>
+        <button type="button" class="save">Guardar motivo</button>
+      </div>
+      <div class="publish">Publicar en Metricool</div>
+    </article>
+  </section>
+  <footer>Vista ilustrativa. El buscador y el motivo viven en la app en /recibo; esta página no guarda comentarios reales.</footer>
+</main>
+</body>
+</html>

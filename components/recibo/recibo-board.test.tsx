@@ -26,6 +26,14 @@ vi.mock('@/lib/actions/recibo-publish', () => ({
   publishReciboOnCadence: vi.fn(async () => ({ ok: true, label: 'viernes 25 de septiembre, 6:00 p.m.' })),
   cancelReciboSchedule: vi.fn(async () => ({ ok: true, deleted: true })),
 }))
+vi.mock('@/lib/actions/review-staff', () => ({
+  addStaffReviewComment: vi.fn(async () => ({ ok: true })),
+  getReciboReviewComments: vi.fn(async () => []),
+}))
+vi.mock('@/lib/actions/recibo-internal-notes', () => ({
+  addReciboInternalNote: vi.fn(async () => ({ ok: true })),
+  listReciboInternalNotes: vi.fn(async () => []),
+}))
 vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: vi.fn(async () => ({ token: 'abc' })),
 }))
@@ -450,6 +458,45 @@ describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
     )
     expect(screen.getByText('Arecibo Lab')).toBeInTheDocument()
     expect(screen.getAllByTestId('recibo-space-empty')).toHaveLength(2)
+  })
+})
+
+describe('ReciboBoard — buscar y motivo', () => {
+  it('filtra tarjetas por cliente o título sin recargar', async () => {
+    const user = userEvent.setup()
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      title: 'Pregunta para todas',
+      generated_caption: 'Pregunta en el mostrador.',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+          { id: 'farmacia', name: 'Farmacia Buena Vida', logo_url: null },
+        ]}
+        ideas={[editedIdea, farmacia]}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    const search = screen.getByRole('searchbox', { name: /buscar cliente o idea/i })
+    expect(search).toHaveAttribute('placeholder', 'Buscar cliente o idea…')
+    await user.type(search, 'farmacia')
+    expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    await user.clear(search)
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+  })
+
+  it('cada tarjeta ocupada tiene el cuadro para decir por qué no les gusta', async () => {
+    render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    expect(await screen.findByRole('textbox', { name: /por qué no te gusta/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /guardar motivo/i })).toBeInTheDocument()
   })
 })
 
