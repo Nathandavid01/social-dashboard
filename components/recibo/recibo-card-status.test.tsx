@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 
 const setManualPostedStatus = vi.fn()
 const publishReciboOnCadence = vi.fn()
+const cancelReciboSchedule = vi.fn()
 const refresh = vi.fn()
 const toast = vi.fn((..._a: unknown[]) => ({ dismiss: vi.fn() }))
 
@@ -15,8 +16,12 @@ vi.mock('@/lib/actions/recibo', () => ({
 vi.mock('@/lib/actions/entregas-client-review', () => ({ crearEnlaceCliente: vi.fn() }))
 vi.mock('@/lib/actions/recibo-publish', () => ({
   publishReciboOnCadence: (...a: unknown[]) => publishReciboOnCadence(...a),
+  cancelReciboSchedule: (...a: unknown[]) => cancelReciboSchedule(...a),
 }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
+vi.mock('@/components/auth/role-gate', () => ({
+  useHasPermission: () => true,
+}))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 
 import { ReciboPublishButton, ReciboStatusMarks } from './recibo-card-status'
@@ -167,6 +172,79 @@ describe('ReciboPublishButton — programar el espacio', () => {
     )
     expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Programar/i })).toBeDisabled()
+    expect(publishReciboOnCadence).not.toHaveBeenCalled()
+  })
+})
+
+describe('ReciboPublishButton — ya programado', () => {
+  it('muestra Programado, Cambiar fecha y Cancelar programación', () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        scheduled
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    expect(screen.getByText(/Programado miércoles 7 de octubre/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cambiar fecha/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cancelar programación/i })).toBeInTheDocument()
+  })
+
+  it('cambiar fecha reprograma a otra fecha futura', async () => {
+    publishReciboOnCadence.mockResolvedValue({ ok: true, label: 'viernes 9 de octubre, 6:00 p.m.' })
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        scheduled
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: /Cambiar fecha/i }))
+    await userEvent.type(screen.getByLabelText('Nueva fecha'), '2026-10-09')
+    await userEvent.click(screen.getByRole('button', { name: /Guardar nueva fecha/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', '2026-10-09'))
+    expect(await screen.findByText(/Programado viernes 9 de octubre/i)).toBeInTheDocument()
+  })
+
+  it('cancelar pide confirmación, borra el post y vuelve a no programado', async () => {
+    cancelReciboSchedule.mockResolvedValue({ ok: true, deleted: true })
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        scheduled
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: /Cancelar programación/i }))
+    expect(cancelReciboSchedule).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: /Sí, cancelar/i }))
+    await waitFor(() => expect(cancelReciboSchedule).toHaveBeenCalledWith('i1'))
+    expect(await screen.findByRole('button', { name: /Programar para/i })).toBeInTheDocument()
+  })
+
+  it('no reprograma a una fecha ya pasada', async () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        scheduled
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+      />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: /Cambiar fecha/i }))
+    await userEvent.type(screen.getByLabelText('Nueva fecha'), '2026-09-28')
+    expect(screen.getByRole('button', { name: /Guardar nueva fecha/i })).toBeDisabled()
     expect(publishReciboOnCadence).not.toHaveBeenCalled()
   })
 })

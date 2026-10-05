@@ -91,9 +91,9 @@ describe('reciboSpaceTone', () => {
     expect(reciboSpaceTone(idea({ entregas_review_status: 'approved' }))).toBe('approved')
   })
 
-  it('verde si ya está publicado o programado en Metricool', () => {
+  it('verde si ya está publicado; programado se distingue para poder cancelar', () => {
     expect(reciboSpaceTone(idea({ published_at: '2026-10-01T00:00:00Z' }))).toBe('approved')
-    expect(reciboSpaceTone(idea({ metricool_post_id: 3 }))).toBe('approved')
+    expect(reciboSpaceTone(idea({ metricool_post_id: 3, posted_at: '2026-10-02T10:00:00Z' }))).toBe('scheduled')
   })
 
   it('ámbar si sigue pendiente o en borrador', () => {
@@ -150,7 +150,7 @@ describe('buildReciboCadenceSpaces', () => {
     expect(spaces.every((space) => space.kind === 'occupied')).toBe(true)
   })
 
-  it('un publicado o agendado de esta semana ocupa cupo y no vuelve a la cola', () => {
+  it('un publicado de esta semana ocupa cupo y no vuelve a la cola', () => {
     const queue = [idea({ id: 'cola' })]
     const occupancy = [
       idea({ id: 'cola' }),
@@ -169,6 +169,25 @@ describe('buildReciboCadenceSpaces', () => {
     })
     expect(spaces.map((space) => space.kind)).toEqual(['occupied', 'empty'])
     expect(spaces[0]).toMatchObject({ kind: 'occupied', idea: { id: 'cola' } })
+  })
+
+  it('un agendado de esta semana se ve en su fecha, no se esconde', () => {
+    const scheduled = idea({
+      id: 'sch',
+      metricool_post_id: 9,
+      posted_at: '2026-09-30T10:00:00Z',
+      publish_date: '2026-09-30',
+      staff_client_approval: 'approved',
+    })
+    const spaces = buildReciboCadenceSpaces({
+      postingDays: [1, 3, 5],
+      ideas: [idea({ id: 'cola' })],
+      occupancyIdeas: [idea({ id: 'cola' }), scheduled],
+      week: WEEK,
+    })
+    expect(spaces.map((space) => space.kind)).toEqual(['occupied', 'occupied', 'empty'])
+    expect(spaces[0]).toMatchObject({ kind: 'occupied', idea: { id: 'cola' }, dateISO: '2026-09-28' })
+    expect(spaces[1]).toMatchObject({ kind: 'occupied', idea: { id: 'sch' }, dateISO: '2026-09-30', tone: 'scheduled' })
   })
 
   it('sin padEmpty no inventa huecos: un corte de Eric en cliente humano no abre cupo semanal', () => {

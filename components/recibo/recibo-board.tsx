@@ -136,7 +136,7 @@ export function ReciboBoard({
     const seen = new Set(ideas.map((idea) => idea.id))
     const extra = occupancy.filter((idea) => {
       if (seen.has(idea.id)) return false
-      if (isPublishedIdea(idea) || isAgendadoIdea(idea)) return false
+      if (isPublishedIdea(idea)) return false
       return occupyingVideo(idea) != null
     })
     return [...ideas, ...extra]
@@ -361,7 +361,8 @@ export function ReciboBoard({
                               const editedVideoId = editedEntregasVideoId(idea)
                               const occupy = occupyingVideo(idea)
                               const caption = captionOf(idea, captionOverrides)
-                              const approved = space.tone === 'approved'
+                              const approved = space.tone === 'approved' || space.tone === 'scheduled'
+                              const scheduled = isAgendadoIdea(idea)
                               const coverUrl = coverUrlForIdea(idea)
                               const graphic = isReciboGraphic(idea)
                               return (
@@ -371,9 +372,11 @@ export function ReciboBoard({
                                   data-tone={space.tone}
                                   className={cn(
                                     'flex flex-col overflow-hidden rounded-2xl border bg-gradient-to-b from-card to-card/80 shadow-md shadow-black/20',
-                                    space.tone === 'approved'
-                                      ? 'border-emerald-500/70 ring-1 ring-emerald-500/30'
-                                      : 'border-amber-500/70 ring-1 ring-amber-500/30',
+                                    space.tone === 'scheduled'
+                                      ? 'border-violet-500/70 ring-1 ring-violet-500/30'
+                                      : space.tone === 'approved'
+                                        ? 'border-emerald-500/70 ring-1 ring-emerald-500/30'
+                                        : 'border-amber-500/70 ring-1 ring-amber-500/30',
                                   )}
                                 >
                                   <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
@@ -410,6 +413,7 @@ export function ReciboBoard({
                                         approved={approved}
                                         sent={sent.has(idea.id)}
                                         postedStatus={idea.manual_posted_status ?? null}
+                                        hidePublished={scheduled}
                                       />
                                     ) : null}
                                     {hasEdit && client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
@@ -419,8 +423,9 @@ export function ReciboBoard({
                                     <ReciboPublishButton
                                       ideaId={idea.id}
                                       approved={approved}
+                                      scheduled={scheduled}
                                       todayISO={todayISO ?? ''}
-                                      spaceDateISO={space.dateISO ?? null}
+                                      spaceDateISO={space.dateISO ?? idea.publish_date ?? null}
                                       cadence={cadence}
                                     />
                                   )}

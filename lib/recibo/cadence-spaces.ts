@@ -30,7 +30,7 @@ export type ReciboSpaceIdea = ReciboQueueIdea & {
   videos?: ReciboSpaceVideo[] | null
 }
 
-export type ReciboSpaceTone = 'approved' | 'pending'
+export type ReciboSpaceTone = 'approved' | 'pending' | 'scheduled'
 
 export type ReciboCadenceSpace<T extends ReciboSpaceIdea = ReciboSpaceIdea> =
   | { kind: 'occupied'; key: string; idea: T; tone: ReciboSpaceTone; dateISO?: string }
@@ -107,7 +107,9 @@ export function applyEntregasReviewStatus<T extends ReciboSpaceIdea>(
 }
 
 export function reciboSpaceTone(idea: PoolStateInput): ReciboSpaceTone {
-  if (isClientApproved(idea) || isPublishedIdea(idea) || isAgendadoIdea(idea)) return 'approved'
+  if (isPublishedIdea(idea)) return 'approved'
+  if (isAgendadoIdea(idea)) return 'scheduled'
+  if (isClientApproved(idea)) return 'approved'
   return 'pending'
 }
 
@@ -130,6 +132,20 @@ function stillOnQueue(idea: ReciboSpaceIdea): boolean {
   return !isPublishedIdea(idea) && !isAgendadoIdea(idea)
 }
 
+function scheduledOnBoard(idea: ReciboSpaceIdea): boolean {
+  return isAgendadoIdea(idea) && !isPublishedIdea(idea) && hasUsableUpload(idea)
+}
+
+function occupiedSpace<T extends ReciboSpaceIdea>(idea: T, dateISO?: string): ReciboCadenceSpace<T> {
+  return {
+    kind: 'occupied',
+    key: `idea-${idea.id}`,
+    idea,
+    tone: reciboSpaceTone(idea),
+    dateISO,
+  }
+}
+
 export function buildReciboCadenceSpaces<T extends ReciboSpaceIdea>(input: {
   postingDays?: number[] | null
   ideas: T[]
@@ -138,35 +154,57 @@ export function buildReciboCadenceSpaces<T extends ReciboSpaceIdea>(input: {
   /** Empty cadence padding is only for AI clients. Eric cuts on a human client stay as cards. */
   padEmpty?: boolean
 }): ReciboCadenceSpace<T>[] {
-  const queue = input.ideas.filter((idea) => stillOnQueue(idea) && hasUsableUpload(idea))
   const occupancy = input.occupancyIdeas ?? input.ideas
-  const cupoTaken = occupancy.filter((idea) => publishedThisWeek(idea, input.week)).length
-  const dates = input.padEmpty === false ? [] : weekCadenceDates(input.postingDays, input.week)
-  const slotCount = dates.length
-
-  const spaces: ReciboCadenceSpace<T>[] = []
-  const shown = slotCount === 0 ? queue.length : Math.max(queue.length, Math.max(0, slotCount - cupoTaken))
-
-  for (let index = 0; index < shown; index++) {
-    const idea = queue[index]
-    const dateISO = dates[index]
-    if (idea) {
-      spaces.push({
-        kind: 'occupied',
-        key: `idea-${idea.id}`,
-        idea,
-        tone: reciboSpaceTone(idea),
-        dateISO,
-      })
-    } else {
-      spaces.push({
-        kind: 'empty',
-        key: `empty-${dateISO ?? index}`,
-        dateISO,
-        label: 'Pendiente',
-      })
-    }
+  const queue = input.ideas.filter((idea) => stillOnQueue(idea) && hasUsableUpload(idea))
+  const scheduledById = new Map<string, T>()
+  for (const idea of [...occupancy, ...input.ideas]) {
+    if (scheduledOnBoard(idea) && !scheduledById.has(idea.id)) scheduledById.set(idea.id, idea)
   }
+  const scheduled = [...scheduledById.values()]
+  const liveCupo = occupancy.filter((idea) => isPublishedIdea(idea) && publishedThisWeek(idea, input.week)).length
+  const dates = input.padEmpty === false ? [] : weekCadenceDates(input.postingDays, input.week)
+
+  if (dates.length === 0) {
+    return [...scheduled, ...queue].map((idea) => occupiedSpace(idea, idea.publish_date?.slice(0, 10)))
+  }
+
+  const pinned = new Map<string, T>()
+  const overflowScheduled: T[] = []
+  for (const idea of scheduled) {
+    const date = idea.publish_date?.slice(0, 10)
+    if (date && dates.includes(date) && !pinned.has(date)) pinned.set(date, idea)
+    else overflowScheduled.push(idea)
+  }
+
+  const leftoverQueue = [...queue]
+  const spaces: ReciboCadenceSpace<T>[] = []
+  let skipEmpties = liveCupo
+
+  for (const dateISO of dates) {
+    const pinnedIdea = pinned.get(dateISO)
+    if (pinnedIdea) {
+      spaces.push(occupiedSpace(pinnedIdea, dateISO))
+      continue
+    }
+    const next = leftoverQueue.shift()
+    if (next) {
+      spaces.push(occupiedSpace(next, dateISO))
+      continue
+    }
+    if (skipEmpties > 0) {
+      skipEmpties -= 1
+      continue
+    }
+    spaces.push({
+      kind: 'empty',
+      key: `empty-${dateISO}`,
+      dateISO,
+      label: 'Pendiente',
+    })
+  }
+
+  for (const idea of leftoverQueue) spaces.push(occupiedSpace(idea))
+  for (const idea of overflowScheduled) spaces.push(occupiedSpace(idea, idea.publish_date?.slice(0, 10)))
   return spaces
 }
 

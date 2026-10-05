@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.125 — 2026-10-05
+
+**Si no te gusta el video después de programarlo en Recibo, puedes cambiar la fecha o cancelar.**
+- En un espacio ya programado aparecen **Cambiar fecha** y **Cancelar programación** (con confirmación).
+- Cambiar fecha mueve el mismo post en Metricool a otra fecha futura. No se programa en el pasado.
+- Cancelar quita el post agendado de Metricool y el espacio vuelve a Recibo para programarlo otra vez. Si Metricool no deja borrar, el post queda como borrador para revisión.
+
+[Ver el preview](/previews/v5.125-recibo-cambiar-cancelar.html)
+
+![Cambiar fecha o cancelar en Recibo](/changelog/v5.125-recibo-cambiar-cancelar.png)
+
 ## v5.124 — 2026-10-04
 
 **En Recibo, Publicar programa el video en la fecha de ese espacio, no lo suelta ya.**

@@ -1,6 +1,6 @@
 'use server'
 
-import { schedulePoolIdea } from '@/lib/actions/client-pool'
+import { schedulePoolIdea, unschedulePoolIdea } from '@/lib/actions/client-pool'
 import { createClient } from '@/lib/supabase/server'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
@@ -51,7 +51,12 @@ export async function publishReciboOnCadence(
     }
   }
 
-  const scheduled = await schedulePoolIdea({ ideaId, date: slot.dateISO })
+  const scheduled = await schedulePoolIdea({ ideaId, date: slot.dateISO, asDraft: true })
   if (scheduled.error) return { error: scheduled.error }
   return { ok: true, label: slot.label }
+}
+
+export async function cancelReciboSchedule(ideaId: string) {
+  if (!ideaId) return { error: 'Falta el video' }
+  return unschedulePoolIdea({ ideaId })
 }

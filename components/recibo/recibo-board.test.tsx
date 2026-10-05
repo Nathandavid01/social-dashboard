@@ -24,6 +24,7 @@ vi.mock('@/lib/actions/pipeline-submit', () => ({
 }))
 vi.mock('@/lib/actions/recibo-publish', () => ({
   publishReciboOnCadence: vi.fn(async () => ({ ok: true, label: 'viernes 25 de septiembre, 6:00 p.m.' })),
+  cancelReciboSchedule: vi.fn(async () => ({ ok: true, deleted: true })),
 }))
 vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: vi.fn(async () => ({ token: 'abc' })),
@@ -411,6 +412,31 @@ describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
       />,
     )
     expect(screen.getByTestId('recibo-idea-voted')).toHaveAttribute('data-tone', 'approved')
+  })
+
+  it('un espacio ya programado se ve con Cambiar fecha y Cancelar', () => {
+    const scheduled = {
+      ...editedIdea,
+      id: 'sch1',
+      metricool_post_id: 44,
+      posted_at: `${publishThisWeek}T12:00:00Z`,
+      publish_date: publishThisWeek,
+      staff_client_approval: 'approved',
+      videos: [{ ...editedIdea.videos[0], id: 'vs1' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        occupancyIdeas={[scheduled]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5], postingTime: '18:00', metricool: true } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-sch1')).toHaveAttribute('data-tone', 'scheduled')
+    expect(screen.getByRole('button', { name: /Cambiar fecha/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cancelar programación/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Publicado' })).not.toBeInTheDocument()
   })
 
   it('muestra clientes AI sin video para que se vean los espacios pendientes', () => {

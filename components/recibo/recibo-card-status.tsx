@@ -6,7 +6,8 @@ import { useToast } from '@/lib/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
 import { setManualPostedStatus, setStaffClientApproval, type ManualPostedStatus } from '@/lib/actions/recibo'
 import { crearEnlaceCliente } from '@/lib/actions/entregas-client-review'
-import { publishReciboOnCadence } from '@/lib/actions/recibo-publish'
+import { cancelReciboSchedule, publishReciboOnCadence } from '@/lib/actions/recibo-publish'
+import { useHasPermission } from '@/components/auth/role-gate'
 import { nextCadenceSlot, reciboScheduleTarget, type CadenceSlot } from '@/lib/recibo/cadence-slot'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +17,7 @@ export function ReciboStatusMarks({
   approved,
   sent,
   postedStatus = null,
+  hidePublished = false,
 }: {
   ideaId: string
   clientId: string
@@ -23,6 +25,7 @@ export function ReciboStatusMarks({
   sent: boolean
   /** manual_posted_status now: Deshacer puts this back. */
   postedStatus?: ManualPostedStatus
+  hidePublished?: boolean
 }) {
   const { toast } = useToast()
   const router = useRouter()
@@ -97,7 +100,9 @@ export function ReciboStatusMarks({
     <div className="absolute bottom-3 left-3 flex gap-1.5">
       <Mark on={isSent} disabled={pending || isSent} onClick={markSent} label="Enviado" />
       <Mark on={isApproved} disabled={pending} onClick={toggleApproved} label="Aprobado" />
-      <Mark on={isPublished} disabled={pending || isPublished} onClick={markPublished} label="Publicado" />
+      {hidePublished ? null : (
+        <Mark on={isPublished} disabled={pending || isPublished} onClick={markPublished} label="Publicado" />
+      )}
     </div>
   )
 }
@@ -137,6 +142,7 @@ export function ReciboPublishButton({
   todayISO,
   spaceDateISO = null,
   nowMs,
+  scheduled = false,
 }: {
   ideaId: string
   approved: boolean
@@ -149,14 +155,28 @@ export function ReciboPublishButton({
   todayISO: string
   spaceDateISO?: string | null
   nowMs?: number
+  scheduled?: boolean
 }) {
   const { toast } = useToast()
   const router = useRouter()
+  const canPublish = useHasPermission('posting.publish')
   const [pending, start] = useTransition()
   const [pickedDate, setPickedDate] = useState('')
+  const [isScheduled, setIsScheduled] = useState(scheduled)
   const [scheduledLabel, setScheduledLabel] = useState<string | null>(null)
+  const [changingDate, setChangingDate] = useState(false)
+  const [confirmCancel, setConfirmCancel] = useState(false)
+  const activeDate = changingDate ? pickedDate : (pickedDate || spaceDateISO)
   const target: CadenceSlot = reciboScheduleTarget({
-    spaceDateISO: pickedDate || spaceDateISO,
+    spaceDateISO: activeDate,
+    postingDays: cadence.postingDays,
+    postingTime: cadence.postingTime,
+    postingSchedule: cadence.postingSchedule,
+    todayISO,
+    nowMs,
+  })
+  const currentSlot = reciboScheduleTarget({
+    spaceDateISO,
     postingDays: cadence.postingDays,
     postingTime: cadence.postingTime,
     postingSchedule: cadence.postingSchedule,
@@ -170,9 +190,12 @@ export function ReciboPublishButton({
     todayISO,
   })
   const past = target.ok === false && target.reason === 'pasado'
+  const showDateField = past || changingDate
+  const programmedText = scheduledLabel
+    ?? (currentSlot.ok ? currentSlot.label : spaceDateISO)
 
   let hint = ''
-  if (scheduledLabel) hint = ''
+  if (isScheduled && !changingDate && !confirmCancel) hint = ''
   else if (!approved) hint = 'Márcalo aprobado para programarlo.'
   else if (!cadence.metricool) hint = 'A este cliente le falta Metricool.'
   else if (past) hint = `El espacio era ${target.label ?? spaceDateISO}. Esa fecha ya pasó; no se programa en el pasado.`
@@ -181,8 +204,8 @@ export function ReciboPublishButton({
 
   const dateToSend = target.ok ? target.dateISO : null
   const canSchedule = Boolean(approved && cadence.metricool && target.ok && dateToSend)
-  const label = scheduledLabel
-    ? `Programado ${scheduledLabel}`
+  const label = isScheduled && !changingDate
+    ? `Programado ${programmedText}`
     : target.ok
       ? `Programar para ${target.label}`
       : 'Programar en Metricool'
@@ -193,6 +216,8 @@ export function ReciboPublishButton({
       const res = await publishReciboOnCadence(ideaId, dateToSend)
       if (res.error) toast({ title: 'No se programó', description: res.error, variant: 'destructive' })
       else {
+        setIsScheduled(true)
+        setChangingDate(false)
         setScheduledLabel(res.label ?? (target.ok ? target.label : dateToSend))
         toast({ title: `Programado ${res.label ?? dateToSend}`, description: 'Quedó como borrador en Metricool. No se publica solo.' })
         router.refresh()
@@ -200,9 +225,39 @@ export function ReciboPublishButton({
     })
   }
 
+  function cancelSchedule() {
+    start(async () => {
+      const res = await cancelReciboSchedule(ideaId)
+      if (res.error) {
+        toast({ title: 'No se canceló', description: res.error, variant: 'destructive' })
+        return
+      }
+      setIsScheduled(false)
+      setConfirmCancel(false)
+      setScheduledLabel(null)
+      setPickedDate('')
+      toast({
+        title: 'Programación cancelada',
+        description: res.leftoverDraft
+          ? (res.message ?? 'Quedó como borrador en Metricool para revisión.')
+          : 'Se quitó de Metricool. El espacio volvió a Recibo.',
+      })
+      router.refresh()
+    })
+  }
+
+  if (!canPublish) {
+    return isScheduled ? (
+      <p className="px-3 pb-3 text-xs font-semibold text-violet-100">Programado {programmedText}</p>
+    ) : null
+  }
+
   return (
     <div className="px-3 pb-3">
-      {past ? (
+      {isScheduled && !changingDate ? (
+        <p className="mb-2 text-xs font-semibold text-violet-100">{pending ? 'Programando…' : `Programado ${programmedText}`}</p>
+      ) : null}
+      {showDateField ? (
         <label className="mb-2 block text-[11px] text-amber-200">
           Nueva fecha
           <input
@@ -214,7 +269,7 @@ export function ReciboPublishButton({
           />
         </label>
       ) : null}
-      {past && nextSlot.ok ? (
+      {showDateField && nextSlot.ok ? (
         <button
           type="button"
           onClick={() => setPickedDate(nextSlot.dateISO)}
@@ -223,14 +278,58 @@ export function ReciboPublishButton({
           Usar próximo de cadencia · {nextSlot.label}
         </button>
       ) : null}
-      <button
-        type="button"
-        disabled={pending || !canSchedule || Boolean(scheduledLabel)}
-        onClick={publish}
-        className="w-full rounded-xl bg-violet-500/15 px-3 py-2 text-left text-xs font-semibold text-violet-100 disabled:opacity-70"
-      >
-        {pending ? 'Programando…' : label}
-      </button>
+      {isScheduled && !changingDate ? (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => { setChangingDate(true); setConfirmCancel(false) }}
+            className="w-full rounded-xl bg-violet-500/15 px-3 py-2 text-left text-xs font-semibold text-violet-100 disabled:opacity-70"
+          >
+            Cambiar fecha
+          </button>
+          {confirmCancel ? (
+            <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-2">
+              <p className="text-[11px] text-amber-100">¿Quitar este video de Metricool y devolver el espacio?</p>
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={cancelSchedule}
+                  className="rounded-lg bg-amber-500/20 px-2 py-1 text-[11px] font-semibold text-amber-100"
+                >
+                  Sí, cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmCancel(false)}
+                  className="rounded-lg px-2 py-1 text-[11px] text-muted-foreground"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setConfirmCancel(true)}
+              className="w-full rounded-xl bg-black/30 px-3 py-2 text-left text-xs font-medium text-muted-foreground disabled:opacity-70"
+            >
+              Cancelar programación
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={pending || !canSchedule || (isScheduled && !changingDate)}
+          onClick={publish}
+          className="w-full rounded-xl bg-violet-500/15 px-3 py-2 text-left text-xs font-semibold text-violet-100 disabled:opacity-70"
+        >
+          {pending ? 'Programando…' : changingDate ? 'Guardar nueva fecha' : label}
+        </button>
+      )}
       {hint ? <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{hint}</p> : null}
     </div>
   )
