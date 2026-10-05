@@ -1,10 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Bot, Loader2 } from 'lucide-react'
+import { Bot, Loader2, Search } from 'lucide-react'
 import { ClientLogo } from '@/components/clients/client-logo'
 import { EnviarAlCliente } from '@/components/entregas/enviar-al-cliente'
 import { ReciboCaption } from '@/components/recibo/recibo-caption'
+import { ReciboFeedback } from '@/components/recibo/recibo-feedback'
 import { ReciboDeleteButton } from '@/components/recibo/recibo-delete'
 import { ReciboDownloadButton } from '@/components/recibo/recibo-download'
 import { ReciboPublishButton, ReciboStatusMarks } from '@/components/recibo/recibo-card-status'
@@ -20,6 +21,7 @@ import {
   reciboMonthlyUploadCounts,
   type ReciboMonthCount,
 } from '@/lib/recibo/cadence-spaces'
+import { filterReciboIdeas } from '@/lib/recibo/search'
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { formatCadenceDaysEs } from '@/lib/utils/client-cadence'
@@ -32,7 +34,8 @@ import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
  * Recibo — intake for clients with edit_mode='ai', plus any cut Eric uploaded (v5.113).
- * Spaces follow the client's posting cadence. Occupied cards keep caption + publish.
+ * Spaces follow the client's posting cadence. Occupied cards keep caption, internal
+ * dislike reason, and publish.
  */
 
 function captionOf(idea: IdeaWithPipeline, overrides: Record<string, string>): string {
@@ -129,8 +132,10 @@ export function ReciboBoard({
   const [captionOverrides, setCaptionOverrides] = useState<Record<string, string>>({})
   const [filling, setFilling] = useState(false)
   const [fillLabel, setFillLabel] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
   const week = weekFromToday(todayISO)
   const occupancy = occupancyIdeas ?? ideas
+  const queryNeedle = query.trim().toLocaleLowerCase('es')
 
   const displayIdeas = useMemo(() => {
     const seen = new Set(ideas.map((idea) => idea.id))
@@ -141,6 +146,10 @@ export function ReciboBoard({
     })
     return [...ideas, ...extra]
   }, [ideas, occupancy])
+
+  const visibleIdeas = useMemo(() => filterReciboIdeas(displayIdeas, query), [displayIdeas, query])
+  const visibleIds = useMemo(() => new Set(visibleIdeas.map((idea) => idea.id)), [visibleIdeas])
+  const clientNameMatches = (name: string) => !queryNeedle || name.toLocaleLowerCase('es').includes(queryNeedle)
 
   const byClient = useMemo(() => {
     const known = new Map(aiClients.map((client) => [client.id, client]))
@@ -157,7 +166,7 @@ export function ReciboBoard({
         ideas: [],
       })
     }
-    for (const idea of displayIdeas) {
+    for (const idea of visibleIdeas) {
       const entry = map.get(idea.client_id)
       if (entry) entry.ideas.push(idea)
       else {
@@ -172,8 +181,10 @@ export function ReciboBoard({
         })
       }
     }
-    return [...map.values()].sort((a, b) => a.client.name.localeCompare(b.client.name, 'es'))
-  }, [displayIdeas, aiClients])
+    return [...map.values()]
+      .filter((entry) => !queryNeedle || clientNameMatches(entry.client.name) || entry.ideas.length > 0)
+      .sort((a, b) => a.client.name.localeCompare(b.client.name, 'es'))
+  }, [visibleIdeas, aiClients, queryNeedle])
 
   async function fillCaptions() {
     const missing = ideas.filter(
@@ -268,9 +279,22 @@ export function ReciboBoard({
         </button>
       </header>
 
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Buscar cliente o idea…"
+          aria-label="Buscar cliente o idea"
+          data-testid="recibo-search"
+          className="min-h-11 w-full rounded-2xl border border-border bg-muted/40 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40"
+        />
+      </div>
+
       {byClient.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
-          No hay videos por aprobar ni por programar en Metricool.
+          {queryNeedle ? 'Ningún video coincide con esa búsqueda.' : 'No hay videos por aprobar ni por programar en Metricool.'}
         </div>
       ) : (
         <>
@@ -282,15 +306,17 @@ export function ReciboBoard({
               const postingDays = cadence.postingDays ?? []
               const videoIdeas = clientIdeas.filter((idea) => !isReciboGraphic(idea))
               const graphicIdeas = clientIdeas.filter((idea) => isReciboGraphic(idea))
-              const occupancyForClient = occupancy.filter(
-                (idea) => idea.client_id === client.id && !isReciboGraphic(idea),
-              )
+              const occupancyForClient = occupancy.filter((idea) => {
+                if (idea.client_id !== client.id || isReciboGraphic(idea)) return false
+                if (!queryNeedle || clientNameMatches(client.name)) return true
+                return visibleIds.has(idea.id)
+              })
               const spaces = buildReciboCadenceSpaces({
                 postingDays,
                 ideas: videoIdeas,
                 occupancyIdeas: occupancyForClient,
                 week,
-                padEmpty: client.ai,
+                padEmpty: client.ai && (!queryNeedle || clientNameMatches(client.name)),
               })
               const clientMonths = reciboMonthlyUploadCounts(
                 occupancy.filter((idea) => idea.client_id === client.id),
@@ -419,6 +445,7 @@ export function ReciboBoard({
                                     {hasEdit && client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                                   </div>
                                   <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
+                                  <ReciboFeedback ideaId={idea.id} />
                                   {!graphic && hasEdit && (
                                     <ReciboPublishButton
                                       ideaId={idea.id}
@@ -469,6 +496,7 @@ export function ReciboBoard({
                                     {client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
                                   </div>
                                   <ReciboCaption ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
+                                  <ReciboFeedback ideaId={idea.id} />
                                 </li>
                               )
                             })}
