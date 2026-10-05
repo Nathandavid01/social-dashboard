@@ -3,24 +3,28 @@
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import { MessageSquareWarning, Send } from 'lucide-react'
 import { useHasPermission } from '@/components/auth/role-gate'
-import { addStaffReviewComment, getReciboReviewComments } from '@/lib/actions/review-staff'
+import {
+  addReciboInternalNote,
+  listReciboInternalNotes,
+  type ReciboInternalNote,
+} from '@/lib/actions/recibo-internal-notes'
 import { useToast } from '@/lib/hooks/use-toast'
-import { authorKindLabel, formatReviewDateES, type ReviewComment } from '@/lib/utils/review-link-core'
+import { formatReviewDateES } from '@/lib/utils/review-link-core'
 
 /**
- * Compact Recibo thread: why this cut does not work, plus any staff/client notes.
- * Write reuses addStaffReviewComment (planning.move). Read is entregas.read.
+ * Recibo-only reason a cut does not work. Internal staff notes — never the
+ * client /review thread.
  */
 export function ReciboFeedback({ ideaId }: { ideaId: string }) {
-  const canWrite = useHasPermission('planning.move')
+  const canWrite = useHasPermission('entregas.read')
   const { toast } = useToast()
-  const [comments, setComments] = useState<ReviewComment[]>([])
+  const [notes, setNotes] = useState<ReciboInternalNote[]>([])
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
   const load = useCallback(() => {
-    getReciboReviewComments(ideaId).then(setComments).catch(() => setComments([]))
+    listReciboInternalNotes(ideaId).then(setNotes).catch(() => setNotes([]))
   }, [ideaId])
 
   useEffect(() => {
@@ -32,7 +36,7 @@ export function ReciboFeedback({ ideaId }: { ideaId: string }) {
     if (!body || pending) return
     setError(null)
     start(async () => {
-      const res = await addStaffReviewComment(ideaId, body)
+      const res = await addReciboInternalNote(ideaId, body)
       if (res.error) {
         setError(res.error)
         toast({ title: 'No se pudo guardar el motivo', description: res.error, variant: 'destructive' })
@@ -43,7 +47,7 @@ export function ReciboFeedback({ ideaId }: { ideaId: string }) {
     })
   }
 
-  if (!canWrite && comments.length === 0) return null
+  if (!canWrite && notes.length === 0) return null
 
   return (
     <section
@@ -51,31 +55,26 @@ export function ReciboFeedback({ ideaId }: { ideaId: string }) {
       className="space-y-2 border-t border-border px-3 py-3"
       aria-label="Motivo si no te gusta"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <MessageSquareWarning className="h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden="true" />
         <p className="text-xs font-semibold text-foreground">No me gusta · ¿por qué?</p>
+        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          Solo el equipo
+        </span>
       </div>
 
-      {comments.length > 0 && (
+      {notes.length > 0 && (
         <ul className="space-y-2" data-testid={`recibo-feedback-thread-${ideaId}`}>
-          {comments.map((comment) => (
-            <li key={comment.id} className="rounded-xl bg-muted/40 px-2.5 py-2">
+          {notes.map((note) => (
+            <li key={note.id} className="rounded-xl bg-muted/40 px-2.5 py-2">
               <div className="mb-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px]">
-                <span
-                  className={`rounded px-1 py-0.5 font-medium ${
-                    comment.author_kind === 'client'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {authorKindLabel(comment.author_kind)}
-                </span>
-                <span className="min-w-0 truncate font-medium">{comment.author_name}</span>
+                <span className="rounded bg-muted px-1 py-0.5 font-medium text-muted-foreground">Equipo</span>
+                <span className="min-w-0 truncate font-medium">{note.author_name}</span>
                 <span className="ml-auto shrink-0 whitespace-nowrap text-muted-foreground">
-                  {formatReviewDateES(comment.created_at)}
+                  {formatReviewDateES(note.created_at)}
                 </span>
               </div>
-              <p className="whitespace-pre-wrap text-xs leading-relaxed">{comment.body}</p>
+              <p className="whitespace-pre-wrap text-xs leading-relaxed">{note.body}</p>
             </li>
           ))}
         </ul>

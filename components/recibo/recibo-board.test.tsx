@@ -26,9 +26,9 @@ vi.mock('@/lib/actions/recibo-publish', () => ({
   publishReciboOnCadence: vi.fn(async () => ({ ok: true, label: 'viernes 25 de septiembre, 6:00 p.m.' })),
   cancelReciboSchedule: vi.fn(async () => ({ ok: true, deleted: true })),
 }))
-vi.mock('@/lib/actions/review-staff', () => ({
-  addStaffReviewComment: vi.fn(async () => ({ ok: true })),
-  getReciboReviewComments: vi.fn(async () => []),
+vi.mock('@/lib/actions/recibo-internal-notes', () => ({
+  addReciboInternalNote: vi.fn(async () => ({ ok: true })),
+  listReciboInternalNotes: vi.fn(async () => []),
 }))
 vi.mock('@/lib/actions/recibo-internal-notes', () => ({
   addReciboInternalNote: vi.fn(async () => ({ ok: true })),
