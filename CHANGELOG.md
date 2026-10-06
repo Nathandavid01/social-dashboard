@@ -4,6 +4,15 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.127 — 2026-10-06
+
+**Los videos editados por Nathan también aparecen en Recibo y sus contadores.**
+- Los cortes subidos por Eric o Nathan entran en Recibo aunque el cliente tenga editor humano.
+- Las entregas de Nathan suman al contador de autor y al mes correspondiente; varias versiones de una idea cuentan una sola vez.
+- Se conservan la revisión, los clientes en pausa y las restricciones comerciales.
+
+[Ver el ejemplo de entregas y contadores](/previews/v5.127-recibo-nathan.html)
+
 ## v5.126 — 2026-10-05
 
 **En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**
