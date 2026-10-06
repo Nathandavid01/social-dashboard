@@ -18,7 +18,7 @@ export type ReciboQueueIdea = {
   client_review_status?: string | null
   entregas_review_status?: string | null
   videos?: ReciboVideo[] | null
-  /** Paused or archived clients stay off Recibo, even if Eric uploaded the cut. */
+  /** Paused or archived clients stay off Recibo, even if Eric or Nathan uploaded the cut. */
   client?: { status?: string | null } | null
 }
 
@@ -28,16 +28,24 @@ export function usableCut(video: ReciboVideo): boolean {
   return video.kind === 'edited' && video.status !== 'archived' && video.status !== 'failed'
 }
 
+const RECIBO_EDIT_UPLOADER_IDS: ReadonlySet<string> = new Set([
+  ...ERIC_IDS,
+  '165e5259-8f69-4ff4-b0f0-f790cba77b80', // Nathan Torres — verified real account, not Nathan Test
+])
+
 function hasEditedCut(idea: ReciboQueueIdea): boolean {
   return (idea.videos ?? []).some(usableCut)
 }
 
 /**
- * A usable edited cut that Eric uploaded (dashboard or terminal taller). Eric 2026-09-24: «quiero que puedas
- * poner en recibo los videos que yo edito aunque el cliente sea de un editor».
+ * Eric or Nathan's usable edited cut enters Recibo regardless of the client's editor.
+ * Eric 2026-10-06: «también Nathan los puede hacer, cualquiera de los dos».
+ * Eligibility uses the real uploader id, never a display name or owner role.
  */
-export function hasEricCut(idea: ReciboQueueIdea): boolean {
-  return (idea.videos ?? []).some((video) => usableCut(video) && !!video.uploaded_by && ERIC_IDS.has(video.uploaded_by))
+export function hasReciboUploaderCut(idea: ReciboQueueIdea): boolean {
+  return (idea.videos ?? []).some((video) =>
+    usableCut(video) && !!video.uploaded_by && RECIBO_EDIT_UPLOADER_IDS.has(video.uploaded_by),
+  )
 }
 
 /**
@@ -70,11 +78,11 @@ export const RECIBO_HELD_CLIENT_IDS: ReadonlySet<string> = new Set([
 
 export const RECIBO_MANUAL_IDEA_IDS: ReadonlySet<string> = new Set()
 
-/** The AI clients' waiting cuts, plus any waiting cut Eric uploaded (whatever the client's editor). */
+/** The AI clients' waiting cuts, plus any waiting cut Eric or Nathan uploaded (whatever the client's editor). */
 export function reciboBoardIdeas<T extends ReciboQueueIdea>(ideas: T[], aiClientIds: Iterable<string>): T[] {
   const ids = new Set(aiClientIds)
   return ideas.filter((idea) => {
     if (RECIBO_HELD_CLIENT_IDS.has(idea.client_id) && !RECIBO_MANUAL_IDEA_IDS.has(idea.id)) return false
-    return (ids.has(idea.client_id) || hasEricCut(idea)) && belongsOnRecibo(idea)
+    return (ids.has(idea.client_id) || hasReciboUploaderCut(idea)) && belongsOnRecibo(idea)
   })
 }

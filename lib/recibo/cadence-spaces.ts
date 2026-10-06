@@ -7,7 +7,7 @@ import {
 } from '@/lib/utils/client-pool-state'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
 import {
-  hasEricCut,
+  hasReciboUploaderCut,
   RECIBO_HELD_CLIENT_IDS,
   RECIBO_MANUAL_IDEA_IDS,
   type ReciboQueueIdea,
@@ -65,8 +65,8 @@ function inReciboScope(idea: ReciboSpaceIdea, aiClientIds: Set<string>): boolean
   if (idea.client?.status && idea.client.status !== 'active') return false
   if (idea.status === 'descartada') return false
   if (RECIBO_HELD_CLIENT_IDS.has(idea.client_id) && !RECIBO_MANUAL_IDEA_IDS.has(idea.id)) return false
-  // Human clients: only Eric's edited cut. Raw stays in On Site → Revisión.
-  return aiClientIds.has(idea.client_id) || hasEricCut(idea)
+  // Human clients: only Eric or Nathan's edited cut. Raw stays in On Site → Revisión.
+  return aiClientIds.has(idea.client_id) || hasReciboUploaderCut(idea)
 }
 
 /** Videos that can fill a Recibo space or a monthly count. Includes published. */
@@ -151,7 +151,7 @@ export function buildReciboCadenceSpaces<T extends ReciboSpaceIdea>(input: {
   ideas: T[]
   occupancyIdeas?: T[]
   week: { desde: string; hasta: string }
-  /** Empty cadence padding is only for AI clients. Eric cuts on a human client stay as cards. */
+  /** Empty cadence padding is only for AI clients. Eric or Nathan cuts on a human client stay as cards. */
   padEmpty?: boolean
 }): ReciboCadenceSpace<T>[] {
   const occupancy = input.occupancyIdeas ?? input.ideas
