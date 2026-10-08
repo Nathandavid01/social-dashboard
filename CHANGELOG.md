@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.128 — 2026-10-08
+
+**En Recibo, Programar ya funciona si al cliente AI le falta la hora o los días de cadencia.**
+- Si el cliente AI tiene cadencia completa, el botón sigue diciendo **Programar para** el día y la hora (ejemplo: martes 11:19 a.m.).
+- Si le falta la hora (o tiene basura como «reel» / «post» en ese campo), aparecen fecha y hora en la tarjeta. Ya no se ve «12:NaN p.m.».
+- El hint dice *Este cliente no tiene hora de publicación; escógela aquí*. Si hay días, la fecha sale prellenada con el próximo de cadencia.
+- Los clientes con editor humano no se programan desde Recibo: en vez del botón aparece *Solo clientes AI se programan desde Recibo*. El servidor sigue rechazando ese caso.
+- Queda como borrador en Metricool, igual que hoy. No se publica solo.
+
+[Ver los tres estados](/previews/v5.128-recibo-programar-ai.html)
+
+![Programar Recibo con cadencia incompleta](/changelog/v5.128-recibo-programar-ai.png)
+
 ## v5.126 — 2026-10-05
 
 **En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**

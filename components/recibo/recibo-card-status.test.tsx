@@ -7,7 +7,7 @@ const setManualPostedStatus = vi.fn()
 const publishReciboOnCadence = vi.fn()
 const cancelReciboSchedule = vi.fn()
 const refresh = vi.fn()
-const toast = vi.fn((..._a: unknown[]) => ({ dismiss: vi.fn() }))
+const toast = vi.fn(() => ({ dismiss: vi.fn() }))
 
 vi.mock('@/lib/actions/recibo', () => ({
   setManualPostedStatus: (...a: unknown[]) => setManualPostedStatus(...a),
@@ -117,6 +117,7 @@ describe('ReciboPublishButton — programar el espacio', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     expect(screen.getByRole('button', { name: /Programar para/i })).toHaveTextContent(/miércoles 7 de octubre/i)
@@ -131,6 +132,7 @@ describe('ReciboPublishButton — programar el espacio', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     await userEvent.click(screen.getByRole('button', { name: /Programar para/i }))
@@ -147,6 +149,7 @@ describe('ReciboPublishButton — programar el espacio', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-09-28"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
@@ -168,6 +171,7 @@ describe('ReciboPublishButton — programar el espacio', () => {
         spaceDateISO="2026-10-04"
         nowMs={Date.parse('2026-10-04T20:00:00-04:00')}
         cadence={{ ...cadence, postingDays: [0], postingTime: '09:00' }}
+        editMode="ai"
       />,
     )
     expect(screen.getByText(/ya pasó/i)).toBeInTheDocument()
@@ -186,6 +190,7 @@ describe('ReciboPublishButton — ya programado', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     expect(screen.getByText(/Programado miércoles 7 de octubre/i)).toBeInTheDocument()
@@ -203,6 +208,7 @@ describe('ReciboPublishButton — ya programado', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     await userEvent.click(screen.getByRole('button', { name: /Cambiar fecha/i }))
@@ -222,6 +228,7 @@ describe('ReciboPublishButton — ya programado', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     await userEvent.click(screen.getByRole('button', { name: /Cancelar programación/i }))
@@ -240,11 +247,67 @@ describe('ReciboPublishButton — ya programado', () => {
         todayISO="2026-10-04"
         spaceDateISO="2026-10-07"
         cadence={cadence}
+        editMode="ai"
       />,
     )
     await userEvent.click(screen.getByRole('button', { name: /Cambiar fecha/i }))
     await userEvent.type(screen.getByLabelText('Nueva fecha'), '2026-09-28')
     expect(screen.getByRole('button', { name: /Guardar nueva fecha/i })).toBeDisabled()
+    expect(publishReciboOnCadence).not.toHaveBeenCalled()
+  })
+})
+
+describe('ReciboPublishButton — cadencia incompleta (AI)', () => {
+  it('no muestra NaN si la hora guardada es reel', () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-06"
+        cadence={{ ...cadence, postingDays: [2], postingTime: 'reel' }}
+        editMode="ai"
+      />,
+    )
+    expect(document.body.textContent).not.toMatch(/NaN/)
+    expect(screen.queryByRole('button', { name: /12:NaN/i })).not.toBeInTheDocument()
+  })
+
+  it('pide fecha y hora a mano y prellena el próximo día de cadencia', async () => {
+    publishReciboOnCadence.mockResolvedValue({ ok: true, label: 'martes 6 de octubre, 11:19 a.m.' })
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-06"
+        cadence={{ ...cadence, postingDays: [2], postingTime: null }}
+        editMode="ai"
+      />,
+    )
+    expect(screen.getByText(/no tiene hora de publicación; escógela aquí/i)).toBeInTheDocument()
+    const dateField = screen.getByLabelText(/fecha/i)
+    expect(dateField).toHaveValue('2026-10-06')
+    const timeField = screen.getByLabelText(/hora/i)
+    await userEvent.clear(timeField)
+    await userEvent.type(timeField, '11:19')
+    await userEvent.click(screen.getByRole('button', { name: /Programar/i }))
+    await waitFor(() => expect(publishReciboOnCadence).toHaveBeenCalledWith('i1', '2026-10-06', '11:19'))
+  })
+})
+
+describe('ReciboPublishButton — cliente no-AI', () => {
+  it('muestra la nota y no un botón que programe', async () => {
+    render(
+      <ReciboPublishButton
+        ideaId="i1"
+        approved
+        todayISO="2026-10-04"
+        spaceDateISO="2026-10-07"
+        cadence={cadence}
+        editMode="human"
+      />,
+    )
+    expect(screen.getByText(/Solo clientes AI se programan desde Recibo/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Programar/i })).not.toBeInTheDocument()
     expect(publishReciboOnCadence).not.toHaveBeenCalled()
   })
 })

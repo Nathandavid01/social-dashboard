@@ -84,6 +84,47 @@ describe('publishReciboOnCadence', () => {
     expect(schedulePoolIdea).toHaveBeenCalledWith({ ideaId: 'i1', date: '2026-10-09', asDraft: true })
     expect(res).toMatchObject({ ok: true })
   })
+
+  it('rechaza hora inválida y no llama a Metricool', async () => {
+    for (const time of ['reel', 'post', '25:00', '12:60', '']) {
+      schedulePoolIdea.mockClear()
+      const res = await publishReciboOnCadence('i1', '2026-10-09', time)
+      expect(schedulePoolIdea).not.toHaveBeenCalled()
+      expect(res.error).toMatch(/hora/i)
+    }
+  })
+
+  it('rechaza fecha pasada aunque la hora sea válida', async () => {
+    const res = await publishReciboOnCadence('i1', '2026-09-28', '11:19')
+    expect(schedulePoolIdea).not.toHaveBeenCalled()
+    expect(res).toMatchObject({ error: expect.stringMatching(/ya pasó/i), reason: 'pasado' })
+  })
+
+  it('AI + aprobado + hora explícita agenda con esa hora (borrador)', async () => {
+    idea.mockResolvedValue({
+      data: { id: 'i1', client: { posting_days: [], posting_time: null, posting_schedule: null } },
+      error: null,
+    })
+    schedulePoolIdea.mockResolvedValue({ ok: true, state: 'agendado', draft: true })
+    const res = await publishReciboOnCadence('i1', '2026-10-09', '11:19')
+    expect(schedulePoolIdea).toHaveBeenCalledWith({
+      ideaId: 'i1',
+      date: '2026-10-09',
+      time: '11:19',
+      asDraft: true,
+    })
+    expect(res).toMatchObject({ ok: true })
+    if (res.ok) expect(res.label).toMatch(/11:19 a\.m\./i)
+  })
+
+  it('pasa el rechazo de cliente no-AI de schedulePoolIdea', async () => {
+    schedulePoolIdea.mockResolvedValue({
+      error: 'Solo el pool de Recibo (clientes AI) se agenda desde aquí',
+    })
+    const res = await publishReciboOnCadence('i1', '2026-10-09', '11:19')
+    expect(schedulePoolIdea).toHaveBeenCalled()
+    expect(res.error).toMatch(/AI/i)
+  })
 })
 
 describe('cancelReciboSchedule', () => {

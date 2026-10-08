@@ -8,7 +8,8 @@ import { setManualPostedStatus, setStaffClientApproval, type ManualPostedStatus 
 import { crearEnlaceCliente } from '@/lib/actions/entregas-client-review'
 import { cancelReciboSchedule, publishReciboOnCadence } from '@/lib/actions/recibo-publish'
 import { useHasPermission } from '@/components/auth/role-gate'
-import { nextCadenceSlot, reciboScheduleTarget, type CadenceSlot } from '@/lib/recibo/cadence-slot'
+import { manualCadenceSlot, nextCadenceSlot, reciboScheduleTarget, type CadenceSlot } from '@/lib/recibo/cadence-slot'
+import { parseSlotTime } from '@/lib/utils/posting-schedule'
 import { cn } from '@/lib/utils'
 
 export function ReciboStatusMarks({
@@ -143,6 +144,7 @@ export function ReciboPublishButton({
   spaceDateISO = null,
   nowMs,
   scheduled = false,
+  editMode,
 }: {
   ideaId: string
   approved: boolean
@@ -156,12 +158,25 @@ export function ReciboPublishButton({
   spaceDateISO?: string | null
   nowMs?: number
   scheduled?: boolean
+  editMode: 'ai' | 'human'
 }) {
   const { toast } = useToast()
   const router = useRouter()
   const canPublish = useHasPermission('posting.publish')
   const [pending, start] = useTransition()
-  const [pickedDate, setPickedDate] = useState('')
+  const [pickedDate, setPickedDate] = useState(() => {
+    const slot = reciboScheduleTarget({
+      spaceDateISO,
+      postingDays: cadence.postingDays,
+      postingTime: cadence.postingTime,
+      postingSchedule: cadence.postingSchedule,
+      todayISO,
+      nowMs,
+    })
+    if (!slot.ok && slot.dateISO && (slot.reason === 'sin-hora' || slot.reason === 'sin-dias')) return slot.dateISO
+    return ''
+  })
+  const [pickedTime, setPickedTime] = useState('')
   const [isScheduled, setIsScheduled] = useState(scheduled)
   const [scheduledLabel, setScheduledLabel] = useState<string | null>(null)
   const [changingDate, setChangingDate] = useState(false)
@@ -190,7 +205,11 @@ export function ReciboPublishButton({
     todayISO,
   })
   const past = target.ok === false && target.reason === 'pasado'
-  const showDateField = past || changingDate
+  const needsManual = target.ok === false && (target.reason === 'sin-hora' || target.reason === 'sin-dias')
+  const showDateField = past || changingDate || needsManual
+  const showTimeField = needsManual || (changingDate && !currentSlot.ok)
+  const parsedTime = parseSlotTime(pickedTime)
+  const manualSlot = needsManual && pickedDate && parsedTime ? manualCadenceSlot(pickedDate, parsedTime) : null
   const programmedText = scheduledLabel
     ?? (currentSlot.ok ? currentSlot.label : spaceDateISO)
 
@@ -199,27 +218,36 @@ export function ReciboPublishButton({
   else if (!approved) hint = 'Márcalo aprobado para programarlo.'
   else if (!cadence.metricool) hint = 'A este cliente le falta Metricool.'
   else if (past) hint = `El espacio era ${target.label ?? spaceDateISO}. Esa fecha ya pasó; no se programa en el pasado.`
-  else if (!target.ok && target.reason === 'sin-dias') hint = 'Agrega los días de publicación en la cadencia del cliente.'
-  else if (!target.ok) hint = 'Agrega la hora de publicación en la cadencia del cliente.'
+  else if (!target.ok && target.reason === 'sin-hora') hint = 'Este cliente no tiene hora de publicación; escógela aquí'
+  else if (!target.ok && target.reason === 'sin-dias') hint = 'Este cliente no tiene días de publicación; escoge fecha y hora aquí'
 
-  const dateToSend = target.ok ? target.dateISO : null
-  const canSchedule = Boolean(approved && cadence.metricool && target.ok && dateToSend)
+  const dateToSend = target.ok ? target.dateISO : (needsManual ? pickedDate || null : null)
+  const manualReady = Boolean(needsManual && pickedDate && parsedTime && pickedDate >= todayISO)
+  const canSchedule = Boolean(approved && cadence.metricool && ((target.ok && dateToSend) || manualReady))
   const label = isScheduled && !changingDate
     ? `Programado ${programmedText}`
-    : target.ok
-      ? `Programar para ${target.label}`
-      : 'Programar en Metricool'
+    : manualSlot?.ok
+      ? `Programar para ${manualSlot.label}`
+      : target.ok
+        ? `Programar para ${target.label}`
+        : 'Programar en Metricool'
 
   function publish() {
-    if (!canSchedule || !dateToSend) return
+    if (!canSchedule) return
+    const manualTime = needsManual || showTimeField ? parsedTime : null
+    const date = target.ok ? target.dateISO : pickedDate
+    if (!date) return
+    if ((needsManual || showTimeField) && !manualTime) return
     start(async () => {
-      const res = await publishReciboOnCadence(ideaId, dateToSend)
+      const res = manualTime
+        ? await publishReciboOnCadence(ideaId, date, manualTime)
+        : await publishReciboOnCadence(ideaId, date)
       if (res.error) toast({ title: 'No se programó', description: res.error, variant: 'destructive' })
       else {
         setIsScheduled(true)
         setChangingDate(false)
-        setScheduledLabel(res.label ?? (target.ok ? target.label : dateToSend))
-        toast({ title: `Programado ${res.label ?? dateToSend}`, description: 'Quedó como borrador en Metricool. No se publica solo.' })
+        setScheduledLabel(res.label ?? (target.ok ? target.label : date))
+        toast({ title: `Programado ${res.label ?? date}`, description: 'Quedó como borrador en Metricool. No se publica solo.' })
         router.refresh()
       }
     })
@@ -236,6 +264,7 @@ export function ReciboPublishButton({
       setConfirmCancel(false)
       setScheduledLabel(null)
       setPickedDate('')
+      setPickedTime('')
       toast({
         title: 'Programación cancelada',
         description: res.leftoverDraft
@@ -244,6 +273,22 @@ export function ReciboPublishButton({
       })
       router.refresh()
     })
+  }
+
+  if (editMode !== 'ai') {
+    if (!canPublish) {
+      return isScheduled ? (
+        <p className="px-3 pb-3 text-xs font-semibold text-violet-100">Programado {programmedText}</p>
+      ) : null
+    }
+    return (
+      <div className="px-3 pb-3">
+        {isScheduled ? (
+          <p className="mb-2 text-xs font-semibold text-violet-100">Programado {programmedText}</p>
+        ) : null}
+        <p className="text-[11px] leading-snug text-muted-foreground">Solo clientes AI se programan desde Recibo</p>
+      </div>
+    )
   }
 
   if (!canPublish) {
@@ -259,7 +304,7 @@ export function ReciboPublishButton({
       ) : null}
       {showDateField ? (
         <label className="mb-2 block text-[11px] text-amber-200">
-          Nueva fecha
+          {needsManual && !past && !changingDate ? 'Fecha de publicación' : 'Nueva fecha'}
           <input
             type="date"
             min={todayISO}
@@ -269,10 +314,21 @@ export function ReciboPublishButton({
           />
         </label>
       ) : null}
-      {showDateField && nextSlot.ok ? (
+      {showTimeField ? (
+        <label className="mb-2 block text-[11px] text-amber-200">
+          Hora de publicación
+          <input
+            type="time"
+            value={pickedTime}
+            onChange={(event) => setPickedTime(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-amber-500/40 bg-black/40 px-2 py-1.5 text-xs text-foreground"
+          />
+        </label>
+      ) : null}
+      {showDateField && (nextSlot.ok || nextSlot.dateISO) ? (
         <button
           type="button"
-          onClick={() => setPickedDate(nextSlot.dateISO)}
+          onClick={() => { if (nextSlot.dateISO) setPickedDate(nextSlot.dateISO) }}
           className="mb-2 text-left text-[11px] font-medium text-violet-300"
         >
           Usar próximo de cadencia · {nextSlot.label}

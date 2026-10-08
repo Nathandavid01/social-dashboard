@@ -284,6 +284,57 @@ describe('schedulePoolIdea', () => {
     })
     expect(h.post).not.toHaveBeenCalled()
   })
+
+  it('hora explícita gana a la cadencia (create y Cambiar fecha)', async () => {
+    const created = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23', time: '11:19' })
+    expect(created).toMatchObject({ ok: true, state: 'agendado', draft: true })
+    expect(h.post).toHaveBeenCalledWith(
+      'Caption listo',
+      'blog-ai',
+      ['instagram'],
+      undefined,
+      '2026-09-23T11:19:00',
+      expect.anything(),
+    )
+
+    h.idea.metricool_post_id = 44
+    h.idea.metricool_uuid = 'u-44'
+    h.idea.posted_at = '2026-09-20T10:00:00Z'
+    const moved = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-25', time: '09:05', asDraft: true })
+    expect(moved).toMatchObject({ ok: true, rescheduled: true })
+    expect(h.update).toHaveBeenCalledWith(
+      44,
+      'blog-ai',
+      expect.objectContaining({
+        draft: true,
+        publicationDate: {
+          dateTime: '2026-09-25T09:05:00',
+          timezone: 'America/Puerto_Rico',
+        },
+      }),
+    )
+  })
+
+  it('hora explícida inválida no agenda ni inventa 10:00', async () => {
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23', time: 'reel' })
+    expect(res.error).toMatch(/hora/i)
+    expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('sin override, reel/post en cadencia se rechazan (Pool no inventa 10:00)', async () => {
+    ;(h.idea.client as { posting_time: string }).posting_time = 'reel'
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23' })
+    expect(res.error).toMatch(/hora/i)
+    expect(h.post).not.toHaveBeenCalled()
+  })
+
+  it('cliente no-AI sigue rechazado aunque manden hora explícita', async () => {
+    ;(h.idea.client as { edit_mode: string }).edit_mode = 'human'
+    expect(await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-23', time: '11:19' })).toMatchObject({
+      error: expect.stringMatching(/Recibo|pool|AI/i),
+    })
+    expect(h.post).not.toHaveBeenCalled()
+  })
 })
 
 describe('unschedulePoolIdea', () => {

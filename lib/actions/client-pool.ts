@@ -10,7 +10,7 @@ import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 import { resolvePlatforms, resolveVideoForPublish } from '@/lib/utils/idea-posting-core'
 import { automaticPublishSchedule } from '@/lib/utils/automatic-publish-schedule'
-import { resolveSlotTime } from '@/lib/utils/posting-schedule'
+import { parseSlotTime } from '@/lib/utils/posting-schedule'
 import { rangoSemana, diaDeFecha } from '@/lib/entregas/dias'
 import { coverUrlForIdea } from '@/lib/pipeline/editor-history'
 import {
@@ -68,11 +68,32 @@ function coverVideoIdOf(videos: Array<{ id: string; kind?: string | null; status
  * Nunca autoPublish en el primer envío: el live se confirma en Metricool.
  * Agendado → otra fecha: PUT updateScheduledPost (no un segundo POST).
  */
+function resolvePoolScheduleTime(input: {
+  date: string
+  postingTime?: string | null
+  postingSchedule?: Record<string, string> | null
+  timeOverride?: string | null
+}): { time: string | null; error?: string } {
+  if (input.timeOverride !== undefined && input.timeOverride !== null) {
+    const parsed = parseSlotTime(input.timeOverride)
+    if (!parsed) return { time: null, error: 'La hora de publicación no es válida' }
+    return { time: parsed }
+  }
+  const dow = diaDeFecha(input.date)
+  if (dow == null) return { time: input.postingTime ?? null }
+  const override = input.postingSchedule?.[String(dow)]
+  if (override && override.trim()) return { time: override }
+  if (input.postingTime && input.postingTime.trim()) return { time: input.postingTime }
+  return { time: null }
+}
+
 export async function schedulePoolIdea(input: {
   ideaId: string
   date: string
   /** Recibo keeps a Metricool draft. The Panel reschedule stays live. */
   asDraft?: boolean
+  /** Explicit HH:MM from Recibo when cadence time is missing. Pool drag omits this. */
+  time?: string | null
 }): Promise<SchedulePoolResult> {
   try {
     await requirePermission('posting.publish')
@@ -123,6 +144,7 @@ export async function schedulePoolIdea(input: {
       ideaId: input.ideaId,
       date: input.date,
       asDraft: input.asDraft === true,
+      time: input.time,
     })
   }
   if (!canCreateMetricoolSchedule(state, editMode)) {
@@ -155,11 +177,14 @@ export async function schedulePoolIdea(input: {
   const health = await checkVideoPlayable(pubUrl)
   if (!health.ok) return { error: `El video no se puede reproducir desde su URL pública: ${health.reason}` }
 
-  const dow = diaDeFecha(input.date)
-  const slotTime = dow == null
-    ? client.posting_time
-    : resolveSlotTime(dow, client.posting_time, client.posting_schedule)
-  const schedule = automaticPublishSchedule(input.date, slotTime)
+  const resolvedTime = resolvePoolScheduleTime({
+    date: input.date,
+    postingTime: client.posting_time,
+    postingSchedule: client.posting_schedule,
+    timeOverride: input.time,
+  })
+  if (resolvedTime.error) return { error: resolvedTime.error }
+  const schedule = automaticPublishSchedule(input.date, resolvedTime.time)
   if (!schedule.ok) return { error: schedule.error }
 
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
@@ -281,6 +306,7 @@ async function rescheduleAgendadoIdea(input: {
   ideaId: string
   date: string
   asDraft?: boolean
+  time?: string | null
 }): Promise<SchedulePoolResult> {
   const postId = (input.idea.metricool_post_id as number | null) ?? null
   if (postId == null) {
@@ -290,11 +316,14 @@ async function rescheduleAgendadoIdea(input: {
   const blogId = input.client.metricool_blog_id?.trim()
   if (!blogId) return { error: 'El cliente no tiene Metricool configurado (falta blog_id)' }
 
-  const dow = diaDeFecha(input.date)
-  const slotTime = dow == null
-    ? input.client.posting_time
-    : resolveSlotTime(dow, input.client.posting_time, input.client.posting_schedule)
-  const schedule = automaticPublishSchedule(input.date, slotTime)
+  const resolvedTime = resolvePoolScheduleTime({
+    date: input.date,
+    postingTime: input.client.posting_time,
+    postingSchedule: input.client.posting_schedule,
+    timeOverride: input.time,
+  })
+  if (resolvedTime.error) return { error: resolvedTime.error }
+  const schedule = automaticPublishSchedule(input.date, resolvedTime.time)
   if (!schedule.ok) return { error: schedule.error }
 
   const media = await resolvePoolMedia(

@@ -20,6 +20,29 @@ describe('resolveSlotTime', () => {
     expect(resolveSlotTime(1, null, {})).toBeNull()
     expect(resolveSlotTime(1, undefined, undefined)).toBeNull()
   })
+
+  it('acepta HH:MM válidas (24h) y normaliza', () => {
+    expect(resolveSlotTime(1, '11:19', null)).toBe('11:19')
+    expect(resolveSlotTime(1, '09:05', null)).toBe('09:05')
+    expect(resolveSlotTime(2, '9:05', null)).toBe('09:05')
+    expect(resolveSlotTime(3, '18:00:00', null)).toBe('18:00')
+  })
+
+  it('ignora reel, post, vacío y basura como si no hubiera hora', () => {
+    expect(resolveSlotTime(1, 'reel', null)).toBeNull()
+    expect(resolveSlotTime(1, 'post', null)).toBeNull()
+    expect(resolveSlotTime(1, '', null)).toBeNull()
+    expect(resolveSlotTime(1, '   ', null)).toBeNull()
+    expect(resolveSlotTime(1, '12:NaN', null)).toBeNull()
+    expect(resolveSlotTime(1, '25:00', null)).toBeNull()
+    expect(resolveSlotTime(1, '12:60', null)).toBeNull()
+    expect(resolveSlotTime(1, 'mediodía', null)).toBeNull()
+  })
+
+  it('si el override del día es basura, cae a posting_time si es válida', () => {
+    expect(resolveSlotTime(3, '14:30', { '3': 'reel' })).toBe('14:30')
+    expect(resolveSlotTime(3, 'post', { '3': 'reel' })).toBeNull()
+  })
 })
 
 describe('computeScheduleSlots', () => {

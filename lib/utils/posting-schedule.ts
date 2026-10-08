@@ -33,19 +33,30 @@ export interface ScheduleSummary {
   falto: number
 }
 
+/** HH:MM (24h), optionally with seconds. "reel" / "post" / garbage → null. */
+const SLOT_TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/
+
+export function parseSlotTime(value: string | null | undefined): string | null {
+  if (value == null) return null
+  const match = SLOT_TIME_RE.exec(value.trim())
+  if (!match) return null
+  return `${match[1].padStart(2, '0')}:${match[2]}`
+}
+
 /**
  * Resolve the expected posting time for a given weekday: a per-day override in
  * posting_schedule wins, otherwise the default posting_time, otherwise null.
+ * Only valid HH:MM values count — "reel", "post", empty, and other junk are
+ * treated as "no time" so labels never render 12:NaN.
  */
 export function resolveSlotTime(
   dayOfWeek: number,
   postingTime: string | null | undefined,
   postingSchedule: Record<string, string> | null | undefined,
 ): string | null {
-  const override = postingSchedule?.[String(dayOfWeek)]
-  if (override && override.trim()) return override
-  if (postingTime && postingTime.trim()) return postingTime
-  return null
+  const override = parseSlotTime(postingSchedule?.[String(dayOfWeek)])
+  if (override) return override
+  return parseSlotTime(postingTime)
 }
 
 /** YYYY-MM-DD from a Date's LOCAL calendar fields (matches posting-cadence). */
