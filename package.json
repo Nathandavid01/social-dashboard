@@ -21,6 +21,7 @@
     "test:relationships": "vitest run lib/actions/content-idea-video-relationship scripts/check-content-idea-video-schema --exclude \"**/.claude/**\"",
     "pretest": "npm run check:db-relationships",
     "announce-commit": "node scripts/announce-commit.mjs",
+    "recording-ops:digest": "tsx lib/agents/recording-ops/cli.ts",
     "merge-gate": "node scripts/merge-gate.mjs",
     "migrate:r2-to-entregas": "node scripts/migrate-pipeline-r2-to-entregas.mjs --execute",
     "migrate:r2-to-entregas:dry": "node scripts/migrate-pipeline-r2-to-entregas.mjs --dry-run",

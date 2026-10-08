@@ -1,0 +1,112 @@
+{
+  "sessions": [
+    {
+      "id": "s1",
+      "session_date": "2026-09-22",
+      "start_time": "09:00",
+      "end_time": "11:00",
+      "title": "Grabación Café Sol",
+      "status": "scheduled",
+      "client_id": "c1",
+      "client_name": "Café Sol",
+      "videographer_id": "v1",
+      "videographer_name": "Ana Rivera",
+      "confirmation_status": "unconfirmed",
+      "client_confirmed_at": null,
+      "videographer_confirmed_at": null
+    },
+    {
+      "id": "s2",
+      "session_date": "2026-09-23",
+      "start_time": "10:00",
+      "end_time": "12:00",
+      "title": "Grabación Estudio Norte",
+      "status": "scheduled",
+      "client_id": "c2",
+      "client_name": "Estudio Norte",
+      "videographer_id": null,
+      "videographer_name": null,
+      "confirmation_status": "unconfirmed",
+      "client_confirmed_at": null,
+      "videographer_confirmed_at": null
+    },
+    {
+      "id": "s3",
+      "session_date": "2026-09-24",
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "title": "Grabación Café Sol (T2)",
+      "status": "scheduled",
+      "client_id": "c1",
+      "client_name": "Café Sol",
+      "videographer_id": "v1",
+      "videographer_name": "Ana Rivera",
+      "confirmation_status": "confirmed",
+      "client_confirmed_at": "2026-09-18T15:00:00Z",
+      "videographer_confirmed_at": "2026-09-18T15:05:00Z"
+    },
+    {
+      "id": "s4",
+      "session_date": "2026-09-20",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "title": "Fuera de ventana",
+      "status": "scheduled",
+      "client_id": "c1",
+      "client_name": "Café Sol",
+      "videographer_id": "v1",
+      "videographer_name": "Ana Rivera",
+      "confirmation_status": "unconfirmed",
+      "client_confirmed_at": null,
+      "videographer_confirmed_at": null
+    },
+    {
+      "id": "s5",
+      "session_date": "2026-09-23",
+      "start_time": "15:00",
+      "end_time": "17:00",
+      "title": "Grabación Mar Azul",
+      "status": "scheduled",
+      "client_id": "c3",
+      "client_name": "Mar Azul",
+      "videographer_id": "v2",
+      "videographer_name": "Luis Vega",
+      "confirmation_status": "unconfirmed",
+      "client_confirmed_at": "2026-09-19T12:00:00Z",
+      "videographer_confirmed_at": null
+    },
+    {
+      "id": "s6",
+      "session_date": "2026-09-25",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "title": "Cancelada",
+      "status": "cancelled",
+      "client_id": "c2",
+      "client_name": "Estudio Norte",
+      "videographer_id": "v2",
+      "videographer_name": "Luis Vega",
+      "confirmation_status": "unconfirmed",
+      "client_confirmed_at": null,
+      "videographer_confirmed_at": null
+    }
+  ],
+  "ideas": [
+    { "id": "i1", "title": "Reel menú", "status": "idea", "client_id": "c1", "recording_session_id": "s1" },
+    { "id": "i2", "title": "Reel terraza", "status": "asignada", "client_id": "c1", "recording_session_id": "s1" },
+    { "id": "i3", "title": " ", "status": "idea", "client_id": "c1", "recording_session_id": "s1" },
+    { "id": "i4", "title": "Descartada", "status": "descartada", "client_id": "c1", "recording_session_id": "s1" },
+    { "id": "i5", "title": "Hook norte", "status": "idea", "client_id": "c2", "recording_session_id": "s2" },
+    { "id": "i6", "title": "Confirmada extra", "status": "idea", "client_id": "c1", "recording_session_id": "s3" },
+    { "id": "i7", "title": "Otro cliente", "status": "idea", "client_id": "c9", "recording_session_id": "s1" }
+  ],
+  "clients": [
+    { "id": "c1", "name": "Café Sol", "posting_days": [1, 4], "assigned_to": "e1", "assignee_name": "Marta Editor" },
+    { "id": "c2", "name": "Estudio Norte", "posting_days": [2, 3, 5], "assigned_to": "e1", "assignee_name": "Marta Editor" },
+    { "id": "c3", "name": "Mar Azul", "posting_days": [], "assigned_to": null, "assignee_name": null }
+  ],
+  "videographers": [
+    { "id": "v1", "full_name": "Ana Rivera", "daily_video_capacity": 3 },
+    { "id": "v2", "full_name": "Luis Vega", "daily_video_capacity": 2 }
+  ]
+}
