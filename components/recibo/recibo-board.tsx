@@ -454,6 +454,7 @@ export function ReciboBoard({
                                       todayISO={todayISO ?? ''}
                                       spaceDateISO={space.dateISO ?? idea.publish_date ?? null}
                                       cadence={cadence}
+                                      editMode={client.ai ? 'ai' : 'human'}
                                     />
                                   )}
                                 </li>

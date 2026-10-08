@@ -12,15 +12,48 @@ describe('nextCadenceSlot', () => {
     if (slot.ok) expect(slot.label).toContain('6:00 p.m.')
   })
 
-  it('dice cuando no hay días o no hay hora', () => {
+  it('dice cuando no hay días o no hay hora y pide fecha/hora a mano', () => {
     expect(nextCadenceSlot({ postingDays: [], postingTime: '18:00', todayISO: '2026-09-23' })).toEqual({
       ok: false,
       reason: 'sin-dias',
+      needsManual: true,
     })
-    expect(nextCadenceSlot({ postingDays: [3], postingTime: null, todayISO: '2026-09-23' })).toEqual({
+    expect(nextCadenceSlot({ postingDays: [3], postingTime: null, todayISO: '2026-09-23' })).toMatchObject({
       ok: false,
       reason: 'sin-hora',
+      needsManual: true,
+      dateISO: '2026-09-23',
     })
+  })
+
+  it('sin hora válida prellena el próximo día de cadencia', () => {
+    const slot = nextCadenceSlot({
+      postingDays: [1],
+      postingTime: null,
+      todayISO: '2026-10-08',
+    })
+    expect(slot).toMatchObject({
+      ok: false,
+      reason: 'sin-hora',
+      needsManual: true,
+      dateISO: '2026-10-12',
+    })
+  })
+
+  it('reel o post en la hora no inventan 12:NaN y piden hora a mano', () => {
+    const slot = nextCadenceSlot({
+      postingDays: [2],
+      postingTime: 'reel',
+      todayISO: '2026-10-06',
+    })
+    expect(JSON.stringify(slot)).not.toMatch(/NaN/)
+    expect(slot).toMatchObject({
+      ok: false,
+      reason: 'sin-hora',
+      needsManual: true,
+      dateISO: '2026-10-06',
+    })
+    if (!slot.ok) expect(slot.label ?? '').not.toMatch(/NaN/)
   })
 })
 
@@ -35,10 +68,19 @@ describe('cadenceSlotForDate', () => {
   })
 
   it('no inventa hora si el cliente no tiene posting_time ese día', () => {
-    expect(cadenceSlotForDate({ dateISO: '2026-10-07', postingTime: null })).toEqual({
+    expect(cadenceSlotForDate({ dateISO: '2026-10-07', postingTime: null })).toMatchObject({
       ok: false,
       reason: 'sin-hora',
+      needsManual: true,
+      dateISO: '2026-10-07',
     })
+  })
+
+  it('post en posting_time no produce NaN en la etiqueta', () => {
+    const slot = cadenceSlotForDate({ dateISO: '2026-10-07', postingTime: 'post' })
+    expect(slot.ok).toBe(false)
+    expect(JSON.stringify(slot)).not.toMatch(/NaN/)
+    if (!slot.ok) expect(slot.label ?? '').not.toMatch(/NaN/)
   })
 })
 
@@ -89,5 +131,28 @@ describe('reciboScheduleTarget', () => {
       todayISO: '2026-10-04',
       nowMs: Date.parse('2026-10-04T14:00:00-04:00'),
     })).toMatchObject({ ok: true, dateISO: '2026-10-04', time: '18:00' })
+  })
+
+  it('espacio futuro sin hora válida pide hora a mano y conserva la fecha', () => {
+    expect(reciboScheduleTarget({
+      spaceDateISO: '2026-10-13',
+      postingDays: [1],
+      postingTime: 'reel',
+      todayISO: '2026-10-08',
+    })).toMatchObject({
+      ok: false,
+      reason: 'sin-hora',
+      needsManual: true,
+      dateISO: '2026-10-13',
+    })
+  })
+
+  it('sin días ni fecha de espacio pide fecha y hora a mano', () => {
+    expect(reciboScheduleTarget({
+      spaceDateISO: null,
+      postingDays: [],
+      postingTime: '11:19',
+      todayISO: '2026-10-08',
+    })).toMatchObject({ ok: false, reason: 'sin-dias', needsManual: true })
   })
 })
