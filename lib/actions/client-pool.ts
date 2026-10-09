@@ -159,6 +159,9 @@ export async function schedulePoolIdea(input: {
   const slotTime = dow == null
     ? client.posting_time
     : resolveSlotTime(dow, client.posting_time, client.posting_schedule)
+  if(slotTime==null && (client.posting_time?.trim() || (dow!=null && client.posting_schedule?.[String(dow)]?.trim()))) {
+    return {error:'Falta una hora válida para este día; configura la frecuencia del cliente antes de agendar.'}
+  }
   const schedule = automaticPublishSchedule(input.date, slotTime)
   if (!schedule.ok) return { error: schedule.error }
 
@@ -294,6 +297,9 @@ async function rescheduleAgendadoIdea(input: {
   const slotTime = dow == null
     ? input.client.posting_time
     : resolveSlotTime(dow, input.client.posting_time, input.client.posting_schedule)
+  if(slotTime==null && (input.client.posting_time?.trim() || (dow!=null && input.client.posting_schedule?.[String(dow)]?.trim()))) {
+    return {error:'Falta una hora válida para este día; configura la frecuencia del cliente antes de agendar.'}
+  }
   const schedule = automaticPublishSchedule(input.date, slotTime)
   if (!schedule.ok) return { error: schedule.error }
 

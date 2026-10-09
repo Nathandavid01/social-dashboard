@@ -67,6 +67,18 @@ export function cleanPostingSchedule(
   return out
 }
 
+/** Preserve known content formats in stored schedules; they are never read as hours. */
+export function cleanPostingScheduleWithFormats(schedule:Record<string,string>|null|undefined):Record<string,string>{
+ const normalized=Object.fromEntries(Object.entries(schedule??{}).map(([day,value])=>[day,/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(value.trim())?value.trim().slice(0,5):value]))
+ const out=cleanPostingSchedule(normalized)
+ for(const [day,value] of Object.entries(schedule??{})){
+  if(!/^[0-6]$/.test(day))continue
+  const format=value.trim().toLowerCase()
+  if(['reel','post','story'].includes(format))out[day]=format
+ }
+ return out
+}
+
 export function cleanTimezone(tz: string | null | undefined): string | null {
   if (!tz || !tz.trim()) return null
   return isCadenceTimezone(tz.trim()) ? tz.trim() : null
@@ -123,6 +135,8 @@ export function minutesSinceMidnightInTz(timeZone: string, now: Date = new Date(
 export function cadenceRevalidatePaths(clientId: string): string[] {
   return [
     `/clients/${clientId}`,
+    `/clients/${clientId}/calendar`,
+    '/recibo',
     '/clients',
     '/pipeline',
     '/home',

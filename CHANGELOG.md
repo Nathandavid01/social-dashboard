@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.131 — 2026-10-09
+
+**Configura la frecuencia de cada cliente directamente desde Recibos.**
+- Pulsa «Configurar frecuencia» junto al cliente en el panel del calendario.
+- Elige días, hora general y horarios por día; los cambios se guardan automáticamente.
+- La frecuencia y las marcas «Previsto» se actualizan al confirmar el guardado.
+- Los posts programados en Metricool conservan sus fechas.
+
+[Ver configuración desde el calendario](/previews/v5.131-calendario-configurar.html)
+
+![Configurar frecuencia desde Recibos](/changelog/v5.131-calendario-configurar.png)
+
 ## v5.130 — 2026-10-09
 
 **Recibos marca los días en que le toca publicar a cada cliente.**
