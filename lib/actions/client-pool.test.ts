@@ -339,3 +339,13 @@ describe('unschedulePoolIdea', () => {
     expect(h.del).not.toHaveBeenCalled()
   })
 })
+
+describe('invalid cadence clocks do not become implicit 10am sends',()=>{
+ it.each([['new','25:00',null],['existing','25:00',null],['new',null,{3:'reel'}],['existing',null,{3:'reel'}]])('blocks %s scheduling with configured invalid clock data',async(mode,time,schedule)=>{
+  const client=h.idea.client as Record<string,unknown>;client.posting_time=time;client.posting_schedule=schedule
+  if(mode==='existing'){h.idea.metricool_post_id=44;h.idea.metricool_uuid='u-44';h.idea.posted_at='2026-09-20T10:00:00Z'}
+  const res=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23'});expect(res.error).toMatch(/hora/i);expect(h.post).not.toHaveBeenCalled();expect(h.update).not.toHaveBeenCalled();expect(h.writes).toEqual([])
+ })
+ it('uses a valid general time with a legacy format instead of the pool default',async()=>{const client=h.idea.client as Record<string,unknown>;client.posting_schedule={3:'reel'};await schedulePoolIdea({ideaId:'idea',date:'2026-09-23'});expect(h.post.mock.calls[0][4]).toBe('2026-09-23T09:15:00')})
+ it('retains the established pool default for clients with no clock or override at all',async()=>{const client=h.idea.client as Record<string,unknown>;client.posting_time=null;client.posting_schedule=null;await schedulePoolIdea({ideaId:'idea',date:'2026-09-23'});expect(h.post.mock.calls[0][4]).toBe('2026-09-23T10:00:00')})
+})

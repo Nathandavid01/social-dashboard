@@ -90,6 +90,7 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 
 ## Calendario de publicaciones
 
+- Pool creation and rescheduling reject a null resolved time if raw cadence contains invalid clock/format data; only the longstanding completely unconfigured Pool case keeps its existing 10am default.
 - `resolveSlotTime` scheduling resolves only valid HH:mm(:ss), normalizes to HH:mm, and falls back from legacy formats/invalid overrides to a valid general time or null. Never send content formats as Metricool clock times.
 - CalendarCadenceSettings reuses ClientCadenceEditor and updateClientCadence (cadence.edit on UI and server). Confirmed patch callbacks update calendar local cadence immediately; failures roll back. Explicit in-flight state serializes autosave and blocks controls and closing the dialog. `cleanPostingScheduleWithFormats` preserves recognized legacy reel/post/story values on retained weekdays and normalizes valid HH:mm:ss per-day values to HH:mm; strict read cleaners remain unchanged and accept only times as hours. Removing a weekday prunes its override; setting a per-day time replaces that day's prior format/time value. The calendar dialog hides timezone editing. Cadence revalidation includes /recibo and /clients/[id]/calendar. Frequency changes do not move existing Metricool posts.
 
