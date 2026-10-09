@@ -1,4 +1,4 @@
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
@@ -14,6 +14,8 @@ import { POSTING_TZ } from '@/lib/utils/publish-override'
 import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
 import { ReciboPublishedSync } from '@/components/recibo/recibo-published-sync'
+import { ContentCalendar } from '@/components/published/content-calendar'
+import { ReciboWorkspace } from '@/components/recibo/recibo-workspace'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -21,12 +23,16 @@ export const revalidate = 0
 
 /**
  * Recibo — videos waiting for approval, or approved and still waiting
- * to be posted or scheduled in Metricool. No Metricool auto-post.
+ * to be posted or scheduled in Metricool. The calendar supports explicit scheduling.
  */
 export default async function ReciboPage() {
   await requirePermission('entregas.read')
 
   const supabase = await createClient()
+  const canSeeCalendar = await currentUserHas('metricool.read')
+  const calendarClients = canSeeCalendar
+    ? (await supabase.from('clients').select('id, name, metricool_blog_id, platforms, default_platforms').eq('status', 'active').order('name')).data ?? []
+    : []
   const [ideas, aiClientsRes] = await Promise.all([
     getIdeacionPipeline({ complete: true }),
     supabase
@@ -82,6 +88,7 @@ export default async function ReciboPage() {
   return (
     <>
       <ReciboPublishedSync />
+      <ReciboWorkspace calendar={canSeeCalendar ? <ContentCalendar clients={calendarClients} /> : null}>
       <ReciboBoard
         ideas={boardWithReview}
         occupancyIdeas={occupancyWithReview}
@@ -93,6 +100,7 @@ export default async function ReciboPage() {
         publishedByClient={published.byClient}
         showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
       />
+      </ReciboWorkspace>
     </>
   )
 }
