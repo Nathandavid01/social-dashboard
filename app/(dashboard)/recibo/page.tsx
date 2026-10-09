@@ -31,7 +31,7 @@ export default async function ReciboPage() {
   const supabase = await createClient()
   const canSeeCalendar = await currentUserHas('metricool.read')
   const calendarClients = canSeeCalendar
-    ? (await supabase.from('clients').select('id, name, metricool_blog_id, platforms, default_platforms').eq('status', 'active').order('name')).data ?? []
+    ? (await supabase.from('clients').select('id, name, metricool_blog_id, platforms, default_platforms, posting_days, posting_time, posting_schedule').eq('status', 'active').order('name')).data ?? []
     : []
   const [ideas, aiClientsRes] = await Promise.all([
     getIdeacionPipeline({ complete: true }),

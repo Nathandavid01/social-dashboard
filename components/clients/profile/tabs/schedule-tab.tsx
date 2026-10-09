@@ -83,7 +83,7 @@ export async function ScheduleTab({ client }: { client: Client }) {
 
   return (
     <div className="space-y-4">
-      {canSeeCalendar && <ContentCalendar clients={[{id:client.id,name:client.name,metricool_blog_id:client.metricool_blog_id,platforms:client.platforms,default_platforms:client.default_platforms}]} clientId={client.id} />}
+      {canSeeCalendar && <ContentCalendar clients={[{id:client.id,name:client.name,metricool_blog_id:client.metricool_blog_id,platforms:client.platforms,default_platforms:client.default_platforms,posting_days:client.posting_days,posting_time:client.posting_time,posting_schedule:client.posting_schedule}]} clientId={client.id} />}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">

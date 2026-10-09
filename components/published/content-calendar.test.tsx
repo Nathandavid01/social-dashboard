@@ -84,3 +84,16 @@ it('plays an uploaded video in its detail card',async()=>{
  render(<ContentCalendar clients={[]} />);await screen.findAllByText('Oferta de octubre');fireEvent.click(screen.getAllByRole('button',{name:/Oferta de octubre/})[0])
  expect(screen.getByRole('dialog').querySelector('video')).toHaveAttribute('controls')
 })
+
+it('shows each client frequency and marks expected weekdays even when Metricool has no posts',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:new Date().toISOString()})}))
+ render(<ContentCalendar clients={[{id:'a',name:'Cliente A',metricool_blog_id:'1',posting_days:[1,3,5],posting_time:'10:00'},{id:'b',name:'Cliente B',metricool_blog_id:null,posting_days:[]}]} />)
+ const cadence=screen.getByRole('region',{name:'Frecuencia por cliente'})
+ expect(within(cadence).getByText('3 días por semana')).toBeInTheDocument();expect(within(cadence).getByText('Sin frecuencia configurada')).toBeInTheDocument()
+ await waitFor(()=>expect(screen.getAllByText('Previsto · Cliente A · 10:00').length).toBeGreaterThan(0))
+ const marker=screen.getAllByText('Previsto · Cliente A · 10:00')[0]
+ const cell=marker.closest('[data-calendar-date]')!
+ expect([1,3,5]).toContain(new Date(`${cell.getAttribute('data-calendar-date')}T12:00:00`).getDay())
+ expect(screen.queryByText(/Previsto · Cliente B/)).toBeNull()
+ fireEvent.click(screen.getByRole('button',{name:'Semana'}));expect(screen.getAllByText('Previsto · Cliente A · 10:00')).toHaveLength(3)
+})
