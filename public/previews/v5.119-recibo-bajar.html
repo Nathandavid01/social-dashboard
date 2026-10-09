@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.119 — Recibo: Bajar</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --ok:#34d399; --bad:#fca5a5; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:920px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    h2 { font-size:13px; color:var(--gold); margin:0 0 10px; letter-spacing:.04em; text-transform:uppercase; }
+    .split { display:grid; grid-template-columns:1fr; gap:22px; }
+    @media (min-width:800px) { .split { grid-template-columns:1fr 1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; max-width:320px; }
+    .stage { position:relative; background:#09090b; padding:12px 12px 8px; }
+    .phone { margin:0 auto; width:100%; max-width:240px; aspect-ratio:9/16; border-radius:18px; background:linear-gradient(160deg,#1c1c1c,#050505); border:1px solid #2a2a2a; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); }
+    .pill { position:absolute; display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:999px; background:rgba(0,0,0,.7); color:#fff; font-size:12px; font-weight:600; border:0; }
+    .dl { left:8px; top:8px; outline:2px solid var(--gold); outline-offset:2px; }
+    .trash { right:8px; top:8px; width:32px; padding:0; justify-content:center; }
+    .marks { position:absolute; left:12px; bottom:12px; display:flex; gap:6px; }
+    .mark { font-size:10px; font-weight:600; padding:4px 8px; border-radius:999px; background:rgba(0,0,0,.7); color:var(--muted); }
+    .caption { padding:12px 14px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
+    .file { margin-top:12px; font-family:ui-monospace,monospace; font-size:12px; padding:10px 12px; border-radius:10px; background:#161616; border:1px solid var(--border); }
+    .file .bad { color:var(--bad); }
+    .file .ok { color:var(--ok); }
+    .note { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.45; }
+    svg { width:14px; height:14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recibo · Bajar el video</h1>
+    <p class="sub">Cada tarjeta de Recibo con video editado tiene <strong>Bajar</strong> arriba a la izquierda. Baja el mismo corte que se ve en la tarjeta, con su nombre original, en computadora y en el celular. También en las entregas puntuales.</p>
+
+    <div class="split">
+      <section>
+        <h2>Antes</h2>
+        <div class="card">
+          <div class="stage">
+            <div class="phone">▶ Reel</div>
+            <button class="pill trash" aria-label="Borrar">🗑</button>
+            <div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span></div>
+          </div>
+          <div class="caption">Caption…</div>
+        </div>
+        <p class="note">No había manera de bajarlo. En el iPhone el reproductor ni siquiera ofrece descargar.</p>
+        <div class="file">Desde Entregas: <span class="bad">La GÃ¼ira 48.mp4</span></div>
+      </section>
+
+      <section>
+        <h2>Después (v5.119)</h2>
+        <div class="card">
+          <div class="stage">
+            <div class="phone">▶ Reel</div>
+            <button class="pill dl">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Bajar
+            </button>
+            <button class="pill trash" aria-label="Borrar">🗑</button>
+            <div class="marks"><span class="mark">Enviado</span><span class="mark">Aprobado</span></div>
+          </div>
+          <div class="caption">Caption…</div>
+        </div>
+        <p class="note">Si alguien subió otro corte mientras tenías Recibo abierto, avisa «El video cambió. Vuelve a cargar Recibo.» en vez de bajar uno que no has visto.</p>
+        <div class="file">Recibo y Entregas: <span class="ok">La Güira 48.mp4</span></div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

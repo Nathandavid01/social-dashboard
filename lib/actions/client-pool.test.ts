@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
   recordFail: false,
   post: vi.fn(),
   update: vi.fn(),
+  del: vi.fn(),
   health: vi.fn(),
 }))
 
@@ -26,6 +27,7 @@ vi.mock('@/lib/metricool/post', async (importOriginal) => {
     ...actual,
     createDraftPost: h.post,
     updateScheduledPost: h.update,
+    deleteScheduledPost: h.del,
   }
 })
 vi.mock('@/lib/integrations/video-health', () => ({ checkVideoPlayable: h.health }))
@@ -81,7 +83,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { schedulePoolIdea } from './client-pool'
+import { schedulePoolIdea, unschedulePoolIdea } from './client-pool'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -93,6 +95,7 @@ beforeEach(() => {
   h.recordFail = false
   h.post.mockReset().mockResolvedValue({ data: { id: 44, uuid: 'u-44' } })
   h.update.mockReset().mockResolvedValue({ data: { id: 99, uuid: 'u-44' } })
+  h.del.mockReset().mockResolvedValue({ deleted: true })
   h.health.mockReset().mockResolvedValue({ ok: true })
   h.videos = [{
     id: 'vid',
@@ -192,6 +195,19 @@ describe('schedulePoolIdea', () => {
     expect(h.post.mock.calls[0][0]).toBe('Hook del reel')
   })
 
+  it('Agendado desde Recibo se reprograma como borrador, no live', async () => {
+    h.idea.metricool_post_id = 44
+    h.idea.metricool_uuid = 'u-44'
+    h.idea.posted_at = '2026-09-20T10:00:00Z'
+    const res = await schedulePoolIdea({ ideaId: 'idea', date: '2026-09-25', asDraft: true })
+    expect(res).toMatchObject({ ok: true, rescheduled: true })
+    expect(h.update).toHaveBeenCalledWith(
+      44,
+      'blog-ai',
+      expect.objectContaining({ draft: true, autoPublish: false }),
+    )
+  })
+
   it('Agendado se reprograma con PUT a Metricool y guarda el id nuevo', async () => {
     h.idea.metricool_post_id = 44
     h.idea.metricool_uuid = 'u-44'
@@ -267,5 +283,59 @@ describe('schedulePoolIdea', () => {
       error: expect.stringMatching(/publicado/i),
     })
     expect(h.post).not.toHaveBeenCalled()
+  })
+})
+
+describe('unschedulePoolIdea', () => {
+  beforeEach(() => {
+    h.idea.metricool_post_id = 44
+    h.idea.metricool_uuid = 'u-44'
+    h.idea.posted_at = '2026-09-20T10:00:00Z'
+    h.idea.publish_date = '2026-09-23'
+  })
+
+  it('borra el post en Metricool y limpia el id local', async () => {
+    const res = await unschedulePoolIdea({ ideaId: 'idea' })
+    expect(res).toEqual({ ok: true, deleted: true })
+    expect(h.del).toHaveBeenCalledWith(44, 'blog-ai')
+    expect(h.update).not.toHaveBeenCalled()
+    expect(h.writes).toEqual([
+      expect.objectContaining({
+        metricool_post_id: null,
+        metricool_uuid: null,
+        posted_at: null,
+        publish_date: null,
+        posting_started_at: null,
+      }),
+    ])
+  })
+
+  it('si Metricool no deja borrar, deja el post como borrador y limpia Recibo', async () => {
+    h.del.mockRejectedValue(Object.assign(new Error('Metricool API error: 405'), { unsupportedDelete: true }))
+    const res = await unschedulePoolIdea({ ideaId: 'idea' })
+    expect(res).toMatchObject({ ok: true, leftoverDraft: true })
+    expect(h.update).toHaveBeenCalledWith(
+      44,
+      'blog-ai',
+      expect.objectContaining({ draft: true, autoPublish: false, id: 44 }),
+    )
+    expect(h.writes.at(-1)).toEqual(expect.objectContaining({
+      metricool_post_id: null,
+      posted_at: null,
+    }))
+  })
+
+  it('no toca un video ya publicado en vivo', async () => {
+    h.idea.status = 'publicada'
+    const res = await unschedulePoolIdea({ ideaId: 'idea' })
+    expect(res.error).toMatch(/publicado/i)
+    expect(h.del).not.toHaveBeenCalled()
+  })
+
+  it('sin metricool_post_id no inventa un delete', async () => {
+    h.idea.metricool_post_id = null
+    const res = await unschedulePoolIdea({ ideaId: 'idea' })
+    expect(res.error).toMatch(/metricool_post_id|Metricool/i)
+    expect(h.del).not.toHaveBeenCalled()
   })
 })

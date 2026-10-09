@@ -4,46 +4,105 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v5.122 — 2026-10-08
+## v5.127 — 2026-10-08
 
-**Guarda un post como borrador o programa su publicación desde el calendario.**
-- Abre una tarjeta para guardar el mismo post como borrador en Metricool y detener su publicación automática.
-- Elige fecha y hora de Puerto Rico y pulsa «Programar» para activar la publicación automática.
-- Se conserva el contenido, las redes y las opciones del post; no se crea un duplicado.
-- Metricool se vuelve a consultar para confirmar el cambio. Los posts ya publicados permanecen en el historial.
+**Calendario visual conectado directamente con Metricool en el inicio.**
+- Vistas de mes y semana con miniaturas, horarios de Puerto Rico y filtros por cliente y estado.
+- Panel derecho con próximas publicaciones, resumen de estados y publicaciones que necesitan atención.
+- Verifica los estados cada minuto mientras está abierto; confirma «Publicado» solo con evidencia de todas las redes y muestra enlaces por red.
+- Abre un post para guardarlo como borrador o elegir fecha y hora y activar su publicación automática. Conserva el mismo post, contenido, redes y opciones.
+- Vuelve a consultar Metricool para confirmar cada cambio; los posts publicados conservan su historial y los errores quedan visibles.
 
-![Borrador y programación](/changelog/v5.122-calendario-programar.png)
+[Ver el calendario y sus controles](/previews/v5.127-calendario-programar.html)
 
-## v5.121 — 2026-10-08
+![Calendario y programación](/changelog/v5.127-calendario-programar.png)
 
-**El calendario verifica la publicación directamente con Metricool.**
-- Consulta sin caché y actualiza los estados cada minuto mientras el calendario está abierto.
-- Muestra la última verificación y confirma «Publicado» solo cuando todas las redes lo confirman.
-- Los detalles muestran el estado por red y enlaces a las publicaciones confirmadas.
-- Publicaciones parciales, errores y pendientes fuera de hora aparecen en «Necesita atención».
-- Si una cuenta falla, se avisa y los conteos quedan sin confirmar; una falla nunca se muestra como calendario vacío verificado.
+## v5.126 — 2026-10-05
 
-![Verificación con Metricool](/changelog/v5.121-calendario-verificacion.png)
+**En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**
+- Arriba del tablero hay un buscador: escribe cliente, título o texto del caption y las tarjetas se filtran al instante, también en el celular.
+- Si no hay coincidencias, Recibo lo dice. Si dejas el buscador vacío, vuelven a verse todos.
+- Debajo de cada video (y de cada gráfico) puedes escribir el motivo si el corte no sirve.
+- Ese motivo es **solo interno**: el cliente no lo ve en su link de revisión ni en el portal.
 
-## v5.120 — 2026-10-08
+[Ver el buscador y el motivo](/previews/v5.126-recibo-buscar-motivo.html)
 
-**El calendario se parece más a la referencia y tiene su panel derecho.**
-- Diseño claro, tarjetas blancas y acentos violeta.
-- Próximas publicaciones a la derecha en escritorio, con miniaturas y «Ver todas».
-- Selecciona un estado en el panel para filtrar el calendario.
-- El panel acompaña el desplazamiento y se adapta a móvil.
+![Buscador y motivo en Recibo](/changelog/v5.126-recibo-buscar-motivo.png)
 
-![Calendario con panel derecho](/changelog/v5.120-calendario-panel-derecho.png)
+## v5.125 — 2026-10-05
 
-## v5.119 — 2026-10-08
+**Si no te gusta el video después de programarlo en Recibo, puedes cambiar la fecha o cancelar.**
+- En un espacio ya programado aparecen **Cambiar fecha** y **Cancelar programación** (con confirmación).
+- Cambiar fecha mueve el mismo post en Metricool a otra fecha futura. No se programa en el pasado.
+- Cancelar quita el post agendado de Metricool y el espacio vuelve a Recibo para programarlo otra vez. Si Metricool no deja borrar, el post queda como borrador para revisión.
 
-**El inicio ahora muestra un calendario visual de publicaciones.**
-- Vistas de mes y semana con filtros por cliente, redes, horarios y miniaturas.
-- Próximas publicaciones y resumen de estados en el período seleccionado.
-- Abre las tarjetas para revisar el caption y los detalles.
-- Los estados vienen de Metricool; una fecha pasada no convierte un post en publicado. Fechas en hora de Puerto Rico.
+[Ver el preview](/previews/v5.125-recibo-cambiar-cancelar.html)
 
-![Calendario de publicaciones](/changelog/v5.119-calendario-publicaciones.png)
+![Cambiar fecha o cancelar en Recibo](/changelog/v5.125-recibo-cambiar-cancelar.png)
+
+## v5.124 — 2026-10-04
+
+**En Recibo, Publicar programa el video en la fecha de ese espacio, no lo suelta ya.**
+- El botón dice **Programar para** la fecha (y hora de cadencia) del espacio. Al confirmar queda **Programado** esa fecha, como borrador en Metricool.
+- Si el espacio no tiene fecha, se usa el próximo hueco de cadencia, como antes. No se inventa una fecha.
+- Si esa fecha (o la hora de hoy) ya pasó, avisa y pide otra. No se programa en el pasado.
+
+[Ver el preview](/previews/v5.124-recibo-programar.html)
+
+![Programar Recibo en la fecha del espacio](/changelog/v5.124-recibo-programar.png)
+
+## v5.123 — 2026-10-04
+
+**Recibo muestra los espacios de cadencia de cada cliente, no un listado suelto.**
+- Cada cliente tiene N espacios según sus días de publicación (cadencia). Los huecos vacíos se ven como pendientes.
+- Los videos que se van subiendo (corte, crudo o subida del cliente) llenan esos espacios con portada y caption visible.
+- Verde = aprobado o ya publicado/programado en Metricool. Ámbar = todavía sin aprobar.
+- Contador de subidas por mes, con el mes actual destacado y los meses anteriores solo si hay datos. El número sale de los mismos videos que llenan los espacios.
+- Los huecos vacíos son solo de clientes AI activos. Aníbal, Arasibo, VSS y Primer Round no ganan columna. Un corte de Eric en un cliente humano no abre el cupo semanal de ese cliente.
+
+[Ver el preview](/previews/v5.123-recibo-espacios.html)
+
+![Recibo por espacios de cadencia](/changelog/v5.123-recibo-espacios.png)
+
+## v5.122 — 2026-10-02
+
+**Recibo separa los gráficos y los videos de cada cliente.**
+- Nueva sección Gráficos con imágenes estáticas y el nombre de cada arte.
+- Cada gráfico conserva su caption editable y descarga individual.
+- Los videos mantienen su sección y sus controles habituales.
+- Las imágenes quedan en revisión; no se publican automáticamente.
+
+## v5.121 — 2026-10-01
+
+**Los videos editados que sube Eric aparecen en Recibo, también para clientes sin AI.**
+- Los cortes editados se muestran tanto si se subieron por el dashboard como por Entregas, respetando los filtros de Recibo.
+- Puedes ver y bajar el corte que aparece en la tarjeta desde su ubicación correspondiente.
+- El conteo incluye los videos editados de ambas rutas de subida y Recibo se actualiza al registrar una nueva subida.
+- La tarjeta sin archivo aclara que el video aparecerá al subir un archivo editado.
+
+[Ver el antes y después](/previews/v5.121-recibo-storage.html)
+
+![Alacena en Recibo](/changelog/v5.121-recibo-storage.png)
+
+## v5.120 — 2026-09-25
+
+**Lo que ya está publicado en Metricool sale de Recibo, aunque se haya subido a mano.**
+- Al abrir Recibo se revisa Metricool: si un video de la tarjeta ya está publicado o programado allí, sale de la lista y aparece un aviso. También lo hace el sync de cada mañana.
+- Lo reconoce por el archivo, no por el caption: sirve aunque se haya publicado con otro texto. Un borrador en Metricool no cuenta.
+- Nueva marca **Publicado** en la tarjeta, junto a Enviado y Aprobado, para lo que se publicó con otro archivo. Se puede deshacer desde el aviso.
+- Hoy salen tres que ya estaban publicados: «Conoce A La Doctora» y «Nuevo Laboratorio En Arecibo» (Arecibo Lab) y un «trend» de Farmacia Buena Vida. Arecibo Lab queda además conectado a su cuenta de Metricool.
+
+![Recibo sin los videos ya publicados](/changelog/v5.120-recibo-sin-publicados.png)
+
+## v5.119 — 2026-09-25
+
+**En Recibo cada video se puede bajar.**
+- Botón **Bajar** arriba a la izquierda de cada tarjeta con video editado, también en las entregas puntuales.
+- Baja el mismo corte que se ve en la tarjeta. Si alguien subió otro mientras Recibo estaba abierto, avisa que hay que recargar en vez de bajar uno que no has visto.
+- Funciona en computadora y en el celular (en el iPhone el reproductor no deja descargar).
+- Los nombres con acentos o «—» ya no llegan rotos al bajar, aquí ni en Entregas («La Güira 48.mp4», no «La GÃ¼ira 48.mp4»).
+
+![Recibo con el botón Bajar](/changelog/v5.119-recibo-bajar.png)
 
 ## v5.118 — 2026-09-24
 

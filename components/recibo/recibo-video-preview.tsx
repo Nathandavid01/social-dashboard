@@ -13,11 +13,15 @@ export function ReciboVideoPreview({
   hasEdited,
   expectedVideoId,
   className,
+  image = false,
+  title = "Gráfico",
 }: {
   ideaId: string
   hasEdited: boolean
   expectedVideoId?: string
   className?: string
+  image?: boolean
+  title?: string
 }) {
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +53,8 @@ export function ReciboVideoPreview({
   }, [ideaId, hasEdited, expectedVideoId])
 
   const frame = cn(
-    'aspect-[9/16] w-full overflow-hidden rounded-[1.25rem] bg-black',
+    'w-full overflow-hidden rounded-[1.25rem] bg-black',
+    image ? 'aspect-[4/5]' : 'aspect-[9/16]',
     className,
   )
 
@@ -62,7 +67,7 @@ export function ReciboVideoPreview({
         <Film className="h-7 w-7 opacity-50" aria-hidden="true" />
         <p className="text-xs font-medium">Sin video editado</p>
         <p className="px-5 text-center text-[10px] leading-snug opacity-80">
-          El corte aparecerá aquí cuando esté en Entregas.
+          El video aparecerá aquí cuando subas un archivo editado.
         </p>
       </div>
     )
@@ -95,7 +100,10 @@ export function ReciboVideoPreview({
 
   return (
     <div className={cn(frame, 'ring-1 ring-white/10 shadow-lg shadow-black/40')}>
-      <video
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img data-testid="recibo-graphic-image" src={url} alt={title} className="h-full w-full object-contain" />
+      ) : <video
         data-testid="recibo-video-player"
         src={url}
         controls
@@ -104,7 +112,7 @@ export function ReciboVideoPreview({
         className="h-full w-full object-contain"
       >
         Tu navegador no puede reproducir este video.
-      </video>
+      </video>}
     </div>
   )
 }

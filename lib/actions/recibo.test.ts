@@ -6,12 +6,18 @@ const from = vi.fn(() => ({ update }))
 
 const getEntregaVideoEditado = vi.fn()
 const getEntregasPreviewUrl = vi.fn()
+const getEntregasDownloadUrl = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ from })),
 }))
+const requirePermission = vi.fn(async (..._a: unknown[]) => undefined)
 vi.mock('@/lib/auth/server', () => ({
-  requirePermission: vi.fn(async () => undefined),
+  requirePermission: (...a: unknown[]) => requirePermission(...a),
+}))
+const runReciboPublishedMatch = vi.fn()
+vi.mock('@/lib/recibo/sync-published', () => ({
+  runReciboPublishedMatch: (options?: unknown) => runReciboPublishedMatch(options),
 }))
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -19,7 +25,13 @@ vi.mock('next/cache', () => ({
 vi.mock('@/lib/actions/entregas-r2', () => ({
   getEntregaVideoEditado: (...a: unknown[]) => getEntregaVideoEditado(...a),
   getEntregasPreviewUrl: (...a: unknown[]) => getEntregasPreviewUrl(...a),
+  getEntregasDownloadUrl: (...a: unknown[]) => getEntregasDownloadUrl(...a),
 }))
+
+vi.mock('@/lib/actions/recibo-video', () => ({ getReciboEditedVideo: (...a: unknown[]) => getEntregaVideoEditado(...a) }))
+const r2Preview = vi.fn()
+const r2Download = vi.fn()
+vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2PreviewUrl: (...a: unknown[]) => r2Preview(...a), getR2DownloadUrl: (...a: unknown[]) => r2Download(...a) }))
 
 describe('recibo manual flags', () => {
   beforeEach(() => {
@@ -92,5 +104,104 @@ describe('getReciboIdeaPreviewUrl', () => {
     const res = await getReciboIdeaPreviewUrl('idea-2')
     expect(res.error).toMatch(/Sin video editado/i)
     expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+  })
+})
+
+describe('getReciboIdeaDownloadUrl', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('downloads the same cut the card is showing', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v7' })
+    getEntregasDownloadUrl.mockResolvedValue({ url: 'https://signed.example/v7.mp4?attachment' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
+    expect(getEntregaVideoEditado).toHaveBeenCalledWith('outfit')
+    expect(getEntregasDownloadUrl).toHaveBeenCalledWith('v7')
+    expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+    expect(res.url).toBe('https://signed.example/v7.mp4?attachment')
+  })
+
+  it('refuses a newer cut than the one on the card instead of downloading it', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'v8' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
+    expect(res.error).toMatch(/video cambió/i)
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('returns Sin video editado when the idea has no usable cut', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: null })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('idea-2')).error).toMatch(/Sin video editado/i)
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('passes the permission error through without signing', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ error: 'No autorizado' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('idea-3', 'v1')).error).toBe('No autorizado')
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('rejects an empty idea id', async () => {
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('')).error).toBe('Falta el video')
+    expect(getEntregaVideoEditado).not.toHaveBeenCalled()
+  })
+})
+
+describe('syncReciboPublished', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
+    requirePermission.mockResolvedValue(undefined)
+    runReciboPublishedMatch.mockResolvedValue({ linked: 2 })
+  })
+
+  it('pide permiso de Recibo y enlaza lo publicado a mano', async () => {
+    const { syncReciboPublished } = await import('./recibo')
+    expect(await syncReciboPublished()).toEqual({ linked: 2 })
+    expect(requirePermission).toHaveBeenCalledWith('entregas.read')
+    expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
+    // Plazo corto: la server action tiene su propio límite en Vercel.
+    const { deadline } = runReciboPublishedMatch.mock.calls[0][0] as { deadline: number }
+    expect(deadline - Date.now()).toBeGreaterThan(5_000)
+    expect(deadline - Date.now()).toBeLessThanOrEqual(8_000)
+  })
+
+  it('sin permiso no toca Metricool', async () => {
+    requirePermission.mockRejectedValueOnce(new Error('No autorizado'))
+    const { syncReciboPublished } = await import('./recibo')
+    expect(await syncReciboPublished()).toEqual({ linked: 0, error: 'No autorizado' })
+    expect(runReciboPublishedMatch).not.toHaveBeenCalled()
+  })
+
+  it('abrir Recibo varias veces seguidas consulta Metricool una sola vez por minuto', async () => {
+    const { syncReciboPublished } = await import('./recibo')
+    await syncReciboPublished()
+    expect(await syncReciboPublished()).toEqual({ linked: 0 })
+    expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('pipeline R2 cuts on Recibo', () => {
+  beforeEach(() => vi.clearAllMocks())
+  it('plays a non-AI client cut using its original storage signer', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'r2-edit', storage_provider: 'r2' })
+    r2Preview.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4' })
+    const { getReciboIdeaPreviewUrl } = await import('./recibo')
+    expect((await getReciboIdeaPreviewUrl('human-client-idea', 'r2-edit')).url).toContain('r2-edit.mp4')
+    expect(r2Preview).toHaveBeenCalledWith('r2-edit')
+    expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+  })
+  it('downloads that same cut from pipeline storage', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'r2-edit', storage_provider: 'r2' })
+    r2Download.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4?attachment' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('human-client-idea', 'r2-edit')).url).toContain('attachment')
+    expect(r2Download).toHaveBeenCalledWith('r2-edit')
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
   })
 })

@@ -6,19 +6,27 @@ export function puertoRicoDay(date: Date): string {
 }
 
 /** Metricool sends either an absolute ISO timestamp or wall time + IANA zone. */
-export function publicationDay(value: ScheduledPost['publicationDate']): string | null {
+export function publicationDay(value: ScheduledPost['publicationDate'] | undefined): string | null {
+  const instant = publicationInstant(value)
+  return instant ? puertoRicoDay(new Date(instant)) : null
+}
+
+/** The same Metricool date as a UTC ISO instant, or null when it can't be read. */
+export function publicationInstant(
+  value: { dateTime?: string | null; timezone?: string | null } | null | undefined,
+): string | null {
   const raw = value?.dateTime
   if (!raw) return null
   try {
     if (/(Z|[+-]\d{2}:?\d{2})$/i.test(raw)) {
       const instant = new Date(raw)
-      return Number.isFinite(instant.getTime()) ? puertoRicoDay(instant) : null
+      return Number.isFinite(instant.getTime()) ? instant.toISOString() : null
     }
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/.exec(raw)
     if (!match) return null
     const parts = match.slice(1).map(part => Number(part || 0))
     const wall = Date.UTC(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5])
-    const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: value.timezone || TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' })
+    const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: value?.timezone || TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' })
     const localEpoch = (instant: number) => {
       const p = Object.fromEntries(formatter.formatToParts(new Date(instant)).map(part => [part.type, part.value]))
       return Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second))
@@ -32,7 +40,6 @@ export function publicationDay(value: ScheduledPost['publicationDate']): string 
     }
     // Reject impossible wall times (e.g. a daylight-saving gap).
     if (localEpoch(instant) !== wall || new Date(wall).toISOString().slice(0, 16) !== raw.slice(0, 16)) return null
-    return puertoRicoDay(new Date(instant))
+    return new Date(instant).toISOString()
   } catch { return null }
 }
-

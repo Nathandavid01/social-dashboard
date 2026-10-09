@@ -11,6 +11,7 @@ import {
   ENTREGAS_PROVIDER,
 } from '@/lib/integrations/entregas-r2'
 import { isAllowedVideoUploadType } from '@/lib/utils/video-upload-guard'
+import { attachmentDisposition } from '@/lib/utils/content-disposition'
 
 /**
  * Upload/playback for Entregas, against its own bucket.
@@ -155,7 +156,7 @@ export async function getEntregasDownloadUrl(
       new GetObjectCommand({
         Bucket: entregasR2Bucket(),
         Key: video.drive_file_id,
-        ResponseContentDisposition: `attachment; filename="${video.name}"`,
+        ResponseContentDisposition: attachmentDisposition(video.name),
       }),
       { expiresIn: 60 * 60 },
     )

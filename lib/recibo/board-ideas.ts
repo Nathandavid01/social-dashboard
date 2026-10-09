@@ -23,7 +23,8 @@ export type ReciboQueueIdea = {
 }
 
 
-function usableCut(video: ReciboVideo): boolean {
+/** An edited cut that still counts (not archived, not failed). Shared with the Metricool match. */
+export function usableCut(video: ReciboVideo): boolean {
   return video.kind === 'edited' && video.status !== 'archived' && video.status !== 'failed'
 }
 

@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { getEntregaVideoEditado, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getReciboEditedVideo } from '@/lib/actions/recibo-video'
+import { getR2PreviewUrl, getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
+import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
 export type StaffClientApproval = 'approved' | 'rejected' | null
@@ -36,6 +39,7 @@ export async function setManualPostedStatus(input: {
   revalidatePath('/recibo')
   revalidatePath('/entregas')
   revalidatePath('/pool')
+  revalidatePath('/calendar')
   return { ok: true }
 }
 
@@ -66,22 +70,73 @@ export async function setStaffClientApproval(input: {
   return { ok: true }
 }
 
+const MATCH_EVERY_MS = 60_000
+/** Well inside the server action's own time limit, so a slow run stops before writing. */
+const MATCH_BUDGET_MS = 8_000
+let lastMatchAt = 0
+
 /**
- * Presigned playback URL for the idea's current edited Entregas file.
+ * On opening Recibo: link the cuts the team already posted by hand in Metricool
+ * (same run as the daily cron), so they leave Recibo without waiting a day.
+ * At most once a minute per server instance — Recibo reloads a lot.
+ */
+export async function syncReciboPublished(): Promise<{ linked: number; error?: string }> {
+  try {
+    await requirePermission('entregas.read')
+  } catch (err) {
+    return { linked: 0, error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (Date.now() - lastMatchAt < MATCH_EVERY_MS) return { linked: 0 }
+  lastMatchAt = Date.now()
+
+  const res = await runReciboPublishedMatch({ deadline: Date.now() + MATCH_BUDGET_MS })
+  if (res.linked > 0) {
+    revalidatePath('/recibo')
+    revalidatePath('/entregas')
+    revalidatePath('/pool')
+    revalidatePath('/calendar')
+  }
+  return res
+}
+
+/**
+ * Presigned playback URL for the idea's current edited dashboard file.
  * Usable as <video src>. Does not touch Pipeline raw.
  */
 export async function getReciboIdeaPreviewUrl(
   ideaId: string,
   expectedVideoId?: string,
 ): Promise<{ url?: string; error?: string }> {
+  const edited = await currentReciboCut(ideaId, expectedVideoId)
+  if (!edited.id) return { error: edited.error }
+  return edited.storage_provider === 'r2' ? getR2PreviewUrl(edited.id) : getEntregasPreviewUrl(edited.id)
+}
+
+/**
+ * Presigned GET that forces a download of the cut the card is showing — "Bajar".
+ * Same pin as the preview: a newer upload means the card is stale, so it
+ * refuses instead of handing over a cut nobody on Recibo has seen.
+ */
+export async function getReciboIdeaDownloadUrl(
+  ideaId: string,
+  expectedVideoId?: string,
+): Promise<{ url?: string; error?: string }> {
+  const edited = await currentReciboCut(ideaId, expectedVideoId)
+  if (!edited.id) return { error: edited.error }
+  return edited.storage_provider === 'r2' ? getR2DownloadUrl(edited.id) : getEntregasDownloadUrl(edited.id)
+}
+
+async function currentReciboCut(
+  ideaId: string,
+  expectedVideoId?: string,
+): Promise<{ id?: string; storage_provider?: string; error?: string }> {
   if (!ideaId) return { error: 'Falta el video' }
 
-  const edited = await getEntregaVideoEditado(ideaId)
+  const edited = await getReciboEditedVideo(ideaId)
   if (edited.error) return { error: edited.error }
   if (!edited.id) return { error: 'Sin video editado' }
   if (expectedVideoId && edited.id !== expectedVideoId) {
     return { error: 'El video cambió. Vuelve a cargar Recibo.' }
   }
-
-  return getEntregasPreviewUrl(edited.id)
+  return { id: edited.id, storage_provider: edited.storage_provider }
 }

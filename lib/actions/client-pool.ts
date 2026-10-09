@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { currentUserHas, requirePermission } from '@/lib/auth/server'
-import { createDraftPost, postFormatData, updateScheduledPost } from '@/lib/metricool/post'
+import { createDraftPost, deleteScheduledPost, postFormatData, updateScheduledPost } from '@/lib/metricool/post'
 import { checkVideoPlayable } from '@/lib/integrations/video-health'
 import { r2PublicUrl } from '@/lib/integrations/r2'
 import { entregasR2PublicUrl } from '@/lib/integrations/entregas-r2'
@@ -30,6 +30,14 @@ export type SchedulePoolResult = {
   state?: 'agendado'
   draft?: true
   rescheduled?: boolean
+  error?: string
+}
+
+export type UnschedulePoolResult = {
+  ok?: true
+  deleted?: true
+  leftoverDraft?: true
+  message?: string
   error?: string
 }
 
@@ -63,6 +71,8 @@ function coverVideoIdOf(videos: Array<{ id: string; kind?: string | null; status
 export async function schedulePoolIdea(input: {
   ideaId: string
   date: string
+  /** Recibo keeps a Metricool draft. The Panel reschedule stays live. */
+  asDraft?: boolean
 }): Promise<SchedulePoolResult> {
   try {
     await requirePermission('posting.publish')
@@ -112,6 +122,7 @@ export async function schedulePoolIdea(input: {
       client,
       ideaId: input.ideaId,
       date: input.date,
+      asDraft: input.asDraft === true,
     })
   }
   if (!canCreateMetricoolSchedule(state, editMode)) {
@@ -269,6 +280,7 @@ async function rescheduleAgendadoIdea(input: {
   client: PoolClient
   ideaId: string
   date: string
+  asDraft?: boolean
 }): Promise<SchedulePoolResult> {
   const postId = (input.idea.metricool_post_id as number | null) ?? null
   if (postId == null) {
@@ -305,8 +317,8 @@ async function rescheduleAgendadoIdea(input: {
       id: postId,
       uuid: (input.idea.metricool_uuid as string | null) ?? null,
       text: caption,
-      draft: false,
-      autoPublish: true,
+      draft: input.asDraft === true,
+      autoPublish: input.asDraft !== true,
       providers: platforms.map((network) => ({ network: network.toLowerCase() })),
       publicationDate: {
         dateTime: schedule.iso,
@@ -348,6 +360,134 @@ async function rescheduleAgendadoIdea(input: {
     const msg = err instanceof Error ? err.message : 'No se pudo reprogramar en Metricool'
     return { error: msg }
   }
+}
+
+/**
+ * Cancel a Recibo/pool schedule: DELETE the Metricool post, then clear local ids.
+ * If Metricool cannot delete, leave the remote post as a draft for review.
+ */
+export async function unschedulePoolIdea(input: {
+  ideaId: string
+}): Promise<UnschedulePoolResult> {
+  try {
+    await requirePermission('posting.publish')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'No autorizado' }
+  }
+  if (!input.ideaId) return { error: 'Falta el video' }
+
+  const supabase = await createClient()
+  const { data: idea, error: ideaErr } = await supabase
+    .from('content_ideas')
+    .select(
+      'id, title, hook, content_type, generated_caption, status, published_at, publish_date, metricool_post_id, metricool_uuid, posted_at, manual_posted_status, staff_client_approval, client_review_status, approved_video_id, client_id, client:clients(id, edit_mode, metricool_blog_id, platforms, default_platforms, posting_time, posting_schedule)',
+    )
+    .eq('id', input.ideaId)
+    .single()
+  if (ideaErr || !idea) return { error: 'Idea no encontrada' }
+
+  const client = (idea.client ?? {}) as PoolClient & { edit_mode?: 'ai' | 'human' | null }
+  const state = poolPublishState({
+    status: idea.status as string | null,
+    published_at: idea.published_at as string | null,
+    manual_posted_status: (idea as { manual_posted_status?: string | null }).manual_posted_status ?? null,
+    metricool_post_id: (idea.metricool_post_id as number | null) ?? null,
+    posted_at: idea.posted_at as string | null,
+    publish_date: idea.publish_date as string | null,
+    staff_client_approval: (idea as { staff_client_approval?: string | null }).staff_client_approval ?? null,
+    client_review_status: (idea as { client_review_status?: string | null }).client_review_status ?? null,
+    client_edit_mode: client.edit_mode ?? null,
+  })
+  if (state === 'publicado') return { error: 'El video ya está publicado. No se cancela desde Recibo.' }
+  if (!canReschedulePoolIdea(state)) return { error: 'Este video no está programado en Metricool.' }
+
+  const postId = (idea.metricool_post_id as number | null) ?? null
+  if (postId == null) {
+    return { error: 'Este video no tiene un post en Metricool (falta metricool_post_id). No se canceló.' }
+  }
+
+  const blogId = client.metricool_blog_id?.trim()
+  if (!blogId) return { error: 'El cliente no tiene Metricool configurado (falta blog_id)' }
+
+  let leftoverDraft = false
+  try {
+    await deleteScheduledPost(postId, blogId)
+  } catch (err) {
+    const unsupported = err instanceof Error && 'unsupportedDelete' in err && err.unsupportedDelete === true
+    if (!unsupported) {
+      return { error: err instanceof Error ? err.message : 'No se pudo cancelar en Metricool' }
+    }
+    const media = await resolvePoolMedia(
+      supabase,
+      input.ideaId,
+      (idea as { approved_video_id?: string | null }).approved_video_id ?? null,
+    )
+    if (media.error || !media.url) {
+      return { error: `Metricool no deja borrar el post y no se pudo dejarlo como borrador: ${media.error ?? 'Falta el video'}` }
+    }
+    const platforms = resolvePlatforms(client.platforms, client.default_platforms)
+    const caption = captionForSchedule(idea)
+    const formatData = postFormatData((idea.content_type as string | null) ?? null, platforms)
+    try {
+      await updateScheduledPost(postId, blogId, {
+        id: postId,
+        uuid: (idea.metricool_uuid as string | null) ?? null,
+        text: caption,
+        draft: true,
+        autoPublish: false,
+        providers: platforms.map((network) => ({ network: network.toLowerCase() })),
+        media: [media.url],
+        ...formatData,
+      })
+      leftoverDraft = true
+    } catch (draftErr) {
+      return {
+        error: draftErr instanceof Error
+          ? draftErr.message
+          : 'Metricool no dejó borrar ni dejar el post como borrador.',
+      }
+    }
+  }
+
+  const { error } = await supabase
+    .from('content_ideas')
+    .update({
+      metricool_post_id: null,
+      metricool_uuid: null,
+      posted_at: null,
+      publish_date: null,
+      posting_started_at: null,
+      posting_error: leftoverDraft ? 'Cancelado en Recibo: quedó borrador en Metricool' : null,
+    })
+    .eq('id', input.ideaId)
+  if (error) {
+    return {
+      error: leftoverDraft
+        ? 'El post quedó como borrador en Metricool, pero no se pudo limpiar Recibo.'
+        : 'Metricool borró el post, pero no se pudo limpiar Recibo.',
+    }
+  }
+
+  await logIdeaActivity(supabase, {
+    ideaId: input.ideaId,
+    action: 'posted_to_metricool',
+    clientId: (idea.client_id as string | null) ?? client.id ?? null,
+    metadata: {
+      source: 'recibo_cancel',
+      metricoolPostId: postId,
+      leftoverDraft,
+      cancelled: true,
+    },
+  })
+  revalidatePoolPaths()
+  if (leftoverDraft) {
+    return {
+      ok: true,
+      leftoverDraft: true,
+      message: 'No se pudo borrar en Metricool. Quedó como borrador para revisión. Recibo ya no lo tiene programado.',
+    }
+  }
+  return { ok: true, deleted: true }
 }
 
 function revalidatePoolPaths() {

@@ -21,6 +21,7 @@ import {
   validateBankUpload,
   type ClientBankFile,
 } from '@/lib/utils/client-asset-bank'
+import { attachmentDisposition } from '@/lib/utils/content-disposition'
 
 /**
  * Banco permanente por cliente. Additive: nunca escribe ni borra
@@ -211,7 +212,7 @@ export async function getClientAssetDownloadUrl(
         new GetObjectCommand({
           Bucket: r2Bucket(),
           Key: key,
-          ResponseContentDisposition: `attachment; filename="${(data.name || 'archivo').replace(/"/g, '')}"`,
+          ResponseContentDisposition: attachmentDisposition(data.name, 'archivo'),
         }),
         { expiresIn: 60 * 60 },
       )
