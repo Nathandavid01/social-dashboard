@@ -5,6 +5,7 @@ import {
   cadenceRevalidatePaths,
   cadenceTimeForWeekday,
   cleanPostingDays,
+  cleanPostingScheduleWithFormats,
   cleanPostingSchedule,
   cleanPostingTime,
   cleanTimezone,
@@ -172,6 +173,8 @@ describe('cadenceRevalidatePaths', () => {
     expect(paths).toEqual(
       expect.arrayContaining([
         '/clients/c1',
+        '/clients/c1/calendar',
+        '/recibo',
         '/clients',
         '/pipeline',
         '/home',
@@ -214,3 +217,5 @@ describe('minutesSinceMidnightInTz', () => {
     expect(minutesSinceMidnightInTz('UTC', now)).toBe(16 * 60 + 30)
   })
 })
+
+it('preserves recognized legacy formats during cadence saves while rejecting malformed values',()=>{expect(cleanPostingScheduleWithFormats({1:'reel',2:'09:15',3:'post',4:'story',5:'25:00',6:'18:30:00',7:'10:00'})).toEqual({1:'reel',2:'09:15',3:'post',4:'story',6:'18:30'})})

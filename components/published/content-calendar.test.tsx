@@ -1,5 +1,7 @@
 import { render, screen, waitFor, fireEvent, cleanup, within, act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
+vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn(async()=>({ok:true}))}))
 import { ContentCalendar } from './content-calendar'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })
 const base = { id: 1, uuid: 'one', text: 'Oferta de octubre', publicationDate: `${date}T23:59:00`, timezone: 'America/Puerto_Rico', platforms: ['instagram'], draft: false, autoPublish: true, media: [{ url: '/preview.jpg', type: 'image' }], clientName: 'Cliente A', blogId: '1', providerStatuses: ['PENDING'] }
@@ -96,4 +98,10 @@ it('shows each client frequency and marks expected weekdays even when Metricool 
  expect([1,3,5]).toContain(new Date(`${cell.getAttribute('data-calendar-date')}T12:00:00`).getDay())
  expect(screen.queryByText(/Previsto · Cliente B/)).toBeNull()
  fireEvent.click(screen.getByRole('button',{name:'Semana'}));expect(screen.getAllByText('Previsto · Cliente A · 10:00')).toHaveLength(3)
+})
+
+it('updates the frequency and planned calendar days after configuring them in the sidebar',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[]})}))
+ render(<ContentCalendar clients={[{id:'a',name:'Cliente A',metricool_blog_id:'1',posting_days:[1,3,5]}]} clientId="a"/>)
+ fireEvent.click(screen.getByRole('button',{name:'Configurar frecuencia de Cliente A'}));fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Jueves'}));await waitFor(()=>expect(screen.getByText('4 días por semana')).toBeInTheDocument());fireEvent.click(screen.getByRole('button',{name:'Listo'}));expect(screen.getAllByText('Previsto · Cliente A').some(el=>new Date(`${el.closest('[data-calendar-date]')!.getAttribute('data-calendar-date')}T12:00:00`).getDay()===4)).toBe(true)
 })
