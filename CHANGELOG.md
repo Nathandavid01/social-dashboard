@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.121 — 2026-10-08
+
+**El calendario verifica la publicación directamente con Metricool.**
+- Consulta sin caché y actualiza los estados cada minuto mientras el calendario está abierto.
+- Muestra la última verificación y confirma «Publicado» solo cuando todas las redes lo confirman.
+- Los detalles muestran el estado por red y enlaces a las publicaciones confirmadas.
+- Publicaciones parciales, errores y pendientes fuera de hora aparecen en «Necesita atención».
+- Si una cuenta falla, se avisa y los conteos quedan sin confirmar; una falla nunca se muestra como calendario vacío verificado.
+
+![Verificación con Metricool](/changelog/v5.121-calendario-verificacion.png)
+
 ## v5.120 — 2026-10-08
 
 **El calendario se parece más a la referencia y tiene su panel derecho.**

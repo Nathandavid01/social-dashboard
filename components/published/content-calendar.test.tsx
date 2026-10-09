@@ -1,9 +1,9 @@
-import { render, screen, waitFor, fireEvent, cleanup, within } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, cleanup, within, act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ContentCalendar } from './content-calendar'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })
 const base = { id: 1, uuid: 'one', text: 'Oferta de octubre', publicationDate: `${date}T23:59:00`, timezone: 'America/Puerto_Rico', platforms: ['instagram'], draft: false, autoPublish: true, media: [{ url: '/preview.jpg', type: 'image' }], clientName: 'Cliente A', blogId: '1', providerStatuses: ['PENDING'] }
-afterEach(() => { cleanup(); vi.unstubAllGlobals() })
+afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals() })
 describe('visual posting calendar', () => {
   it('loads a month, exposes thumbnails and upcoming posts, and opens post details', async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [base] }) })
@@ -37,10 +37,33 @@ describe('visual posting calendar', () => {
     fireEvent.click(within(panel).getByRole('button', { name: 'Ver todas' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Oferta de octubre')
   })
+  it('automatically verifies publishing and updates the calendar and open details', async () => {
+    vi.useFakeTimers()
+    let published = false
+    const fetcher = vi.fn().mockImplementation(async () => ({ ok: true, json: async () => ({ complete: true, checkedAt: new Date().toISOString(), posts: [{ ...base, providerStatuses: [published ? 'PUBLISHED' : 'PENDING'], providers: [{ network: 'instagram', status: published ? 'PUBLISHED' : 'PENDING', publicUrl: published ? 'https://www.instagram.com/p/test/' : undefined }] }] }) }))
+    vi.stubGlobal('fetch', fetcher)
+    await act(async () => { render(<ContentCalendar clients={[]} />) })
+    fireEvent.click(screen.getAllByRole('button', { name: /Oferta de octubre/ })[0])
+    published = true
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole('dialog')).toHaveTextContent('Publicado')
+    expect(screen.getByRole('link', { name: /Ver publicación en instagram/i })).toHaveAttribute('href', 'https://www.instagram.com/p/test/')
+    expect(screen.getByText(/Verificado con Metricool/)).toBeInTheDocument()
+  })
+  it('keeps the last result visible when a later verification fails', async () => {
+    const fetcher = vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ posts: [base], complete: true, checkedAt: new Date().toISOString() }) }).mockResolvedValueOnce({ ok: false })
+    vi.stubGlobal('fetch', fetcher)
+    render(<ContentCalendar clients={[]} />)
+    await screen.findAllByText('Oferta de octubre')
+    fireEvent.click(screen.getByRole('button', { name: 'Verificar con Metricool' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo verificar')
+    expect(screen.getAllByText('Oferta de octubre').length).toBeGreaterThan(0)
+  })
   it('reports load failures without showing empty-state counts as real data', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
     render(<ContentCalendar clients={[]} />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar')
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo verificar')
     expect(screen.queryByText('No hay publicaciones en este período.')).not.toBeInTheDocument()
   })
 })

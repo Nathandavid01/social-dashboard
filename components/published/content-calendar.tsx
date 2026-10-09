@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,13 +18,14 @@ const states: Record<CalendarPostState, { label: string; color: string }> = {
   draft: { label: 'Borrador', color: 'bg-amber-500/15 text-amber-700' },
   published: { label: 'Publicado', color: 'bg-emerald-500/15 text-emerald-700' },
   error: { label: 'Error', color: 'bg-red-500/15 text-red-600' },
+  partial: { label: 'Publicación parcial', color: 'bg-orange-500/15 text-orange-700' },
   unknown: { label: 'Sin confirmar', color: 'bg-muted text-muted-foreground' },
 }
 const platforms: Record<string, string> = { instagram: 'text-pink-600', facebook: 'text-blue-600', tiktok: 'text-cyan-700', youtube: 'text-red-600' }
 const dayLabels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 const dateKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
-const key = (p: PublishedPost) => `${p.blogId}:${p.id}`
+const key = (p: PublishedPost) => `${p.blogId}:${p.clientId ?? ''}:${p.id}`
 function StateBadge({ post }: { post: PublishedPost }) {
   const state = states[calendarPostState(post)]
   return <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium', state.color)}>{state.label}</span>
@@ -63,6 +64,11 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const [posts, setPosts] = useState<PublishedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [checkedAt, setCheckedAt] = useState<string | null>(null)
+  const [failedClients, setFailedClients] = useState<{ id: string; name: string }[]>([])
+  const inFlight = useRef(false)
+  const lastScope = useRef('')
+  const lastAttempt = useRef(0)
   const [refresh, setRefresh] = useState(0)
   const [stateFilter, setStateFilter] = useState<CalendarPostState | 'all'>('all')
   const [upcomingOpen, setUpcomingOpen] = useState(false)
@@ -75,16 +81,35 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const startKey = dateKey(start), endKey = dateKey(end)
   useEffect(() => {
     const controller = new AbortController()
-    setLoading(true); setError(null); setPosts([]); setExpandedDays({})
+    const scope = `${blogId}:${startKey}:${endKey}`
+    if (lastScope.current !== scope) {
+      setPosts([]); setExpandedDays({}); setCheckedAt(null); setFailedClients([]); setSelected(null)
+      lastScope.current = scope
+    }
+    inFlight.current = true; lastAttempt.current = Date.now()
+    setLoading(true); setError(null)
     const params = new URLSearchParams({ startDate: dateKey(addDays(new Date(`${startKey}T12:00:00`), -1)), endDate: dateKey(addDays(new Date(`${endKey}T12:00:00`), 1)), includeDrafts: 'true' })
     params.set(blogId === 'all' ? 'all' : 'blogId', blogId === 'all' ? 'true' : blogId)
-    fetch(`/api/metricool/posts?${params}`, { signal: controller.signal })
+    fetch(`/api/metricool/posts?${params}`, { signal: controller.signal, cache: 'no-store' })
       .then(async res => { if (!res.ok) throw new Error(); return res.json() })
-      .then(data => { if (!controller.signal.aborted) setPosts(data.posts ?? []) })
-      .catch(() => { if (!controller.signal.aborted) setError('No se pudo cargar el calendario. Intenta actualizar.') })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
-    return () => controller.abort()
+      .then(data => {
+        if (controller.signal.aborted) return
+        setPosts(data.posts ?? []); setCheckedAt(data.checkedAt ?? null); setFailedClients(data.failedClients ?? [])
+      })
+      .catch(() => { if (!controller.signal.aborted) setError('No se pudo verificar Metricool. Los datos anteriores no están confirmados; intenta nuevamente.') })
+      .finally(() => { if (!controller.signal.aborted) { inFlight.current = false; setLoading(false) } })
+    return () => { controller.abort(); inFlight.current = false }
   }, [blogId, startKey, endKey, refresh])
+  useEffect(() => {
+    const verify = () => {
+      if (document.visibilityState !== 'hidden' && !inFlight.current && Date.now() - lastAttempt.current >= 60_000) setRefresh(r => r + 1)
+    }
+    const timer = window.setInterval(verify, 60_000)
+    document.addEventListener('visibilitychange', verify)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', verify) }
+  }, [])
+  // Open details follow the latest Metricool result instead of a stale copy.
+  const selectedPost = selected ? posts.find(p => key(p) === key(selected)) ?? null : null
   const visiblePosts = useMemo(() => posts.filter(p => {
     const day = calendarPostDate(p).slice(0, 10)
     return day >= startKey && day <= endKey
@@ -93,6 +118,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const today = now.slice(0, 10)
   const filteredPosts = visiblePosts.filter(p => stateFilter === 'all' || calendarPostState(p) === stateFilter)
   const upcoming = filteredPosts.filter(p => calendarPostState(p) === 'scheduled' && calendarPostDate(p) >= now)
+  const attention = visiblePosts.filter(p => ['partial', 'error'].includes(calendarPostState(p)) || (calendarPostState(p) === 'scheduled' && calendarPostDate(p) < now))
   const days: Date[] = []
   for (let d = start; d <= end; d = addDays(d, 1)) days.push(d)
   function navigate(direction: number) {
@@ -111,14 +137,20 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
         <Button aria-label="Período anterior" variant="outline" size="icon" onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
         <Button aria-label="Período siguiente" variant="outline" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
         <div className="flex rounded-lg border bg-muted/40 p-1">{(['month', 'week'] as const).map(v => <button key={v} aria-pressed={view === v} onClick={() => setView(v)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', view === v ? 'bg-primary/15 text-primary' : 'text-muted-foreground')}>{v === 'month' ? 'Mes' : 'Semana'}</button>)}</div>
-        <Button aria-label="Actualizar calendario" variant="ghost" size="icon" disabled={loading} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /></Button>
+        <Button aria-label="Verificar con Metricool" variant="outline" size="sm" disabled={loading} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Verificar</Button>
       </div>
     </div>
+    <div aria-live="polite" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <span className={cn('h-2 w-2 rounded-full', error || failedClients.length ? 'bg-amber-500' : checkedAt ? 'bg-emerald-500' : 'bg-muted-foreground')} />
+      {loading ? 'Verificando con Metricool…' : error ? 'Verificación no disponible' : failedClients.length ? 'Verificación incompleta' : checkedAt ? `Verificado con Metricool · ${new Date(checkedAt).toLocaleTimeString('es-PR', { timeZone: 'America/Puerto_Rico', hour: 'numeric', minute: '2-digit', second: '2-digit' })}` : 'Esperando verificación de Metricool'}
+      <span>· Actualización automática cada minuto con el calendario abierto</span>
+    </div>
+    {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No se pudo verificar: {failedClients.map(c => c.name).join(', ')}. Los conteos están incompletos.</div>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     <div className={styles.layout}>
       <div className="min-w-0 space-y-3">
         {!loading && !error && filteredPosts.length === 0 && <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">No hay publicaciones en este período.</p>}
-        <div className="overflow-hidden rounded-xl border bg-white"><div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-5"><h3 className="text-xl font-semibold">{title.charAt(0).toUpperCase() + title.slice(1)}</h3><span className="text-xs text-muted-foreground">{loading || error ? '—' : filteredPosts.length} publicaciones</span></div><div className="overflow-x-auto"><div className="min-w-[560px]">
+        <div className="overflow-hidden rounded-xl border bg-white"><div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-5"><h3 className="text-xl font-semibold">{title.charAt(0).toUpperCase() + title.slice(1)}</h3><span className="text-xs text-muted-foreground">{loading || error || failedClients.length ? '—' : filteredPosts.length} publicaciones</span></div><div className="overflow-x-auto"><div className="min-w-[560px]">
           <div className="grid grid-cols-7 border-b bg-muted/30">{dayLabels.map(d => <div key={d} className="py-3 text-center text-xs font-medium text-muted-foreground">{d}</div>)}</div>
           <div className="grid grid-cols-7">{days.map(day => {
             const date = dateKey(day), dayPosts = filteredPosts.filter(p => calendarPostDate(p).startsWith(date))
@@ -137,13 +169,14 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
           {loading ? <Skeleton className="h-24" /> : !error && (upcoming.length ? upcoming.slice(0, 3).map(p => <PostCard key={key(p)} post={p} compact onOpen={() => setSelected(p)} />) : <p className="py-5 text-xs text-muted-foreground">Sin publicaciones programadas próximas.</p>)}
         </div>
         <div className="rounded-xl border bg-white p-4 space-y-2"><h3 className="mb-3 text-sm font-semibold">Estado del contenido</h3>
-          <button aria-pressed={stateFilter === 'all'} onClick={() => setStateFilter('all')} className={cn('flex w-full items-center justify-between rounded-lg px-2 py-2 text-xs', stateFilter === 'all' && 'bg-accent text-primary')}><span>Todos los estados</span><span>{loading || error ? '—' : visiblePosts.length}</span></button>
-          {Object.entries(states).map(([state, info]) => <button aria-pressed={stateFilter === state} key={state} onClick={() => setStateFilter(state as CalendarPostState)} className={cn('flex w-full items-center justify-between rounded-lg px-2 py-2 text-xs hover:bg-muted', stateFilter === state && 'bg-accent text-primary')}><span className="flex items-center gap-2"><span className={cn('h-3 w-3 rounded-full', info.color)} />{info.label}</span><span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{loading || error ? '—' : visiblePosts.filter(p => calendarPostState(p) === state).length}</span></button>)}
+          <button aria-pressed={stateFilter === 'all'} onClick={() => setStateFilter('all')} className={cn('flex w-full items-center justify-between rounded-lg px-2 py-2 text-xs', stateFilter === 'all' && 'bg-accent text-primary')}><span>Todos los estados</span><span>{loading || error || failedClients.length ? '—' : visiblePosts.length}</span></button>
+          {Object.entries(states).map(([state, info]) => <button aria-pressed={stateFilter === state} key={state} onClick={() => setStateFilter(state as CalendarPostState)} className={cn('flex w-full items-center justify-between rounded-lg px-2 py-2 text-xs hover:bg-muted', stateFilter === state && 'bg-accent text-primary')}><span className="flex items-center gap-2"><span className={cn('h-3 w-3 rounded-full', info.color)} />{info.label}</span><span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{loading || error || failedClients.length ? '—' : visiblePosts.filter(p => calendarPostState(p) === state).length}</span></button>)}
         </div>
+        {!loading && attention.length > 0 && <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/50 p-4"><h3 className="text-sm font-semibold text-amber-900">Necesita atención</h3><p className="text-xs text-amber-800">Publicaciones parciales, errores o posts que siguen pendientes después de su hora.</p>{attention.slice(0, 3).map(p => <PostCard key={key(p)} post={p} compact onOpen={() => setSelected(p)} />)}</div>}
         <div className="rounded-xl bg-primary/5 p-5"><CalendarDays className="mb-4 h-6 w-6 text-primary" /><p className="text-sm font-medium">Cada publicación tiene su momento.</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">Organiza tu contenido y revisa lo que viene para cada cliente.</p><div className="mt-5 h-px w-6 bg-primary" /><p className="mt-4 text-[11px] text-primary">Planea hoy. Publica con intención.</p></div>
       </aside>
     </div>
     <Dialog open={upcomingOpen} onOpenChange={setUpcomingOpen}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>Próximas publicaciones</DialogTitle><DialogDescription>Publicaciones programadas en el período seleccionado · Hora de Puerto Rico</DialogDescription></DialogHeader><div className="space-y-3">{upcoming.length ? upcoming.map(p => <PostCard key={key(p)} post={p} compact onOpen={() => { setUpcomingOpen(false); setSelected(p) }} />) : <p className="text-sm text-muted-foreground">Sin publicaciones programadas próximas.</p>}</div></DialogContent></Dialog>
-    <Dialog open={!!selected} onOpenChange={open => { if (!open) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selected?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selected && `${calendarPostDate(selected).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selected && <div className="space-y-4"><StateBadge post={selected} /><p className="text-xs capitalize text-muted-foreground">{selected.platforms.join(' · ')}</p><Thumbnail post={selected} className="h-56 w-full" /><p className="whitespace-pre-wrap text-sm leading-relaxed">{selected.text || 'Sin caption'}</p><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
+    <Dialog open={!!selectedPost} onOpenChange={open => { if (!open) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
   </section>
 }

@@ -1,10 +1,11 @@
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
-export type CalendarPostState = 'draft' | 'scheduled' | 'published' | 'error' | 'unknown'
-export function calendarPostState(post: Pick<PublishedPost, 'draft'> & { providerStatuses?: string[] }): CalendarPostState {
+export type CalendarPostState = 'draft' | 'scheduled' | 'published' | 'error' | 'unknown' | 'partial'
+export function calendarPostState(post: Pick<PublishedPost, 'draft'> & { providerStatuses?: string[]; providers?: PublishedPost['providers'] }): CalendarPostState {
   if (post.draft) return 'draft'
-  const statuses = post.providerStatuses ?? []
+  const statuses = post.providers?.map(p => p.status) ?? post.providerStatuses ?? []
   if (statuses.some(s => s === 'ERROR')) return 'error'
   if (statuses.length && statuses.every(s => s === 'PUBLISHED')) return 'published'
+  if (statuses.some(s => s === 'PUBLISHED')) return 'partial'
   if (statuses.some(s => s === 'PENDING')) return 'scheduled'
   return 'unknown'
 }

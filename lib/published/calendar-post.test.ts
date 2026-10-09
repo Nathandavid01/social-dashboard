@@ -7,7 +7,7 @@ describe('calendar publication evidence', () => {
     expect(calendarPostState({ ...post, providerStatuses: ['PENDING'] })).toBe('scheduled')
   })
   it('requires every platform to confirm publication and preserves drafts and failures', () => {
-    expect(calendarPostState({ ...post, providerStatuses: ['PUBLISHED', 'PENDING'] })).toBe('scheduled')
+    expect(calendarPostState({ ...post, providerStatuses: ['PUBLISHED', 'PENDING'] })).toBe('partial')
     expect(calendarPostState({ ...post, providerStatuses: ['PUBLISHED', 'PUBLISHED'] })).toBe('published')
     expect(calendarPostState({ ...post, providerStatuses: ['PUBLISHED', 'ERROR'] })).toBe('error')
     expect(calendarPostState({ ...post, draft: true, providerStatuses: ['PENDING'] })).toBe('draft')

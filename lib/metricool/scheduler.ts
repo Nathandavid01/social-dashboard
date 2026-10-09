@@ -87,7 +87,9 @@ export async function getScheduledPosts(
     config,
     { start, end, timezone, extendedRange: 'true' }
   )
-  return Array.isArray(response) ? response : response.data ?? []
+  if (Array.isArray(response)) return response
+  if (response && Array.isArray(response.data)) return response.data
+  throw new Error('Metricool devolvió una respuesta de calendario inválida.')
 }
 
 export function verifySchedule(posts: ScheduledPost[]): ScheduleVerification[] {
