@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.130 — 2026-10-09
+
+**Recibos marca los días en que le toca publicar a cada cliente.**
+- El panel «Frecuencia por cliente» muestra sus días por semana, horario y tipo de contenido configurados.
+- Las marcas «Previsto» aparecen en mes y semana, incluso cuando todavía no hay un post en Metricool.
+- Al elegir un cliente, solo aparecen su frecuencia y sus días previstos.
+- Los clientes sin días guardados muestran «Sin frecuencia configurada».
+
+[Ver frecuencia y días previstos](/previews/v5.130-calendario-frecuencia.html)
+
+![Calendario con frecuencia por cliente](/changelog/v5.130-calendario-frecuencia.png)
+
 ## v5.129 — 2026-10-09
 
 **El calendario de publicaciones ahora está en Recibos.**
