@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.129 — 2026-10-09
+
+**El calendario de publicaciones ahora está en Recibos.**
+- Abre Recibos para ver el calendario, elegir cliente y subir imágenes o videos.
+- Desde las tarjetas puedes guardar borradores, programar y verificar publicaciones con Metricool.
+- La pestaña «Contenido recibido» conserva los videos y sus controles de aprobación.
+- Cambiar de pestaña conserva una subida pendiente en el calendario.
+
+[Ver Recibos con calendario](/previews/v5.129-recibos-calendario.html)
+
+![Calendario dentro de Recibos](/changelog/v5.129-recibos-calendario.png)
+
 ## v5.128 — 2026-10-08
 
 **Sube imágenes y videos directamente al calendario de cada cliente.**
