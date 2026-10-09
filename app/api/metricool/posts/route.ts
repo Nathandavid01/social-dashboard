@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     if (!effectiveBlogId) return json({ error: 'Selecciona un cliente conectado a Metricool.' }, 503)
     let clientName: string | undefined, clientId: string | undefined
     if (blogId) {
-      const { data: c, error } = await supabase.from('clients').select('id, name').eq('metricool_blog_id', blogId).single()
+      const { data: c, error } = await supabase.from('clients').select('id, name').eq('metricool_blog_id', blogId).eq('status', 'active').order('name').order('id').limit(1).maybeSingle()
       if (error || !c) return json({ error: 'Cliente de Metricool no disponible.' }, 404)
       clientName = c.name; clientId = c.id
     }
