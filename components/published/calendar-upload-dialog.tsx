@@ -21,7 +21,10 @@ export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,o
  const {toast}=useToast()
  const [open,setOpen]=useState(false)
  const [selection,setSelection]=useState(clientId??'')
- const selectedClient=clients.find(c=>c.id===(clientId??selection))
+ const [preparedClientId,setPreparedClientId]=useState<string|null>(null)
+ const requestedClientId=clientId??selection
+ const selectedClient=clients.find(c=>c.id===(preparedClientId??requestedClientId))
+ const scopeChanged=!!preparedClientId&&preparedClientId!==requestedClientId
  const networks=resolvePlatforms(selectedClient?.platforms,selectedClient?.default_platforms)
  const [selectedNetworks,setSelectedNetworks]=useState<string[]>([])
  const [file,setFile]=useState<File|null>(null)
@@ -50,7 +53,7 @@ export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,o
  const connected=!!selectedClient?.metricool_blog_id
  const mime=file?.type||(/\.mov$/i.test(file?.name??'')?'video/quicktime':/\.mp4$/i.test(file?.name??'')?'video/mp4':/\.png$/i.test(file?.name??'')?'image/png':/\.jpe?g$/i.test(file?.name??'')?'image/jpeg':'')
  async function save() {
-  if(busyRef.current||uncertain||!file||!selectedClient)return
+  if(busyRef.current||uncertain||scopeChanged||!file||!selectedClient)return
   const invalid=validateCalendarUpload({title,caption,fileName:file.name,mimeType:mime,sizeBytes:file.size,dateTime,platforms:selectedNetworks})
   if(invalid){setError(invalid);return}
   if(!connected){setError('Conecta este cliente con Metricool antes de subir contenido.');return}
@@ -62,7 +65,7 @@ export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,o
    if(!tx.prepared) {
     const result=await prepareCalendarUpload({ideaId:tx.ideaId,clientId:selectedClient.id,title,caption,fileName:file.name,mimeType:mime,sizeBytes:file.size,dateTime,platforms:selectedNetworks})
     if(!result.ok||!result.ideaId)throw Error(result.error??'No se pudo preparar la subida.')
-    tx.ideaId=result.ideaId;tx.prepared=true;setPrepared(true)
+    tx.ideaId=result.ideaId;tx.prepared=true;setPreparedClientId(selectedClient.id);setPrepared(true)
    }
    if(!tx.key) {
     setStage('Subiendo archivo…');setProgress(0)
@@ -85,7 +88,7 @@ export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,o
    toast({title:result.confirmed?'Contenido guardado como borrador':'Borrador pendiente de verificar',description:result.warning??'Abre la tarjeta para elegir cuándo publicarlo.'})
    setOpen(false)
    onSaved({clientId:result.clientId??selectedClient.id,dateTime:result.dateTime??dateTime,postId:result.postId,confirmed:result.confirmed})
-   transaction.current=null;setPrepared(false);setUploaded(false);setFile(null);setTitle('');setCaption('');setUncertain(false);setStage('')
+   transaction.current=null;setPreparedClientId(null);setPrepared(false);setUploaded(false);setFile(null);setTitle('');setCaption('');setUncertain(false);setStage('')
   }catch(err){setError(err instanceof Error?err.message:'No se pudo completar la subida.');setStage('')}
   finally{busyRef.current=false;setBusy(false);onBusy?.(false)}
  }
@@ -107,8 +110,9 @@ export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,o
      {selectedClient&&<fieldset disabled={disabled||prepared} className="space-y-2"><legend className="text-sm font-medium">Redes del cliente</legend><div className="flex flex-wrap gap-3">{networks.map(network=><label key={network} className="flex items-center gap-2 text-sm capitalize"><input type="checkbox" checked={selectedNetworks.includes(network)} onChange={e=>setSelectedNetworks(values=>e.target.checked?[...values,network]:values.filter(v=>v!==network))}/>{network}</label>)}</div></fieldset>}
      {busy&&<div role="status" className="space-y-2 text-sm"><p>{stage}</p>{stage.startsWith('Subiendo')&&<><progress value={progress} max={100} className="w-full"/><p>{progress}%</p></>}</div>}
      {error&&<p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-     {uncertain&&<Button type="button" variant="outline" onClick={()=>{if(selectedClient)onVerify?.({clientId:selectedClient.id,dateTime});setOpen(false)}}>Verificar calendario</Button>}
-     <Button type="submit" className="w-full" disabled={disabled||uncertain||!file||!connected}>{busy&&<Loader2 className="h-4 w-4 animate-spin"/>}{uploaded?'Guardar borrador nuevamente':'Subir y guardar borrador'}</Button>
+     {scopeChanged&&<p role="alert" className="text-sm text-amber-700">La subida pendiente pertenece a {selectedClient?.name}. Vuelve a su calendario para continuar.</p>}
+     {(uncertain||scopeChanged)&&<Button type="button" variant="outline" onClick={()=>{if(selectedClient)onVerify?.({clientId:selectedClient.id,dateTime});setOpen(false)}}>Verificar calendario</Button>}
+     <Button type="submit" className="w-full" disabled={disabled||uncertain||scopeChanged||!file||!connected}>{busy&&<Loader2 className="h-4 w-4 animate-spin"/>}{uploaded?'Guardar borrador nuevamente':'Subir y guardar borrador'}</Button>
     </form>
    </DialogContent>
   </Dialog>

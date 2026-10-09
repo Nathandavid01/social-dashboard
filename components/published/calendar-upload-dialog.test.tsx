@@ -34,3 +34,13 @@ it('puts an image directly to its signed storage URL and creates its draft after
  expect(putBlob).toHaveBeenCalledWith('https://signed.example/photo',expect.any(File),'image/jpeg',expect.objectContaining({onProgress:expect.any(Function)}))
  expect(h.upload).not.toHaveBeenCalled();expect(h.finish).toHaveBeenCalledWith(expect.objectContaining({key:'entregas/idea/edited/photo.jpg'}))
 })
+
+it('retains the original client after a failed upload and blocks retry in another calendar',async()=>{
+ h.finish.mockResolvedValue({error:'Revisa las redes'});const saved=vi.fn(),verify=vi.fn()
+ const view=render(<CalendarUploadDialog clients={clients} clientId="c" onSaved={saved} onVerify={verify}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Subir contenido'}));await fill();fireEvent.click(screen.getByRole('button',{name:'Subir y guardar borrador'}));await screen.findByText('Revisa las redes');
+ fireEvent.click(screen.getByRole('button',{name:'Close'}));view.rerender(<CalendarUploadDialog clients={clients} clientId="d" onSaved={saved} onVerify={verify}/>);fireEvent.click(screen.getByRole('button',{name:'Subir contenido'}));
+ expect(screen.getByRole('dialog')).toHaveTextContent('Subir al calendario · Cliente A');expect(screen.getByRole('button',{name:'Guardar borrador nuevamente'})).toBeDisabled();expect(screen.getByLabelText('instagram')).toBeChecked();
+ fireEvent.click(screen.getByRole('button',{name:'Verificar calendario'}));expect(verify).toHaveBeenCalledWith(expect.objectContaining({clientId:'c'}));
+ view.rerender(<CalendarUploadDialog clients={clients} clientId="c" onSaved={saved} onVerify={verify}/>);fireEvent.click(screen.getByRole('button',{name:'Subir contenido'}));fireEvent.click(screen.getByRole('button',{name:'Guardar borrador nuevamente'}));await waitFor(()=>expect(h.finish).toHaveBeenCalledTimes(2));expect(h.prepare).toHaveBeenCalledTimes(1);expect(h.upload).toHaveBeenCalledTimes(1)
+})
