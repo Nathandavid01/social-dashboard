@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.120 — 2026-10-08
+
+**El calendario se parece más a la referencia y tiene su panel derecho.**
+- Diseño claro, tarjetas blancas y acentos violeta.
+- Próximas publicaciones a la derecha en escritorio, con miniaturas y «Ver todas».
+- Selecciona un estado en el panel para filtrar el calendario.
+- El panel acompaña el desplazamiento y se adapta a móvil.
+
+![Calendario con panel derecho](/changelog/v5.120-calendario-panel-derecho.png)
+
 ## v5.119 — 2026-10-08
 
 **El inicio ahora muestra un calendario visual de publicaciones.**

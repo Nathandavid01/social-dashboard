@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, cleanup, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ContentCalendar } from './content-calendar'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })
@@ -23,6 +23,19 @@ describe('visual posting calendar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }))
     expect(screen.getByRole('button', { name: 'Semana' })).toHaveAttribute('aria-pressed', 'true')
     await screen.findByText('No hay publicaciones en este período.')
+  })
+  it('provides a right panel with all upcoming posts and clickable state filters', async () => {
+    const published = { ...base, id: 2, text: 'Publicación confirmada', providerStatuses: ['PUBLISHED'] }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [base, published] }) }))
+    render(<ContentCalendar clients={[]} />)
+    const panel = screen.getByRole('complementary', { name: 'Menú de publicaciones' })
+    await waitFor(() => expect(within(panel).getByRole('button', { name: /Publicado/ })).toHaveTextContent('1'))
+    fireEvent.click(within(panel).getByRole('button', { name: /Publicado/ }))
+    expect(screen.queryByRole('button', { name: /Oferta de octubre/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /Publicación confirmada/ })).toBeInTheDocument()
+    fireEvent.click(within(panel).getByRole('button', { name: /Todos los estados/ }))
+    fireEvent.click(within(panel).getByRole('button', { name: 'Ver todas' }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('Oferta de octubre')
   })
   it('reports load failures without showing empty-state counts as real data', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
