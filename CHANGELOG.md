@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.128 — 2026-10-08
+
+**Sube imágenes y videos directamente al calendario de cada cliente.**
+- Cada cliente tiene su calendario visual en la pestaña Calendario y un enlace directo desde su perfil.
+- «Subir contenido» permite adjuntar JPG/PNG o MP4/MOV, escribir el caption y elegir sus redes y fecha.
+- El archivo se guarda como borrador en Metricool; abre su tarjeta para programar la publicación automática.
+- Puedes revisar el video desde sus detalles. La subida muestra progreso y conserva el archivo para reintentar sin volver a subirlo.
+- Un envío pendiente de confirmar pide verificar Metricool antes de repetir, para evitar duplicados.
+
+[Ver la subida al calendario](/previews/v5.128-calendario-subidas.html)
+
+![Subida al calendario de un cliente](/changelog/v5.128-calendario-subidas.png)
+
 ## v5.127 — 2026-10-08
 
 **Calendario visual conectado directamente con Metricool en el inicio.**
