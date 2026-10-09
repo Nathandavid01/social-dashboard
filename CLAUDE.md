@@ -88,6 +88,12 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 - `components/` — organized by domain (`clients/`, `home/`, `notifications/`, `presence/`, `planning/`, `recording/`…)
 - `supabase/migrations/` — sequential SQL; new schema gets a new `NNNN_*.sql` file, never edit old ones
 
+## Calendario de publicaciones
+
+- UI: `components/published/content-calendar.tsx` in `/home`; usage is documented in [README.md](README.md#calendario-de-publicaciones-v5127). Reads use `/api/metricool/posts` with explicit dates, drafts included and `no-store`; active clients sharing a Metricool blog reuse one account read. Failed accounts are reported separately, and `calendarPostState` requires every provider to be `PUBLISHED` for the published state.
+- Changes use `POST /api/metricool/calendar-state`: `metricool.write` for drafts, plus `posting.publish` for schedules; the server checks the active client's blog ownership, re-reads the existing post and compares UUID, draft, text, publication date and supplied timezone before PUT. This is optimistic concurrency: Metricool PUT has no external compare-and-swap, so a concurrent external edit between the read and PUT can still be overwritten.
+- `buildCalendarStateUpdate` preserves the fetched post's content, media, providers and options while changing draft/autoPublish and, for scheduling, a future `America/Puerto_Rico` date. Published providers and unsafe in-progress/unknown states are rejected. Read-back verifies identity, text, media, provider networks and the requested state/time; linked dashboard references and confirmed activity records are updated separately. A timeout or unverified accepted write must prompt verification, never automatic replay or post creation. Release validation used mock writes and live reads, not live scheduling mutations.
+
 ## Loader
 
 **No full-screen brand splash on route transitions** (no Nate Media logo between pages).

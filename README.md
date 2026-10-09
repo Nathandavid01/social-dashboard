@@ -22,6 +22,16 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Learn More
 
+### Calendario de publicaciones (v5.127)
+
+En `/home`, el calendario muestra los posts existentes en Metricool en vistas de mes y semana, con miniaturas, horarios de Puerto Rico y filtros por cliente y estado. El panel derecho reúne próximas publicaciones, conteos por estado y posts que necesitan atención.
+
+Abre una tarjeta para ver el caption, el estado por red y los enlaces disponibles. **Publicado** requiere que todas las redes estén en `PUBLISHED`; una publicación parcial, un error o un estado sin confirmar permanece identificado. **Verificar** consulta Metricool de nuevo; la actualización automática se ejecuta cada minuto mientras el calendario está visible. Si una cuenta falla, el calendario advierte que la verificación y los conteos están incompletos.
+
+Con permiso `metricool.write`, abre un post pendiente y elige **Guardar como borrador** para desactivar su publicación automática. Con ese permiso y `posting.publish`, elige una fecha y hora futuras en Puerto Rico (UTC−4) y pulsa **Programar** para activar la publicación automática del mismo post. Los posts publicados en una o más redes conservan su historial y no se pueden reprogramar desde estos controles.
+
+Cada cambio vuelve a leer el post y después consulta Metricool para comprobar el resultado. Si aparece **Cambio pendiente de verificar** o falla la conexión tras enviar, usa **Verificar calendario** antes de repetir la acción. La validación de esta entrega incluye escrituras simuladas y consultas reales de lectura; no se probaron cambios reales de programación. Ver [notas de implementación](CLAUDE.md#calendario-de-publicaciones).
+
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
