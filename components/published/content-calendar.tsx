@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ChevronLeft, ChevronRight, RefreshCw, CalendarDays, ImageIcon, ArrowUpRight } from 'lucide-react'
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
 import { calendarPostDate, calendarPostState, puertoRicoNow, type CalendarPostState } from '@/lib/published/calendar-post'
+import { calendarCadenceDays, calendarCadenceSlot, CADENCE_DAY_NAMES } from '@/lib/published/calendar-cadence'
 import { cn } from '@/lib/utils'
 import styles from './content-calendar.module.css'
 
@@ -81,6 +82,8 @@ export function ContentCalendar({ clients, clientId }: { clients: Client[]; clie
   const [stateFilter, setStateFilter] = useState<CalendarPostState | 'all'>('all')
   const [upcomingOpen, setUpcomingOpen] = useState(false)
   const [selected, setSelected] = useState<PublishedPost | null>(null)
+  const [expandedCadenceDays,setExpandedCadenceDays] = useState<Record<string,boolean>>({})
+  const cadenceClients = activeClient ? [activeClient] : activeClientId === 'all' ? clients : []
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
   const monthStart = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
   const start = view === 'month' ? addDays(monthStart, -monthStart.getDay()) : addDays(anchor, -anchor.getDay())
@@ -91,7 +94,7 @@ export function ContentCalendar({ clients, clientId }: { clients: Client[]; clie
     const controller = new AbortController()
     const scope = `${activeClientId}:${startKey}:${endKey}`
     if (lastScope.current !== scope) {
-      setPosts([]); setExpandedDays({}); setCheckedAt(null); setFailedClients([]); setSelected(null)
+      setPosts([]); setExpandedDays({}); setExpandedCadenceDays({}); setCheckedAt(null); setFailedClients([]); setSelected(null)
       lastScope.current = scope
     }
     inFlight.current = true; lastAttempt.current = Date.now()
@@ -171,14 +174,19 @@ export function ContentCalendar({ clients, clientId }: { clients: Client[]; clie
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     <div className={styles.layout}>
       <div className="min-w-0 space-y-3">
+        <p className="text-xs text-muted-foreground"><span className="mr-1 inline-block h-2 w-2 rounded-full border border-dashed border-violet-500"/>Previsto = día configurado para publicar · Los posts reales conservan su estado de Metricool.</p>
         {!loading && !error && filteredPosts.length === 0 && <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">No hay publicaciones en este período.</p>}
         <div className="overflow-hidden rounded-xl border bg-white"><div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-5"><h3 className="text-xl font-semibold">{title.charAt(0).toUpperCase() + title.slice(1)}</h3><span className="text-xs text-muted-foreground">{loading || error || failedClients.length ? '—' : filteredPosts.length} publicaciones</span></div><div className="overflow-x-auto"><div className="min-w-[560px]">
           <div className="grid grid-cols-7 border-b bg-muted/30">{dayLabels.map(d => <div key={d} className="py-3 text-center text-xs font-medium text-muted-foreground">{d}</div>)}</div>
           <div className="grid grid-cols-7">{days.map(day => {
             const date = dateKey(day), dayPosts = filteredPosts.filter(p => calendarPostDate(p).startsWith(date))
+            const expected = cadenceClients.flatMap(client=>{const slot=calendarCadenceSlot(client,day.getDay());return slot?[{client,...slot}]:[]})
+            const expectedShown=expandedCadenceDays[date]?expected:expected.slice(0,2)
             const shown = expandedDays[date] ? dayPosts : dayPosts.slice(0, 2)
-            return <div key={date} className={cn('min-h-[150px] border-b border-r border-border/70 p-2 space-y-2', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5')}>
+            return <div key={date} data-calendar-date={date} className={cn('min-h-[150px] border-b border-r border-border/70 p-2 space-y-2', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5')}>
               <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-xs', date === today ? 'bg-primary font-semibold text-primary-foreground' : 'text-muted-foreground')}>{day.getDate()}</span>
+              {expectedShown.map(slot=><p key={slot.client.id} className="rounded-md border border-dashed border-violet-300 bg-violet-50 p-1 text-[10px] leading-relaxed text-violet-800">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
+              {expected.length>2&&<button type="button" onClick={()=>setExpandedCadenceDays(s=>({...s,[date]:!s[date]}))} className="text-[10px] text-violet-700">{expandedCadenceDays[date]?'Ocultar días previstos':`+${expected.length-2} clientes previstos`}</button>}
               {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} />)}
               {dayPosts.length > 2 && <button onClick={() => setExpandedDays(s => ({ ...s, [date]: !s[date] }))} className="px-1 text-xs text-primary">{expandedDays[date] ? 'Ver menos' : `+${dayPosts.length - 2} más`}</button>}
             </div>
@@ -186,6 +194,11 @@ export function ContentCalendar({ clients, clientId }: { clients: Client[]; clie
         </div></div></div>
       </div>
       <aside aria-label="Menú de publicaciones" className={cn(styles.panel, 'space-y-5')}>
+        <section aria-label="Frecuencia por cliente" className="rounded-xl border bg-white p-4 space-y-3">
+          <h3 className="text-sm font-semibold">Frecuencia por cliente</h3>
+          <p className="text-xs text-muted-foreground">Días configurados · Hora de Puerto Rico</p>
+          <div className="max-h-80 space-y-3 overflow-y-auto">{cadenceClients.map(client=>{const days=calendarCadenceDays(client.posting_days);return <div key={client.id} className="space-y-1 border-b pb-3 last:border-0"><p className="text-xs font-semibold">{client.name}</p><p className="text-xs text-violet-700">{days.length?`${days.length} ${days.length===1?'día':'días'} por semana`:'Sin frecuencia configurada'}</p>{days.map(day=>{const slot=calendarCadenceSlot(client,day)!;return <p key={day} className="text-[11px] text-muted-foreground">{CADENCE_DAY_NAMES[day]}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:' · Sin hora'}</p>})}</div>})}{!cadenceClients.length&&<p className="text-xs text-muted-foreground">Sin clientes en esta vista.</p>}</div>
+        </section>
         <div className="rounded-xl border bg-white p-4 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">Próximas publicaciones</h3><button onClick={() => setUpcomingOpen(true)} disabled={loading || !!error} className="inline-flex items-center gap-1 text-xs text-primary disabled:opacity-50">Ver todas <ArrowUpRight className="h-3.5 w-3.5" /></button></div>
           {loading ? <Skeleton className="h-24" /> : !error && (upcoming.length ? upcoming.slice(0, 3).map(p => <PostCard key={key(p)} post={p} compact onOpen={() => setSelected(p)} />) : <p className="py-5 text-xs text-muted-foreground">Sin publicaciones programadas próximas.</p>)}

@@ -14,7 +14,7 @@ import { validateCalendarUpload } from '@/lib/published/calendar-upload'
 import { puertoRicoNow } from '@/lib/published/calendar-post'
 import styles from './content-calendar.module.css'
 
-export interface CalendarClient {id:string;name:string;metricool_blog_id:string|null;platforms?:string[]|null;default_platforms?:string[]|null}
+export interface CalendarClient {id:string;name:string;metricool_blog_id:string|null;platforms?:string[]|null;default_platforms?:string[]|null;posting_days?:number[]|null;posting_time?:string|null;posting_schedule?:Record<string,string>|null}
 export interface CalendarUploadSaved {clientId:string;dateTime:string;postId?:number;confirmed?:boolean}
 export function CalendarUploadDialog({clients,clientId,initialDateTime,onSaved,onVerify,onBusy}:{clients:CalendarClient[];clientId?:string;initialDateTime?:string;onSaved:(result:CalendarUploadSaved)=>void;onVerify?:(scope:CalendarUploadSaved)=>void;onBusy?:(busy:boolean)=>void}) {
  const canUpload=useHasPermission('posting.calendar.upload')
