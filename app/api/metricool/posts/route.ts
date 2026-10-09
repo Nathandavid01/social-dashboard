@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { currentUserHas } from '@/lib/auth/server'
 
 export interface PublishedPost {
   id: number
@@ -8,6 +9,7 @@ export interface PublishedPost {
   publicationDate: string
   timezone: string
   platforms: string[]
+  providerStatuses?: string[]
   draft: boolean
   autoPublish: boolean
   media: { url?: string; type?: string }[]
@@ -34,7 +36,7 @@ async function fetchMetricoolPosts(blogId: string, start: string, end: string) {
       uuid: string
       text: string
       publicationDate: { dateTime: string; timezone: string }
-      providers: { network: string }[]
+      providers: { network: string; status?: string }[]
       draft: boolean
       autoPublish: boolean
       media?: { url?: string; type?: string }[]
@@ -48,6 +50,7 @@ async function fetchMetricoolPosts(blogId: string, start: string, end: string) {
     publicationDate: p.publicationDate?.dateTime || '',
     timezone: p.publicationDate?.timezone || 'America/Puerto_Rico',
     platforms: (p.providers || []).map((x) => x.network),
+    providerStatuses: (p.providers || []).map((x) => x.status ?? 'UNKNOWN'),
     draft: p.draft,
     autoPublish: p.autoPublish,
     media: (p.media || []) as { url?: string; type?: string }[],
@@ -56,9 +59,11 @@ async function fetchMetricoolPosts(blogId: string, start: string, end: string) {
 }
 
 export async function GET(req: NextRequest) {
+  if (!await currentUserHas('metricool.read')) return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
   const { searchParams } = new URL(req.url)
   const blogId = searchParams.get('blogId')
   const range = searchParams.get('range') || '30d'
+  const includeDrafts = searchParams.get('includeDrafts') === 'true'
   const all = searchParams.get('all') === 'true'
   const todayOnly = searchParams.get('today') === 'true'
   // Direct date params for calendar view — ISO date strings (YYYY-MM-DD)
@@ -114,7 +119,7 @@ export async function GET(req: NextRequest) {
       const posts: PublishedPost[] = results
         .filter((r) => r.status === 'fulfilled')
         .flatMap((r) => (r as PromiseFulfilledResult<PublishedPost[]>).value)
-        .filter((p) => !p.draft)
+        .filter((p) => includeDrafts || !p.draft)
         .sort((a, b) => todayOnly
           ? a.publicationDate.localeCompare(b.publicationDate)
           : b.publicationDate.localeCompare(a.publicationDate))
@@ -140,7 +145,7 @@ export async function GET(req: NextRequest) {
 
     const posts = await fetchMetricoolPosts(effectiveBlogId, startStr, endStr)
     const filtered = posts
-      .filter((p) => !p.draft)
+      .filter((p) => includeDrafts || !p.draft)
       .sort((a, b) => b.publicationDate.localeCompare(a.publicationDate))
       .map((p) => ({ ...p, clientName, clientId }))
 

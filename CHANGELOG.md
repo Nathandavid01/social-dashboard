@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.119 — 2026-10-08
+
+**El inicio ahora muestra un calendario visual de publicaciones.**
+- Vistas de mes y semana con filtros por cliente, redes, horarios y miniaturas.
+- Próximas publicaciones y resumen de estados en el período seleccionado.
+- Abre las tarjetas para revisar el caption y los detalles.
+- Los estados vienen de Metricool; una fecha pasada no convierte un post en publicado. Fechas en hora de Puerto Rico.
+
+![Calendario de publicaciones](/changelog/v5.119-calendario-publicaciones.png)
+
 ## v5.118 — 2026-09-24
 
 **Recibo cuenta los videos de AI que ya están publicados en Metricool.**
