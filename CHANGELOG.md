@@ -4,6 +4,32 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.128 — 2026-10-08
+
+**Sube imágenes y videos directamente al calendario de cada cliente.**
+- Cada cliente tiene su calendario visual en la pestaña Calendario y un enlace directo desde su perfil.
+- «Subir contenido» permite adjuntar JPG/PNG o MP4/MOV, escribir el caption y elegir sus redes y fecha.
+- El archivo se guarda como borrador en Metricool; abre su tarjeta para programar la publicación automática.
+- Puedes revisar el video desde sus detalles. La subida muestra progreso y conserva el archivo para reintentar sin volver a subirlo.
+- Un envío pendiente de confirmar pide verificar Metricool antes de repetir, para evitar duplicados.
+
+[Ver la subida al calendario](/previews/v5.128-calendario-subidas.html)
+
+![Subida al calendario de un cliente](/changelog/v5.128-calendario-subidas.png)
+
+## v5.127 — 2026-10-08
+
+**Calendario visual conectado directamente con Metricool en el inicio.**
+- Vistas de mes y semana con miniaturas, horarios de Puerto Rico y filtros por cliente y estado.
+- Panel derecho con próximas publicaciones, resumen de estados y publicaciones que necesitan atención.
+- Verifica los estados cada minuto mientras está abierto; confirma «Publicado» solo con evidencia de todas las redes y muestra enlaces por red.
+- Abre un post para guardarlo como borrador o elegir fecha y hora y activar su publicación automática. Conserva el mismo post, contenido, redes y opciones.
+- Vuelve a consultar Metricool para confirmar cada cambio; los posts publicados conservan su historial y los errores quedan visibles.
+
+[Ver el calendario y sus controles](/previews/v5.127-calendario-programar.html)
+
+![Calendario y programación](/changelog/v5.127-calendario-programar.png)
+
 ## v5.126 — 2026-10-05
 
 **En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**

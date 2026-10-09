@@ -1,0 +1,29 @@
+.theme {
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 229 46% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 229 46% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 229 46% 12%;
+  --primary: 252 78% 62%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 240 25% 97%;
+  --muted-foreground: 226 14% 46%;
+  --accent: 252 80% 96%;
+  --accent-foreground: 252 60% 38%;
+  --border: 230 22% 92%;
+  --input: 230 22% 89%;
+  --ring: 252 78% 62%;
+  color: hsl(var(--foreground));
+}
+.layout {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1024px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 300px; }
+  .panel { position: sticky; top: 20px; }
+}

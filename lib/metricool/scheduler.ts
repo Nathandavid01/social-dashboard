@@ -87,7 +87,9 @@ export async function getScheduledPosts(
     config,
     { start, end, timezone, extendedRange: 'true' }
   )
-  return Array.isArray(response) ? response : response.data ?? []
+  if (Array.isArray(response)) return response
+  if (response && Array.isArray(response.data)) return response.data
+  throw new Error('Metricool devolvió una respuesta de calendario inválida.')
 }
 
 export function verifySchedule(posts: ScheduledPost[]): ScheduleVerification[] {
@@ -139,4 +141,15 @@ export function getScheduleStats(verifications: ScheduleVerification[]) {
     drafts,
     successRate: total > 0 ? Math.round((published / (total - drafts)) * 100) : 0,
   }
+}
+
+/** Read the full original payload before PUT, including per-network options. */
+export async function getScheduledPost(config: MetricoolConfig, postId: number): Promise<import('./calendar-state').EditableCalendarPost> {
+  if (!Number.isSafeInteger(postId) || postId <= 0) throw new Error('ID de publicación inválido.')
+  const response = await schedulerFetch<Record<string, unknown>>(`/v2/scheduler/posts/${postId}`, config)
+  const post = response?.data ?? response
+  if (!post || typeof post !== 'object' || Array.isArray(post)) throw new Error('Publicación no disponible en Metricool.')
+  const raw = post as Record<string, unknown>
+  if (raw.id !== postId || typeof raw.uuid !== 'string' || !Array.isArray(raw.providers) || !raw.publicationDate) throw new Error('No se pudo verificar la publicación original.')
+  return raw as import('./calendar-state').EditableCalendarPost
 }

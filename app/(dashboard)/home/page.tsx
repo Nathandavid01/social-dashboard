@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { ContentCalendar } from '@/components/published/content-calendar'
 import { KpiCard } from '@/components/performance/kpi-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { QuickBriefingButton } from '@/components/home/quick-briefing-button'
@@ -154,6 +155,10 @@ export default async function HomePage() {
   const weeklyProduction = await getWeeklyProductionStatus()
   const canSeeWeeklyCompliance = await currentUserHas('weekly_compliance.read')
   const weeklyCompliance = canSeeWeeklyCompliance ? await getWeeklyComplianceByClient() : null
+  const canSeePostingCalendar = await currentUserHas('metricool.read')
+  const calendarClients = canSeePostingCalendar
+    ? (await supabase.from('clients').select('id, name, metricool_blog_id, platforms, default_platforms').eq('status', 'active').not('metricool_blog_id', 'is', null).order('name')).data ?? []
+    : []
   const canSeeCadencia = await currentUserHas('cadence.read')
 
   return (
@@ -197,6 +202,8 @@ export default async function HomePage() {
           />
         </div>
       )}
+
+      {canSeePostingCalendar && <ContentCalendar clients={calendarClients} />}
 
       {/* Content runway health (portfolio) */}
       <RunwayHealthCard perClient={pipelineGlobal.perClient} />
