@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.122 — 2026-10-08
+
+**Guarda un post como borrador o programa su publicación desde el calendario.**
+- Abre una tarjeta para guardar el mismo post como borrador en Metricool y detener su publicación automática.
+- Elige fecha y hora de Puerto Rico y pulsa «Programar» para activar la publicación automática.
+- Se conserva el contenido, las redes y las opciones del post; no se crea un duplicado.
+- Metricool se vuelve a consultar para confirmar el cambio. Los posts ya publicados permanecen en el historial.
+
+![Borrador y programación](/changelog/v5.122-calendario-programar.png)
+
 ## v5.121 — 2026-10-08
 
 **El calendario verifica la publicación directamente con Metricool.**

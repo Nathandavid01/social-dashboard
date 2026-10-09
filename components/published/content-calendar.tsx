@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { CalendarPostControls, type CalendarStateChange } from './calendar-post-controls'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -66,6 +67,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const [error, setError] = useState<string | null>(null)
   const [checkedAt, setCheckedAt] = useState<string | null>(null)
   const [failedClients, setFailedClients] = useState<{ id: string; name: string }[]>([])
+  const mutationInFlight = useRef(false)
   const inFlight = useRef(false)
   const lastScope = useRef('')
   const lastAttempt = useRef(0)
@@ -102,7 +104,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   }, [blogId, startKey, endKey, refresh])
   useEffect(() => {
     const verify = () => {
-      if (document.visibilityState !== 'hidden' && !inFlight.current && Date.now() - lastAttempt.current >= 60_000) setRefresh(r => r + 1)
+      if (document.visibilityState !== 'hidden' && !inFlight.current && !mutationInFlight.current && Date.now() - lastAttempt.current >= 60_000) setRefresh(r => r + 1)
     }
     const timer = window.setInterval(verify, 60_000)
     document.addEventListener('visibilitychange', verify)
@@ -121,6 +123,11 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const attention = visiblePosts.filter(p => ['partial', 'error'].includes(calendarPostState(p)) || (calendarPostState(p) === 'scheduled' && calendarPostDate(p) < now))
   const days: Date[] = []
   for (let d = start; d <= end; d = addDays(d, 1)) days.push(d)
+  function onPostChanged(result: CalendarStateChange) {
+    setSelected(null); setStateFilter('all')
+    if (result.confirmed && result.action === 'schedule' && result.dateTime) setAnchor(new Date(`${result.dateTime.slice(0, 10)}T12:00:00`))
+    setRefresh(r => r + 1)
+  }
   function navigate(direction: number) {
     setAnchor(d => view === 'month' ? new Date(d.getFullYear(), d.getMonth() + direction, 1) : addDays(d, direction * 7))
   }
@@ -177,6 +184,6 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
       </aside>
     </div>
     <Dialog open={upcomingOpen} onOpenChange={setUpcomingOpen}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>Próximas publicaciones</DialogTitle><DialogDescription>Publicaciones programadas en el período seleccionado · Hora de Puerto Rico</DialogDescription></DialogHeader><div className="space-y-3">{upcoming.length ? upcoming.map(p => <PostCard key={key(p)} post={p} compact onOpen={() => { setUpcomingOpen(false); setSelected(p) }} />) : <p className="text-sm text-muted-foreground">Sin publicaciones programadas próximas.</p>}</div></DialogContent></Dialog>
-    <Dialog open={!!selectedPost} onOpenChange={open => { if (!open) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
+    <Dialog open={!!selectedPost} onOpenChange={open => { if (!open && !mutationInFlight.current) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><CalendarPostControls key={`${key(selectedPost)}:${checkedAt}`} post={selectedPost} onChanged={onPostChanged} verifying={loading} onBusy={busy => { mutationInFlight.current = busy }} onVerify={() => setRefresh(r => r + 1)} /><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
   </section>
 }
