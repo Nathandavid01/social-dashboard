@@ -1,3 +1,5 @@
+import { ContentCalendar } from '@/components/published/content-calendar'
+import { currentUserHas } from '@/lib/auth/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalendarClock, Clock, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -33,6 +35,7 @@ function fmtDate(iso: string): string {
 }
 
 export async function ScheduleTab({ client }: { client: Client }) {
+  const canSeeCalendar = await currentUserHas('metricool.read')
   const postingDays = client.posting_days ?? []
 
   const supabase = await createClient()
@@ -80,6 +83,7 @@ export async function ScheduleTab({ client }: { client: Client }) {
 
   return (
     <div className="space-y-4">
+      {canSeeCalendar && <ContentCalendar clients={[{id:client.id,name:client.name,metricool_blog_id:client.metricool_blog_id,platforms:client.platforms,default_platforms:client.default_platforms}]} clientId={client.id} />}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">

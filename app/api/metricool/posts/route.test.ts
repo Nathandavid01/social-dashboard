@@ -9,8 +9,8 @@ vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ from: () 
     eq: (...args: unknown[]) => { auth.clientFilters(...args); return query },
     order: () => query,
     limit: (count: number) => { rowLimit = count; return query },
-    maybeSingle: async () => auth.sharedBlog && rowLimit !== 1 ? { data: null, error: { code: 'PGRST116' } } : { data: { id: 'c', name: 'Client' } },
-    single: async () => auth.sharedBlog ? { data: null, error: { code: 'PGRST116' } } : { data: { id: 'c', name: 'Client' } },
+    maybeSingle: async () => auth.sharedBlog && rowLimit !== 1 ? { data: null, error: { code: 'PGRST116' } } : { data: { id: 'c', name: 'Client', metricool_blog_id: '1' } },
+    single: async () => auth.sharedBlog ? { data: null, error: { code: 'PGRST116' } } : { data: { id: 'c', name: 'Client', metricool_blog_id: '1' } },
     not: () => ({ eq: async () => ({ data: [{ id: 'c', name: 'Client', metricool_blog_id: '1' }, { id: 'd', name: 'Other', metricool_blog_id: '2' }] }) }),
   }
   return query
@@ -63,4 +63,21 @@ describe('calendar posts endpoint', () => {
     const response = await (await GET(new NextRequest(`${url}&includeDrafts=true`))).json()
     expect(response.posts[0]).toMatchObject({ draft: true, providerStatuses: ['PENDING'] })
   })
+})
+
+it('resolves a per-client account from the database even if a different blog is supplied',async()=>{
+ vi.stubEnv('METRICOOL_TOKEN','test');vi.stubEnv('METRICOOL_USER_ID','test')
+ const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({data:[]})});vi.stubGlobal('fetch',fetcher)
+ const res=await GET(new NextRequest('http://localhost/api/metricool/posts?clientId=c&blogId=foreign'))
+ expect(res.status).toBe(200)
+ expect(auth.clientFilters).toHaveBeenCalledWith('id','c')
+ expect(fetcher.mock.calls[0][0]).toContain('blogId=1')
+ expect(fetcher.mock.calls[0][0]).not.toContain('foreign')
+})
+
+it('normalizes media URLs returned as strings so uploaded images have calendar previews',async()=>{
+ vi.stubEnv('METRICOOL_TOKEN','test');vi.stubEnv('METRICOOL_USER_ID','test')
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({data:[{id:1,draft:true,providers:[],publicationDate:{dateTime:'2099-10-20T10:30:00'},media:['https://media.example/photo.jpg']}]})}))
+ const data=await (await GET(new NextRequest('http://localhost/api/metricool/posts?clientId=c&includeDrafts=true'))).json()
+ expect(data.posts[0].media).toEqual([{url:'https://media.example/photo.jpg'}])
 })

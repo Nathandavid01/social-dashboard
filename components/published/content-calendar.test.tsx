@@ -67,3 +67,20 @@ describe('visual posting calendar', () => {
     expect(screen.queryByText('No hay publicaciones en este período.')).not.toBeInTheDocument()
   })
 })
+
+it('opens a client calendar with fixed identity and no all-clients query', async () => {
+ const fetcher = vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[]})})
+ vi.stubGlobal('fetch',fetcher)
+ render(<ContentCalendar clients={[{id:'c',name:'Cliente A',metricool_blog_id:'1'}]} clientId="c" />)
+ await waitFor(()=>expect(fetcher).toHaveBeenCalled())
+ expect(fetcher.mock.calls[0][0]).toContain('clientId=c')
+ expect(fetcher.mock.calls[0][0]).not.toContain('all=true')
+ expect(screen.getByRole('heading', {name:'Calendario de Cliente A'})).toBeInTheDocument()
+ expect(screen.queryByRole('combobox',{name:'Filtrar por cliente'})).toBeNull()
+})
+
+it('plays an uploaded video in its detail card',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[{...base,media:[{url:'https://media.example/corte.mp4',type:'video'}]}]})}))
+ render(<ContentCalendar clients={[]} />);await screen.findAllByText('Oferta de octubre');fireEvent.click(screen.getAllByRole('button',{name:/Oferta de octubre/})[0])
+ expect(screen.getByRole('dialog').querySelector('video')).toHaveAttribute('controls')
+})

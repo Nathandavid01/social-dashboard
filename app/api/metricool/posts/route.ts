@@ -32,7 +32,7 @@ async function fetchMetricoolPosts(blogId: string, start: string, end: string): 
     providerStatuses: (p.providers || []).map(x => x.status ?? 'UNKNOWN'),
     providers: (p.providers || []).map(x => ({ network: x.network, status: x.status ?? 'UNKNOWN', detailedStatus: x.detailedStatus, publicUrl: x.publicUrl })),
     draft: p.draft, autoPublish: p.autoPublish,
-    media: (p.media || []) as PublishedPost['media'], blogId,
+    media: (p.media || []).map(m => typeof m === 'string' ? {url:m} : m) as PublishedPost['media'], blogId,
   }))
 }
 export async function GET(req: NextRequest) {
@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
   if (!process.env.METRICOOL_TOKEN || !process.env.METRICOOL_USER_ID) return json({ error: 'Metricool no está configurado.' }, 503)
   const { searchParams } = new URL(req.url)
   const blogId = searchParams.get('blogId')
+  const requestedClientId = searchParams.get('clientId')
   const includeDrafts = searchParams.get('includeDrafts') === 'true'
   const all = searchParams.get('all') === 'true'
   const todayOnly = searchParams.get('today') === 'true'
@@ -64,6 +65,12 @@ export async function GET(req: NextRequest) {
   const sort = (posts: PublishedPost[]) => posts.filter(p => includeDrafts || !p.draft).sort((a, b) => todayOnly ? a.publicationDate.localeCompare(b.publicationDate) : b.publicationDate.localeCompare(a.publicationDate))
   try {
     const supabase = await createClient()
+    if (requestedClientId) {
+      const {data: client, error} = await supabase.from('clients').select('id,name,metricool_blog_id').eq('id',requestedClientId).eq('status','active').maybeSingle()
+      if(error || !client?.metricool_blog_id)return json({error:'Cliente de Metricool no disponible.'},404)
+      const posts=await fetchMetricoolPosts(client.metricool_blog_id,startStr,endStr)
+      return json({posts:sort(posts).map(p=>({...p,clientId:client.id,clientName:client.name})),checkedAt:new Date().toISOString(),complete:true,failedClients:[]})
+    }
     if (all) {
       const { data: clients, error } = await supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
       if (error) return json({ error: 'No se pudo consultar los clientes.' }, 502)

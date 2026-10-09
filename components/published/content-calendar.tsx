@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { CalendarUploadDialog, type CalendarClient, type CalendarUploadSaved } from './calendar-upload-dialog'
 import { CalendarPostControls, type CalendarStateChange } from './calendar-post-controls'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,7 +14,7 @@ import { calendarPostDate, calendarPostState, puertoRicoNow, type CalendarPostSt
 import { cn } from '@/lib/utils'
 import styles from './content-calendar.module.css'
 
-interface Client { id: string; name: string; metricool_blog_id: string | null }
+type Client = CalendarClient
 const states: Record<CalendarPostState, { label: string; color: string }> = {
   scheduled: { label: 'Programado', color: 'bg-violet-500/15 text-violet-600' },
   draft: { label: 'Borrador', color: 'bg-amber-500/15 text-amber-700' },
@@ -31,12 +32,14 @@ function StateBadge({ post }: { post: PublishedPost }) {
   const state = states[calendarPostState(post)]
   return <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium', state.color)}>{state.label}</span>
 }
-function Thumbnail({ post, className }: { post: PublishedPost; className?: string }) {
+function Thumbnail({ post, className, playable = false }: { post: PublishedPost; className?: string; playable?: boolean }) {
   const [failed, setFailed] = useState(false)
   const media = post.media?.[0]
   const isVideo = media?.type?.toLowerCase().includes('video') || /\.(mp4|mov|webm)(?:\?|$)/i.test(media?.url ?? '')
   return <div className={cn('overflow-hidden rounded-lg bg-muted flex items-center justify-center', className)}>
-    {media?.url && !isVideo && !failed
+    {media?.url && isVideo && !failed
+      ? <video src={media.url} muted={!playable} controls={playable} preload="metadata" className="h-full w-full object-cover" onError={() => setFailed(true)} />
+      : media?.url && !isVideo && !failed
       ? <img width={320} height={200} src={media.url} alt={post.text.slice(0, 70) || 'Vista previa del contenido'} loading="lazy" className="h-full w-full object-cover" onError={() => setFailed(true)} />
       : <ImageIcon className="h-5 w-5 text-muted-foreground/50" />}
   </div>
@@ -58,15 +61,18 @@ function PostCard({ post, onOpen, compact = false }: { post: PublishedPost; onOp
     </div>
   </button>
 }
-export function ContentCalendar({ clients }: { clients: Client[] }) {
+export function ContentCalendar({ clients, clientId }: { clients: Client[]; clientId?: string }) {
   const [view, setView] = useState<'month' | 'week'>('month')
   const [anchor, setAnchor] = useState(() => new Date(`${puertoRicoNow().slice(0, 10)}T12:00:00`))
-  const [blogId, setBlogId] = useState('all')
+  const [clientFilter, setClientFilter] = useState(clientId ?? 'all')
+  const activeClientId = clientId ?? clientFilter
+  const activeClient = clients.find(c => c.id === activeClientId)
   const [posts, setPosts] = useState<PublishedPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [checkedAt, setCheckedAt] = useState<string | null>(null)
   const [failedClients, setFailedClients] = useState<{ id: string; name: string }[]>([])
+  const [calendarBusy, setCalendarBusy] = useState(false)
   const mutationInFlight = useRef(false)
   const inFlight = useRef(false)
   const lastScope = useRef('')
@@ -83,7 +89,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
   const startKey = dateKey(start), endKey = dateKey(end)
   useEffect(() => {
     const controller = new AbortController()
-    const scope = `${blogId}:${startKey}:${endKey}`
+    const scope = `${activeClientId}:${startKey}:${endKey}`
     if (lastScope.current !== scope) {
       setPosts([]); setExpandedDays({}); setCheckedAt(null); setFailedClients([]); setSelected(null)
       lastScope.current = scope
@@ -91,7 +97,9 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
     inFlight.current = true; lastAttempt.current = Date.now()
     setLoading(true); setError(null)
     const params = new URLSearchParams({ startDate: dateKey(addDays(new Date(`${startKey}T12:00:00`), -1)), endDate: dateKey(addDays(new Date(`${endKey}T12:00:00`), 1)), includeDrafts: 'true' })
-    params.set(blogId === 'all' ? 'all' : 'blogId', blogId === 'all' ? 'true' : blogId)
+    if (activeClientId === 'all') params.set('all', 'true')
+    else params.set('clientId', activeClientId)
+    if (activeClientId !== 'all' && !activeClient?.metricool_blog_id) { setLoading(false); inFlight.current = false; return () => controller.abort() }
     fetch(`/api/metricool/posts?${params}`, { signal: controller.signal, cache: 'no-store' })
       .then(async res => { if (!res.ok) throw new Error(); return res.json() })
       .then(data => {
@@ -101,7 +109,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
       .catch(() => { if (!controller.signal.aborted) setError('No se pudo verificar Metricool. Los datos anteriores no están confirmados; intenta nuevamente.') })
       .finally(() => { if (!controller.signal.aborted) { inFlight.current = false; setLoading(false) } })
     return () => { controller.abort(); inFlight.current = false }
-  }, [blogId, startKey, endKey, refresh])
+  }, [activeClientId, activeClient?.metricool_blog_id, startKey, endKey, refresh])
   useEffect(() => {
     const verify = () => {
       if (document.visibilityState !== 'hidden' && !inFlight.current && !mutationInFlight.current && Date.now() - lastAttempt.current >= 60_000) setRefresh(r => r + 1)
@@ -128,23 +136,29 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
     if (result.confirmed && result.action === 'schedule' && result.dateTime) setAnchor(new Date(`${result.dateTime.slice(0, 10)}T12:00:00`))
     setRefresh(r => r + 1)
   }
+  function onUploaded(result: CalendarUploadSaved) {
+    if (!clientId) setClientFilter(result.clientId)
+    setAnchor(new Date(`${result.dateTime.slice(0, 10)}T12:00:00`))
+    setStateFilter('all'); setRefresh(r => r + 1)
+  }
   function navigate(direction: number) {
     setAnchor(d => view === 'month' ? new Date(d.getFullYear(), d.getMonth() + direction, 1) : addDays(d, direction * 7))
   }
   const title = view === 'month' ? anchor.toLocaleDateString('es-PR', { month: 'long', year: 'numeric' }) : `${start.toLocaleDateString('es-PR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-PR', { month: 'short', day: 'numeric', year: 'numeric' })}`
   return <section aria-label="Calendario de publicaciones" className={cn(styles.theme, 'space-y-5 rounded-2xl border bg-[#fcfcff] p-4 sm:p-6')}>
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
-      <div className="min-w-0"><h2 className="text-xl font-semibold tracking-tight">Calendario de publicaciones</h2><p className="mt-1 text-xs text-muted-foreground">Tu contenido, fechas y redes en un solo lugar · Hora de Puerto Rico</p></div>
-      <Button asChild size="sm"><Link href="/published">Ver contenido <ArrowUpRight className="h-4 w-4" /></Link></Button>
+      <div className="min-w-0"><h2 className="text-xl font-semibold tracking-tight">{clientId && activeClient ? `Calendario de ${activeClient.name}` : 'Calendario de publicaciones'}</h2><p className="mt-1 text-xs text-muted-foreground">Tu contenido, fechas y redes en un solo lugar · Hora de Puerto Rico</p></div>
+      <div className="flex flex-wrap items-center gap-2"><CalendarUploadDialog clients={clients} clientId={activeClientId === 'all' ? undefined : activeClientId} initialDateTime={`${dateKey(anchor)}T12:00`} onSaved={onUploaded} onVerify={onUploaded} onBusy={busy => { mutationInFlight.current = busy; setCalendarBusy(busy) }} /><Button asChild size="sm" variant="outline"><Link href="/published">Ver contenido <ArrowUpRight className="h-4 w-4" /></Link></Button></div>
     </div>
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <Select value={blogId} onValueChange={setBlogId}><SelectTrigger aria-label="Filtrar por cliente" className="w-full sm:w-[220px]"><SelectValue placeholder="Todos los clientes" /></SelectTrigger><SelectContent className={styles.theme}><SelectItem value="all">Todos los clientes</SelectItem>{clients.filter(c => c.metricool_blog_id).map(c => <SelectItem key={c.id} value={c.metricool_blog_id!}>{c.name}</SelectItem>)}</SelectContent></Select>
+      {!clientId && <Select value={clientFilter} onValueChange={setClientFilter} disabled={calendarBusy}><SelectTrigger aria-label="Filtrar por cliente" className="w-full sm:w-[220px]"><SelectValue placeholder="Todos los clientes" /></SelectTrigger><SelectContent className={styles.theme}><SelectItem value="all">Todos los clientes</SelectItem>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select>}
+      {activeClient && !clientId && <Link className="text-xs text-primary hover:underline" href={`/clients/${activeClient.id}/calendar`}>Abrir calendario de {activeClient.name} <ArrowUpRight className="inline h-3 w-3" /></Link>}
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => setAnchor(new Date(`${puertoRicoNow().slice(0, 10)}T12:00:00`))}>Hoy</Button>
-        <Button aria-label="Período anterior" variant="outline" size="icon" onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
-        <Button aria-label="Período siguiente" variant="outline" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
-        <div className="flex rounded-lg border bg-muted/40 p-1">{(['month', 'week'] as const).map(v => <button key={v} aria-pressed={view === v} onClick={() => setView(v)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', view === v ? 'bg-primary/15 text-primary' : 'text-muted-foreground')}>{v === 'month' ? 'Mes' : 'Semana'}</button>)}</div>
-        <Button aria-label="Verificar con Metricool" variant="outline" size="sm" disabled={loading} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Verificar</Button>
+        <Button variant="outline" size="sm" disabled={calendarBusy} onClick={() => setAnchor(new Date(`${puertoRicoNow().slice(0, 10)}T12:00:00`))}>Hoy</Button>
+        <Button aria-label="Período anterior" variant="outline" size="icon" disabled={calendarBusy} onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+        <Button aria-label="Período siguiente" variant="outline" size="icon" disabled={calendarBusy} onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
+        <div className="flex rounded-lg border bg-muted/40 p-1">{(['month', 'week'] as const).map(v => <button key={v} disabled={calendarBusy} aria-pressed={view === v} onClick={() => setView(v)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', view === v ? 'bg-primary/15 text-primary' : 'text-muted-foreground')}>{v === 'month' ? 'Mes' : 'Semana'}</button>)}</div>
+        <Button aria-label="Verificar con Metricool" variant="outline" size="sm" disabled={loading || calendarBusy} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Verificar</Button>
       </div>
     </div>
     <div aria-live="polite" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -153,6 +167,7 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
       <span>· Actualización automática cada minuto con el calendario abierto</span>
     </div>
     {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No se pudo verificar: {failedClients.map(c => c.name).join(', ')}. Los conteos están incompletos.</div>}
+    {activeClient && !activeClient.metricool_blog_id && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Conecta {activeClient.name} con Metricool para ver sus publicaciones y subir contenido.</p>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     <div className={styles.layout}>
       <div className="min-w-0 space-y-3">
@@ -184,6 +199,6 @@ export function ContentCalendar({ clients }: { clients: Client[] }) {
       </aside>
     </div>
     <Dialog open={upcomingOpen} onOpenChange={setUpcomingOpen}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>Próximas publicaciones</DialogTitle><DialogDescription>Publicaciones programadas en el período seleccionado · Hora de Puerto Rico</DialogDescription></DialogHeader><div className="space-y-3">{upcoming.length ? upcoming.map(p => <PostCard key={key(p)} post={p} compact onOpen={() => { setUpcomingOpen(false); setSelected(p) }} />) : <p className="text-sm text-muted-foreground">Sin publicaciones programadas próximas.</p>}</div></DialogContent></Dialog>
-    <Dialog open={!!selectedPost} onOpenChange={open => { if (!open && !mutationInFlight.current) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><CalendarPostControls key={`${key(selectedPost)}:${checkedAt}`} post={selectedPost} onChanged={onPostChanged} verifying={loading} onBusy={busy => { mutationInFlight.current = busy }} onVerify={() => setRefresh(r => r + 1)} /><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
+    <Dialog open={!!selectedPost} onOpenChange={open => { if (!open && !mutationInFlight.current) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" playable /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><CalendarPostControls key={`${key(selectedPost)}:${checkedAt}`} post={selectedPost} onChanged={onPostChanged} verifying={loading} onBusy={busy => { mutationInFlight.current = busy; setCalendarBusy(busy) }} onVerify={() => setRefresh(r => r + 1)} /><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
   </section>
 }
