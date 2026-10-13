@@ -17,6 +17,8 @@ import { getCadenciaData } from '@/lib/actions/cadencia'
 import { currentUserHas } from '@/lib/auth/server'
 import { PageSpinner } from '@/components/shared/page-spinner'
 import { Suspense } from 'react'
+import { ClientVideoInventory } from '@/components/home/client-video-inventory'
+import { getClientVideoInventory } from '@/lib/utils/load-client-video-inventory'
 import Link from 'next/link'
 import {
   Users,
@@ -155,6 +157,7 @@ export default async function HomePage() {
   const canSeeWeeklyCompliance = await currentUserHas('weekly_compliance.read')
   const weeklyCompliance = canSeeWeeklyCompliance ? await getWeeklyComplianceByClient() : null
   const canSeeCadencia = await currentUserHas('cadence.read')
+  const canSeeInventory = await currentUserHas('inventory.read')
 
   return (
     <div className="space-y-6">
@@ -176,6 +179,12 @@ export default async function HomePage() {
       )}
 
       {/* My Tasks — personal work first, before the global view */}
+      {canSeeInventory && (
+        <Suspense fallback={<div className="grid h-48 place-items-center rounded-xl border"><PageSpinner /></div>}>
+          <ClientInventorySection />
+        </Suspense>
+      )}
+
       {(myTasks?.length ?? 0) > 0 && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -271,4 +280,13 @@ export default async function HomePage() {
 async function CadenciaSection() {
   const cadencia = await getCadenciaData()
   return <CadenciaCard data={cadencia} />
+}
+
+async function ClientInventorySection() {
+  try {
+    const data = await getClientVideoInventory()
+    return <ClientVideoInventory {...data} />
+  } catch {
+    return <Card><CardContent className="p-6 text-sm text-muted-foreground">No se pudo cargar el inventario de videos. Recarga para volver a consultar.</CardContent></Card>
+  }
 }
