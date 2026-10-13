@@ -41,7 +41,7 @@ describe('unpublished client video inventory', () => {
   })
   it('restricts the cross-client inventory to management', () => {
     expect(hasPermission('owner', 'inventory.read')).toBe(true)
-    expect(hasPermission('supervisor', 'inventory.read')).toBe(true)
+    expect(hasPermission('supervisor', 'inventory.read')).toBe(false)
     expect(hasPermission('editor', 'inventory.read')).toBe(false)
     expect(hasPermission('video', 'inventory.read')).toBe(false)
   })

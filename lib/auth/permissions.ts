@@ -110,7 +110,6 @@ const RBAC: Record<UserRole, RolePerms> = {
   // Supervisor — manage team/content; can edit contracts; billing remains owner-only.
   supervisor: [
     'operations.overview',
-    'inventory.read',
     'clients.read', 'clients.create', 'clients.edit', 'clients.brand.edit',
     'clients.billing.read', 'clients.contract.read', 'clients.contract.edit', 'clients.assets.upload',
     'clients.sms.send',

@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.133 — 2026-10-13
+
+**El inventario de videos tiene su propia pestaña, exclusiva para Denisha y Nathan.**
+- «Inventario de videos» aparece en el menú de Clientes solo para Denisha Matos y Nathan Torres.
+- La lista ya no aparece en Inicio.
+- El acceso directo y la consulta de datos también están restringidos a esas dos cuentas; otros administradores no tienen acceso.
+
+[Ver la pestaña de inventario](/previews/v5.133-inventario-privado.html)
+
+![Inventario exclusivo](/changelog/v5.133-inventario-privado.png)
+
 ## v5.132 — 2026-10-13
 
 **Consulta los videos pendientes de cada cliente y quién los edita desde Inicio.**

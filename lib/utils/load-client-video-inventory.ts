@@ -2,7 +2,7 @@ import 'server-only'
 
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/auth/server'
+import { requireVideoInventoryAccess } from '@/lib/auth/video-inventory-server'
 import { getScheduledPosts } from '@/lib/metricool/scheduler'
 import { buildClientVideoInventory, type InventoryClient, type InventoryIdea, type InventoryPost } from './client-video-inventory'
 
@@ -34,7 +34,7 @@ async function calendarForClient(client: InventoryClient, start: string, end: st
 }
 
 export async function getClientVideoInventory() {
-  await requirePermission('inventory.read')
+  await requireVideoInventoryAccess()
   const db = await createClient()
   const [clients, ideas, profiles, assignments] = await Promise.all([
     allRows<InventoryClient>(db, 'clients', 'id,name,status,assigned_to,edit_mode,metricool_blog_id', 'id'),

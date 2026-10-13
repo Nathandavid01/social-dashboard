@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 const h = vi.hoisted(() => ({ permission: vi.fn(), db: vi.fn(), scheduler: vi.fn(), fail: false }))
-vi.mock('@/lib/auth/server', () => ({ requirePermission: h.permission }))
+vi.mock('@/lib/auth/video-inventory-server', () => ({ requireVideoInventoryAccess: h.permission }))
 vi.mock('@/lib/supabase/server', () => ({ createClient: h.db }))
 vi.mock('@/lib/metricool/scheduler', () => ({ getScheduledPosts: h.scheduler }))
 vi.mock('next/cache', () => ({ unstable_cache: (fn: () => unknown) => fn }))
@@ -14,7 +14,7 @@ beforeEach(() => {
 it('checks permission before reading any data or external calendar', async () => {
   h.permission.mockRejectedValue(new Error('Denied'))
   await expect(getClientVideoInventory()).rejects.toThrow('Denied')
-  expect(h.permission).toHaveBeenCalledWith('inventory.read'); expect(h.db).not.toHaveBeenCalled(); expect(h.scheduler).not.toHaveBeenCalled()
+  expect(h.permission).toHaveBeenCalled(); expect(h.db).not.toHaveBeenCalled(); expect(h.scheduler).not.toHaveBeenCalled()
 })
 it('does not turn a Metricool failure into a zero scheduled count', async () => {
   h.scheduler.mockRejectedValue(new Error('unavailable'))
