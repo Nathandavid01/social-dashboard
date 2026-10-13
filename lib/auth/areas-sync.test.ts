@@ -19,7 +19,7 @@ const DASHBOARD_DIR = join(process.cwd(), 'app', '(dashboard)')
 
 /**
  * Routes under (dashboard) that are deliberately NOT gated areas: personal/
- * essential pages every signed-in user can always reach. Adding a new top-level
+ * essential pages, or pages with their own stricter server guard. Adding a new top-level
  * route forces a conscious choice — register it as an AREA or add it here.
  */
 const NON_AREA_ROUTES = new Set<string>([
@@ -28,6 +28,7 @@ const NON_AREA_ROUTES = new Set<string>([
   '/changelog',  // release notes, everyone
   '/account',    // personal account (e.g. /account/security)
   '/subir-video', // redirect to /primer-round — not a product area, not in nav
+  '/inventario-videos', // exact-account server guard; cannot be granted through AREAS
 ])
 
 /** Top-level route hrefs that have their own page.tsx. */
