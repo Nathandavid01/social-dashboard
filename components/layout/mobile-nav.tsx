@@ -4,12 +4,11 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navItems } from './nav-items'
+import { visibleNavItems } from './nav-items'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu, Zap } from 'lucide-react'
 import { useAuth } from '@/lib/context/auth-context'
-import { hasPermission } from '@/lib/auth/permissions'
 
 interface MobileNavProps {
   videoReviewCount?: number
@@ -18,10 +17,10 @@ interface MobileNavProps {
 export function MobileNav({ videoReviewCount = 0 }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  const { role } = useAuth()
+  const { role, user, viewAsEditor } = useAuth()
   const allowed = useMemo(
-    () => navItems.filter((n) => !n.permission || hasPermission(role, n.permission)),
-    [role],
+    () => visibleNavItems(role, undefined, viewAsEditor?.id ?? user?.id, user?.id),
+    [role, user?.id, viewAsEditor?.id],
   )
 
   return (

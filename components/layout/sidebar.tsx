@@ -51,7 +51,7 @@ export function Sidebar({
   areaAccess = null,
 }: SidebarProps) {
   const pathname = usePathname()
-  const { role } = useAuth()
+  const { role, user, viewAsEditor } = useAuth()
   const { collapsed, toggle } = useSidebar()
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
@@ -59,7 +59,8 @@ export function Sidebar({
 
   // Hide items the user cannot access: role permissions AND the admin-granted
   // per-user area list (independent of user prefs).
-  const allowedItems = useMemo(() => visibleNavItems(role, areaAccess), [role, areaAccess])
+  const effectiveUserId = viewAsEditor?.id ?? user?.id
+  const allowedItems = useMemo(() => visibleNavItems(role, areaAccess, effectiveUserId, user?.id), [role, areaAccess, effectiveUserId, user?.id])
   const allowedHrefs = useMemo(() => new Set(allowedItems.map((n) => n.href)), [allowedItems])
 
   // Local working copy during edit mode (optimistic)

@@ -40,6 +40,10 @@ Con permiso `metricool.write`, abre un post pendiente y elige **Guardar como bor
 
 Los cambios de borrador/programación vuelven a leer el post y después consultan Metricool para comprobar el resultado; la subida también consulta el borrador creado. Si aparece un cambio o borrador pendiente de verificar, o falla la conexión tras enviar, usa **Verificar calendario** antes de repetir la acción. La validación de esta entrega incluye escrituras simuladas y consultas reales de lectura; no se probaron subidas, creación de borradores ni cambios de programación reales. Ver [notas de implementación](CLAUDE.md#calendario-de-publicaciones).
 
+### Inventario de videos (v5.133)
+
+Denisha Matos y Nathan Torres pueden abrir **Clientes → Inventario de videos** (`/inventario-videos`) para consultar el editor asignado y las piezas editadas, crudas y programadas sin publicar registradas en el dashboard y Metricool. La tabla permite buscar por cliente o editor y muestra los casos pendientes de verificar. Es una vista de consulta; las asignaciones se cambian en Clientes → Asignaciones. Consulta las [definiciones de conteo y los límites de verificación](docs/CLIENT_VIDEO_INVENTORY.md).
+
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.

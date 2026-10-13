@@ -19,6 +19,7 @@ export type Permission =
   | 'clients.assets.upload'
   | 'clients.sms.send'
   | 'operations.overview'
+  | 'inventory.read'
   // Tasks / operations
   | 'tasks.read.all'
   | 'tasks.read.own'

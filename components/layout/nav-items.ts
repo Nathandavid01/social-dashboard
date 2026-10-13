@@ -40,6 +40,7 @@ import {
   type NavGroup,
 } from '@/lib/auth/areas'
 import type { UserRole } from '@/lib/supabase/types'
+import { canAccessVideoInventory } from '@/lib/auth/video-inventory-access'
 
 export interface NavItem {
   href: string
@@ -95,13 +96,13 @@ export const navItems: NavItem[] = [
   // The landing: what each person has to do today. First, always, for everyone.
   { href: '/mi-dia', label: 'Mi día', icon: Sun },
   { href: '/home', label: 'Inicio', icon: Home },
-  ...AREAS.filter((a) => a.nav !== false).map((a) => ({
+  ...AREAS.filter((a) => a.nav !== false).flatMap((a): NavItem[] => [{
     href: a.href,
     label: a.label,
     group: a.group,
     icon: ICON_BY_HREF[a.href] ?? Home,
     permission: a.permission,
-  })),
+  }, ...(a.href === '/clients' ? [{ href: '/inventario-videos', label: 'Inventario de videos', icon: Film, permission: 'inventory.read' as const, group: 'Clientes' as const }] : [])]),
 ]
 
 /**
@@ -113,16 +114,19 @@ export const navItems: NavItem[] = [
 export function visibleNavItems(
   role: UserRole | null | undefined,
   areaAccess?: string[] | null,
+  userId?: string | null,
+  realUserId: string | null | undefined = userId,
 ): NavItem[] {
+  const identityAllowed = navItems.filter((item) => item.href !== '/inventario-videos' || (canAccessVideoInventory(userId) && canAccessVideoInventory(realUserId)))
   if (areaAccess === undefined) {
-    return navItems.filter((n) => !n.permission || hasPermission(role, n.permission))
+    return identityAllowed.filter((n) => !n.permission || hasPermission(role, n.permission))
   }
   const reachable = effectiveAreaHrefs(role, areaAccess)
   // Always-allowed destinations aren't in AREAS (there's nothing to authorize),
   // so they'd never be "reachable" and would vanish from the sidebar. This used
   // to hardcode '/home'; the moment '/mi-dia' was added it disappeared for
   // everyone — owner included. Read the list instead of naming routes here.
-  return navItems.filter(
-    (n) => ALWAYS_ALLOWED_PREFIXES.includes(n.href) || reachable.has(n.href),
+  return identityAllowed.filter(
+    (n) => n.href === '/inventario-videos' ? hasPermission(role, 'inventory.read') : ALWAYS_ALLOWED_PREFIXES.includes(n.href) || reachable.has(n.href),
   )
 }

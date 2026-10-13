@@ -43,8 +43,8 @@ describe('navItems source', () => {
 })
 
 describe('visibleNavItems', () => {
-  it('owner sees every nav item', () => {
-    expect(visibleNavItems('owner')).toHaveLength(navItems.length)
+  it('owner sees every general nav item; identity-restricted tabs stay hidden', () => {
+    expect(visibleNavItems('owner')).toHaveLength(navItems.filter((item) => item.href !== '/inventario-videos').length)
   })
 
   it('a null role sees only ungated (permission-less) items', () => {
