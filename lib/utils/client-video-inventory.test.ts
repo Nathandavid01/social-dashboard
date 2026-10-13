@@ -26,6 +26,15 @@ describe('unpublished client video inventory', () => {
     const row = build([idea('a', { metricool_post_id: 1, videos: [video('edited')] }), idea('b', { metricool_post_id: 1, videos: [video('edited')] })], [post(1), post(1), post(2), post(3, { media: ['photo.jpg'] })])
     expect(row).toMatchObject({ edited: 2, raw: 0, scheduled: 2 })
   })
+  it('excludes scheduled posts when any linked idea records publication, even if Metricool is stale', () => {
+    const row = build([
+      idea('published', { published_at: '2026-10-01', metricool_post_id: 1 }),
+      idea('manual', { manual_posted_status: 'posted', metricool_post_id: 2 }),
+      idea('status', { status: 'publicada', metricool_post_id: 3 }),
+      idea('duplicate', { metricool_post_id: 1, videos: [video('edited')] }),
+    ], [post(1), post(2), post(3), post(4)])
+    expect(row).toMatchObject({ edited: 0, raw: 0, scheduled: 1 })
+  })
   it('drafts and errored posts are not scheduled, and a planned date alone is not a schedule', () => {
     expect(build([idea('planned', { publish_date: '2026-10-14' }), idea('draft', { metricool_post_id: 1, videos: [video('edited')] })], [post(1, { draft: true }), post(2, { providers: [{ status: 'ERROR' }] })])).toMatchObject({ edited: 1, raw: 1, scheduled: 0 })
   })

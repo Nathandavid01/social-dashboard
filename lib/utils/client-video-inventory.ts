@@ -52,13 +52,18 @@ export function buildClientVideoInventory(input: {
     if (client.edit_mode === 'ai') editors.unshift('IA')
     const posts = input.calendar[client.id]
     const byPost = new Map((posts ?? []).map((post) => [String(post.id), post]))
-    const scheduledIds = new Set((posts ?? []).filter((post) => scheduled(post) && postHasVideo(post)).map((post) => String(post.id)))
+    const clientIdeas = ideasByClient.get(client.id) ?? []
+    // A recorded publication wins over a stale PENDING calendar response,
+    // including other ideas pointing at the same post.
+    const publishedIds = new Set(clientIdeas.filter((idea) => isPublishedIdea(idea) && idea.metricool_post_id != null).map((idea) => String(idea.metricool_post_id)))
+    const scheduledIds = new Set((posts ?? []).filter((post) => !publishedIds.has(String(post.id)) && scheduled(post) && postHasVideo(post)).map((post) => String(post.id)))
     let edited = 0, raw = 0, unverified = 0
     const seen = new Set<string>()
-    for (const idea of ideasByClient.get(client.id) ?? []) {
+    for (const idea of clientIdeas) {
       if (seen.has(idea.id)) continue
       seen.add(idea.id)
       if (idea.status === 'descartada' || isPublishedIdea(idea)) continue
+      if (idea.metricool_post_id != null && publishedIds.has(String(idea.metricool_post_id))) continue
       const files = (idea.videos ?? []).filter(usableVideo)
       const hasEdited = files.some((file) => file.kind === 'edited')
       const hasRaw = files.some((file) => file.kind === 'raw')
