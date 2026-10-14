@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, useTransition } from 'react'
+import styles from './recibo-board.module.css'
 import { MessageSquareWarning, Send } from 'lucide-react'
 import { useHasPermission } from '@/components/auth/role-gate'
 import {
@@ -94,7 +95,7 @@ export function ReciboFeedback({ ideaId }: { ideaId: string }) {
             type="button"
             disabled={pending}
             onClick={save}
-            className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 px-3 text-xs font-semibold text-amber-100 disabled:opacity-60 sm:w-auto"
+            className={`${styles.feedbackSave} inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-amber-500/15 px-3 text-xs font-semibold text-amber-100 disabled:opacity-60 sm:w-auto`}
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             {pending ? 'Guardando…' : 'Guardar motivo'}

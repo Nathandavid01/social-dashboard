@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import styles from './recibo-board.module.css'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -13,10 +14,12 @@ export function ReciboCaption({
   ideaId,
   caption,
   disabled,
+  onSaved,
 }: {
   ideaId: string
   caption: string
   disabled?: boolean
+  onSaved?: (caption: string) => void
 }) {
   const { toast } = useToast()
   const [text, setText] = useState(caption)
@@ -32,6 +35,7 @@ export function ReciboCaption({
     if (!clean || clean === caption.trim() || saving) return
     start(async () => {
       const res = await saveIdeaCaption(ideaId, clean)
+      if (!res.error) onSaved?.(clean)
       if (res.error) toast({ title: 'No se pudo guardar el caption', description: res.error, variant: 'destructive' })
     })
   }
@@ -56,7 +60,7 @@ export function ReciboCaption({
         <button
           type="button"
           onClick={() => setExpanded((open) => !open)}
-          className="px-3 pb-2 text-left text-xs font-medium text-violet-300"
+          className={`${styles.captionToggle} px-3 pb-2 text-left text-xs font-medium text-violet-300`}
         >
           {expanded ? 'Ver menos' : 'Ver caption completo'}
         </button>
