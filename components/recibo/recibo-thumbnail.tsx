@@ -41,7 +41,7 @@ export function ReciboThumbnail({ videoId, title, coverUrl, image = false }: { v
   return <span ref={ref} className={`relative flex ${image ? 'aspect-[4/5]' : 'aspect-[9/16]'} w-full items-center justify-center overflow-hidden bg-slate-100`}>
     {imageUrl ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img data-testid="recibo-thumbnail" src={imageUrl} alt={`Miniatura de ${title}`} loading="lazy" decoding="async" onError={() => existingCover ? setFailedCover(existingCover) : setUrl(null)} className="h-full w-full object-contain" />
+      <img data-testid="recibo-thumbnail" src={imageUrl} alt={`Miniatura de ${title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => existingCover ? setFailedCover(existingCover) : setUrl(null)} className="h-full w-full object-contain" />
     ) : <span className="flex items-center gap-2 text-xs text-slate-500"><Film className="h-5 w-5" />{loading ? 'Cargando miniatura…' : 'Miniatura no disponible'}</span>}
   </span>
 }

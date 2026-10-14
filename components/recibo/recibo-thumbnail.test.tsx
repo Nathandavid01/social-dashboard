@@ -38,6 +38,7 @@ describe('ReciboThumbnail', () => {
 it('uses an existing Drive cover without requesting authenticated thumbs or playback', () => {
   const { container } = render(<ReciboThumbnail videoId="raw-drive" title="Crudo" coverUrl="https://drive.example/raw.jpg" />)
   expect(screen.getByAltText('Miniatura de Crudo')).toHaveAttribute('src', 'https://drive.example/raw.jpg')
+  expect(screen.getByAltText('Miniatura de Crudo')).toHaveAttribute('referrerpolicy', 'no-referrer')
   expect(thumbs).not.toHaveBeenCalled()
   expect(container.querySelector('video')).toBeNull()
 })
