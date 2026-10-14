@@ -58,3 +58,7 @@ main:has(.board) {
 .board input[type='date'] {
   background: #fff;
 }
+
+/* These actions sit on the white review surface, outside the dark player. */
+.board .captionToggle { color: #4338ca; }
+.board .feedbackSave { color: #854d0e; }

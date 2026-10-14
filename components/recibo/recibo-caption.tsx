@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import styles from './recibo-board.module.css'
 import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { useToast } from '@/lib/hooks/use-toast'
 
@@ -59,7 +60,7 @@ export function ReciboCaption({
         <button
           type="button"
           onClick={() => setExpanded((open) => !open)}
-          className="px-3 pb-2 text-left text-xs font-medium text-violet-300"
+          className={`${styles.captionToggle} px-3 pb-2 text-left text-xs font-medium text-violet-300`}
         >
           {expanded ? 'Ver menos' : 'Ver caption completo'}
         </button>

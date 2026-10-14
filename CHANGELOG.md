@@ -9,7 +9,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 **Recibo muestra tus videos en tarjetas verticales, con miniaturas y filtros.**
 - Encuentra entregas por cliente, búsqueda y estado; consulta el resumen de piezas por enviar, enlaces creados, cambios, aprobaciones y programadas.
 - Reconoce cada video con una miniatura vertical antes de abrirlo.
-- El reproductor se carga al abrir la revisión y se puede reintentar si falla.
+- Videos y gráficos cargan su revisión al abrir la tarjeta; las miniaturas aprovechan las portadas existentes y el reproductor permite reintentar.
 - Revisa las entregas con fondos claros, tarjetas compactas y controles más legibles.
 - Conserva el calendario, las frecuencias y las acciones de cada entrega.
 

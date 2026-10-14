@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 
 vi.mock('@/components/recibo/recibo-thumbnail', () => ({
-  ReciboThumbnail: ({ title }: { title: string }) => <span>Miniatura de {title}</span>,
+  ReciboThumbnail: ({ title, coverUrl }: { title: string; coverUrl?: string }) => coverUrl ? <img src={coverUrl} alt={`Miniatura de ${title}`} /> : <span>Miniatura de {title}</span>,
 }))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
@@ -51,6 +51,7 @@ import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
 import { getReciboIdeaDownloadUrl, getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
 import { ReciboBoard } from './recibo-board'
+import { listReciboInternalNotes } from '@/lib/actions/recibo-internal-notes'
 
 /** Dated inside the current week so the week filter still includes the card. */
 const publishThisWeek = rangoSemana().desde
@@ -375,6 +376,8 @@ describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
       />,
     )
     expect(screen.getByTestId('recibo-idea-raw1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/raw.jpg')
+    expect(screen.queryByTestId('recibo-video-player')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     expect(screen.getByRole('img', { name: /portada/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Aprobado' })).not.toBeInTheDocument()
@@ -513,11 +516,18 @@ describe('ReciboBoard — buscar y motivo', () => {
 
 it('separates a client graphic from videos and renders its image with caption', async () => {
   vi.mocked(getReciboIdeaPreviewUrl).mockResolvedValue({ url: 'https://signed.example/graphic.png' })
+  vi.mocked(getReciboIdeaPreviewUrl).mockClear()
+  vi.mocked(listReciboInternalNotes).mockClear()
   const graphic = { ...editedIdea, id: 'graphic-1', title: 'Encías', content_type: 'P', generated_caption: 'Cuida tus encías.', videos: [{ ...editedIdea.videos[0], id: 'g1', mime_type: 'image/png' }] }
   render(<ReciboBoard ideas={[editedIdea, graphic] as any} aiClients={[{ id: 'c1', name: 'Arecibo Lab' }]} />)
   expect(screen.getByRole('region', { name: 'Arecibo Lab · Gráficos' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Arecibo Lab · Videos' })).toBeTruthy()
+  expect(getReciboIdeaPreviewUrl).not.toHaveBeenCalled()
+  expect(listReciboInternalNotes).not.toHaveBeenCalled()
+  await userEvent.click(screen.getByRole('button', { name: 'Abrir gráfico y caption de Encías' }))
   await waitFor(() => expect(screen.getByRole('img', { name: 'Encías' })).toBeTruthy())
+  expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('graphic-1', 'g1')
+  expect(listReciboInternalNotes).toHaveBeenCalledWith('graphic-1')
   const card = screen.getByTestId('recibo-idea-graphic-1')
   expect(card.querySelector('video')).toBeNull()
   expect(card.textContent).not.toContain('Programar en Metricool')
@@ -589,4 +599,14 @@ it('completes captions only for the currently filtered client', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Completar captions visibles' }))
   await waitFor(() => expect(fillReciboCaption).toHaveBeenCalledTimes(1))
   expect(fillReciboCaption).toHaveBeenCalledWith('i1', expect.any(Array))
+})
+
+
+it('uses the cover of the current cut rather than an older version', () => {
+  const idea = { ...editedIdea, videos: [
+    { ...editedIdea.videos[0], id: 'older', uploaded_at: '2020-01-01T10:00:00Z', drive_thumb_url: 'https://img.example/old.jpg' },
+    { ...editedIdea.videos[0], id: 'current', uploaded_at: '2030-01-01T10:00:00Z', drive_thumb_url: 'https://img.example/current.jpg' },
+  ] }
+  render(<ReciboBoard aiClients={[]} ideas={[idea]} />)
+  expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/current.jpg')
 })

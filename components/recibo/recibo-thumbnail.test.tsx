@@ -33,3 +33,20 @@ describe('ReciboThumbnail', () => {
     expect(container.querySelector('video')).toBeNull()
   })
 })
+
+
+it('uses an existing Drive cover without requesting authenticated thumbs or playback', () => {
+  const { container } = render(<ReciboThumbnail videoId="raw-drive" title="Crudo" coverUrl="https://drive.example/raw.jpg" />)
+  expect(screen.getByAltText('Miniatura de Crudo')).toHaveAttribute('src', 'https://drive.example/raw.jpg')
+  expect(thumbs).not.toHaveBeenCalled()
+  expect(container.querySelector('video')).toBeNull()
+})
+
+it('falls back to authenticated thumbnails if the existing cover cannot load', async () => {
+  thumbs.mockResolvedValue({ urls: ['https://signed.example/thumb.jpg'] })
+  render(<ReciboThumbnail videoId="raw-drive" title="Crudo" coverUrl="https://drive.example/broken.jpg" />)
+  fireEvent.error(screen.getByRole('img'))
+  intersect([{ isIntersecting: true }])
+  await waitFor(() => expect(screen.getByRole('img')).toHaveAttribute('src', 'https://signed.example/thumb.jpg'))
+  expect(thumbs).toHaveBeenCalledWith('raw-drive')
+})

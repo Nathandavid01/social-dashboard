@@ -56,6 +56,11 @@ function ideaTitle(idea: IdeaWithPipeline): string {
   return idea.title?.trim() || idea.hook?.trim() || 'Sin título'
 }
 
+/** A cover must describe the same uploaded file the card will open. */
+function coverForVideo(idea: IdeaWithPipeline, videoId: string | null | undefined): string | null {
+  return coverUrlForIdea({ ...idea, videos: (idea.videos ?? []).filter(video => video.id === videoId) })
+}
+
 function weekFromToday(todayISO?: string) {
   if (!todayISO) return rangoSemana()
   const [year, month, day] = todayISO.split('-').map(Number)
@@ -424,7 +429,7 @@ export function ReciboBoard({
                               const caption = captionOf(idea, captionOverrides)
                               const approved = space.tone === 'approved' || space.tone === 'scheduled'
                               const scheduled = isAgendadoIdea(idea)
-                              const coverUrl = coverUrlForIdea(idea)
+                              const coverUrl = coverForVideo(idea, editedVideoId ?? occupy?.id)
                               const graphic = isReciboGraphic(idea)
                               return (
                                 <li
@@ -441,7 +446,7 @@ export function ReciboBoard({
                                   )}
                                 >
                                   <button type="button" aria-expanded={openIdea === idea.id} onClick={() => setOpenIdea(openIdea === idea.id ? null : idea.id)} aria-label={openIdea === idea.id ? `Cerrar revisión de ${ideaTitle(idea)}` : `Abrir video y caption de ${ideaTitle(idea)}`} className="group relative block w-full overflow-hidden text-left">
-                                    {editedVideoId || occupy?.id ? <ReciboThumbnail key={editedVideoId ?? occupy?.id} videoId={(editedVideoId ?? occupy?.id)!} title={ideaTitle(idea)} /> : <span className="block aspect-[9/16] bg-slate-100" />}
+                                    {editedVideoId || occupy?.id ? <ReciboThumbnail key={editedVideoId ?? occupy?.id} videoId={(editedVideoId ?? occupy?.id)!} title={ideaTitle(idea)} coverUrl={coverUrl} /> : <span className="block aspect-[9/16] bg-slate-100" />}
                                     <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-12 text-xs font-medium text-white"><Play aria-hidden="true" className="h-8 w-8 shrink-0 rounded-full bg-white/95 p-2 text-slate-900 shadow-sm" />{openIdea === idea.id ? 'Cerrar revisión' : 'Abrir video y caption'}</span>
                                     <span className={`absolute right-2 top-2 rounded-full px-2.5 py-1 text-[10px] font-semibold shadow-sm ${stateOf(idea) === 'approved' ? 'bg-emerald-50 text-emerald-800' : stateOf(idea) === 'changes' ? 'bg-rose-50 text-rose-800' : stateOf(idea) === 'scheduled' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-900'}`}>{states.find(state => state.id === stateOf(idea))?.label}</span>
                                   </button>
@@ -525,6 +530,16 @@ export function ReciboBoard({
                                   data-testid={`recibo-idea-${idea.id}`}
                                   className="flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
                                 >
+                                  <button type="button" aria-expanded={openIdea === idea.id} onClick={() => setOpenIdea(openIdea === idea.id ? null : idea.id)} aria-label={openIdea === idea.id ? `Cerrar revisión de ${ideaTitle(idea)}` : `Abrir gráfico y caption de ${ideaTitle(idea)}`} className="group relative block w-full overflow-hidden text-left">
+                                    {editedVideoId ? <ReciboThumbnail key={editedVideoId} videoId={editedVideoId} title={ideaTitle(idea)} coverUrl={coverForVideo(idea, editedVideoId)} image /> : <span className="block aspect-[4/5] bg-slate-100" />}
+                                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-12 text-xs font-medium text-white">{openIdea === idea.id ? 'Cerrar revisión' : 'Abrir gráfico y caption'}</span>
+                                    <span className="absolute right-2 top-2 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-800 shadow-sm">{states.find(state => state.id === stateOf(idea))?.label}</span>
+                                  </button>
+                                  <div className="space-y-2 p-3">
+                                    <h3 className="line-clamp-2 text-sm font-semibold leading-snug">Gráfico · {ideaTitle(idea)}</h3>
+                                    {openIdea !== idea.id && <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{caption || 'Sin caption'}</p>}
+                                  </div>
+                                  {openIdea === idea.id && <>
                                   <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
                                     <p className="mb-2 text-xs font-semibold text-violet-300">Gráfico · {ideaTitle(idea)}</p>
                                     <div className="mx-auto w-full max-w-[min(100%,280px)]">
@@ -544,6 +559,7 @@ export function ReciboBoard({
                                   </div>
                                   <ReciboCaption onSaved={text => setCaptionOverrides(prev => ({ ...prev, [idea.id]: text }))} ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
                                   <ReciboFeedback ideaId={idea.id} />
+                                  </>}
                                 </li>
                               )
                             })}
