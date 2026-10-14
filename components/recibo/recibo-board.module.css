@@ -1,0 +1,60 @@
+.board {
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 222 35% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 35% 16%;
+  --muted: 215 25% 95%;
+  --muted-foreground: 215 16% 40%;
+  --border: 214 24% 88%;
+  --input: 214 24% 88%;
+  --primary: 40 90% 42%;
+  --primary-foreground: 222 35% 16%;
+  color: hsl(var(--foreground));
+  padding-block: 12px 40px;
+}
+
+main:has(.board) {
+  background: #f3f5f8;
+  min-height: 100vh;
+}
+
+.board input:focus-visible,
+.board select:focus-visible,
+.board button:focus-visible,
+.board summary:focus-visible,
+.board textarea:focus-visible {
+  outline: 2px solid #a66b05;
+  outline-offset: 3px;
+}
+
+.board select { color-scheme: light; }
+
+.board [data-testid^='recibo-idea-'] > div:last-child > button {
+  background: #edf2ff;
+  color: #334a82;
+  border: 1px solid #d5def3;
+  min-height: 40px;
+}
+
+.board [data-testid^='recibo-idea-'] > div:last-child > button:disabled {
+  background: #f1f3f6;
+  color: #626d7e;
+  border-color: #e2e6ec;
+  opacity: 1;
+}
+
+/* Scheduling controls inherit the light card surface; the player keeps its dark frame. */
+.board [data-testid^='recibo-idea-'] > div:last-child :global(.text-violet-100),
+.board [data-testid^='recibo-idea-'] > div:last-child :global(.text-violet-300) {
+  color: #334a82;
+}
+
+.board [data-testid^='recibo-idea-'] > div:last-child :global(.text-amber-100),
+.board [data-testid^='recibo-idea-'] > div:last-child :global(.text-amber-200) {
+  color: #854d0e;
+}
+
+.board input[type='date'] {
+  background: #fff;
+}

@@ -27,6 +27,8 @@ export function ReciboVideoPreview({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const [attempt, setAttempt] = useState(0)
+
   useEffect(() => {
     if (!hasEdited) {
       setUrl(null)
@@ -46,11 +48,15 @@ export function ReciboVideoPreview({
       setLoading(false)
       if (res.url) setUrl(res.url)
       else setError(res.error ?? 'No se pudo cargar el video')
+    }).catch(() => {
+      if (!alive) return
+      setLoading(false)
+      setError('No se pudo cargar el video. Intenta de nuevo.')
     })
     return () => {
       alive = false
     }
-  }, [ideaId, hasEdited, expectedVideoId])
+  }, [ideaId, hasEdited, expectedVideoId, attempt])
 
   const frame = cn(
     'w-full overflow-hidden rounded-[1.25rem] bg-black',
@@ -89,9 +95,10 @@ export function ReciboVideoPreview({
     return (
       <div
         data-testid="recibo-video-error"
-        className={cn(frame, 'flex items-center justify-center bg-muted/40 px-4 text-center text-xs text-amber-200')}
+        className={cn(frame, 'flex flex-col gap-3 items-center justify-center bg-muted/40 px-4 text-center text-xs text-amber-200')}
       >
         {error}
+        <button type="button" onClick={() => setAttempt(value => value + 1)} className="rounded-lg border border-border px-3 py-2">Reintentar video</button>
       </div>
     )
   }

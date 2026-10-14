@@ -13,10 +13,12 @@ export function ReciboCaption({
   ideaId,
   caption,
   disabled,
+  onSaved,
 }: {
   ideaId: string
   caption: string
   disabled?: boolean
+  onSaved?: (caption: string) => void
 }) {
   const { toast } = useToast()
   const [text, setText] = useState(caption)
@@ -32,6 +34,7 @@ export function ReciboCaption({
     if (!clean || clean === caption.trim() || saving) return
     start(async () => {
       const res = await saveIdeaCaption(ideaId, clean)
+      if (!res.error) onSaved?.(clean)
       if (res.error) toast({ title: 'No se pudo guardar el caption', description: res.error, variant: 'destructive' })
     })
   }

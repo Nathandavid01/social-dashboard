@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.132 — 2026-10-13
+
+**Recibo muestra tus videos en tarjetas verticales, con miniaturas y filtros.**
+- Encuentra entregas por cliente, búsqueda y estado; consulta el resumen de piezas por enviar, enlaces creados, cambios, aprobaciones y programadas.
+- Reconoce cada video con una miniatura vertical antes de abrirlo.
+- El reproductor se carga al abrir la revisión y se puede reintentar si falla.
+- Revisa las entregas con fondos claros, tarjetas compactas y controles más legibles.
+- Conserva el calendario, las frecuencias y las acciones de cada entrega.
+
+[Ver diseño de Recibo](/previews/v5.132-recibo-tarjetas.html)
+
+![Tarjetas verticales de Recibo](/changelog/v5.132-recibo-tarjetas.png)
+
 ## v5.131 — 2026-10-09
 
 **Configura la frecuencia de cada cliente directamente desde Recibos.**

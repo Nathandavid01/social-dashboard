@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 
 const getReciboIdeaPreviewUrl = vi.fn()
 
@@ -39,4 +39,15 @@ describe('ReciboVideoPreview', () => {
     })
     expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1')
   })
+})
+
+
+it('allows retrying a rejected playback request', async () => {
+  getReciboIdeaPreviewUrl.mockReset()
+  getReciboIdeaPreviewUrl.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ url: 'https://signed.example/retry.mp4' })
+  render(<ReciboVideoPreview ideaId="i1" hasEdited expectedVideoId="v1" />)
+  fireEvent.click(await screen.findByRole('button', { name: 'Reintentar video' }))
+  expect(await screen.findByTestId('recibo-video-player')).toHaveAttribute('src', 'https://signed.example/retry.mp4')
+  expect(getReciboIdeaPreviewUrl).toHaveBeenCalledTimes(2)
+  expect(getReciboIdeaPreviewUrl).toHaveBeenLastCalledWith('i1', 'v1')
 })
