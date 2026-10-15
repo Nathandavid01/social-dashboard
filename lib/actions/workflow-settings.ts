@@ -41,7 +41,6 @@ export async function updateWorkflowSettings(input: WorkflowSettingsPatch): Prom
 
   revalidatePath('/settings/workflow')
   revalidatePath('/planning')
-  revalidatePath('/home')
   revalidatePath('/pipeline')
   return { ok: true }
 }

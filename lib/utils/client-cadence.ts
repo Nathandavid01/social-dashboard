@@ -139,7 +139,6 @@ export function cadenceRevalidatePaths(clientId: string): string[] {
     '/recibo',
     '/clients',
     '/pipeline',
-    '/home',
     '/planning',
     '/calendar',
     '/produccion',

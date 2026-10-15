@@ -4,7 +4,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
-## v5.133 — 2026-10-14
+## v5.135 — 2026-10-14
 
 **Nuevo: Inventario de video — un anfiteatro 3D con el logo de cada cliente, cuántos reels y posts le quedan, y su calendario de las próximas 2 semanas.**
 - Cada cliente es un medallón con su logo (o sus iniciales) en gradas curvas por estado: al frente **Sin videos**, luego **Menos de 1 semana**, **1–2 semanas**, **2+ semanas** y **Sin cadencia**, cada grada con su letrero.
@@ -19,6 +19,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 ![Inventario de video en 3D](/changelog/v5.133-inventario-video-escena.png)
 
 ![Perfil y calendario del cliente](/changelog/v5.133-inventario-perfil.png)
+
+## v5.134 — 2026-10-14
+
+**«Inicio» y «Escribir ideas» ya no están en el dashboard: todo arranca en Mi día.**
+- El menú ya no muestra «Inicio» ni «Escribir ideas».
+- Si abres un enlace viejo a `/home` o `/escribir-ideas`, sale la página de «no existe».
+- Cuando una página no te deja entrar, o al salir de «Ver como», caes en Mi día en vez de Inicio.
+- La app instalada (PWA) y la pantalla sin conexión abren en Mi día.
+- Para escribir ideas sigue el Lab de Ideas; las de On Site se siguen editando en On Site.
+
+[Ver el menú antes y después](/previews/v5.134-sin-inicio.html)
 
 ## v5.132 — 2026-10-13
 

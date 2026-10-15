@@ -177,7 +177,7 @@ describe('cadenceRevalidatePaths', () => {
         '/recibo',
         '/clients',
         '/pipeline',
-        '/home',
+        // '/home' salió: Eric quitó Inicio el 2026-10-14 (ver lib/auth/removed-pages.test.ts).
         '/planning',
         '/calendar',
         '/produccion',

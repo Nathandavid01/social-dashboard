@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Compass, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LANDING_PATH } from '@/lib/auth/areas'
 
 export default function NotFound() {
   return (
@@ -16,8 +17,8 @@ export default function NotFound() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/home">
-            <Home className="mr-1.5 h-3.5 w-3.5" /> Volver al inicio
+          <Link href={LANDING_PATH}>
+            <Home className="mr-1.5 h-3.5 w-3.5" /> Ir a Mi día
           </Link>
         </Button>
       </div>

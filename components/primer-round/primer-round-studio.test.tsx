@@ -49,7 +49,7 @@ const studio: PrimerRoundStudioPayload = {
   ],
   autopostEnabled: true,
   ctas: {
-    ideas: '/escribir-ideas?c=x',
+    ideas: '/idea-lab',
     bank: '/banco',
     pipeline: '/pipeline',
     editing: '/pipeline',

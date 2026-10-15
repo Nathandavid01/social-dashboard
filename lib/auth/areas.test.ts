@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   AREAS,
   ALWAYS_ALLOWED_PREFIXES,
+  LANDING_PATH,
   NAV_GROUPS,
   areaForPath,
   effectiveAreaHrefs,
@@ -25,8 +26,12 @@ describe('AREAS catalogue', () => {
     expect(AREAS.find((a) => a.href === '/home')).toBeUndefined()
   })
 
+  // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas. El aterrizaje es /mi-dia.
   it('always allows the essential landing/changelog/pending prefixes', () => {
-    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/home')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/mi-dia')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/changelog')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/pending')
+    expect(ALWAYS_ALLOWED_PREFIXES).not.toContain('/home')
   })
 })
 
@@ -83,7 +88,9 @@ describe('canAccessPath', () => {
   const role: UserRole = 'editor'
 
   it('always allows the landing page even with an empty grant', () => {
-    expect(canAccessPath('/home', role, [])).toBe(true)
+    // Contrato cambiado por Eric 2026-10-14: el aterrizaje es /mi-dia, no /home.
+    expect(canAccessPath(LANDING_PATH, role, [])).toBe(true)
+    expect(canAccessPath('/mi-dia', 'video', ['/clients'])).toBe(true)
   })
 
   it('blocks a restricted area not in the explicit grant', () => {
