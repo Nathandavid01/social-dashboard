@@ -16,7 +16,7 @@ function sourceFiles(dir: string): string[] {
   for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
     const rel = path.join(dir, entry.name)
     if (entry.isDirectory()) out.push(...sourceFiles(rel))
-    else if (/\.(ts|tsx)$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) out.push(rel)
+    else if (/\.(ts|tsx|js|mjs)$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) out.push(rel)
   }
   return out
 }
@@ -55,12 +55,16 @@ describe('páginas quitadas: /home y /escribir-ideas', () => {
   })
 
   it('ningún archivo de código enlaza, redirige ni revalida esas rutas', () => {
-    const files = [...sourceFiles('app'), ...sourceFiles('components'), ...sourceFiles('lib'), 'middleware.ts']
+    const files = [
+      ...sourceFiles('app'), ...sourceFiles('components'), ...sourceFiles('lib'),
+      'middleware.ts', 'public/sw.js',
+      ...fs.readdirSync(ROOT).filter((f) => /^next\.config\./.test(f)),
+    ]
     const hits: string[] = []
     for (const file of files) {
       const text = fs.readFileSync(path.join(ROOT, file), 'utf8')
       for (const href of GONE) {
-        if (new RegExp(`['"\`]${href}(['"\`#?/])`).test(text)) hits.push(`${file} → ${href}`)
+        if (new RegExp(`['"\`]${href}(['"\`#?/$\\s])`).test(text)) hits.push(`${file} → ${href}`)
       }
     }
     expect(hits).toEqual([])
