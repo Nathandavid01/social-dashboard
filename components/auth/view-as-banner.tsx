@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Eye, X } from 'lucide-react'
 import { useAuth } from '@/lib/context/auth-context'
 import { stopViewAs } from '@/lib/actions/view-as'
+import { LANDING_PATH } from '@/lib/auth/areas'
 
 export function ViewAsBanner() {
   const { viewAsEditor } = useAuth()
@@ -32,7 +33,7 @@ export function ViewAsBanner() {
         onClick={() => {
           startTransition(async () => {
             await stopViewAs()
-            router.push('/home')
+            router.push(LANDING_PATH)
             router.refresh()
           })
         }}

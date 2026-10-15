@@ -21,17 +21,19 @@ describe('navItems source', () => {
     expect(hrefs).not.toContain('/schedule-check')
   })
 
-  it('includes /home and the regular nav areas', () => {
+  // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas.
+  it('includes /mi-dia and the regular nav areas (no /home)', () => {
     const hrefs = navItems.map((n) => n.href)
-    expect(hrefs).toContain('/home')
+    expect(hrefs).toContain('/mi-dia')
+    expect(hrefs).not.toContain('/home')
     expect(hrefs).toContain('/clients')
     expect(hrefs).toContain('/settings/users')
   })
 
   it('el menú de proceso empieza por generar ideas (con Gráficas), grabar, luego Pipeline', () => {
     const process = navItems.filter((n) => n.group).map((n) => n.href)
-    expect(process.slice(0, 7)).toEqual([
-      '/escribir-ideas',
+    // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas.
+    expect(process.slice(0, 6)).toEqual([
       '/idea-lab',
       '/ideas-aprobadas',
       '/graficas',
@@ -52,7 +54,6 @@ describe('visibleNavItems', () => {
     expect(visible.length).toBeGreaterThan(0)
     expect(visible.every((n) => !n.permission)).toBe(true)
     const hrefs = visible.map((n) => n.href)
-    expect(hrefs).toContain('/home') // Inicio has no permission gate
     expect(hrefs).toContain('/mi-dia') // your own work — nothing to authorize
     // /calendar USED to be ungated (any role could see every client's schedule).
     // It's now behind clients.read, like the client list it draws from.
@@ -61,7 +62,7 @@ describe('visibleNavItems', () => {
 
   it('every nav area lives in a section — a flat 20-item wall is not a menu', () => {
     const ungrouped = navItems
-      .filter((n) => n.href !== '/home' && n.href !== '/mi-dia')
+      .filter((n) => n.href !== '/mi-dia')
       .filter((n) => !n.group)
     expect(ungrouped).toEqual([])
   })
@@ -92,14 +93,13 @@ describe('visibleNavItems with an areaAccess grant (the branch the sidebar uses)
     'shows the always-allowed destinations to %s (no per-user restriction)',
     (role) => {
       expect(hrefs(role, null)).toContain('/mi-dia')
-      expect(hrefs(role, null)).toContain('/home')
+      expect(hrefs(role, null)).not.toContain('/home') // quitado por Eric 2026-10-14
     },
   )
 
   it('still shows them to a user locked down to one unrelated area', () => {
     // Their own day is their own work — there is nothing to authorize.
     expect(hrefs('editor', ['/clients'])).toContain('/mi-dia')
-    expect(hrefs('editor', ['/clients'])).toContain('/home')
   })
 
   it('keeps hiding the areas a restricted user cannot reach', () => {

@@ -26,7 +26,6 @@ import {
   FileBarChart,
   Activity,
   ClipboardList,
-  PenLine,
   Palette,
   Mic2,
   type LucideIcon,
@@ -57,9 +56,7 @@ export { NAV_GROUPS, type NavGroup }
  * the destinations themselves; the sidebar just attaches an icon to each. */
 const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/mi-dia': Sun,
-  '/home': Home,
   '/runway': Rocket,
-  '/escribir-ideas': PenLine,
   '/idea-lab': Lightbulb,
   '/ideas-aprobadas': CheckCircle2,
   '/graficas': Palette,
@@ -94,7 +91,6 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
 export const navItems: NavItem[] = [
   // The landing: what each person has to do today. First, always, for everyone.
   { href: '/mi-dia', label: 'Mi día', icon: Sun },
-  { href: '/home', label: 'Inicio', icon: Home },
   ...AREAS.filter((a) => a.nav !== false).map((a) => ({
     href: a.href,
     label: a.label,
@@ -105,7 +101,7 @@ export const navItems: NavItem[] = [
 ]
 
 /**
- * Nav items the user may see. `/home` is always shown; otherwise the user must
+ * Nav items the user may see. Always-allowed destinations (Mi día) are always shown; otherwise the user must
  * be able to reach the area. With no `areaAccess` argument this stays a pure
  * role filter (backwards-compatible). When `areaAccess` is provided it honors
  * the per-user admin grant (null grant → role defaults; owners see everything).
@@ -120,7 +116,7 @@ export function visibleNavItems(
   const reachable = effectiveAreaHrefs(role, areaAccess)
   // Always-allowed destinations aren't in AREAS (there's nothing to authorize),
   // so they'd never be "reachable" and would vanish from the sidebar. This used
-  // to hardcode '/home'; the moment '/mi-dia' was added it disappeared for
+  // to hardcode the old Inicio route; the moment '/mi-dia' was added it disappeared for
   // everyone — owner included. Read the list instead of naming routes here.
   return navItems.filter(
     (n) => ALWAYS_ALLOWED_PREFIXES.includes(n.href) || reachable.has(n.href),

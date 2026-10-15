@@ -200,7 +200,8 @@ describe('studio lanes', () => {
     ])
     expect(g.ideas).toHaveLength(1)
     expect(g.bank).toHaveLength(1)
-    expect(primerRoundCtas('cid').ideas).toContain('c=cid')
+    // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas. Las ideas van al Lab de Ideas.
+    expect(primerRoundCtas('cid').ideas).toBe('/idea-lab')
   })
 })
 

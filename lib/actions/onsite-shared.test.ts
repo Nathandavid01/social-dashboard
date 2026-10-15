@@ -40,7 +40,9 @@ describe('ideas compartidas con Onsite', () => {
     const result = await toggleShotRecorded({ ideaId: 'i1', recorded: true, sessionId: 's1' })
     expect(result.error).toBeUndefined()
     expect(state.patch).toMatchObject({ status: 'grabada', recording_session_id: 's1' })
-    expect(revalidatePath).toHaveBeenCalledWith('/escribir-ideas')
+    // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas.
+    expect(revalidatePath).toHaveBeenCalledWith('/onsite')
+    expect(revalidatePath).not.toHaveBeenCalledWith('/escribir-ideas')
   })
   it('rechaza grabar una idea de otro cliente o de otra sesión', async () => {
     state.idea.client_id = 'otro'
@@ -49,9 +51,11 @@ describe('ideas compartidas con Onsite', () => {
     expect((await toggleShotRecorded({ ideaId: 'i1', recorded: true, sessionId: 's1' })).error).toBeTruthy()
     expect(state.patch).toEqual({})
   })
-  it('actualiza Escribir ideas al editar desde Onsite', async () => {
+  // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas.
+  it('actualiza On Site al editar desde Onsite (Escribir ideas ya no existe)', async () => {
     await updateOnsiteIdea({ ideaId: 'i1', hook: 'Nuevo texto' })
-    expect(revalidatePath).toHaveBeenCalledWith('/escribir-ideas')
+    expect(revalidatePath).toHaveBeenCalledWith('/onsite')
+    expect(revalidatePath).not.toHaveBeenCalledWith('/escribir-ideas')
   })
   it('mantiene el permiso de lectura', async () => {
     state.denied = true

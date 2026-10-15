@@ -4,6 +4,7 @@ import { SettingsTabs } from '@/components/settings/settings-tabs'
 import { WorkflowSettingsForm } from '@/components/settings/workflow-settings-form'
 import { PipelineStepAssigneesForm } from '@/components/settings/pipeline-step-assignees-form'
 import { getCurrentRole } from '@/lib/auth/server'
+import { LANDING_PATH } from '@/lib/auth/areas'
 import { getWorkflowSettings } from '@/lib/utils/workflow-progress'
 import { createClient } from '@/lib/supabase/server'
 
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function WorkflowSettingsPage() {
   const role = await getCurrentRole()
-  if (role !== 'owner') redirect('/home')
+  if (role !== 'owner') redirect(LANDING_PATH)
 
   const settings = await getWorkflowSettings()
   const supabase = await createClient()

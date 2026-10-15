@@ -170,7 +170,6 @@ export async function adoptInferredCadence(clientId: string, days: number[]): Pr
   if (error) return { error: error.message }
   revalidatePath(`/clients/${clientId}`)
   revalidatePath('/clients/cadence')
-  revalidatePath('/home')
   return { ok: true }
 }
 
@@ -261,7 +260,6 @@ export async function applyInferredProfileToAll(): Promise<AutoApplyResult[]> {
 
   revalidatePath('/clients')
   revalidatePath('/clients/cadence')
-  revalidatePath('/home')
   return out
 }
 

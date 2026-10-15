@@ -77,7 +77,6 @@ export async function convertRequestToTask(
     .eq('id', requestId)
 
   revalidatePath('/operations')
-  revalidatePath('/home')
 
   return { taskId: task.id }
 }

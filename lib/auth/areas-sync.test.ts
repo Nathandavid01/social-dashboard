@@ -24,7 +24,6 @@ const DASHBOARD_DIR = join(process.cwd(), 'app', '(dashboard)')
  */
 const NON_AREA_ROUTES = new Set<string>([
   '/mi-dia',     // the landing: a person's OWN work — nothing to authorize
-  '/home',       // mandatory landing
   '/changelog',  // release notes, everyone
   '/account',    // personal account (e.g. /account/security)
   '/subir-video', // redirect to /primer-round — not a product area, not in nav

@@ -71,6 +71,6 @@ export async function POST(req: NextRequest) {
     }
   }
   if (!confirmed) warning = [warning, 'Metricool aceptó el cambio, pero todavía no se pudo verificar. Actualiza el calendario antes de repetir la acción.'].filter(Boolean).join(' ')
-  try { for (const path of ['/home', '/published', '/calendar', '/pool', '/recibo', '/produccion']) revalidatePath(path) } catch { /* Response remains truthful even if route invalidation is unavailable. */ }
+  try { for (const path of ['/mi-dia', '/published', '/calendar', '/pool', '/recibo', '/produccion']) revalidatePath(path) } catch { /* Response remains truthful even if route invalidation is unavailable. */ }
   return json({ ok: true, confirmed, postId, uuid, action: input.action, ...(warning ? { warning } : {}) })
 }
