@@ -4,6 +4,17 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.134 — 2026-10-14
+
+**«Inicio» y «Escribir ideas» ya no están en el dashboard: todo arranca en Mi día.**
+- El menú ya no muestra «Inicio» ni «Escribir ideas».
+- Si abres un enlace viejo a `/home` o `/escribir-ideas`, sale la página de «no existe».
+- Cuando una página no te deja entrar, o al salir de «Ver como», caes en Mi día en vez de Inicio.
+- La app instalada (PWA) y la pantalla sin conexión abren en Mi día.
+- Para escribir ideas sigue el Lab de Ideas; las de On Site se siguen editando en On Site.
+
+[Ver el menú antes y después](/previews/v5.134-sin-inicio.html)
+
 ## v5.132 — 2026-10-13
 
 **Recibo muestra tus videos en tarjetas verticales, con miniaturas y filtros.**

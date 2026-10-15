@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { AlertOctagon, Home, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LANDING_PATH } from '@/lib/auth/areas'
 
 interface Props {
   error: Error & { digest?: string }
@@ -44,8 +45,8 @@ export default function DashboardError({ error, reset }: Props) {
             </Button>
           )}
           <Button asChild variant="outline" size="sm">
-            <Link href="/home">
-              <Home className="mr-1.5 h-3.5 w-3.5" /> Volver al inicio
+            <Link href={LANDING_PATH}>
+              <Home className="mr-1.5 h-3.5 w-3.5" /> Ir a Mi día
             </Link>
           </Button>
         </div>

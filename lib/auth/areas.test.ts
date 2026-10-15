@@ -25,8 +25,12 @@ describe('AREAS catalogue', () => {
     expect(AREAS.find((a) => a.href === '/home')).toBeUndefined()
   })
 
+  // Contrato cambiado por Eric 2026-10-14: se quitaron /home (Inicio) y /escribir-ideas. El aterrizaje es /mi-dia.
   it('always allows the essential landing/changelog/pending prefixes', () => {
-    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/home')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/mi-dia')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/changelog')
+    expect(ALWAYS_ALLOWED_PREFIXES).toContain('/pending')
+    expect(ALWAYS_ALLOWED_PREFIXES).not.toContain('/home')
   })
 })
 

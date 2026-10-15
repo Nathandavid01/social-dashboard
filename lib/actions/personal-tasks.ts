@@ -7,7 +7,7 @@ import {readCompletePages} from '@/lib/utils/read-complete-pages'
 const assignment=z.object({id:z.string().uuid(),title:z.string().trim().min(1).max(200),description:z.string().trim().max(1000),assignee_id:z.string().uuid(),due_at:z.string().datetime({offset:true}),priority:z.number().int().min(1).max(3)})
 export interface PersonalTask {id:string;title:string;description:string|null;assignee_id:string|null;due_at:string|null;priority:number;status:string}
 export interface TaskPerson {id:string;full_name:string|null}
-function refresh(){for(const path of ['/account/profile','/mi-dia','/team','/operations','/home'])revalidatePath(path)}
+function refresh(){for(const path of ['/account/profile','/mi-dia','/team','/operations'])revalidatePath(path)}
 export async function getPersonalTasks():Promise<{tasks:PersonalTask[];people:TaskPerson[];canAssign:boolean;userId:string;error?:string}>{
  try{
   const db=await createClient();const {data:{user}}=await db.auth.getUser()

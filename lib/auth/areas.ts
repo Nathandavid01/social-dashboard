@@ -49,11 +49,10 @@ export const NAV_GROUPS = [
 
 export type NavGroup = (typeof NAV_GROUPS)[number]
 
-/** Restricted areas. `/mi-dia` and `/home` are intentionally excluded — everyone
+/** Restricted areas. `/mi-dia` is intentionally excluded — everyone
  * lands there and `/mi-dia` only ever shows a person their OWN work. */
 export const AREAS: Area[] = [
   // ── 1. Ideas: primer paso del proceso ──
-  { href: '/escribir-ideas',     label: 'Escribir ideas',  permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/idea-lab',           label: 'Lab de Ideas',    permission: 'ideas.edit',         group: 'Marketing' },
   { href: '/ideas-aprobadas',    label: 'Ideas Aprobadas', permission: 'ideas.read',         group: 'Marketing' },
   // Artes con IA (Grok Imagine) usando los colores y voz de marca del cliente.
@@ -113,7 +112,7 @@ export const AREAS: Area[] = [
   // where the Metricool credentials get seeded into the browser's localStorage,
   // and /schedule-check + /published read them from there. Owner-only would trap
   // every supervisor on a fresh browser in a loop — Verificación says "ve a
-  // Metricool" and Metricool bounces them to /home.
+  // Metricool" and Metricool bounces them to Mi día.
   { href: '/settings/metricool', label: 'Metricool',       permission: 'metricool.read',     group: 'Equipo' },
   // Reached via deep links (notifications, home cards, command palette), not the
   // sidebar — gated and manageable all the same. No permission = open by role
@@ -125,7 +124,13 @@ export const AREAS: Area[] = [
 ]
 
 /** Prefixes every authenticated user can always reach, never restrictable. */
-export const ALWAYS_ALLOWED_PREFIXES = ['/mi-dia', '/home', '/changelog', '/pending']
+export const ALWAYS_ALLOWED_PREFIXES = ['/mi-dia', '/changelog', '/pending']
+
+/**
+ * Where everyone lands and where every "you can't be here" bounces to.
+ * Eric 2026-10-14: «Inicio» (/home) was removed; /mi-dia took its place.
+ */
+export const LANDING_PATH = '/mi-dia'
 
 function matchesPrefix(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + '/')

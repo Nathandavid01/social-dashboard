@@ -46,7 +46,6 @@ export async function createTask(values: TaskFormValues, collaboratorIds?: strin
   }
 
   revalidatePath('/operations')
-  revalidatePath('/home')
   return { success: true }
 }
 
@@ -63,7 +62,6 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>, co
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
-  revalidatePath('/home')
   return { success: true }
 }
 
@@ -77,7 +75,6 @@ export async function updateTaskStatus(id: string, status: string) {
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
-  revalidatePath('/home')
   return { success: true }
 }
 
@@ -88,7 +85,6 @@ export async function deleteTask(id: string) {
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
-  revalidatePath('/home')
   return { success: true }
 }
 
@@ -114,6 +110,5 @@ export async function duplicateTask(id: string) {
 
   if (error) return { error: error.message }
   revalidatePath('/operations')
-  revalidatePath('/home')
   return { success: true }
 }
