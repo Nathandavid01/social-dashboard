@@ -89,6 +89,8 @@ export const AREAS: Area[] = [
   // ── Clientes ──
   { href: '/clients',            label: 'Clientes',        permission: 'clients.read',       group: 'Clientes' },
   { href: '/clients/cadence',    label: 'Cadencia',        permission: 'clients.read',       group: 'Clientes' },
+  // Qué clientes tienen grabaciones por editar y cuántos videos editados les quedan.
+  { href: '/inventario',         label: 'Inventario',      permission: 'video_stock.read',   group: 'Clientes' },
   // Reparto de la cartera a editor y diseñador, todos en una pantalla.
   { href: '/clients/asignaciones', label: 'Asignaciones',  permission: 'clients.edit',       group: 'Clientes' },
   // Was ungated: any role could reach it. It shows every client's schedule, so it
