@@ -4,6 +4,19 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.133 — 2026-10-14
+
+**Nuevo: Inventario de video — de un vistazo, qué clientes tienen grabaciones y cuántos videos les quedan.**
+- Una vista 3D animada: cada cliente es una columna. Lo dorado son los videos editados que le quedan; lo de cristal, las grabaciones en crudo esperando edición; el aro azul marca a quien tiene grabaciones; la base dice cuánto le alcanza (rojo = sin videos, verde = 2+ semanas).
+- Al frente salen los más urgentes. Gira la escena arrastrando y toca un cliente (o una fila de la lista) para acercarte.
+- Cada cliente dice cuántos días de contenido tiene según su cadencia y qué día se le acaba, y se marca «Hay que grabar» cuando lo editado más lo grabado no cubre dos semanas.
+- Filtros: Hay que grabar, Con grabaciones y Sin cadencia. Los videos que ya se publicaron o se agendaron en Metricool no cuentan como pendientes.
+- Solo cuenta lo que está subido al sistema. Lo que vive únicamente en Drive todavía no sale, y la página lo dice.
+
+[Ver diseño del Inventario](/previews/v5.133-inventario-video.html)
+
+![Inventario de video en 3D](/changelog/v5.133-inventario-video.png)
+
 ## v5.132 — 2026-10-13
 
 **Recibo muestra tus videos en tarjetas verticales, con miniaturas y filtros.**

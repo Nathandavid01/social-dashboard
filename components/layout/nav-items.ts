@@ -29,6 +29,7 @@ import {
   PenLine,
   Palette,
   Mic2,
+  Boxes,
   type LucideIcon,
 } from 'lucide-react'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
@@ -77,6 +78,7 @@ const ICON_BY_HREF: Record<string, LucideIcon> = {
   '/onsite': ClipboardList,
   '/clients': Users,
   '/clients/cadence': CalendarClock,
+  '/inventario': Boxes,
   '/clients/asignaciones': UserSquare2,
   '/calendar': Calendar,
   '/performance': BarChart3,
