@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Reglas globales de edición de video
+
+Para todos los clientes y el video pipeline: [GLOBAL_VIDEO_RULES.md](GLOBAL_VIDEO_RULES.md). Incluye encuadre, zona de ojos, subtítulos, zooms por corte y transiciones; la marca de cada cliente se conserva por separado.
+
 ## Getting Started
 
 First, run the development server:

@@ -1,5 +1,9 @@
 # Nate Media — Social Dashboard
 
+## Reglas globales de edición de video
+
+Antes de editar o revisar videos para cualquier cliente, leer [GLOBAL_VIDEO_RULES.md](GLOBAL_VIDEO_RULES.md). Rige en todo el repositorio y en el video pipeline; no convertir tipografía, colores, hooks u outros de un cliente en reglas universales.
+
 Next.js 14 (App Router) · Supabase (auth + Postgres + Storage + Realtime) · Anthropic SDK · Radix/shadcn + Tailwind.
 
 ## Mandatory: TDD for ALL work
