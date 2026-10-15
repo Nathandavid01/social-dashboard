@@ -1,15 +1,18 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, Clapperboard, Film, Info, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClientStock, VideoStock } from '@/lib/inventario/video-stock-core'
 import { OK_DAYS } from '@/lib/inventario/video-stock-core'
 import { VideoStockSceneLazy } from './video-stock-scene-lazy'
+import { ClientLogo } from './client-logo'
+import { ClientProfilePanel } from './client-profile-panel'
+import { getClientStockDetail } from '@/lib/actions/video-stock-detail'
+import type { ClientStockDetail } from '@/lib/inventario/client-detail-types'
 import {
   GOLD_HEX,
   HEALTH_META,
-  HEALTH_ORDER,
   RAW_HEX,
   daysLeftLabel,
   lastRawLabel,
@@ -101,9 +104,10 @@ function StockRow({
       )}
       style={{ animationDelay: `${Math.min(index, 20) * 25}ms` }}
     >
-      <div className="min-w-0">
+      <div className="flex min-w-0 items-center gap-3">
+        <ClientLogo key={client.logoUrl ?? 'none'} name={client.clientName} src={client.logoUrl} ringHex={meta.hex} />
+        <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: meta.hex }} aria-hidden />
           <span className="min-w-0 truncate font-medium">{client.clientName}</span>
           {client.necesitaGrabar && (
             <span className="shrink-0 whitespace-nowrap rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-red-500 dark:text-red-400">
@@ -117,13 +121,16 @@ function StockRow({
           {lastRaw && <> · {lastRaw}</>}
           {client.sinArchivo > 0 && <> · {client.sinArchivo} grabados sin archivo</>}
         </div>
+        </div>
       </div>
 
       <div className="text-right sm:text-center">
         <div data-testid="row-listos" className="text-lg font-bold tabular-nums" style={{ color: GOLD_HEX }}>
           {client.listos}
         </div>
-        <div className="text-[11px] text-muted-foreground">listos</div>
+        <div data-testid="row-split" className="whitespace-nowrap text-[11px] text-muted-foreground">
+          {client.reels} {client.reels === 1 ? 'reel' : 'reels'} · {client.posts} {client.posts === 1 ? 'post' : 'posts'}
+        </div>
       </div>
       <div className="hidden text-center sm:block">
         <div data-testid="row-crudo" className="text-lg font-bold tabular-nums" style={{ color: RAW_HEX }}>
@@ -138,7 +145,10 @@ function StockRow({
 
       <div className="col-span-2 min-w-0 space-y-1.5 sm:col-span-1">
         <div className="flex items-center justify-between gap-2 text-xs">
-          <span className={cn('min-w-0 truncate font-medium', meta.text)}>{runOutLabel(client.runOutDate, today)}</span>
+          <span className={cn('min-w-0 truncate font-medium', meta.text)}>
+            {runOutLabel(client.runOutDate, today)}
+            {client.runOutFormat && ` · falta ${client.runOutFormat}`}
+          </span>
           {/* Phones hide the crudo column — keep the number reachable here. */}
           <span className="shrink-0 whitespace-nowrap text-muted-foreground sm:hidden">
             <span style={{ color: RAW_HEX }}>{client.crudo}</span> en crudo · {daysLeftLabel(client)}
@@ -150,10 +160,44 @@ function StockRow({
   )
 }
 
-export function VideoStockView({ stock }: { stock: VideoStock }) {
+type DetailLoader = (clientId: string) => Promise<{ detail: ClientStockDetail } | { error: string }>
+
+export function VideoStockView({
+  stock,
+  loadDetail = getClientStockDetail,
+}: {
+  stock: VideoStock
+  /** Injected for previews; the page uses the server action. */
+  loadDetail?: DetailLoader
+}) {
   const [filter, setFilter] = useState<Filter>('todos')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const stageRef = useRef<HTMLDivElement>(null)
+  // Profiles already fetched this visit, so going back and forth is instant.
+  const [details, setDetails] = useState<Record<string, ClientStockDetail>>({})
+  const [detailError, setDetailError] = useState<string | null>(null)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!selectedId || details[selectedId]) return
+    let cancelled = false
+    setLoadingId(selectedId)
+    setDetailError(null)
+    loadDetail(selectedId)
+      .then((res) => {
+        if (cancelled) return
+        if ('detail' in res) setDetails((cur) => ({ ...cur, [selectedId]: res.detail }))
+        else setDetailError(res.error)
+      })
+      .catch(() => !cancelled && setDetailError('error de red'))
+      .finally(() => !cancelled && setLoadingId(null))
+    return () => {
+      cancelled = true
+    }
+  }, [selectedId, details, loadDetail])
+
+  const selected = selectedId ? stock.clients.find((c) => c.clientId === selectedId) ?? null : null
+  const selectedDetail = selectedId ? details[selectedId] ?? null : null
   const { totals, today } = stock
 
   const visible = useMemo(() => {
@@ -175,34 +219,84 @@ export function VideoStockView({ stock }: { stock: VideoStock }) {
         <Kpi testId="kpi-grabar" label="Hay que grabar" value={totals.necesitanGrabar} hint="Listos + crudo < 2 semanas" icon={Camera} accent={HEALTH_META.agotado.hex} delay={180} />
       </div>
 
+      <div role="group" aria-label="Filtros" className="flex flex-wrap gap-2">
+        {FILTERS.map((f) => {
+          const count = stock.clients.filter(f.match).length
+          const active = filter === f.key
+          return (
+            <button
+              key={f.key}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setFilter(f.key)}
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                active ? 'border-primary bg-primary text-primary-foreground' : 'hover:border-primary/50',
+              )}
+            >
+              {f.label} <span className="tabular-nums opacity-70">{count}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="relative">
       <div
         ref={stageRef}
-        className="relative h-[380px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707] shadow-[0_0_80px_-30px_rgba(230,175,35,0.35)] sm:h-[520px]"
+        className="relative h-[460px] overflow-hidden rounded-2xl border border-white/10 bg-[#070707] shadow-[0_0_80px_-30px_rgba(230,175,35,0.35)] sm:h-[640px]"
       >
-        <VideoStockSceneLazy clients={stock.clients} today={today} selectedId={selectedId} onSelect={setSelectedId} />
+        <VideoStockSceneLazy
+          clients={visible}
+          today={today}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          calendar={selectedDetail?.calendar ?? null}
+        />
 
         <div className="pointer-events-none absolute left-3 top-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[11px] text-white/70 backdrop-blur">
-          Al frente, los más urgentes · arrastra para girar · toca un cliente
+          Al frente, los más urgentes · toca un logo para ver el detalle
         </div>
 
-        <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg bg-black/60 px-3 py-2 text-[11px] text-white/80 backdrop-blur sm:right-auto">
+        <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg bg-black/65 px-3 py-2 text-[11px] text-white/85 backdrop-blur sm:right-auto">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: GOLD_HEX }} /> Listos
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm border" style={{ borderColor: RAW_HEX, backgroundColor: `${RAW_HEX}40` }} /> En crudo
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: RAW_HEX }} /> Tiene grabaciones
-          </span>
-          <span className="hidden h-3 w-px bg-white/20 sm:block" />
-          {HEALTH_ORDER.map((h) => (
-            <span key={h} className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: HEALTH_META[h].hex }} />
-              {HEALTH_META[h].label}
+            <span
+              className="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-extrabold text-black"
+              style={{ backgroundColor: GOLD_HEX }}
+            >
+              8
             </span>
-          ))}
+            Videos listos
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-extrabold text-[#0b1a2e]"
+              style={{ backgroundColor: RAW_HEX }}
+            >
+              +3
+            </span>
+            Clips en crudo
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2" style={{ borderColor: RAW_HEX }} /> Tiene grabaciones
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2" style={{ borderColor: HEALTH_META.agotado.hex }} /> Aro = cuánto le alcanza
+          </span>
         </div>
+      </div>
+
+      {selected && (
+        <div className="mt-3 max-h-[600px] md:absolute md:bottom-3 md:right-3 md:top-3 md:mt-0 md:max-h-none md:w-[360px]">
+          <ClientProfilePanel
+            client={selected}
+            today={today}
+            detail={selectedDetail}
+            loading={loadingId === selected.clientId && !selectedDetail}
+            error={selectedDetail ? null : detailError}
+            onClose={() => setSelectedId(null)}
+          />
+        </div>
+      )}
       </div>
 
       <p className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-xs text-muted-foreground">
@@ -219,26 +313,6 @@ export function VideoStockView({ stock }: { stock: VideoStock }) {
       </p>
 
       <div className="space-y-3">
-        <div role="group" aria-label="Filtros" className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => {
-            const count = stock.clients.filter(f.match).length
-            const active = filter === f.key
-            return (
-              <button
-                key={f.key}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setFilter(f.key)}
-                className={cn(
-                  'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                  active ? 'border-primary bg-primary text-primary-foreground' : 'hover:border-primary/50',
-                )}
-              >
-                {f.label} <span className="tabular-nums opacity-70">{count}</span>
-              </button>
-            )
-          })}
-        </div>
 
         {visible.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">

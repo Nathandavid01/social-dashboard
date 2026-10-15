@@ -20,6 +20,7 @@
  */
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import { addDaysISO } from '@/lib/utils/deadlines'
+import { ideaFormat, type Format } from './cadence-formats'
 
 export type StockStage = 'salio' | 'agendado' | 'listo' | 'crudo' | 'sin_archivo' | 'por_grabar'
 
@@ -39,6 +40,8 @@ export interface StockIdea {
   manual_posted_status?: string | null
   metricool_post_id?: number | null
   posted_at?: string | null
+  /** R = reel, P = post, C = carrusel, S = story. */
+  content_type?: string | null
   /** Planned publish day "YYYY-MM-DD" — for a scheduled cut, the day it goes out. */
   publish_date?: string | null
   videos?: StockVideo[] | null
@@ -49,14 +52,22 @@ export interface StockClient {
   name: string
   /** JS weekdays 0=Sun..6=Sat (clients.posting_days). */
   posting_days: number[] | null
+  /** Same-origin logo URL (the loader routes it through /api/img-proxy). */
+  logoUrl?: string | null
+  /** Format each posting day takes (JS weekday → reel/post/story, null = either). */
+  formats?: Partial<Record<number, Format | null>>
 }
 
 export interface ClientStock {
   clientId: string
   clientName: string
+  logoUrl: string | null
   /** Posts per week from the cadence; 0 = no cadence set. */
   perWeek: number
   listos: number
+  /** Ready reels / ready feed posts (incl. carrusel and story) — listos split. */
+  reels: number
+  posts: number
   /** Scheduled in Metricool for today or later. */
   agendados: number
   crudo: number
@@ -66,10 +77,12 @@ export interface ClientStock {
   salieron: number
   /** Most recent raw/b-roll upload (ISO timestamp) or null. */
   lastRawAt: string | null
-  /** Days of content (listos + agendados) at the cadence; null without cadence. */
+  /** Days from today until runOutDate (listos + agendados, format-matched); null without cadence. */
   daysLeft: number | null
   /** First posting day with no edited video ("YYYY-MM-DD"); null without cadence. */
   runOutDate: string | null
+  /** Format that posting day needed (what runs out first); null = either. */
+  runOutFormat: Format | null
   health: StockHealth
   /** Edited + raw cover less than RECORD_AHEAD_WEEKS — time to book a shoot. */
   necesitaGrabar: boolean
@@ -157,6 +170,38 @@ export function runOutDate(
   return null
 }
 
+function dayDiff(from: string, to: string): number {
+  const [ay, am, ad] = from.split('-').map(Number)
+  const [by, bm, bd] = to.split('-').map(Number)
+  return Math.round((Date.UTC(by, bm - 1, bd) - Date.UTC(ay, am - 1, ad)) / 86_400_000)
+}
+
+/**
+ * Format-aware walk: each posting day spends one video of the format it takes
+ * (a reel day needs a reel; a post day needs a post). A day with no known
+ * format takes a reel first, then a post. Stops at the first uncovered day.
+ */
+export function runOutTyped(
+  postingDays: number[] | null | undefined,
+  formats: Partial<Record<number, Format | null>> | undefined,
+  stock: { reel: number; post: number },
+  today: string,
+): { date: string; format: Format | null } | null {
+  const days = cadenceDays(postingDays)
+  if (days.size === 0) return null
+  const left = { reel: Math.max(0, stock.reel), post: Math.max(0, stock.post) }
+  for (let i = 0; i < 400 + (left.reel + left.post) * 7; i++) {
+    const date = addDaysISO(today, i)
+    const wd = weekdayOf(date)
+    if (!days.has(wd)) continue
+    const f = formats?.[wd] ?? null
+    const bucket = f === 'reel' ? 'reel' : f ? 'post' : left.reel > 0 ? 'reel' : 'post'
+    if (left[bucket] === 0) return { date, format: f }
+    left[bucket]--
+  }
+  return null
+}
+
 function healthFor(perWeek: number, listos: number, daysLeft: number | null): StockHealth {
   if (perWeek === 0 || daysLeft === null) return 'sin_cadencia'
   if (listos === 0) return 'agotado'
@@ -176,11 +221,18 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
 
   const rows: ClientStock[] = clients.map((client) => {
     const counts = { listo: 0, agendado: 0, crudo: 0, sin_archivo: 0, por_grabar: 0, salio: 0 }
+    const ready = { reel: 0, post: 0 }
+    const covering = { reel: 0, post: 0 }
     let lastRawAt: string | null = null
     for (const idea of byClient.get(client.id) ?? []) {
       const stage = classifyStockIdea(idea, today)
       if (!stage) continue
       counts[stage]++
+      if (stage === 'listo' || stage === 'agendado') {
+        const bucket = ideaFormat(idea.content_type) === 'reel' ? 'reel' : 'post'
+        covering[bucket]++
+        if (stage === 'listo') ready[bucket]++
+      }
       for (const v of idea.videos ?? []) {
         if (!usable(v) || !isRawKind(v.kind) || !v.uploaded_at) continue
         if (!lastRawAt || v.uploaded_at > lastRawAt) lastRawAt = v.uploaded_at
@@ -190,14 +242,18 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
     const perWeek = cadenceDays(client.posting_days).size
     // Scheduled cuts fill upcoming posting days just like unscheduled ones.
     const covered = counts.listo + counts.agendado
-    const daysLeft = perWeek > 0 ? Math.round((covered / perWeek) * 7 * 10) / 10 : null
+    const runOut = runOutTyped(client.posting_days, client.formats, covering, today)
+    const daysLeft = perWeek > 0 && runOut ? Math.max(0, dayDiff(today, runOut.date)) : null
     const necesitaGrabar = perWeek > 0 && (covered + counts.crudo) / perWeek < RECORD_AHEAD_WEEKS
 
     return {
       clientId: client.id,
       clientName: client.name,
+      logoUrl: client.logoUrl ?? null,
       perWeek,
       listos: counts.listo,
+      reels: ready.reel,
+      posts: ready.post,
       agendados: counts.agendado,
       crudo: counts.crudo,
       sinArchivo: counts.sin_archivo,
@@ -205,17 +261,18 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
       salieron: counts.salio,
       lastRawAt,
       daysLeft,
-      runOutDate: runOutDate(client.posting_days, covered, today),
+      runOutDate: runOut?.date ?? null,
+      runOutFormat: runOut?.format ?? null,
       health: healthFor(perWeek, covered, daysLeft),
       necesitaGrabar,
     }
   })
 
+  // Same order as the 3D tiers: status first, then who runs out soonest.
+  const rank: Record<StockHealth, number> = { agotado: 0, critico: 1, bajo: 2, ok: 3, sin_cadencia: 4 }
   rows.sort((a, b) => {
-    if (a.daysLeft === null && b.daysLeft === null) return a.clientName.localeCompare(b.clientName)
-    if (a.daysLeft === null) return 1
-    if (b.daysLeft === null) return -1
-    if (a.daysLeft !== b.daysLeft) return a.daysLeft - b.daysLeft
+    if (rank[a.health] !== rank[b.health]) return rank[a.health] - rank[b.health]
+    if (a.daysLeft !== null && b.daysLeft !== null && a.daysLeft !== b.daysLeft) return a.daysLeft - b.daysLeft
     // Same runway: the one with less raw footage behind it is worse off.
     if (a.crudo !== b.crudo) return a.crudo - b.crudo
     return a.clientName.localeCompare(b.clientName)

@@ -131,11 +131,15 @@ describe('buildVideoStock', () => {
   })
 
   it('turns videos left into days of content and the run-out date', () => {
-    // 1 listo at 3/week → 2.3 days; runs out Fri 16 (Wed 14 covered).
-    expect(byId.c1.daysLeft).toBeCloseTo(2.3, 1)
+    // daysLeft = days until the run-out date (contract changed in this PR,
+    // 2026-10-14, Eric asked for reels vs posts per cadence day: an average
+    // count/perWeek can't express "the reels last but the posts don't").
+    // 1 listo, Mon/Wed/Fri, today Wed 14 → Wed covered, runs out Fri 16.
     expect(byId.c1.runOutDate).toBe('2026-10-16')
-    // 6 listos at 2/week → 21 days.
-    expect(byId.c2.daysLeft).toBe(21)
+    expect(byId.c1.daysLeft).toBe(2)
+    // 6 listos, Tue/Fri → covers through Tue Nov 3, runs out Fri Nov 6.
+    expect(byId.c2.runOutDate).toBe('2026-11-06')
+    expect(byId.c2.daysLeft).toBe(23)
   })
 
   it('rates health by days of edited content (videos que le quedan)', () => {
@@ -212,3 +216,53 @@ describe('scheduled posts still cover the cadence (review #248)', () => {
   })
 })
 
+
+describe('client logo', () => {
+  it('passes the logo url through, null when the client has none', () => {
+    const stock = buildVideoStock(
+      [
+        { id: 'a', name: 'Con logo', posting_days: [1], logoUrl: '/api/img-proxy?u=x' },
+        { id: 'b', name: 'Sin logo', posting_days: [1] },
+      ],
+      [],
+      '2026-10-14',
+    )
+    const byId = Object.fromEntries(stock.clients.map((c) => [c.clientId, c]))
+    expect(byId.a.logoUrl).toBe('/api/img-proxy?u=x')
+    expect(byId.b.logoUrl).toBeNull()
+  })
+})
+
+describe('reels vs posts per cadence day', () => {
+  const today = '2026-10-14' // Wednesday
+  const reel = (id: string): StockIdea => ({ id, client_id: 'c', status: 'producida', content_type: 'R', videos: [{ kind: 'edited', status: 'uploaded' }] })
+  const post = (id: string): StockIdea => ({ id, client_id: 'c', status: 'producida', content_type: 'P', videos: [{ kind: 'edited', status: 'uploaded' }] })
+  // Mon reel · Wed post · Fri reel
+  const client: StockClient = { id: 'c', name: 'Mixto', posting_days: [1, 3, 5], formats: { 1: 'reel', 3: 'post', 5: 'reel' } }
+
+  it('splits the ready videos into reels and posts', () => {
+    const [row] = buildVideoStock([client], [reel('r1'), reel('r2'), post('p1')], today).clients
+    expect(row).toMatchObject({ listos: 3, reels: 2, posts: 1 })
+  })
+
+  it('a reel cannot cover a post day: plenty of reels, no post → runs out today (Wed = post)', () => {
+    const [row] = buildVideoStock([client], [reel('r1'), reel('r2'), reel('r3'), reel('r4')], today).clients
+    expect(row.runOutDate).toBe('2026-10-14')
+    expect(row.runOutFormat).toBe('post')
+    expect(row.daysLeft).toBe(0)
+  })
+
+  it('matching formats walk the cadence day by day', () => {
+    // Wed post ✓, Fri reel ✓, Mon reel ✓, Wed 21 post ✗
+    const [row] = buildVideoStock([client], [post('p1'), reel('r1'), reel('r2'), reel('r3')], today).clients
+    expect(row.runOutDate).toBe('2026-10-21')
+    expect(row.runOutFormat).toBe('post')
+  })
+
+  it('a day with no known format takes whatever is ready', () => {
+    const open: StockClient = { id: 'c', name: 'Abierto', posting_days: [3, 5] }
+    const [row] = buildVideoStock([open], [post('p1'), reel('r1')], today).clients
+    expect(row.runOutDate).toBe('2026-10-21')
+    expect(row.runOutFormat).toBeNull()
+  })
+})

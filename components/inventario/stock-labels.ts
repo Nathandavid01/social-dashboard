@@ -55,3 +55,30 @@ export function daysLeftLabel(c: Pick<ClientStock, 'daysLeft'>): string {
 export function videosLabel(n: number): string {
   return n === 1 ? '1 video' : `${n} videos`
 }
+
+/** "lun 19 oct" */
+export function shortDateLabel(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${d} ${MONTHS[m - 1]}`
+}
+
+const CADENCE_ORDER = [1, 2, 3, 4, 5, 6, 0]
+const DAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+
+/** "Lun · Mié · Vie · 6:00 p. m." — the client's posting cadence. */
+export function cadenceLabel(days: number[], time: string | null): string {
+  const set = new Set(days)
+  const parts = CADENCE_ORDER.filter((d) => set.has(d)).map((d) => DAY_SHORT[d])
+  if (parts.length === 0) return 'Sin cadencia'
+  const t = timeLabel(time)
+  if (t) parts.push(t)
+  return parts.join(' · ')
+}
+
+/** "18:00:00" → "6:00 p. m."; null when it is not a time. */
+export function timeLabel(time: string | null | undefined): string | null {
+  const m = time?.match(/^(\d{1,2}):(\d{2})/)
+  if (!m) return null
+  const h = Number(m[1])
+  return `${h % 12 === 0 ? 12 : h % 12}:${m[2]} ${h < 12 ? 'a. m.' : 'p. m.'}`
+}

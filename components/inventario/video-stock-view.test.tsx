@@ -13,6 +13,22 @@ vi.mock('./video-stock-scene-lazy', () => ({
   },
 }))
 
+const detailCall = vi.fn()
+vi.mock('@/lib/actions/video-stock-detail', () => ({
+  getClientStockDetail: async (id: string) => {
+    detailCall(id)
+    return {
+      detail: {
+        profile: { id, name: 'Apiario Coffee', logoUrl: null, postingDays: [2, 5], postingTime: null, editorName: null, formats: { 2: 'reel', 5: 'post' } },
+        calendar: [],
+        upcoming: [{ id: 'p1', title: 'Reel de abejas', stage: 'agendado', format: 'reel', date: '2026-10-16', coverVideoId: null, coverUrl: null }],
+        recent: [],
+        crudo: 0,
+      },
+    }
+  },
+}))
+
 import { VideoStockView } from './video-stock-view'
 
 const edited = { kind: 'edited', status: 'uploaded', uploaded_at: '2026-10-09T12:00:00Z' }
@@ -33,7 +49,7 @@ function stock() {
   return buildVideoStock(
     [
       { id: 'guira', name: 'La Guira', posting_days: [1, 3, 5] },
-      { id: 'apiario', name: 'Apiario Coffee', posting_days: [2, 5] },
+      { id: 'apiario', name: 'Apiario Coffee', posting_days: [2, 5], logoUrl: '/api/img-proxy?u=apiario' },
       { id: 'lenel', name: 'Lenel', posting_days: [] },
     ],
     ideas,
@@ -61,6 +77,12 @@ describe('VideoStockView', () => {
     expect(guira.getByTestId('row-crudo')).toHaveTextContent('2')
   })
 
+  it('splits the ready videos into reels and posts on each row', () => {
+    render(<VideoStockView stock={stock()} />)
+    const apiario = screen.getAllByTestId('stock-row')[1]
+    expect(within(apiario).getByTestId('row-split')).toHaveTextContent('6 reels · 0 posts')
+  })
+
   it('says where the numbers come from (only footage uploaded to the system)', () => {
     render(<VideoStockView stock={stock()} />)
     expect(screen.getByText(/Solo cuenta lo que está subido al sistema/i)).toBeInTheDocument()
@@ -82,6 +104,32 @@ describe('VideoStockView', () => {
     render(<VideoStockView stock={stock()} />)
     fireEvent.click(screen.getAllByTestId('stock-row')[1])
     expect(screen.getByTestId('scene')).toHaveAttribute('data-selected', 'apiario')
+  })
+
+  it('each row shows the client logo, or the initials when there is none', () => {
+    render(<VideoStockView stock={stock()} />)
+    const [guira, apiario] = screen.getAllByTestId('stock-row')
+    expect(within(apiario).getByRole('img', { name: 'Logo de Apiario Coffee' })).toHaveAttribute('src', '/api/img-proxy?u=apiario')
+    expect(within(guira).queryByRole('img')).toBeNull()
+    expect(within(guira).getByText('LG')).toBeInTheDocument()
+  })
+
+  it('a logo that fails to load falls back to the initials', () => {
+    render(<VideoStockView stock={stock()} />)
+    const apiario = screen.getAllByTestId('stock-row')[1]
+    fireEvent.error(within(apiario).getByRole('img', { name: 'Logo de Apiario Coffee' }))
+    expect(within(apiario).queryByRole('img')).toBeNull()
+    expect(within(apiario).getByText('AC')).toBeInTheDocument()
+  })
+
+  it('selecting a client opens its profile with the posts on its calendar', async () => {
+    render(<VideoStockView stock={stock()} />)
+    fireEvent.click(screen.getAllByTestId('stock-row')[1])
+    expect(detailCall).toHaveBeenCalledWith('apiario')
+    const panel = await screen.findByRole('complementary', { name: 'Perfil de Apiario Coffee' })
+    expect(await within(panel).findByText('Reel de abejas')).toBeInTheDocument()
+    fireEvent.click(within(panel).getByRole('button', { name: 'Cerrar perfil' }))
+    expect(screen.queryByRole('complementary', { name: 'Perfil de Apiario Coffee' })).toBeNull()
   })
 
   it('shows an honest empty state when a filter leaves nothing', () => {

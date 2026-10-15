@@ -6,16 +6,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 ## v5.133 — 2026-10-14
 
-**Nuevo: Inventario de video — de un vistazo, qué clientes tienen grabaciones y cuántos videos les quedan.**
-- Una vista 3D animada: cada cliente es una columna. Lo dorado son los videos editados que le quedan; lo de cristal, las grabaciones en crudo esperando edición; el aro azul marca a quien tiene grabaciones; la base dice cuánto le alcanza (rojo = sin videos, verde = 2+ semanas).
-- Al frente salen los más urgentes. Gira la escena arrastrando y toca un cliente (o una fila de la lista) para acercarte.
-- Cada cliente dice cuántos días de contenido tiene según su cadencia y qué día se le acaba, y se marca «Hay que grabar» cuando lo editado más lo grabado no cubre dos semanas.
-- Filtros: Hay que grabar, Con grabaciones y Sin cadencia. Lo ya publicado no cuenta; lo agendado en Metricool para hoy o después sí cubre días (sale como «agendados»).
-- Solo cuenta lo que está subido al sistema. Lo que vive únicamente en Drive todavía no sale, y la página lo dice.
+**Nuevo: Inventario de video — un anfiteatro 3D con el logo de cada cliente, cuántos reels y posts le quedan, y su calendario de las próximas 2 semanas.**
+- Cada cliente es un medallón con su logo (o sus iniciales) en gradas curvas por estado: al frente **Sin videos**, luego **Menos de 1 semana**, **1–2 semanas**, **2+ semanas** y **Sin cadencia**, cada grada con su letrero.
+- En el medallón se ve sin tocar nada: el número dorado son los videos listos y el azul (+N) los clips en crudo esperando edición.
+- **Reels y posts por separado:** la cadencia dice qué toca cada día (lunes reel, martes post…) y un reel no cubre un día de post. Si se acaba antes, la fila lo dice: «Se acaba vie 16 oct · falta post».
+- Al tocar un cliente, la cámara vuela hasta él y despliega **su calendario de 14 días en 3D**: qué día es reel o post, qué está agendado, qué video listo saldría y qué días están vacíos. Al lado se abre su **perfil**: cadencia, hora, editor, los números y sus reels y posts (agendados, listos y publicados) con portada.
+- Lo ya publicado no cuenta; lo agendado en Metricool para hoy o después sí cubre días. Solo cuenta lo que está subido al sistema: lo que vive únicamente en Drive todavía no sale, y la página lo dice.
 
 [Ver diseño del Inventario](/previews/v5.133-inventario-video.html)
 
-![Inventario de video en 3D](/changelog/v5.133-inventario-video.png)
+![Inventario de video en 3D](/changelog/v5.133-inventario-video-escena.png)
+
+![Perfil y calendario del cliente](/changelog/v5.133-inventario-perfil.png)
 
 ## v5.132 — 2026-10-13
 
