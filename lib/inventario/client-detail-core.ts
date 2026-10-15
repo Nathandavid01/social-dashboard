@@ -10,8 +10,10 @@
  *   libre      → not a posting day, nothing dated on it
  */
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
-import { addDaysISO } from '@/lib/utils/deadlines'
+import { addDaysISO, todayISOInTimeZone } from '@/lib/utils/deadlines'
+import { POST_TZ } from '@/lib/utils/idea-lab-send-core'
 import { ideaFormat, type Format } from './cadence-formats'
+import type { ScheduledSlot } from './metricool-scheduled-core'
 
 export type DayKind = 'publicado' | 'agendado' | 'proyectado' | 'vacio' | 'libre'
 export type PostStage = 'publicado' | 'agendado' | 'listo'
@@ -91,6 +93,8 @@ export function buildClientDetail(
   postingDays: number[] | null,
   today: string,
   formats?: Partial<Record<number, Format | null>>,
+  /** Pending posts from the Metricool planner, including hand-made ones. */
+  plannerPosts: ScheduledSlot[] = [],
 ): ClientDetail {
   const cadence = new Set((postingDays ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))
   const live = ideas.filter((i) => i.status !== 'descartada')
@@ -103,12 +107,16 @@ export function buildClientDetail(
   for (const idea of live) {
     const cut = editedVideo(idea)
     if (isPublishedIdea(idea)) {
-      const date = (idea.published_at ?? idea.publish_date ?? '').slice(0, 10) || null
+      // published_at is a UTC timestamp; the calendar is Puerto Rico days.
+      const date = idea.published_at
+        ? todayISOInTimeZone(POST_TZ, new Date(idea.published_at))
+        : idea.publish_date?.slice(0, 10) || null
       published.push({ id: idea.id, title: titleOf(idea), stage: 'publicado', format: ideaFormat(idea.content_type), date, coverVideoId: cut?.id ?? null })
     } else if (isAgendadoIdea(idea)) {
       const date = idea.publish_date?.slice(0, 10) || null
-      // Scheduled for a day already gone = it went out; Metricool just never told us.
-      if (date && date < today) {
+      // Scheduled for a day already gone (or with no date) = it went out; the
+      // inventory card counts it the same way.
+      if (!date || date < today) {
         published.push({ id: idea.id, title: titleOf(idea), stage: 'publicado', format: ideaFormat(idea.content_type), date, coverVideoId: cut?.id ?? null })
       } else {
         scheduled.push({ id: idea.id, title: titleOf(idea), stage: 'agendado', format: ideaFormat(idea.content_type), date, coverVideoId: cut?.id ?? null })
@@ -118,6 +126,13 @@ export function buildClientDetail(
     } else if ((idea.videos ?? []).some((v) => usable(v) && (v.kind === 'raw' || v.kind === 'broll'))) {
       crudo++
     }
+  }
+
+  // Planner posts the dashboard doesn't know yet (made by hand in Metricool).
+  const known = new Set(live.map((i) => i.metricool_post_id).filter((id) => id != null).map(Number))
+  for (const slot of plannerPosts) {
+    if (known.has(slot.id)) continue
+    scheduled.push({ id: `mc-${slot.id}`, title: slot.title, stage: 'agendado', format: slot.format, date: slot.date, coverVideoId: null })
   }
 
   // Dated posts own their day.
@@ -138,7 +153,8 @@ export function buildClientDetail(
       const wd = weekdayOf(date)
       if (!cadence.has(wd) || byDate.has(date)) continue
       const f = formatOf(wd)
-      const idx = f === null ? 0 : pool.findIndex((x) => (f === 'reel') === isReel(x))
+      // An open day takes a reel first, like the inventory card's walk.
+      const idx = f === null ? Math.max(0, pool.findIndex(isReel)) : pool.findIndex((x) => (f === 'reel') === isReel(x))
       if (idx < 0) continue
       const [pick] = pool.splice(idx, 1)
       projected.set(date, pick)

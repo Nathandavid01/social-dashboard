@@ -4,6 +4,22 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.136 — 2026-10-14
+
+**Inventario de video: cuenta lo agendado en Metricool, cambias la cadencia ahí mismo y te acercas con la rueda del mouse.**
+- **Lo agendado de verdad:** se lee el planificador de Metricool de cada cliente, incluidos los posts hechos a mano que el dashboard no conocía. Cada post agendado cubre su día en la tarjeta y aparece en el calendario 3D y en el perfil como «Agendado». Se actualiza cada 10 minutos.
+- **La cadencia se edita desde el perfil:** «Editar cadencia» abre los días, si cada día es reel o post y la hora. Al guardar, el inventario se recalcula.
+- La rueda (o pellizcar en el celular) acerca la escena 3D hacia donde apunta el cursor; arrastra para inclinar y usa clic derecho o dos dedos para moverte.
+- «Vista general» te devuelve a todas las gradas. Fuera de la escena, la página sigue bajando normal.
+- Un post publicado de noche ya no aparece al día siguiente en el calendario.
+- El perfil siempre deja espacio para lo publicado recientemente.
+
+[Ver diseño](/previews/v5.136-inventario-zoom.html)
+
+![Zoom en el inventario](/changelog/v5.136-inventario-zoom.png)
+
+![Post agendado a mano en Metricool en el calendario del cliente](/changelog/v5.136-inventario-agendados.png)
+
 ## v5.135 — 2026-10-14
 
 **Nuevo: Inventario de video — un anfiteatro 3D con el logo de cada cliente, cuántos reels y posts le quedan, y su calendario de las próximas 2 semanas.**

@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useHasPermission } from '@/components/auth/role-gate'
+import { ClientCadenceEditor } from '@/components/clients/cadence/client-cadence-editor'
 import { CalendarClock, CheckCircle2, ExternalLink, Film, Send, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClientStock } from '@/lib/inventario/video-stock-core'
@@ -71,6 +74,7 @@ export function ClientProfilePanel({
   loading,
   error,
   onClose,
+  onCadenceSaved,
 }: {
   client: ClientStock
   today: string
@@ -78,7 +82,11 @@ export function ClientProfilePanel({
   loading: boolean
   error: string | null
   onClose: () => void
+  /** The cadence was changed here: the page recomputes the inventory. */
+  onCadenceSaved?: (clientId: string) => void
 }) {
+  const canEditCadence = useHasPermission('cadence.edit')
+  const [editing, setEditing] = useState(false)
   const health = HEALTH_META[client.health]
   const empty = detail ? detail.calendar.filter((d) => d.kind === 'vacio').length : 0
   const posts: Post[] = detail ? [...detail.upcoming, ...detail.recent] : []
@@ -136,6 +144,34 @@ export function ClientProfilePanel({
             </ul>
           ) : (
             !loading && <div>Sin cadencia</div>
+          )}
+          {detail && canEditCadence && (
+            <button
+              type="button"
+              onClick={() => setEditing((v) => !v)}
+              aria-expanded={editing}
+              className="rounded-md border border-[#e6af23]/40 px-2 py-0.5 text-[11px] font-medium text-[#e6af23] transition-colors hover:bg-[#e6af23]/10"
+            >
+              {editing ? 'Cerrar' : 'Editar cadencia'}
+            </button>
+          )}
+          {detail && editing && (
+            <div className="dark rounded-lg border border-white/10 bg-white/[0.04] p-2 text-foreground">
+              <ClientCadenceEditor
+                key={client.clientId}
+                clientId={client.clientId}
+                initialDays={detail.profile.postingDays}
+                initialTime={detail.profile.postingTime}
+                initialSchedule={detail.profile.postingSchedule}
+                initialTimezone={detail.profile.postingTimezone}
+                compact
+                showTimezone={false}
+                onSaved={() => {
+                  setEditing(false)
+                  onCadenceSaved?.(client.clientId)
+                }}
+              />
+            </div>
           )}
           {detail && (
             <div>

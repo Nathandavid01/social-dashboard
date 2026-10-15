@@ -142,3 +142,52 @@ describe('buildClientDetail — reels vs posts', () => {
     ])
   })
 })
+
+describe('buildClientDetail — review #248 fixes', () => {
+  it('a post published at 9:30 pm Puerto Rico time lands on that day, not tomorrow (UTC)', () => {
+    const { calendar } = buildClientDetail(
+      [idea({ id: 'p', status: 'publicada', published_at: '2026-10-15T01:30:00Z', videos: [edited()] })],
+      MWF,
+      today,
+    )
+    expect(calendar[0]).toMatchObject({ date: '2026-10-14', kind: 'publicado' })
+    expect(calendar[1].kind).toBe('libre')
+  })
+
+  it('a day with no known format takes a reel first (same rule as the inventory card)', () => {
+    const { calendar } = buildClientDetail(
+      [
+        idea({ id: 'p1', content_type: 'P', publish_date: '2026-10-01', videos: [edited('a')] }),
+        idea({ id: 'r1', content_type: 'R', videos: [edited('b')] }),
+      ],
+      MWF,
+      today,
+    )
+    expect(calendar[0]).toMatchObject({ kind: 'proyectado', postId: 'r1' })
+  })
+
+  it('a scheduled post with no date is treated as already out, like the card does', () => {
+    const d = buildClientDetail([idea({ id: 'x', metricool_post_id: 3, publish_date: null, videos: [edited()] })], MWF, today)
+    expect(d.upcoming).toEqual([])
+  })
+})
+
+describe('buildClientDetail — Metricool planner posts', () => {
+  it('a planner post fills its day as agendado and shows in upcoming, without duplicating a linked idea', () => {
+    const d = buildClientDetail(
+      [idea({ id: 'linked', title: 'Ligado', metricool_post_id: 5, publish_date: '2026-10-19', videos: [edited()] })],
+      MWF,
+      today,
+      undefined,
+      [
+        { id: 5, date: '2026-10-19', format: 'reel', title: 'Ligado (Metricool)' },
+        { id: 6, date: '2026-10-16', format: 'post', title: 'Hecho a mano en Metricool' },
+      ],
+    )
+    expect(d.calendar.find((x) => x.date === '2026-10-16')).toMatchObject({ kind: 'agendado', title: 'Hecho a mano en Metricool' })
+    expect(d.upcoming.map((p) => [p.id, p.stage, p.date, p.format])).toEqual([
+      ['mc-6', 'agendado', '2026-10-16', 'post'],
+      ['linked', 'agendado', '2026-10-19', 'reel'],
+    ])
+  })
+})

@@ -3,6 +3,20 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { buildVideoStock } from '@/lib/inventario/video-stock-core'
 import { buildClientDetail } from '@/lib/inventario/client-detail-core'
 import type { ClientStockDetail } from '@/lib/inventario/client-detail-types'
+const perms = vi.hoisted(() => ({ cadenceEdit: true }))
+vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: () => perms.cadenceEdit }))
+const editorProps = vi.fn()
+vi.mock('@/components/clients/cadence/client-cadence-editor', () => ({
+  ClientCadenceEditor: (props: { clientId: string; initialDays: number[]; onSaved?: (p: unknown) => void }) => {
+    editorProps(props)
+    return (
+      <button type="button" onClick={() => props.onSaved?.({ posting_days: [2, 4] })}>
+        guardar cadencia (mock)
+      </button>
+    )
+  },
+}))
+
 import { ClientProfilePanel } from './client-profile-panel'
 
 const today = '2026-10-14'
@@ -31,6 +45,8 @@ function detail(): ClientStockDetail {
     profile: {
       id: 'c1', name: 'La Guira', logoUrl: null, postingDays: [1, 3, 5], postingTime: '18:00:00', editorName: 'David',
       formats: { 1: 'reel', 3: 'post', 5: 'reel' },
+      postingSchedule: { '1': 'reel', '3': 'post', '5': 'reel' },
+      postingTimezone: null,
     },
     calendar: d.calendar,
     upcoming: d.upcoming.map((p) => ({ ...p, coverUrl: p.id === 'ag' ? 'https://signed/ag.jpg' : null })),
@@ -95,5 +111,25 @@ describe('ClientProfilePanel', () => {
     expect(screen.getByTestId('profile-loading')).toBeInTheDocument()
     rerender(<ClientProfilePanel client={stock} today={today} detail={null} loading={false} error="No autorizado" onClose={() => {}} />)
     expect(screen.getByText(/No se pudo cargar el perfil/)).toBeInTheDocument()
+  })
+
+  it('the cadence can be changed right here: the editor opens with the current days, and saving tells the page', () => {
+    const onCadenceSaved = vi.fn()
+    render(
+      <ClientProfilePanel client={stock} today={today} detail={detail()} loading={false} error={null} onClose={() => {}} onCadenceSaved={onCadenceSaved} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Editar cadencia' }))
+    expect(editorProps).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: 'c1', initialDays: [1, 3, 5], initialSchedule: { '1': 'reel', '3': 'post', '5': 'reel' } }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'guardar cadencia (mock)' }))
+    expect(onCadenceSaved).toHaveBeenCalledWith('c1')
+  })
+
+  it('without cadence.edit there is no edit button', () => {
+    perms.cadenceEdit = false
+    render(<ClientProfilePanel client={stock} today={today} detail={detail()} loading={false} error={null} onClose={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'Editar cadencia' })).toBeNull()
+    perms.cadenceEdit = true
   })
 })

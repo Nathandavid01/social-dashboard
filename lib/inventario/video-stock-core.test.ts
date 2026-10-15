@@ -266,3 +266,57 @@ describe('reels vs posts per cadence day', () => {
     expect(row.runOutFormat).toBeNull()
   })
 })
+
+describe('scheduled posts only cover their own day (review #248, same model as the profile calendar)', () => {
+  const today = '2026-10-14' // Wednesday
+  const client: StockClient = { id: 'c', name: 'Agendado lejos', posting_days: [1, 3, 5] }
+  const sched = (id: string, date: string): StockIdea => ({
+    id, client_id: 'c', status: 'producida', metricool_post_id: 1, publish_date: date,
+    videos: [{ kind: 'edited', status: 'uploaded' }],
+  })
+
+  it('three posts scheduled a month out do not cover this week', () => {
+    const [row] = buildVideoStock([client], [sched('a', '2026-11-16'), sched('b', '2026-11-18'), sched('c', '2026-11-20')], today).clients
+    expect(row.runOutDate).toBe('2026-10-14')
+    expect(row.daysLeft).toBe(0)
+  })
+
+  it('a scheduled day is skipped by the walk, and ready cuts fill the others', () => {
+    const ready: StockIdea = { id: 'r', client_id: 'c', status: 'producida', videos: [{ kind: 'edited', status: 'uploaded' }] }
+    // Wed 14 scheduled, Fri 16 ← ready cut, Mon 19 empty.
+    const [row] = buildVideoStock([client], [sched('a', '2026-10-14'), ready], today).clients
+    expect(row.runOutDate).toBe('2026-10-19')
+  })
+})
+
+describe('posts scheduled in Metricool (the planner, not only the dashboard)', () => {
+  const today = '2026-10-14' // Wednesday
+  const ready: StockIdea = { id: 'r', client_id: 'c', status: 'producida', videos: [{ kind: 'edited', status: 'uploaded' }] }
+
+  it('each scheduled post covers its own day and counts as agendado', () => {
+    const client: StockClient = {
+      id: 'c', name: 'Planner', posting_days: [1, 3, 5],
+      scheduled: [
+        { id: 1, date: '2026-10-14', format: 'reel', title: 'a' },
+        { id: 2, date: '2026-10-16', format: 'reel', title: 'b' },
+      ],
+    }
+    // Wed + Fri scheduled, Mon 19 ← ready cut, Wed 21 empty.
+    const [row] = buildVideoStock([client], [ready], today).clients
+    expect(row.agendados).toBe(2)
+    expect(row.runOutDate).toBe('2026-10-21')
+  })
+
+  it('a dashboard idea already linked to that Metricool post is not counted twice', () => {
+    const client: StockClient = {
+      id: 'c', name: 'Planner', posting_days: [1, 3, 5],
+      scheduled: [{ id: 9, date: '2026-10-16', format: 'reel', title: 'x' }],
+    }
+    const linked: StockIdea = {
+      id: 'l', client_id: 'c', status: 'producida', metricool_post_id: 9, publish_date: '2026-10-16',
+      videos: [{ kind: 'edited', status: 'uploaded' }],
+    }
+    const [row] = buildVideoStock([client], [linked], today).clients
+    expect(row.agendados).toBe(1)
+  })
+})

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getMetricoolPicturesByBlogId } from '@/lib/actions/client-pictures'
 import { proxiedClientLogo } from './client-logo-url'
 import { cadenceFormats } from './cadence-formats'
+import { loadPlannerSlots } from './load-scheduled'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POST_TZ } from '@/lib/utils/idea-lab-send-core'
 import { buildVideoStock, type StockClient, type StockIdea, type VideoStock } from './video-stock-core'
@@ -28,7 +29,8 @@ export const metricoolPictures = unstable_cache(getMetricoolPicturesByBlogId, ['
 export async function loadVideoStock(): Promise<VideoStock | null> {
   const supabase = await createClient()
 
-  const [{ data: clients, error: clientsError }, pictures, { data: schedules }] = await Promise.all([
+  const today = todayISOInTimeZone(POST_TZ)
+  const [{ data: clients, error: clientsError }, pictures, { data: schedules }, planner] = await Promise.all([
     supabase
       .from('clients')
       .select('id, name, posting_days, posting_schedule, logo_url, metricool_blog_id')
@@ -37,6 +39,8 @@ export async function loadVideoStock(): Promise<VideoStock | null> {
     metricoolPictures().catch(() => ({}) as Record<string, string>),
     // Per-day reel/post plan; a read error only loses the format split, not the page.
     supabase.from('production_schedules').select('client_id, day_of_week, content_type'),
+    // Scheduled posts live in the Metricool planner, hand-made ones included.
+    loadPlannerSlots(today).catch(() => null),
   ])
   if (clientsError) return null
 
@@ -75,6 +79,7 @@ export async function loadVideoStock(): Promise<VideoStock | null> {
         (schedules ?? []).filter((r) => r.client_id === c.id),
       ),
     ),
+    scheduled: planner?.[c.id] ?? [],
   }))
-  return buildVideoStock(stockClients, ideas, todayISOInTimeZone(POST_TZ))
+  return { ...buildVideoStock(stockClients, ideas, today), plannerAvailable: planner !== null }
 }
