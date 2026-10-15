@@ -21,6 +21,7 @@
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import { addDaysISO } from '@/lib/utils/deadlines'
 import { ideaFormat, type Format } from './cadence-formats'
+import type { ScheduledSlot } from './metricool-scheduled-core'
 
 export type StockStage = 'salio' | 'agendado' | 'listo' | 'crudo' | 'sin_archivo' | 'por_grabar'
 
@@ -56,6 +57,8 @@ export interface StockClient {
   logoUrl?: string | null
   /** Format each posting day takes (JS weekday → reel/post/story, null = either). */
   formats?: Partial<Record<number, Format | null>>
+  /** Pending posts in the Metricool planner (today or later), hand-made ones included. */
+  scheduled?: ScheduledSlot[]
 }
 
 export interface ClientStock {
@@ -102,6 +105,8 @@ export interface VideoStockTotals {
 
 export interface VideoStock {
   today: string
+  /** False when the Metricool planner couldn't be read: scheduled = dashboard only. */
+  plannerAvailable?: boolean
   clients: ClientStock[]
   totals: VideoStockTotals
 }
@@ -237,6 +242,17 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
         if (!usable(v) || !isRawKind(v.kind) || !v.uploaded_at) continue
         if (!lastRawAt || v.uploaded_at > lastRawAt) lastRawAt = v.uploaded_at
       }
+    }
+
+    // Planner posts the dashboard doesn't already know as an agendado idea.
+    const linked = new Set(
+      (byClient.get(client.id) ?? [])
+        .filter((i) => classifyStockIdea(i, today) === 'agendado' && i.metricool_post_id != null)
+        .map((i) => Number(i.metricool_post_id)),
+    )
+    for (const slot of client.scheduled ?? []) {
+      pinned.add(slot.date)
+      if (!linked.has(slot.id)) counts.agendado++
     }
 
     const perWeek = cadenceDays(client.posting_days).size

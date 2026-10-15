@@ -11,6 +11,11 @@ const h = vi.hoisted(() => ({
 vi.mock('@/lib/auth/server', () => ({ currentUserHas: async () => h.allowed }))
 vi.mock('@/lib/integrations/r2-cover-urls', () => ({ signCoverUrls: (ids: string[]) => h.sign(ids) }))
 vi.mock('@/lib/inventario/load-video-stock', () => ({ metricoolPictures: async () => ({}) }))
+vi.mock('@/lib/inventario/load-scheduled', () => ({
+  loadPlannerSlots: async () => ({
+    '11111111-1111-4111-8111-111111111111': [{ id: 900, date: '2099-01-09', format: 'post', title: 'A mano en Metricool' }],
+  }),
+}))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (table: string) => {
@@ -59,6 +64,8 @@ it('returns the profile, the 14-day calendar and signed covers for upcoming post
   expect(res.detail.calendar).toHaveLength(14)
   expect(res.detail.upcoming[0]).toMatchObject({ id: 'ag', coverUrl: 'https://signed/v2.jpg' })
   expect(h.sign).toHaveBeenCalledWith(['v2'])
+  // Planner posts made by hand in Metricool show up too.
+  expect(res.detail.upcoming.map((p) => p.id)).toContain('mc-900')
 })
 
 it('says so when the client does not exist', async () => {

@@ -13,6 +13,9 @@ export interface ClientStockDetail {
     editorName: string | null
     /** JS weekday → format that day takes (null = either). */
     formats: Partial<Record<number, Format | null>>
+    /** Raw cadence fields, for the cadence editor. */
+    postingSchedule: Record<string, string>
+    postingTimezone: string | null
   }
   calendar: CalendarDay[]
   upcoming: (DetailPost & { coverUrl: string | null })[]

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Camera, Clapperboard, Film, Info, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClientStock, VideoStock } from '@/lib/inventario/video-stock-core'
@@ -177,6 +178,7 @@ export function VideoStockView({
   const [details, setDetails] = useState<Record<string, ClientStockDetail>>({})
   const [detailError, setDetailError] = useState<string | null>(null)
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     if (!selectedId || details[selectedId]) return
@@ -294,6 +296,12 @@ export function VideoStockView({
             loading={loadingId === selected.clientId && !selectedDetail}
             error={selectedDetail ? null : detailError}
             onClose={() => setSelectedId(null)}
+            onCadenceSaved={(id) => {
+              // New cadence → new run-out dates: drop the cached profile and
+              // recompute the inventory on the server.
+              setDetails(({ [id]: _stale, ...rest }) => rest)
+              router.refresh()
+            }}
           />
         </div>
       )}
@@ -302,7 +310,10 @@ export function VideoStockView({
       <p className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-xs text-muted-foreground">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
         <span>
-          Solo cuenta lo que está subido al sistema (Pipeline y Entregas). Lo que está únicamente en Drive todavía no aparece.
+          Solo cuenta lo que está subido al sistema (Pipeline y Entregas). Lo que está únicamente en Drive todavía no aparece.{' '}
+          {stock.plannerAvailable === false
+            ? 'No se pudo leer el planificador de Metricool: lo agendado solo cuenta lo que se agendó desde el dashboard.'
+            : 'Lo agendado se lee del planificador de Metricool, incluidos los posts hechos a mano (se actualiza cada 10 min).'}
           {totals.sinArchivo > 0 && (
             <>
               {' '}

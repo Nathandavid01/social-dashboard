@@ -13,6 +13,7 @@ import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import { addDaysISO, todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POST_TZ } from '@/lib/utils/idea-lab-send-core'
 import { ideaFormat, type Format } from './cadence-formats'
+import type { ScheduledSlot } from './metricool-scheduled-core'
 
 export type DayKind = 'publicado' | 'agendado' | 'proyectado' | 'vacio' | 'libre'
 export type PostStage = 'publicado' | 'agendado' | 'listo'
@@ -92,6 +93,8 @@ export function buildClientDetail(
   postingDays: number[] | null,
   today: string,
   formats?: Partial<Record<number, Format | null>>,
+  /** Pending posts from the Metricool planner, including hand-made ones. */
+  plannerPosts: ScheduledSlot[] = [],
 ): ClientDetail {
   const cadence = new Set((postingDays ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))
   const live = ideas.filter((i) => i.status !== 'descartada')
@@ -123,6 +126,13 @@ export function buildClientDetail(
     } else if ((idea.videos ?? []).some((v) => usable(v) && (v.kind === 'raw' || v.kind === 'broll'))) {
       crudo++
     }
+  }
+
+  // Planner posts the dashboard doesn't know yet (made by hand in Metricool).
+  const known = new Set(live.map((i) => i.metricool_post_id).filter((id) => id != null).map(Number))
+  for (const slot of plannerPosts) {
+    if (known.has(slot.id)) continue
+    scheduled.push({ id: `mc-${slot.id}`, title: slot.title, stage: 'agendado', format: slot.format, date: slot.date, coverVideoId: null })
   }
 
   // Dated posts own their day.

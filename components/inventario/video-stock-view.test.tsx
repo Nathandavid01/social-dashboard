@@ -29,6 +29,9 @@ vi.mock('@/lib/actions/video-stock-detail', () => ({
   },
 }))
 
+const refresh = vi.fn()
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }))
+
 import { VideoStockView } from './video-stock-view'
 
 const edited = { kind: 'edited', status: 'uploaded', uploaded_at: '2026-10-09T12:00:00Z' }
@@ -81,6 +84,13 @@ describe('VideoStockView', () => {
     render(<VideoStockView stock={stock()} />)
     const apiario = screen.getAllByTestId('stock-row')[1]
     expect(within(apiario).getByTestId('row-split')).toHaveTextContent('6 reels · 0 posts')
+  })
+
+  it('says scheduled posts come from the Metricool planner, or warns when it could not be read', () => {
+    const { rerender } = render(<VideoStockView stock={{ ...stock(), plannerAvailable: true }} />)
+    expect(screen.getByText(/Lo agendado se lee del planificador de Metricool/)).toBeInTheDocument()
+    rerender(<VideoStockView stock={{ ...stock(), plannerAvailable: false }} />)
+    expect(screen.getByText(/No se pudo leer el planificador de Metricool/)).toBeInTheDocument()
   })
 
   it('says where the numbers come from (only footage uploaded to the system)', () => {

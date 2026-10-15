@@ -171,3 +171,23 @@ describe('buildClientDetail — review #248 fixes', () => {
     expect(d.upcoming).toEqual([])
   })
 })
+
+describe('buildClientDetail — Metricool planner posts', () => {
+  it('a planner post fills its day as agendado and shows in upcoming, without duplicating a linked idea', () => {
+    const d = buildClientDetail(
+      [idea({ id: 'linked', title: 'Ligado', metricool_post_id: 5, publish_date: '2026-10-19', videos: [edited()] })],
+      MWF,
+      today,
+      undefined,
+      [
+        { id: 5, date: '2026-10-19', format: 'reel', title: 'Ligado (Metricool)' },
+        { id: 6, date: '2026-10-16', format: 'post', title: 'Hecho a mano en Metricool' },
+      ],
+    )
+    expect(d.calendar.find((x) => x.date === '2026-10-16')).toMatchObject({ kind: 'agendado', title: 'Hecho a mano en Metricool' })
+    expect(d.upcoming.map((p) => [p.id, p.stage, p.date, p.format])).toEqual([
+      ['mc-6', 'agendado', '2026-10-16', 'post'],
+      ['linked', 'agendado', '2026-10-19', 'reel'],
+    ])
+  })
+})
