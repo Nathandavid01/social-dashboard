@@ -65,3 +65,15 @@ it('says so when the client does not exist', async () => {
   h.client = null
   expect(await getClientStockDetail('11111111-1111-4111-8111-111111111111')).toEqual({ error: 'Cliente no encontrado' })
 })
+
+it('keeps room for recent posts even when there are many upcoming ones (review #248)', async () => {
+  h.client = { id: '11111111-1111-4111-8111-111111111111', name: 'Lleno', posting_days: [1, 3, 5], posting_time: null, logo_url: null, metricool_blog_id: null, assigned_to: null }
+  const recentDay = new Date(Date.now() - 2 * 86_400_000).toISOString()
+  h.ideas = [
+    ...Array.from({ length: 14 }, (_, n) => ({ id: `l${n}`, title: 'Listo', status: 'producida', videos: [{ id: `v${n}`, kind: 'edited', status: 'uploaded' }] })),
+    { id: 'pub', title: 'Publicado', status: 'publicada', published_at: recentDay, videos: [] },
+  ]
+  const res = await getClientStockDetail('11111111-1111-4111-8111-111111111111')
+  if (!('detail' in res)) throw new Error('expected detail')
+  expect(res.detail.recent.map((p) => p.id)).toEqual(['pub'])
+})

@@ -24,3 +24,34 @@ export function proxyImageType(declared: string, bytes: Uint8Array): string | nu
   if (ct === '' || ct.startsWith('application/octet-stream')) return sniffImageType(bytes)
   return null
 }
+
+/**
+ * Read a response body but give up as soon as it passes `max` bytes — first
+ * from Content-Length, then while streaming — so a huge or endless response
+ * never fills memory. Returns null when over the cap.
+ */
+export async function readCapped(res: Response, max: number): Promise<ArrayBuffer | null> {
+  const declared = Number(res.headers.get('content-length'))
+  if (Number.isFinite(declared) && declared > max) return null
+  if (!res.body) return null
+  const reader = res.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > max) {
+      await reader.cancel().catch(() => {})
+      return null
+    }
+    chunks.push(value)
+  }
+  const out = new Uint8Array(total)
+  let at = 0
+  for (const c of chunks) {
+    out.set(c, at)
+    at += c.byteLength
+  }
+  return out.buffer
+}

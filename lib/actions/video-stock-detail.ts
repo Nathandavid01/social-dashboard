@@ -14,6 +14,7 @@ import { POST_TZ } from '@/lib/utils/idea-lab-send-core'
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 /** Covers signed per open profile — the panel never shows more than this. */
 const MAX_POSTS = 12
+const RECENT_SLOTS = 3
 
 /**
  * Client profile for /inventario: who they are, the next 14 days of their
@@ -67,8 +68,10 @@ export async function getClientStockDetail(
   )
   const detail = buildClientDetail((ideas ?? []) as unknown as DetailIdea[], postingDays, today, formats)
 
-  const upcoming = detail.upcoming.slice(0, MAX_POSTS)
-  const recent = detail.recent.slice(0, Math.max(0, MAX_POSTS - upcoming.length))
+  // Always leave room for what just went out, so a full queue never reads as
+  // "nothing published lately".
+  const recent = detail.recent.slice(0, Math.max(RECENT_SLOTS, MAX_POSTS - detail.upcoming.length))
+  const upcoming = detail.upcoming.slice(0, MAX_POSTS - recent.length)
   const coverIds = [...upcoming, ...recent].map((p) => p.coverVideoId).filter((id): id is string => !!id)
   const { urls = {} } = coverIds.length > 0 ? await signCoverUrls(coverIds) : { urls: {} }
   const withCover = (p: DetailPost) => ({ ...p, coverUrl: p.coverVideoId ? urls[p.coverVideoId] ?? null : null })

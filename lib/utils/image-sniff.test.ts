@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { proxyImageType, sniffImageType } from './image-sniff'
+import { proxyImageType, readCapped, sniffImageType } from './image-sniff'
 
 const bytes = (...b: number[]) => new Uint8Array([...b, 0, 0, 0, 0, 0, 0, 0, 0])
 
@@ -32,5 +32,24 @@ describe('proxyImageType', () => {
   it('rejects octet-stream that is not an image, and any other declared type', () => {
     expect(proxyImageType('application/octet-stream', new TextEncoder().encode('hello world!'))).toBeNull()
     expect(proxyImageType('text/html', png)).toBeNull()
+  })
+})
+
+describe('readCapped', () => {
+  const body = (chunks: number[]) =>
+    new Response(new ReadableStream({ start(c) { chunks.forEach((n) => c.enqueue(new Uint8Array(n))); c.close() } }))
+
+  it('returns the bytes when under the cap', async () => {
+    const out = await readCapped(body([10, 20]), 100)
+    expect(out?.byteLength).toBe(30)
+  })
+
+  it('stops reading and returns null as soon as the cap is passed (no full download)', async () => {
+    expect(await readCapped(body([60, 60, 60]), 100)).toBeNull()
+  })
+
+  it('rejects early from Content-Length without reading', async () => {
+    const res = new Response('x', { headers: { 'content-length': '999999' } })
+    expect(await readCapped(res, 100)).toBeNull()
   })
 })

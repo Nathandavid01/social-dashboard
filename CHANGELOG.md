@@ -11,7 +11,8 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - En el medallón se ve sin tocar nada: el número dorado son los videos listos y el azul (+N) los clips en crudo esperando edición.
 - **Reels y posts por separado:** la cadencia dice qué toca cada día (lunes reel, martes post…) y un reel no cubre un día de post. Si se acaba antes, la fila lo dice: «Se acaba vie 16 oct · falta post».
 - Al tocar un cliente, la cámara vuela hasta él y despliega **su calendario de 14 días en 3D**: qué día es reel o post, qué está agendado, qué video listo saldría y qué días están vacíos. Al lado se abre su **perfil**: cadencia, hora, editor, los números y sus reels y posts (agendados, listos y publicados) con portada.
-- Lo ya publicado no cuenta; lo agendado en Metricool para hoy o después sí cubre días. Solo cuenta lo que está subido al sistema: lo que vive únicamente en Drive todavía no sale, y la página lo dice.
+- **Acércate con la rueda del mouse o pellizcando** (hacia donde apunta el cursor), gira arrastrando y muévete con clic derecho o dos dedos. «Vista general» te devuelve a todas las gradas. Fuera de la escena la página sigue bajando normal.
+- Lo ya publicado no cuenta; lo agendado en Metricool cubre su propio día. Solo cuenta lo que está subido al sistema: lo que vive únicamente en Drive todavía no sale, y la página lo dice.
 
 [Ver diseño del Inventario](/previews/v5.133-inventario-video.html)
 
