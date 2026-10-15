@@ -10,7 +10,7 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Una vista 3D animada: cada cliente es una columna. Lo dorado son los videos editados que le quedan; lo de cristal, las grabaciones en crudo esperando edición; el aro azul marca a quien tiene grabaciones; la base dice cuánto le alcanza (rojo = sin videos, verde = 2+ semanas).
 - Al frente salen los más urgentes. Gira la escena arrastrando y toca un cliente (o una fila de la lista) para acercarte.
 - Cada cliente dice cuántos días de contenido tiene según su cadencia y qué día se le acaba, y se marca «Hay que grabar» cuando lo editado más lo grabado no cubre dos semanas.
-- Filtros: Hay que grabar, Con grabaciones y Sin cadencia. Los videos que ya se publicaron o se agendaron en Metricool no cuentan como pendientes.
+- Filtros: Hay que grabar, Con grabaciones y Sin cadencia. Lo ya publicado no cuenta; lo agendado en Metricool para hoy o después sí cubre días (sale como «agendados»).
 - Solo cuenta lo que está subido al sistema. Lo que vive únicamente en Drive todavía no sale, y la página lo dice.
 
 [Ver diseño del Inventario](/previews/v5.133-inventario-video.html)

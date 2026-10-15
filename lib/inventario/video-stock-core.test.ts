@@ -175,3 +175,40 @@ describe('buildVideoStock', () => {
     })
   })
 })
+
+describe('scheduled posts still cover the cadence (review #248)', () => {
+  const today = '2026-10-14'
+  const client = { id: 'c1', name: 'Agendado', posting_days: [1, 3, 5] }
+  const scheduled = (id: string, publish_date: string): StockIdea => ({
+    id,
+    client_id: 'c1',
+    status: 'producida',
+    metricool_post_id: 1,
+    posted_at: '2026-10-10T12:00:00Z',
+    publish_date,
+    videos: [{ kind: 'edited', status: 'uploaded' }],
+  })
+
+  it('a cut scheduled for today or later is agendado, not salió', () => {
+    expect(classifyStockIdea(scheduled('a', '2026-10-16'), today)).toBe('agendado')
+    expect(classifyStockIdea(scheduled('a', '2026-10-14'), today)).toBe('agendado')
+  })
+
+  it('a scheduled cut whose date already passed (or has no date) already left', () => {
+    expect(classifyStockIdea(scheduled('a', '2026-10-13'), today)).toBe('salio')
+    expect(classifyStockIdea({ ...scheduled('a', ''), publish_date: null }, today)).toBe('salio')
+  })
+
+  it('a published cut is salió even if its planned date is in the future', () => {
+    expect(classifyStockIdea({ ...scheduled('a', '2026-10-20'), published_at: '2026-10-12T00:00:00Z' }, today)).toBe('salio')
+  })
+
+  it('six scheduled posts and zero unscheduled cuts = two weeks covered, not "sin videos"', () => {
+    const ideas = ['10-14', '10-16', '10-19', '10-21', '10-23', '10-26'].map((d, n) => scheduled(`s${n}`, `2026-${d}`))
+    const [row] = buildVideoStock([client], ideas, today).clients
+    expect(row).toMatchObject({ listos: 0, agendados: 6, health: 'ok', necesitaGrabar: false })
+    expect(row.daysLeft).toBe(14)
+    expect(row.runOutDate).toBe('2026-10-28')
+  })
+})
+

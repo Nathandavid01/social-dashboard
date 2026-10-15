@@ -113,6 +113,7 @@ function StockRow({
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
           {client.perWeek > 0 ? `${client.perWeek} por semana` : 'Sin cadencia'}
+          {client.agendados > 0 && <> · {client.agendados} agendados</>}
           {lastRaw && <> · {lastRaw}</>}
           {client.sinArchivo > 0 && <> · {client.sinArchivo} grabados sin archivo</>}
         </div>
@@ -168,7 +169,7 @@ export function VideoStockView({ stock }: { stock: VideoStock }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi testId="kpi-listos" label="Videos listos" value={totals.listos} hint="Editados, sin publicar ni agendar" icon={Film} accent={GOLD_HEX} delay={0} />
+        <Kpi testId="kpi-listos" label="Videos listos" value={totals.listos} hint={totals.agendados > 0 ? `Editados sin agendar · ${totals.agendados} más agendados` : 'Editados, sin publicar ni agendar'} icon={Film} accent={GOLD_HEX} delay={0} />
         <Kpi testId="kpi-crudo" label="En crudo" value={totals.crudo} hint="Grabaciones esperando edición" icon={Clapperboard} accent={RAW_HEX} delay={60} />
         <Kpi testId="kpi-con-crudo" label="Clientes con grabaciones" value={totals.clientesConCrudo} hint="Tienen crudo subido sin editar" icon={Users} accent={RAW_HEX} delay={120} />
         <Kpi testId="kpi-grabar" label="Hay que grabar" value={totals.necesitanGrabar} hint="Listos + crudo < 2 semanas" icon={Camera} accent={HEALTH_META.agotado.hex} delay={180} />

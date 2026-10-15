@@ -378,6 +378,13 @@ export function VideoStockScene({ clients, today, selectedId, onSelect }: VideoS
       const id = col?.client.clientId ?? null
       onSelectRef.current(id && id === selectedRef.current ? null : id)
     }
+    // A dropped GPU context (iOS background tab, too many GPU tabs) would leave a
+    // black box; fall back to the message — the list keeps the numbers.
+    const onContextLost = (ev: Event) => {
+      ev.preventDefault()
+      setUnsupported(true)
+    }
+    canvas.addEventListener('webglcontextlost', onContextLost)
     canvas.addEventListener('pointermove', onMove)
     canvas.addEventListener('pointerleave', onLeave)
     canvas.addEventListener('pointerdown', onDown)
@@ -390,8 +397,14 @@ export function VideoStockScene({ clients, today, selectedId, onSelect }: VideoS
     const dir = new THREE.Vector3()
     const top = new THREE.Vector3()
     let raf = 0
+    // Only draw while the stage is on screen — saves battery on phones.
+    let visible = true
 
     const frame = (now: number) => {
+      if (!visible) {
+        raf = 0
+        return
+      }
       raf = requestAnimationFrame(frame)
       const t = now - start
       const sel = selectedRef.current
@@ -482,11 +495,21 @@ export function VideoStockScene({ clients, today, selectedId, onSelect }: VideoS
       renderer.render(scene, camera)
     }
     raf = requestAnimationFrame(frame)
+    const io =
+      typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(([entry]) => {
+            visible = entry.isIntersecting
+            if (visible && raf === 0) raf = requestAnimationFrame(frame)
+          })
+        : null
+    io?.observe(mount)
 
     return () => {
       cancelAnimationFrame(raf)
       if (idleTimer) clearTimeout(idleTimer)
       ro?.disconnect()
+      canvas.removeEventListener('webglcontextlost', onContextLost)
+      io?.disconnect()
       canvas.removeEventListener('pointermove', onMove)
       canvas.removeEventListener('pointerleave', onLeave)
       canvas.removeEventListener('pointerdown', onDown)
@@ -551,6 +574,12 @@ export function VideoStockScene({ clients, today, selectedId, onSelect }: VideoS
           <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-white/70">
             <dt>Listos</dt>
             <dd className="text-right font-medium text-[#e6af23]">{tip.client.listos}</dd>
+            {tip.client.agendados > 0 && (
+              <>
+                <dt>Agendados</dt>
+                <dd className="text-right font-medium text-white">{tip.client.agendados}</dd>
+              </>
+            )}
             <dt>En crudo</dt>
             <dd className="text-right font-medium text-[#93c5fd]">{tip.client.crudo}</dd>
             <dt>Alcanza</dt>

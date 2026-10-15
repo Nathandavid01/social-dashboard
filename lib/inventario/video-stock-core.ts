@@ -8,8 +8,10 @@
  * Metricool stamps), never by `content_ideas.status` alone — `producida` also
  * holds cuts that already went out, and `grabada` is often set with no file.
  *
- *   salio        → already left: published, or scheduled/posted in Metricool
- *                  (same predicates Recibo and the Panel use)
+ *   salio        → already left: published, or scheduled in Metricool for a
+ *                  date that already passed (same predicates Recibo/Panel use)
+ *   agendado     → scheduled in Metricool for today or later — still covers
+ *                  an upcoming posting day, so it counts toward the runway
  *   listo        → a usable edited cut that has not left  = "videos que le quedan"
  *   crudo        → raw / b-roll footage with no cut yet   = "grabaciones por editar"
  *   sin_archivo  → marked grabada/producida but no file in the system
@@ -19,7 +21,7 @@
 import { isAgendadoIdea, isPublishedIdea } from '@/lib/utils/client-pool-state'
 import { addDaysISO } from '@/lib/utils/deadlines'
 
-export type StockStage = 'salio' | 'listo' | 'crudo' | 'sin_archivo' | 'por_grabar'
+export type StockStage = 'salio' | 'agendado' | 'listo' | 'crudo' | 'sin_archivo' | 'por_grabar'
 
 export type StockHealth = 'agotado' | 'critico' | 'bajo' | 'ok' | 'sin_cadencia'
 
@@ -37,6 +39,8 @@ export interface StockIdea {
   manual_posted_status?: string | null
   metricool_post_id?: number | null
   posted_at?: string | null
+  /** Planned publish day "YYYY-MM-DD" — for a scheduled cut, the day it goes out. */
+  publish_date?: string | null
   videos?: StockVideo[] | null
 }
 
@@ -53,13 +57,16 @@ export interface ClientStock {
   /** Posts per week from the cadence; 0 = no cadence set. */
   perWeek: number
   listos: number
+  /** Scheduled in Metricool for today or later. */
+  agendados: number
   crudo: number
   sinArchivo: number
   porGrabar: number
+  /** Only those still loaded — the loader skips published history. */
   salieron: number
   /** Most recent raw/b-roll upload (ISO timestamp) or null. */
   lastRawAt: string | null
-  /** Days of content the edited cuts cover at the cadence; null without cadence. */
+  /** Days of content (listos + agendados) at the cadence; null without cadence. */
   daysLeft: number | null
   /** First posting day with no edited video ("YYYY-MM-DD"); null without cadence. */
   runOutDate: string | null
@@ -70,6 +77,7 @@ export interface ClientStock {
 
 export interface VideoStockTotals {
   listos: number
+  agendados: number
   crudo: number
   sinArchivo: number
   porGrabar: number
@@ -100,9 +108,17 @@ function isRawKind(kind: string | null | undefined): boolean {
   return kind === 'raw' || kind === 'broll'
 }
 
-export function classifyStockIdea(idea: StockIdea): StockStage | null {
+/**
+ * `today` ("YYYY-MM-DD") lets a scheduled cut with a future publish_date count
+ * as agendado. `posted_at` is when it was scheduled, not when it goes out.
+ */
+export function classifyStockIdea(idea: StockIdea, today?: string): StockStage | null {
   if (idea.status === 'descartada') return null
-  if (isPublishedIdea(idea) || isAgendadoIdea(idea)) return 'salio'
+  if (isPublishedIdea(idea)) return 'salio'
+  if (isAgendadoIdea(idea)) {
+    const day = idea.publish_date?.slice(0, 10)
+    return today && day && day >= today ? 'agendado' : 'salio'
+  }
   const videos = (idea.videos ?? []).filter(usable)
   if (videos.some((v) => v.kind === 'edited')) return 'listo'
   if (videos.some((v) => isRawKind(v.kind))) return 'crudo'
@@ -159,10 +175,10 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
   }
 
   const rows: ClientStock[] = clients.map((client) => {
-    const counts = { listo: 0, crudo: 0, sin_archivo: 0, por_grabar: 0, salio: 0 }
+    const counts = { listo: 0, agendado: 0, crudo: 0, sin_archivo: 0, por_grabar: 0, salio: 0 }
     let lastRawAt: string | null = null
     for (const idea of byClient.get(client.id) ?? []) {
-      const stage = classifyStockIdea(idea)
+      const stage = classifyStockIdea(idea, today)
       if (!stage) continue
       counts[stage]++
       for (const v of idea.videos ?? []) {
@@ -172,22 +188,25 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
     }
 
     const perWeek = cadenceDays(client.posting_days).size
-    const daysLeft = perWeek > 0 ? Math.round((counts.listo / perWeek) * 7 * 10) / 10 : null
-    const necesitaGrabar = perWeek > 0 && (counts.listo + counts.crudo) / perWeek < RECORD_AHEAD_WEEKS
+    // Scheduled cuts fill upcoming posting days just like unscheduled ones.
+    const covered = counts.listo + counts.agendado
+    const daysLeft = perWeek > 0 ? Math.round((covered / perWeek) * 7 * 10) / 10 : null
+    const necesitaGrabar = perWeek > 0 && (covered + counts.crudo) / perWeek < RECORD_AHEAD_WEEKS
 
     return {
       clientId: client.id,
       clientName: client.name,
       perWeek,
       listos: counts.listo,
+      agendados: counts.agendado,
       crudo: counts.crudo,
       sinArchivo: counts.sin_archivo,
       porGrabar: counts.por_grabar,
       salieron: counts.salio,
       lastRawAt,
       daysLeft,
-      runOutDate: runOutDate(client.posting_days, counts.listo, today),
-      health: healthFor(perWeek, counts.listo, daysLeft),
+      runOutDate: runOutDate(client.posting_days, covered, today),
+      health: healthFor(perWeek, covered, daysLeft),
       necesitaGrabar,
     }
   })
@@ -204,6 +223,7 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
 
   const totals: VideoStockTotals = {
     listos: 0,
+    agendados: 0,
     crudo: 0,
     sinArchivo: 0,
     porGrabar: 0,
@@ -214,6 +234,7 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
   }
   for (const r of rows) {
     totals.listos += r.listos
+    totals.agendados += r.agendados
     totals.crudo += r.crudo
     totals.sinArchivo += r.sinArchivo
     totals.porGrabar += r.porGrabar

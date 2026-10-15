@@ -7,7 +7,7 @@ import { buildVideoStock, type StockClient, type StockIdea, type VideoStock } fr
 const PAGE = 1000
 
 const IDEA_COLUMNS =
-  'id, client_id, status, published_at, manual_posted_status, metricool_post_id, posted_at, ' +
+  'id, client_id, status, published_at, manual_posted_status, metricool_post_id, posted_at, publish_date, ' +
   // Always the idea→videos FK (CLAUDE.md: a bare embed hits PGRST201).
   'videos:content_idea_videos!content_idea_videos_idea_id_fkey(kind, status, uploaded_at)'
 
@@ -26,18 +26,27 @@ export async function loadVideoStock(): Promise<VideoStock | null> {
     .order('name')
   if (clientsError) return null
 
+  const clientIds = (clients ?? []).map((c) => c.id)
   const ideas: StockIdea[] = []
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase
+  // Keyset paging: offsets would skip or repeat a row if an idea changes mid-load.
+  // Published history can never be "left", so the database drops it up front.
+  let lastId: string | null = null
+  while (clientIds.length > 0) {
+    let query = supabase
       .from('content_ideas')
       .select(IDEA_COLUMNS)
-      .neq('status', 'descartada')
+      .in('client_id', clientIds)
+      .not('status', 'in', '(descartada,publicada)')
+      .is('published_at', null)
       .order('id')
-      .range(from, from + PAGE - 1)
+      .limit(PAGE)
+    if (lastId) query = query.gt('id', lastId)
+    const { data, error } = await query
     if (error) return null
     const rows = (data ?? []) as unknown as StockIdea[]
     ideas.push(...rows)
     if (rows.length < PAGE) break
+    lastId = rows[rows.length - 1].id
   }
 
   return buildVideoStock((clients ?? []) as StockClient[], ideas, todayISOInTimeZone(POST_TZ))
