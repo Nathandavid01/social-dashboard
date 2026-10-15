@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.136 — 2026-10-14
+
+**Inventario de video: acércate a los clientes con la rueda del mouse o pellizcando.**
+- La rueda (o pellizcar en el celular) acerca la escena 3D hacia donde apunta el cursor; arrastra para inclinar y usa clic derecho o dos dedos para moverte.
+- «Vista general» te devuelve a todas las gradas. Fuera de la escena, la página sigue bajando normal.
+- Lo agendado en Metricool ahora cubre solo su propio día, igual en la tarjeta y en el calendario del perfil; un post publicado de noche ya no aparece al día siguiente.
+- El perfil siempre deja espacio para lo publicado recientemente.
+
+[Ver diseño](/previews/v5.136-inventario-zoom.html)
+
+![Zoom en el inventario](/changelog/v5.136-inventario-zoom.png)
+
 ## v5.135 — 2026-10-14
 
 **Nuevo: Inventario de video — un anfiteatro 3D con el logo de cada cliente, cuántos reels y posts le quedan, y su calendario de las próximas 2 semanas.**

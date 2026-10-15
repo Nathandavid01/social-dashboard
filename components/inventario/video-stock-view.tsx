@@ -254,7 +254,7 @@ export function VideoStockView({
         />
 
         <div className="pointer-events-none absolute left-3 top-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[11px] text-white/70 backdrop-blur">
-          Al frente, los más urgentes · toca un logo para ver el detalle
+          Rueda o pellizco para acercarte · arrastra para girar · clic derecho o dos dedos para moverte · toca un logo
         </div>
 
         <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg bg-black/65 px-3 py-2 text-[11px] text-white/85 backdrop-blur sm:right-auto">
@@ -286,7 +286,7 @@ export function VideoStockView({
       </div>
 
       {selected && (
-        <div className="mt-3 max-h-[600px] md:absolute md:bottom-3 md:right-3 md:top-3 md:mt-0 md:max-h-none md:w-[360px]">
+        <div className="mt-3 flex h-[600px] flex-col md:absolute md:bottom-3 md:right-3 md:top-3 md:mt-0 md:h-auto md:w-[360px]">
           <ClientProfilePanel
             client={selected}
             today={today}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { proxyImageType } from '@/lib/utils/image-sniff'
+import { proxyImageType, readCapped } from '@/lib/utils/image-sniff'
 
 /** Logos and thumbnails are small; anything bigger is not what this proxy is for. */
 const MAX_BYTES = 5 * 1024 * 1024
@@ -51,13 +51,20 @@ export async function GET(req: NextRequest) {
   try {
     const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) })
     if (!res.ok) return new NextResponse('No disponible', { status: 502 })
-    const buf = await res.arrayBuffer()
-    if (buf.byteLength > MAX_BYTES) return new NextResponse('Imagen demasiado grande', { status: 413 })
+    const buf = await readCapped(res, MAX_BYTES)
+    if (!buf) return new NextResponse('Imagen demasiado grande', { status: 413 })
     // static.metricool.com serves logos as application/octet-stream — trust the bytes.
     const ct = proxyImageType(res.headers.get('content-type') ?? '', new Uint8Array(buf, 0, Math.min(buf.byteLength, 16)))
     if (!ct) return new NextResponse('No es una imagen', { status: 415 })
     return new NextResponse(buf, {
-      headers: { 'content-type': ct, 'cache-control': 'public, max-age=3600' },
+      headers: {
+        'content-type': ct,
+        'cache-control': 'public, max-age=3600',
+        // Same-origin bytes from the internet: never let them run as a page
+        // (an SVG opened directly could otherwise execute script).
+        'x-content-type-options': 'nosniff',
+        'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+      },
     })
   } catch {
     return new NextResponse('Error al obtener la imagen', { status: 502 })

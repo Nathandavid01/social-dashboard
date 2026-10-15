@@ -186,6 +186,8 @@ export function runOutTyped(
   formats: Partial<Record<number, Format | null>> | undefined,
   stock: { reel: number; post: number },
   today: string,
+  /** Days already covered by a post scheduled for that exact date. */
+  pinned: ReadonlySet<string> = new Set(),
 ): { date: string; format: Format | null } | null {
   const days = cadenceDays(postingDays)
   if (days.size === 0) return null
@@ -193,7 +195,7 @@ export function runOutTyped(
   for (let i = 0; i < 400 + (left.reel + left.post) * 7; i++) {
     const date = addDaysISO(today, i)
     const wd = weekdayOf(date)
-    if (!days.has(wd)) continue
+    if (!days.has(wd) || pinned.has(date)) continue
     const f = formats?.[wd] ?? null
     const bucket = f === 'reel' ? 'reel' : f ? 'post' : left.reel > 0 ? 'reel' : 'post'
     if (left[bucket] === 0) return { date, format: f }
@@ -222,17 +224,15 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
   const rows: ClientStock[] = clients.map((client) => {
     const counts = { listo: 0, agendado: 0, crudo: 0, sin_archivo: 0, por_grabar: 0, salio: 0 }
     const ready = { reel: 0, post: 0 }
-    const covering = { reel: 0, post: 0 }
+    // A scheduled post covers its own date only — same model as the profile calendar.
+    const pinned = new Set<string>()
     let lastRawAt: string | null = null
     for (const idea of byClient.get(client.id) ?? []) {
       const stage = classifyStockIdea(idea, today)
       if (!stage) continue
       counts[stage]++
-      if (stage === 'listo' || stage === 'agendado') {
-        const bucket = ideaFormat(idea.content_type) === 'reel' ? 'reel' : 'post'
-        covering[bucket]++
-        if (stage === 'listo') ready[bucket]++
-      }
+      if (stage === 'listo') ready[ideaFormat(idea.content_type) === 'reel' ? 'reel' : 'post']++
+      if (stage === 'agendado' && idea.publish_date) pinned.add(idea.publish_date.slice(0, 10))
       for (const v of idea.videos ?? []) {
         if (!usable(v) || !isRawKind(v.kind) || !v.uploaded_at) continue
         if (!lastRawAt || v.uploaded_at > lastRawAt) lastRawAt = v.uploaded_at
@@ -242,7 +242,7 @@ export function buildVideoStock(clients: StockClient[], ideas: StockIdea[], toda
     const perWeek = cadenceDays(client.posting_days).size
     // Scheduled cuts fill upcoming posting days just like unscheduled ones.
     const covered = counts.listo + counts.agendado
-    const runOut = runOutTyped(client.posting_days, client.formats, covering, today)
+    const runOut = runOutTyped(client.posting_days, client.formats, ready, today, pinned)
     const daysLeft = perWeek > 0 && runOut ? Math.max(0, dayDiff(today, runOut.date)) : null
     const necesitaGrabar = perWeek > 0 && (covered + counts.crudo) / perWeek < RECORD_AHEAD_WEEKS
 

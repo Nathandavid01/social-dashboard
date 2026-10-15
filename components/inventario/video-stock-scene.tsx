@@ -7,6 +7,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { ClientStock } from '@/lib/inventario/video-stock-core'
 import type { CalendarDay } from '@/lib/inventario/client-detail-core'
 import { ROW_DEPTH, layoutStage, toArc } from '@/lib/inventario/stage-layout'
+import { cameraControls, flightArrived } from '@/lib/inventario/scene-camera'
 import {
   BADGE_PX,
   DAY_STYLE,
@@ -127,6 +128,10 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
   const onSelectRef = useRef(onSelect)
   const [unsupported, setUnsupported] = useState(false)
   const [tip, setTip] = useState<Tip | null>(null)
+  // The person zoomed / moved: offer a one-click way back to the whole stand.
+  const [moved, setMoved] = useState(false)
+  const onUserMoveRef = useRef(() => setMoved(true))
+  const resetRef = useRef<() => void>(() => {})
 
   onSelectRef.current = onSelect
   selectedRef.current = selectedId
@@ -422,9 +427,9 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
     controls.target.copy(center)
     controls.enableDamping = true
     controls.dampingFactor = 0.08
-    // Reading, not flying: a gentle tilt only, no zoom/pan (the page keeps the wheel).
-    controls.enableZoom = false
-    controls.enablePan = false
+    // Wheel / pinch zooms toward the cursor (the page scrolls anywhere else);
+    // right-drag / two fingers move around once you are close.
+    const applyControls = () => Object.assign(controls, cameraControls(overviewDist))
     controls.minAzimuthAngle = -0.55
     controls.maxAzimuthAngle = 0.55
     controls.minPolarAngle = 0.4
@@ -438,12 +443,26 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       fit()
+      applyControls()
     }
     resize()
     camera.position.copy(center).addScaledVector(viewDir, overviewDist)
     controls.update()
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null
     ro?.observe(mount)
+
+    // ── Flights: the scene moves the camera when the selection changes or on
+    // reset; the rest of the time the person drives (zoom, tilt, move). ──
+    let flightKey = ''
+    let flying = true
+    const onControlStart = () => {
+      flying = false
+      onUserMoveRef.current()
+    }
+    controls.addEventListener('start', onControlStart)
+    resetRef.current = () => {
+      flightKey = ''
+    }
 
     // ── Picking ──
     const raycaster = new THREE.Raycaster()
@@ -503,6 +522,10 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
     // black box; fall back to the message — the list keeps the numbers.
     const onContextLost = (ev: Event) => {
       ev.preventDefault()
+      // Stop drawing now: the effect cleanup only runs when the data changes.
+      visible = false
+      cancelAnimationFrame(raf)
+      raf = 0
       setUnsupported(true)
     }
     canvas.addEventListener('webglcontextlost', onContextLost)
@@ -515,7 +538,7 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
     const start = performance.now()
     const goalTarget = new THREE.Vector3()
     const desired = new THREE.Vector3()
-    const dir = new THREE.Vector3()
+    const dir = viewDir.clone()
     const right = new THREE.Vector3()
     let raf = 0
     // Only draw while the stage is on screen — saves battery on phones.
@@ -584,6 +607,11 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
       }
 
       // Fly to the selected client (and its calendar); back to the stand otherwise.
+      const wantFlight = focus ? `${focus.client.clientId}:${ribbon ? 1 : 0}` : 'overview'
+      if (wantFlight !== flightKey) {
+        flightKey = wantFlight
+        flying = true
+      }
       let goalDist = overviewDist
       if (focus) {
         focus.group.getWorldPosition(goalTarget)
@@ -600,11 +628,18 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
       } else {
         goalTarget.copy(center)
       }
-      const k = reduceMotion ? 1 : 0.07
-      controls.target.lerp(goalTarget, k)
-      dir.subVectors(camera.position, controls.target).normalize()
-      desired.copy(controls.target).addScaledVector(dir, goalDist)
-      camera.position.lerp(desired, k)
+      if (flying) {
+        const k = reduceMotion ? 1 : 0.07
+        controls.target.lerp(goalTarget, k)
+        // Back to the whole stand also undoes any tilt; a client keeps your angle.
+        if (focus) dir.subVectors(camera.position, controls.target).normalize()
+        else dir.copy(viewDir)
+        desired.copy(controls.target).addScaledVector(dir, goalDist)
+        camera.position.lerp(desired, k)
+        if (flightArrived(controls.target.distanceTo(goalTarget), camera.position.distanceTo(desired))) {
+          flying = false
+        }
+      }
       controls.update()
 
       renderer.render(scene, camera)
@@ -630,6 +665,7 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
       canvas.removeEventListener('pointerdown', onDown)
       canvas.removeEventListener('pointerup', onUp)
       ribbon?.dispose()
+      controls.removeEventListener('start', onControlStart)
       controls.dispose()
       for (const d of disposables) d.dispose()
       renderer.dispose()
@@ -659,6 +695,20 @@ export function VideoStockScene({ clients, today, selectedId, onSelect, calendar
       <div ref={mountRef} className="absolute inset-0" />
       {/* Vignette keeps the edges calm so the medallions read first. */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,0,0,0.6)_100%)]" />
+
+      {moved && (
+        <button
+          type="button"
+          onClick={() => {
+            setMoved(false)
+            onSelect(null)
+            resetRef.current()
+          }}
+          className="absolute left-3 top-14 z-10 rounded-full border border-[#e6af23]/50 bg-black/75 px-3 py-1.5 text-xs font-medium text-[#e6af23] backdrop-blur transition-colors hover:bg-black"
+        >
+          Vista general
+        </button>
+      )}
 
       {tip?.kind === 'client' && tip.client.clientId !== selectedId && (
         <div
