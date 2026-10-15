@@ -26,7 +26,7 @@ export async function submitEditorDelivery(ideaId:string,videoId:string){
  if(error||!file?.drive_file_id||file.uploaded_by!==user.id)return {error:'Sube El Video Editado Antes De Enviar A Revisión'}
  const {data:changed,error:saveError}=await db.from('content_ideas').update({status:'producida',approval_status:'submitted',submitted_at:new Date().toISOString(),approved_video_id:null,approved_at:null,approved_by:null}).eq('id',ideaId).eq('approval_status','pending').eq('status',idea.status).is('metricool_post_id',null).is('posted_at',null).is('published_at',null).is('posting_started_at',null).select('id').maybeSingle()
  if(saveError||!changed)return {error:'No Se Pudo Confirmar El Envío. Actualiza Antes De Reintentar.'}
- for(const path of ['/pipeline','/revision','/mi-dia','/home','/entregas','/banco'])revalidatePath(path)
+ for(const path of ['/pipeline','/revision','/mi-dia','/entregas','/banco'])revalidatePath(path)
  const warning=await notifyReviewChange(db,{ideaId,title:idea.title||'Video',actorId:user.id,outcome:'submitted'})
  return {ok:true as const,...(warning?{warning}:{})}
  }catch(e){return {error:e instanceof Error?e.message:'No Se Pudo Enviar A Revisión'}}

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { areaForPath, canAccessPath } from '@/lib/auth/areas'
+import { areaForPath, canAccessPath, LANDING_PATH } from '@/lib/auth/areas'
 import { SESSION_ONLY_COOKIE, applyCookiePersistence, shouldUseSessionOnlyCookies } from '@/lib/supabase/cookie-persistence'
 import { VIEW_AS_COOKIE, resolveEffectiveRole, canStartViewAs, isViewAsEditorId, viewAsTargetOk } from '@/lib/auth/view-as-core'
 import type { UserRole } from '@/lib/supabase/types'
@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
     const areaAccess = target ? target.area_access : (profile?.area_access as string[] | null | undefined) ?? null
     if (profile && !canAccessPath(path, effectiveRole, areaAccess)) {
       const url = request.nextUrl.clone()
-      url.pathname = '/home'
+      url.pathname = LANDING_PATH
       url.search = ''
       const redirect = NextResponse.redirect(url)
       // Preserve any refreshed auth cookies on the redirect response.

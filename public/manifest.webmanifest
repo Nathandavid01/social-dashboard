@@ -2,7 +2,7 @@
   "name": "Nate Media — Dashboard",
   "short_name": "NMedia",
   "description": "Operations dashboard de Nate Media — planning, contenido, video QC, clientes.",
-  "start_url": "/home",
+  "start_url": "/mi-dia",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",

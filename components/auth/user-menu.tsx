@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut, Camera, Loader2, Trash2, Activity, Sparkles, KeyRound, Eye } from 'lucide-react'
 import { startViewAsEditor, stopViewAs } from '@/lib/actions/view-as'
 import { ROLE_LABEL } from '@/lib/auth/permissions'
+import { LANDING_PATH } from '@/lib/auth/areas'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ThemeToggleMenuItem } from '@/components/shared/theme-toggle'
@@ -153,7 +154,7 @@ export function UserMenu() {
                   e.preventDefault()
                   startTransition(async () => {
                     await stopViewAs()
-                    router.push('/home')
+                    router.push(LANDING_PATH)
                     router.refresh()
                   })
                 }}
@@ -203,7 +204,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         {/* Gated: the page is behind `metricool.read`, so for a role without it
-            this link just bounced to /home. */}
+            this link just bounced to Mi día. */}
         {canReadMetricool && (
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link href="/settings/metricool">

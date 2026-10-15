@@ -126,7 +126,7 @@ export async function finishCalendarUpload(input:{ideaId:string;key:string;fileN
     }
    }catch{/* Accepted creation is never replayed if read-back fails. */}
    await logIdeaActivity(db,{ideaId:idea.id,clientId:idea.client_id,userId:user.id,action:'posted_to_metricool',metadata:{source:'calendar_upload',draft:true,autoPublish:false,metricoolPostId:postId,platforms,scheduledFor:dateTime,publicUrl:mediaUrl}})
-   for(const path of ['/home','/published','/recibo','/pool',`/clients/${idea.client_id}`,`/clients/${idea.client_id}/calendar`])revalidatePath(path)
+   for(const path of ['/mi-dia','/published','/recibo','/pool',`/clients/${idea.client_id}`,`/clients/${idea.client_id}/calendar`])revalidatePath(path)
    return {ok:true,postId,uuid,confirmed,dateTime,clientId:idea.client_id,...(!confirmed?{warning:'Metricool aceptó el borrador; verifica el calendario para confirmar su contenido.'}:{})}
   }catch {
    if(!accepted)await db.from('content_ideas').update({posting_started_at:null,posting_error:'No se pudo registrar el archivo.'}).eq('id',idea.id)
