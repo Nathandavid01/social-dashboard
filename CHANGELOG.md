@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.137 — 2026-10-17
+
+**Ya puedes eliminar un borrador directamente desde el calendario de publicaciones.**
+- Abre un post marcado «Borrador» en el calendario y toca «Eliminar borrador».
+- Antes de borrar te pide confirmar: «Sí, eliminar» o «Cancelar». Se borra de Metricool y no se puede deshacer.
+- Solo aparece en borradores: los posts programados o ya publicados no se pueden eliminar desde aquí.
+- Disponible para owners y supervisores.
+
+[Ver diseño](/previews/v5.137-borrar-borrador.html)
+
+![Eliminar borrador desde el calendario](/changelog/v5.137-borrar-borrador.png)
+
 ## v5.136 — 2026-10-14
 
 **Inventario de video: cuenta lo agendado en Metricool, cambias la cadencia ahí mismo y te acercas con la rueda del mouse.**
