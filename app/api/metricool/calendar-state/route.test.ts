@@ -71,7 +71,7 @@ describe('deleting drafts from the calendar', () => {
     expect(await response.json()).toMatchObject({ ok: true, confirmed: true, action: 'delete', postId: 4 })
     expect(h.del).toHaveBeenCalledWith(4, '1')
     expect(h.write).not.toHaveBeenCalled()
-    expect(h.persist).toHaveBeenCalledWith({ metricool_post_id: null, metricool_uuid: null, posting_started_at: null })
+    expect(h.persist).toHaveBeenCalledWith({ metricool_post_id: null, metricool_uuid: null, posted_at: null, posting_started_at: null })
     expect(h.activity).toHaveBeenCalledWith([expect.objectContaining({ content_idea_id: 'idea-1', metadata: expect.objectContaining({ source: 'posting_calendar', deleted: true, metricoolPostId: 4 }) })])
   })
   it('requires the delete-draft permission', async () => {

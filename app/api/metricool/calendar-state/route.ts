@@ -86,7 +86,7 @@ async function deleteDraft(db: Awaited<ReturnType<typeof createClient>>, clientI
   }
   let warning: string | undefined
   try {
-    const { data: linked, error } = await db.from('content_ideas').update({ metricool_post_id: null, metricool_uuid: null, posting_started_at: null }).eq('client_id', clientId).or(`metricool_post_id.eq.${original.id},metricool_uuid.eq.${JSON.stringify(original.uuid)}`).select('id')
+    const { data: linked, error } = await db.from('content_ideas').update({ metricool_post_id: null, metricool_uuid: null, posted_at: null, posting_started_at: null }).eq('client_id', clientId).or(`metricool_post_id.eq.${original.id},metricool_uuid.eq.${JSON.stringify(original.uuid)}`).select('id')
     if (error) throw error
     if (linked?.length) {
       const { data: { user } } = await db.auth.getUser()
