@@ -25,7 +25,7 @@ export const revalidate = 0
  * Recibo — videos waiting for approval, or approved and still waiting
  * to be posted or scheduled in Metricool. The calendar supports explicit scheduling.
  */
-export default async function ReciboPage() {
+export default async function ReciboPage({ searchParams }: { searchParams?: { client?: string } } = {}) {
   await requirePermission('entregas.read')
 
   const supabase = await createClient()
@@ -88,7 +88,7 @@ export default async function ReciboPage() {
   return (
     <>
       <ReciboPublishedSync />
-      <ReciboWorkspace calendar={canSeeCalendar ? <ContentCalendar clients={calendarClients} /> : null}>
+      <ReciboWorkspace calendar={canSeeCalendar ? <ContentCalendar clients={calendarClients} clientId={calendarClients.some(client => client.id === searchParams?.client) ? searchParams?.client : undefined} projectionIdeas={boardWithReview} /> : null}>
       <ReciboBoard
         ideas={boardWithReview}
         occupancyIdeas={occupancyWithReview}
