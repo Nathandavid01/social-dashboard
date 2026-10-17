@@ -1,4 +1,4 @@
-import { render, screen, waitFor, cleanup } from '@testing-library/react'
+import { render, screen, waitFor, cleanup, act } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
@@ -6,7 +6,7 @@ vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importO
 vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId}:{ideaId:string})=><video controls data-testid={`preview-${ideaId}`}/>}))
 import { ContentCalendar } from './content-calendar'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
-afterEach(()=>{cleanup();vi.unstubAllGlobals()})
+afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals()})
 const client={id:'c',name:'Yabuuchi',metricool_blog_id:'1',posting_days:[0,1,2,3,4,5,6],posting_time:'23:00'}
 const idea={id:'i',client_id:'c',title:'La Jefa',status:'producida',videos:[{id:'v',kind:'edited',status:'uploaded',name:'jefa.mp4',storage_provider:'entregas-r2',drive_file_id:'file'}]} as IdeaWithPipeline
 it('shows an actual player in its projected date and opens on this week',async()=>{
@@ -50,4 +50,16 @@ it('extends coverage in 35-day batches and stops once all queued videos fit',asy
  expect(fetcher).toHaveBeenCalledTimes(3)
  expect(fetcher.mock.calls[1][0]).toContain('startDate=2026-10-16')
  expect(fetcher.mock.calls[2][0]).toContain('startDate=2026-11-20')
+})
+
+it('keeps playable coverage visible while the minute refresh is pending',async()=>{
+ vi.useFakeTimers()
+ const fetcher=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockImplementation(()=>new Promise(()=>{}))
+ vi.stubGlobal('fetch',fetcher)
+ await act(async()=>{render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)})
+ expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ await act(async()=>{vi.advanceTimersByTime(60000)})
+ expect(fetcher).toHaveBeenCalledTimes(4)
+ expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
 })

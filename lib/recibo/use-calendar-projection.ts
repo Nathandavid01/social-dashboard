@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
 import { calendarPostDate, calendarPostState } from '@/lib/published/calendar-post'
@@ -15,12 +15,16 @@ export function useReciboProjection(ideas: IdeaWithPipeline[] | undefined, clien
   const [state, setState] = useState<{ scope: string; projection: Projection | null; error: string | null }>({ scope: '', projection: null, error: null })
   const id = client?.id, blog = client?.metricool_blog_id
   const days = client?.posting_days, schedule = client?.posting_schedule, time = client?.posting_time
-  const today = now.slice(0, 10), nowTime = now.slice(11, 16)
-  const scope = JSON.stringify([id, blog, days, schedule, time, today, nowTime, refresh])
+  const clock = useRef(now)
+  clock.current = now
+  const today = now.slice(0, 10)
+  const scope = JSON.stringify([id, blog, days, schedule, time, today])
   const source = ideas ?? EMPTY_IDEAS
   useEffect(() => {
     const controller = new AbortController()
-    setState({ scope, projection: null, error: null })
+    // Keep the current players mounted during same-client verification.
+    setState(previous => previous.scope === scope ? previous : { scope, projection: null, error: null })
+    const nowTime = clock.current.slice(11, 16)
     if (!ideas || !id || !blog) return () => controller.abort()
     const queue = source.filter(idea => idea.client_id === id)
     const project = (occupied: string[]) => projectReciboVideos(queue, today, days ?? [], occupied, schedule, time, nowTime)
@@ -51,6 +55,6 @@ export function useReciboProjection(ideas: IdeaWithPipeline[] | undefined, clien
       if (!controller.signal.aborted) setState({ scope, projection: null, error: 'No se pudo verificar la cobertura. Las publicaciones del calendario se consultan por separado.' })
     })
     return () => controller.abort()
-  }, [source, !!ideas, id, blog, days, schedule, time, today, nowTime, refresh, scope])
+  }, [source, !!ideas, id, blog, days, schedule, time, today, refresh, scope])
   return state.scope === scope ? state : { scope, projection: null, error: null }
 }
