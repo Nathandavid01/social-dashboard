@@ -4,6 +4,16 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.138 — 2026-10-16
+
+**Recibos muestra tus videos pendientes dentro del calendario y hasta cuándo te alcanzan.**
+- Selecciona un cliente para ver cada video reproducible en su fecha proyectada, según su cadencia.
+- La cobertura evita días ocupados, publicados, duplicados y días destinados a posts o stories; las proyecciones conservan su aprobación pendiente.
+- El calendario comienza con la semana actual y muestra cinco semanas hacia adelante.
+- Si Metricool no se puede verificar, no se presentan fechas de cobertura como confirmadas.
+
+![Calendario de Recibos con videos pendientes](/changelog/v5.138-recibo-proyeccion.png)
+
 ## v5.136 — 2026-10-14
 
 **Inventario de video: cuenta lo agendado en Metricool, cambias la cadencia ahí mismo y te acercas con la rueda del mouse.**
