@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
-import { projectReciboVideos, shiftCalendarDay } from '@/lib/recibo/calendar-projection'
+import { useReciboProjection } from '@/lib/recibo/use-calendar-projection'
+import { reciboSpaceTone } from '@/lib/recibo/cadence-spaces'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
 import { CalendarCadenceSettings } from './calendar-cadence-settings'
 import type { ClientCadencePatch } from '@/lib/actions/client-cadence'
@@ -95,10 +96,6 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   const start = addDays(anchor, -anchor.getDay())
   const end = addDays(start, view === 'month' ? 34 : 6)
   const startKey = dateKey(start), endKey = dateKey(end)
-  const projectionToday = puertoRicoNow().slice(0, 10)
-  const fetchStart = projectionIdeas && activeClient ? (startKey < projectionToday ? startKey : projectionToday) : startKey
-  const horizonEnd = shiftCalendarDay(projectionToday, 365)
-  const fetchEnd = projectionIdeas && activeClient ? (endKey > horizonEnd ? endKey : horizonEnd) : endKey
   useEffect(() => {
     const controller = new AbortController()
     const scope = `${activeClientId}:${startKey}:${endKey}`
@@ -108,7 +105,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     }
     inFlight.current = true; lastAttempt.current = Date.now()
     setLoading(true); setError(null)
-    const params = new URLSearchParams({ startDate: dateKey(addDays(new Date(`${fetchStart}T12:00:00`), -1)), endDate: dateKey(addDays(new Date(`${fetchEnd}T12:00:00`), 1)), includeDrafts: 'true' })
+    const params = new URLSearchParams({ startDate: dateKey(addDays(new Date(`${startKey}T12:00:00`), -1)), endDate: dateKey(addDays(new Date(`${endKey}T12:00:00`), 1)), includeDrafts: 'true' })
     if (activeClientId === 'all') params.set('all', 'true')
     else params.set('clientId', activeClientId)
     if (activeClientId !== 'all' && !activeClient?.metricool_blog_id) { setLoading(false); inFlight.current = false; return () => controller.abort() }
@@ -121,7 +118,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       .catch(() => { if (!controller.signal.aborted) setError('No se pudo verificar Metricool. Los datos anteriores no están confirmados; intenta nuevamente.') })
       .finally(() => { if (!controller.signal.aborted) { inFlight.current = false; setLoading(false) } })
     return () => { controller.abort(); inFlight.current = false }
-  }, [activeClientId, activeClient?.metricool_blog_id, startKey, endKey, fetchStart, fetchEnd, refresh])
+  }, [activeClientId, activeClient?.metricool_blog_id, startKey, endKey, refresh])
   useEffect(() => {
     const verify = () => {
       if (document.visibilityState !== 'hidden' && !inFlight.current && !mutationInFlight.current && Date.now() - lastAttempt.current >= 60_000) setRefresh(r => r + 1)
@@ -138,10 +135,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   }).sort((a, b) => calendarPostDate(a).localeCompare(calendarPostDate(b))), [posts, startKey, endKey])
   const now = puertoRicoNow()
   const today = now.slice(0, 10)
-  const projection = projectionIdeas && activeClient && activeClient.metricool_blog_id && checkedAt && !loading && !error && !failedClients.length
-    ? projectReciboVideos(projectionIdeas.filter(idea => idea.client_id === activeClient.id), today,
-      activeClient.posting_days ?? [], posts.filter(post => ['published', 'scheduled', 'partial'].includes(calendarPostState(post))).map(post => calendarPostDate(post).slice(0, 10)), activeClient.posting_schedule, activeClient.posting_time, now.slice(11, 16))
-    : null
+  const { projection, error: coverageError } = useReciboProjection(projectionIdeas, activeClient, now, refresh)
   const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' }) : null
   const filteredPosts = visiblePosts.filter(p => stateFilter === 'all' || calendarPostState(p) === stateFilter)
   const upcoming = filteredPosts.filter(p => calendarPostState(p) === 'scheduled' && calendarPostDate(p) >= now)
@@ -187,6 +181,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     {activeClient && !activeClient.metricool_blog_id && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Conecta {activeClient.name} con Metricool para ver sus publicaciones y subir contenido.</p>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus videos pendientes en las fechas proyectadas y su cobertura.</p>}
+    {coverageError && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{coverageError}</p>}
     {projection && <section aria-label="Cobertura de videos" className="space-y-1 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
       <p className="font-semibold">{projection.total} videos pendientes{coverageLabel ? ` · Cobertura proyectada hasta el ${coverageLabel}` : ''}</p>
       <p className="text-xs">Un video por día de cadencia disponible. Se omiten días de Post/Story y días con publicaciones programadas o publicadas. Proyección sujeta a revisión y aprobación; no programa publicaciones.</p>
@@ -211,7 +206,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
               {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({ idea, videoId }) => <article key={idea.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2">
                 <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} hasEdited />
                 <p className="text-xs font-semibold">{idea.title || idea.hook || 'Video'}</p>
-                <p className="text-[10px] text-amber-800">{idea.approval_status === 'approved' && idea.approved_video_id === videoId ? 'Proyectado · aprobado' : 'Proyectado · pendiente de aprobación'}</p>
+                <p className="text-[10px] text-amber-800">{reciboSpaceTone(idea) === 'approved' ? 'Proyectado · aprobado' : 'Proyectado · pendiente de aprobación'}</p>
               </article>)}
               {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} />)}
               {dayPosts.length > 2 && <button onClick={() => setExpandedDays(s => ({ ...s, [date]: !s[date] }))} className="px-1 text-xs text-primary">{expandedDays[date] ? 'Ver menos' : `+${dayPosts.length - 2} más`}</button>}
