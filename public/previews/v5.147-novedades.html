@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nate Media · Novedades v5.140</title>
+<title>Nate Media · Novedades v5.147</title>
 <style>
 :root{--bg:#0a0a0a;--card:#121212;--line:rgba(255,255,255,.1);--gold:#e6af23;--text:#fafafa;--muted:#a1a1aa}
 *{box-sizing:border-box}
@@ -11,23 +11,28 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,s
 .content{flex:1;padding:24px}.content div{height:120px;border-radius:14px;background:#151515;margin-bottom:16px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:12px}
 .modal{width:100%;max-width:576px;max-height:90vh;display:flex;flex-direction:column;background:var(--card);border:1px solid rgba(230,175,35,.3);border-radius:16px;overflow:hidden;box-shadow:0 0 80px -30px rgba(230,175,35,.45)}
-.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 20px;border-bottom:1px solid var(--line)}
-.bar .l,.bar .r{display:flex;align-items:center;gap:8px}
+.bar,.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 20px}
+.bar{border-bottom:1px solid var(--line)}.foot{border-top:1px solid var(--line)}
+.bar .l,.bar .r,.btns{display:flex;align-items:center;gap:8px}
 .title{font-size:14px;font-weight:600}.spark{color:var(--gold)}
 .pill{font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;background:rgba(230,175,35,.1);border:1px solid rgba(230,175,35,.3);color:var(--gold)}
 .count{font-size:12px;color:var(--muted)}.x{color:var(--muted);cursor:pointer;font-size:16px;background:none;border:0}
 .body{padding:20px;overflow-y:auto}
+.media{width:100%;border-radius:12px;border:1px solid var(--line);margin-bottom:16px;display:block;background:#1a1a1a}
+.mock{aspect-ratio:16/9;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(230,175,35,.18),transparent 60%),#0d0d0d}
+.mock .m{position:absolute;left:18%;right:18%;top:14%;bottom:14%;border:1px solid rgba(230,175,35,.35);border-radius:10px;background:#141414;padding:10px}
+.mock .ph{height:44%;border-radius:6px;background:linear-gradient(135deg,#3a2f1a,#1a1a1a 60%,#2b2414)}
+.mock .ln{height:6px;border-radius:4px;background:#2a2a2a;margin-top:8px}.mock .ln.s{width:60%}
+.mock .bt{position:absolute;right:10px;bottom:10px;width:60px;height:16px;border-radius:999px;background:var(--gold)}
 .body h2{font-size:18px;margin:0;line-height:1.35}.date{font-size:12px;color:var(--muted);margin:4px 0 16px}
 ul{list-style:none;padding:0 0 0 4px;margin:0 0 16px}li{display:flex;gap:8px;font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:8px}
 li:before{content:"";flex-shrink:0;margin-top:8px;width:6px;height:6px;border-radius:50%;background:rgba(230,175,35,.7)}
-a{color:var(--gold);font-size:14px;font-weight:500;text-decoration:none}
-img{width:100%;border-radius:12px;border:1px solid var(--line);margin-top:12px}
-.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 20px;border-top:1px solid var(--line)}
-.hist{font-size:12px;color:var(--muted)}.btns{display:flex;align-items:center;gap:8px}
+.hist{font-size:12px;color:var(--muted);text-decoration:none}
 .dots{display:flex;gap:4px;margin-right:4px}.dot{height:6px;width:6px;border-radius:999px;background:rgba(161,161,170,.4);transition:all .2s}.dot.on{width:16px;background:var(--gold)}
 button.b{border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--text)}
 button.g{background:var(--gold);border-color:var(--gold);color:#121212}
 .done{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted)}
+.done a{color:var(--gold)}
 .step{display:none}.step.on{display:block;animation:in .3s ease}
 @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 </style></head>
@@ -35,29 +40,28 @@ button.g{background:var(--gold);border-color:var(--gold);color:#121212}
 <div class="app"><aside class="side"><div></div><div></div><div></div><div></div><div></div></aside><section class="content"><div></div><div></div><div></div></section></div>
 <div class="overlay" id="ov"><div class="modal" role="dialog" aria-label="Novedades">
   <div class="bar">
-    <div class="l"><span class="spark">✦</span><span class="title">Novedades</span><span class="pill" id="ver">v5.140</span></div>
+    <div class="l"><span class="spark">✦</span><span class="title">Novedades</span><span class="pill" id="ver">v5.147</span></div>
     <div class="r"><span class="count" id="count">1 de 2</span><button class="x" onclick="done()" aria-label="Cerrar">✕</button></div>
   </div>
   <div class="body">
-    <div class="step on" data-v="5.140">
-      <h2>Ahora el dashboard te enseña lo nuevo apenas entras, paso a paso.</h2><p class="date">2026-10-18</p>
+    <div class="step on" data-v="5.147">
+      <div class="media mock" role="img" aria-label="Novedades paso a paso"><div class="m"><div class="ph"></div><div class="ln"></div><div class="ln s"></div><div class="bt"></div></div></div>
+      <h2>Ahora el dashboard te enseña lo nuevo apenas entras, paso a paso.</h2><p class="date">18 de octubre de 2026</p>
       <ul>
         <li>Cuando sale una versión nueva, al abrir el dashboard aparece «Novedades» con lo que cambió desde la última vez que entraste.</li>
-        <li>Avanzas con «Siguiente» y «Anterior»: cada paso muestra el resumen, los puntos clave y la captura de esa versión.</li>
+        <li>Cada paso empieza con una foto o un video de lo que cambió, y debajo el resumen y los puntos clave.</li>
         <li>Al tocar «Entendido» (o cerrar) no vuelve a salir hasta la próxima versión.</li>
         <li>«Ver todo el historial» te lleva a la página completa de Novedades.</li>
       </ul>
     </div>
-    <div class="step" data-v="5.139">
-      <h2>Ya puedes eliminar un borrador directamente desde el calendario de publicaciones.</h2><p class="date">2026-10-18</p>
+    <div class="step" data-v="5.146">
+      <img class="media" src="../changelog/v5.146-calendar-weeks.png" alt="Semanas restantes de contenido">
+      <h2>En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.</h2><p class="date">18 de octubre de 2026</p>
       <ul>
-        <li>Abre un post marcado «Borrador» en el calendario y toca «Eliminar borrador».</li>
-        <li>Antes de borrar te pide confirmar: «Sí, eliminar» o «Cancelar». Se borra de Metricool y no se puede deshacer.</li>
-        <li>Solo aparece en borradores: los posts programados o ya publicados no se pueden eliminar desde aquí.</li>
-        <li>Disponible para owners y supervisores.</li>
+        <li>El resumen muestra semanas completas y días restantes desde hoy en Puerto Rico, junto a la última fecha prevista.</li>
+        <li>Navegar entre semanas conserva el cálculo desde hoy; las fechas sugeridas y los borradores mantienen sus estados.</li>
+        <li>El tiempo restante aparece después de verificar todas las fechas; el contenido sin fecha se sigue mostrando aparte.</li>
       </ul>
-      <a href="/previews/v5.139-borrar-borrador.html">Ver diseño</a>
-      <img src="/changelog/v5.139-borrar-borrador.png" alt="Eliminar borrador desde el calendario">
     </div>
   </div>
   <div class="foot">
@@ -74,8 +78,8 @@ button.g{background:var(--gold);border-color:var(--gold);color:#121212}
 let i=0;const steps=[...document.querySelectorAll('.step')],dots=[...document.querySelectorAll('.dot')];
 function render(){steps.forEach((s,k)=>s.classList.toggle('on',k===i));dots.forEach((d,k)=>d.classList.toggle('on',k===i));
 document.getElementById('ver').textContent='v'+steps[i].dataset.v;document.getElementById('count').textContent=(i+1)+' de '+steps.length;
-document.getElementById('prev').style.display=i>0?'':'none';const n=document.getElementById('next');
-n.textContent=i===steps.length-1?'Entendido':'Siguiente ›';}
+document.getElementById('prev').style.display=i>0?'':'none';
+document.getElementById('next').textContent=i===steps.length-1?'Entendido':'Siguiente ›';}
 function go(d){if(d>0&&i===steps.length-1)return done();i+=d;render();}
 function done(){document.getElementById('ov').style.display='none';document.getElementById('msg').style.display='block';}
 </script>

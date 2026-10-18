@@ -10,12 +10,14 @@ const ENTRIES = [
     version: APP_VERSION,
     date: '2026-10-18',
     headline: 'Ya puedes eliminar un borrador.',
-    body: '- Toca «Eliminar borrador».\n\n![Eliminar borrador](/changelog/x.png)',
+    media: { kind: 'image', src: '/changelog/x.png', alt: 'Eliminar borrador' },
+    body: '- Toca «Eliminar borrador».',
   },
   {
     version: '5.0',
     date: '2026-10-16',
     headline: 'Recibos muestra tus videos pendientes.',
+    media: { kind: 'video', src: '/changelog/recibos.mp4', alt: 'Recibos en video' },
     body: '- Selecciona un cliente.',
   },
 ]
@@ -100,6 +102,38 @@ describe('WhatsNew', () => {
     await waitFor(() => expect(mockFetch).toHaveBeenCalled())
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(localStorage.getItem(WHATS_NEW_STORAGE_KEY)).toBeNull()
+  })
+})
+
+describe('WhatsNew media', () => {
+  it('la foto sale sin esperar al markdown, encima del texto', async () => {
+    mockFetch.mockResolvedValue(ok([ENTRIES[0]]))
+    render(<WhatsNew />)
+    await screen.findByRole('dialog')
+    const img = screen.getByRole('img', { name: 'Eliminar borrador' })
+    expect(img).toHaveAttribute('src', '/changelog/x.png')
+    expect(img.compareDocumentPosition(screen.getByText('Ya puedes eliminar un borrador.')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('un video se reproduce solo, en silencio y en bucle', async () => {
+    mockFetch.mockResolvedValue(ok([ENTRIES[1]]))
+    render(<WhatsNew />)
+    await screen.findByRole('dialog')
+    const video = screen.getByLabelText('Recibos en video') as HTMLVideoElement
+    expect(video.tagName).toBe('VIDEO')
+    expect(video).toHaveAttribute('src', '/changelog/recibos.mp4')
+    expect(video.autoplay).toBe(true)
+    expect(video.muted).toBe(true)
+    expect(video.loop).toBe(true)
+  })
+
+  it('sin captura enseña el diseño interactivo', async () => {
+    mockFetch.mockResolvedValue(
+      ok([{ ...ENTRIES[0], media: { kind: 'preview', src: '/previews/v1.html', alt: 'Diseño de la novedad' } }]),
+    )
+    render(<WhatsNew />)
+    await screen.findByRole('dialog')
+    expect(screen.getByTitle('Diseño de la novedad')).toHaveAttribute('src', '/previews/v1.html')
   })
 })
 

@@ -7,11 +7,12 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react'
 import { APP_VERSION } from '@/lib/version'
 import { cn } from '@/lib/utils'
-import type { ChangelogEntry } from '@/lib/changelog/entries'
+import type { ChangelogEntry, ChangelogMedia } from '@/lib/changelog/entries'
 
 /**
  * «Novedades»: al entrar con una versión que todavía no ha visto, cada persona
- * recorre lo nuevo paso a paso (titular, viñetas y captura de cada versión).
+ * recorre lo nuevo paso a paso: arriba la foto, el video o el diseño de lo que
+ * cambió, y debajo el titular y las viñetas de cada versión.
  *
  * UpdateNotice recarga la pestaña al salir un deploy; al montar el bundle nuevo
  * APP_VERSION ya no coincide con lo guardado y esto se abre. Lo visto vive en
@@ -113,6 +114,7 @@ export function WhatsNew() {
             key={entry.version}
             className="min-h-0 flex-1 overflow-y-auto px-5 py-5 animate-in fade-in slide-in-from-bottom-1 duration-300"
           >
+            <WhatsNewMedia media={entry.media} headline={entry.headline} />
             {entry.headline && (
               <h2 className="text-lg font-semibold leading-snug text-foreground">{entry.headline}</h2>
             )}
@@ -175,4 +177,43 @@ export function WhatsNew() {
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   )
+}
+
+/** Lo primero que se ve en cada paso: lo que cambió, en foto, video o el diseño interactivo. */
+function WhatsNewMedia({ media, headline }: { media: ChangelogMedia | null; headline: string | null }) {
+  const frame = 'mb-4 aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted/30'
+  if (!media) {
+    return (
+      <div className={cn(frame, 'flex items-center justify-center')} aria-hidden>
+        <Sparkles className="h-10 w-10 text-primary/50" />
+      </div>
+    )
+  }
+  if (media.kind === 'video') {
+    return (
+      <video
+        src={media.src}
+        aria-label={media.alt}
+        autoPlay
+        muted
+        loop
+        playsInline
+        controls
+        className={cn(frame, 'bg-black object-contain')}
+      />
+    )
+  }
+  if (media.kind === 'preview') {
+    return (
+      <iframe
+        src={media.src}
+        title={media.alt || headline || 'Diseño'}
+        loading="lazy"
+        sandbox="allow-scripts"
+        className={cn(frame, 'bg-black')}
+      />
+    )
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={media.src} alt={media.alt} className={cn(frame, 'aspect-auto object-contain')} />
 }
