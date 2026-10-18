@@ -11,7 +11,7 @@ import { ContentCalendar } from './content-calendar'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals()})
 const client={id:'c',name:'Yabuuchi',metricool_blog_id:'1',posting_days:[0,1,2,3,4,5,6],posting_time:'23:00'}
-const idea={id:'i',client_id:'c',title:'La Jefa',status:'producida',videos:[{id:'v',kind:'edited',status:'uploaded',name:'jefa.mp4',storage_provider:'entregas-r2',drive_file_id:'file'}]} as IdeaWithPipeline
+const idea={id:'i',client_id:'c',title:'La Jefa',status:'producida',client:{id:'c',name:'Yabuuchi',industry:'restaurant',edit_mode:'ai'},videos:[{id:'v',kind:'edited',status:'uploaded',name:'jefa.mp4',storage_provider:'entregas-r2',drive_file_id:'file'}]} as IdeaWithPipeline
 it('shows an actual player in its projected date and opens on this week',async()=>{
  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'2026-10-17T00:00:00Z',complete:true})}))
  const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
@@ -161,4 +161,14 @@ it('keeps a single explicit format badge on undated cards',async()=>{
  const card=(await screen.findByTestId('preview-i')).closest('article')!
  expect(within(card).getAllByText('Reel',{exact:true})).toHaveLength(1)
  expect(within(card).getByText('Pendiente de aprobación',{exact:true})).toBeInTheDocument()
+})
+
+it.each(['human','unknown','legacy-r2'])('keeps %s content visible without unsupported drafting controls',async kind=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ const unsupported={...idea,staff_client_approval:'approved',client:kind==='unknown'?undefined:{edit_mode:kind==='human'?'human':'ai'},videos:idea.videos!.map(v=>({...v,storage_provider:kind==='legacy-r2'?'r2':v.storage_provider}))} as IdeaWithPipeline
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[unsupported]} />)
+ const card=(await screen.findByTestId('preview-i')).closest('article')!
+ expect(card).toHaveAttribute('draggable','false')
+ expect(within(card).queryByRole('button',{name:'Elegir fecha de borrador'})).toBeNull()
+ expect(within(card).getByText(/Borrador desde calendario no disponible/)).toBeInTheDocument()
 })

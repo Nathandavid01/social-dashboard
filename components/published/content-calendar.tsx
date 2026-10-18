@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useHasPermission } from '@/components/auth/role-gate'
+import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-support'
 import { draftReciboOnDate } from '@/lib/actions/recibo-calendar-draft'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 import { useReciboProjection } from '@/lib/recibo/use-calendar-projection'
@@ -156,7 +157,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   async function createCalendarDraft(payload:{ideaId:string;clientId:string;videoId:string},date:string) {
     if(mutationInFlight.current || !canDraft || payload.clientId!==activeClientId || date<today) return
     const source=[...(projection?.posts??[]),...(projection?.unplaced??[])].find(item=>item.idea.id===payload.ideaId && item.videoId===payload.videoId && item.idea.client_id===payload.clientId)
-    if(!source || reciboSpaceTone(source.idea)!=='approved') return
+    if(!source || reciboSpaceTone(source.idea)!=='approved' || calendarDraftUnavailableReason(source.idea,payload.videoId)) return
     mutationInFlight.current=true;setCalendarBusy(true);setDraftMessage('Creando borrador…')
     try {
       const result=await draftReciboOnDate({...payload,date})
@@ -168,14 +169,15 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     finally {mutationInFlight.current=false;setCalendarBusy(false);dragPayload.current=null;setDragging(false)}
   }
   function pendingCard(idea:IdeaWithPipeline,videoId:string,image:boolean,projected:boolean,date?:string) {
-    const allowed=canDraft && reciboSpaceTone(idea)==='approved' && !calendarBusy
+    const unavailable=calendarDraftUnavailableReason(idea,videoId)
+    const allowed=canDraft && !unavailable && reciboSpaceTone(idea)==='approved' && !calendarBusy
     const payload={ideaId:idea.id,clientId:idea.client_id,videoId}
     return <article key={idea.id} draggable={allowed} onDragStart={event=>{if(!allowed){event.preventDefault();return}dragPayload.current=payload;event.dataTransfer.setData('application/x-nate-recibo',JSON.stringify(payload));event.dataTransfer.effectAllowed='move';setDragging(true)}} onDragEnd={()=>{dragPayload.current=null;setDragging(false)}} className={cn('min-w-0 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2',allowed && 'cursor-grab')}>
       <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
       <span aria-label={`Formato: ${image ? 'Post' : 'Reel'}`} className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-950">{image ? 'Post' : 'Reel'}</span>
       <p className="text-xs font-semibold">{idea.title || idea.hook || 'Contenido'}</p>
       <p className="text-[10px] text-amber-800">{projected ? (reciboSpaceTone(idea)==='approved'?'Proyectado · aprobado':'Proyectado · pendiente de aprobación') : (reciboSpaceTone(idea)==='approved'?'Aprobado':'Pendiente de aprobación')}</p>
-      {canDraft && (reciboSpaceTone(idea)==='approved' ? <button type="button" disabled={calendarBusy} className="min-h-10 w-full rounded-lg border border-amber-300 px-2 text-xs font-medium disabled:opacity-50" onClick={()=>setDateChoice({...payload,date:date && date>=today?date:today})}>Elegir fecha de borrador</button> : <p className="text-[10px] text-amber-900">Aprueba en Recibo para crear un borrador.</p>)}
+      {canDraft && (unavailable ? <p className="text-[10px] text-amber-900">{unavailable}</p> : reciboSpaceTone(idea)==='approved' ? <button type="button" disabled={calendarBusy} className="min-h-10 w-full rounded-lg border border-amber-300 px-2 text-xs font-medium disabled:opacity-50" onClick={()=>setDateChoice({...payload,date:date && date>=today?date:today})}>Elegir fecha de borrador</button> : <p className="text-[10px] text-amber-900">Aprueba en Recibo para crear un borrador.</p>)}
     </article>
   }
   function onPostChanged(result: CalendarStateChange) {

@@ -13,3 +13,9 @@ it('rejects old or malformed calendar dates',async()=>{for(const date of ['2020-
 it('rejects already linked content rather than rescheduling',async()=>{const row=await read();read.mockResolvedValue({data:{...row.data,metricool_post_id:4}});expect(await draftReciboOnDate(input)).toHaveProperty('error');expect(schedule).not.toHaveBeenCalled()})
 it('rejects denied permission before data access',async()=>{permission.mockRejectedValue(Error('No autorizado'));expect(await draftReciboOnDate(input)).toHaveProperty('error');expect(read).not.toHaveBeenCalled()})
 it('keeps unconfirmed remote results as an error',async()=>{schedule.mockResolvedValue({error:'Verifica Metricool antes de reenviar'});expect(await draftReciboOnDate(input)).toHaveProperty('error','Verifica Metricool antes de reenviar')})
+
+it.each(['human','unknown','legacy-r2'])('rejects unsupported %s drafting before delegation',async kind=>{
+ const row=await read();read.mockResolvedValue({data:{...row.data,client:kind==='unknown'?undefined:{status:'active',edit_mode:kind==='human'?'human':'ai'},videos:row.data.videos.map((v:Record<string,unknown>)=>({...v,storage_provider:kind==='legacy-r2'?'r2':v.storage_provider}))}})
+ expect(await draftReciboOnDate(input)).toHaveProperty('error')
+ expect(schedule).not.toHaveBeenCalled()
+})

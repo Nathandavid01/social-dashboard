@@ -4,6 +4,7 @@
 - Posts y reels identificados, borradores al arrastrar y fecha final del contenido actual.
 - La lista pendiente distingue lo que ya salió para evitar repeticiones.
 - Se conserva la eliminación de borradores incorporada en main.
+- Las piezas de otros flujos siguen visibles, con una explicación cuando crear borradores desde el calendario no está disponible; solo se habilita para clientes AI con el archivo actual de Entregas.
 
 ## v5.144 — 18 de octubre de 2026
 

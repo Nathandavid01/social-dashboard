@@ -7,6 +7,7 @@ import { belongsOnRecibo } from '@/lib/recibo/board-ideas'
 import { editedEntregasVideoId } from '@/lib/recibo/preview'
 import { reciboSpaceTone } from '@/lib/recibo/cadence-spaces'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
+import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-support'
 import { schedulePoolIdea } from './client-pool'
 
 /** Eric 2026-10-18: an explicit calendar placement means draft, never publication. */
@@ -22,6 +23,8 @@ export async function draftReciboOnDate(input: {ideaId:string;clientId:string;vi
   if(idea.client_id!==input.clientId) return {error:'El contenido pertenece a otro cliente.'}
   if(!belongsOnRecibo(idea) || data.posting_started_at || data.metricool_uuid) return {error:'Este contenido ya salió de Recibo o tiene un envío pendiente. Verifica Metricool.'}
   if(editedEntregasVideoId(idea)!==input.videoId) return {error:'Cambió el archivo editado. Actualiza antes de crear el borrador.'}
+  const unavailable = calendarDraftUnavailableReason(idea,input.videoId)
+  if (unavailable) return {error:unavailable}
   if(reciboSpaceTone(idea)!=='approved') return {error:'Aprueba el contenido en Recibo antes de crear su borrador.'}
   return schedulePoolIdea({ideaId:input.ideaId,date:input.date,asDraft:true,expectedRecibo:{clientId:input.clientId,videoId:input.videoId}})
 }
