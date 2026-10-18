@@ -98,6 +98,14 @@ describe('deleting drafts from the calendar', () => {
     expect(await response.json()).not.toHaveProperty('uncertain')
     expect(h.persist).not.toHaveBeenCalled()
   })
+  it('unlinks the idea when a timed-out delete is confirmed gone on read-back', async () => {
+    h.read.mockResolvedValueOnce({ ...h.remote, draft: true }).mockRejectedValueOnce(new Error('Metricool API error: 404 Not Found'))
+    h.del.mockRejectedValue(new Error('timeout'))
+    const response = await POST(del())
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ ok: true, confirmed: true, action: 'delete' })
+    expect(h.persist).toHaveBeenCalledWith(expect.objectContaining({ metricool_post_id: null, posted_at: null }))
+  })
   it('asks to verify when the delete outcome is unknown', async () => {
     h.read.mockResolvedValueOnce({ ...h.remote, draft: true })
     h.del.mockRejectedValue(new Error('timeout'))

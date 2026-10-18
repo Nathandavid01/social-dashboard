@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   let original
   try { original = await getScheduledPost(account, input.postId) } catch { return json({ error: 'No se pudo leer el post actual en Metricool. Verifica el calendario antes de cambiarlo.' }, 502) }
   if (original.uuid !== input.uuid || original.draft !== input.expected.draft || (original.text || '') !== input.expected.text || original.publicationDate.dateTime !== input.expected.publicationDate || (input.expected.timezone && original.publicationDate.timezone !== input.expected.timezone)) return json({ error: 'El post cambió en Metricool. Actualiza el calendario antes de modificarlo.' }, 409)
-  if (input.action === 'delete') return deleteDraft(db, input.clientId, input.blogId, original)
+  if (input.action === 'delete') return deleteDraft(db, account, input.clientId, original)
   let update
   try { update = buildCalendarStateUpdate(original, input.action, input.dateTime) } catch (error) { return json({ error: error instanceof Error ? error.message : 'No se puede cambiar este post.' }, 409) }
   let result
@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
   return json({ ok: true, confirmed, postId, uuid, action: input.action, ...(warning ? { warning } : {}) })
 }
 
-async function deleteDraft(db: Awaited<ReturnType<typeof createClient>>, clientId: string, blogId: string, original: EditableCalendarPost) {
+async function deleteDraft(db: Awaited<ReturnType<typeof createClient>>, account: Parameters<typeof getScheduledPost>[0], clientId: string, original: EditableCalendarPost) {
   try { assertDeletableDraft(original) } catch (error) { return json({ error: error instanceof Error ? error.message : 'No se puede eliminar este post.' }, 409) }
-  try { await deleteScheduledPost(original.id, blogId) } catch (error) {
+  try { await deleteScheduledPost(original.id, account.blogId) } catch (error) {
     if (error instanceof Error && ('unsupportedDelete' in error || 'definitelyNotCreated' in error)) return json({ error: 'Metricool no permitió eliminar este borrador. Sigue guardado como borrador.' }, 409)
-    // A timeout may occur after Metricool deleted the post; verify before retrying.
-    return json({ error: 'No se pudo confirmar que el borrador se eliminó. Verifica el calendario antes de intentarlo nuevamente.', uncertain: true }, 502)
+    // A timeout may occur after Metricool deleted the post: only a 404 on read-back proves it is gone.
+    if (!await confirmedGone(account, original.id)) return json({ error: 'No se pudo confirmar que el borrador se eliminó. Verifica el calendario antes de intentarlo nuevamente.', uncertain: true }, 502)
   }
   let warning: string | undefined
   try {
@@ -104,4 +104,8 @@ async function deleteDraft(db: Awaited<ReturnType<typeof createClient>>, clientI
   } catch { warning = 'El borrador se eliminó en Metricool, pero la idea del dashboard sigue enlazada y necesita revisión.' }
   revalidateCalendar()
   return json({ ok: true, confirmed: true, postId: original.id, uuid: original.uuid, action: 'delete', ...(warning ? { warning } : {}) })
+}
+
+async function confirmedGone(account: Parameters<typeof getScheduledPost>[0], postId: number) {
+  try { await getScheduledPost(account, postId); return false } catch (error) { return error instanceof Error && /\b404\b/.test(error.message) }
 }
