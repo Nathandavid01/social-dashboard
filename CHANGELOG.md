@@ -1,3 +1,13 @@
+## v5.143 — 18 de octubre de 2026
+
+**El calendario te muestra hasta qué día llega el contenido que tienes ahora.**
+- Una fecha destacada combina las piezas pendientes, los borradores y las publicaciones programadas del cliente seleccionado.
+- Los borradores reservan su día para que las piezas pendientes no se proyecten encima.
+- «Ver última fecha» lleva el calendario al final previsto, aunque quede fuera del mes visible.
+- La fecha se verifica al actualizar; las piezas pendientes requieren aprobación y los borradores no se publican automáticamente.
+
+![Fecha final del contenido de 643](/changelog/v5.143-calendar-coverage.png)
+
 ## v5.142 — 18 de octubre de 2026
 
 **Recibo reconoce también las gráficas que ya salieron por Metricool para evitar repetirlas.**

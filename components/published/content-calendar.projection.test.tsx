@@ -18,7 +18,7 @@ it('shows an actual player in its projected date and opens on this week',async()
  await screen.findByTestId('preview-i')
  expect(container.querySelector('[data-calendar-date]')).toHaveAttribute('data-calendar-date','2026-10-11')
  expect(screen.getByTestId('preview-i').closest('[data-calendar-date]')).toHaveAttribute('data-calendar-date','2026-10-16')
- expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
+ expect(screen.getByText(/Contenido actual hasta el/)).toBeInTheDocument()
  expect(screen.getByText('Proyectado · pendiente de aprobación')).toBeInTheDocument()
 })
 it('does not present unverified dates as coverage after a Metricool failure',async()=>{
@@ -26,7 +26,7 @@ it('does not present unverified dates as coverage after a Metricool failure',asy
  render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
  await waitFor(()=>expect(screen.getByRole('alert')).toBeInTheDocument())
  expect(screen.queryByTestId('preview-i')).toBeNull()
- expect(screen.queryByText(/Cobertura proyectada hasta/)).toBeNull()
+ expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
 })
 it('uses Recibo approval and never the Revisión seal for projected cards',async()=>{
  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'now',complete:true})}))
@@ -44,27 +44,32 @@ it('keeps visible calendar posts when the separate coverage query fails',async()
  expect(screen.queryByTestId('preview-i')).toBeNull()
  for(const [url] of fetcher.mock.calls){const p=new URL(url,'http://localhost').searchParams;expect((Date.parse(p.get('endDate')!)-Date.parse(p.get('startDate')!))/86400000).toBeLessThan(40)}
 })
-it('extends coverage in 35-day batches and stops once all queued videos fit',async()=>{
+// Eric, 2026-10-18: coverage now includes future drafts/scheduled posts after the pending queue ends.
+it('verifies a full year in bounded batches even after all queued videos fit',async()=>{
  const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'now',complete:true})})
  vi.stubGlobal('fetch',fetcher)
  const queue=Array.from({length:50},(_,i)=>({...idea,id:`piece-${i}`}))
  render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={queue} />)
- expect(await screen.findByText(/50 piezas pendientes/)).toHaveTextContent('4 de diciembre de 2026')
- expect(fetcher).toHaveBeenCalledTimes(3)
+ await screen.findByText(/50 piezas pendientes/)
+ expect(screen.getByText(/Contenido actual hasta el/)).toHaveTextContent('4 de diciembre de 2026')
+ expect(fetcher).toHaveBeenCalledTimes(12)
  expect(fetcher.mock.calls[1][0]).toContain('startDate=2026-10-16')
  expect(fetcher.mock.calls[2][0]).toContain('startDate=2026-11-20')
 })
 
 it('keeps playable coverage visible while the minute refresh is pending',async()=>{
  vi.useFakeTimers()
- const fetcher=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockImplementation(()=>new Promise(()=>{}))
+ let refreshing=false
+ const fetcher=vi.fn().mockImplementation(()=>refreshing?new Promise(()=>{}):Promise.resolve({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}))
  vi.stubGlobal('fetch',fetcher)
  await act(async()=>{render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)})
  expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ refreshing=true
  await act(async()=>{vi.advanceTimersByTime(60000)})
- expect(fetcher).toHaveBeenCalledTimes(4)
+ expect(fetcher).toHaveBeenCalledTimes(14)
  expect(screen.getByTestId('preview-i')).toBeInTheDocument()
- expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
+ expect(screen.getByText('Verificando hasta qué día llega tu contenido…')).toBeInTheDocument()
+ expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
 })
 
 it('shows pending graphics as images without dates when cadence is unconfigured',async()=>{
@@ -120,4 +125,20 @@ it('ignores foreign transfers and past date drops',async()=>{
  fireEvent.dragStart(card,{dataTransfer:{setData:vi.fn()}})
  fireEvent.drop(container.querySelector('[data-calendar-date="2026-10-12"]')!)
  expect(draft).not.toHaveBeenCalled()
+})
+
+it('shows the last existing draft date with no pending ideas, even outside the visible month',async()=>{
+ const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[{id:1,uuid:'u',blogId:'1',clientId:'c',text:'Draft',publicationDate:'2027-02-10T11:00:00',timezone:'America/Puerto_Rico',draft:true,media:[],platforms:[]}],complete:true})})
+ vi.stubGlobal('fetch',fetcher)
+ const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[]} />)
+ expect(await screen.findByText(/Contenido actual hasta el/)).toHaveTextContent('10 de febrero de 2027')
+ expect(screen.getByText(/1 borrador/)).toBeInTheDocument()
+ fireEvent.click(screen.getByRole('button',{name:'Ver última fecha'}))
+ await waitFor(()=>expect(container.querySelector('[data-calendar-date="2027-02-10"]')).toBeInTheDocument())
+})
+it('does not expose a date when a later verification chunk is incomplete',async()=>{
+ vi.stubGlobal('fetch',vi.fn(async(url:string)=>({ok:true,json:async()=>({posts:[],complete:!url.includes('startDate=2026-12-25')})})))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ expect(await screen.findByText(/No se pudo verificar la cobertura/)).toBeInTheDocument()
+ expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
 })

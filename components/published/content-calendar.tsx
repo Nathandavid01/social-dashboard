@@ -146,8 +146,8 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   const now = puertoRicoNow()
   const today = now.slice(0, 10)
   const pendingProjectionIdeas = useMemo(()=>projectionIdeas?.filter(idea=>!drafted.includes(idea.id)),[projectionIdeas,drafted])
-  const { projection, error: coverageError } = useReciboProjection(pendingProjectionIdeas, activeClient, now, refresh)
-  const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' }) : null
+  const { projection, error: coverageError, verifying: coverageVerifying } = useReciboProjection(pendingProjectionIdeas, activeClient, now, refresh)
+  const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null
   const filteredPosts = visiblePosts.filter(p => stateFilter === 'all' || calendarPostState(p) === stateFilter)
   const upcoming = filteredPosts.filter(p => calendarPostState(p) === 'scheduled' && calendarPostDate(p) >= now)
   const attention = visiblePosts.filter(p => ['partial', 'error'].includes(calendarPostState(p)) || (calendarPostState(p) === 'scheduled' && calendarPostDate(p) < now))
@@ -218,11 +218,20 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus posts y videos pendientes en las fechas proyectadas y su cobertura.</p>}
     {coverageError && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{coverageError}</p>}
-    {projection && <section aria-label="Cobertura de contenido" className="space-y-1 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
-      <p className="font-semibold">{projection.total} {projection.total === 1 ? 'pieza pendiente' : 'piezas pendientes'}{coverageLabel ? ` · Cobertura proyectada hasta el ${coverageLabel}` : ''}</p>
-      <p className="text-xs">Una pieza por día disponible: gráficas en Post, videos en Reel y ambos cuando el día no tiene formato. Se omiten Stories y días con publicaciones programadas o publicadas. Proyección sujeta a revisión y aprobación; no programa publicaciones. Arrastra una pieza aprobada a un día o elige su fecha para crear un borrador en Metricool.</p>
-      {!activeClient?.posting_days?.length && <p className="text-sm">Configura la cadencia para calcular fechas.</p>}
-      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} piezas sin fecha compatible dentro del próximo año.</p>}
+    {coverageVerifying && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Verificando hasta qué día llega tu contenido…</p>}
+    {projection && !coverageVerifying && <section aria-label="Cobertura de contenido" className="space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide">{activeClient?.name} · Alcance del contenido actual</p>
+          <h3 className="mt-1 text-xl font-semibold sm:text-2xl">{coverageLabel ? `Contenido actual hasta el ${coverageLabel}` : 'Sin publicaciones futuras con fecha'}</h3>
+        </div>
+        {projection.through && <Button variant="outline" className="shrink-0" onClick={() => setAnchor(new Date(`${projection.through}T12:00:00`))}>Ver última fecha</Button>}
+      </div>
+      <p className="text-sm">{projection.total} {projection.total === 1 ? 'pieza pendiente' : 'piezas pendientes'} · {projection.drafts} {projection.drafts === 1 ? 'borrador' : 'borradores'} · {projection.scheduled} {projection.scheduled === 1 ? 'publicación programada' : 'publicaciones programadas'}</p>
+      <p className="text-xs">Última fecha prevista según la frecuencia actual, con borradores y publicaciones programadas. Las piezas pendientes requieren aprobación; los borradores no se publican automáticamente.</p>
+      <p className="text-xs">Las piezas pendientes ocupan días compatibles y libres. Arrastra una pieza aprobada a un día para guardarla como borrador.</p>
+      {!activeClient?.posting_days?.length && <p className="text-sm">Configura la cadencia para calcular fechas pendientes.</p>}
+      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} piezas sin fecha compatible dentro del próximo año; no se incluyen en la fecha final.</p>}
     </section>}
     {projection && projection.unplaced.length > 0 && stateFilter === 'all' && <section aria-label="Contenido sin fecha" className="space-y-3 rounded-xl border bg-white p-4">
       <h3 className="text-sm font-semibold">Sin fecha · {projection.unplaced.length} {projection.unplaced.length === 1 ? 'pieza' : 'piezas'}</h3>
