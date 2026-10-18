@@ -1,10 +1,4 @@
-# Changelog
-
-Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
-
-> Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
-
-## v5.140 — 2026-10-18
+## v5.147 — 18 de octubre de 2026
 
 **Ahora el dashboard te enseña lo nuevo apenas entras, paso a paso.**
 - Cuando sale una versión nueva, al abrir el dashboard aparece «Novedades» con lo que cambió desde la última vez que entraste.
@@ -12,9 +6,89 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 - Al tocar «Entendido» (o cerrar) no vuelve a salir hasta la próxima versión.
 - «Ver todo el historial» te lleva a la página completa de Novedades.
 
-[Ver diseño](/previews/v5.140-novedades.html)
+[Ver diseño](/previews/v5.147-novedades.html)
 
-![Novedades paso a paso](/changelog/v5.140-novedades.png)
+![Novedades paso a paso](/changelog/v5.147-novedades.png)
+
+## v5.146 — 18 de octubre de 2026
+
+**En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**
+- El resumen muestra semanas completas y días restantes desde hoy en Puerto Rico, junto a la última fecha prevista.
+- Navegar entre semanas conserva el cálculo desde hoy; las fechas sugeridas y los borradores mantienen sus estados.
+- El tiempo restante aparece después de verificar todas las fechas; el contenido sin fecha se sigue mostrando aparte.
+
+![Semanas restantes de contenido](/changelog/v5.146-calendar-weeks.png)
+
+## v5.145 — 18 de octubre de 2026
+
+**Recibos reúne las mejoras de calendario y acceso, junto con la última versión de producción.**
+- Posts y reels identificados, borradores al arrastrar y fecha final del contenido actual.
+- La lista pendiente distingue lo que ya salió para evitar repeticiones.
+- Se conserva la eliminación de borradores incorporada en main.
+- Las piezas de otros flujos siguen visibles, con una explicación cuando crear borradores desde el calendario no está disponible; solo se habilita para clientes AI con el archivo actual de Entregas.
+
+## v5.144 — 18 de octubre de 2026
+
+**Identifica de un vistazo si cada pieza pendiente es Post o Reel.**
+- Las gráficas muestran «Post» y los videos «Reel» en una etiqueta visible dentro de su tarjeta del calendario.
+- La etiqueta también aparece en «Sin fecha» y se mantiene separada de la aprobación y la proyección.
+
+![Formato de contenido en el calendario](/changelog/v5.144-calendar-format.png)
+
+## v5.143 — 18 de octubre de 2026
+
+**El calendario te muestra hasta qué día llega el contenido que tienes ahora.**
+- Una fecha destacada combina las piezas pendientes, los borradores y las publicaciones programadas del cliente seleccionado.
+- Los borradores reservan su día para que las piezas pendientes no se proyecten encima.
+- «Ver última fecha» lleva el calendario al final previsto, aunque quede fuera del mes visible.
+- La fecha se verifica al actualizar; las piezas pendientes requieren aprobación y los borradores no se publican automáticamente.
+
+![Fecha final del contenido de 643](/changelog/v5.143-calendar-coverage.png)
+
+## v5.142 — 18 de octubre de 2026
+
+**Recibo reconoce también las gráficas que ya salieron por Metricool para evitar repetirlas.**
+- Al abrir Recibo, las gráficas individuales se cruzan con la cuenta guardada del cliente mediante el archivo exacto, además de los videos.
+- Las piezas confirmadas como publicadas o programadas salen de la lista pendiente y de sus sugerencias en el calendario.
+- Los borradores, las coincidencias dudosas y las imágenes que no se pudieron comprobar se conservan; compartir título o tamaño no basta.
+- La verificación conserva las revisiones nuevas y no borra archivos ni publicaciones.
+
+![Recibo con borradores y pendientes de 643](/changelog/v5.142-recibo-published.png)
+
+## v5.141 — 18 de octubre de 2026
+
+**Arrastra contenido aprobado al calendario para guardarlo como borrador de ese día.**
+- Las piezas aprobadas de Recibo se pueden arrastrar a una fecha o usar «Elegir fecha de borrador» desde el teléfono o teclado.
+- La fecha elegida crea un borrador en Metricool con la hora configurada del cliente; no activa la publicación automática.
+- Las fechas proyectadas siguen siendo sugerencias hasta que eliges una fecha. Las piezas sin aprobar explican el paso pendiente.
+- Si el envío no se confirma, la pieza permanece visible y se indica verificar Metricool antes de reenviarla.
+
+![Borradores desde el calendario](/changelog/v5.141-calendar-draft.png)
+
+## v5.140 — 18 de octubre de 2026
+
+**Los posts de Recibo también aparecen en el calendario de publicaciones.**
+- Las gráficas muestran su imagen y los videos conservan su reproductor.
+- Cada pieza ocupa un día compatible con la frecuencia del cliente, evitando publicaciones existentes.
+- Cuando faltan días configurados, las piezas aparecen en «Sin fecha» sin inventar una fecha de publicación.
+- Las fechas proyectadas conservan su aprobación pendiente y no programan contenido automáticamente.
+
+![Posts pendientes en el calendario](/changelog/v5.140-recibo-posts.png)
+
+## Acceso local — 18 de octubre de 2026 (incluido en v5.145)
+
+**Un acceso más claro y cómodo a Nate Media.**
+- Pantalla de entrada con una tarjeta centrada y jerarquía visual más cuidada.
+- Campos y controles más cómodos en el teléfono.
+- El formulario anuncia cuándo está entrando y evita enviar dos veces.
+
+![Acceso de Nate Media](/changelog/v5.139-login.png)
+
+# Changelog
+
+Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
+
+> Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
 ## v5.139 — 2026-10-18
 

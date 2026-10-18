@@ -1,14 +1,14 @@
 import { beforeEach, expect, it, vi } from 'vitest'
-const h = vi.hoisted(() => ({ replies: [] as any[], ranges: [] as number[][] }))
+const h = vi.hoisted(() => ({ replies: [] as any[], ranges: [] as number[][], selects: [] as string[] }))
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ from: () => {
-  const q: any = { select: () => q, order: () => q, eq: () => q, limit: () => q,
+  const q: any = { select: (columns:string) => {h.selects.push(columns);return q}, order: () => q, eq: () => q, limit: () => q,
     range: (a: number, b: number) => { h.ranges.push([a,b]); return q },
     then: (resolve: any) => Promise.resolve(h.replies.shift()).then(resolve) }
   return q
 } }) }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 import { getIdeacionPipeline } from './content-ideas'
-beforeEach(() => { h.replies = []; h.ranges = [] })
+beforeEach(() => { h.replies = []; h.ranges = []; h.selects = [] })
 it('loads older review videos beyond the first page', async () => {
  h.replies = [{data: Array.from({length:500},(_,i)=>({id:String(i)})),count:501}, {data:[{id:'older'}],count:501}]
  const rows = await getIdeacionPipeline({ complete: true })
@@ -36,4 +36,10 @@ it('rejects duplicate rows across pages',async()=>{
 it('accepts a verified empty queue',async()=>{
  h.replies=[{data:[],count:0}]
  await expect(getIdeacionPipeline({complete:true})).resolves.toEqual([])
+})
+
+it('loads client edit mode so calendar drafting eligibility can be checked',async()=>{
+ h.replies=[{data:[],count:0}]
+ await getIdeacionPipeline({complete:true})
+ expect(h.selects[0]).toMatch(/client:clients[^\n]*edit_mode/)
 })

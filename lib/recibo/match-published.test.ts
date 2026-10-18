@@ -144,3 +144,7 @@ describe('measurableMedia', () => {
     expect(measurableMedia(posts)).toEqual(['https://m/ok.mp4', 'https://m/objeto.MOV?x=1'])
   })
 })
+
+ it('no enlaza un MP4 con una gráfica del mismo tamaño',()=>{
+ expect(matchReciboPublished([idea('graphic',cut(100,{mime_type:'image/png',name:'a.png'}))],[post(1,'https://m/a.mp4')],()=>100)).toEqual([])
+ })

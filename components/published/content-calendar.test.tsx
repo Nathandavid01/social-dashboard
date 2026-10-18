@@ -1,5 +1,7 @@
 import { render, screen, waitFor, fireEvent, cleanup, within, act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+// Calendar now refreshes server-provided Recibo data after a confirmed draft.
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn(async()=>({ok:true}))}))
 import { ContentCalendar } from './content-calendar'

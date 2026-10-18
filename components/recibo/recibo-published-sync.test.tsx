@@ -20,13 +20,13 @@ describe('ReciboPublishedSync', () => {
     syncReciboPublished.mockResolvedValue({ linked: 2 })
     render(<ReciboPublishedSync />)
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1))
-    expect(toast).toHaveBeenCalledWith({ title: '2 videos ya estaban en Metricool y salieron de Recibo' })
+    expect(toast).toHaveBeenCalledWith({ title: '2 piezas ya estaban en Metricool y salieron de Recibo' })
   })
 
   it('uno solo, en singular', async () => {
     syncReciboPublished.mockResolvedValue({ linked: 1 })
     render(<ReciboPublishedSync />)
-    await waitFor(() => expect(toast).toHaveBeenCalledWith({ title: '1 video ya estaba en Metricool y salió de Recibo' }))
+    await waitFor(() => expect(toast).toHaveBeenCalledWith({ title: '1 pieza ya estaba en Metricool y salió de Recibo' }))
   })
 
   it('si no había nada, no recarga ni avisa', async () => {

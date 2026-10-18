@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useHasPermission } from '@/components/auth/role-gate'
+import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-support'
+import { draftReciboOnDate } from '@/lib/actions/recibo-calendar-draft'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import { calendarCoverageDuration } from '@/lib/recibo/calendar-coverage'
 import { useReciboProjection } from '@/lib/recibo/use-calendar-projection'
 import { reciboSpaceTone } from '@/lib/recibo/cadence-spaces'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
@@ -69,6 +74,13 @@ function PostCard({ post, onOpen, compact = false }: { post: PublishedPost; onOp
   </button>
 }
 export function ContentCalendar({ clients, clientId, projectionIdeas }: { clients: Client[]; clientId?: string; projectionIdeas?: IdeaWithPipeline[] }) {
+  const router = useRouter()
+  const canDraft = useHasPermission('posting.publish')
+  const [drafted, setDrafted] = useState<string[]>([])
+  const [draftMessage, setDraftMessage] = useState('')
+  const [dragging, setDragging] = useState(false)
+  const dragPayload = useRef<{ideaId:string;clientId:string;videoId:string}|null>(null)
+  const [dateChoice,setDateChoice] = useState<{ideaId:string;clientId:string;videoId:string;date:string}|null>(null)
   const [view, setView] = useState<'month' | 'week'>('month')
   const [anchor, setAnchor] = useState(() => new Date(`${puertoRicoNow().slice(0, 10)}T12:00:00`))
   const [clientFilter, setClientFilter] = useState(clientId ?? 'all')
@@ -135,13 +147,41 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   }).sort((a, b) => calendarPostDate(a).localeCompare(calendarPostDate(b))), [posts, startKey, endKey])
   const now = puertoRicoNow()
   const today = now.slice(0, 10)
-  const { projection, error: coverageError } = useReciboProjection(projectionIdeas, activeClient, now, refresh)
-  const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' }) : null
+  const pendingProjectionIdeas = useMemo(()=>projectionIdeas?.filter(idea=>!drafted.includes(idea.id)),[projectionIdeas,drafted])
+  const { projection, error: coverageError, verifying: coverageVerifying } = useReciboProjection(pendingProjectionIdeas, activeClient, now, refresh)
+  const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null
+  const coverageDuration = view === 'week' ? calendarCoverageDuration(projection?.through, today) : null
   const filteredPosts = visiblePosts.filter(p => stateFilter === 'all' || calendarPostState(p) === stateFilter)
   const upcoming = filteredPosts.filter(p => calendarPostState(p) === 'scheduled' && calendarPostDate(p) >= now)
   const attention = visiblePosts.filter(p => ['partial', 'error'].includes(calendarPostState(p)) || (calendarPostState(p) === 'scheduled' && calendarPostDate(p) < now))
   const days: Date[] = []
   for (let d = start; d <= end; d = addDays(d, 1)) days.push(d)
+  async function createCalendarDraft(payload:{ideaId:string;clientId:string;videoId:string},date:string) {
+    if(mutationInFlight.current || !canDraft || payload.clientId!==activeClientId || date<today) return
+    const source=[...(projection?.posts??[]),...(projection?.unplaced??[])].find(item=>item.idea.id===payload.ideaId && item.videoId===payload.videoId && item.idea.client_id===payload.clientId)
+    if(!source || reciboSpaceTone(source.idea)!=='approved' || calendarDraftUnavailableReason(source.idea,payload.videoId)) return
+    mutationInFlight.current=true;setCalendarBusy(true);setDraftMessage('Creando borrador…')
+    try {
+      const result=await draftReciboOnDate({...payload,date})
+      if(result.error || !result.ok) {setDraftMessage(result.error || 'No se confirmó el borrador. Verifica Metricool antes de reenviar.');return}
+      setDrafted(current=>[...current,payload.ideaId]);setDateChoice(null);setStateFilter('all')
+      setDraftMessage(`Borrador creado para el ${date}. No se publicará automáticamente.`)
+      setRefresh(value=>value+1);router.refresh()
+    } catch {setDraftMessage('No se pudo confirmar el envío. Verifica Metricool antes de reenviar.')}
+    finally {mutationInFlight.current=false;setCalendarBusy(false);dragPayload.current=null;setDragging(false)}
+  }
+  function pendingCard(idea:IdeaWithPipeline,videoId:string,image:boolean,projected:boolean,date?:string) {
+    const unavailable=calendarDraftUnavailableReason(idea,videoId)
+    const allowed=canDraft && !unavailable && reciboSpaceTone(idea)==='approved' && !calendarBusy
+    const payload={ideaId:idea.id,clientId:idea.client_id,videoId}
+    return <article key={idea.id} draggable={allowed} onDragStart={event=>{if(!allowed){event.preventDefault();return}dragPayload.current=payload;event.dataTransfer.setData('application/x-nate-recibo',JSON.stringify(payload));event.dataTransfer.effectAllowed='move';setDragging(true)}} onDragEnd={()=>{dragPayload.current=null;setDragging(false)}} className={cn('min-w-0 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2',allowed && 'cursor-grab')}>
+      <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
+      <span aria-label={`Formato: ${image ? 'Post' : 'Reel'}`} className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-950">{image ? 'Post' : 'Reel'}</span>
+      <p className="text-xs font-semibold">{idea.title || idea.hook || 'Contenido'}</p>
+      <p className="text-[10px] text-amber-800">{projected ? (reciboSpaceTone(idea)==='approved'?'Proyectado · aprobado':'Proyectado · pendiente de aprobación') : (reciboSpaceTone(idea)==='approved'?'Aprobado':'Pendiente de aprobación')}</p>
+      {canDraft && (unavailable ? <p className="text-[10px] text-amber-900">{unavailable}</p> : reciboSpaceTone(idea)==='approved' ? <button type="button" disabled={calendarBusy} className="min-h-10 w-full rounded-lg border border-amber-300 px-2 text-xs font-medium disabled:opacity-50" onClick={()=>setDateChoice({...payload,date:date && date>=today?date:today})}>Elegir fecha de borrador</button> : <p className="text-[10px] text-amber-900">Aprueba en Recibo para crear un borrador.</p>)}
+    </article>
+  }
   function onPostChanged(result: CalendarStateChange) {
     setSelected(null); setStateFilter('all')
     if (result.confirmed && result.action === 'schedule' && result.dateTime) setAnchor(new Date(`${result.dateTime.slice(0, 10)}T12:00:00`))
@@ -177,16 +217,32 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       {loading ? 'Verificando con Metricool…' : error ? 'Verificación no disponible' : failedClients.length ? 'Verificación incompleta' : checkedAt ? `Verificado con Metricool · ${new Date(checkedAt).toLocaleTimeString('es-PR', { timeZone: 'America/Puerto_Rico', hour: 'numeric', minute: '2-digit', second: '2-digit' })}` : 'Esperando verificación de Metricool'}
       <span>· Actualización automática cada minuto con el calendario abierto</span>
     </div>
+    {draftMessage && <p role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">{draftMessage}</p>}
     {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No se pudo verificar: {failedClients.map(c => c.name).join(', ')}. Los conteos están incompletos.</div>}
     {activeClient && !activeClient.metricool_blog_id && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Conecta {activeClient.name} con Metricool para ver sus publicaciones y subir contenido.</p>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
-    {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus videos pendientes en las fechas proyectadas y su cobertura.</p>}
+    {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus posts y videos pendientes en las fechas proyectadas y su cobertura.</p>}
     {coverageError && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{coverageError}</p>}
-    {projection && <section aria-label="Cobertura de videos" className="space-y-1 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
-      <p className="font-semibold">{projection.total} videos pendientes{coverageLabel ? ` · Cobertura proyectada hasta el ${coverageLabel}` : ''}</p>
-      <p className="text-xs">Un video por día de cadencia disponible. Se omiten días de Post/Story y días con publicaciones programadas o publicadas. Proyección sujeta a revisión y aprobación; no programa publicaciones.</p>
-      {!activeClient?.posting_days?.length && <p className="text-sm">Configura la cadencia para calcular fechas.</p>}
-      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} videos sin fecha dentro del próximo año.</p>}
+    {coverageVerifying && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Verificando hasta qué día llega tu contenido…</p>}
+    {projection && !coverageVerifying && <section aria-label="Cobertura de contenido" className="space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide">{activeClient?.name} · Alcance del contenido actual</p>
+          {coverageDuration && <p aria-label="Tiempo restante de contenido" className="mt-2 text-xl font-semibold sm:text-2xl">{coverageDuration}</p>}
+          <h3 className="mt-1 text-xl font-semibold sm:text-2xl">{coverageLabel ? `Contenido actual hasta el ${coverageLabel}` : 'Sin publicaciones futuras con fecha'}</h3>
+        </div>
+        {projection.through && <Button variant="outline" className="shrink-0" onClick={() => setAnchor(new Date(`${projection.through}T12:00:00`))}>Ver última fecha</Button>}
+      </div>
+      <p className="text-sm">{projection.total} {projection.total === 1 ? 'pieza pendiente' : 'piezas pendientes'} · {projection.drafts} {projection.drafts === 1 ? 'borrador' : 'borradores'} · {projection.scheduled} {projection.scheduled === 1 ? 'publicación programada' : 'publicaciones programadas'}</p>
+      <p className="text-xs">Última fecha prevista según la frecuencia actual, con borradores y publicaciones programadas. Las piezas pendientes requieren aprobación; los borradores no se publican automáticamente.</p>
+      <p className="text-xs">Las piezas pendientes ocupan días compatibles y libres. Arrastra una pieza aprobada a un día para guardarla como borrador.</p>
+      {!activeClient?.posting_days?.length && <p className="text-sm">Configura la cadencia para calcular fechas pendientes.</p>}
+      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} piezas sin fecha compatible dentro del próximo año; no se incluyen en la fecha final.</p>}
+    </section>}
+    {projection && projection.unplaced.length > 0 && stateFilter === 'all' && <section aria-label="Contenido sin fecha" className="space-y-3 rounded-xl border bg-white p-4">
+      <h3 className="text-sm font-semibold">Sin fecha · {projection.unplaced.length} {projection.unplaced.length === 1 ? 'pieza' : 'piezas'}</h3>
+      <p className="text-xs text-muted-foreground">Contenido pendiente de Recibo. Configura días compatibles en la frecuencia del cliente para proyectar sus fechas.</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">{projection.unplaced.map(({idea,videoId,image}) => pendingCard(idea,videoId,image,false))}</div>
     </section>}
     <div className={styles.layout}>
       <div className="min-w-0 space-y-3">
@@ -199,15 +255,11 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
             const expected = cadenceClients.flatMap(client=>{const slot=calendarCadenceSlot(client,day.getDay());return slot?[{client,...slot}]:[]})
             const expectedShown=expandedCadenceDays[date]?expected:expected.slice(0,2)
             const shown = expandedDays[date] ? dayPosts : dayPosts.slice(0, 2)
-            return <div key={date} data-calendar-date={date} className={cn('min-h-[150px] border-b border-r border-border/70 p-2 space-y-2', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5')}>
+            return <div key={date} data-calendar-date={date} onDragOver={event=>{if(dragPayload.current && date>=today && !calendarBusy){event.preventDefault();event.dataTransfer.dropEffect='move'}}} onDrop={event=>{event.preventDefault();const payload=dragPayload.current;if(payload)void createCalendarDraft(payload,date)}} className={cn('min-h-[150px] border-b border-r border-border/70 p-2 space-y-2', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5', dragging && date>=today && 'ring-1 ring-inset ring-amber-400')}>
               <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-xs', date === today ? 'bg-primary font-semibold text-primary-foreground' : 'text-muted-foreground')}>{day.getDate()}</span>
               {expectedShown.map(slot=><p key={slot.client.id} className="rounded-md border border-dashed border-violet-300 bg-violet-50 p-1 text-[10px] leading-relaxed text-violet-800">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
               {expected.length>2&&<button type="button" onClick={()=>setExpandedCadenceDays(s=>({...s,[date]:!s[date]}))} className="text-[10px] text-violet-700">{expandedCadenceDays[date]?'Ocultar días previstos':`+${expected.length-2} clientes previstos`}</button>}
-              {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({ idea, videoId }) => <article key={idea.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2">
-                <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} hasEdited />
-                <p className="text-xs font-semibold">{idea.title || idea.hook || 'Video'}</p>
-                <p className="text-[10px] text-amber-800">{reciboSpaceTone(idea) === 'approved' ? 'Proyectado · aprobado' : 'Proyectado · pendiente de aprobación'}</p>
-              </article>)}
+              {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({idea,videoId,image}) => pendingCard(idea,videoId,image,true,date))}
               {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} />)}
               {dayPosts.length > 2 && <button onClick={() => setExpandedDays(s => ({ ...s, [date]: !s[date] }))} className="px-1 text-xs text-primary">{expandedDays[date] ? 'Ver menos' : `+${dayPosts.length - 2} más`}</button>}
             </div>
@@ -232,6 +284,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
         <div className="rounded-xl bg-primary/5 p-5"><CalendarDays className="mb-4 h-6 w-6 text-primary" /><p className="text-sm font-medium">Cada publicación tiene su momento.</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">Organiza tu contenido y revisa lo que viene para cada cliente.</p><div className="mt-5 h-px w-6 bg-primary" /><p className="mt-4 text-[11px] text-primary">Planea hoy. Publica con intención.</p></div>
       </aside>
     </div>
+    <Dialog open={!!dateChoice} onOpenChange={open=>{if(!open && !calendarBusy)setDateChoice(null)}}><DialogContent className={styles.theme}><DialogHeader><DialogTitle>Crear borrador para un día</DialogTitle><DialogDescription>Se guardará en Metricool como borrador. Publicarlo requiere una acción aparte.</DialogDescription></DialogHeader><label className="space-y-2 text-sm">Fecha · Puerto Rico<input aria-label="Fecha del borrador" type="date" min={today} value={dateChoice?.date??today} disabled={calendarBusy} className="block min-h-12 w-full rounded-lg border bg-background p-3 text-base" onChange={event=>setDateChoice(choice=>choice?{...choice,date:event.target.value}:null)}/></label><Button disabled={calendarBusy || !dateChoice?.date || dateChoice.date<today} onClick={()=>{if(dateChoice)void createCalendarDraft(dateChoice,dateChoice.date)}}>{calendarBusy?'Creando borrador…':'Crear borrador'}</Button></DialogContent></Dialog>
     <Dialog open={upcomingOpen} onOpenChange={setUpcomingOpen}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>Próximas publicaciones</DialogTitle><DialogDescription>Publicaciones programadas en el período seleccionado · Hora de Puerto Rico</DialogDescription></DialogHeader><div className="space-y-3">{upcoming.length ? upcoming.map(p => <PostCard key={key(p)} post={p} compact onOpen={() => { setUpcomingOpen(false); setSelected(p) }} />) : <p className="text-sm text-muted-foreground">Sin publicaciones programadas próximas.</p>}</div></DialogContent></Dialog>
     <Dialog open={!!selectedPost} onOpenChange={open => { if (!open && !mutationInFlight.current) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" playable /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><CalendarPostControls key={`${key(selectedPost)}:${checkedAt}`} post={selectedPost} onChanged={onPostChanged} verifying={loading} onBusy={busy => { mutationInFlight.current = busy; setCalendarBusy(busy) }} onVerify={() => setRefresh(r => r + 1)} /><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
   </section>

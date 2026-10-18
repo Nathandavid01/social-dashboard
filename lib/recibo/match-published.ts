@@ -21,7 +21,7 @@ export type MatchPost = {
   creationDate?: { dateTime?: string | null; timezone?: string | null } | null
 }
 
-type MatchVideo = { kind?: string | null; status?: string | null; size_bytes?: number | null }
+type MatchVideo = { kind?: string | null; status?: string | null; size_bytes?: number | null; mime_type?: string | null; name?: string | null }
 export type MatchIdea = { id: string; videos?: MatchVideo[] | null }
 
 export type ReciboPublishedMatch<P extends MatchPost = MatchPost> = { ideaId: string; post: P }
@@ -68,7 +68,7 @@ export function matchReciboPublished<P extends MatchPost>(
   const owner = new Map<number, string | null>()
   for (const idea of ideas) {
     for (const video of idea.videos ?? []) {
-      if (!usableCut(video)) continue
+      if (!usableCut(video) || video.mime_type?.startsWith('image/') || /\.(png|jpe?g|webp|gif)$/i.test(video.name ?? '')) continue
       const size = video.size_bytes
       if (!size || size <= 0) continue
       const prev = owner.get(size)
