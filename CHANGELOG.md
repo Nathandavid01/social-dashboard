@@ -1,3 +1,13 @@
+## v5.140 — 18 de octubre de 2026
+
+**Los posts de Recibo también aparecen en el calendario de publicaciones.**
+- Las gráficas muestran su imagen y los videos conservan su reproductor.
+- Cada pieza ocupa un día compatible con la frecuencia del cliente, evitando publicaciones existentes.
+- Cuando faltan días configurados, las piezas aparecen en «Sin fecha» sin inventar una fecha de publicación.
+- Las fechas proyectadas conservan su aprobación pendiente y no programan contenido automáticamente.
+
+![Posts pendientes en el calendario](/changelog/v5.140-recibo-posts.png)
+
 ## v5.139 — 18 de octubre de 2026
 
 **Un acceso más claro y cómodo a Nate Media.**

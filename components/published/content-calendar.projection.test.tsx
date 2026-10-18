@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
 vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importOriginal<object>(),puertoRicoNow:()=> '2026-10-16T20:00:00'}))
-vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId}:{ideaId:string})=><video controls data-testid={`preview-${ideaId}`}/>}))
+vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId,image,title}:{ideaId:string;image?:boolean;title?:string})=>image?<img alt={title} data-testid={`image-${ideaId}`}/>:<video controls data-testid={`preview-${ideaId}`}/>}))
 import { ContentCalendar } from './content-calendar'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals()})
@@ -46,7 +46,7 @@ it('extends coverage in 35-day batches and stops once all queued videos fit',asy
  vi.stubGlobal('fetch',fetcher)
  const queue=Array.from({length:50},(_,i)=>({...idea,id:`piece-${i}`}))
  render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={queue} />)
- expect(await screen.findByText(/50 videos pendientes/)).toHaveTextContent('4 de diciembre de 2026')
+ expect(await screen.findByText(/50 piezas pendientes/)).toHaveTextContent('4 de diciembre de 2026')
  expect(fetcher).toHaveBeenCalledTimes(3)
  expect(fetcher.mock.calls[1][0]).toContain('startDate=2026-10-16')
  expect(fetcher.mock.calls[2][0]).toContain('startDate=2026-11-20')
@@ -62,4 +62,14 @@ it('keeps playable coverage visible while the minute refresh is pending',async()
  expect(fetcher).toHaveBeenCalledTimes(4)
  expect(screen.getByTestId('preview-i')).toBeInTheDocument()
  expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
+})
+
+it('shows pending graphics as images without dates when cadence is unconfigured',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}))
+ const graphic={...idea,id:'graphic',title:'Pizza 643',videos:[{...idea.videos![0],id:'png',name:'pizza.png',mime_type:'image/png'}]}
+ render(<ContentCalendar clients={[{...client,posting_days:[]}]} clientId="c" projectionIdeas={[graphic]} />)
+ expect(await screen.findByTestId('image-graphic')).toHaveAttribute('alt','Pizza 643')
+ expect(screen.getByTestId('image-graphic').closest('[data-calendar-date]')).toBeNull()
+ expect(screen.getByText('Sin fecha · 1 pieza')).toBeInTheDocument()
+ expect(screen.getByText(/1 pieza pendiente/)).toBeInTheDocument()
 })

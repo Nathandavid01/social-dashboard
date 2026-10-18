@@ -180,13 +180,22 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No se pudo verificar: {failedClients.map(c => c.name).join(', ')}. Los conteos están incompletos.</div>}
     {activeClient && !activeClient.metricool_blog_id && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Conecta {activeClient.name} con Metricool para ver sus publicaciones y subir contenido.</p>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
-    {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus videos pendientes en las fechas proyectadas y su cobertura.</p>}
+    {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus posts y videos pendientes en las fechas proyectadas y su cobertura.</p>}
     {coverageError && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{coverageError}</p>}
-    {projection && <section aria-label="Cobertura de videos" className="space-y-1 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
-      <p className="font-semibold">{projection.total} videos pendientes{coverageLabel ? ` · Cobertura proyectada hasta el ${coverageLabel}` : ''}</p>
-      <p className="text-xs">Un video por día de cadencia disponible. Se omiten días de Post/Story y días con publicaciones programadas o publicadas. Proyección sujeta a revisión y aprobación; no programa publicaciones.</p>
+    {projection && <section aria-label="Cobertura de contenido" className="space-y-1 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+      <p className="font-semibold">{projection.total} {projection.total === 1 ? 'pieza pendiente' : 'piezas pendientes'}{coverageLabel ? ` · Cobertura proyectada hasta el ${coverageLabel}` : ''}</p>
+      <p className="text-xs">Una pieza por día disponible: gráficas en Post, videos en Reel y ambos cuando el día no tiene formato. Se omiten Stories y días con publicaciones programadas o publicadas. Proyección sujeta a revisión y aprobación; no programa publicaciones.</p>
       {!activeClient?.posting_days?.length && <p className="text-sm">Configura la cadencia para calcular fechas.</p>}
-      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} videos sin fecha dentro del próximo año.</p>}
+      {projection.overflow > 0 && <p className="text-xs">{projection.overflow} piezas sin fecha compatible dentro del próximo año.</p>}
+    </section>}
+    {projection && projection.unplaced.length > 0 && stateFilter === 'all' && <section aria-label="Contenido sin fecha" className="space-y-3 rounded-xl border bg-white p-4">
+      <h3 className="text-sm font-semibold">Sin fecha · {projection.unplaced.length} {projection.unplaced.length === 1 ? 'pieza' : 'piezas'}</h3>
+      <p className="text-xs text-muted-foreground">Contenido pendiente de Recibo. Configura días compatibles en la frecuencia del cliente para proyectar sus fechas.</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">{projection.unplaced.map(({idea,videoId,image}) => <article key={idea.id} className="min-w-0 space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-2">
+        <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
+        <p className="text-xs font-semibold">{idea.title || idea.hook || 'Contenido'}</p>
+        <p className="text-[10px] text-amber-800">{image ? 'Post' : 'Reel'} · {reciboSpaceTone(idea) === 'approved' ? 'Aprobado' : 'Pendiente de aprobación'}</p>
+      </article>)}</div>
     </section>}
     <div className={styles.layout}>
       <div className="min-w-0 space-y-3">
@@ -203,8 +212,8 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
               <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-xs', date === today ? 'bg-primary font-semibold text-primary-foreground' : 'text-muted-foreground')}>{day.getDate()}</span>
               {expectedShown.map(slot=><p key={slot.client.id} className="rounded-md border border-dashed border-violet-300 bg-violet-50 p-1 text-[10px] leading-relaxed text-violet-800">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
               {expected.length>2&&<button type="button" onClick={()=>setExpandedCadenceDays(s=>({...s,[date]:!s[date]}))} className="text-[10px] text-violet-700">{expandedCadenceDays[date]?'Ocultar días previstos':`+${expected.length-2} clientes previstos`}</button>}
-              {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({ idea, videoId }) => <article key={idea.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2">
-                <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} hasEdited />
+              {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({ idea, videoId, image }) => <article key={idea.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2">
+                <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || "Contenido"} hasEdited />
                 <p className="text-xs font-semibold">{idea.title || idea.hook || 'Video'}</p>
                 <p className="text-[10px] text-amber-800">{reciboSpaceTone(idea) === 'approved' ? 'Proyectado · aprobado' : 'Proyectado · pendiente de aprobación'}</p>
               </article>)}

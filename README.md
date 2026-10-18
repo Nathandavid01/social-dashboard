@@ -52,3 +52,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Posts pendientes en el calendario (v5.140)
+
+Por instrucción de Eric del 18 de octubre de 2026, la cobertura de Recibo incluye gráficas y videos. Reemplaza la restricción anterior a videos: las gráficas se proyectan en días Post, los videos en Reel y los días sin formato admiten ambos en orden de recepción. Story queda excluido. Las piezas ya programadas/publicadas y los días ocupados no se vuelven a asignar.
+
+Sin una frecuencia compatible se muestran las piezas en **Sin fecha**, con su imagen o reproductor y aprobación real. Configurar frecuencia permite proyectarlas; la proyección no programa ni publica contenido. Comprobar con `lib/recibo/calendar-projection.test.ts` y `components/published/content-calendar.projection.test.tsx`.
