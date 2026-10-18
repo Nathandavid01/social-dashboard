@@ -53,7 +53,7 @@ describe('WhatsNew', () => {
     await screen.findByRole('dialog')
     expect(screen.getByText('Ya puedes eliminar un borrador.')).toBeInTheDocument()
     expect(screen.getByText('1 de 2')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Eliminar borrador' })).toBeInTheDocument()
+    expect(await screen.findByRole('img', { name: 'Eliminar borrador' })).toBeInTheDocument()
     expect(localStorage.getItem(WHATS_NEW_STORAGE_KEY)).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: /siguiente/i }))
@@ -100,5 +100,13 @@ describe('WhatsNew', () => {
     await waitFor(() => expect(mockFetch).toHaveBeenCalled())
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(localStorage.getItem(WHATS_NEW_STORAGE_KEY)).toBeNull()
+  })
+})
+
+describe('WhatsNew bundle', () => {
+  it('no importa react-markdown de forma estática (se monta en todas las rutas)', async () => {
+    const { readFileSync } = await import('node:fs')
+    const src = readFileSync('components/shared/whats-new.tsx', 'utf8')
+    expect(src).not.toMatch(/from 'react-markdown'|from 'remark-gfm'/)
   })
 })
