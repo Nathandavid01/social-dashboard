@@ -1,3 +1,12 @@
+## v5.121 — 18 de octubre de 2026
+
+**Un acceso más claro y cómodo a Nate Media.**
+- Pantalla de entrada con una tarjeta centrada y jerarquía visual más cuidada.
+- Campos y controles más cómodos en el teléfono.
+- El formulario anuncia cuándo está entrando y evita enviar dos veces.
+
+![Acceso de Nate Media](/changelog/v5.121-login.png)
+
 # Changelog
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
