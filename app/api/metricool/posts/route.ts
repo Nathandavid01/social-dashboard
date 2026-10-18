@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { currentUserHas } from '@/lib/auth/server'
+import { getScheduledPosts } from '@/lib/metricool/scheduler'
 
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 export interface PublishedPost {
   id: number
   uuid: string
@@ -8,6 +12,8 @@ export interface PublishedPost {
   publicationDate: string
   timezone: string
   platforms: string[]
+  providerStatuses?: string[]
+  providers?: { network: string; status: string; detailedStatus?: string; publicUrl?: string }[]
   draft: boolean
   autoPublish: boolean
   media: { url?: string; type?: string }[]
@@ -15,138 +21,83 @@ export interface PublishedPost {
   clientId?: string
   blogId: string
 }
-
-async function fetchMetricoolPosts(blogId: string, start: string, end: string) {
-  const token = process.env.METRICOOL_TOKEN
-  const userId = process.env.METRICOOL_USER_ID
-  if (!token || !userId) return []
-
-  const url = `https://app.metricool.com/api/v2/scheduler/posts?userId=${userId}&blogId=${blogId}&start=${start}&end=${end}`
-  const res = await fetch(url, {
-    headers: { 'X-Mc-Auth': token },
-    next: { revalidate: 60 },
-  })
-  if (!res.ok) return []
-
-  const json = await res.json() as {
-    data?: {
-      id: number
-      uuid: string
-      text: string
-      publicationDate: { dateTime: string; timezone: string }
-      providers: { network: string }[]
-      draft: boolean
-      autoPublish: boolean
-      media?: { url?: string; type?: string }[]
-    }[]
-  }
-
-  return (json.data || []).map((p) => ({
-    id: p.id,
-    uuid: p.uuid,
-    text: p.text || '',
+const json = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
+async function fetchMetricoolPosts(blogId: string, start: string, end: string): Promise<PublishedPost[]> {
+  const posts = await getScheduledPosts({ userToken: process.env.METRICOOL_TOKEN!, userId: process.env.METRICOOL_USER_ID!, blogId }, start, end)
+  return posts.map(p => ({
+    id: p.id, uuid: p.uuid, text: p.text || '',
     publicationDate: p.publicationDate?.dateTime || '',
     timezone: p.publicationDate?.timezone || 'America/Puerto_Rico',
-    platforms: (p.providers || []).map((x) => x.network),
-    draft: p.draft,
-    autoPublish: p.autoPublish,
-    media: (p.media || []) as { url?: string; type?: string }[],
-    blogId,
+    platforms: (p.providers || []).map(x => x.network),
+    providerStatuses: (p.providers || []).map(x => x.status ?? 'UNKNOWN'),
+    providers: (p.providers || []).map(x => ({ network: x.network, status: x.status ?? 'UNKNOWN', detailedStatus: x.detailedStatus, publicUrl: x.publicUrl })),
+    draft: p.draft, autoPublish: p.autoPublish,
+    media: (p.media || []).map(m => typeof m === 'string' ? {url:m} : m) as PublishedPost['media'], blogId,
   }))
 }
-
 export async function GET(req: NextRequest) {
+  if (!await currentUserHas('metricool.read')) return json({ error: 'Acceso denegado' }, 403)
+  if (!process.env.METRICOOL_TOKEN || !process.env.METRICOOL_USER_ID) return json({ error: 'Metricool no está configurado.' }, 503)
   const { searchParams } = new URL(req.url)
   const blogId = searchParams.get('blogId')
-  const range = searchParams.get('range') || '30d'
+  const requestedClientId = searchParams.get('clientId')
+  const includeDrafts = searchParams.get('includeDrafts') === 'true'
   const all = searchParams.get('all') === 'true'
   const todayOnly = searchParams.get('today') === 'true'
-  // Direct date params for calendar view — ISO date strings (YYYY-MM-DD)
-  const startParam = searchParams.get('startDate')
-  const endParam = searchParams.get('endDate')
-
-  let start: Date
-  let end: Date
-
-  if (startParam && endParam) {
-    start = new Date(startParam + 'T00:00:00')
-    end = new Date(endParam + 'T23:59:59')
-  } else if (todayOnly) {
-    const now = new Date()
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+  const startParam = searchParams.get('startDate'), endParam = searchParams.get('endDate')
+  let start: Date, end: Date
+  if (startParam || endParam) {
+    const valid = (date: string | null) => !!date && /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(`${date}T00:00:00Z`)) && new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) === date
+    if (!valid(startParam) || !valid(endParam) || startParam! > endParam!) return json({ error: 'Rango de fechas inválido.' }, 400)
+    start = new Date(`${startParam}T00:00:00Z`); end = new Date(`${endParam}T23:59:59Z`)
   } else {
-    // Default: past range + 30 days into the future for scheduled posts
-    start = new Date()
-    switch (range) {
-      case '7d': start.setDate(start.getDate() - 7); break
-      case '14d': start.setDate(start.getDate() - 14); break
-      case '30d': start.setDate(start.getDate() - 30); break
-      case '90d': start.setDate(start.getDate() - 90); break
-      case '180d': start.setDate(start.getDate() - 180); break
+    start = new Date(); end = new Date()
+    if (todayOnly) {
+      const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(start)
+      start = new Date(`${day}T00:00:00Z`); end = new Date(`${day}T23:59:59Z`)
+    } else {
+      const ranges: Record<string, number> = { '7d': 7, '14d': 14, '30d': 30, '90d': 90, '180d': 180 }
+      start.setUTCDate(start.getUTCDate() - (ranges[searchParams.get('range') || '30d'] ?? 30))
+      end.setUTCDate(end.getUTCDate() + 30)
     }
-    end = new Date()
-    end.setDate(end.getDate() + 30) // Always include 30 days of future scheduled posts
   }
-  const startStr = start.toISOString().slice(0, 19)
-  const endStr = end.toISOString().slice(0, 19)
-
+  const startStr = start.toISOString().slice(0, 19), endStr = end.toISOString().slice(0, 19)
+  const sort = (posts: PublishedPost[]) => posts.filter(p => includeDrafts || !p.draft).sort((a, b) => todayOnly ? a.publicationDate.localeCompare(b.publicationDate) : b.publicationDate.localeCompare(a.publicationDate))
   try {
     const supabase = await createClient()
-
+    if (requestedClientId) {
+      const {data: client, error} = await supabase.from('clients').select('id,name,metricool_blog_id').eq('id',requestedClientId).eq('status','active').maybeSingle()
+      if(error || !client?.metricool_blog_id)return json({error:'Cliente de Metricool no disponible.'},404)
+      const posts=await fetchMetricoolPosts(client.metricool_blog_id,startStr,endStr)
+      return json({posts:sort(posts).map(p=>({...p,clientId:client.id,clientName:client.name})),checkedAt:new Date().toISOString(),complete:true,failedClients:[]})
+    }
     if (all) {
-      // Fetch from all active clients with metricool_blog_id in parallel
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('id, name, metricool_blog_id')
-        .not('metricool_blog_id', 'is', null)
-        .eq('status', 'active')
-        .limit(50)
-
-      if (!clients?.length) return NextResponse.json({ posts: [] })
-
-      const results = await Promise.allSettled(
-        clients.map((c) => fetchMetricoolPosts(c.metricool_blog_id!, startStr, endStr).then((posts) =>
-          posts.map((p) => ({ ...p, clientName: c.name, clientId: c.id }))
-        ))
-      )
-
-      const posts: PublishedPost[] = results
-        .filter((r) => r.status === 'fulfilled')
-        .flatMap((r) => (r as PromiseFulfilledResult<PublishedPost[]>).value)
-        .filter((p) => !p.draft)
-        .sort((a, b) => todayOnly
-          ? a.publicationDate.localeCompare(b.publicationDate)
-          : b.publicationDate.localeCompare(a.publicationDate))
-
-      return NextResponse.json({ posts, clientCount: clients.length })
+      const { data: clients, error } = await supabase.from('clients').select('id, name, metricool_blog_id').not('metricool_blog_id', 'is', null).eq('status', 'active')
+      if (error) return json({ error: 'No se pudo consultar los clientes.' }, 502)
+      const clientsToCheck = clients ?? []
+      // One read per Metricool account, even when clients share a blog.
+      const queries = new Map<string, Promise<PublishedPost[]>>()
+      const results = await Promise.allSettled(clientsToCheck.map(async c => {
+        const id = c.metricool_blog_id!
+        if (!queries.has(id)) queries.set(id, fetchMetricoolPosts(id, startStr, endStr))
+        return (await queries.get(id)!).map(p => ({ ...p, clientName: c.name, clientId: c.id }))
+      }))
+      const failedClients = results.flatMap((r, i) => r.status === 'rejected' ? [{ id: clientsToCheck[i].id, name: clientsToCheck[i].name }] : [])
+      const posts = results.flatMap(r => r.status === 'fulfilled' ? r.value : [])
+      if (clientsToCheck.length && failedClients.length === clientsToCheck.length) return json({ error: 'No se pudo verificar Metricool.', failedClients, complete: false }, 502)
+      return json({ posts: sort(posts), clientCount: clientsToCheck.length, checkedAt: new Date().toISOString(), complete: failedClients.length === 0, failedClients })
     }
-
-    // Single blog
     const effectiveBlogId = blogId || process.env.METRICOOL_BLOG_ID
-    if (!effectiveBlogId) return NextResponse.json({ posts: [] })
-
-    let clientName: string | undefined
-    let clientId: string | undefined
+    if (!effectiveBlogId) return json({ error: 'Selecciona un cliente conectado a Metricool.' }, 503)
+    let clientName: string | undefined, clientId: string | undefined
     if (blogId) {
-      const { data: c } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('metricool_blog_id', blogId)
-        .single()
-      clientName = c?.name
-      clientId = c?.id
+      const { data: c, error } = await supabase.from('clients').select('id, name').eq('metricool_blog_id', blogId).eq('status', 'active').order('name').order('id').limit(1).maybeSingle()
+      if (error || !c) return json({ error: 'Cliente de Metricool no disponible.' }, 404)
+      clientName = c.name; clientId = c.id
     }
-
     const posts = await fetchMetricoolPosts(effectiveBlogId, startStr, endStr)
-    const filtered = posts
-      .filter((p) => !p.draft)
-      .sort((a, b) => b.publicationDate.localeCompare(a.publicationDate))
-      .map((p) => ({ ...p, clientName, clientId }))
-
-    return NextResponse.json({ posts: filtered })
-  } catch (error) {
-    console.error('Metricool posts API error:', error)
-    return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })
+    return json({ posts: sort(posts).map(p => ({ ...p, clientName, clientId })), checkedAt: new Date().toISOString(), complete: true, failedClients: [] })
+  } catch {
+    return json({ error: 'No se pudo verificar Metricool. Intenta nuevamente.', complete: false }, 502)
   }
 }

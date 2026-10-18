@@ -1,8 +1,8 @@
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 /**
- * Latest usable edited Entregas file id on an idea (client-side mirror of
- * getEntregaVideoEditado). Null → show "Sin video editado".
+ * Latest usable edited dashboard file id on an idea (client-side mirror of
+ * getReciboEditedVideo). Null → show "Sin video editado".
  */
 export function editedEntregasVideoId(
   idea: Pick<IdeaWithPipeline, 'videos'>,
@@ -10,7 +10,7 @@ export function editedEntregasVideoId(
   const candidates = (idea.videos ?? []).filter(
     (v) =>
       v.kind === 'edited' &&
-      v.storage_provider === 'entregas-r2' &&
+      ['r2', 'entregas-r2'].includes(v.storage_provider) &&
       v.status !== 'failed' &&
       v.status !== 'archived' &&
       !!v.drive_file_id &&
@@ -21,4 +21,10 @@ export function editedEntregasVideoId(
     (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''),
   )
   return sorted[0]?.id ?? null
+}
+
+/** Classify the exact current file, never a stale or archived attachment. */
+export function isReciboGraphic(idea: Pick<IdeaWithPipeline, 'videos'>): boolean {
+  const id = editedEntregasVideoId(idea)
+  return !!idea.videos?.find((file) => file.id === id)?.mime_type?.startsWith('image/')
 }

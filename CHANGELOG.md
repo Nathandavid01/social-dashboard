@@ -1,17 +1,211 @@
-## v5.121 — 18 de octubre de 2026
+## v5.139 — 18 de octubre de 2026
 
 **Un acceso más claro y cómodo a Nate Media.**
 - Pantalla de entrada con una tarjeta centrada y jerarquía visual más cuidada.
 - Campos y controles más cómodos en el teléfono.
 - El formulario anuncia cuándo está entrando y evita enviar dos veces.
 
-![Acceso de Nate Media](/changelog/v5.121-login.png)
+![Acceso de Nate Media](/changelog/v5.139-login.png)
 
 # Changelog
 
 Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un commit.
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
+
+## v5.138 — 2026-10-16
+
+**Recibos muestra tus videos pendientes dentro del calendario y hasta cuándo te alcanzan.**
+- Selecciona un cliente para ver cada video reproducible en su fecha proyectada, según su cadencia.
+- La cobertura evita días ocupados, publicados, duplicados y días destinados a posts o stories; las proyecciones conservan su aprobación pendiente.
+- El calendario comienza con la semana actual y muestra cinco semanas hacia adelante.
+- Si Metricool no se puede verificar, no se presentan fechas de cobertura como confirmadas.
+
+![Calendario de Recibos con videos pendientes](/changelog/v5.138-recibo-proyeccion.png)
+
+## v5.136 — 2026-10-14
+
+**Inventario de video: cuenta lo agendado en Metricool, cambias la cadencia ahí mismo y te acercas con la rueda del mouse.**
+- **Lo agendado de verdad:** se lee el planificador de Metricool de cada cliente, incluidos los posts hechos a mano que el dashboard no conocía. Cada post agendado cubre su día en la tarjeta y aparece en el calendario 3D y en el perfil como «Agendado». Se actualiza cada 10 minutos.
+- **La cadencia se edita desde el perfil:** «Editar cadencia» abre los días, si cada día es reel o post y la hora. Al guardar, el inventario se recalcula.
+- La rueda (o pellizcar en el celular) acerca la escena 3D hacia donde apunta el cursor; arrastra para inclinar y usa clic derecho o dos dedos para moverte.
+- «Vista general» te devuelve a todas las gradas. Fuera de la escena, la página sigue bajando normal.
+- Un post publicado de noche ya no aparece al día siguiente en el calendario.
+- El perfil siempre deja espacio para lo publicado recientemente.
+
+[Ver diseño](/previews/v5.136-inventario-zoom.html)
+
+![Zoom en el inventario](/changelog/v5.136-inventario-zoom.png)
+
+![Post agendado a mano en Metricool en el calendario del cliente](/changelog/v5.136-inventario-agendados.png)
+
+## v5.135 — 2026-10-14
+
+**Nuevo: Inventario de video — un anfiteatro 3D con el logo de cada cliente, cuántos reels y posts le quedan, y su calendario de las próximas 2 semanas.**
+- Cada cliente es un medallón con su logo (o sus iniciales) en gradas curvas por estado: al frente **Sin videos**, luego **Menos de 1 semana**, **1–2 semanas**, **2+ semanas** y **Sin cadencia**, cada grada con su letrero.
+- En el medallón se ve sin tocar nada: el número dorado son los videos listos y el azul (+N) los clips en crudo esperando edición.
+- **Reels y posts por separado:** la cadencia dice qué toca cada día (lunes reel, martes post…) y un reel no cubre un día de post. Si se acaba antes, la fila lo dice: «Se acaba vie 16 oct · falta post».
+- Al tocar un cliente, la cámara vuela hasta él y despliega **su calendario de 14 días en 3D**: qué día es reel o post, qué está agendado, qué video listo saldría y qué días están vacíos. Al lado se abre su **perfil**: cadencia, hora, editor, los números y sus reels y posts (agendados, listos y publicados) con portada.
+- Lo ya publicado no cuenta; lo agendado en Metricool para hoy o después sí cubre días. Solo cuenta lo que está subido al sistema: lo que vive únicamente en Drive todavía no sale, y la página lo dice.
+
+[Ver diseño del Inventario](/previews/v5.133-inventario-video.html)
+
+![Inventario de video en 3D](/changelog/v5.133-inventario-video-escena.png)
+
+![Perfil y calendario del cliente](/changelog/v5.133-inventario-perfil.png)
+
+## v5.134 — 2026-10-14
+
+**«Inicio» y «Escribir ideas» ya no están en el dashboard: todo arranca en Mi día.**
+- El menú ya no muestra «Inicio» ni «Escribir ideas».
+- Si abres un enlace viejo a `/home` o `/escribir-ideas`, sale la página de «no existe».
+- Cuando una página no te deja entrar, o al salir de «Ver como», caes en Mi día en vez de Inicio.
+- La app instalada (PWA) y la pantalla sin conexión abren en Mi día.
+- Para escribir ideas sigue el Lab de Ideas; las de On Site se siguen editando en On Site.
+
+[Ver el menú antes y después](/previews/v5.134-sin-inicio.html)
+
+## v5.132 — 2026-10-13
+
+**Recibo muestra tus videos en tarjetas verticales, con miniaturas y filtros.**
+- Encuentra entregas por cliente, búsqueda y estado; consulta el resumen de piezas por enviar, enlaces creados, cambios, aprobaciones y programadas.
+- Reconoce cada video con una miniatura vertical antes de abrirlo.
+- Videos y gráficos cargan su revisión al abrir la tarjeta; las miniaturas aprovechan las portadas existentes y el reproductor permite reintentar.
+- Revisa las entregas con fondos claros, tarjetas compactas y controles más legibles.
+- Conserva el calendario, las frecuencias y las acciones de cada entrega.
+
+[Ver diseño de Recibo](/previews/v5.132-recibo-tarjetas.html)
+
+![Tarjetas verticales de Recibo](/changelog/v5.132-recibo-tarjetas.png)
+
+## v5.131 — 2026-10-09
+
+**Configura la frecuencia de cada cliente directamente desde Recibos.**
+- Pulsa «Configurar frecuencia» junto al cliente en el panel del calendario.
+- Elige días, hora general y horarios por día; los cambios se guardan automáticamente.
+- La frecuencia y las marcas «Previsto» se actualizan al confirmar el guardado.
+- Los posts programados en Metricool conservan sus fechas.
+
+[Ver configuración desde el calendario](/previews/v5.131-calendario-configurar.html)
+
+![Configurar frecuencia desde Recibos](/changelog/v5.131-calendario-configurar.png)
+
+## v5.130 — 2026-10-09
+
+**Recibos marca los días en que le toca publicar a cada cliente.**
+- El panel «Frecuencia por cliente» muestra sus días por semana, horario y tipo de contenido configurados.
+- Las marcas «Previsto» aparecen en mes y semana, incluso cuando todavía no hay un post en Metricool.
+- Al elegir un cliente, solo aparecen su frecuencia y sus días previstos.
+- Los clientes sin días guardados muestran «Sin frecuencia configurada».
+
+[Ver frecuencia y días previstos](/previews/v5.130-calendario-frecuencia.html)
+
+![Calendario con frecuencia por cliente](/changelog/v5.130-calendario-frecuencia.png)
+
+## v5.129 — 2026-10-09
+
+**El calendario de publicaciones ahora está en Recibos.**
+- Abre Recibos para ver el calendario, elegir cliente y subir imágenes o videos.
+- Desde las tarjetas puedes guardar borradores, programar y verificar publicaciones con Metricool.
+- La pestaña «Contenido recibido» conserva los videos y sus controles de aprobación.
+- Cambiar de pestaña conserva una subida pendiente en el calendario.
+
+[Ver Recibos con calendario](/previews/v5.129-recibos-calendario.html)
+
+![Calendario dentro de Recibos](/changelog/v5.129-recibos-calendario.png)
+
+## v5.128 — 2026-10-08
+
+**Sube imágenes y videos directamente al calendario de cada cliente.**
+- Cada cliente tiene su calendario visual en la pestaña Calendario y un enlace directo desde su perfil.
+- «Subir contenido» permite adjuntar JPG/PNG o MP4/MOV, escribir el caption y elegir sus redes y fecha.
+- El archivo se guarda como borrador en Metricool; abre su tarjeta para programar la publicación automática.
+- Puedes revisar el video desde sus detalles. La subida muestra progreso y conserva el archivo para reintentar sin volver a subirlo.
+- Un envío pendiente de confirmar pide verificar Metricool antes de repetir, para evitar duplicados.
+
+[Ver la subida al calendario](/previews/v5.128-calendario-subidas.html)
+
+![Subida al calendario de un cliente](/changelog/v5.128-calendario-subidas.png)
+
+## v5.127 — 2026-10-08
+
+**Calendario visual conectado directamente con Metricool en el inicio.**
+- Vistas de mes y semana con miniaturas, horarios de Puerto Rico y filtros por cliente y estado.
+- Panel derecho con próximas publicaciones, resumen de estados y publicaciones que necesitan atención.
+- Verifica los estados cada minuto mientras está abierto; confirma «Publicado» solo con evidencia de todas las redes y muestra enlaces por red.
+- Abre un post para guardarlo como borrador o elegir fecha y hora y activar su publicación automática. Conserva el mismo post, contenido, redes y opciones.
+- Vuelve a consultar Metricool para confirmar cada cambio; los posts publicados conservan su historial y los errores quedan visibles.
+
+[Ver el calendario y sus controles](/previews/v5.127-calendario-programar.html)
+
+![Calendario y programación](/changelog/v5.127-calendario-programar.png)
+
+## v5.126 — 2026-10-05
+
+**En Recibo puedes buscar un video y dejar por qué no te gusta — solo el equipo lo ve.**
+- Arriba del tablero hay un buscador: escribe cliente, título o texto del caption y las tarjetas se filtran al instante, también en el celular.
+- Si no hay coincidencias, Recibo lo dice. Si dejas el buscador vacío, vuelven a verse todos.
+- Debajo de cada video (y de cada gráfico) puedes escribir el motivo si el corte no sirve.
+- Ese motivo es **solo interno**: el cliente no lo ve en su link de revisión ni en el portal.
+
+[Ver el buscador y el motivo](/previews/v5.126-recibo-buscar-motivo.html)
+
+![Buscador y motivo en Recibo](/changelog/v5.126-recibo-buscar-motivo.png)
+
+## v5.125 — 2026-10-05
+
+**Si no te gusta el video después de programarlo en Recibo, puedes cambiar la fecha o cancelar.**
+- En un espacio ya programado aparecen **Cambiar fecha** y **Cancelar programación** (con confirmación).
+- Cambiar fecha mueve el mismo post en Metricool a otra fecha futura. No se programa en el pasado.
+- Cancelar quita el post agendado de Metricool y el espacio vuelve a Recibo para programarlo otra vez. Si Metricool no deja borrar, el post queda como borrador para revisión.
+
+[Ver el preview](/previews/v5.125-recibo-cambiar-cancelar.html)
+
+![Cambiar fecha o cancelar en Recibo](/changelog/v5.125-recibo-cambiar-cancelar.png)
+
+## v5.124 — 2026-10-04
+
+**En Recibo, Publicar programa el video en la fecha de ese espacio, no lo suelta ya.**
+- El botón dice **Programar para** la fecha (y hora de cadencia) del espacio. Al confirmar queda **Programado** esa fecha, como borrador en Metricool.
+- Si el espacio no tiene fecha, se usa el próximo hueco de cadencia, como antes. No se inventa una fecha.
+- Si esa fecha (o la hora de hoy) ya pasó, avisa y pide otra. No se programa en el pasado.
+
+[Ver el preview](/previews/v5.124-recibo-programar.html)
+
+![Programar Recibo en la fecha del espacio](/changelog/v5.124-recibo-programar.png)
+
+## v5.123 — 2026-10-04
+
+**Recibo muestra los espacios de cadencia de cada cliente, no un listado suelto.**
+- Cada cliente tiene N espacios según sus días de publicación (cadencia). Los huecos vacíos se ven como pendientes.
+- Los videos que se van subiendo (corte, crudo o subida del cliente) llenan esos espacios con portada y caption visible.
+- Verde = aprobado o ya publicado/programado en Metricool. Ámbar = todavía sin aprobar.
+- Contador de subidas por mes, con el mes actual destacado y los meses anteriores solo si hay datos. El número sale de los mismos videos que llenan los espacios.
+- Los huecos vacíos son solo de clientes AI activos. Aníbal, Arasibo, VSS y Primer Round no ganan columna. Un corte de Eric en un cliente humano no abre el cupo semanal de ese cliente.
+
+[Ver el preview](/previews/v5.123-recibo-espacios.html)
+
+![Recibo por espacios de cadencia](/changelog/v5.123-recibo-espacios.png)
+
+## v5.122 — 2026-10-02
+
+**Recibo separa los gráficos y los videos de cada cliente.**
+- Nueva sección Gráficos con imágenes estáticas y el nombre de cada arte.
+- Cada gráfico conserva su caption editable y descarga individual.
+- Los videos mantienen su sección y sus controles habituales.
+- Las imágenes quedan en revisión; no se publican automáticamente.
+
+## v5.121 — 2026-10-01
+
+**Los videos editados que sube Eric aparecen en Recibo, también para clientes sin AI.**
+- Los cortes editados se muestran tanto si se subieron por el dashboard como por Entregas, respetando los filtros de Recibo.
+- Puedes ver y bajar el corte que aparece en la tarjeta desde su ubicación correspondiente.
+- El conteo incluye los videos editados de ambas rutas de subida y Recibo se actualiza al registrar una nueva subida.
+- La tarjeta sin archivo aclara que el video aparecerá al subir un archivo editado.
+
+[Ver el antes y después](/previews/v5.121-recibo-storage.html)
+
+![Alacena en Recibo](/changelog/v5.121-recibo-storage.png)
 
 ## v5.120 — 2026-09-25
 

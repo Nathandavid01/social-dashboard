@@ -42,10 +42,11 @@ export function resolveSlotTime(
   postingTime: string | null | undefined,
   postingSchedule: Record<string, string> | null | undefined,
 ): string | null {
-  const override = postingSchedule?.[String(dayOfWeek)]
-  if (override && override.trim()) return override
-  if (postingTime && postingTime.trim()) return postingTime
-  return null
+  const clock = (value: string | null | undefined): string | null => {
+    const trimmed=value?.trim()??''
+    return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(trimmed)?trimmed.slice(0,5):null
+  }
+  return clock(postingSchedule?.[String(dayOfWeek)]) ?? clock(postingTime)
 }
 
 /** YYYY-MM-DD from a Date's LOCAL calendar fields (matches posting-cadence). */

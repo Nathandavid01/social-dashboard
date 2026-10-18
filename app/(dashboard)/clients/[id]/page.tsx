@@ -1,3 +1,4 @@
+import { currentUserHas } from '@/lib/auth/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getClientById } from '@/lib/actions/clients'
@@ -39,6 +40,7 @@ export default async function ClientDetailPage({
 
   if (!clientRaw) notFound()
   const client = clientRaw as unknown as Client
+  const canSeeCalendar = await currentUserHas('metricool.read')
 
   const [
     { data: tasks },
@@ -240,6 +242,7 @@ export default async function ClientDetailPage({
 
       {/* Quick actions row */}
       <div className="flex flex-wrap gap-2">
+        {canSeeCalendar && <Button asChild variant="outline" size="sm"><Link href={`/clients/${id}/calendar`}><Calendar className="mr-1.5 h-3.5 w-3.5" /> Calendario de publicaciones</Link></Button>}
         {pipeline && (
           <NotifyOwnerButton
             clientId={id}

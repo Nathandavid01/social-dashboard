@@ -80,3 +80,16 @@ describe('ClientCadenceEditor', () => {
     expect(screen.queryByText(/AM sugerido/i)).not.toBeInTheDocument()
   })
 })
+
+it('reports confirmed edits to its calendar parent and preserves legacy formats in day edits',async()=>{
+ const saved=vi.fn();renderEditor({initialDays:[1,3],initialSchedule:{1:'reel',3:'16:00'},onSaved:saved})
+ fireEvent.click(screen.getByTestId('cadence-day-5'))
+ await waitFor(()=>expect(saved).toHaveBeenCalledWith({posting_days:[1,3,5],posting_schedule:{1:'reel',3:'16:00'}}))
+ expect(screen.getByLabelText('Hora del Lunes')).toHaveValue('')
+})
+it('keeps controls disabled until the server confirms a save and does not notify on rejection',async()=>{
+ let finish!:(value:any)=>void;updateClientCadence.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}));const saved=vi.fn();renderEditor({onSaved:saved})
+ fireEvent.change(screen.getByLabelText('Hora preferida'),{target:{value:'09:15'}})
+ expect(screen.getByLabelText('Hora preferida')).toBeDisabled();finish({error:'No autorizado'})
+ await waitFor(()=>expect(screen.getByLabelText('Hora preferida')).toHaveValue('14:00'));expect(saved).not.toHaveBeenCalled()
+})

@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest'
+import {calendarCadenceDays,calendarCadenceSlot} from './calendar-cadence'
+it('counts unique valid weekdays including Sunday without inventing an empty cadence',()=>{expect(calendarCadenceDays([1,3,5,1,0,9,2.5])).toEqual([1,3,5,0]);expect(calendarCadenceDays(null)).toEqual([])})
+it('uses per-day times and preserves legacy content types without treating them as times',()=>{expect(calendarCadenceSlot({posting_days:[2,4],posting_time:'10:30:00',posting_schedule:{2:'reel',4:'16:45'}},2)).toEqual({time:'10:30',format:'Reel'});expect(calendarCadenceSlot({posting_days:[4],posting_schedule:{4:'16:45'}},4)).toEqual({time:'16:45',format:null});expect(calendarCadenceSlot({posting_days:[4],posting_time:'25:00',posting_schedule:{4:'post'}},4)).toEqual({time:null,format:'Post'});expect(calendarCadenceSlot({posting_days:[2],posting_schedule:{4:'reel'}},4)).toBeNull()})

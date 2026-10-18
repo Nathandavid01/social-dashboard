@@ -95,7 +95,7 @@ export function groupStudioIdeas<T extends StudioIdeaRef>(ideas: T[]): Record<St
 /** Deep links into existing flows, scoped when the destination supports ?c= */
 export function primerRoundCtas(clientId: string) {
   return {
-    ideas: `/escribir-ideas?c=${encodeURIComponent(clientId)}`,
+    ideas: '/idea-lab',
     bank: '/banco',
     pipeline: '/pipeline',
     editing: '/pipeline',

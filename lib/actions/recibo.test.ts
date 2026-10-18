@@ -28,6 +28,11 @@ vi.mock('@/lib/actions/entregas-r2', () => ({
   getEntregasDownloadUrl: (...a: unknown[]) => getEntregasDownloadUrl(...a),
 }))
 
+vi.mock('@/lib/actions/recibo-video', () => ({ getReciboEditedVideo: (...a: unknown[]) => getEntregaVideoEditado(...a) }))
+const r2Preview = vi.fn()
+const r2Download = vi.fn()
+vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2PreviewUrl: (...a: unknown[]) => r2Preview(...a), getR2DownloadUrl: (...a: unknown[]) => r2Download(...a) }))
+
 describe('recibo manual flags', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -178,5 +183,25 @@ describe('syncReciboPublished', () => {
     await syncReciboPublished()
     expect(await syncReciboPublished()).toEqual({ linked: 0 })
     expect(runReciboPublishedMatch).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('pipeline R2 cuts on Recibo', () => {
+  beforeEach(() => vi.clearAllMocks())
+  it('plays a non-AI client cut using its original storage signer', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'r2-edit', storage_provider: 'r2' })
+    r2Preview.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4' })
+    const { getReciboIdeaPreviewUrl } = await import('./recibo')
+    expect((await getReciboIdeaPreviewUrl('human-client-idea', 'r2-edit')).url).toContain('r2-edit.mp4')
+    expect(r2Preview).toHaveBeenCalledWith('r2-edit')
+    expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
+  })
+  it('downloads that same cut from pipeline storage', async () => {
+    getEntregaVideoEditado.mockResolvedValue({ id: 'r2-edit', storage_provider: 'r2' })
+    r2Download.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4?attachment' })
+    const { getReciboIdeaDownloadUrl } = await import('./recibo')
+    expect((await getReciboIdeaDownloadUrl('human-client-idea', 'r2-edit')).url).toContain('attachment')
+    expect(r2Download).toHaveBeenCalledWith('r2-edit')
+    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
   })
 })

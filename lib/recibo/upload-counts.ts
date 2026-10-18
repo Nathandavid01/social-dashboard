@@ -11,12 +11,12 @@ export type CountedVideo = {
   uploader?: { full_name?: string | null } | null
 }
 
-/** The cut Recibo plays: newest usable edited file in Entregas. */
+/** The cut Recibo plays: newest usable edited file from either dashboard storage. */
 export function currentEntregasEdit<T extends CountedVideo>(videos: T[] | null | undefined): T | null {
   const usable = (videos ?? []).filter(
     (video) =>
       video.kind === 'edited' &&
-      video.storage_provider === 'entregas-r2' &&
+      ['r2', 'entregas-r2'].includes(video.storage_provider) &&
       video.status !== 'failed' &&
       video.status !== 'archived' &&
       !!video.drive_file_id,

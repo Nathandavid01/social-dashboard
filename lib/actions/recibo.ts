@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { getEntregaVideoEditado, getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getReciboEditedVideo } from '@/lib/actions/recibo-video'
+import { getR2PreviewUrl, getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
 import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
@@ -98,7 +100,7 @@ export async function syncReciboPublished(): Promise<{ linked: number; error?: s
 }
 
 /**
- * Presigned playback URL for the idea's current edited Entregas file.
+ * Presigned playback URL for the idea's current edited dashboard file.
  * Usable as <video src>. Does not touch Pipeline raw.
  */
 export async function getReciboIdeaPreviewUrl(
@@ -106,7 +108,8 @@ export async function getReciboIdeaPreviewUrl(
   expectedVideoId?: string,
 ): Promise<{ url?: string; error?: string }> {
   const edited = await currentReciboCut(ideaId, expectedVideoId)
-  return edited.id ? getEntregasPreviewUrl(edited.id) : { error: edited.error }
+  if (!edited.id) return { error: edited.error }
+  return edited.storage_provider === 'r2' ? getR2PreviewUrl(edited.id) : getEntregasPreviewUrl(edited.id)
 }
 
 /**
@@ -119,20 +122,21 @@ export async function getReciboIdeaDownloadUrl(
   expectedVideoId?: string,
 ): Promise<{ url?: string; error?: string }> {
   const edited = await currentReciboCut(ideaId, expectedVideoId)
-  return edited.id ? getEntregasDownloadUrl(edited.id) : { error: edited.error }
+  if (!edited.id) return { error: edited.error }
+  return edited.storage_provider === 'r2' ? getR2DownloadUrl(edited.id) : getEntregasDownloadUrl(edited.id)
 }
 
 async function currentReciboCut(
   ideaId: string,
   expectedVideoId?: string,
-): Promise<{ id?: string; error?: string }> {
+): Promise<{ id?: string; storage_provider?: string; error?: string }> {
   if (!ideaId) return { error: 'Falta el video' }
 
-  const edited = await getEntregaVideoEditado(ideaId)
+  const edited = await getReciboEditedVideo(ideaId)
   if (edited.error) return { error: edited.error }
   if (!edited.id) return { error: 'Sin video editado' }
   if (expectedVideoId && edited.id !== expectedVideoId) {
     return { error: 'El video cambió. Vuelve a cargar Recibo.' }
   }
-  return { id: edited.id }
+  return { id: edited.id, storage_provider: edited.storage_provider }
 }

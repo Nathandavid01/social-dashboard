@@ -122,3 +122,9 @@ describe('summarizeSlots', () => {
     expect(summary).toEqual({ total: 4, hecho: 2, pendiente: 1, falto: 1 })
   })
 })
+
+describe('stored formats are not scheduling clock times',()=>{
+ it('falls back to a valid general hour for legacy content-format overrides',()=>{for(const format of ['reel','post','story'])expect(resolveSlotTime(1,'09:30',{1:format})).toBe('09:30')})
+ it('returns no hour when both values are invalid instead of sending invalid Metricool timestamps',()=>{expect(resolveSlotTime(1,'25:00',{1:'reel'})).toBeNull();expect(resolveSlotTime(1,null,{1:'12:90'})).toBeNull()})
+ it('normalizes valid stored times with seconds and preserves override priority',()=>{expect(resolveSlotTime(1,'09:30:00',{1:'18:15:00'})).toBe('18:15');expect(resolveSlotTime(1,'09:30:00',{1:'post'})).toBe('09:30')})
+})

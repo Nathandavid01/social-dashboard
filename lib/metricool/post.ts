@@ -2,6 +2,10 @@ class MetricoolPostRejected extends Error {
   readonly definitelyNotCreated = true
 }
 
+class MetricoolDeleteUnsupported extends Error {
+  readonly unsupportedDelete = true
+}
+
 const METRICOOL_BASE = 'https://app.metricool.com/api'
 
 export interface MetricoolServerConfig {
@@ -207,6 +211,43 @@ export async function updateScheduledPost(
   }
 
   return res.json() as Promise<MetricoolDraftResponse>
+}
+
+/**
+ * Delete a scheduled/draft post. Metricool 405/404 means this account
+ * cannot delete via API — caller should leave it as a draft instead.
+ */
+export async function deleteScheduledPost(
+  postId: number,
+  blogId?: string,
+): Promise<{ deleted: true }> {
+  const config = getServerConfig()
+  if (!config) throw new MetricoolPostRejected('Metricool server credentials not configured')
+
+  const effectiveBlogId = blogId || config.blogId
+  const url = new URL(`${METRICOOL_BASE}/v2/scheduler/posts/${postId}`)
+  url.searchParams.set('userId', config.userId)
+  url.searchParams.set('blogId', effectiveBlogId)
+
+  const res = await fetch(url.toString(), {
+    method: 'DELETE',
+    signal: AbortSignal.timeout(15_000),
+    headers: {
+      'X-Mc-Auth': config.userToken,
+    },
+  })
+
+  if (res.ok || res.status === 204) return { deleted: true }
+
+  const text = await res.text()
+  const message = `Metricool API error: ${res.status} - ${text}`
+  if ([404, 405, 501].includes(res.status)) {
+    throw new MetricoolDeleteUnsupported(message)
+  }
+  if ([400, 401, 403, 413, 415, 422, 429].includes(res.status)) {
+    throw new MetricoolPostRejected(message)
+  }
+  throw new Error(message)
 }
 
 export { getServerConfig }

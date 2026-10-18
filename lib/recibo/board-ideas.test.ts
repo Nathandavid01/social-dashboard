@@ -98,3 +98,8 @@ describe('reciboBoardIdeas', () => {
     expect(reciboBoardIdeas([archivado, agendado], ['ai'])).toEqual([])
   })
 })
+
+it('includes Eric pipeline uploads for a non-AI client', () => {
+  const idea = { ...edited, client_id: 'human', videos: [{ kind: 'edited', storage_provider: 'r2', status: 'uploaded', uploaded_by: [...ERIC_IDS][0] }] }
+  expect(reciboBoardIdeas([idea], [])).toEqual([idea])
+})

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createDraftPost, postFormatData, updateScheduledPost } from './post'
+import { createDraftPost, deleteScheduledPost, postFormatData, updateScheduledPost } from './post'
 
 function captureFetch() {
   const spy = vi.fn(async () => ({ ok: true, json: async () => ({ data: { id: 1, uuid: 'u' } }) }))
@@ -189,6 +189,24 @@ describe('updateScheduledPost', () => {
   it('throws when Metricool credentials are not configured', async () => {
     delete process.env.METRICOOL_TOKEN
     await expect(updateScheduledPost(44, 'blog-9', { text: 'x' })).rejects.toThrow(/credentials/i)
+  })
+})
+
+describe('deleteScheduledPost', () => {
+  it('DELETE /v2/scheduler/posts/{id} con blog y user', async () => {
+    const spy = vi.fn(async () => ({ ok: true, status: 204, text: async () => '' }))
+    vi.stubGlobal('fetch', spy)
+    await expect(deleteScheduledPost(44, 'blog-9')).resolves.toEqual({ deleted: true })
+    const [url, init] = spy.mock.calls[0] as unknown as [string, { method: string }]
+    expect(url).toContain('/v2/scheduler/posts/44')
+    expect(url).toContain('blogId=blog-9')
+    expect(url).toContain('userId=uid')
+    expect(init.method).toBe('DELETE')
+  })
+
+  it('405/404 marca que Metricool no deja borrar', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 405, text: async () => 'no delete' })))
+    await expect(deleteScheduledPost(44, 'blog-9')).rejects.toMatchObject({ unsupportedDelete: true })
   })
 })
 

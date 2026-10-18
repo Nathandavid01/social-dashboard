@@ -240,7 +240,6 @@ export async function toggleShotRecorded(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   revalidatePath('/mi-dia')
   return { ok: true }
 }
@@ -268,7 +267,6 @@ export async function updateShotDetails(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -291,7 +289,6 @@ export async function removeShotFromSession(ideaId: string): Promise<{ ok?: true
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -386,7 +383,6 @@ export async function addIdeaToSession(input: {
     if (error) return { error: error.message }
     revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-    revalidatePath('/escribir-ideas')
     return { ok: true }
   }
 
@@ -431,7 +427,6 @@ export async function addIdeaToSession(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -551,7 +546,6 @@ export async function generateOnsiteIdeas(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { created }
 }
 
@@ -588,7 +582,6 @@ export async function updateOnsiteIdea(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { ok: true }
 }
 
@@ -612,7 +605,6 @@ export async function updateOnsiteAnnotations(input: {
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   revalidatePath('/revision')
   return { ok: true }
 }
@@ -646,6 +638,5 @@ export async function checkInOnsite(sessionId: string): Promise<{ ok?: true; err
 
   revalidatePath('/onsite')
     revalidatePath('/recording-calendar')
-  revalidatePath('/escribir-ideas')
   return { ok: true }
 }

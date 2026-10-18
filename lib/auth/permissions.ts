@@ -45,6 +45,8 @@ export type Permission =
   // Posting
   | 'posting.read'
   | 'posting.publish'
+  /** Subir contenido directamente al calendario como borrador. */
+  | 'posting.calendar.upload'
   | 'captions.use'
   | 'captions.edit'
   /** Gráficas IA: generar artes con Grok Imagine usando la marca del cliente. */
@@ -70,6 +72,8 @@ export type Permission =
   | 'pipeline.claim'
   /** Banco de Video global (/banco): biblioteca de crudos + calendario proyectado. Solo admins. */
   | 'video_bank.read'
+  /** Inventario de video (/inventario): grabaciones por editar y videos editados que le quedan a cada cliente. */
+  | 'video_stock.read'
   | 'planning.act'
   | 'planning.assign'
   | 'planning.move'
@@ -115,12 +119,12 @@ const RBAC: Record<UserRole, RolePerms> = {
     'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
     'production.read', 'production.edit',
     'recording.read', 'recording.create', 'recording.complete', 'recording.brief',
-    'posting.read', 'posting.publish', 'captions.use', 'captions.edit',
+    'posting.read', 'posting.publish', 'posting.calendar.upload', 'captions.use', 'captions.edit',
     'graphics.generate', 'graphics.cost.read',
     'metricool.read', 'metricool.write', 'metricool.draft',
     'performance.read', 'efficiency.read',
     'weekly_compliance.read', 'runway.read', 'activity.read', 'presence.read',
-    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'pipeline.claim', 'video_bank.read', 'planning.act', 'planning.assign', 'planning.move',
+    'planning.read', 'entregas.read', 'revision.read', 'pipeline.read', 'pipeline.claim', 'video_bank.read', 'video_stock.read', 'planning.act', 'planning.assign', 'planning.move',
     // Reparte los roles de ejecución; owner y supervisor siguen siendo del
     // owner (lo impone canAssignRole, no esta lista).
     'team.assign_roles',
@@ -154,6 +158,8 @@ const RBAC: Record<UserRole, RolePerms> = {
     'tasks.read.own', 'tasks.edit',
     'ideas.read', 'ideas.edit',
     'runway.read',
+    // Decide a quién grabar: ve quién se está quedando sin videos.
+    'video_stock.read',
     'video.upload',
     'recording.read', 'recording.create', 'recording.complete',
     'weekly_compliance.read', 'cadence.read', 'activity.read', 'presence.read',

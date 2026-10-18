@@ -8,7 +8,7 @@ import { syncSchedulesToPostingDays } from '@/lib/actions/sync-posting-cadence'
 import {
   cadenceRevalidatePaths,
   cleanPostingDays,
-  cleanPostingSchedule,
+  cleanPostingScheduleWithFormats,
   cleanPostingTime,
   cleanTimezone,
   isMissingTimezoneColumn,
@@ -48,7 +48,7 @@ export async function updateClientCadence(
     patch.posting_time = cleanPostingTime(input.posting_time)
   }
   if (input.posting_schedule) {
-    const schedule = cleanPostingSchedule(input.posting_schedule)
+    const schedule = cleanPostingScheduleWithFormats(input.posting_schedule)
     const days = Array.isArray(patch.posting_days) ? (patch.posting_days as number[]) : null
     patch.posting_schedule = days ? pruneScheduleToDays(schedule, days) : schedule
   }

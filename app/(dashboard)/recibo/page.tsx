@@ -1,13 +1,21 @@
-import { requirePermission } from '@/lib/auth/server'
+import { requirePermission, currentUserHas } from '@/lib/auth/server'
 import { getIdeacionPipeline } from '@/lib/actions/content-ideas'
 import { createClient } from '@/lib/supabase/server'
 import { reciboBoardIdeas } from '@/lib/recibo/board-ideas'
+import {
+  applyEntregasReviewStatus,
+  reciboOccupancyIdeas,
+  reciboVisibleAiClients,
+  reviewStatusByIdea,
+} from '@/lib/recibo/cadence-spaces'
 import { loadPublishedVideoCounts } from '@/lib/recibo/load-published-videos'
 import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { POSTING_TZ } from '@/lib/utils/publish-override'
 import { canSeeReciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { ReciboBoard } from '@/components/recibo/recibo-board'
 import { ReciboPublishedSync } from '@/components/recibo/recibo-published-sync'
+import { ContentCalendar } from '@/components/published/content-calendar'
+import { ReciboWorkspace } from '@/components/recibo/recibo-workspace'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -15,12 +23,16 @@ export const revalidate = 0
 
 /**
  * Recibo — videos waiting for approval, or approved and still waiting
- * to be posted or scheduled in Metricool. No Metricool auto-post.
+ * to be posted or scheduled in Metricool. The calendar supports explicit scheduling.
  */
-export default async function ReciboPage() {
+export default async function ReciboPage({ searchParams }: { searchParams?: { client?: string } }) {
   await requirePermission('entregas.read')
 
   const supabase = await createClient()
+  const canSeeCalendar = await currentUserHas('metricool.read')
+  const calendarClients = canSeeCalendar
+    ? (await supabase.from('clients').select('id, name, metricool_blog_id, platforms, default_platforms, posting_days, posting_time, posting_schedule').eq('status', 'active').order('name')).data ?? []
+    : []
   const [ideas, aiClientsRes] = await Promise.all([
     getIdeacionPipeline({ complete: true }),
     supabase
@@ -36,18 +48,27 @@ export default async function ReciboPage() {
     aiClients = []
   }
 
-  const boardIdeas = await withUploaderNames(supabase, reciboBoardIdeas(ideas, aiClients.map((client) => client.id)))
-  const shownClientIds = [...new Set(boardIdeas.map((idea) => idea.client_id))]
-  const boardClients = aiClients.filter((client) => shownClientIds.includes(client.id))
-  const ideaIds = boardIdeas.map((idea) => idea.id)
-  const [{ data: sentRows }, { data: cadenceRows }] = await Promise.all([
-    ideaIds.length
-      ? supabase.from('entregas_client_review_items').select('idea_id').in('idea_id', ideaIds)
-      : Promise.resolve({ data: [] as { idea_id: string }[] }),
+  const visibleAiClients = reciboVisibleAiClients(aiClients)
+  const aiIds = visibleAiClients.map((client) => client.id)
+  const occupancyIdeas = await withUploaderNames(supabase, reciboOccupancyIdeas(ideas, aiIds))
+  const boardIdeas = reciboBoardIdeas(occupancyIdeas, aiIds)
+  const shownClientIds = [...new Set([...aiIds, ...occupancyIdeas.map((idea) => idea.client_id)])]
+  const occupancyIds = occupancyIdeas.map((idea) => idea.id)
+  const [{ data: reviewRows }, { data: cadenceRows }] = await Promise.all([
+    occupancyIds.length
+      ? supabase
+          .from('entregas_client_review_items')
+          .select('idea_id, status, decided_at')
+          .in('idea_id', occupancyIds)
+          .order('decided_at', { ascending: false })
+      : Promise.resolve({ data: [] as { idea_id: string; status: string | null; decided_at: string | null }[] }),
     shownClientIds.length
       ? supabase.from('clients').select('id, posting_days, posting_time, posting_schedule, metricool_blog_id').in('id', shownClientIds)
       : Promise.resolve({ data: [] as { id: string; posting_days: number[] | null; posting_time: string | null; posting_schedule: Record<string, string> | null; metricool_blog_id: string | null }[] }),
   ])
+  const reviewByIdea = reviewStatusByIdea(reviewRows ?? [])
+  const occupancyWithReview = applyEntregasReviewStatus(occupancyIdeas, reviewByIdea)
+  const boardWithReview = applyEntregasReviewStatus(boardIdeas, reviewByIdea)
   const published = await loadPublishedVideoCounts(aiClients)
   const cadenceByClient = Object.fromEntries((cadenceRows ?? []).map((client) => [client.id, {
     postingDays: client.posting_days,
@@ -67,16 +88,19 @@ export default async function ReciboPage() {
   return (
     <>
       <ReciboPublishedSync />
+      <ReciboWorkspace calendar={canSeeCalendar ? <ContentCalendar clients={calendarClients} clientId={calendarClients.some(client => client.id === searchParams?.client) ? searchParams?.client : undefined} projectionIdeas={boardWithReview} /> : null}>
       <ReciboBoard
-        ideas={boardIdeas}
-        aiClients={boardClients}
-        sentIdeaIds={(sentRows ?? []).map((row) => row.idea_id)}
+        ideas={boardWithReview}
+        occupancyIdeas={occupancyWithReview}
+        aiClients={visibleAiClients}
+        sentIdeaIds={(reviewRows ?? []).map((row) => row.idea_id)}
         cadenceByClient={cadenceByClient}
         todayISO={todayISOInTimeZone(POSTING_TZ)}
         publishedTotal={published.total}
         publishedByClient={published.byClient}
         showUploadCounts={canSeeReciboUploadCounts({ id: viewer?.id, fullName: viewerName })}
       />
+      </ReciboWorkspace>
     </>
   )
 }

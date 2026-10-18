@@ -69,3 +69,10 @@ describe('reciboUploadCounts', () => {
     expect(counts).toEqual({ nathan: 1, eric: 1, otro: 1, total: 3 })
   })
 })
+
+it('counts the latest pipeline upload under Eric without double counting the old cut', () => {
+  expect(reciboUploadCounts([{ videos: [
+    cut({ id: 'old', uploaded_at: '2026-09-01', uploader: { full_name: 'Nathan' } }),
+    cut({ id: 'pipeline', storage_provider: 'r2', uploaded_at: '2026-10-01', uploader: { full_name: 'Eric Perez' } }),
+  ] }])).toEqual({ total: 1, eric: 1, nathan: 0, otro: 0 })
+})

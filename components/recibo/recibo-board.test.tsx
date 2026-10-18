@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 
+vi.mock('@/components/recibo/recibo-thumbnail', () => ({
+  ReciboThumbnail: ({ title, coverUrl }: { title: string; coverUrl?: string }) => coverUrl ? <img src={coverUrl} alt={`Miniatura de ${title}`} /> : <span>Miniatura de {title}</span>,
+}))
 vi.mock('@/components/auth/role-gate', () => ({
   useHasPermission: () => true,
 }))
@@ -24,6 +27,11 @@ vi.mock('@/lib/actions/pipeline-submit', () => ({
 }))
 vi.mock('@/lib/actions/recibo-publish', () => ({
   publishReciboOnCadence: vi.fn(async () => ({ ok: true, label: 'viernes 25 de septiembre, 6:00 p.m.' })),
+  cancelReciboSchedule: vi.fn(async () => ({ ok: true, deleted: true })),
+}))
+vi.mock('@/lib/actions/recibo-internal-notes', () => ({
+  addReciboInternalNote: vi.fn(async () => ({ ok: true })),
+  listReciboInternalNotes: vi.fn(async () => []),
 }))
 vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: vi.fn(async () => ({ token: 'abc' })),
@@ -43,6 +51,7 @@ import { saveIdeaCaption } from '@/lib/actions/idea-captions'
 import { discardEntregaVideos } from '@/lib/actions/pipeline-submit'
 import { getReciboIdeaDownloadUrl, getReciboIdeaPreviewUrl } from '@/lib/actions/recibo'
 import { ReciboBoard } from './recibo-board'
+import { listReciboInternalNotes } from '@/lib/actions/recibo-internal-notes'
 
 /** Dated inside the current week so the week filter still includes the card. */
 const publishThisWeek = rangoSemana().desde
@@ -81,6 +90,7 @@ const bareIdea = {
 describe('ReciboBoard', () => {
   it('limita la entrega puntual al archivo mostrado y evita acciones de toda la idea', async () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1', 'v1'))
     expect(screen.queryByTestId('enviar')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /borrar/i })).not.toBeInTheDocument()
@@ -89,6 +99,7 @@ describe('ReciboBoard', () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
     expect(screen.getByText('Entrega puntual')).toBeInTheDocument()
     expect(screen.queryByTestId('recibo-ai-badge')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     expect(screen.getByLabelText('Caption')).toHaveValue(editedIdea.generated_caption)
   })
 
@@ -107,11 +118,12 @@ describe('ReciboBoard', () => {
     expect(screen.queryByRole('button', { name: 'Aprobado por el cliente' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'No aprobado' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Enviar al cliente' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Reel playa')).not.toBeInTheDocument()
+    expect(screen.getByText('Reel playa')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     expect(screen.getByLabelText('Caption')).toHaveValue('El laboratorio ya abrió en Arecibo.')
     expect(screen.getByRole('button', { name: 'Enviado' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'Aprobado' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText(/Márcalo aprobado para publicarlo/i)).toBeInTheDocument()
+    expect(screen.getByText(/Márcalo aprobado para programarlo/i)).toBeInTheDocument()
     expect(screen.queryByText('Subir video editado')).not.toBeInTheDocument()
     expect(screen.queryByTestId('submit-slot')).not.toBeInTheDocument()
     await waitFor(() => {
@@ -122,14 +134,18 @@ describe('ReciboBoard', () => {
     })
   })
 
-  it('muestra Sin video editado cuando no hay archivo', () => {
+  it('un idea sin archivo no ocupa espacio; con cadencia se ve el hueco pendiente', () => {
     render(
       <ReciboBoard
         aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
         ideas={[bareIdea]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5] } }}
       />,
     )
-    expect(screen.getByTestId('recibo-video-empty')).toHaveTextContent('Sin video editado')
+    expect(screen.queryByTestId('recibo-idea-i2')).not.toBeInTheDocument()
+    expect(screen.getAllByTestId('recibo-space-empty').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Pendiente').length).toBeGreaterThan(0)
   })
 
   it('muestra el caption y lo guarda al editarlo', async () => {
@@ -140,6 +156,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     const field = screen.getByLabelText('Caption')
     expect(field).toHaveValue('El laboratorio ya abrió en Arecibo.')
     await user.clear(field)
@@ -159,11 +176,12 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea, sinCaption]}
       />,
     )
-    await user.click(screen.getByRole('button', { name: 'Poner captions' }))
+    await user.click(screen.getByRole('button', { name: 'Completar captions visibles' }))
     await waitFor(() => {
       expect(fillReciboCaption).toHaveBeenCalledTimes(1)
       expect(fillReciboCaption).toHaveBeenCalledWith('i3', expect.any(Array))
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Sin texto' }))
     expect(await screen.findByDisplayValue('Caption nuevo desde Metricool')).toBeInTheDocument()
   })
 
@@ -198,7 +216,7 @@ describe('ReciboBoard', () => {
         ideas={[nathan, eric, editedIdea, yabu]}
       />,
     )
-    await screen.findAllByTestId('recibo-video-player')
+    expect(screen.queryByTestId('recibo-video-player')).not.toBeInTheDocument()
     expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Total 4 · Nathan 1 · Eric 2 · Sin autor 1')
     expect(screen.getByTestId('recibo-upload-counts')).toHaveTextContent('Publicados 0')
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('Total 3 · Nathan 1 · Eric 1 · Sin autor 1 · Publicados 0')
@@ -213,6 +231,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     await screen.findByTestId('recibo-video-player')
     expect(screen.queryByTestId('recibo-upload-counts')).not.toBeInTheDocument()
     expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent('1 video')
@@ -227,6 +246,7 @@ describe('ReciboBoard', () => {
         ideas={[editedIdea]}
       />,
     )
+    await user.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     await user.click(screen.getByRole('button', { name: 'Borrar Reel playa' }))
     expect(discardEntregaVideos).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -253,12 +273,13 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
     }
     render(<ReciboBoard ideas={[editedIdea, farmacia]} aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} />)
     expect(screen.getAllByTestId('recibo-ai-badge')).toHaveLength(1)
-    expect(screen.getByText('Farmacia Buena Vida')).toBeInTheDocument()
+    expect(screen.getAllByText('Farmacia Buena Vida')[0]).toBeInTheDocument()
   })
 
   it('cada tarjeta con corte tiene «Bajar» y baja ese mismo archivo', async () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     await userEvent.click(screen.getByRole('button', { name: 'Bajar Reel playa' }))
     await waitFor(() => expect(getReciboIdeaDownloadUrl).toHaveBeenCalledWith('i1', 'v1'))
     await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
@@ -267,6 +288,7 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
 
   it('la entrega puntual (cliente humano) también se puede bajar', () => {
     render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     expect(screen.getByRole('button', { name: 'Bajar Reel playa' })).toBeInTheDocument()
   })
 
@@ -276,6 +298,315 @@ describe('ReciboBoard — corte de Eric en un cliente con editor (v5.113)', () =
   })
   it('cada tarjeta trae la marca Publicado junto a Enviado y Aprobado', () => {
     render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
     expect(screen.getByRole('button', { name: 'Publicado' })).toHaveAttribute('aria-pressed', 'false')
   })
+})
+
+describe('ReciboBoard — espacios de cadencia y conteo mensual', () => {
+  it('llena espacios con videos y deja huecos pendientes según la cadencia', () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getAllByTestId('recibo-space-empty').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('recibo-client-counts-c1')).toHaveTextContent(/espacios esta semana/i)
+  })
+
+  it('marca en verde un espacio aprobado y en ámbar uno pendiente', () => {
+    const approved = {
+      ...editedIdea,
+      id: 'ok',
+      staff_client_approval: 'approved',
+      videos: [{ ...editedIdea.videos[0], id: 'v-ok' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, approved]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getByTestId('recibo-idea-ok')).toHaveAttribute('data-tone', 'approved')
+  })
+
+  it('cuenta por mes las mismas subidas que llenan los espacios, con el mes actual destacado', () => {
+    const older = {
+      ...editedIdea,
+      id: 'old',
+      videos: [{ ...editedIdea.videos[0], id: 'v-old', uploaded_at: '2026-09-04T10:00:00Z' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[editedIdea, older]}
+        occupancyIdeas={[editedIdea, older]}
+        todayISO="2026-10-04"
+      />,
+    )
+    const monthly = screen.getByTestId('recibo-monthly-counts')
+    expect(monthly.textContent).toMatch(/octubre/i)
+    expect(monthly.textContent).toMatch(/septiembre/i)
+    expect(monthly.textContent).toMatch(/Total 2/)
+    expect(monthly.querySelector('[data-current="true"]')?.textContent).toMatch(/octubre/i)
+    expect(screen.getByTestId('recibo-client-months-c1').textContent).toMatch(/Total 2/)
+  })
+
+  it('un crudo de cliente AI ocupa espacio sin aprobar ni borrar', () => {
+    const raw = {
+      ...editedIdea,
+      id: 'raw1',
+      generated_caption: '',
+      videos: [{ ...editedIdea.videos[0], id: 'rawv', kind: 'raw', drive_thumb_url: 'https://img.example/raw.jpg' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        occupancyIdeas={[raw]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-raw1')).toHaveAttribute('data-tone', 'pending')
+    expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/raw.jpg')
+    expect(screen.queryByTestId('recibo-video-player')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
+    expect(screen.getByRole('img', { name: /portada/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Aprobado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /borrar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /publicar en metricool/i })).not.toBeInTheDocument()
+  })
+
+  it('un cliente held no gana columna vacía aunque esté en la lista AI', () => {
+    render(
+      <ReciboBoard
+        aiClients={[
+          { id: '165b8416-5316-43e1-b6d6-f23caaa57b0c', name: 'Aníbal Fuentes PNP', logo_url: null },
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+        ]}
+        ideas={[]}
+        todayISO="2026-10-04"
+        cadenceByClient={{
+          '165b8416-5316-43e1-b6d6-f23caaa57b0c': { postingDays: [1, 3, 5] },
+          c1: { postingDays: [1] },
+        }}
+      />,
+    )
+    expect(screen.queryByText('Aníbal Fuentes PNP')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Arecibo Lab')[0]).toBeInTheDocument()
+  })
+
+  it('un corte de Eric en cliente humano no abre huecos de cadencia', () => {
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[]}
+        ideas={[farmacia]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ farmacia: { postingDays: [1, 3, 5] } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-space-empty')).not.toBeInTheDocument()
+  })
+
+  it('un voto de /aprobacion pinta el espacio en verde', () => {
+    const voted = { ...editedIdea, id: 'voted', entregas_review_status: 'approved', videos: [{ ...editedIdea.videos[0], id: 'vv' }] }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[voted]}
+        todayISO={publishThisWeek}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-voted')).toHaveAttribute('data-tone', 'approved')
+  })
+
+  it('un espacio ya programado se ve con Cambiar fecha y Cancelar', () => {
+    const scheduled = {
+      ...editedIdea,
+      id: 'sch1',
+      metricool_post_id: 44,
+      posted_at: `${publishThisWeek}T12:00:00Z`,
+      publish_date: publishThisWeek,
+      staff_client_approval: 'approved',
+      videos: [{ ...editedIdea.videos[0], id: 'vs1' }],
+    }
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        occupancyIdeas={[scheduled]}
+        todayISO={publishThisWeek}
+        cadenceByClient={{ c1: { postingDays: [1, 3, 5], postingTime: '18:00', metricool: true } }}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-sch1')).toHaveAttribute('data-tone', 'scheduled')
+    expect(screen.getByRole('button', { name: /Cambiar fecha/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cancelar programación/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Publicado' })).not.toBeInTheDocument()
+  })
+
+  it('muestra clientes AI sin video para que se vean los espacios pendientes', () => {
+    render(
+      <ReciboBoard
+        aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]}
+        ideas={[]}
+        todayISO="2026-10-04"
+        cadenceByClient={{ c1: { postingDays: [1, 4] } }}
+      />,
+    )
+    expect(screen.getAllByText('Arecibo Lab')[0]).toBeInTheDocument()
+    expect(screen.getAllByTestId('recibo-space-empty')).toHaveLength(2)
+  })
+})
+
+describe('ReciboBoard — buscar y motivo', () => {
+  it('filtra tarjetas por cliente o título sin recargar', async () => {
+    const user = userEvent.setup()
+    const farmacia = {
+      ...editedIdea,
+      id: 'farm',
+      client_id: 'farmacia',
+      title: 'Pregunta para todas',
+      generated_caption: 'Pregunta en el mostrador.',
+      client: { id: 'farmacia', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    }
+    render(
+      <ReciboBoard
+        aiClients={[
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+          { id: 'farmacia', name: 'Farmacia Buena Vida', logo_url: null },
+        ]}
+        ideas={[editedIdea, farmacia]}
+      />,
+    )
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    const search = screen.getByRole('searchbox', { name: /buscar cliente o idea/i })
+    expect(search).toHaveAttribute('placeholder', 'Título o nombre del cliente…')
+    await user.type(search, 'farmacia')
+    expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+    await user.clear(search)
+    expect(screen.getByTestId('recibo-idea-i1')).toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-farm')).toBeInTheDocument()
+  })
+
+  it('cada tarjeta ocupada tiene el cuadro para decir por qué no les gusta', async () => {
+    render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab', logo_url: null }]} ideas={[editedIdea]} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
+    expect(await screen.findByRole('textbox', { name: /por qué no te gusta/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /guardar motivo/i })).toBeInTheDocument()
+  })
+})
+
+it('separates a client graphic from videos and renders its image with caption', async () => {
+  vi.mocked(getReciboIdeaPreviewUrl).mockResolvedValue({ url: 'https://signed.example/graphic.png' })
+  vi.mocked(getReciboIdeaPreviewUrl).mockClear()
+  vi.mocked(listReciboInternalNotes).mockClear()
+  const graphic = { ...editedIdea, id: 'graphic-1', title: 'Encías', content_type: 'P', generated_caption: 'Cuida tus encías.', videos: [{ ...editedIdea.videos[0], id: 'g1', mime_type: 'image/png' }] }
+  render(<ReciboBoard ideas={[editedIdea, graphic] as any} aiClients={[{ id: 'c1', name: 'Arecibo Lab' }]} />)
+  expect(screen.getByRole('region', { name: 'Arecibo Lab · Gráficos' })).toBeTruthy()
+  expect(screen.getByRole('region', { name: 'Arecibo Lab · Videos' })).toBeTruthy()
+  expect(getReciboIdeaPreviewUrl).not.toHaveBeenCalled()
+  expect(listReciboInternalNotes).not.toHaveBeenCalled()
+  await userEvent.click(screen.getByRole('button', { name: 'Abrir gráfico y caption de Encías' }))
+  await waitFor(() => expect(screen.getByRole('img', { name: 'Encías' })).toBeTruthy())
+  expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('graphic-1', 'g1')
+  expect(listReciboInternalNotes).toHaveBeenCalledWith('graphic-1')
+  const card = screen.getByTestId('recibo-idea-graphic-1')
+  expect(card.querySelector('video')).toBeNull()
+  expect(card.textContent).not.toContain('Programar en Metricool')
+  expect(card.textContent).not.toContain('Programar para')
+})
+
+
+describe('ReciboBoard — compact review', () => {
+  it('does not request playback until a card is opened and unmounts playback when closed', async () => {
+    vi.mocked(getReciboIdeaPreviewUrl).mockClear()
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    expect(getReciboIdeaPreviewUrl).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('recibo-video-player')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
+    expect(await screen.findByTestId('recibo-video-player')).toBeInTheDocument()
+    expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('i1', 'v1')
+    await userEvent.click(screen.getByRole('button', { name: 'Cerrar revisión de Reel playa' }))
+    expect(screen.queryByTestId('recibo-video-player')).not.toBeInTheDocument()
+  })
+
+  it('combines client and state filters while keeping scheduled cards separate from approvals', async () => {
+    const approved = { ...editedIdea, id: 'approved', entregas_review_status: 'approved' }
+    const scheduled = { ...editedIdea, id: 'scheduled', metricool_post_id: 123, entregas_review_status: 'approved' }
+    const other = { ...editedIdea, id: 'other', client_id: 'c2', client: { id: 'c2', name: 'Otro' } }
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea, approved, scheduled, other]} />)
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Filtrar por cliente' }), 'c1')
+    expect(screen.queryByTestId('recibo-idea-other')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Todas 3' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Aprobadas 1' }))
+    expect(screen.getByTestId('recibo-idea-approved')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-scheduled')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Programadas 1' }))
+    expect(screen.getByTestId('recibo-idea-scheduled')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-approved')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+    expect(screen.getByTestId('recibo-idea-other')).toBeInTheDocument()
+  })
+
+  it('keeps a saved caption when closing and reopening review', async () => {
+    render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
+    const field = screen.getByLabelText('Caption')
+    fireEvent.change(field, { target: { value: 'Caption guardado' } })
+    fireEvent.blur(field)
+    await waitFor(() => expect(saveIdeaCaption).toHaveBeenCalledWith('i1', 'Caption guardado'))
+    await userEvent.click(screen.getByRole('button', { name: 'Cerrar revisión de Reel playa' }))
+    expect(within(screen.getByTestId('recibo-idea-i1')).getByText('Caption guardado')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Reel playa' }))
+    expect(screen.getByLabelText('Caption')).toHaveValue('Caption guardado')
+  })
+})
+
+it('preserves the assigned cadence date when filtering out an earlier card', async () => {
+  const second = { ...editedIdea, id: 'second', title: 'Segundo', staff_client_approval: 'approved' }
+  render(<ReciboBoard aiClients={[{ id: 'c1', name: 'Arecibo Lab' }]} ideas={[editedIdea, second]} todayISO="2030-01-07" cadenceByClient={{ c1: { postingDays: [1, 3, 5], postingTime: '18:00', metricool: true } }} />)
+  const card = screen.getByTestId('recibo-idea-second')
+  const originalLabel = within(card).getByRole('button', { name: /Programar para/ }).textContent
+  await userEvent.click(screen.getByRole('button', { name: 'Aprobadas 1' }))
+  expect(screen.queryByTestId('recibo-idea-i1')).not.toBeInTheDocument()
+  expect(within(screen.getByTestId('recibo-idea-second')).getByRole('button', { name: /Programar para/ }).textContent).toBe(originalLabel)
+})
+
+it('completes captions only for the currently filtered client', async () => {
+  vi.mocked(fillReciboCaption).mockClear()
+  const first = { ...editedIdea, generated_caption: '' }
+  const other = { ...first, id: 'other', client_id: 'c2', client: { id: 'c2', name: 'Otro' } }
+  render(<ReciboBoard aiClients={[]} ideas={[first, other]} />)
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Filtrar por cliente' }), 'c1')
+  await userEvent.click(screen.getByRole('button', { name: 'Completar captions visibles' }))
+  await waitFor(() => expect(fillReciboCaption).toHaveBeenCalledTimes(1))
+  expect(fillReciboCaption).toHaveBeenCalledWith('i1', expect.any(Array))
+})
+
+
+it('uses the cover of the current cut rather than an older version', () => {
+  const idea = { ...editedIdea, videos: [
+    { ...editedIdea.videos[0], id: 'older', uploaded_at: '2020-01-01T10:00:00Z', drive_thumb_url: 'https://img.example/old.jpg' },
+    { ...editedIdea.videos[0], id: 'current', uploaded_at: '2030-01-01T10:00:00Z', drive_thumb_url: 'https://img.example/current.jpg' },
+  ] }
+  render(<ReciboBoard aiClients={[]} ideas={[idea]} />)
+  expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/current.jpg')
 })

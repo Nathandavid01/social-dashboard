@@ -1,3 +1,4 @@
+import { LANDING_PATH } from '@/lib/auth/areas'
 export const metadata = { title: 'Sin conexión — NMedia' }
 
 export default function OfflinePage() {
@@ -9,7 +10,7 @@ export default function OfflinePage() {
         No hay conexión a internet. Verifica tu red y toca Reintentar cuando regrese la conexión.
       </p>
       <a
-        href="/home"
+        href={LANDING_PATH}
         className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
       >
         Reintentar

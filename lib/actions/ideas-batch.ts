@@ -48,7 +48,6 @@ export async function createIdeasBatch(input: {
 
   // On Site las ofrece para añadir a una sesión, y el resto de pantallas de
   // ideas las lista: sin esto habría que recargar a mano para verlas.
-  revalidatePath('/escribir-ideas')
   revalidatePath('/onsite')
   revalidatePath('/ideas-aprobadas')
   return { ok: true, created: data?.length ?? 0 }
@@ -131,7 +130,6 @@ export async function discardWrittenIdea(ideaId: string): Promise<{ ok?: true; e
     metadata: { versionId, reason: 'discarded', fields: ['status'] },
   })
 
-  revalidatePath('/escribir-ideas')
   revalidatePath('/onsite')
   return { ok: true }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
@@ -11,6 +11,7 @@ import {
   CADENCE_TIMEZONES,
   formatCadenceSummaryEs,
   readClientCadence,
+  cleanPostingTime,
   type ClientPostingCadence,
 } from '@/lib/utils/client-cadence'
 
@@ -23,6 +24,9 @@ interface Props {
   initialSchedule: Record<string, string>
   initialTimezone: string | null
   compact?: boolean
+  showTimezone?: boolean
+  onSaved?: (patch:Parameters<typeof updateClientCadence>[1])=>void
+  onPendingChange?: (pending:boolean)=>void
 }
 
 export function ClientCadenceEditor({
@@ -32,14 +36,20 @@ export function ClientCadenceEditor({
   initialSchedule,
   initialTimezone,
   compact = false,
+  showTimezone = true,
+  onSaved,
+  onPendingChange,
 }: Props) {
   const canEdit = useHasPermission('cadence.edit')
   const { toast } = useToast()
   const [days, setDays] = useState<number[]>(initialDays)
-  const [time, setTime] = useState(initialTime ?? '')
+  const [time, setTime] = useState(cleanPostingTime(initialTime?.slice(0,5)) ?? '')
   const [schedule, setSchedule] = useState<Record<string, string>>(initialSchedule ?? {})
   const [timezone, setTimezone] = useState(initialTimezone ?? '')
-  const [isPending, startTransition] = useTransition()
+  const [transitionPending, startTransition] = useTransition()
+  const [saving,setSaving]=useState(false)
+  const saveInFlight=useRef(false)
+  const isPending=saving||transitionPending
 
   const cadence: ClientPostingCadence = readClientCadence({
     posting_days: days,
@@ -49,17 +59,26 @@ export function ClientCadenceEditor({
   })
 
   function persist(patch: Parameters<typeof updateClientCadence>[1], rollback: () => void) {
+    if(saveInFlight.current)return
+    saveInFlight.current=true;setSaving(true);onPendingChange?.(true)
     startTransition(async () => {
-      const res = await updateClientCadence(clientId, patch)
-      if (res.error) {
-        toast({ title: 'Error', description: res.error, variant: 'destructive' })
+      try {
+        const res = await updateClientCadence(clientId, patch)
+        if (res.error) {
+          toast({ title: 'Error', description: res.error, variant: 'destructive' })
+          rollback()
+        }else if(res.ok)onSaved?.(patch)
+      }catch {
+        toast({title:'Error',description:'No se pudo guardar la frecuencia. Intenta nuevamente.',variant:'destructive'})
         rollback()
+      }finally {
+        saveInFlight.current=false;setSaving(false);onPendingChange?.(false)
       }
     })
   }
 
   function toggleDay(d: number) {
-    if (!canEdit) return
+    if (!canEdit||saveInFlight.current) return
     const prev = days
     const next = days.includes(d) ? days.filter((x) => x !== d) : [...days, d].sort((a, b) => a - b)
     const nextSchedule = { ...schedule }
@@ -73,14 +92,14 @@ export function ClientCadenceEditor({
   }
 
   function saveDefaultTime(next: string) {
-    if (!canEdit) return
+    if (!canEdit||saveInFlight.current) return
     const prev = time
     setTime(next)
     persist({ posting_time: next || null }, () => setTime(prev))
   }
 
   function saveOverride(day: number, next: string) {
-    if (!canEdit) return
+    if (!canEdit||saveInFlight.current) return
     const prev = schedule
     const nextSchedule = { ...schedule }
     if (next) nextSchedule[String(day)] = next
@@ -90,7 +109,7 @@ export function ClientCadenceEditor({
   }
 
   function saveTimezone(next: string) {
-    if (!canEdit) return
+    if (!canEdit||saveInFlight.current) return
     const prev = timezone
     setTimezone(next)
     persist({ posting_timezone: next || null }, () => setTimezone(prev))
@@ -156,7 +175,7 @@ export function ClientCadenceEditor({
             className="rounded-md border border-border bg-background px-2 py-1.5 text-sm tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-70"
           />
         </label>
-        <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+        {showTimezone&&<label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
           Zona horaria
           <select
             value={timezone}
@@ -172,7 +191,7 @@ export function ClientCadenceEditor({
               </option>
             ))}
           </select>
-        </label>
+        </label>}
       </div>
 
       {activeDays.length > 0 && (
@@ -184,7 +203,7 @@ export function ClientCadenceEditor({
                 <span className="text-sm">{dayLabelsFull[d]}</span>
                 <input
                   type="time"
-                  value={schedule[String(d)] ?? ''}
+                  value={cleanPostingTime(schedule[String(d)]?.slice(0,5)) ?? ''}
                   placeholder={time || undefined}
                   onChange={(e) => saveOverride(d, e.target.value)}
                   disabled={!canEdit || isPending}
