@@ -1,5 +1,8 @@
-import { render, screen, waitFor, cleanup, act } from '@testing-library/react'
+import { render, screen, waitFor, cleanup, act, fireEvent } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
+const {draft}=vi.hoisted(()=>({draft:vi.fn()}))
+vi.mock('@/lib/actions/recibo-calendar-draft',()=>({draftReciboOnDate:draft}))
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
 vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importOriginal<object>(),puertoRicoNow:()=> '2026-10-16T20:00:00'}))
@@ -72,4 +75,49 @@ it('shows pending graphics as images without dates when cadence is unconfigured'
  expect(screen.getByTestId('image-graphic').closest('[data-calendar-date]')).toBeNull()
  expect(screen.getByText('Sin fecha · 1 pieza')).toBeInTheDocument()
  expect(screen.getByText(/1 pieza pendiente/)).toBeInTheDocument()
+})
+
+it('dragging an approved projection creates an exact-day draft once and removes its suggestion',async()=>{
+ draft.mockReset();let finish:(value:unknown)=>void=()=>{};draft.mockImplementation(()=>new Promise(resolve=>{finish=resolve}))
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[{...idea,staff_client_approval:'approved'}]} />)
+ const card=(await screen.findByTestId('preview-i')).closest('article')!
+ expect(card).toHaveAttribute('draggable','true')
+ const transfer={setData:vi.fn(),getData:()=>JSON.stringify({ideaId:'i',clientId:'c',videoId:'v'}),types:['application/x-nate-recibo']}
+ fireEvent.dragStart(card,{dataTransfer:transfer})
+ const day=container.querySelector('[data-calendar-date="2026-10-20"]')!
+ fireEvent.drop(day,{dataTransfer:transfer});fireEvent.drop(day,{dataTransfer:transfer})
+ expect(draft).toHaveBeenCalledTimes(1)
+ expect(draft).toHaveBeenCalledWith({ideaId:'i',clientId:'c',videoId:'v',date:'2026-10-20'})
+ await act(async()=>finish({ok:true}))
+ expect(screen.queryByTestId('preview-i')).toBeNull()
+ expect(screen.getByText(/Borrador creado/)).toBeInTheDocument()
+})
+it('pending approval cannot be dragged and has an explanation',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ expect((await screen.findByTestId('preview-i')).closest('article')).toHaveAttribute('draggable','false')
+ expect(screen.getByText(/Aprueba en Recibo para crear/)).toBeInTheDocument()
+})
+it('lets touch and keyboard users choose a date, retaining the piece on unconfirmed failure',async()=>{
+ draft.mockReset().mockResolvedValue({error:'No se confirmó. Verifica Metricool.'})
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[{...idea,staff_client_approval:'approved'}]} />)
+ fireEvent.click(await screen.findByRole('button',{name:'Elegir fecha de borrador'}))
+ fireEvent.change(screen.getByLabelText('Fecha del borrador'),{target:{value:'2026-10-21'}})
+ fireEvent.click(screen.getByRole('button',{name:'Crear borrador'}))
+ await screen.findByText('No se confirmó. Verifica Metricool.')
+ expect(draft).toHaveBeenCalledWith({ideaId:'i',clientId:'c',videoId:'v',date:'2026-10-21'})
+ expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ expect(draft).toHaveBeenCalledTimes(1)
+})
+it('ignores foreign transfers and past date drops',async()=>{
+ draft.mockReset()
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[{...idea,staff_client_approval:'approved'}]} />)
+ const card=(await screen.findByTestId('preview-i')).closest('article')!
+ fireEvent.drop(container.querySelector('[data-calendar-date="2026-10-20"]')!,{dataTransfer:{getData:()=>'{"ideaId":"foreign"}'}})
+ fireEvent.dragStart(card,{dataTransfer:{setData:vi.fn()}})
+ fireEvent.drop(container.querySelector('[data-calendar-date="2026-10-12"]')!)
+ expect(draft).not.toHaveBeenCalled()
 })

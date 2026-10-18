@@ -1,3 +1,13 @@
+## v5.141 — 18 de octubre de 2026
+
+**Arrastra contenido aprobado al calendario para guardarlo como borrador de ese día.**
+- Las piezas aprobadas de Recibo se pueden arrastrar a una fecha o usar «Elegir fecha de borrador» desde el teléfono o teclado.
+- La fecha elegida crea un borrador en Metricool con la hora configurada del cliente; no activa la publicación automática.
+- Las fechas proyectadas siguen siendo sugerencias hasta que eliges una fecha. Las piezas sin aprobar explican el paso pendiente.
+- Si el envío no se confirma, la pieza permanece visible y se indica verificar Metricool antes de reenviarla.
+
+![Borradores desde el calendario](/changelog/v5.141-calendar-draft.png)
+
 ## v5.140 — 18 de octubre de 2026
 
 **Los posts de Recibo también aparecen en el calendario de publicaciones.**

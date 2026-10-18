@@ -73,6 +73,8 @@ export async function schedulePoolIdea(input: {
   date: string
   /** Recibo keeps a Metricool draft. The Panel reschedule stays live. */
   asDraft?: boolean
+  /** Bind an explicit pending Recibo placement to the client and file actually seen. */
+  expectedRecibo?: { clientId: string; videoId: string }
 }): Promise<SchedulePoolResult> {
   try {
     await requirePermission('posting.publish')
@@ -114,6 +116,10 @@ export async function schedulePoolIdea(input: {
     client_edit_mode: editMode,
   })
 
+  if (input.expectedRecibo) {
+    if (idea.client_id !== input.expectedRecibo.clientId) return {error:'El contenido cambió de cliente. Actualiza el calendario.'}
+    if (!input.asDraft || idea.metricool_post_id || idea.metricool_uuid || idea.posted_at) return {error:'El contenido ya salió de Recibo. Verifica el borrador existente.'}
+  }
   if (state === 'publicado') return { error: 'El video ya está publicado' }
   if (canReschedulePoolIdea(state)) {
     return rescheduleAgendadoIdea({
@@ -150,6 +156,7 @@ export async function schedulePoolIdea(input: {
   if (choice.skipped) return { error: choice.skipped }
   if (!choice.video) return { error: 'Falta el video editado' }
 
+  if (input.expectedRecibo && choice.video.id !== input.expectedRecibo.videoId) return {error:'Cambió el archivo editado. Actualiza el calendario.'}
   const pubUrl = publicVideoUrl(choice.video)
   if (!pubUrl) return { error: 'No se pudo obtener la URL pública del video editado' }
   const health = await checkVideoPlayable(pubUrl)
@@ -168,7 +175,7 @@ export async function schedulePoolIdea(input: {
   const platforms = resolvePlatforms(client.platforms, client.default_platforms)
   const caption = captionForSchedule(idea)
 
-  const { data: claimed, error: claimErr } = await supabase
+  let claimQuery = supabase
     .from('content_ideas')
     .update({ posting_started_at: new Date().toISOString() })
     .eq('id', input.ideaId)
@@ -176,6 +183,14 @@ export async function schedulePoolIdea(input: {
     .is('posted_at', null)
     .is('posting_started_at', null)
     .select('id')
+  if(input.expectedRecibo) {
+    claimQuery=claimQuery.eq('client_id',input.expectedRecibo.clientId).eq('status',idea.status).is('metricool_uuid',null)
+    for(const column of ['staff_client_approval','client_review_status','approved_video_id'] as const) {
+      const value=idea[column]
+      claimQuery=value==null ? claimQuery.is(column,null) : claimQuery.eq(column,value)
+    }
+  }
+  const {data:claimed,error:claimErr}=await claimQuery
   if (claimErr) return { error: claimErr.message }
   if (!claimed || claimed.length === 0) {
     return { error: 'El video ya está agendado o tiene un envío en curso' }

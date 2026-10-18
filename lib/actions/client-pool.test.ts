@@ -349,3 +349,10 @@ describe('invalid cadence clocks do not become implicit 10am sends',()=>{
  it('uses a valid general time with a legacy format instead of the pool default',async()=>{const client=h.idea.client as Record<string,unknown>;client.posting_schedule={3:'reel'};await schedulePoolIdea({ideaId:'idea',date:'2026-09-23'});expect(h.post.mock.calls[0][4]).toBe('2026-09-23T09:15:00')})
  it('retains the established pool default for clients with no clock or override at all',async()=>{const client=h.idea.client as Record<string,unknown>;client.posting_time=null;client.posting_schedule=null;await schedulePoolIdea({ideaId:'idea',date:'2026-09-23'});expect(h.post.mock.calls[0][4]).toBe('2026-09-23T10:00:00')})
 })
+
+describe('calendar draft guards',()=>{
+ beforeEach(()=>{h.idea.client_id='c'})
+ it('rejects changed client before posting',async()=>{const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'other',videoId:'vid'}});expect(result.error).toMatch(/cliente/i);expect(h.post).not.toHaveBeenCalled()})
+ it('rejects replaced file before posting',async()=>{const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'c',videoId:'old'}});expect(result.error).toMatch(/archivo/i);expect(h.post).not.toHaveBeenCalled()})
+ it('does not turn a stale pending drag into rescheduling',async()=>{h.idea.metricool_post_id=44;h.idea.posted_at='2026-09-20';const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'c',videoId:'vid'}});expect(result.error).toMatch(/Recibo|pendiente/i);expect(h.update).not.toHaveBeenCalled();expect(h.post).not.toHaveBeenCalled()})
+})

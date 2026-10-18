@@ -118,3 +118,5 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 ## When the user reports a "looks broken" UI bug
 
 First check: is the offending header using the responsive card-header pattern above? Most overflow/clipping bugs in this app are missing `flex-wrap` + `min-w-0` + `shrink-0`.
+
+- Eric, 2026-10-18: arrastrar explícitamente una pieza aprobada de Recibo sobre un día significa crear un borrador Metricool para esa fecha, nunca activar publicación. Proyecciones automáticas = sugerencias. Mantener alternativa accesible «Elegir fecha de borrador», posting.publish y aprobación de Recibo, validar cliente/archivo actuales y fecha en Puerto Rico, bloquear duplicados y no convertir un arrastre obsoleto en reprogramación. Refrescar ambas vistas al confirmar; conservar pieza y explicar verificación ante resultado desconocido. Evidencia: `recibo-calendar-draft.test.ts`, guardas `client-pool.test.ts` e interacción `content-calendar.projection.test.tsx`; validación de escrituras mediante mocks.

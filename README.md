@@ -62,3 +62,14 @@ Sin una frecuencia compatible se muestran las piezas en **Sin fecha**, con su im
 ### Frecuencias basadas en historial por cliente
 
 - [643 Sport Bar & Pizzería: frecuencia y evidencia histórica](docs/client-rules/643-publication-frequency.md). Regla específica de esta cuenta, por instrucción de Eric del 18 de octubre de 2026.
+
+
+### Borradores al colocar Recibo en el calendario (v5.141)
+
+Eric, 18 de octubre de 2026: arrastrar una pieza aprobada a un día expresa la decisión de crear su **borrador en Metricool para ese día**, con la hora de la frecuencia del cliente y zona de Puerto Rico. Las proyecciones automáticas siguen siendo sugerencias. El botón **Elegir fecha de borrador** ofrece la misma acción en teléfono y teclado. La aprobación de Recibo y el permiso de publicación siguen siendo necesarios; esta acción no publica automáticamente.
+
+Solo se acepta el cliente seleccionado y el archivo editado actual de una pieza pendiente. Durante el envío se bloquean operaciones duplicadas y cambios de calendario; al confirmar se retira su sugerencia y se actualizan Recibo y Metricool. Ante error o resultado desconocido se conserva la pieza y se solicita verificar Metricool antes de reenviar. Los ensayos de escritura usan mocks; no se creó contenido real para validar esta función.
+
+Vista previa: `/previews/v5.141-calendar-drafts.html`.
+
+Límite de concurrencia: el envío vuelve a comprobar cliente y archivo elegido; la reserva en la idea compara cliente, estado y aprobación. Los archivos adjuntos viven en otra tabla, por lo que una sustitución concurrente posterior a esa comprobación no queda bloqueada atómicamente por esta reserva.
