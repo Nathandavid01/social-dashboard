@@ -1,3 +1,11 @@
+## v5.144 — 18 de octubre de 2026
+
+**Identifica de un vistazo si cada pieza pendiente es Post o Reel.**
+- Las gráficas muestran «Post» y los videos «Reel» en una etiqueta visible dentro de su tarjeta del calendario.
+- La etiqueta también aparece en «Sin fecha» y se mantiene separada de la aprobación y la proyección.
+
+![Formato de contenido en el calendario](/changelog/v5.144-calendar-format.png)
+
 ## v5.143 — 18 de octubre de 2026
 
 **El calendario te muestra hasta qué día llega el contenido que tienes ahora.**

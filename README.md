@@ -98,3 +98,9 @@ Si falla cualquier tramo o una cuenta devuelve datos incompletos, no se afirma l
 Evidencia de lectura de 643 del 18 de octubre de 2026: cinco gráficas pendientes, dos borradores (23 y 28 de octubre), cero publicaciones programadas futuras; frecuencia lunes/miércoles/viernes a las 10:00. Las sugerencias ocupan 19, 21, 26 y 30 de octubre y 2 de noviembre: última fecha prevista **lunes, 2 de noviembre de 2026**. Esta lectura no constituye una nueva programación. Verificación visual local y lecturas reales; las escrituras de calendario no se ensayaron con datos reales.
 
 Pruebas: `lib/recibo/calendar-coverage.test.ts`, `lib/recibo/use-calendar-projection.test.tsx`, `lib/recibo/calendar-projection.test.ts` y `components/published/content-calendar.projection.test.tsx`. Vista previa: `/previews/v5.143-calendar-coverage.html`.
+
+### Formato visible en el calendario (v5.144)
+
+Eric, 18 de octubre de 2026: identificar si la pieza es Post o Reel dentro de la tarjeta del calendario. Las piezas pendientes muestran una etiqueta «Post» para imágenes y «Reel» para videos, usando la clasificación existente del archivo editado actual, tanto en fechas proyectadas como en «Sin fecha». La etiqueta permanece separada del estado de aprobación y de «Proyectado»; no modifica fechas ni crea borradores. Este alcance no inventa formatos para registros externos de Metricool sin datos suficientes.
+
+Verificar con `components/published/content-calendar.projection.test.tsx`: gráfica y video proyectados identificados en sus propias tarjetas, aprobación conservada y etiqueta única en piezas sin fecha. Vista previa: `/previews/v5.144-calendar-format.html`.

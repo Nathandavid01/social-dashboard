@@ -172,8 +172,9 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     const payload={ideaId:idea.id,clientId:idea.client_id,videoId}
     return <article key={idea.id} draggable={allowed} onDragStart={event=>{if(!allowed){event.preventDefault();return}dragPayload.current=payload;event.dataTransfer.setData('application/x-nate-recibo',JSON.stringify(payload));event.dataTransfer.effectAllowed='move';setDragging(true)}} onDragEnd={()=>{dragPayload.current=null;setDragging(false)}} className={cn('min-w-0 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2',allowed && 'cursor-grab')}>
       <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
+      <span aria-label={`Formato: ${image ? 'Post' : 'Reel'}`} className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-950">{image ? 'Post' : 'Reel'}</span>
       <p className="text-xs font-semibold">{idea.title || idea.hook || 'Contenido'}</p>
-      <p className="text-[10px] text-amber-800">{projected ? (reciboSpaceTone(idea)==='approved'?'Proyectado · aprobado':'Proyectado · pendiente de aprobación') : `${image?'Post':'Reel'} · ${reciboSpaceTone(idea)==='approved'?'Aprobado':'Pendiente de aprobación'}`}</p>
+      <p className="text-[10px] text-amber-800">{projected ? (reciboSpaceTone(idea)==='approved'?'Proyectado · aprobado':'Proyectado · pendiente de aprobación') : (reciboSpaceTone(idea)==='approved'?'Aprobado':'Pendiente de aprobación')}</p>
       {canDraft && (reciboSpaceTone(idea)==='approved' ? <button type="button" disabled={calendarBusy} className="min-h-10 w-full rounded-lg border border-amber-300 px-2 text-xs font-medium disabled:opacity-50" onClick={()=>setDateChoice({...payload,date:date && date>=today?date:today})}>Elegir fecha de borrador</button> : <p className="text-[10px] text-amber-900">Aprueba en Recibo para crear un borrador.</p>)}
     </article>
   }

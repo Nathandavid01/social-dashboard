@@ -1,4 +1,4 @@
-import { render, screen, waitFor, cleanup, act, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, cleanup, act, fireEvent, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 const {draft}=vi.hoisted(()=>({draft:vi.fn()}))
 vi.mock('@/lib/actions/recibo-calendar-draft',()=>({draftReciboOnDate:draft}))
@@ -141,4 +141,24 @@ it('does not expose a date when a later verification chunk is incomplete',async(
  render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
  expect(await screen.findByText(/No se pudo verificar la cobertura/)).toBeInTheDocument()
  expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
+})
+
+// Eric, 2026-10-18: every pending calendar card identifies its actual format separately from approval.
+it('labels projected graphics Post and videos Reel on their own cards',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ const graphic={...idea,id:'graphic',title:'Pizza 643',videos:[{...idea.videos![0],id:'png',name:'pizza.png',mime_type:'image/png'}]}
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[graphic,idea]} />)
+ const postCard=(await screen.findByTestId('image-graphic')).closest('article')!
+ const reelCard=(await screen.findByTestId('preview-i')).closest('article')!
+ expect(within(postCard).getByText('Post',{exact:true})).toBeVisible()
+ expect(within(reelCard).getByText('Reel',{exact:true})).toBeVisible()
+ expect(within(postCard).getByText('Proyectado · pendiente de aprobación')).toBeInTheDocument()
+ expect(within(reelCard).getByText('Proyectado · pendiente de aprobación')).toBeInTheDocument()
+})
+it('keeps a single explicit format badge on undated cards',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
+ render(<ContentCalendar clients={[{...client,posting_days:[]}]} clientId="c" projectionIdeas={[idea]} />)
+ const card=(await screen.findByTestId('preview-i')).closest('article')!
+ expect(within(card).getAllByText('Reel',{exact:true})).toHaveLength(1)
+ expect(within(card).getByText('Pendiente de aprobación',{exact:true})).toBeInTheDocument()
 })
