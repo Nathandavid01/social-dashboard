@@ -58,3 +58,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 Por instrucción de Eric del 18 de octubre de 2026, la cobertura de Recibo incluye gráficas y videos. Reemplaza la restricción anterior a videos: las gráficas se proyectan en días Post, los videos en Reel y los días sin formato admiten ambos en orden de recepción. Story queda excluido. Las piezas ya programadas/publicadas y los días ocupados no se vuelven a asignar.
 
 Sin una frecuencia compatible se muestran las piezas en **Sin fecha**, con su imagen o reproductor y aprobación real. Configurar frecuencia permite proyectarlas; la proyección no programa ni publica contenido. Comprobar con `lib/recibo/calendar-projection.test.ts` y `components/published/content-calendar.projection.test.tsx`.
+
+### Frecuencias basadas en historial por cliente
+
+- [643 Sport Bar & Pizzería: frecuencia y evidencia histórica](docs/client-rules/643-publication-frequency.md). Regla específica de esta cuenta, por instrucción de Eric del 18 de octubre de 2026.
