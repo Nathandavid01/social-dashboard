@@ -8,6 +8,8 @@ import { publicationDay, publicationInstant } from '@/lib/metricool/publication-
 import { matchMetricoolBlogId } from '@/lib/recibo/metricool-profile'
 import { reciboBoardIdeas, usableCut, type ReciboQueueIdea } from '@/lib/recibo/board-ideas'
 import { matchReciboPublished, measurableMedia, type ReciboPublishedMatch } from '@/lib/recibo/match-published'
+import { matchReciboPublishedImages, measurableImages, IMAGE_URL } from '@/lib/recibo/match-published-images'
+import { sourceImageFingerprint, metricoolImageFingerprint } from '@/lib/recibo/image-fingerprint'
 import { logIdeaActivity } from '@/lib/utils/idea-activity'
 
 export type ReciboPublishedSyncResult = {
@@ -18,7 +20,7 @@ export type ReciboPublishedSyncResult = {
 
 type CandidateIdea = Omit<ReciboQueueIdea, 'client' | 'videos'> & {
   client?: { status?: string | null; name?: string | null; metricool_blog_id?: string | null } | null
-  videos?: (NonNullable<ReciboQueueIdea['videos']>[number] & { size_bytes?: number | null; uploaded_at?: string | null })[] | null
+  videos?: (NonNullable<ReciboQueueIdea['videos']>[number] & { size_bytes?: number | null; uploaded_at?: string | null; id?: string; drive_file_id?: string | null; mime_type?: string | null; name?: string | null })[] | null
 }
 
 type ClientMatches = {
@@ -26,7 +28,7 @@ type ClientMatches = {
   blogId: string
   /** metricool_blog_id exactly as read — null/blank means the blog was found by name. */
   readBlogId: string | null
-  matches: ReciboPublishedMatch<ScheduledPost>[]
+  matches: (ReciboPublishedMatch<ScheduledPost> & { currentImageId?: string })[]
 }
 
 const DAY = 24 * 60 * 60 * 1000
@@ -81,7 +83,7 @@ async function loadCandidates(supabase: SupabaseClient): Promise<{ rows: Candida
     let query = supabase
       .from('content_ideas')
       .select(
-        'id, client_id, status, published_at, manual_posted_status, metricool_post_id, posted_at, staff_client_approval, client_review_status, client:clients!content_ideas_client_id_fkey(status, name, metricool_blog_id), videos:content_idea_videos!content_idea_videos_idea_id_fkey!inner(kind, status, storage_provider, uploaded_by, uploaded_at, size_bytes)',
+        'id, client_id, status, published_at, manual_posted_status, metricool_post_id, posted_at, staff_client_approval, client_review_status, client:clients!content_ideas_client_id_fkey(status, name, metricool_blog_id), videos:content_idea_videos!content_idea_videos_idea_id_fkey!inner(id, kind, status, storage_provider, uploaded_by, uploaded_at, size_bytes, drive_file_id, mime_type, name)',
       )
       .not('status', 'in', '(descartada,publicada)')
       .is('metricool_post_id', null)
@@ -116,7 +118,8 @@ function windowStart(ideas: CandidateIdea[], now: number): string {
  * overrides a dashboard send. Past `deadline` it measures and writes nothing.
  */
 export async function runReciboPublishedMatch(options: { deadline?: number } = {}): Promise<ReciboPublishedSyncResult> {
-  const late = () => options.deadline !== undefined && Date.now() > options.deadline
+  const deadline = options.deadline ?? Date.now() + 8_000
+  const late = () => Date.now() > deadline
   if (late()) return TOO_LATE
   const base = getServerConfig()
   if (!base) return { linked: 0, error: 'Metricool no está configurado.' }
@@ -151,7 +154,34 @@ export async function runReciboPublishedMatch(options: { deadline?: number } = {
       if (!blogId) return null
       const posts = await getScheduledPosts({ ...base, blogId }, windowStart(ideas, now), end)
       const sizes = await measureAll(measurableMedia(posts), late)
-      return { clientId, blogId, readBlogId, matches: matchReciboPublished(ideas, posts, (url) => sizes.get(url)) }
+      const matches: ClientMatches['matches'] = matchReciboPublished(ideas, posts, (url) => sizes.get(url))
+      // Image identity cannot establish the client account: only a saved blog binding can.
+      const imageDeadline = Math.min(deadline - 1_000, Date.now() + 4_000)
+      const imageLate = () => Date.now() >= imageDeadline
+      const urls = readBlogId?.trim() ? measurableImages(posts) : []
+      if (urls.length && !imageLate()) {
+        const images: {id:string;fingerprint?:string;videoId:string;size:number}[] = []
+        for (const idea of ideas) {
+          if (imageLate()) break
+          const candidates = [...(idea.videos ?? [])].filter(v=>usableCut(v) && ['r2','entregas-r2'].includes(v.storage_provider ?? '') && !!v.drive_file_id && !!v.id)
+            .sort((a,b)=>(b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))
+          // The UI orders by upload time. Ties provide no safe current identity.
+          if (candidates.length > 1 && candidates[0].uploaded_at === candidates[1].uploaded_at) continue
+          const current = candidates[0]
+          if (!current?.id || !current.drive_file_id || !current.size_bytes || !(current.mime_type?.startsWith('image/') || IMAGE_URL.test(current.name ?? ''))) continue
+          const fingerprint = await sourceImageFingerprint(current,imageDeadline)
+          if (fingerprint) images.push({id:idea.id,videoId:current.id,size:current.size_bytes,fingerprint})
+        }
+        const fingerprints = new Map<string, string | undefined>()
+        const candidateSizes = new Set(images.map(image=>image.size))
+        // HEAD sizes only shortlist downloads. SHA-256 is still the sole image identity.
+        for (const url of images.length ? urls : []) {
+          if (imageLate()) break
+          fingerprints.set(url, await metricoolImageFingerprint(url,imageDeadline,candidateSizes))
+        }
+        matches.push(...matchReciboPublishedImages(images,posts,url=>fingerprints.get(url)).map(match=>({...match,currentImageId:images.find(image=>image.id===match.ideaId)!.videoId})))
+      }
+      return { clientId, blogId, readBlogId, matches }
     }),
   )
   if (late()) return TOO_LATE
@@ -186,6 +216,14 @@ export async function runReciboPublishedMatch(options: { deadline?: number } = {
       if (!saved.ok) continue
     }
     for (const match of client.matches) {
+      if (match.currentImageId) {
+        // A revision arriving during byte verification must stay in Recibo.
+        const {data:current,error} = await supabase.from('content_idea_videos').select('id')
+          .eq('idea_id',match.ideaId).eq('kind','edited').in('storage_provider',['r2','entregas-r2'])
+          .not('status','in','(archived,failed)').not('drive_file_id','is',null)
+          .neq('drive_file_id','').order('uploaded_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle()
+        if (error || current?.id !== match.currentImageId || late()) continue
+      }
       if (!(await linkIdea(supabase, match))) continue
       linked += 1
       await logIdeaActivity(supabase, {

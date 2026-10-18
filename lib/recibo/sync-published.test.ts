@@ -12,6 +12,9 @@ process.env.METRICOOL_USER_ID = 'uid'
 process.env.METRICOOL_BLOG_ID = 'blog-default'
 
 const getScheduledPosts = vi.fn()
+const sourceImageFingerprint = vi.fn()
+const metricoolImageFingerprint = vi.fn()
+vi.mock('@/lib/recibo/image-fingerprint',()=>({sourceImageFingerprint:(...a:unknown[])=>sourceImageFingerprint(...a),metricoolImageFingerprint:(...a:unknown[])=>metricoolImageFingerprint(...a)}))
 const logIdeaActivity = vi.fn(async () => {})
 
 vi.mock('@/lib/metricool/scheduler', () => ({ getScheduledPosts: (...a: unknown[]) => getScheduledPosts(...a) }))
@@ -34,6 +37,7 @@ function builder(table: string) {
   const op: Op = { table, kind: 'select', filters: [] }
   ops.push(op)
   const result = () => {
+    if (table === 'content_idea_videos') return {data:{id:'image-current'},error:null}
     if (op.kind === 'update') {
       return table === 'clients'
         ? { data: clientUpdateError ? null : clientUpdateReturns, error: clientUpdateError }
@@ -301,4 +305,64 @@ describe('runReciboPublishedMatch', () => {
     expect(fetch).not.toHaveBeenCalled()
     expect(updates()).toEqual([])
   })
+})
+
+
+describe('published graphic reconciliation', () => {
+  it('links a current exact-byte image in the saved client account',async()=>{
+    ideaRows = [onRecibo('graphic',100,{videos:[{...cut(100),id:'image-current',drive_file_id:'edited/a.png',mime_type:'image/png',name:'a.png'}]})]
+    getScheduledPosts.mockResolvedValue([post(88,'https://static.metricool.com/a.png')])
+    sourceImageFingerprint.mockResolvedValue('hash-a')
+    metricoolImageFingerprint.mockResolvedValue('hash-a')
+    expect(await run()).toEqual({linked:1})
+    expect(updates().find(op=>op.table==='content_ideas')?.payload).toMatchObject({metricool_post_id:88})
+  })
+  it('does not link an image of the same size with different bytes',async()=>{
+    ideaRows = [onRecibo('graphic',100,{videos:[{...cut(100),id:'image-current',drive_file_id:'edited/a.png',mime_type:'image/png'}]})]
+    getScheduledPosts.mockResolvedValue([post(88,'https://static.metricool.com/a.png')])
+    sourceImageFingerprint.mockResolvedValue('hash-a')
+    metricoolImageFingerprint.mockResolvedValue('hash-b')
+    expect(await run()).toEqual({linked:0})
+    expect(updates()).toEqual([])
+  })
+  it('does not infer an account by name for graphic identity',async()=>{
+    ideaRows = [onRecibo('graphic',100,{client:{...ARECIBO,metricool_blog_id:null},videos:[{...cut(100),id:'image-current',drive_file_id:'edited/a.png',mime_type:'image/png'}]})]
+    profiles = [{id:123,label:'Arecibo Lab'}]
+    getScheduledPosts.mockResolvedValue([post(88,'https://static.metricool.com/a.png')])
+    sourceImageFingerprint.mockResolvedValue('hash-a')
+    metricoolImageFingerprint.mockResolvedValue('hash-a')
+    expect(await run()).toEqual({linked:0})
+    expect(sourceImageFingerprint).not.toHaveBeenCalled()
+  })
+  it('does not hide a new revision when the old graphic was published',async()=>{
+    ideaRows = [onRecibo('graphic',100,{videos:[{...cut(100),id:'old',drive_file_id:'old.png',mime_type:'image/png',uploaded_at:'2026-10-01'},{...cut(200),id:'image-current',drive_file_id:'new.png',mime_type:'image/png',uploaded_at:'2026-10-02'}]})]
+    getScheduledPosts.mockResolvedValue([post(88,'https://static.metricool.com/a.png')])
+    sourceImageFingerprint.mockImplementation(async(source:{drive_file_id:string})=>source.drive_file_id==='old.png'?'hash-old':'hash-new')
+    metricoolImageFingerprint.mockResolvedValue('hash-old')
+    expect(await run()).toEqual({linked:0})
+    expect(sourceImageFingerprint).toHaveBeenCalledTimes(1)
+  })
+  it('does not link a cut replaced during verification',async()=>{
+    ideaRows = [onRecibo('graphic',100,{videos:[{...cut(100),id:'old-id',drive_file_id:'edited/a.png',mime_type:'image/png'}]})]
+    getScheduledPosts.mockResolvedValue([post(88,'https://static.metricool.com/a.png')])
+    sourceImageFingerprint.mockResolvedValue('hash-a')
+    metricoolImageFingerprint.mockResolvedValue('hash-a')
+    expect(await run()).toEqual({linked:0})
+    expect(updates()).toEqual([])
+  })
+})
+
+it('conserva el enlace de video confirmado cuando se agota el presupuesto opcional de imágenes',async()=>{
+  const start = Date.now()
+  let clock = start
+  const now = vi.spyOn(Date,'now').mockImplementation(()=>clock)
+  try {
+    ideaRows = [onRecibo('video',123),onRecibo('graphic',100,{videos:[{...cut(100),id:'image-current',drive_file_id:'a.png',mime_type:'image/png'}]})]
+    sizes['https://static.metricool.com/v.mp4'] = 123
+    getScheduledPosts.mockResolvedValue([post(1,'https://static.metricool.com/v.mp4'),post(2,'https://static.metricool.com/a.png')])
+    metricoolImageFingerprint.mockImplementation(async(_url:string,deadline:number)=>{clock=deadline;return undefined})
+    const {runReciboPublishedMatch} = await import('./sync-published')
+    expect(await runReciboPublishedMatch({deadline:start+8000})).toEqual({linked:1})
+    expect(updates().find(op=>op.table==='content_ideas')?.payload).toMatchObject({metricool_post_id:1})
+  } finally {now.mockRestore()}
 })

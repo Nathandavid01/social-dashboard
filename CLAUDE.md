@@ -30,7 +30,7 @@ Admin (once): `bash scripts/apply-branch-protection.sh`
 ## Workflow & commits
 
 - Work on a feature branch (e.g. `eric/dev`). Commit in small, green increments — never leave large uncommitted work.
-- After each green increment: commit, then merge the branch into `main` locally. Only push when explicitly asked.
+- Eric, 2026-10-18: after every completed change, commit, push the feature branch, open a PR, pass the required checks and independent review, then merge to `main` and verify the Vercel deployment. This standing authorization replaces the previous local-only / ask-before-push rule. Never push directly to `main` or bypass required checks or reviews.
 
 ## Mandatory: every new feature must respect RBAC
 
@@ -90,6 +90,9 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 
 ## Calendario de publicaciones
 
+- Eric, 2026-10-18: Recibo calendar coverage includes current graphics and videos. Graphics occupy Post slots, videos Reel slots, and untyped cadence days use received order across both. Story slots remain excluded. Reuse current edited-file identity and image previews; never duplicate scheduled/published ideas. Pending pieces without compatible cadence appear in the calendar workspace under «Sin fecha»; never invent dates or mutate scheduling. This supersedes the v5.138 video-only projection contract. Verify mixed-format assignment, occupancy, deduplication, image rendering and absent cadence in projection tests.
+
+
 - Pool creation and rescheduling reject a null resolved time if raw cadence contains invalid clock/format data; only the longstanding completely unconfigured Pool case keeps its existing 10am default.
 - `resolveSlotTime` scheduling resolves only valid HH:mm(:ss), normalizes to HH:mm, and falls back from legacy formats/invalid overrides to a valid general time or null. Never send content formats as Metricool clock times.
 - CalendarCadenceSettings reuses ClientCadenceEditor and updateClientCadence (cadence.edit on UI and server). Confirmed patch callbacks update calendar local cadence immediately; failures roll back. Explicit in-flight state serializes autosave and blocks controls and closing the dialog. `cleanPostingScheduleWithFormats` preserves recognized legacy reel/post/story values on retained weekdays and normalizes valid HH:mm:ss per-day values to HH:mm; strict read cleaners remain unchanged and accept only times as hours. Removing a weekday prunes its override; setting a per-day time replaces that day's prior format/time value. The calendar dialog hides timezone editing. Cadence revalidation includes /recibo and /clients/[id]/calendar. Frequency changes do not move existing Metricool posts.
@@ -116,3 +119,12 @@ The Sidebar items themselves don't currently filter by permission (legacy). When
 ## When the user reports a "looks broken" UI bug
 
 First check: is the offending header using the responsive card-header pattern above? Most overflow/clipping bugs in this app are missing `flex-wrap` + `min-w-0` + `shrink-0`.
+
+- Eric, 2026-10-18: arrastrar explícitamente una pieza aprobada de Recibo sobre un día significa crear un borrador Metricool para esa fecha, nunca activar publicación. Proyecciones automáticas = sugerencias. Mantener alternativa accesible «Elegir fecha de borrador», posting.publish y aprobación de Recibo, validar cliente/archivo actuales y fecha en Puerto Rico, bloquear duplicados y no convertir un arrastre obsoleto en reprogramación. Refrescar ambas vistas al confirmar; conservar pieza y explicar verificación ante resultado desconocido. Evidencia: `recibo-calendar-draft.test.ts`, guardas `client-pool.test.ts` e interacción `content-calendar.projection.test.tsx`; validación de escrituras mediante mocks.
+
+- Eric, 2026-10-18: excluir de pendientes lo ya publicado para evitar repeticiones. El cruce automático de gráficas individuales requiere SHA-256 idéntico entre el archivo editado actual en R2 y la copia en la cuenta Metricool guardada del cliente; nunca título, tamaño de imagen o cuenta inferida por nombre. Borradores, carruseles, evidencia incompleta y revisiones ambiguas permanecen pendientes. Las imágenes no participan en el cruce histórico por tamaño de videos. Consultar README «Evitar publicaciones repetidas en Recibo (v5.142)» para límites, evidencia de 643 y verificaciones; `lib/recibo/image-fingerprint.ts` y `match-published-images.ts` implementan el contrato. No borrar archivos ni posts.
+
+
+- Eric, 2026-10-18: mostrar la última fecha prevista del contenido actual del cliente en el calendario, combinando pendientes compatibles, borradores futuros y publicaciones programadas; los borradores reservan su fecha antes de proyectar pendientes. Esta regla sustituye el cálculo v5.140 que solo mostraba el final de la cola pendiente y no reservaba borradores. No confundir borrador/sugerencia con publicación automática. Verificar todos los tramos del horizonte de 366 días (consultas de hasta 35), incluso sin pendientes; errores o respuestas incompletas no permiten afirmar una fecha. Separar los conteos y ofrecer «Ver última fecha». Leer README «Última fecha del contenido actual (v5.143)» para alcance, evidencia y pruebas.
+
+- Eric, 2026-10-18: cada tarjeta pendiente del calendario, proyectada o «Sin fecha», debe indicar explícitamente «Post» para una imagen o «Reel» para un video según el archivo editado actual. Mostrar una etiqueta visible y accesible independiente de la proyección y aprobación; no inferir el formato del título ni inventar el de posts externos sin datos. Evidencia: `content-calendar.projection.test.tsx`; alcance y vista previa en README «Formato visible en el calendario (v5.144)».

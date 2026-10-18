@@ -130,3 +130,32 @@ describe('LoginForm — remember email', () => {
     expect(m.get('nm_remember_email')).toBe('bob@x.com')
   })
 })
+
+
+describe('LoginForm — accesibilidad durante el acceso', () => {
+  it('anuncia el formulario ocupado y evita reenvíos mientras entra', async () => {
+    let finish!: (value: { error?: string }) => void
+    signIn.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    render(<LoginForm />)
+    fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'a@b.com' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'x' } })
+    const form = screen.getByRole('form', { name: /acceso a nate media/i })
+    fireEvent.submit(form)
+    expect(form).toHaveAttribute('aria-busy', 'true')
+    fireEvent.submit(form)
+    expect(signIn).toHaveBeenCalledTimes(1)
+    finish({ error: 'Inténtalo de nuevo' })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Inténtalo de nuevo')
+    expect(form).toHaveAttribute('aria-busy', 'false')
+  })
+})
+
+
+it('allows signing in when browser storage cannot save the email', async () => {
+  mockStorage()
+  vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => { throw new Error('Quota exceeded') })
+  render(<LoginForm />)
+  fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'a@b.com' } })
+  fireEvent.submit(screen.getByRole('form', { name: /acceso a nate media/i }))
+  await vi.waitFor(() => expect(signIn).toHaveBeenCalledTimes(1))
+})

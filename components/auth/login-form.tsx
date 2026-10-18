@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ShieldCheck } from 'lucide-react'
 import { signIn } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +31,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
   const [email, setEmail] = useState('')
 
   // Prefill the remembered email on the client only (avoids SSR mismatch).
@@ -41,12 +42,18 @@ export function LoginForm() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (submitting.current) return
+    submitting.current = true
     const formData = new FormData(e.currentTarget)
 
     // Persist BEFORE the action — on success signIn redirects, so code after
     // the await may not run.
     const store = safeStorage()
-    if (store && email.trim()) store.setItem(REMEMBER_KEY, email.trim())
+    try {
+      if (store && email.trim()) store.setItem(REMEMBER_KEY, email.trim())
+    } catch {
+      // Remembering the email is optional; storage restrictions must not block login.
+    }
 
     setError(null)
     setPending(true)
@@ -55,18 +62,19 @@ export function LoginForm() {
       // On success the server action redirects; otherwise it returns { error }.
       if (result?.error) setError(result.error)
     } finally {
+      submitting.current = false
       setPending(false)
     }
   }
 
   return (
     <div className="w-full">
-      <div className="mb-6 space-y-1.5">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Bienvenido de nuevo</h2>
+      <div className="mb-5 space-y-2">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">Bienvenido de nuevo</h2>
         <p className="text-sm text-muted-foreground">Entra a tu panel de Nate Media para seguir trabajando.</p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form aria-label="Acceso a Nate Media" aria-busy={pending} onSubmit={onSubmit} className="space-y-4">
         {error && (
           <div
             role="alert"
@@ -90,7 +98,7 @@ export function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-11 pl-9"
+              className="h-12 rounded-xl bg-background/60 pl-10 text-base md:text-base"
             />
           </div>
         </div>
@@ -106,13 +114,13 @@ export function LoginForm() {
               autoComplete="current-password"
               placeholder="••••••••"
               required
-              className="h-11 px-9"
+              className="h-12 rounded-xl bg-background/60 pl-10 pr-12 text-base md:text-base"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="absolute right-0 top-0 flex h-12 w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -120,11 +128,12 @@ export function LoginForm() {
         </div>
 
         <input type="hidden" name="remember" value="1" />
-        <p className="text-sm text-muted-foreground">
-          Tu sesión se mantiene en este dispositivo hasta que cierres sesión.
+        <p className="flex items-start gap-2 rounded-xl border border-primary/15 bg-primary/5 px-3.5 py-3 text-xs leading-5 text-muted-foreground">
+          <ShieldCheck aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <span>Tu sesión se mantiene en este dispositivo hasta que cierres sesión.</span>
         </p>
 
-        <Button type="submit" className="h-11 w-full text-sm font-semibold shadow-sm shadow-primary/20" disabled={pending}>
+        <Button type="submit" className="h-12 w-full rounded-xl text-sm font-semibold shadow-lg shadow-primary/10" disabled={pending}>
           {pending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Entrando…
@@ -135,7 +144,7 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
+      <p className="mt-5 border-t border-border/60 pt-4 text-center text-xs leading-5 text-muted-foreground">
         ¿Problemas para entrar? Escríbele a un administrador de Nate Media.
       </p>
     </div>
