@@ -1,0 +1,65 @@
+import { render, screen, waitFor, cleanup, act } from '@testing-library/react'
+import { afterEach, expect, it, vi } from 'vitest'
+vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
+vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
+vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importOriginal<object>(),puertoRicoNow:()=> '2026-10-16T20:00:00'}))
+vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId}:{ideaId:string})=><video controls data-testid={`preview-${ideaId}`}/>}))
+import { ContentCalendar } from './content-calendar'
+import type { IdeaWithPipeline } from '@/lib/supabase/types'
+afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals()})
+const client={id:'c',name:'Yabuuchi',metricool_blog_id:'1',posting_days:[0,1,2,3,4,5,6],posting_time:'23:00'}
+const idea={id:'i',client_id:'c',title:'La Jefa',status:'producida',videos:[{id:'v',kind:'edited',status:'uploaded',name:'jefa.mp4',storage_provider:'entregas-r2',drive_file_id:'file'}]} as IdeaWithPipeline
+it('shows an actual player in its projected date and opens on this week',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'2026-10-17T00:00:00Z',complete:true})}))
+ const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ await screen.findByTestId('preview-i')
+ expect(container.querySelector('[data-calendar-date]')).toHaveAttribute('data-calendar-date','2026-10-11')
+ expect(screen.getByTestId('preview-i').closest('[data-calendar-date]')).toHaveAttribute('data-calendar-date','2026-10-16')
+ expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
+ expect(screen.getByText('Proyectado · pendiente de aprobación')).toBeInTheDocument()
+})
+it('does not present unverified dates as coverage after a Metricool failure',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:false}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ await waitFor(()=>expect(screen.getByRole('alert')).toBeInTheDocument())
+ expect(screen.queryByTestId('preview-i')).toBeNull()
+ expect(screen.queryByText(/Cobertura proyectada hasta/)).toBeNull()
+})
+it('uses Recibo approval and never the Revisión seal for projected cards',async()=>{
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'now',complete:true})}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[{...idea,approval_status:'approved',approved_video_id:'v'},{...idea,id:'approved',staff_client_approval:'approved'}]} />)
+ await screen.findByTestId('preview-i')
+ expect(screen.getByText('Proyectado · pendiente de aprobación')).toBeInTheDocument()
+ expect(screen.getByText('Proyectado · aprobado')).toBeInTheDocument()
+})
+it('keeps visible calendar posts when the separate coverage query fails',async()=>{
+ const fetcher=vi.fn(async (url:string)=>({ok:!url.includes('startDate=2026-10-16'),json:async()=>({complete:true,checkedAt:'now',posts:[{id:1,text:'Publicación programada existente',publicationDate:'2026-10-17T11:00:00',timezone:'America/Puerto_Rico',platforms:['instagram'],providerStatuses:['PENDING'],media:[],blogId:'1',clientId:'c',draft:false}]})}))
+ vi.stubGlobal('fetch',fetcher)
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ await screen.findAllByText('Publicación programada existente')
+ expect(await screen.findByText(/No se pudo verificar la cobertura/)).toBeInTheDocument()
+ expect(screen.queryByTestId('preview-i')).toBeNull()
+ for(const [url] of fetcher.mock.calls){const p=new URL(url,'http://localhost').searchParams;expect((Date.parse(p.get('endDate')!)-Date.parse(p.get('startDate')!))/86400000).toBeLessThan(40)}
+})
+it('extends coverage in 35-day batches and stops once all queued videos fit',async()=>{
+ const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'now',complete:true})})
+ vi.stubGlobal('fetch',fetcher)
+ const queue=Array.from({length:50},(_,i)=>({...idea,id:`piece-${i}`}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={queue} />)
+ expect(await screen.findByText(/50 videos pendientes/)).toHaveTextContent('4 de diciembre de 2026')
+ expect(fetcher).toHaveBeenCalledTimes(3)
+ expect(fetcher.mock.calls[1][0]).toContain('startDate=2026-10-16')
+ expect(fetcher.mock.calls[2][0]).toContain('startDate=2026-11-20')
+})
+
+it('keeps playable coverage visible while the minute refresh is pending',async()=>{
+ vi.useFakeTimers()
+ const fetcher=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockResolvedValueOnce({ok:true,json:async()=>({posts:[],complete:true,checkedAt:'now'})}).mockImplementation(()=>new Promise(()=>{}))
+ vi.stubGlobal('fetch',fetcher)
+ await act(async()=>{render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)})
+ expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ await act(async()=>{vi.advanceTimersByTime(60000)})
+ expect(fetcher).toHaveBeenCalledTimes(4)
+ expect(screen.getByTestId('preview-i')).toBeInTheDocument()
+ expect(screen.getByText(/Cobertura proyectada hasta/)).toBeInTheDocument()
+})
