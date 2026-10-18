@@ -4,6 +4,18 @@ Novedades del dashboard de Nate Media. Cada entrada resume lo que cambió en un 
 
 > Versionado: cada merge a `main` sube la versión. Una **feature grande** sube el número grande (1.x → 2.0); una **feature pequeña o fix** sube el número pequeño (1.4 → 1.5).
 
+## v5.140 — 2026-10-18
+
+**Ahora el dashboard te enseña lo nuevo apenas entras, paso a paso.**
+- Cuando sale una versión nueva, al abrir el dashboard aparece «Novedades» con lo que cambió desde la última vez que entraste.
+- Avanzas con «Siguiente» y «Anterior»: cada paso muestra el resumen, los puntos clave y la captura de esa versión.
+- Al tocar «Entendido» (o cerrar) no vuelve a salir hasta la próxima versión.
+- «Ver todo el historial» te lleva a la página completa de Novedades.
+
+[Ver diseño](/previews/v5.140-novedades.html)
+
+![Novedades paso a paso](/changelog/v5.140-novedades.png)
+
 ## v5.139 — 2026-10-18
 
 **Ya puedes eliminar un borrador directamente desde el calendario de publicaciones.**

@@ -13,6 +13,7 @@ import { AvatarSetupGate } from '@/components/account/avatar-setup-gate'
 import { VideoReviewNotifier } from '@/components/shared/video-review-notifier'
 import { NateTopProgress } from '@/components/shared/nate-top-progress'
 import { UpdateNotice } from '@/components/shared/update-notice'
+import { WhatsNew } from '@/components/shared/whats-new'
 import { getMyNotifications, getMyUnreadCount } from '@/lib/actions/notifications'
 import { getCurrentRole, getViewAsEditor } from '@/lib/auth/server'
 import { listEditorsForViewAs } from '@/lib/actions/view-as'
@@ -115,6 +116,7 @@ export default async function DashboardLayout({
         </SidebarAwareContent>
         <Toaster />
         <UpdateNotice />
+        <WhatsNew />
         <ChatBubble />
         <UploadDock />
         <CommandPalette />
