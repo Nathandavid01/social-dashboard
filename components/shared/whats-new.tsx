@@ -43,6 +43,25 @@ function markSeen() {
   }
 }
 
+/**
+ * Abre cuando no hay otro diálogo en pantalla (p. ej. AvatarSetupGate al primer
+ * login): dos modales Radix a la vez se pelean el foco y el pointer-events del body.
+ */
+function whenNoOtherDialog(open: () => void): () => void {
+  const busy = () => document.querySelector('[role="dialog"][data-state="open"]') !== null
+  if (!busy()) {
+    open()
+    return () => {}
+  }
+  const observer = new MutationObserver(() => {
+    if (busy()) return
+    observer.disconnect()
+    open()
+  })
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-state'] })
+  return () => observer.disconnect()
+}
+
 export function WhatsNew() {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [step, setStep] = useState(0)
@@ -52,6 +71,7 @@ export function WhatsNew() {
     const seen = readSeen()
     if (seen === APP_VERSION) return
     let alive = true
+    let stopWaiting = () => {}
     const url = seen ? `/api/changelog?since=${encodeURIComponent(seen)}` : '/api/changelog'
     fetch(url, { cache: 'no-store' })
       .then(async (res) => {
@@ -60,13 +80,16 @@ export function WhatsNew() {
         if (!alive || !Array.isArray(entries)) return
         if (entries.length === 0) return markSeen()
         setEntries(entries)
-        setOpen(true)
+        stopWaiting = whenNoOtherDialog(() => {
+          if (alive) setOpen(true)
+        })
       })
       .catch(() => {
         /* sin red no hay novedades — se reintenta en la próxima carga */
       })
     return () => {
       alive = false
+      stopWaiting()
     }
   }, [])
 

@@ -19,7 +19,8 @@ export async function GET(request: Request) {
   try {
     md = await readFile(path.join(process.cwd(), 'CHANGELOG.md'), 'utf8')
   } catch {
-    return NextResponse.json({ entries: [] })
+    // Nunca `entries: []`: el cliente lo tomaría como «al día» y marcaría la versión vista.
+    return NextResponse.json({ error: 'changelog_unavailable' }, { status: 500 })
   }
   const since = new URL(request.url).searchParams.get('since')
   const entries = entriesToShow(parseChangelog(md), { lastSeen: since, current: APP_VERSION })

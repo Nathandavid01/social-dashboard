@@ -105,6 +105,31 @@ describe('WhatsNew', () => {
   })
 })
 
+describe('WhatsNew con otros avisos', () => {
+  it('espera a que se cierre otro diálogo abierto (p. ej. la foto de perfil) antes de abrirse', async () => {
+    const other = document.createElement('div')
+    other.setAttribute('role', 'dialog')
+    other.setAttribute('data-state', 'open')
+    document.body.appendChild(other)
+    mockFetch.mockResolvedValue(ok([ENTRIES[0]]))
+    render(<WhatsNew />)
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled())
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.queryByText('Ya puedes eliminar un borrador.')).toBeNull()
+
+    other.remove()
+    expect(await screen.findByText('Ya puedes eliminar un borrador.')).toBeInTheDocument()
+  })
+
+  it('si el servidor no pudo leer el changelog no marca nada como visto', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500, json: async () => ({ error: 'changelog_unavailable' }) })
+    render(<WhatsNew />)
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled())
+    await new Promise((r) => setTimeout(r, 0))
+    expect(localStorage.getItem(WHATS_NEW_STORAGE_KEY)).toBeNull()
+  })
+})
+
 describe('WhatsNew media', () => {
   it('la foto sale sin esperar al markdown, encima del texto', async () => {
     mockFetch.mockResolvedValue(ok([ENTRIES[0]]))
