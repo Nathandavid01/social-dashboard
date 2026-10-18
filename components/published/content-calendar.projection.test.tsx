@@ -27,6 +27,7 @@ it('does not present unverified dates as coverage after a Metricool failure',asy
  await waitFor(()=>expect(screen.getByRole('alert')).toBeInTheDocument())
  expect(screen.queryByTestId('preview-i')).toBeNull()
  expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
+ expect(screen.queryByLabelText('Tiempo restante de contenido')).toBeNull()
 })
 it('uses Recibo approval and never the Revisión seal for projected cards',async()=>{
  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:'now',complete:true})}))
@@ -55,6 +56,8 @@ it('verifies a full year in bounded batches even after all queued videos fit',as
  expect(fetcher).toHaveBeenCalledTimes(12)
  expect(fetcher.mock.calls[1][0]).toContain('startDate=2026-10-16')
  expect(fetcher.mock.calls[2][0]).toContain('startDate=2026-11-20')
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Semana'}))})
+ expect(screen.getByText('7 semanas más de contenido')).toBeVisible()
 })
 
 it('keeps playable coverage visible while the minute refresh is pending',async()=>{
@@ -69,6 +72,7 @@ it('keeps playable coverage visible while the minute refresh is pending',async()
  expect(fetcher).toHaveBeenCalledTimes(14)
  expect(screen.getByTestId('preview-i')).toBeInTheDocument()
  expect(screen.getByText('Verificando hasta qué día llega tu contenido…')).toBeInTheDocument()
+ expect(screen.queryByLabelText('Tiempo restante de contenido')).toBeNull()
  expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
 })
 
@@ -79,6 +83,8 @@ it('shows pending graphics as images without dates when cadence is unconfigured'
  expect(await screen.findByTestId('image-graphic')).toHaveAttribute('alt','Pizza 643')
  expect(screen.getByTestId('image-graphic').closest('[data-calendar-date]')).toBeNull()
  expect(screen.getByText('Sin fecha · 1 pieza')).toBeInTheDocument()
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Semana'}))})
+ expect(screen.queryByLabelText('Tiempo restante de contenido')).toBeNull()
  expect(screen.getByText(/1 pieza pendiente/)).toBeInTheDocument()
 })
 
@@ -141,6 +147,7 @@ it('does not expose a date when a later verification chunk is incomplete',async(
  render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
  expect(await screen.findByText(/No se pudo verificar la cobertura/)).toBeInTheDocument()
  expect(screen.queryByText(/Contenido actual hasta el/)).toBeNull()
+ expect(screen.queryByLabelText('Tiempo restante de contenido')).toBeNull()
 })
 
 // Eric, 2026-10-18: every pending calendar card identifies its actual format separately from approval.
@@ -171,4 +178,34 @@ it.each(['human','unknown','legacy-r2'])('keeps %s content visible without unsup
  expect(card).toHaveAttribute('draggable','false')
  expect(within(card).queryByRole('button',{name:'Elegir fecha de borrador'})).toBeNull()
  expect(within(card).getByText(/Borrador desde calendario no disponible/)).toBeInTheDocument()
+})
+
+
+it('shows weeks remaining only in Semana, anchored to today while navigating weeks', async () => {
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[{id:1,uuid:'u',blogId:'1',clientId:'c',text:'Draft',publicationDate:'2026-10-31T11:00:00',timezone:'America/Puerto_Rico',draft:true,media:[],platforms:[]}],complete:true})}))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[]} />)
+ await screen.findByText(/Contenido actual hasta el/)
+ expect(screen.queryByText('2 semanas y 1 día más de contenido')).toBeNull()
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Semana'}))})
+ expect(screen.getByText('2 semanas y 1 día más de contenido')).toBeVisible()
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Período siguiente'}))})
+ expect(screen.getByText('2 semanas y 1 día más de contenido')).toBeVisible()
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Ver última fecha'}))})
+ expect(screen.getByText('2 semanas y 1 día más de contenido')).toBeVisible()
+ expect(screen.getByText(/1 borrador/)).toBeInTheDocument()
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'5 semanas'}))})
+ expect(screen.queryByText('2 semanas y 1 día más de contenido')).toBeNull()
+})
+
+
+it.each(['loading', 'failure', 'incomplete'])('withholds remaining weeks during %s coverage', async state => {
+ vi.stubGlobal('fetch',vi.fn((url:string)=> {
+  if (state === 'loading') return new Promise(()=>{})
+  return Promise.resolve({ok:state !== 'failure',json:async()=>({posts:[],complete:!(state === 'incomplete' && url.includes('startDate=2026-12-25'))})})
+ }))
+ render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[idea]} />)
+ await act(async()=>{fireEvent.click(screen.getByRole('button',{name:'Semana'}))})
+ if(state !== 'loading') await screen.findByText(/No se pudo verificar la cobertura/)
+ else expect(screen.getByText('Verificando hasta qué día llega tu contenido…')).toBeInTheDocument()
+ expect(screen.queryByLabelText('Tiempo restante de contenido')).toBeNull()
 })

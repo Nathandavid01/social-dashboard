@@ -29,3 +29,20 @@ export function buildCalendarCoverage(ideas: IdeaWithPipeline[], client: Coverag
     scheduled: future.filter(post => post.state === 'scheduled').length,
   }
 }
+
+
+/** Elapsed calendar days from Puerto Rico today, independent of the week being viewed. */
+export function calendarCoverageDuration(through: string | null | undefined, today: string): string | null {
+  const dayNumber = (date: string | null | undefined) => {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+    const parsed = new Date(`${date}T00:00:00Z`)
+    return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date ? parsed.getTime() / 86400000 : null
+  }
+  const end = dayNumber(through), start = dayNumber(today)
+  if (end === null || start === null || end < start) return null
+  const remaining = end - start
+  if (remaining === 0) return 'Contenido hasta hoy'
+  const weeks = Math.floor(remaining / 7), days = remaining % 7
+  const parts = [weeks ? `${weeks} ${weeks === 1 ? 'semana' : 'semanas'}` : '', days ? `${days} ${days === 1 ? 'día' : 'días'}` : ''].filter(Boolean)
+  return `${parts.join(' y ')} más de contenido`
+}
