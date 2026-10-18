@@ -22,8 +22,8 @@ export function ReciboPublishedSync() {
         if (!linked) return
         toast({
           title: linked === 1
-            ? '1 video ya estaba en Metricool y salió de Recibo'
-            : `${linked} videos ya estaban en Metricool y salieron de Recibo`,
+            ? '1 pieza ya estaba en Metricool y salió de Recibo'
+            : `${linked} piezas ya estaban en Metricool y salieron de Recibo`,
         })
         router.refresh()
       })

@@ -1,3 +1,13 @@
+## v5.142 — 18 de octubre de 2026
+
+**Recibo reconoce también las gráficas que ya salieron por Metricool para evitar repetirlas.**
+- Al abrir Recibo, las gráficas individuales se cruzan con la cuenta guardada del cliente mediante el archivo exacto, además de los videos.
+- Las piezas confirmadas como publicadas o programadas salen de la lista pendiente y de sus sugerencias en el calendario.
+- Los borradores, las coincidencias dudosas y las imágenes que no se pudieron comprobar se conservan; compartir título o tamaño no basta.
+- La verificación conserva las revisiones nuevas y no borra archivos ni publicaciones.
+
+![Recibo con borradores y pendientes de 643](/changelog/v5.142-recibo-published.png)
+
 ## v5.141 — 18 de octubre de 2026
 
 **Arrastra contenido aprobado al calendario para guardarlo como borrador de ese día.**
