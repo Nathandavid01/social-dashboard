@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildCalendarCoverage } from './calendar-coverage'
+import { buildCalendarCoverage, calendarCoverageDuration } from './calendar-coverage'
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 const idea = { id:'i', client_id:'c', status:'producida', videos:[{id:'v',kind:'edited',status:'uploaded',name:'pizza.png',storage_provider:'entregas-r2',drive_file_id:'f'}] } as IdeaWithPipeline
@@ -38,5 +38,22 @@ describe('calendar end date from current content',()=>{
   const result=buildCalendarCoverage([idea],{...client,posting_days:[]},[post(1,'2028-10-18T10:00:00')],'2026-10-18T10:00:00')
   expect(result.through).toBeNull()
   expect(result.overflow).toBe(1)
+ })
+})
+
+
+describe('remaining content duration from Puerto Rico today', () => {
+ it.each([
+  ['2026-11-02', '2026-10-18', '2 semanas y 1 día más de contenido'],
+  ['2026-10-25', '2026-10-18', '1 semana más de contenido'],
+  ['2026-11-01', '2026-10-18', '2 semanas más de contenido'],
+  ['2026-10-19', '2026-10-18', '1 día más de contenido'],
+  ['2026-10-24', '2026-10-18', '6 días más de contenido'],
+  ['2026-10-18', '2026-10-18', 'Contenido hasta hoy'],
+  ['2026-10-17', '2026-10-18', null],
+  [null, '2026-10-18', null],
+  ['2026-02-30', '2026-10-18', null],
+ ])('formats %s relative to %s without rounding up', (through, today, expected) => {
+  expect(calendarCoverageDuration(through, today)).toBe(expected)
  })
 })

@@ -7,6 +7,7 @@ import { useHasPermission } from '@/components/auth/role-gate'
 import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-support'
 import { draftReciboOnDate } from '@/lib/actions/recibo-calendar-draft'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
+import { calendarCoverageDuration } from '@/lib/recibo/calendar-coverage'
 import { useReciboProjection } from '@/lib/recibo/use-calendar-projection'
 import { reciboSpaceTone } from '@/lib/recibo/cadence-spaces'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
@@ -149,6 +150,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   const pendingProjectionIdeas = useMemo(()=>projectionIdeas?.filter(idea=>!drafted.includes(idea.id)),[projectionIdeas,drafted])
   const { projection, error: coverageError, verifying: coverageVerifying } = useReciboProjection(pendingProjectionIdeas, activeClient, now, refresh)
   const coverageLabel = projection?.through ? new Date(`${projection.through}T12:00:00`).toLocaleDateString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null
+  const coverageDuration = view === 'week' ? calendarCoverageDuration(projection?.through, today) : null
   const filteredPosts = visiblePosts.filter(p => stateFilter === 'all' || calendarPostState(p) === stateFilter)
   const upcoming = filteredPosts.filter(p => calendarPostState(p) === 'scheduled' && calendarPostDate(p) >= now)
   const attention = visiblePosts.filter(p => ['partial', 'error'].includes(calendarPostState(p)) || (calendarPostState(p) === 'scheduled' && calendarPostDate(p) < now))
@@ -226,6 +228,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide">{activeClient?.name} · Alcance del contenido actual</p>
+          {coverageDuration && <p aria-label="Tiempo restante de contenido" className="mt-2 text-xl font-semibold sm:text-2xl">{coverageDuration}</p>}
           <h3 className="mt-1 text-xl font-semibold sm:text-2xl">{coverageLabel ? `Contenido actual hasta el ${coverageLabel}` : 'Sin publicaciones futuras con fecha'}</h3>
         </div>
         {projection.through && <Button variant="outline" className="shrink-0" onClick={() => setAnchor(new Date(`${projection.through}T12:00:00`))}>Ver última fecha</Button>}

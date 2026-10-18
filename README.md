@@ -104,3 +104,12 @@ Pruebas: `lib/recibo/calendar-coverage.test.ts`, `lib/recibo/use-calendar-projec
 Eric, 18 de octubre de 2026: identificar si la pieza es Post o Reel dentro de la tarjeta del calendario. Las piezas pendientes muestran una etiqueta «Post» para imágenes y «Reel» para videos, usando la clasificación existente del archivo editado actual, tanto en fechas proyectadas como en «Sin fecha». La etiqueta permanece separada del estado de aprobación y de «Proyectado»; no modifica fechas ni crea borradores. Este alcance no inventa formatos para registros externos de Metricool sin datos suficientes.
 
 Verificar con `components/published/content-calendar.projection.test.tsx`: gráfica y video proyectados identificados en sus propias tarjetas, aprobación conservada y etiqueta única en piezas sin fecha. Vista previa: `/previews/v5.144-calendar-format.html`.
+
+
+### Semanas restantes de contenido (v5.146)
+
+Eric, 18 de octubre de 2026: en modo «Semana» se muestra la duración restante hasta la última fecha verificada del contenido actual. El cálculo usa hoy en Puerto Rico, independientemente de la semana visible. Cuenta semanas completas más días restantes: del 18 de octubre al 2 de noviembre son «2 semanas y 1 día más de contenido», sin contar hoy como un día adicional ni redondear hacia arriba. Menos de una semana se expresa en días; una fecha final de hoy muestra «Contenido hasta hoy».
+
+Reutiliza la cobertura verificada de pendientes compatibles, borradores y publicaciones programadas, conservando fecha final y conteos. Es tiempo hasta la última fecha, no una promesa de llenar cada día o cada semana. La duración se oculta mientras se verifica, ante datos incompletos o errores y cuando no existe fecha futura. Las piezas sin fecha compatible mantienen su explicación independiente. Cambiar la semana visible no cambia la duración; cambiar cliente o frecuencia vuelve a verificar la cobertura.
+
+Evidencia: `lib/recibo/calendar-coverage.test.ts` (días, semanas, hoy, pasado y fechas inválidas), `components/published/content-calendar.projection.test.tsx` (solo Semana, navegación, horizonte posterior a cinco semanas, estados sin fecha/verificación/error). Vista previa: `/previews/v5.146-calendar-weeks.html`.

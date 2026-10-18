@@ -1,3 +1,12 @@
+## v5.146 — 18 de octubre de 2026
+
+**En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**
+- El resumen muestra semanas completas y días restantes desde hoy en Puerto Rico, junto a la última fecha prevista.
+- Navegar entre semanas conserva el cálculo desde hoy; las fechas sugeridas y los borradores mantienen sus estados.
+- El tiempo restante aparece después de verificar todas las fechas; el contenido sin fecha se sigue mostrando aparte.
+
+![Semanas restantes de contenido](/changelog/v5.146-calendar-weeks.png)
+
 ## v5.145 — 18 de octubre de 2026
 
 **Recibos reúne las mejoras de calendario y acceso, junto con la última versión de producción.**
