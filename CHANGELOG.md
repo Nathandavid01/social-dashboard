@@ -1,3 +1,15 @@
+## v5.147 — 18 de octubre de 2026
+
+**Ahora el dashboard te enseña lo nuevo apenas entras, paso a paso.**
+- Cuando sale una versión nueva, al abrir el dashboard aparece «Novedades» con lo que cambió desde la última vez que entraste.
+- Cada paso empieza con una foto o un video de lo que cambió; debajo, el resumen y los puntos clave. Avanzas con «Siguiente» y «Anterior».
+- Al tocar «Entendido» (o cerrar) no vuelve a salir hasta la próxima versión.
+- «Ver todo el historial» te lleva a la página completa de Novedades.
+
+[Ver diseño](/previews/v5.147-novedades.html)
+
+![Novedades paso a paso](/changelog/v5.147-novedades.png)
+
 ## v5.146 — 18 de octubre de 2026
 
 **En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**
