@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nate Media · Eliminar borradores v5.139</title>
+<style>
+:root{--bg:#0a0a0a;--card:#121212;--line:rgba(255,255,255,.1);--gold:#e6af23;--text:#fafafa;--muted:#a1a1aa;--red:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px}
+h1{font-size:24px;margin:0 0 4px}.lead{color:var(--muted);font-size:14px;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+.dialog{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 0 80px -30px rgba(230,175,35,.35)}
+.dialog h2{font-size:18px;margin:0}.sub{font-size:13px;color:var(--muted);margin:4px 0 14px}
+.badge{display:inline-block;font-size:12px;border-radius:999px;padding:3px 10px;background:rgba(230,175,35,.15);color:var(--gold)}
+.thumb{height:140px;border-radius:12px;margin:12px 0;background:linear-gradient(135deg,#3a2f1a,#1a1a1a 60%,#2b2414)}
+.caption{font-size:14px;line-height:1.5;margin:0 0 14px}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(230,175,35,.04)}
+.box h4{font-size:14px;margin:0 0 6px}.box p{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+input{width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 10px;font-size:14px;margin-bottom:8px}
+.btn{display:block;width:100%;border-radius:8px;padding:9px;font-size:14px;font-weight:500;border:1px solid var(--line);background:#0a0a0a;color:var(--text);text-align:center;margin-top:8px}
+.btn.gold{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}
+.btn.del{color:var(--red);border-color:rgba(239,68,68,.4)}
+.confirm{border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);border-radius:10px;padding:12px;margin-top:10px}
+.confirm p{color:var(--text);margin:0 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px}.row .btn{width:auto;display:inline-block;padding:7px 14px;margin:0}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+</style></head>
+<body><main>
+<h1>Eliminar borradores desde el calendario</h1>
+<p class="lead">Abre un post en «Borrador» del calendario de publicaciones · «Eliminar borrador» · confirma con «Sí, eliminar».</p>
+<div class="grid">
+<section><p class="label">1 · Detalle del borrador</p><div class="dialog">
+<h2>Alacena</h2><p class="sub">2026-10-03 · 11:00 · Puerto Rico</p><span class="badge">Borrador</span>
+<div class="thumb"></div><p class="caption">Hay platos que simplemente se disfrutan mejor en buena compañía…</p>
+<div class="box"><h4>Borrador y programación</h4><p>El borrador queda guardado en Metricool. Al programarlo, se publicará automáticamente en la fecha y hora elegidas.</p>
+<input value="2026-10-03T11:00" readonly><span class="btn gold">Programar</span>
+<p style="margin:10px 0 0">Este post está guardado como borrador.</p>
+<span class="btn del">Eliminar borrador</span></div></div></section>
+<section><p class="label">2 · Confirmación</p><div class="dialog">
+<h2>Alacena</h2><p class="sub">2026-10-03 · 11:00 · Puerto Rico</p><span class="badge">Borrador</span>
+<div class="thumb"></div><p class="caption">Hay platos que simplemente se disfrutan mejor en buena compañía…</p>
+<div class="box"><h4>Borrador y programación</h4><p>Este post está guardado como borrador.</p>
+<div class="confirm"><p style="font-size:12px;line-height:1.5">¿Eliminar este borrador? Se borra de Metricool y deja de aparecer en el calendario. No se puede deshacer.</p>
+<div class="row"><span class="btn red">Sí, eliminar</span><span class="btn">Cancelar</span></div></div></div></div></section>
+</div>
+</main></body></html>

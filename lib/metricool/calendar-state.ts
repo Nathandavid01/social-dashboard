@@ -18,3 +18,8 @@ export function buildCalendarStateUpdate(post: EditableCalendarPost, action: 'dr
   if (instant <= now) throw new Error('La fecha y hora deben estar en el futuro.')
   return { ...post, draft: false, autoPublish: true, publicationDate: { dateTime: `${dateTime}:00`, timezone: 'America/Puerto_Rico' } }
 }
+/** Only drafts that never went out on any network can be deleted from the calendar. */
+export function assertDeletableDraft(post: EditableCalendarPost): void {
+  if (!post.draft) throw new Error('Solo se puede eliminar un borrador. Este post está programado en Metricool.')
+  if (post.providers?.some(p => p.status === 'PUBLISHED')) throw new Error('Este post ya salió en una red y no se puede eliminar.')
+}
