@@ -22,15 +22,15 @@ See **`docs/MERGE_RULES.md`**. Short version:
 1. **Never push to `main` directly** — only via **Pull Request**.
 2. PR must be **verified**: CI jobs `merge-gate`, `test`, and relationship-guard must be green.
 3. **Graph model** must pass: run `npm run merge-gate` (same ordered graph CI runs).
-4. **≥1 approving review** before merge.
-5. Dual-R2: editor media is **`entregas-r2`**; do not reintroduce pipeline-only assumptions.
+4. Dual-R2: editor media is **`entregas-r2`**; do not reintroduce pipeline-only assumptions.
 
 Admin (once): `bash scripts/apply-branch-protection.sh`
 
 ## Workflow & commits
 
 - Work on a feature branch (e.g. `eric/dev`). Commit in small, green increments — never leave large uncommitted work.
-- Eric, 2026-10-18: after every completed change, commit, push the feature branch, open a PR, pass the required checks and independent review, then merge to `main` and verify the Vercel deployment. This standing authorization replaces the previous local-only / ask-before-push rule. Never push directly to `main` or bypass required checks or reviews.
+- Eric, 2026-10-18: after every completed change, commit, push the feature branch, open a PR, pass the required checks, then merge to `main` and verify the Vercel deployment. This standing authorization replaces the previous local-only / ask-before-push rule. Never push directly to `main` or bypass required checks.
+- Eric, 2026-10-19: «no quiero dos personas». No second reviewer or approving review is required; the author merges their own PR once `merge-gate`, `test` and relationship-guard are green.
 
 ## Mandatory: every new feature must respect RBAC
 

@@ -94,7 +94,7 @@ function main() {
       return
     }
   }
-  console.log('═══ ALL GRAPH NODES GREEN — merge allowed (after PR review) ═══')
+  console.log('═══ ALL GRAPH NODES GREEN — merge allowed ═══')
   console.log(JSON.stringify({ graph: results }, null, 2))
 }
 
