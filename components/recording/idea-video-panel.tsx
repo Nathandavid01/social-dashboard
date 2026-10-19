@@ -8,8 +8,10 @@ import { ToastAction } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission, useHasAnyPermission, useCurrentUserId } from '@/components/auth/role-gate'
-import { getR2DownloadUrl, deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
+import { deleteR2Video, restoreR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+import { getVideoDownloadUrl } from '@/lib/actions/video-download'
+import { followDownload } from '@/lib/utils/follow-download'
 import { useUploadStore, TERMINAL_UPLOAD_PHASES, type UploadItem } from '@/lib/stores/upload-store'
 import { NateUploadLogo } from '@/components/uploads/nate-upload-logo'
 import { uploadPhaseText } from '@/lib/utils/upload-phase-text'
@@ -464,15 +466,13 @@ function FileRow({
   }
 
   async function download() {
-    const res = await getR2DownloadUrl(video.id)
-    if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })
-    else if (res.url) window.open(res.url, '_blank')
+    const res = await getVideoDownloadUrl(video.id)
+    if (res.error) toast({ title: 'No se pudo bajar', description: res.error, variant: 'destructive' })
+    else if (res.url) followDownload(res.url)
   }
 
-  // Both pipeline R2 and Entregas R2 support signed preview via getVideoPreviewUrl.
-  // Download still uses pipeline R2 signer (old-bucket rows only); entregas uses preview URL as fallback for now.
+  // Both pipeline R2 and Entregas R2 support signed preview and download.
   const isCloudR2 = video.storage_provider === 'r2' || video.storage_provider === 'entregas-r2'
-  const canDownloadR2 = video.storage_provider === 'r2'
 
   const uploaderFirst = firstName(video.uploader?.full_name)
   const shortDate = formatUploadedAtShort(video.uploaded_at)
@@ -510,7 +510,7 @@ function FileRow({
               Ver
             </Button>
           )}
-          {canDownloadR2 && canSee ? (
+          {isCloudR2 && canSee ? (
             <Button size="sm" variant="outline" onClick={download}>
               <Download className="mr-1 h-3.5 w-3.5" /> Bajar
             </Button>

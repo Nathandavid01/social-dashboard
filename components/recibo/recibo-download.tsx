@@ -43,7 +43,7 @@ export function ReciboDownloadButton({
       aria-label={`Bajar ${title}`}
       disabled={loading}
       onClick={() => void bajar()}
-      className="absolute left-2 top-2 inline-flex h-8 items-center gap-1.5 rounded-full bg-black/70 px-3 text-xs font-semibold text-white hover:bg-black disabled:opacity-70"
+      className="absolute left-2 top-2 z-10 inline-flex h-8 items-center gap-1.5 rounded-full bg-black/70 px-3 text-xs font-semibold text-white hover:bg-black disabled:opacity-70"
     >
       {loading
         ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

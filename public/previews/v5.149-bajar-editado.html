@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.149 — Bajar cualquier video editado</title>
+  <style>
+    :root { --bg:#0a0a0a; --fg:#fafafa; --card:#121212; --muted:#a6a6a6; --border:#1f1f1f; --gold:#d4af37; --ok:#34d399; --bad:#fca5a5; --amber:#fde68a; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); padding:28px 16px; }
+    .wrap { max-width:980px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub { color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.45; }
+    h2 { font-size:13px; color:var(--gold); margin:0 0 10px; letter-spacing:.04em; text-transform:uppercase; }
+    .split { display:grid; grid-template-columns:1fr; gap:22px; }
+    @media (min-width:860px) { .split { grid-template-columns:1fr 1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+    .stage { position:relative; background:#09090b; padding:12px; }
+    .phone { margin:0 auto; width:100%; max-width:220px; aspect-ratio:9/16; border-radius:18px; background:linear-gradient(160deg,#1c1c1c,#050505); border:1px solid #2a2a2a; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); }
+    .pill { position:absolute; display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:999px; background:rgba(0,0,0,.7); color:#fff; font-size:12px; font-weight:600; border:0; left:20px; top:20px; }
+    .dl { outline:2px solid var(--gold); outline-offset:2px; }
+    .caption { padding:12px 14px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
+    .note { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.45; }
+    .toast { margin-top:12px; padding:10px 12px; border-radius:10px; background:#3f1d1d; color:var(--bad); font-size:12px; }
+    .row { display:flex; align-items:center; gap:10px; padding:10px 12px; border-top:1px solid var(--border); }
+    .thumb { width:40px; height:56px; border-radius:8px; background:#1d1d1d; }
+    .inline { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; border-radius:8px; border:1px solid #3a3a3a; background:transparent; color:#fff; font-size:11px; font-weight:600; }
+    .ok { color:var(--ok); }
+    .bad { color:var(--bad); }
+    svg { width:14px; height:14px; }
+    .cal { background:#fffbeb; color:#1c1917; border-radius:16px; padding:12px; }
+    .cal .mini { position:relative; background:#09090b; border-radius:12px; overflow:hidden; }
+    .cal .label { margin-top:8px; font-size:12px; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Bajar el video, da igual cómo llegó</h1>
+    <p class="sub">Denisha en Recibo / calendario de Yabuuchi: el corte se baja con <strong>Bajar</strong> aunque Eric lo haya subido por pipeline, Entregas o el calendario. Si no hay archivo, el dashboard lo dice en español.</p>
+
+    <div class="split">
+      <section>
+        <h2>Antes</h2>
+        <div class="cal">
+          <div class="mini">
+            <div class="phone" style="max-width:none;aspect-ratio:9/16;border-radius:0;height:180px;">▶ La Jefa</div>
+          </div>
+          <p class="label">Reel · Yabuuchi</p>
+          <p class="note" style="color:#92400e;">En el calendario no había Bajar. En el iPhone el reproductor no deja descargar.</p>
+        </div>
+        <div class="toast">Silencio, o «No autorizado», si el corte estaba en el otro bucket.</div>
+      </section>
+
+      <section>
+        <h2>Después (v5.149)</h2>
+        <div class="cal">
+          <div class="mini">
+            <div class="phone" style="max-width:none;aspect-ratio:9/16;border-radius:0;height:180px;">▶ La Jefa</div>
+            <button class="pill dl">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Bajar
+            </button>
+          </div>
+          <p class="label">Reel · Yabuuchi</p>
+        </div>
+        <div class="row">
+          <div class="thumb"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;">Así se prepara</div>
+            <div style="font-size:11px;color:var(--muted);">Inventario · Listo</div>
+          </div>
+          <button class="inline">Bajar</button>
+        </div>
+        <p class="note"><span class="ok">Pipeline y Entregas firman cada uno su bucket.</span> Drive o sin archivo: <span class="bad">aviso en español</span>, no un botón muerto.</p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

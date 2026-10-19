@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/auth/server'
-import { getEntregasDownloadUrl, getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
+import { getEntregasPreviewUrl } from '@/lib/actions/entregas-r2'
 import { getReciboEditedVideo } from '@/lib/actions/recibo-video'
-import { getR2PreviewUrl, getR2DownloadUrl } from '@/lib/actions/idea-videos-r2'
+import { getR2PreviewUrl } from '@/lib/actions/idea-videos-r2'
+import { getVideoDownloadUrl } from '@/lib/actions/video-download'
 import { runReciboPublishedMatch } from '@/lib/recibo/sync-published'
 
 export type ManualPostedStatus = 'posted' | 'not_posted' | null
@@ -123,7 +124,7 @@ export async function getReciboIdeaDownloadUrl(
 ): Promise<{ url?: string; error?: string }> {
   const edited = await currentReciboCut(ideaId, expectedVideoId)
   if (!edited.id) return { error: edited.error }
-  return edited.storage_provider === 'r2' ? getR2DownloadUrl(edited.id) : getEntregasDownloadUrl(edited.id)
+  return getVideoDownloadUrl(edited.id)
 }
 
 async function currentReciboCut(

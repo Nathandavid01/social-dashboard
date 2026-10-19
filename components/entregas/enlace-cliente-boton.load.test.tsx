@@ -3,7 +3,8 @@ import {render,screen,fireEvent} from '@testing-library/react'
 const h=vi.hoisted(()=>({load:vi.fn(),create:vi.fn()}))
 vi.mock('@/lib/hooks/use-toast',()=>({useToast:()=>({toast:vi.fn()})}))
 vi.mock('@/lib/actions/entregas-client-review',()=>({getEnlaceCliente:h.load,crearEnlaceCliente:h.create}))
-vi.mock('@/lib/actions/entregas-r2',()=>({getEntregaVideoEditado:async()=>({id:'v'}),getEntregasDownloadUrl:vi.fn()}))
+vi.mock('@/lib/actions/recibo-video',()=>({getReciboEditedVideo:async()=>({id:'v'})}))
+vi.mock('@/lib/actions/video-download',()=>({getVideoDownloadUrl:vi.fn()}))
 import {EnlaceClienteBoton} from './enlace-cliente-boton'
 beforeEach(()=>{h.load.mockReset();h.create.mockReset()})
 it.each(['returned','rejected'])('does not offer link creation after a %s read failure',async failure=>{

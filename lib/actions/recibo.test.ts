@@ -7,6 +7,7 @@ const from = vi.fn(() => ({ update }))
 const getEntregaVideoEditado = vi.fn()
 const getEntregasPreviewUrl = vi.fn()
 const getEntregasDownloadUrl = vi.fn()
+const getVideoDownloadUrl = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ from })),
@@ -32,6 +33,7 @@ vi.mock('@/lib/actions/recibo-video', () => ({ getReciboEditedVideo: (...a: unkn
 const r2Preview = vi.fn()
 const r2Download = vi.fn()
 vi.mock('@/lib/actions/idea-videos-r2', () => ({ getR2PreviewUrl: (...a: unknown[]) => r2Preview(...a), getR2DownloadUrl: (...a: unknown[]) => r2Download(...a) }))
+vi.mock('@/lib/actions/video-download', () => ({ getVideoDownloadUrl: (...a: unknown[]) => getVideoDownloadUrl(...a) }))
 
 describe('recibo manual flags', () => {
   beforeEach(() => {
@@ -114,11 +116,11 @@ describe('getReciboIdeaDownloadUrl', () => {
 
   it('downloads the same cut the card is showing', async () => {
     getEntregaVideoEditado.mockResolvedValue({ id: 'v7' })
-    getEntregasDownloadUrl.mockResolvedValue({ url: 'https://signed.example/v7.mp4?attachment' })
+    getVideoDownloadUrl.mockResolvedValue({ url: 'https://signed.example/v7.mp4?attachment' })
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
     expect(getEntregaVideoEditado).toHaveBeenCalledWith('outfit')
-    expect(getEntregasDownloadUrl).toHaveBeenCalledWith('v7')
+    expect(getVideoDownloadUrl).toHaveBeenCalledWith('v7')
     expect(getEntregasPreviewUrl).not.toHaveBeenCalled()
     expect(res.url).toBe('https://signed.example/v7.mp4?attachment')
   })
@@ -128,21 +130,21 @@ describe('getReciboIdeaDownloadUrl', () => {
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     const res = await getReciboIdeaDownloadUrl('outfit', 'v7')
     expect(res.error).toMatch(/video cambió/i)
-    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+    expect(getVideoDownloadUrl).not.toHaveBeenCalled()
   })
 
   it('returns Sin video editado when the idea has no usable cut', async () => {
     getEntregaVideoEditado.mockResolvedValue({ id: null })
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     expect((await getReciboIdeaDownloadUrl('idea-2')).error).toMatch(/Sin video editado/i)
-    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+    expect(getVideoDownloadUrl).not.toHaveBeenCalled()
   })
 
   it('passes the permission error through without signing', async () => {
     getEntregaVideoEditado.mockResolvedValue({ error: 'No autorizado' })
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     expect((await getReciboIdeaDownloadUrl('idea-3', 'v1')).error).toBe('No autorizado')
-    expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+    expect(getVideoDownloadUrl).not.toHaveBeenCalled()
   })
 
   it('rejects an empty idea id', async () => {
@@ -198,10 +200,11 @@ describe('pipeline R2 cuts on Recibo', () => {
   })
   it('downloads that same cut from pipeline storage', async () => {
     getEntregaVideoEditado.mockResolvedValue({ id: 'r2-edit', storage_provider: 'r2' })
-    r2Download.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4?attachment' })
+    getVideoDownloadUrl.mockResolvedValue({ url: 'https://example.com/r2-edit.mp4?attachment', provider: 'r2' })
     const { getReciboIdeaDownloadUrl } = await import('./recibo')
     expect((await getReciboIdeaDownloadUrl('human-client-idea', 'r2-edit')).url).toContain('attachment')
-    expect(r2Download).toHaveBeenCalledWith('r2-edit')
+    expect(getVideoDownloadUrl).toHaveBeenCalledWith('r2-edit')
     expect(getEntregasDownloadUrl).not.toHaveBeenCalled()
+    expect(r2Download).not.toHaveBeenCalled()
   })
 })

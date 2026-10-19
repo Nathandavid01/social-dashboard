@@ -12,8 +12,10 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { ClientLogo } from '@/components/clients/client-logo'
-import { getR2DownloadUrl, getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
+import { getR2UploadUrl, registerR2Video } from '@/lib/actions/idea-videos-r2'
 import { getVideoPreviewUrl } from '@/lib/actions/video-preview'
+import { getVideoDownloadUrl } from '@/lib/actions/video-download'
+import { followDownload } from '@/lib/utils/follow-download'
 import { processUploadedVideo } from '@/lib/utils/video-postupload-client'
 import type { Client, ContentIdeaType, ContentIdeaVideo } from '@/lib/supabase/types'
 import type { PipelineVideo } from '@/lib/actions/video-pipeline'
@@ -119,9 +121,9 @@ function MaterialRow({ video, linkKind }: { video: ContentIdeaVideo; linkKind: V
       if (video.drive_view_link) window.open(video.drive_view_link, '_blank')
       return
     }
-    const res = await getR2DownloadUrl(video.id)
-    if (res.error || !res.url) toast({ title: 'Error', description: res.error ?? 'No se pudo descargar', variant: 'destructive' })
-    else window.open(res.url, '_blank')
+    const res = await getVideoDownloadUrl(video.id)
+    if (res.error || !res.url) toast({ title: 'No se pudo bajar', description: res.error ?? 'Vuelve a intentar.', variant: 'destructive' })
+    else followDownload(res.url)
   }
 
   async function togglePreview() {

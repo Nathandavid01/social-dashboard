@@ -1,3 +1,12 @@
+## v5.149 — 19 de octubre de 2026
+
+**Cualquier video editado se puede bajar, da igual por dónde se subió.**
+- En Recibo, el calendario de Recibos y el de cada cliente, Inventario, On Site y Entregas, **Bajar** firma el archivo en el bucket correcto (pipeline o Entregas).
+- Si el corte está en Google Drive o no hay archivo, aparece un aviso en español en vez de un botón que no hace nada.
+- En el iPhone ya no hace falta usar el reproductor: el botón **Bajar** también está en las tarjetas pendientes del calendario.
+
+![Bajar cualquier video editado](/changelog/v5.149-bajar-editado.png)
+
 ## v5.146 — 18 de octubre de 2026
 
 **En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**

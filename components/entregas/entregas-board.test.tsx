@@ -33,6 +33,12 @@ vi.mock('@/lib/actions/entregas-r2', () => ({
   getEntregaVideoEditado: vi.fn(async () => ({ id: null })),
   getEntregasDownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
 }))
+vi.mock('@/lib/actions/recibo-video', () => ({
+  getReciboEditedVideo: vi.fn(async () => ({ id: null })),
+}))
+vi.mock('@/lib/actions/video-download', () => ({
+  getVideoDownloadUrl: vi.fn(async () => ({ url: 'https://r2/get' })),
+}))
 let mockRole: UserRole | null = 'supervisor'
 vi.mock('@/lib/context/auth-context', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'u@x.com' }, profile: null, role: mockRole }),
