@@ -1,20 +1,15 @@
+import { publicationInstant } from './publication-date'
+
 /** What the calendar saw in the Metricool list, compared against a fresh single read before any write. */
 export type SeenCalendarPost = { uuid: string; draft: boolean; text: string; publicationDate: string; timezone?: string }
 type ReadCalendarPost = { uuid: string; draft: boolean; text?: string | null; publicationDate: { dateTime: string; timezone: string } }
 
 const caption = (text: string | null | undefined) => (text ?? '').normalize('NFC').replace(/\r\n?/g, '\n').trim()
 
-/** Epoch ms of a naive wall-clock datetime in an IANA zone, or null when either is invalid. */
+/** Epoch ms of a Metricool date: an absolute ISO timestamp, or wall time in an IANA zone; null when unreadable. */
 export function wallClockInstant(dateTime: string, timeZone = 'America/Puerto_Rico'): number | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(dateTime ?? '')
-  if (!match) return null
-  const [, y, mo, d, h, mi, s] = match.map(Number)
-  const asUtc = Date.UTC(y, mo - 1, d, h, mi, s || 0)
-  try {
-    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(asUtc)).map(p => [p.type, p.value]))
-    const offset = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second) - asUtc
-    return asUtc - offset
-  } catch { return null }
+  const instant = publicationInstant({ dateTime, timezone: timeZone })
+  return instant ? Date.parse(instant) : null
 }
 
 /**

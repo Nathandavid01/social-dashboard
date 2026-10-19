@@ -26,5 +26,8 @@ describe('puertoRicoWallClock', () => {
     expect(puertoRicoWallClock('2099-10-21T03:00:00', 'UTC')).toBe('2099-10-20T23:00')
     expect(puertoRicoWallClock('2099-10-20T10:00:00', 'America/Puerto_Rico')).toBe('2099-10-20T10:00')
     expect(puertoRicoWallClock('bad', 'UTC')).toBeNull()
+    // Bugbot 2026-10-19: an absolute timestamp keeps its own instant whatever the zone label says.
+    expect(puertoRicoWallClock('2099-10-21T03:00:00Z', 'America/New_York')).toBe('2099-10-20T23:00')
+    expect(puertoRicoWallClock('2099-10-20T23:00:00-04:00', 'UTC')).toBe('2099-10-20T23:00')
   })
 })
