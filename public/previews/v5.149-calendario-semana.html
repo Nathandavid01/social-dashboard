@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nate Media · Semana completa del calendario</title>
+<style>
+  body{margin:0;background:#101011;color:#fafafa;font:15px/1.45 system-ui,sans-serif;padding:28px}
+  main{max-width:1100px;margin:auto}
+  header{font-size:24px;font-weight:700;margin-bottom:8px}
+  header b{color:#e7b315}
+  h2{font-size:20px;margin:22px 0 8px}
+  .muted{color:#aaa;font-size:13px}
+  .card{background:#fcfcff;color:#1c1b33;border-radius:16px;padding:18px;margin-top:12px}
+  .banner{background:#fffbeb;border:1px solid #fcd34d;color:#451a03;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .banner small{letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+  .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid #e6e6f0;border-radius:12px;overflow:hidden}
+  .head,.day{min-width:0;padding:8px;border-right:1px solid #eee;border-bottom:1px solid #eee}
+  .head{background:#f6f6fb;text-align:center;font-size:12px;color:#667}
+  .day{min-height:132px;background:#fff}
+  .num{font-size:12px;color:#667}
+  .chip{margin-top:8px;border:1px dashed #c4b5fd;background:#f5f3ff;color:#5b21b6;border-radius:8px;padding:6px;font-size:11px;line-height:1.35;overflow-wrap:anywhere}
+  .post{margin-top:8px;border:1px solid #e6e6f0;border-radius:8px;overflow:hidden}
+  .photo{height:64px;background:linear-gradient(160deg,#f59e0b,#7c2d12)}
+  .meta{padding:6px;font-size:10px}
+  .clip{max-width:640px;overflow:hidden}
+  .clip .week{min-width:920px}
+  .panel{margin-top:12px;border:1px solid #e6e6f0;border-radius:12px;padding:12px;font-size:13px}
+  .note{margin-top:16px}
+</style>
+<body>
+<main>
+  <header>Nate <b>Media</b></header>
+  <p class="muted">Calendario de publicaciones · vista previa v5.149</p>
+
+  <h2>Antes: el sábado y el viernes se cortaban</h2>
+  <div class="card">
+    <div class="clip">
+      <div class="week">
+        <div class="head">Dom</div><div class="head">Lun</div><div class="head">Mar</div><div class="head">Mié</div><div class="head">Jue</div><div class="head">Vie</div><div class="head">Sáb</div>
+        <div class="day"><div class="num">18</div></div>
+        <div class="day"><div class="num">19</div><p class="chip">Previsto · 643 Sport Bar &amp; Pizzería · 10:00</p></div>
+        <div class="day"><div class="num">20</div></div>
+        <div class="day"><div class="num">21</div><p class="chip">Previsto · 643 Sport Bar &amp; Pizzería · 10:00</p></div>
+        <div class="day"><div class="num">22</div></div>
+        <div class="day"><div class="num">23</div><p class="chip">Previsto · 643 Sport I</p><div class="post"><div class="photo"></div><div class="meta">Facebook · Instagram · 10:00</div></div></div>
+        <div class="day"><div class="num">24</div><p class="chip">Sábado</p></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Ahora: los siete días se ven y el texto cabe en el día</h2>
+  <div class="card">
+    <div class="banner">
+      <small>643 Sport Bar &amp; Pizzería · Alcance del contenido actual</small>
+      <h2 style="margin:6px 0">Contenido actual hasta el lunes, 2 de noviembre de 2026</h2>
+      <p>4 piezas pendientes · 3 borradores · 0 publicaciones programadas</p>
+    </div>
+    <div class="week">
+      <div class="head">Dom</div><div class="head">Lun</div><div class="head">Mar</div><div class="head">Mié</div><div class="head">Jue</div><div class="head">Vie</div><div class="head">Sáb</div>
+      <div class="day"><div class="num">18</div></div>
+      <div class="day"><div class="num">19</div><p class="chip">Previsto · 643 Sport Bar &amp; Pizzería · 10:00</p></div>
+      <div class="day"><div class="num">20</div></div>
+      <div class="day"><div class="num">21</div><p class="chip">Previsto · 643 Sport Bar &amp; Pizzería · 10:00</p></div>
+      <div class="day"><div class="num">22</div></div>
+      <div class="day"><div class="num">23</div><p class="chip">Previsto · 643 Sport Bar &amp; Pizzería · 10:00</p><div class="post"><div class="photo"></div><div class="meta">Facebook<br>Instagram<br>10:00</div></div></div>
+      <div class="day"><div class="num">24</div></div>
+    </div>
+    <div class="panel"><strong>Frecuencia por cliente</strong><br>643 Sport Bar &amp; Pizzería · lunes, miércoles y viernes · 10:00</div>
+  </div>
+  <p class="note muted">En la computadora la semana cabe entera. En el teléfono se desliza hacia el lado para llegar al sábado. La frecuencia queda debajo del calendario hasta que la ventana es ancha.</p>
+</main>
+</html>

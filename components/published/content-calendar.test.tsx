@@ -6,6 +6,7 @@ vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn(async()=>({ok:true}))}))
 import { ContentCalendar } from './content-calendar'
+import styles from './content-calendar.module.css'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })
 const base = { id: 1, uuid: 'one', text: 'Oferta de octubre', publicationDate: `${date}T23:59:00`, timezone: 'America/Puerto_Rico', platforms: ['instagram'], draft: false, autoPublish: true, media: [{ url: '/preview.jpg', type: 'image' }], clientName: 'Cliente A', blogId: '1', providerStatuses: ['PENDING'] }
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals() })
@@ -114,7 +115,9 @@ it('keeps Saturday and each day card inside the calendar instead of clipping the
   const { container } = render(<ContentCalendar clients={[{ id: 'a', name: '643 Sport Bar & Pizzería', metricool_blog_id: '1', posting_days: [1, 3, 5], posting_time: '10:00' }]} clientId="a" projectionIdeas={[]} />)
   const week = container.querySelector('[data-calendar-week]')
   expect(week).not.toBeNull()
+  expect(week!.className).toContain(styles.week)
   expect(week!.className).not.toMatch(/min-w-\[/)
+  expect(week!.parentElement?.className).toContain('overflow-x-auto')
   expect(week!.closest('[class*="overflow-hidden"]')).toBeNull()
   expect(screen.getByText('Sáb').closest('[data-calendar-week]')).toBe(week)
   const cell = container.querySelector('[data-calendar-date]')!
@@ -129,7 +132,10 @@ it('keeps Saturday and each day card inside the calendar instead of clipping the
   const dayPost = screen.getAllByRole('button', { name: /Oferta de octubre/ }).find(button => button.closest('[data-calendar-date]'))
   expect(dayPost).toBeTruthy()
   expect(dayPost!.querySelector('.truncate')).toBeNull()
+  expect([...dayPost!.querySelectorAll('div')].some(node => node.className.includes('aspect-[4/3]'))).toBe(true)
   const css = readFileSync('components/published/content-calendar.module.css', 'utf8')
   expect(css).not.toMatch(/min-width:\s*1024px/)
   expect(css).toMatch(/min-width:\s*1536px/)
+  expect(css).toMatch(/max-width:\s*719px/)
+  expect(css).toMatch(/min-width:\s*36rem/)
 })
