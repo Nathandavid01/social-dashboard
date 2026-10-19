@@ -10,6 +10,8 @@ import {
   editingClaimLabel,
   formatEditingClaimWhen,
   isEditingClaimed,
+  isStaleEditingClaim,
+  staleEditingClaimLabel,
   type EditingClaim,
 } from '@/lib/pipeline/editing-claim'
 
@@ -30,6 +32,8 @@ export function EditingClaimControls({
   const taken = isEditingClaimed(claim)
   const mine = taken && claim?.byId === userId
   const label = editingClaimLabel(claim, userId)
+  const stale = isStaleEditingClaim(claim)
+  const staleLabel = staleEditingClaimLabel(claim)
   const when = formatEditingClaimWhen(claim?.at)
   const startDecision = decideEditingClaim(claim, userId)
   const startBlocked = startDecision.ok === false && startDecision.reason === 'taken'
@@ -71,10 +75,15 @@ export function EditingClaimControls({
       {label ? (
         <span
           data-testid={`editing-claim-${ideaId}`}
-          className="min-w-0 truncate rounded bg-sky-500/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-300"
-          title={when ?? undefined}
+          data-stale={stale ? 'true' : undefined}
+          className={
+            stale
+              ? 'min-w-0 truncate rounded border border-amber-400/40 bg-amber-500/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-200'
+              : 'min-w-0 truncate rounded bg-sky-500/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-300'
+          }
+          title={stale ? (staleLabel ?? undefined) : (when ?? undefined)}
         >
-          {label}{when ? ` · ${when}` : ''}
+          {label}{stale && staleLabel ? ` · ${staleLabel}` : when ? ` · ${when}` : ''}
         </span>
       ) : (
         <span className="text-[9px] text-slate-500">Libre</span>

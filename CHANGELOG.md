@@ -1,3 +1,12 @@
+## v5.150 — 19 de octubre de 2026
+
+**En Pipeline se marcan los claims de «editando» que llevan días sin corte.**
+- Si alguien reclamó un video hace 7 días o más y no subió el edit, el chip pasa a ámbar: «En edición — … · Vencido · hace Nd».
+- Soltar sigue siendo un clic (quien lo tiene, o un supervisor con `planning.assign`). Nada se suelta solo.
+- Un claim sin fecha válida no se marca vencido: no inventamos la edad.
+
+![Claims vencidos en Pipeline](/changelog/v5.150-claims-vencidos.png)
+
 ## v5.146 — 18 de octubre de 2026
 
 **En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**
