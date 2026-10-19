@@ -12,6 +12,9 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
+vi.mock('@/lib/actions/video-download', () => ({
+  getVideoDownloadUrl: vi.fn(async () => ({ url: 'https://r2/get', provider: 'r2' })),
+}))
 vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
 vi.mock('@/components/clients/client-logo', () => ({ ClientLogo: () => <div data-testid="logo" /> }))

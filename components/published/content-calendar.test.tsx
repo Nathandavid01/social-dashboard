@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn(async()=>({ok:true}))}))
+vi.mock('@/lib/actions/recibo',()=>({getReciboIdeaDownloadUrl:vi.fn(async()=>({url:'https://signed.example/v.mp4'})),getReciboIdeaPreviewUrl:vi.fn()}))
 import { ContentCalendar } from './content-calendar'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })
 const base = { id: 1, uuid: 'one', text: 'Oferta de octubre', publicationDate: `${date}T23:59:00`, timezone: 'America/Puerto_Rico', platforms: ['instagram'], draft: false, autoPublish: true, media: [{ url: '/preview.jpg', type: 'image' }], clientName: 'Cliente A', blogId: '1', providerStatuses: ['PENDING'] }

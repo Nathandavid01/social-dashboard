@@ -24,6 +24,9 @@ vi.mock('@/lib/actions/idea-videos-r2', () => ({
 vi.mock('@/lib/actions/video-preview', () => ({
   getVideoPreviewUrl: vi.fn(async () => ({ url: 'https://r2/preview', provider: 'r2' })),
 }))
+vi.mock('@/lib/actions/video-download', () => ({
+  getVideoDownloadUrl: vi.fn(async () => ({ url: 'https://r2/get', provider: 'r2' })),
+}))
 vi.mock('@/lib/utils/video-postupload-client', () => ({
   processUploadedVideo: vi.fn().mockResolvedValue(undefined),
 }))
@@ -392,6 +395,15 @@ describe('IdeaVideoPanel — inline preview', () => {
     render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
     await flush()
     expect(screen.getByRole('button', { name: 'Ver' })).toBeInTheDocument()
+  })
+
+  it('muestra Bajar en un editado de entregas-r2, no solo en pipeline r2', async () => {
+    canUpload = true
+    canManageVideos = true
+    const entregas = { ...makeVideo('edited', 0), storage_provider: 'entregas-r2' as const }
+    render(<IdeaVideoPanel ideaId="idea-1" videos={[entregas]} />)
+    await flush()
+    expect(screen.getByRole('button', { name: /Bajar/ })).toBeInTheDocument()
   })
 })
 

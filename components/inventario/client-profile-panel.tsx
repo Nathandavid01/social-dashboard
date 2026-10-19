@@ -12,6 +12,7 @@ import type { DetailPost } from '@/lib/inventario/client-detail-core'
 import type { Format } from '@/lib/inventario/cadence-formats'
 import { ClientLogo } from './client-logo'
 import { GOLD_HEX, HEALTH_META, RAW_HEX, daysLeftLabel, runOutLabel, shortDateLabel, timeLabel } from './stock-labels'
+import { VideoDownloadButton } from '@/components/shared/video-download-button'
 
 type Post = DetailPost & { coverUrl: string | null }
 
@@ -58,6 +59,7 @@ function PostRow({ post }: { post: Post }) {
           <span className="truncate">{postWhen(post)}</span>
         </div>
       </div>
+      {post.coverVideoId ? <VideoDownloadButton videoId={post.coverVideoId} title={post.title} /> : null}
     </li>
   )
 }

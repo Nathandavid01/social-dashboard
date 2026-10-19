@@ -11,11 +11,13 @@ vi.mock('@/lib/actions/entregas-client-review', () => ({
   crearEnlaceCliente: (...a: unknown[]) => crearEnlaceCliente(...(a as [])),
 }))
 
-const getEntregaVideoEditado = vi.fn()
-const getEntregasDownloadUrl = vi.fn()
-vi.mock('@/lib/actions/entregas-r2', () => ({
-  getEntregaVideoEditado: (...a: unknown[]) => getEntregaVideoEditado(...(a as [])),
-  getEntregasDownloadUrl: (...a: unknown[]) => getEntregasDownloadUrl(...(a as [])),
+const getReciboEditedVideo = vi.fn()
+const getVideoDownloadUrl = vi.fn()
+vi.mock('@/lib/actions/recibo-video', () => ({
+  getReciboEditedVideo: (...a: unknown[]) => getReciboEditedVideo(...(a as [])),
+}))
+vi.mock('@/lib/actions/video-download', () => ({
+  getVideoDownloadUrl: (...a: unknown[]) => getVideoDownloadUrl(...(a as [])),
 }))
 
 import { EnlaceClienteBoton } from './enlace-cliente-boton'
@@ -36,10 +38,10 @@ function setup(over: Partial<React.ComponentProps<typeof EnlaceClienteBoton>> = 
 beforeEach(() => {
   vi.clearAllMocks()
   Object.assign(navigator, { clipboard: { writeText: vi.fn(async () => undefined) } })
-  vi.spyOn(window, 'open').mockImplementation(() => null)
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
   getEnlaceCliente.mockResolvedValue({ enlace: null })
-  getEntregaVideoEditado.mockResolvedValue({ id: null })
-  getEntregasDownloadUrl.mockResolvedValue({ url: 'https://r2/get' })
+  getReciboEditedVideo.mockResolvedValue({ id: null })
+  getVideoDownloadUrl.mockResolvedValue({ url: 'https://r2/get' })
 })
 
 describe('EnlaceClienteBoton — sin enlace generado', () => {
@@ -54,7 +56,7 @@ describe('EnlaceClienteBoton — sin enlace generado', () => {
 describe('EnlaceClienteBoton — con enlace generado', () => {
   beforeEach(() => {
     getEnlaceCliente.mockResolvedValue({ enlace: ENLACE })
-    getEntregaVideoEditado.mockResolvedValue({ id: 'v1' })
+    getReciboEditedVideo.mockResolvedValue({ id: 'v1' })
   })
 
   it('muestra los tres controles: copiar, abrir y bajar', async () => {
@@ -84,12 +86,12 @@ describe('EnlaceClienteBoton — con enlace generado', () => {
     setup()
     const bajar = await screen.findByRole('button', { name: /bajar/i })
     fireEvent.click(bajar)
-    await waitFor(() => expect(getEntregasDownloadUrl).toHaveBeenCalledWith('v1'))
-    await waitFor(() => expect(window.open).toHaveBeenCalledWith('https://r2/get', '_blank'))
+    await waitFor(() => expect(getVideoDownloadUrl).toHaveBeenCalledWith('v1'))
+    await waitFor(() => expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled())
   })
 
   it('con error al bajar muestra un toast y no rompe la tarjeta', async () => {
-    getEntregasDownloadUrl.mockResolvedValue({ error: 'No se pudo descargar' })
+    getVideoDownloadUrl.mockResolvedValue({ error: 'No se pudo descargar' })
     setup()
     const bajar = await screen.findByRole('button', { name: /bajar/i })
     fireEvent.click(bajar)
@@ -109,7 +111,7 @@ describe('EnlaceClienteBoton — con enlace generado', () => {
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled())
     fireEvent.click(screen.getByRole('link', { name: /abrir/i }))
     fireEvent.click(screen.getByRole('button', { name: /bajar/i }))
-    await waitFor(() => expect(getEntregasDownloadUrl).toHaveBeenCalled())
+    await waitFor(() => expect(getVideoDownloadUrl).toHaveBeenCalled())
     expect(onCardClick).not.toHaveBeenCalled()
   })
 })
@@ -117,7 +119,7 @@ describe('EnlaceClienteBoton — con enlace generado', () => {
 describe('EnlaceClienteBoton — enlace generado sin video editado vigente', () => {
   it('no renderiza "Bajar" (no un botón muerto)', async () => {
     getEnlaceCliente.mockResolvedValue({ enlace: ENLACE })
-    getEntregaVideoEditado.mockResolvedValue({ id: null })
+    getReciboEditedVideo.mockResolvedValue({ id: null })
     setup()
     await screen.findByRole('button', { name: /copiar enlace/i })
     expect(screen.queryByRole('button', { name: /bajar/i })).not.toBeInTheDocument()
@@ -153,14 +155,14 @@ it('shows a copy failure without claiming the link was copied',async()=>{
 })
 it('releases the download button after a rejected request',async()=>{
  getEnlaceCliente.mockResolvedValue({enlace:ENLACE})
- getEntregaVideoEditado.mockResolvedValue({id:'v1'})
- getEntregasDownloadUrl.mockRejectedValueOnce(Error('network'))
+ getReciboEditedVideo.mockResolvedValue({id:'v1'})
+ getVideoDownloadUrl.mockRejectedValueOnce(Error('network'))
  setup()
  const button=await screen.findByRole('button',{name:/bajar el video/i})
  fireEvent.click(button)
  await waitFor(()=>expect(toast).toHaveBeenCalledWith(expect.objectContaining({title:'No se pudo descargar',variant:'destructive'})))
  expect(button).toBeEnabled()
- expect(window.open).not.toHaveBeenCalled()
+ expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled()
 })
 
 it('does not announce readiness until the created token can be read back',async()=>{

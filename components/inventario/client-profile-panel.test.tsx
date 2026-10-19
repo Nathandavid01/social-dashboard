@@ -5,6 +5,10 @@ import { buildClientDetail } from '@/lib/inventario/client-detail-core'
 import type { ClientStockDetail } from '@/lib/inventario/client-detail-types'
 const perms = vi.hoisted(() => ({ cadenceEdit: true }))
 vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: () => perms.cadenceEdit }))
+vi.mock('@/lib/actions/video-download', () => ({
+  getVideoDownloadUrl: vi.fn(async () => ({ url: 'https://signed.example/v.mp4' })),
+}))
+vi.mock('@/lib/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 const editorProps = vi.fn()
 vi.mock('@/components/clients/cadence/client-cadence-editor', () => ({
   ClientCadenceEditor: (props: { clientId: string; initialDays: number[]; onSaved?: (p: unknown) => void }) => {
@@ -94,6 +98,9 @@ describe('ClientProfilePanel', () => {
     expect(within(li).getByText('Listo · saldría vie 16 oct')).toBeInTheDocument()
     expect(within(pu).getByText('Publicado · mar 13 oct')).toBeInTheDocument()
     expect(within(posts).getByText('Listo · saldría mié 14 oct')).toBeInTheDocument()
+    expect(within(ag).getByRole('button', { name: 'Bajar Reel terraza' })).toBeInTheDocument()
+    expect(within(li).getByRole('button', { name: 'Bajar Así se prepara' })).toBeInTheDocument()
+    expect(within(pu).queryByRole('button', { name: /^Bajar/ })).toBeNull()
   })
 
   it('close button clears the selection', () => {

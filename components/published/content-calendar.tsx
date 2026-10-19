@@ -11,6 +11,7 @@ import { calendarCoverageDuration } from '@/lib/recibo/calendar-coverage'
 import { useReciboProjection } from '@/lib/recibo/use-calendar-projection'
 import { reciboSpaceTone } from '@/lib/recibo/cadence-spaces'
 import { ReciboVideoPreview } from '@/components/recibo/recibo-video-preview'
+import { ReciboDownloadButton } from '@/components/recibo/recibo-download'
 import { CalendarCadenceSettings } from './calendar-cadence-settings'
 import type { ClientCadencePatch } from '@/lib/actions/client-cadence'
 import { CalendarUploadDialog, type CalendarClient, type CalendarUploadSaved } from './calendar-upload-dialog'
@@ -175,7 +176,10 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
     const allowed=canDraft && !unavailable && reciboSpaceTone(idea)==='approved' && !calendarBusy
     const payload={ideaId:idea.id,clientId:idea.client_id,videoId}
     return <article key={idea.id} draggable={allowed} onDragStart={event=>{if(!allowed){event.preventDefault();return}dragPayload.current=payload;event.dataTransfer.setData('application/x-nate-recibo',JSON.stringify(payload));event.dataTransfer.effectAllowed='move';setDragging(true)}} onDragEnd={()=>{dragPayload.current=null;setDragging(false)}} className={cn('min-w-0 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-2',allowed && 'cursor-grab')}>
-      <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
+      <div className="relative">
+        <ReciboVideoPreview ideaId={idea.id} expectedVideoId={videoId} image={image} title={idea.title || idea.hook || 'Contenido'} hasEdited />
+        <ReciboDownloadButton ideaId={idea.id} videoId={videoId} title={idea.title || idea.hook || 'Contenido'} />
+      </div>
       <span aria-label={`Formato: ${image ? 'Post' : 'Reel'}`} className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-950">{image ? 'Post' : 'Reel'}</span>
       <p className="text-xs font-semibold">{idea.title || idea.hook || 'Contenido'}</p>
       <p className="text-[10px] text-amber-800">{projected ? (reciboSpaceTone(idea)==='approved'?'Proyectado · aprobado':'Proyectado · pendiente de aprobación') : (reciboSpaceTone(idea)==='approved'?'Aprobado':'Pendiente de aprobación')}</p>

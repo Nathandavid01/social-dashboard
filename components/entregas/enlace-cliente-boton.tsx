@@ -6,7 +6,9 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/lib/hooks/use-toast'
 import { DIAS_DE_VIGENCIA } from '@/lib/entregas/client-review'
 import { crearEnlaceCliente, getEnlaceCliente, type EnlaceGuardado } from '@/lib/actions/entregas-client-review'
-import { getEntregaVideoEditado, getEntregasDownloadUrl } from '@/lib/actions/entregas-r2'
+import { getReciboEditedVideo } from '@/lib/actions/recibo-video'
+import { getVideoDownloadUrl } from '@/lib/actions/video-download'
+import { followDownload } from '@/lib/utils/follow-download'
 
 /**
  * El enlace de aprobación, en la propia tarjeta del tablero.
@@ -46,7 +48,7 @@ export function EnlaceClienteBoton({
     try {
       const [enlaceRes, videoRes] = await Promise.all([
         getEnlaceCliente(ideaId),
-        getEntregaVideoEditado(ideaId),
+        getReciboEditedVideo(ideaId),
       ])
       if (request !== requestId.current) return false
       if (enlaceRes.error || videoRes.error || (expectedToken && enlaceRes.enlace?.token !== expectedToken)) throw new Error('No se pudo cargar')
@@ -117,9 +119,9 @@ export function EnlaceClienteBoton({
     if (!editedVideoId || bajando) return
     setBajando(true)
     try {
-      const res = await getEntregasDownloadUrl(editedVideoId)
+      const res = await getVideoDownloadUrl(editedVideoId)
       if (res.error || !res.url) throw new Error(res.error ?? 'Error inesperado')
-      window.open(res.url, '_blank')
+      followDownload(res.url)
     } catch (error) {
       toast({ title: 'No se pudo descargar', description: error instanceof Error ? error.message : 'Vuelve a intentar.', variant: 'destructive' })
     } finally {
