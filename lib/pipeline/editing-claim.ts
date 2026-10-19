@@ -100,3 +100,42 @@ export function formatEditingClaimWhen(at: string | null | undefined, now: Date 
   const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
   return `${then.getDate()} ${MES[then.getMonth()]} ${hh}:${mm}`
 }
+
+/** Days a Pipeline/Banco claim can sit without a cut before it is marked vencido. */
+export const STALE_EDITING_CLAIM_DAYS = 7
+const DAY_MS = 86_400_000
+
+function claimStartedAt(claim: EditingClaim | null | undefined): Date | null {
+  if (!claim?.byId || !claim.at) return null
+  const then = new Date(claim.at)
+  return Number.isFinite(then.getTime()) ? then : null
+}
+
+/**
+ * True when the idea is claimed and `at` is at least `thresholdDays` old.
+ * Missing or invalid `at` is not stale — we refuse to invent an age.
+ */
+export function isStaleEditingClaim(
+  claim: EditingClaim | null | undefined,
+  now: Date = new Date(),
+  thresholdDays = STALE_EDITING_CLAIM_DAYS,
+): boolean {
+  const then = claimStartedAt(claim)
+  if (!then) return false
+  const elapsed = now.getTime() - then.getTime()
+  if (elapsed < 0) return false
+  return elapsed >= thresholdDays * DAY_MS
+}
+
+/** Chip suffix, e.g. «Vencido · hace 7d». Null when the claim is not stale. */
+export function staleEditingClaimLabel(
+  claim: EditingClaim | null | undefined,
+  now: Date = new Date(),
+  thresholdDays = STALE_EDITING_CLAIM_DAYS,
+): string | null {
+  if (!isStaleEditingClaim(claim, now, thresholdDays)) return null
+  const then = claimStartedAt(claim)
+  if (!then) return 'Vencido'
+  const days = Math.floor((now.getTime() - then.getTime()) / DAY_MS)
+  return `Vencido · hace ${days}d`
+}

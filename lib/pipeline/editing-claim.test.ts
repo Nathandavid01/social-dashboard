@@ -8,6 +8,8 @@ import {
   editingClaimLabel,
   formatEditingClaimWhen,
   isEditingClaimed,
+  isStaleEditingClaim,
+  staleEditingClaimLabel,
 } from './editing-claim'
 
 const maria = { byId: 'ed-maria', byName: 'María R.', at: '2026-09-21T15:00:00.000Z' }
@@ -95,5 +97,41 @@ describe('formatEditingClaimWhen', () => {
     expect(formatEditingClaimWhen(new Date(2026, 8, 21, 16, 9, 40).toISOString(), now)).toBe('ahora')
     expect(formatEditingClaimWhen(new Date(2026, 8, 21, 15, 55, 0).toISOString(), now)).toBe('hace 15 min')
     expect(formatEditingClaimWhen(new Date(2026, 8, 21, 8, 5, 0).toISOString(), now)).toBe('hoy 08:05')
+  })
+})
+
+describe('isStaleEditingClaim', () => {
+  const now = new Date('2026-10-19T12:00:00.000Z')
+
+  it('a los 6 días todavía no está vencido; a los 7+ sí', () => {
+    const six = { ...maria, at: '2026-10-13T12:00:00.000Z' }
+    const seven = { ...maria, at: '2026-10-12T12:00:00.000Z' }
+    const eighteen = { ...maria, at: '2026-10-01T12:00:00.000Z' }
+    expect(isStaleEditingClaim(six, now)).toBe(false)
+    expect(isStaleEditingClaim(seven, now)).toBe(true)
+    expect(isStaleEditingClaim(eighteen, now)).toBe(true)
+  })
+
+  it('sin claim, sin at o at inválido no se marca vencido', () => {
+    expect(isStaleEditingClaim(null, now)).toBe(false)
+    expect(isStaleEditingClaim({ byId: null, byName: null, at: null }, now)).toBe(false)
+    expect(isStaleEditingClaim({ ...maria, at: null }, now)).toBe(false)
+    expect(isStaleEditingClaim({ ...maria, at: 'no-es-fecha' }, now)).toBe(false)
+  })
+
+  it('respeta un umbral distinto si se pasa', () => {
+    const six = { ...maria, at: '2026-10-13T12:00:00.000Z' }
+    expect(isStaleEditingClaim(six, now, 5)).toBe(true)
+    expect(isStaleEditingClaim(six, now, 7)).toBe(false)
+  })
+})
+
+describe('staleEditingClaimLabel', () => {
+  const now = new Date('2026-10-19T12:00:00.000Z')
+
+  it('etiqueta vencido con días enteros para el chip', () => {
+    expect(staleEditingClaimLabel({ ...maria, at: '2026-10-12T12:00:00.000Z' }, now)).toBe('Vencido · hace 7d')
+    expect(staleEditingClaimLabel({ ...maria, at: '2026-10-01T12:00:00.000Z' }, now)).toBe('Vencido · hace 18d')
+    expect(staleEditingClaimLabel({ ...maria, at: '2026-10-13T12:00:00.000Z' }, now)).toBeNull()
   })
 })
