@@ -6,6 +6,7 @@ import { deleteScheduledPost, getServerConfig } from '@/lib/metricool/post'
 import { getScheduledPost } from '@/lib/metricool/scheduler'
 import { assertDeletableDraft, type EditableCalendarPost } from '@/lib/metricool/calendar-state'
 import { applyCalendarState } from '@/lib/metricool/calendar-state-apply'
+import { calendarPostChanges } from '@/lib/metricool/calendar-stale'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const json = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -25,7 +26,11 @@ export async function POST(req: NextRequest) {
   const account = { ...config, blogId: input.blogId }
   let original
   try { original = await getScheduledPost(account, input.postId) } catch { return json({ error: 'No se pudo leer el post actual en Metricool. Verifica el calendario antes de cambiarlo.' }, 502) }
-  if (original.uuid !== input.uuid || original.draft !== input.expected.draft || (original.text || '') !== input.expected.text || original.publicationDate.dateTime !== input.expected.publicationDate || (input.expected.timezone && original.publicationDate.timezone !== input.expected.timezone)) return json({ error: 'El post cambió en Metricool. Actualiza el calendario antes de modificarlo.' }, 409)
+  const changed = calendarPostChanges(original, { uuid: input.uuid, ...input.expected })
+  if (changed.length) {
+    console.warn('[calendar-state] stale post', { postId: input.postId, changed, seen: { publicationDate: input.expected.publicationDate, timezone: input.expected.timezone }, read: original.publicationDate })
+    return json({ error: 'El post cambió en Metricool. Actualiza el calendario antes de modificarlo.', changed }, 409)
+  }
   if (input.action === 'delete') return deleteDraft(db, account, input.clientId, original)
   const applied = await applyCalendarState(db, account, input.clientId, original, input.action, input.dateTime)
   if (applied.status === 200) revalidateCalendar()

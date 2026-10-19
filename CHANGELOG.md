@@ -5,6 +5,7 @@
 - Si Metricool no confirma la programación, la pieza queda como borrador y te lo indica; nunca se envía dos veces.
 - Nuevo «Quitar del calendario»: la pieza sigue en Recibo, pero ya no ocupa fechas ni cuenta en la fecha final ni en las semanas de contenido.
 - Las piezas quitadas aparecen en «Fuera del calendario», con «Volver al calendario» para devolverlas.
+- Corregido: programar un borrador ya no falla con «El post cambió en Metricool» cuando nadie lo había cambiado.
 
 ![Enviar y quitar desde el calendario](/changelog/v5.148-enviar-quitar-calendario.png)
 
