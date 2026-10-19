@@ -61,16 +61,16 @@ function Thumbnail({ post, className, playable = false }: { post: PublishedPost;
 function PostCard({ post, onOpen, compact = false }: { post: PublishedPost; onOpen: () => void; compact?: boolean }) {
   const wall = calendarPostDate(post)
   const time = wall.slice(11, 16)
-  return <button type="button" onClick={onOpen} className={cn('w-full text-left transition hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', compact ? 'flex gap-3 rounded-xl border border-border bg-card p-3' : 'rounded-lg p-1')}>
+  return <button type="button" onClick={onOpen} className={cn('w-full min-w-0 text-left transition hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', compact ? 'flex gap-3 rounded-xl border border-border bg-card p-3' : 'overflow-hidden rounded-lg border border-border bg-card')}>
     {compact && <Thumbnail post={post} className="h-20 w-20 shrink-0" />}
-    <div className="min-w-0 flex-1 space-y-1.5">
+    <div className={cn('min-w-0 flex-1 space-y-1.5', !compact && 'p-1.5')}>
       <div className="flex flex-wrap gap-x-2 gap-y-1 text-[10px]">
         {post.platforms.map(p => <span key={p} className={cn('font-semibold capitalize', platforms[p] ?? 'text-muted-foreground')}>{p}</span>)}
         <span className="text-muted-foreground">{compact && `${new Date(`${wall.slice(0, 10)}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'short' })} · `}{time}</span>
       </div>
-      {!compact && <Thumbnail post={post} className="h-16 w-full" />}
-      <p className="line-clamp-2 text-xs font-medium leading-relaxed">{post.text || 'Sin caption'}</p>
-      <p className="truncate text-[10px] text-muted-foreground">{post.clientName ?? 'Contenido'}</p>
+      {!compact && <Thumbnail post={post} className="aspect-[4/3] h-auto w-full max-w-full" />}
+      <p className="line-clamp-2 break-words text-xs font-medium leading-relaxed">{post.text || 'Sin caption'}</p>
+      <p className={cn('text-[10px] text-muted-foreground', compact ? 'truncate' : 'break-words [overflow-wrap:anywhere]')}>{post.clientName ?? 'Contenido'}</p>
       <StateBadge post={post} />
     </div>
   </button>
@@ -289,16 +289,16 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       <div className="min-w-0 space-y-3">
         <p className="text-xs text-muted-foreground"><span className="mr-1 inline-block h-2 w-2 rounded-full border border-dashed border-violet-500"/>Previsto = día configurado para publicar · Los posts reales conservan su estado de Metricool.</p>
         {!loading && !error && filteredPosts.length === 0 && !projection?.posts.length && <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">No hay publicaciones en este período.</p>}
-        <div className="overflow-hidden rounded-xl border bg-white"><div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-5"><h3 className="text-xl font-semibold">{title.charAt(0).toUpperCase() + title.slice(1)}</h3><span className="text-xs text-muted-foreground">{loading || error || failedClients.length ? '—' : filteredPosts.length} publicaciones</span></div><div className="overflow-x-auto"><div className={projectionIdeas ? "min-w-[980px]" : "min-w-[560px]"}>
-          <div className="grid grid-cols-7 border-b bg-muted/30">{dayLabels.map(d => <div key={d} className="py-3 text-center text-xs font-medium text-muted-foreground">{d}</div>)}</div>
+        <div className="min-w-0 rounded-xl border bg-white"><div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-5"><h3 className="text-xl font-semibold">{title.charAt(0).toUpperCase() + title.slice(1)}</h3><span className="text-xs text-muted-foreground">{loading || error || failedClients.length ? '—' : filteredPosts.length} publicaciones</span></div><div className="w-full min-w-0 overflow-x-auto"><div data-calendar-week className={cn('w-full min-w-0', styles.week)}>
+          <div className="grid grid-cols-7 border-b bg-muted/30">{dayLabels.map(d => <div key={d} className="min-w-0 py-3 text-center text-xs font-medium text-muted-foreground">{d}</div>)}</div>
           <div className="grid grid-cols-7">{days.map(day => {
             const date = dateKey(day), dayPosts = filteredPosts.filter(p => calendarPostDate(p).startsWith(date))
             const expected = cadenceClients.flatMap(client=>{const slot=calendarCadenceSlot(client,day.getDay());return slot?[{client,...slot}]:[]})
             const expectedShown=expandedCadenceDays[date]?expected:expected.slice(0,2)
             const shown = expandedDays[date] ? dayPosts : dayPosts.slice(0, 2)
-            return <div key={date} data-calendar-date={date} onDragOver={event=>{if(dragPayload.current && date>=today && !calendarBusy){event.preventDefault();event.dataTransfer.dropEffect='move'}}} onDrop={event=>{event.preventDefault();const payload=dragPayload.current;if(payload)void createCalendarDraft(payload,date)}} className={cn('min-h-[150px] border-b border-r border-border/70 p-2 space-y-2', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5', dragging && date>=today && 'ring-1 ring-inset ring-amber-400')}>
+            return <div key={date} data-calendar-date={date} onDragOver={event=>{if(dragPayload.current && date>=today && !calendarBusy){event.preventDefault();event.dataTransfer.dropEffect='move'}}} onDrop={event=>{event.preventDefault();const payload=dragPayload.current;if(payload)void createCalendarDraft(payload,date)}} className={cn('min-h-[150px] min-w-0 break-words border-b border-r border-border/70 p-2 space-y-2 [overflow-wrap:anywhere]', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5', dragging && date>=today && 'ring-1 ring-inset ring-amber-400')}>
               <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-xs', date === today ? 'bg-primary font-semibold text-primary-foreground' : 'text-muted-foreground')}>{day.getDate()}</span>
-              {expectedShown.map(slot=><p key={slot.client.id} className="rounded-md border border-dashed border-violet-300 bg-violet-50 p-1 text-[10px] leading-relaxed text-violet-800">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
+              {expectedShown.map(slot=><p key={slot.client.id} className="break-words rounded-md border border-dashed border-violet-300 bg-violet-50 p-1.5 text-[11px] leading-snug text-violet-800 [overflow-wrap:anywhere]">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
               {expected.length>2&&<button type="button" onClick={()=>setExpandedCadenceDays(s=>({...s,[date]:!s[date]}))} className="text-[10px] text-violet-700">{expandedCadenceDays[date]?'Ocultar días previstos':`+${expected.length-2} clientes previstos`}</button>}
               {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({idea,videoId,image}) => pendingCard(idea,videoId,image,true,date))}
               {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} />)}
