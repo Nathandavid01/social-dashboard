@@ -610,3 +610,96 @@ it('uses the cover of the current cut rather than an older version', () => {
   render(<ReciboBoard aiClients={[]} ideas={[idea]} />)
   expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/current.jpg')
 })
+
+describe('ReciboBoard — videos por día de publicación', () => {
+  const todayISO = '2026-10-19'
+  const morning = {
+    ...editedIdea,
+    id: 'morning',
+    title: 'Sale a las 10',
+    publish_date: '2026-10-20',
+    videos: [{ ...editedIdea.videos[0], id: 'vm', mime_type: 'video/mp4', name: 'a.mp4' }],
+  }
+  const evening = {
+    ...editedIdea,
+    id: 'evening',
+    client_id: 'c2',
+    title: 'Sale a las 6',
+    publish_date: '2026-10-20',
+    metricool_post_id: 7,
+    client: { id: 'c2', name: 'Farmacia Buena Vida', industry: null, logo_url: null },
+    videos: [{ ...editedIdea.videos[0], id: 've', mime_type: 'video/mp4', name: 'b.mp4' }],
+  }
+  const undated = {
+    ...editedIdea,
+    id: 'undated',
+    client_id: 'c3',
+    title: 'Sin fecha',
+    publish_date: null,
+    client: { id: 'c3', name: 'Sin cadencia', industry: null, logo_url: null },
+    videos: [{ ...editedIdea.videos[0], id: 'vu', mime_type: 'video/mp4', name: 'c.mp4' }],
+  }
+
+  function renderDayBoard() {
+    return render(
+      <ReciboBoard
+        todayISO={todayISO}
+        aiClients={[
+          { id: 'c1', name: 'Arecibo Lab', logo_url: null },
+          { id: 'c2', name: 'Farmacia Buena Vida', logo_url: null },
+          { id: 'c3', name: 'Sin cadencia', logo_url: null },
+        ]}
+        cadenceByClient={{
+          c1: { postingDays: [2], postingTime: '10:00' },
+          c2: { postingDays: [2], postingTime: '18:00', metricool: true },
+          c3: { postingDays: [], postingTime: null },
+        }}
+        ideas={[evening, undated, morning]}
+      />,
+    )
+  }
+
+  it('muestra fecha y hora de publicación en la tarjeta, o dice que no hay fecha', () => {
+    renderDayBoard()
+    expect(screen.getByTestId('recibo-publish-morning')).toHaveTextContent(/Fecha prevista/)
+    expect(screen.getByTestId('recibo-publish-morning')).toHaveTextContent(/10:00 a\.m\./)
+    expect(screen.getByTestId('recibo-publish-evening')).toHaveTextContent(/Programado en Metricool/)
+    expect(screen.getByTestId('recibo-publish-undated')).toHaveTextContent('Sin fecha de publicación')
+  })
+
+  it('Mañana lista videos de todos los clientes en orden de hora y deja fuera los sin fecha', async () => {
+    renderDayBoard()
+    await userEvent.click(screen.getByTestId('recibo-day-manana'))
+    const queue = screen.getByTestId('recibo-day-queue')
+    expect(within(queue).getByRole('heading', { name: /Videos que salen el martes 20 de octubre/i })).toBeInTheDocument()
+    const cards = within(queue).getAllByTestId(/recibo-idea-/)
+    expect(cards.map((card) => card.getAttribute('data-testid'))).toEqual(['recibo-idea-morning', 'recibo-idea-evening'])
+    expect(within(queue).queryByTestId('recibo-idea-undated')).not.toBeInTheDocument()
+    expect(within(queue).getByTestId('recibo-day-client-morning')).toHaveTextContent('Arecibo Lab')
+    expect(within(queue).getByTestId('recibo-day-client-evening')).toHaveTextContent('Farmacia Buena Vida')
+  })
+
+  it('el filtro de cliente sigue aplicando sobre el día elegido', async () => {
+    renderDayBoard()
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Filtrar por cliente' }), 'c1')
+    await userEvent.click(screen.getByTestId('recibo-day-manana'))
+    expect(screen.getByTestId('recibo-idea-morning')).toBeInTheDocument()
+    expect(screen.queryByTestId('recibo-idea-evening')).not.toBeInTheDocument()
+  })
+
+  it('reproduce el video desde la lista del día', async () => {
+    renderDayBoard()
+    await userEvent.click(screen.getByTestId('recibo-day-manana'))
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir video y caption de Sale a las 10' }))
+    await waitFor(() => expect(getReciboIdeaPreviewUrl).toHaveBeenCalledWith('morning', 'vm'))
+  })
+
+  it('Limpiar filtros vuelve a la vista por cliente', async () => {
+    renderDayBoard()
+    await userEvent.click(screen.getByTestId('recibo-day-manana'))
+    expect(screen.getByTestId('recibo-day-queue')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+    expect(screen.queryByTestId('recibo-day-queue')).not.toBeInTheDocument()
+    expect(screen.getByTestId('recibo-idea-undated')).toBeInTheDocument()
+  })
+})

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nate Media · Videos por día en Recibo</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#101011;color:#fafafa;font:15px system-ui}
+  header{max-width:1080px;margin:auto;padding:28px 24px 8px;color:#e7b315}
+  main{max-width:1080px;margin:auto;padding:8px 24px 48px}
+  h1{font-size:28px;margin:8px 0}
+  p{line-height:1.55;color:#c9c9c9}
+  .board{background:#f3f5f8;color:#1f2937;border-radius:20px;padding:28px;margin-top:20px}
+  .board h2{margin:0;font-size:26px}
+  .muted{color:#64748b;font-size:13px}
+  .filters{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin:18px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{border:1px solid #e2e8f0;background:#f8fafc;border-radius:12px;padding:10px 16px;font-size:13px}
+  .chip.on{border-color:#d97706;background:#fffbeb;color:#78350f;box-shadow:0 0 0 1px #d97706}
+  .date{border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;background:#fff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  article{background:#fff;border:1px solid #c4b5fd;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+  article.scheduled{border-color:#8b5cf6}
+  .thumb{aspect-ratio:9/16;max-height:280px;background:linear-gradient(180deg,#1e293b,#0f172a);color:#fff;display:flex;align-items:flex-end;padding:14px;font-size:13px}
+  .body{padding:14px}
+  .client{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#64748b;font-weight:700}
+  .pub{font-size:12px;color:#1f2937;margin:8px 0 4px}
+  .src{font-size:11px;color:#6d28d9}
+  .gold{color:#e7b315}
+</style>
+<header>Nate <b>Media</b> · v5.148</header>
+<main>
+  <h1>Videos que salen mañana, en una sola lista</h1>
+  <p>En Recibo → Contenido recibido elige <b class="gold">Hoy</b>, <b class="gold">Mañana</b> o una fecha. Ves los videos de todos los clientes en hora de Puerto Rico, listos para revisar y reproducir.</p>
+  <section class="board">
+    <h2>Recibo</h2>
+    <p class="muted">Revisa las entregas · hora de Puerto Rico</p>
+    <div class="filters">
+      <div class="muted">Día de publicación (hora de Puerto Rico)</div>
+      <div class="row">
+        <span class="chip">Todos</span>
+        <span class="chip">Hoy</span>
+        <span class="chip on">Mañana</span>
+        <span class="date">2026-10-20</span>
+      </div>
+      <p class="muted" style="margin-top:14px">2 videos que salen el martes 20 de octubre, en hora de Puerto Rico.</p>
+    </div>
+    <h3>Videos que salen el martes 20 de octubre</h3>
+    <p class="muted">Ordenados por hora de Puerto Rico · todos los clientes</p>
+    <div class="grid">
+      <article>
+        <div class="thumb">▶ Abrir video y caption</div>
+        <div class="body">
+          <div class="client">Arecibo Lab</div>
+          <strong>Menú de temporada</strong>
+          <p class="pub">Sale martes 20 de octubre, 10:00 a.m. · Fecha prevista</p>
+          <p class="muted">Recibido 18 oct 2026</p>
+        </div>
+      </article>
+      <article class="scheduled">
+        <div class="thumb">▶ Abrir video y caption</div>
+        <div class="body">
+          <div class="client">Farmacia Buena Vida</div>
+          <strong>Tips de encías</strong>
+          <p class="pub">Sale martes 20 de octubre, 6:00 p.m. · <span class="src">Programado en Metricool</span></p>
+          <p class="muted">Recibido 17 oct 2026</p>
+        </div>
+      </article>
+    </div>
+    <p class="muted">Un video sin fecha prevista, sin programación en Metricool y sin cadencia no entra en esta lista. En la vista Todos su tarjeta dice «Sin fecha de publicación».</p>
+  </section>
+</main>
+</html>

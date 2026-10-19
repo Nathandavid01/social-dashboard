@@ -21,16 +21,29 @@ import {
   buildReciboCadenceSpaces,
   occupyingVideo,
   reciboMonthlyUploadCounts,
+  reciboSpaceTone,
   type ReciboMonthCount,
+  type ReciboSpaceTone,
 } from '@/lib/recibo/cadence-spaces'
+import {
+  buildReciboPublishLookup,
+  formatReciboPublishAt,
+  puertoRicoClock,
+  reciboDayPresets,
+  reciboVideosForDay,
+  type ReciboPublishAt,
+} from '@/lib/recibo/day-queue'
 import { filterReciboIdeas } from '@/lib/recibo/search'
 import { formatUploadCounts, reciboUploadCounts } from '@/lib/recibo/upload-counts'
 import { displayCaptionDraft } from '@/lib/utils/caption-draft'
 import { formatCadenceDaysEs } from '@/lib/utils/client-cadence'
+import { todayISOInTimeZone } from '@/lib/utils/deadlines'
 import { RECIBO_HELD_CLIENT_IDS } from '@/lib/recibo/board-ideas'
 import { isAgendadoIdea, isPublishedIdea, isClientApproved } from '@/lib/utils/client-pool-state'
 import { coverUrlForIdea } from '@/lib/pipeline/editor-history'
 import { editedEntregasVideoId, isReciboGraphic } from '@/lib/recibo/preview'
+import { POSTING_TZ } from '@/lib/utils/publish-override'
+import { spanishDateLabel } from '@/lib/utils/next-autopost-core'
 import { cn } from '@/lib/utils'
 import type { IdeaWithPipeline } from '@/lib/supabase/types'
 
@@ -65,6 +78,14 @@ function weekFromToday(todayISO?: string) {
   if (!todayISO) return rangoSemana()
   const [year, month, day] = todayISO.split('-').map(Number)
   return rangoSemana(new Date(year, month - 1, day, 12))
+}
+
+function ReciboPublishLine({ ideaId, at }: { ideaId: string; at: ReciboPublishAt | undefined }) {
+  return (
+    <p data-testid={`recibo-publish-${ideaId}`} className="text-[11px] leading-snug text-foreground">
+      {at ? formatReciboPublishAt(at) : 'Sin fecha de publicación'}
+    </p>
+  )
 }
 
 export type ReciboCadence = {
@@ -142,6 +163,7 @@ export function ReciboBoard({
   const [query, setQuery] = useState('')
   const [clientFilter, setClientFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [dayFilter, setDayFilter] = useState('all')
   const [openIdea, setOpenIdea] = useState<string | null>(null)
   const states = [
     { id: 'all', label: 'Todas' },
@@ -157,7 +179,10 @@ export function ReciboBoard({
     if ([idea.staff_client_approval, idea.client_review_status, idea.entregas_review_status].includes('rejected')) return 'changes'
     return sent.has(idea.id) ? 'sent' : 'pending'
   }
-  const week = weekFromToday(todayISO)
+  const today = todayISO ?? todayISOInTimeZone(POSTING_TZ)
+  const { today: hoyISO, tomorrow: mananaISO } = reciboDayPresets(today)
+  const nowTime = useMemo(() => puertoRicoClock(new Date().toISOString())?.timeHHMM ?? undefined, [today])
+  const week = weekFromToday(today)
   const occupancy = occupancyIdeas ?? ideas
   const queryNeedle = query.trim().toLocaleLowerCase('es')
 
@@ -174,8 +199,14 @@ export function ReciboBoard({
   const clients = [...new Map([...aiClients.filter(client => !RECIBO_HELD_CLIENT_IDS.has(client.id)), ...displayIdeas.map(idea => ({
     id: idea.client_id, name: idea.client?.name || aiClients.find(client => client.id === idea.client_id)?.name || 'Cliente',
   }))].map(client => [client.id, client])).values()].sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  const publishLookup = useMemo(
+    () => buildReciboPublishLookup(displayIdeas, cadenceByClient, today, { occupancy, nowTime }),
+    [displayIdeas, cadenceByClient, today, occupancy, nowTime],
+  )
   const matchingIdeas = filterReciboIdeas(displayIdeas, query).filter(idea => clientFilter === 'all' || idea.client_id === clientFilter)
-  const visibleIdeas = matchingIdeas.filter(idea => statusFilter === 'all' || stateOf(idea) === statusFilter)
+  const scopedIdeas = dayFilter === 'all' ? matchingIdeas : reciboVideosForDay(matchingIdeas, dayFilter, publishLookup)
+  const visibleIdeas = scopedIdeas.filter(idea => statusFilter === 'all' || stateOf(idea) === statusFilter)
+  const dayQueue = dayFilter === 'all' ? [] : visibleIdeas
   const visibleIds = useMemo(() => new Set(visibleIdeas.map((idea) => idea.id)), [visibleIdeas])
   const clientNameMatches = (name: string) => !queryNeedle || name.toLocaleLowerCase('es').includes(queryNeedle)
 
@@ -321,18 +352,96 @@ export function ReciboBoard({
               {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
             </select>
           </label>
-          <button type="button" onClick={() => { setQuery(''); setClientFilter('all'); setStatusFilter('all') }} className="self-end rounded-xl border border-border px-4 py-3 text-xs">Limpiar filtros</button>
+          <button type="button" onClick={() => { setQuery(''); setClientFilter('all'); setStatusFilter('all'); setDayFilter('all') }} className="self-end rounded-xl border border-border px-4 py-3 text-xs">Limpiar filtros</button>
         </div>
+        <fieldset className="space-y-2">
+          <legend className="text-xs text-muted-foreground">Día de publicación (hora de Puerto Rico)</legend>
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar videos por día de publicación">
+            {([
+              { id: 'all', label: 'Todos' },
+              { id: hoyISO, label: 'Hoy' },
+              { id: mananaISO, label: 'Mañana' },
+            ] as const).map((day) => (
+              <button
+                key={day.id}
+                type="button"
+                data-testid={`recibo-day-${day.id === 'all' ? 'all' : day.label === 'Hoy' ? 'hoy' : 'manana'}`}
+                aria-pressed={dayFilter === day.id}
+                onClick={() => setDayFilter(day.id)}
+                className={`rounded-xl border px-4 py-2.5 text-xs font-medium ${dayFilter === day.id ? 'border-amber-500 bg-amber-50 text-amber-950 ring-1 ring-amber-500' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+              >
+                {day.label}
+              </button>
+            ))}
+            <label className="text-xs text-muted-foreground">
+              Fecha
+              <input
+                type="date"
+                data-testid="recibo-day-date"
+                aria-label="Elegir fecha de publicación"
+                value={dayFilter !== 'all' ? dayFilter : ''}
+                onChange={(event) => setDayFilter(event.target.value || 'all')}
+                className="ml-2 h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </label>
+          </div>
+        </fieldset>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6" aria-label="Resumen por estado">
           {states.map(state => <button key={state.id} type="button" aria-pressed={statusFilter === state.id} onClick={() => setStatusFilter(state.id)} className={`rounded-xl border px-4 py-3 text-left text-xs transition-colors ${statusFilter === state.id ? 'border-amber-500 bg-amber-50 text-amber-950 ring-1 ring-amber-500' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
-            {state.label} <span className="mt-2 block text-2xl font-semibold tracking-tight">{state.id === 'all' ? matchingIdeas.length : matchingIdeas.filter(idea => stateOf(idea) === state.id).length}</span>
+            {state.label} <span className="mt-2 block text-2xl font-semibold tracking-tight">{state.id === 'all' ? scopedIdeas.length : scopedIdeas.filter(idea => stateOf(idea) === state.id).length}</span>
           </button>)}
         </div>
-        <p className="text-xs text-muted-foreground" role="status">{visibleIdeas.length} de {displayIdeas.length} piezas · Aprobada no significa programada ni publicada.</p>
-        <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Cómo leer los estados</summary><p className="mt-2">Los contadores respetan la búsqueda y el cliente seleccionado. Enlace creado no confirma la recepción del cliente. Las publicaciones se consultan en el calendario.</p></details>
+        <p className="text-xs text-muted-foreground" role="status">
+          {dayFilter === 'all'
+            ? `${visibleIdeas.length} de ${displayIdeas.length} piezas · Aprobada no significa programada ni publicada.`
+            : `${visibleIdeas.length} video${visibleIdeas.length === 1 ? '' : 's'} que salen el ${spanishDateLabel(dayFilter)}, en hora de Puerto Rico.`}
+        </p>
+        <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Cómo leer los estados</summary><p className="mt-2">Los contadores respetan la búsqueda, el cliente y el día. Enlace creado no confirma la recepción del cliente. La fecha de cada tarjeta indica si está programada en Metricool, prevista o solo sugerida por cadencia. Sin fecha no se inventa un día.</p></details>
       </section>
 
-      {byClient.length === 0 ? (
+      {dayFilter !== 'all' ? (
+        <section data-testid="recibo-day-queue" aria-label="Videos que salen ese día" className="space-y-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-semibold tracking-tight">
+              Videos que salen el {spanishDateLabel(dayFilter)}
+            </h2>
+            <p className="text-xs text-muted-foreground">Ordenados por hora de Puerto Rico · todos los clientes</p>
+          </div>
+          {visibleIdeas.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
+              Ningún video sale ese día con los filtros actuales. Los videos sin fecha de publicación no aparecen aquí.
+            </div>
+          ) : (
+            <ul className="grid grid-cols-1 items-start gap-4 min-[400px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {dayQueue.map((idea) => {
+                const client = aiClients.find((row) => row.id === idea.client_id)
+                return (
+                  <ReciboOccupiedCard
+                    key={idea.id}
+                    idea={idea}
+                    tone={reciboSpaceTone(idea)}
+                    dateISO={publishLookup.get(idea.id)?.dayISO ?? idea.publish_date ?? null}
+                    caption={captionOf(idea, captionOverrides)}
+                    statusId={stateOf(idea)}
+                    statusLabel={states.find((state) => state.id === stateOf(idea))?.label ?? ''}
+                    clientName={idea.client?.name?.trim() || client?.name || 'Cliente'}
+                    clientAi={Boolean(client)}
+                    showClientName
+                    publishAt={publishLookup.get(idea.id)}
+                    open={openIdea === idea.id}
+                    onToggle={() => setOpenIdea(openIdea === idea.id ? null : idea.id)}
+                    sent={sent.has(idea.id)}
+                    filling={filling}
+                    todayISO={today}
+                    cadence={cadenceByClient[idea.client_id]}
+                    onCaptionSaved={(text) => setCaptionOverrides((prev) => ({ ...prev, [idea.id]: text }))}
+                  />
+                )
+              })}
+            </ul>
+          )}
+        </section>
+      ) : byClient.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
           {queryNeedle || clientFilter !== 'all' || statusFilter !== 'all' ? 'Ningún video coincide con esos filtros.' : 'No hay videos por aprobar ni por programar en Metricool.'}
         </div>
@@ -423,92 +532,26 @@ export function ReciboBoard({
                                 )
                               }
                               const idea = space.idea
-                              const hasEdit = !!editedEntregasVideoId(idea)
-                              const editedVideoId = editedEntregasVideoId(idea)
-                              const occupy = occupyingVideo(idea)
-                              const caption = captionOf(idea, captionOverrides)
-                              const approved = space.tone === 'approved' || space.tone === 'scheduled'
-                              const scheduled = isAgendadoIdea(idea)
-                              const coverUrl = coverForVideo(idea, editedVideoId ?? occupy?.id)
-                              const graphic = isReciboGraphic(idea)
                               return (
-                                <li
+                                <ReciboOccupiedCard
                                   key={idea.id}
-                                  data-testid={`recibo-idea-${idea.id}`}
-                                  data-tone={space.tone}
-                                  className={cn(
-                                    'flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md',
-                                    space.tone === 'scheduled'
-                                      ? 'border-violet-500/70 ring-1 ring-violet-500/30'
-                                      : space.tone === 'approved'
-                                        ? 'border-emerald-500/70 ring-1 ring-emerald-500/30'
-                                        : 'border-amber-500/70 ring-1 ring-amber-500/30',
-                                  )}
-                                >
-                                  <button type="button" aria-expanded={openIdea === idea.id} onClick={() => setOpenIdea(openIdea === idea.id ? null : idea.id)} aria-label={openIdea === idea.id ? `Cerrar revisión de ${ideaTitle(idea)}` : `Abrir video y caption de ${ideaTitle(idea)}`} className="group relative block w-full overflow-hidden text-left">
-                                    {editedVideoId || occupy?.id ? <ReciboThumbnail key={editedVideoId ?? occupy?.id} videoId={(editedVideoId ?? occupy?.id)!} title={ideaTitle(idea)} coverUrl={coverUrl} /> : <span className="block aspect-[9/16] bg-slate-100" />}
-                                    <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-12 text-xs font-medium text-white"><Play aria-hidden="true" className="h-8 w-8 shrink-0 rounded-full bg-white/95 p-2 text-slate-900 shadow-sm" />{openIdea === idea.id ? 'Cerrar revisión' : 'Abrir video y caption'}</span>
-                                    <span className={`absolute right-2 top-2 rounded-full px-2.5 py-1 text-[10px] font-semibold shadow-sm ${stateOf(idea) === 'approved' ? 'bg-emerald-50 text-emerald-800' : stateOf(idea) === 'changes' ? 'bg-rose-50 text-rose-800' : stateOf(idea) === 'scheduled' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-900'}`}>{states.find(state => state.id === stateOf(idea))?.label}</span>
-                                  </button>
-                                  <div className="space-y-2 p-3">
-                                    <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-snug" title={ideaTitle(idea)}>{ideaTitle(idea)}</h3>
-                                    <p className="text-[11px] text-muted-foreground">{occupy?.uploaded_at ? `Recibido ${new Date(occupy.uploaded_at).toLocaleDateString('es-PR', { timeZone: 'America/Puerto_Rico' })}` : 'Fecha de recepción no disponible'}</p>
-                                    {openIdea !== idea.id && <p className="line-clamp-2 min-h-10 text-xs leading-relaxed text-muted-foreground">{caption || 'Sin caption'}</p>}
-                                  </div>
-                                  {openIdea === idea.id && <>
-                                  <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
-                                    {graphic && <p className="mb-2 text-xs font-semibold text-violet-300">Gráfico · {ideaTitle(idea)}</p>}
-                                    <div className="mx-auto w-full max-w-[min(100%,280px)]">
-                                      {hasEdit ? (
-                                        <ReciboVideoPreview
-                                          image={graphic}
-                                          title={ideaTitle(idea)}
-                                          ideaId={idea.id}
-                                          hasEdited={hasEdit}
-                                          expectedVideoId={editedVideoId ?? undefined}
-                                        />
-                                      ) : coverUrl ? (
-                                        <div className="relative aspect-[9/16] overflow-hidden rounded-[1.25rem] bg-black">
-                                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                                          <img src={coverUrl} alt={`Portada de ${ideaTitle(idea)}`} className="h-full w-full object-cover" />
-                                        </div>
-                                      ) : occupy?.id ? (
-                                        <div className="relative aspect-[9/16] overflow-hidden rounded-[1.25rem] bg-black">
-                                          <VideoCover videoId={occupy.id} title={ideaTitle(idea)} />
-                                        </div>
-                                      ) : (
-                                        <ReciboVideoPreview image={graphic} title={ideaTitle(idea)} ideaId={idea.id} hasEdited={false} />
-                                      )}
-                                    </div>
-                                    {editedVideoId && (
-                                      <ReciboDownloadButton ideaId={idea.id} videoId={editedVideoId} title={ideaTitle(idea)} />
-                                    )}
-                                    {hasEdit ? (
-                                      <ReciboStatusMarks
-                                        ideaId={idea.id}
-                                        clientId={idea.client_id}
-                                        approved={approved}
-                                        sent={sent.has(idea.id)}
-                                        postedStatus={idea.manual_posted_status ?? null}
-                                        hidePublished={scheduled}
-                                      />
-                                    ) : null}
-                                    {hasEdit && client.ai && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
-                                  </div>
-                                  <ReciboCaption onSaved={text => setCaptionOverrides(prev => ({ ...prev, [idea.id]: text }))} ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
-                                  <ReciboFeedback ideaId={idea.id} />
-                                  </>}
-                                  {!graphic && hasEdit && (
-                                    <ReciboPublishButton
-                                      ideaId={idea.id}
-                                      approved={approved}
-                                      scheduled={scheduled}
-                                      todayISO={todayISO ?? ''}
-                                      spaceDateISO={space.dateISO ?? idea.publish_date ?? null}
-                                      cadence={cadence}
-                                    />
-                                  )}
-                                </li>
+                                  idea={idea}
+                                  tone={space.tone}
+                                  dateISO={space.dateISO ?? idea.publish_date ?? null}
+                                  caption={captionOf(idea, captionOverrides)}
+                                  statusId={stateOf(idea)}
+                                  statusLabel={states.find((state) => state.id === stateOf(idea))?.label ?? ''}
+                                  clientName={client.name}
+                                  clientAi={client.ai}
+                                  publishAt={publishLookup.get(idea.id)}
+                                  open={openIdea === idea.id}
+                                  onToggle={() => setOpenIdea(openIdea === idea.id ? null : idea.id)}
+                                  sent={sent.has(idea.id)}
+                                  filling={filling}
+                                  todayISO={today}
+                                  cadence={cadence}
+                                  onCaptionSaved={(text) => setCaptionOverrides((prev) => ({ ...prev, [idea.id]: text }))}
+                                />
                               )
                             })}
                           </ul>
@@ -537,6 +580,7 @@ export function ReciboBoard({
                                   </button>
                                   <div className="space-y-2 p-3">
                                     <h3 className="line-clamp-2 text-sm font-semibold leading-snug">Gráfico · {ideaTitle(idea)}</h3>
+                                    <ReciboPublishLine ideaId={idea.id} at={publishLookup.get(idea.id)} />
                                     {openIdea !== idea.id && <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{caption || 'Sin caption'}</p>}
                                   </div>
                                   {openIdea === idea.id && <>
@@ -575,5 +619,133 @@ export function ReciboBoard({
         </>
       )}
     </div>
+  )
+}
+
+function ReciboOccupiedCard({
+  idea,
+  tone,
+  dateISO,
+  caption,
+  statusId,
+  statusLabel,
+  clientName,
+  clientAi,
+  showClientName = false,
+  publishAt,
+  open,
+  onToggle,
+  sent,
+  filling,
+  todayISO,
+  cadence,
+  onCaptionSaved,
+}: {
+  idea: IdeaWithPipeline
+  tone: ReciboSpaceTone
+  dateISO?: string | null
+  caption: string
+  statusId: string
+  statusLabel: string
+  clientName: string
+  clientAi: boolean
+  showClientName?: boolean
+  publishAt?: ReciboPublishAt
+  open: boolean
+  onToggle: () => void
+  sent: boolean
+  filling: boolean
+  todayISO: string
+  cadence?: ReciboCadence
+  onCaptionSaved: (text: string) => void
+}) {
+  const hasEdit = !!editedEntregasVideoId(idea)
+  const editedVideoId = editedEntregasVideoId(idea)
+  const occupy = occupyingVideo(idea)
+  const approved = tone === 'approved' || tone === 'scheduled'
+  const scheduled = isAgendadoIdea(idea)
+  const coverUrl = coverForVideo(idea, editedVideoId ?? occupy?.id)
+  const graphic = isReciboGraphic(idea)
+  return (
+    <li
+      data-testid={`recibo-idea-${idea.id}`}
+      data-tone={tone}
+      className={cn(
+        'flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md',
+        tone === 'scheduled'
+          ? 'border-violet-500/70 ring-1 ring-violet-500/30'
+          : tone === 'approved'
+            ? 'border-emerald-500/70 ring-1 ring-emerald-500/30'
+            : 'border-amber-500/70 ring-1 ring-amber-500/30',
+      )}
+    >
+      <button type="button" aria-expanded={open} onClick={onToggle} aria-label={open ? `Cerrar revisión de ${ideaTitle(idea)}` : `Abrir video y caption de ${ideaTitle(idea)}`} className="group relative block w-full overflow-hidden text-left">
+        {editedVideoId || occupy?.id ? <ReciboThumbnail key={editedVideoId ?? occupy?.id} videoId={(editedVideoId ?? occupy?.id)!} title={ideaTitle(idea)} coverUrl={coverUrl} /> : <span className="block aspect-[9/16] bg-slate-100" />}
+        <span className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-12 text-xs font-medium text-white"><Play aria-hidden="true" className="h-8 w-8 shrink-0 rounded-full bg-white/95 p-2 text-slate-900 shadow-sm" />{open ? 'Cerrar revisión' : 'Abrir video y caption'}</span>
+        <span className={`absolute right-2 top-2 rounded-full px-2.5 py-1 text-[10px] font-semibold shadow-sm ${statusId === 'approved' ? 'bg-emerald-50 text-emerald-800' : statusId === 'changes' ? 'bg-rose-50 text-rose-800' : statusId === 'scheduled' ? 'bg-indigo-50 text-indigo-700' : 'bg-amber-50 text-amber-900'}`}>{statusLabel}</span>
+      </button>
+      <div className="space-y-2 p-3">
+        {showClientName ? (
+          <p data-testid={`recibo-day-client-${idea.id}`} className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{clientName}</p>
+        ) : null}
+        <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-snug" title={ideaTitle(idea)}>{ideaTitle(idea)}</h3>
+        <ReciboPublishLine ideaId={idea.id} at={publishAt} />
+        <p className="text-[11px] text-muted-foreground">{occupy?.uploaded_at ? `Recibido ${new Date(occupy.uploaded_at).toLocaleDateString('es-PR', { timeZone: 'America/Puerto_Rico' })}` : 'Fecha de recepción no disponible'}</p>
+        {!open && <p className="line-clamp-2 min-h-10 text-xs leading-relaxed text-muted-foreground">{caption || 'Sin caption'}</p>}
+      </div>
+      {open && <>
+      <div className="relative bg-zinc-950 px-3 pb-2 pt-3 sm:px-4">
+        {graphic && <p className="mb-2 text-xs font-semibold text-violet-300">Gráfico · {ideaTitle(idea)}</p>}
+        <div className="mx-auto w-full max-w-[min(100%,280px)]">
+          {hasEdit ? (
+            <ReciboVideoPreview
+              image={graphic}
+              title={ideaTitle(idea)}
+              ideaId={idea.id}
+              hasEdited={hasEdit}
+              expectedVideoId={editedVideoId ?? undefined}
+            />
+          ) : coverUrl ? (
+            <div className="relative aspect-[9/16] overflow-hidden rounded-[1.25rem] bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverUrl} alt={`Portada de ${ideaTitle(idea)}`} className="h-full w-full object-cover" />
+            </div>
+          ) : occupy?.id ? (
+            <div className="relative aspect-[9/16] overflow-hidden rounded-[1.25rem] bg-black">
+              <VideoCover videoId={occupy.id} title={ideaTitle(idea)} />
+            </div>
+          ) : (
+            <ReciboVideoPreview image={graphic} title={ideaTitle(idea)} ideaId={idea.id} hasEdited={false} />
+          )}
+        </div>
+        {editedVideoId && (
+          <ReciboDownloadButton ideaId={idea.id} videoId={editedVideoId} title={ideaTitle(idea)} />
+        )}
+        {hasEdit ? (
+          <ReciboStatusMarks
+            ideaId={idea.id}
+            clientId={idea.client_id}
+            approved={approved}
+            sent={sent}
+            postedStatus={idea.manual_posted_status ?? null}
+            hidePublished={scheduled}
+          />
+        ) : null}
+        {hasEdit && clientAi && <ReciboDeleteButton ideaId={idea.id} title={ideaTitle(idea)} />}
+      </div>
+      <ReciboCaption onSaved={onCaptionSaved} ideaId={idea.id} caption={caption} disabled={!hasEdit || filling} />
+      <ReciboFeedback ideaId={idea.id} />
+      </>}
+      {!graphic && hasEdit && (
+        <ReciboPublishButton
+          ideaId={idea.id}
+          approved={approved}
+          scheduled={scheduled}
+          todayISO={todayISO}
+          spaceDateISO={dateISO ?? idea.publish_date ?? null}
+          cadence={cadence ?? {}}
+        />
+      )}
+    </li>
   )
 }
