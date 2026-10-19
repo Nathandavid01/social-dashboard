@@ -1,3 +1,13 @@
+## v5.148 — 19 de octubre de 2026
+
+**En Recibo puedes ver, de una vez, los videos que salen hoy o mañana.**
+- En Contenido recibido elige Hoy, Mañana o cualquier fecha: sale una lista de todos los clientes, ordenada por hora de Puerto Rico.
+- Cada tarjeta muestra la fecha y hora de publicación y si viene de Metricool, de la fecha prevista o de una sugerencia de cadencia.
+- Los videos sin fecha no se inventan un día; los filtros de cliente, estado y búsqueda siguen igual.
+- Abre la tarjeta para reproducir el video desde esa lista.
+
+![Videos de Recibo por día de publicación](/changelog/v5.148-recibo-por-dia.png)
+
 ## v5.146 — 18 de octubre de 2026
 
 **En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**
