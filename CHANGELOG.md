@@ -1,3 +1,13 @@
+## v5.148 — 19 de octubre de 2026
+
+**Ahora puedes enviar una pieza aprobada a Metricool desde su tarjeta del calendario, o quitarla del calendario sin sacarla de Recibo.**
+- Nuevo botón «Enviar a Metricool»: confirma la fecha y la hora del día y queda programada para publicarse automáticamente en las redes del cliente.
+- Si Metricool no confirma la programación, la pieza queda como borrador y te lo indica; nunca se envía dos veces.
+- Nuevo «Quitar del calendario»: la pieza sigue en Recibo, pero ya no ocupa fechas ni cuenta en la fecha final ni en las semanas de contenido.
+- Las piezas quitadas aparecen en «Fuera del calendario», con «Volver al calendario» para devolverlas.
+
+![Enviar y quitar desde el calendario](/changelog/v5.148-enviar-quitar-calendario.png)
+
 ## v5.146 — 18 de octubre de 2026
 
 **En Semana puedes ver cuánto tiempo más te alcanza el contenido actual.**

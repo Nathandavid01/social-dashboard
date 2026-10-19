@@ -30,6 +30,9 @@ export type SchedulePoolResult = {
   state?: 'agendado'
   draft?: true
   rescheduled?: boolean
+  /** New Metricool draft identity, so the calendar can schedule that same post. */
+  postId?: number | null
+  uuid?: string | null
   error?: string
 }
 
@@ -244,7 +247,7 @@ export async function schedulePoolIdea(input: {
       },
     })
     revalidatePoolPaths()
-    return { ok: true, state: 'agendado', draft: true }
+    return { ok: true, state: 'agendado', draft: true, postId, uuid }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al publicar en Metricool'
     const definitelyNotCreated = err instanceof Error && 'definitelyNotCreated' in err && err.definitelyNotCreated === true

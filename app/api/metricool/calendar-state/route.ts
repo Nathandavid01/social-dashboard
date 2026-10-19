@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { currentUserHas } from '@/lib/auth/server'
 import { createClient } from '@/lib/supabase/server'
-import { deleteScheduledPost, getServerConfig, updateScheduledPost } from '@/lib/metricool/post'
+import { deleteScheduledPost, getServerConfig } from '@/lib/metricool/post'
 import { getScheduledPost } from '@/lib/metricool/scheduler'
-import { assertDeletableDraft, buildCalendarStateUpdate, type EditableCalendarPost } from '@/lib/metricool/calendar-state'
+import { assertDeletableDraft, type EditableCalendarPost } from '@/lib/metricool/calendar-state'
+import { applyCalendarState } from '@/lib/metricool/calendar-state-apply'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const json = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -26,55 +27,9 @@ export async function POST(req: NextRequest) {
   try { original = await getScheduledPost(account, input.postId) } catch { return json({ error: 'No se pudo leer el post actual en Metricool. Verifica el calendario antes de cambiarlo.' }, 502) }
   if (original.uuid !== input.uuid || original.draft !== input.expected.draft || (original.text || '') !== input.expected.text || original.publicationDate.dateTime !== input.expected.publicationDate || (input.expected.timezone && original.publicationDate.timezone !== input.expected.timezone)) return json({ error: 'El post cambió en Metricool. Actualiza el calendario antes de modificarlo.' }, 409)
   if (input.action === 'delete') return deleteDraft(db, account, input.clientId, original)
-  let update
-  try { update = buildCalendarStateUpdate(original, input.action, input.dateTime) } catch (error) { return json({ error: error instanceof Error ? error.message : 'No se puede cambiar este post.' }, 409) }
-  let result
-  try { result = await updateScheduledPost(original.id, input.blogId, update) } catch {
-    // A timeout may occur after Metricool accepted the PUT; never create/replay a post.
-    return json({ error: 'No se pudo confirmar el cambio. Verifica Metricool antes de intentarlo nuevamente.', uncertain: true }, 502)
-  }
-  const postId = result.data?.id ?? original.id
-  const uuid = result.data?.uuid ?? original.uuid
-  let warning: string | undefined
-  let linkedIdeas: { id: string }[] = []
-  try {
-    const { data: linked, error } = await db.from('content_ideas').update({ metricool_post_id: postId, metricool_uuid: uuid, ...(input.action === 'schedule' ? { publish_date: input.dateTime!.slice(0, 10) } : {}) }).eq('client_id', input.clientId).or(`metricool_post_id.eq.${original.id},metricool_uuid.eq.${JSON.stringify(original.uuid)}`).select('id')
-    if (error) warning = 'Metricool aceptó el cambio, pero no se pudo actualizar la referencia del dashboard. No vuelvas a enviar el post.'
-    else linkedIdeas = linked ?? []
-  } catch { warning = 'Metricool aceptó el cambio; la referencia del dashboard necesita revisión.' }
-  let confirmed = false
-  try {
-    const current = await getScheduledPost(account, postId)
-    const date = update.publicationDate as { dateTime: string; timezone: string }
-    confirmed = current.uuid === original.uuid && (current.text || '') === (original.text || '') && JSON.stringify(current.media) === JSON.stringify(original.media) && JSON.stringify(current.providers.map(p => p.network).sort()) === JSON.stringify(original.providers.map(p => p.network).sort()) && current.draft === update.draft && current.autoPublish === update.autoPublish && (input.action === 'draft' || (current.publicationDate.dateTime === date.dateTime && current.publicationDate.timezone === date.timezone))
-  } catch { /* The write was accepted; report unverified rather than replaying it. */ }
-  if (confirmed && linkedIdeas.length) {
-    try {
-      const { data: { user }, error: authError } = await db.auth.getUser()
-      if (authError || !user) throw new Error('No se pudo identificar al usuario del cambio.')
-      const { error: auditError } = await db.from('content_idea_activity').insert(linkedIdeas.map(idea => ({
-        content_idea_id: idea.id,
-        client_id: input.clientId,
-        user_id: user.id,
-        action: 'posted_to_metricool',
-        metadata: {
-          source: 'posting_calendar',
-          metricoolPostId: postId,
-          previousMetricoolPostId: original.id,
-          scheduledFor: (update.publicationDate as { dateTime: string }).dateTime,
-          platforms: original.providers.map(provider => provider.network),
-          draft: update.draft,
-          autoPublish: update.autoPublish,
-        },
-      })))
-      if (auditError) throw auditError
-    } catch {
-      warning = [warning, 'El cambio está confirmado en Metricool, pero no se pudo actualizar el historial del dashboard. Su indicador de borrador necesita revisión.'].filter(Boolean).join(' ')
-    }
-  }
-  if (!confirmed) warning = [warning, 'Metricool aceptó el cambio, pero todavía no se pudo verificar. Actualiza el calendario antes de repetir la acción.'].filter(Boolean).join(' ')
-  revalidateCalendar()
-  return json({ ok: true, confirmed, postId, uuid, action: input.action, ...(warning ? { warning } : {}) })
+  const applied = await applyCalendarState(db, account, input.clientId, original, input.action, input.dateTime)
+  if (applied.status === 200) revalidateCalendar()
+  return json(applied.body, applied.status)
 }
 
 async function deleteDraft(db: Awaited<ReturnType<typeof createClient>>, account: Parameters<typeof getScheduledPost>[0], clientId: string, original: EditableCalendarPost) {

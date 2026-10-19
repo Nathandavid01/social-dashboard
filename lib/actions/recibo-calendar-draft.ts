@@ -11,7 +11,7 @@ import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-supp
 import { schedulePoolIdea } from './client-pool'
 
 /** Eric 2026-10-18: an explicit calendar placement means draft, never publication. */
-export async function draftReciboOnDate(input: {ideaId:string;clientId:string;videoId:string;date:string}):Promise<{ok?:true;error?:string}> {
+export async function draftReciboOnDate(input: {ideaId:string;clientId:string;videoId:string;date:string}):Promise<{ok?:true;error?:string;postId?:number|null;uuid?:string|null}> {
   try { await requirePermission('posting.publish') } catch { return {error:'No autorizado para crear este borrador.'} }
   if (!input || ![input.ideaId,input.clientId,input.videoId,input.date].every(value=>typeof value==='string' && value.length>0)) return {error:'Faltan datos del contenido.'}
   const parsed=new Date(`${input.date}T12:00:00Z`)

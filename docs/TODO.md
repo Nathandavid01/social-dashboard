@@ -89,3 +89,4 @@ Estado verificado en vivo el 2026-08-15 (sondeo REST columna por columna).
 - [ ] Confirmar en producción las 19 ideas de Miti Miti en la sesión del cliente. Los datos de producción no fueron modificados.
 
 - [ ] Si se vuelve a usar `OnsiteChecklist`, definir exclusiones por sesión antes de habilitar quitar tomas: una idea pendiente sin sesión vuelve al conjunto automático. El Onsite actual no ofrece esa acción.
+- [ ] Aplicar migración **`0091_calendar_hidden.sql`** en Supabase (columna `content_ideas.calendar_hidden_at`). Hasta entonces «Quitar del calendario» responde «Falta aplicar la migración 0091» y no cambia nada; «Enviar a Metricool» no depende de ella.

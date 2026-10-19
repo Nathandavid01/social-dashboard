@@ -16,7 +16,7 @@ export function projectReciboVideos(ideas: IdeaWithPipeline[], today: string, po
   const occupied = new Set(occupiedDays)
   const days = new Set(postingDays.filter(day => Number.isInteger(day) && day >= 0 && day <= 6))
   const seen = new Set<string>()
-  const queue = ideas.flatMap(idea => {
+  const pieces = ideas.flatMap(idea => {
     if (seen.has(idea.id) || !belongsOnRecibo(idea)) return []
     const id = editedEntregasVideoId(idea)
     const video = idea.videos?.find(video => video.id === id)
@@ -26,6 +26,9 @@ export function projectReciboVideos(ideas: IdeaWithPipeline[], today: string, po
     seen.add(idea.id)
     return [{ idea, videoId: id!, image: !!image }]
   }).sort((a, b) => (a.idea.created_at ?? '').localeCompare(b.idea.created_at ?? '') || a.idea.id.localeCompare(b.idea.id))
+  // Eric 2026-10-19: removed from the calendar = still in Recibo, but no date and no count.
+  const queue = pieces.filter(item => !item.idea.calendar_hidden_at)
+  const hidden = pieces.filter(item => !!item.idea.calendar_hidden_at)
   const remaining = [...queue]
   const posts: { date: string; idea: IdeaWithPipeline; videoId: string; image: boolean }[] = []
   for (let offset = 0; offset < 366 && remaining.length > 0 && days.size; offset++) {
@@ -38,5 +41,5 @@ export function projectReciboVideos(ideas: IdeaWithPipeline[], today: string, po
     const [item] = remaining.splice(index, 1)
     posts.push({ date, ...item })
   }
-  return { posts, total: queue.length, unplaced: remaining, overflow: remaining.length, through: posts.at(-1)?.date ?? null }
+  return { posts, total: queue.length, unplaced: remaining, hidden, overflow: remaining.length, through: posts.at(-1)?.date ?? null }
 }
