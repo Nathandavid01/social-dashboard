@@ -57,3 +57,14 @@ it('reports an unverified schedule as uncertain instead of retrying', async () =
   expect(await sendReciboOnDate(input)).toMatchObject({ uncertain: true })
   expect(h.apply).toHaveBeenCalledTimes(1)
 })
+// Bugbot 2026-10-19: the single read may keep the stored zone; schedule the same instant in Puerto Rico.
+it('converts a draft read back in UTC to its Puerto Rico wall clock before scheduling', async () => {
+  h.read.mockResolvedValue({ ...draftPost, publicationDate: { dateTime: '2099-10-21T03:00:00', timezone: 'UTC' } })
+  expect(await sendReciboOnDate(input)).toMatchObject({ ok: true, scheduledFor: '2099-10-20T23:00' })
+  expect(h.apply).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'c', expect.anything(), 'schedule', '2099-10-20T23:00')
+})
+it('keeps the draft when the stored date cannot be read', async () => {
+  h.read.mockResolvedValue({ ...draftPost, publicationDate: { dateTime: 'bad', timezone: 'UTC' } })
+  expect(await sendReciboOnDate(input)).toMatchObject({ draftOnly: true })
+  expect(h.apply).not.toHaveBeenCalled()
+})

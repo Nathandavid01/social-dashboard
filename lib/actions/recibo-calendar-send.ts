@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerConfig } from '@/lib/metricool/post'
 import { getScheduledPost } from '@/lib/metricool/scheduler'
 import { applyCalendarState } from '@/lib/metricool/calendar-state-apply'
+import { puertoRicoWallClock } from '@/lib/metricool/calendar-stale'
 import { draftReciboOnDate } from './recibo-calendar-draft'
 
 export type SendReciboResult = { ok?: true; confirmed?: boolean; scheduledFor?: string; warning?: string; error?: string; draftOnly?: true; uncertain?: true }
@@ -31,7 +32,9 @@ export async function sendReciboOnDate(input: { ideaId: string; clientId: string
   const account = { ...config, blogId }
   let original
   try { original = await getScheduledPost(account, draft.postId) } catch { return keepDraft('no se pudo leer el borrador en Metricool.') }
-  const dateTime = original.publicationDate.dateTime.slice(0, 16)
+  // The single read may keep the stored zone (often UTC); schedule the same instant as Puerto Rico wall time.
+  const dateTime = puertoRicoWallClock(original.publicationDate.dateTime, original.publicationDate.timezone || 'America/Puerto_Rico')
+  if (!dateTime) return keepDraft('no se pudo leer la fecha del borrador.')
   const applied = await applyCalendarState(db, account, input.clientId, original, 'schedule', dateTime)
   try { for (const path of ['/recibo', '/published', '/calendar', `/clients/${input.clientId}/calendar`]) revalidatePath(path) } catch { /* Result stays truthful. */ }
   if (applied.status !== 200) return applied.body.uncertain ? { uncertain: true, error: applied.body.error } : keepDraft(applied.body.error)

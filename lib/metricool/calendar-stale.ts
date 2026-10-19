@@ -32,3 +32,9 @@ export function calendarPostChanges(original: ReadCalendarPost, seen: SeenCalend
   if (was === null || now === null || was !== now) changed.push('publicationDate')
   return changed
 }
+
+/** The stored instant as a Puerto Rico wall clock (UTC−4, no DST), «YYYY-MM-DDTHH:mm», or null. */
+export function puertoRicoWallClock(dateTime: string, timeZone = 'America/Puerto_Rico'): string | null {
+  const instant = wallClockInstant(dateTime, timeZone)
+  return instant === null ? null : new Date(instant - 4 * 3_600_000).toISOString().slice(0, 16)
+}
