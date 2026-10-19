@@ -1,3 +1,12 @@
+## v5.149 — 19 de octubre de 2026
+
+**El calendario muestra la semana completa. El sábado y las tarjetas del día ya no se cortan.**
+- En la computadora se ven los siete días juntos. El nombre del cliente y la hora prevista pasan a la línea siguiente en vez de quedar a la mitad.
+- La foto de cada publicación cabe dentro de su día.
+- La frecuencia y las próximas publicaciones quedan debajo del calendario hasta que la ventana es ancha. En el teléfono, desliza el calendario hacia el lado para ver el sábado.
+
+![Semana completa en el calendario](/changelog/v5.149-calendario-semana.png)
+
 ## v5.148 — 19 de octubre de 2026
 
 **Ahora puedes enviar una pieza aprobada a Metricool desde su tarjeta del calendario, o quitarla del calendario sin sacarla de Recibo.**

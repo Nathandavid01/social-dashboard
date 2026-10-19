@@ -23,7 +23,16 @@
   gap: 20px;
   grid-template-columns: minmax(0, 1fr);
 }
-@media (min-width: 1024px) {
+.week {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 719px) {
+  .week { min-width: 36rem; }
+}
+/* The frequency panel sits beside the week only when seven columns still fit.
+   Below this, it stacks underneath so Saturday and the day cards are not clipped. */
+@media (min-width: 1536px) {
   .layout { grid-template-columns: minmax(0, 1fr) 300px; }
   .panel { position: sticky; top: 20px; }
 }
