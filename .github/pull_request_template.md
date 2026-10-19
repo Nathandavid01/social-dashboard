@@ -17,8 +17,7 @@ This PR may only land on `main` if **all** are true:
 
 1. **PR path only** — no direct commits/pushes to `main`
 2. **CI green** — `merge-gate` + `test` + `relationship-guard` (static)
-3. **Human review** — at least one approving review
-4. **Graph model** — `scripts/merge-gate.mjs` passed (same graph CI runs)
+3. **Graph model** — `scripts/merge-gate.mjs` passed (same graph CI runs)
 
 ## Test plan
 - [ ] `npm run merge-gate` locally

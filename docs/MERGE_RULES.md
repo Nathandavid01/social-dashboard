@@ -10,8 +10,7 @@ These rules exist so **Nathan, Eric, or any contributor** cannot land broken sto
 | 2 | **Every change lands via Pull Request** | Same |
 | 3 | **PR must be verified** — required status checks green | GitHub required checks |
 | 4 | **Graph model must pass** — ordered check graph in `scripts/merge-gate.mjs` | CI job **`merge-gate`** |
-| 5 | **≥1 approving review** before merge | Branch protection |
-| 6 | **Conversations resolved** before merge | Branch protection |
+| 5 | **Conversations resolved** before merge | Branch protection |
 
 ### Graph model (what “verified” means)
 
@@ -56,9 +55,7 @@ Or configure in GitHub UI:
 **Settings → Branches → Branch protection rule for `main`:**
 
 - Require a pull request before merging  
-- Require approvals: **1**  
-- Dismiss stale reviews when new commits are pushed  
-- Require review from Code Owners (optional once CODEOWNERS is filled)  
+- Required approvals: **0** (Eric, 2026-10-19: no second reviewer; the author merges once checks are green)  
 - Require status checks to pass:  
   - `merge-gate`  
   - `test`  
@@ -84,8 +81,8 @@ git checkout -b your-feature
 npm run merge-gate          # must pass
 git push -u origin HEAD
 gh pr create --base main
-# Wait for CI + review
-gh pr merge --squash        # only after green + approval
+# Wait for CI
+gh pr merge --squash        # only after required checks are green
 ```
 
 **Never:**
