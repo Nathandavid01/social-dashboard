@@ -502,6 +502,8 @@ export interface ContentIdea {
   staff_client_approval?: 'approved' | 'rejected' | null
   posting_error: string | null
   posting_started_at: string | null
+  /** Quitada del calendario: sigue en Recibo, sin fecha proyectada ni conteo. Migración 0091. */
+  calendar_hidden_at?: string | null
   /** Quién está cortando ahora (Pipeline). Migración 0088. El candado es este id. */
   editing_started_at?: string | null
   editing_started_by?: string | null

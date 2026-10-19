@@ -354,5 +354,6 @@ describe('calendar draft guards',()=>{
  beforeEach(()=>{h.idea.client_id='c'})
  it('rejects changed client before posting',async()=>{const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'other',videoId:'vid'}});expect(result.error).toMatch(/cliente/i);expect(h.post).not.toHaveBeenCalled()})
  it('rejects replaced file before posting',async()=>{const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'c',videoId:'old'}});expect(result.error).toMatch(/archivo/i);expect(h.post).not.toHaveBeenCalled()})
+ it('returns the new draft identity so the calendar can send it',async()=>{const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'c',videoId:'vid'}});expect(result).toMatchObject({ok:true,draft:true,postId:44,uuid:'u-44'})})
  it('does not turn a stale pending drag into rescheduling',async()=>{h.idea.metricool_post_id=44;h.idea.posted_at='2026-09-20';const result=await schedulePoolIdea({ideaId:'idea',date:'2026-09-23',asDraft:true,expectedRecibo:{clientId:'c',videoId:'vid'}});expect(result.error).toMatch(/Recibo|pendiente/i);expect(h.update).not.toHaveBeenCalled();expect(h.post).not.toHaveBeenCalled()})
 })

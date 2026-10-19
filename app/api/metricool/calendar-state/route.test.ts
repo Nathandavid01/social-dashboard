@@ -114,4 +114,13 @@ describe('deleting drafts from the calendar', () => {
     expect(await response.json()).toMatchObject({ uncertain: true })
     expect(h.persist).not.toHaveBeenCalled()
   })
+  // Eric 2026-10-19: an untouched draft read back in its stored zone must still be schedulable.
+  it('schedules a draft whose single read uses another zone and format for the same instant', async () => {
+    const stored = { ...h.remote, draft: true, publicationDate: { dateTime: '2026-10-20T14:00:00.000', timezone: 'UTC' } }
+    h.read.mockResolvedValueOnce(stored).mockResolvedValueOnce({ ...stored, draft: false, autoPublish: true, publicationDate: { dateTime: '2099-10-22T10:00:00', timezone: 'America/Puerto_Rico' } })
+    h.write.mockResolvedValue({ data: { id: 4, uuid: 'u' } })
+    const response = await POST(request({ action: 'schedule', dateTime: '2099-10-22T10:00', expected: { draft: true, publicationDate: '2026-10-20T10:00:00', timezone: 'America/Puerto_Rico', text: 'Caption\n' } }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ ok: true, confirmed: true })
+  })
 })

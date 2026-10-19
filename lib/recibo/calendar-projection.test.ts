@@ -37,3 +37,9 @@ it('shares unspecified slots fairly by received order and respects occupancy for
  expect(result.posts.map(p=>p.idea.id)).toEqual(['1','2','3'])
  expect(result.posts[0].date).toBe('2026-10-17')
 })
+// Eric 2026-10-19: quitar del calendario deja la pieza en Recibo pero no cuenta.
+it('leaves pieces removed from the calendar out of dates and counts, listing them apart', () => {
+ const result=projectReciboVideos([idea('1',{calendar_hidden_at:'2026-10-19T12:00:00Z'}),idea('2')],'2026-10-16',[0,1,2,3,4,5,6],[])
+ expect(result.total).toBe(1);expect(result.posts.map(p=>p.idea.id)).toEqual(['2']);expect(result.through).toBe('2026-10-16')
+ expect(result.unplaced).toEqual([]);expect(result.hidden.map(p=>p.idea.id)).toEqual(['1'])
+})
