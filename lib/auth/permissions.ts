@@ -18,6 +18,10 @@ export type Permission =
   | 'clients.contract.edit'
   | 'clients.assets.upload'
   | 'clients.sms.send'
+  /** Ver (y revelar) usuarios y contraseñas de las redes del cliente. */
+  | 'clients.credentials.read'
+  /** Agregar, cambiar o borrar accesos de redes del cliente. */
+  | 'clients.credentials.edit'
   | 'operations.overview'
   // Tasks / operations
   | 'tasks.read.all'
@@ -118,6 +122,7 @@ const RBAC: Record<UserRole, RolePerms> = {
     'clients.read', 'clients.create', 'clients.edit', 'clients.brand.edit',
     'clients.billing.read', 'clients.contract.read', 'clients.contract.edit', 'clients.assets.upload',
     'clients.sms.send',
+    'clients.credentials.read', 'clients.credentials.edit',
     'tasks.read.all', 'tasks.create', 'tasks.edit', 'tasks.delete',
     'ideas.read', 'ideas.edit', 'ideas.share',
     'video_reviews.read', 'video_reviews.write', 'video.upload', 'video.approve', 'video.discard',
