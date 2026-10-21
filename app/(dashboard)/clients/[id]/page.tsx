@@ -6,11 +6,14 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText, BarChart3 } from 'lucide-react'
-import { formatDate, taskStatusColors } from '@/lib/utils'
+import { Pencil, Plus, AlertTriangle, CheckSquare, Calendar, MessageSquareText, BarChart3, User } from 'lucide-react'
+import { taskStatusColors } from '@/lib/utils'
 import { ClientHero } from '@/components/clients/profile/client-hero'
 import { UploadLinkButton } from '@/components/clients/upload-link-button'
-import { ClientTabs, type ClientTabKey } from '@/components/clients/profile/client-tabs'
+import { ClientTabs, resolveClientTab } from '@/components/clients/profile/client-tabs'
+import { AccessTab } from '@/components/clients/profile/tabs/access-tab'
+import { OwnerForm } from '@/components/clients/profile/owner-form'
+import { listClientCredentials } from '@/lib/actions/client-credentials'
 import { SavedCaptionsView } from '@/components/captions/saved-captions-view'
 import { fetchClientCaptions } from '@/lib/utils/client-captions'
 import { OverviewTab } from '@/components/clients/profile/tabs/overview-tab'
@@ -24,8 +27,6 @@ import { NotifyOwnerButton } from '@/components/clients/profile/notify-owner-but
 import { getClientPipeline } from '@/lib/utils/content-pipeline'
 import type { Client, ClientPayment, ClientAsset, ContentIdea } from '@/lib/supabase/types'
 
-const VALID_TABS: ClientTabKey[] = ['overview', 'schedule', 'brand', 'contract', 'billing', 'assets', 'tasks', 'content', 'captions']
-
 export default async function ClientDetailPage({
   params,
   searchParams,
@@ -35,12 +36,15 @@ export default async function ClientDetailPage({
 }) {
   const { id } = await params
   const { tab } = await searchParams
-  const defaultTab = (VALID_TABS as string[]).includes(tab ?? '') ? (tab as ClientTabKey) : 'overview'
+  const defaultTab = resolveClientTab(tab)
   const [clientRaw, supabase] = await Promise.all([getClientById(id), createClient()])
 
   if (!clientRaw) notFound()
   const client = clientRaw as unknown as Client
-  const canSeeCalendar = await currentUserHas('metricool.read')
+  const [canSeeCredentials, canEditCredentials] = await Promise.all([
+    currentUserHas('clients.credentials.read'),
+    currentUserHas('clients.credentials.edit'),
+  ])
 
   const [
     { data: tasks },
@@ -73,6 +77,7 @@ export default async function ClientDetailPage({
       .order('uploaded_at', { ascending: false }),
     getClientPipeline(id, client.posting_days ?? []),
   ])
+  const credentials = canSeeCredentials ? await listClientCredentials(id) : null
 
   const paymentsList = (payments ?? []) as ClientPayment[]
   const assetsList = (assets ?? []) as ClientAsset[]
@@ -240,9 +245,13 @@ export default async function ClientDetailPage({
     <div className="space-y-4">
       <ClientHero client={client} lastPayment={paymentsList[0] ?? null} />
 
-      {/* Quick actions row */}
+      {/* Acciones rápidas: solo lo que se usa a diario. El calendario es una pestaña. */}
       <div className="flex flex-wrap gap-2">
-        {canSeeCalendar && <Button asChild variant="outline" size="sm"><Link href={`/clients/${id}/calendar`}><Calendar className="mr-1.5 h-3.5 w-3.5" /> Calendario de publicaciones</Link></Button>}
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/operations?client=${id}`}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Nueva tarea
+          </Link>
+        </Button>
         {pipeline && (
           <NotifyOwnerButton
             clientId={id}
@@ -254,43 +263,67 @@ export default async function ClientDetailPage({
             publicadasSemana={pipeline.publicadasSemana}
           />
         )}
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/operations?client=${id}`}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" /> Nueva tarea
-          </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/clients/${id}/edit`}>
-            <Pencil className="mr-1.5 h-3.5 w-3.5" /> Editar campos base
-          </Link>
-        </Button>
         <UploadLinkButton clientName={client.name} clientId={id} />
-        <span className="ml-auto self-center text-xs text-muted-foreground">Creado {formatDate(client.created_at)}</span>
+        <Button asChild variant="ghost" size="sm" className="ml-auto">
+          <Link href={`/clients/${id}/edit`}>
+            <Pencil className="mr-1.5 h-3.5 w-3.5" /> Editar
+          </Link>
+        </Button>
       </div>
 
       <ClientTabs
         defaultTab={defaultTab}
         overview={<OverviewTab client={client} pipeline={pipeline} />}
         schedule={<ScheduleTab client={client} />}
-        brand={<BrandTab client={client} />}
-        contract={<ContractTab client={client} />}
-        billing={<BillingTab client={client} payments={paymentsList} />}
-        assets={<AssetsTab clientId={id} assets={assetsList} />}
-        tasks={tasksSlot}
-        content={contentSlot}
-        captions={captionsSlot}
+        content={
+          <div className="space-y-6">
+            {contentSlot}
+            {tasksSlot}
+            {captionsSlot}
+          </div>
+        }
+        brand={
+          <div className="space-y-6">
+            <BrandTab client={client} />
+            <AssetsTab clientId={id} assets={assetsList} />
+          </div>
+        }
+        access={
+          credentials ? (
+            credentials.error ? (
+              <p className="text-sm text-red-500">{credentials.error}</p>
+            ) : (
+              <AccessTab
+                clientId={id}
+                initial={credentials.credentials ?? []}
+                canEdit={canEditCredentials}
+                keyConfigured={credentials.keyConfigured}
+              />
+            )
+          ) : undefined
+        }
+        account={
+          <div className="space-y-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" /> Dueño</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OwnerForm
+                  clientId={id}
+                  initial={{
+                    owner_name: client.owner_name,
+                    owner_email: client.owner_email,
+                    owner_phone: client.owner_phone,
+                  }}
+                />
+              </CardContent>
+            </Card>
+            <ContractTab client={client} />
+            <BillingTab client={client} payments={paymentsList} />
+          </div>
+        }
       />
-
-      {client.notes && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Notas internas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{client.notes}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

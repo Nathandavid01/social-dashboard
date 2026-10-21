@@ -2,49 +2,55 @@
 
 import { useState, type ReactNode } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LayoutGrid, CalendarClock, Palette, FileSignature, DollarSign, FolderOpen, CheckSquare, Sparkles, MessageSquareText } from 'lucide-react'
+import { LayoutGrid, CalendarClock, Palette, Sparkles, KeyRound, Briefcase } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type ClientTabKey = 'overview' | 'schedule' | 'brand' | 'contract' | 'billing' | 'assets' | 'tasks' | 'content' | 'captions'
+/**
+ * Perfil simplificado (v5.150): seis pestañas en vez de nueve.
+ * Contenido junta tareas, posts y captions; Marca junta el banco de archivos;
+ * Cuenta junta contrato y pagos. Accesos solo aparece para quien puede verlos.
+ */
+export type ClientTabKey = 'overview' | 'schedule' | 'content' | 'brand' | 'access' | 'account'
+
+const LEGACY_TABS: Record<string, ClientTabKey> = {
+  contract: 'account',
+  billing: 'account',
+  assets: 'brand',
+  tasks: 'content',
+  captions: 'content',
+}
+
+/** Traduce `?tab=` (incluye los nombres viejos) a una pestaña actual. */
+export function resolveClientTab(tab: string | undefined): ClientTabKey {
+  if (!tab) return 'overview'
+  if (tab in LEGACY_TABS) return LEGACY_TABS[tab]
+  return (TAB_META.some((t) => t.key === tab) ? tab : 'overview') as ClientTabKey
+}
 
 interface Props {
   defaultTab?: ClientTabKey
   overview: ReactNode
   schedule: ReactNode
-  brand: ReactNode
-  contract: ReactNode
-  billing: ReactNode
-  assets: ReactNode
-  tasks: ReactNode
   content: ReactNode
-  captions: ReactNode
+  brand: ReactNode
+  /** Sin este slot la pestaña no aparece (sin permiso clients.credentials.read). */
+  access?: ReactNode
+  account: ReactNode
 }
 
 const TAB_META: { key: ClientTabKey; label: string; icon: typeof LayoutGrid }[] = [
   { key: 'overview', label: 'Resumen',    icon: LayoutGrid },
   { key: 'schedule', label: 'Calendario', icon: CalendarClock },
-  { key: 'brand',    label: 'Marca',      icon: Palette },
-  { key: 'contract', label: 'Contrato',   icon: FileSignature },
-  { key: 'billing',  label: 'Pagos',      icon: DollarSign },
-  { key: 'assets',   label: 'Banco',      icon: FolderOpen },
-  { key: 'tasks',    label: 'Tareas',     icon: CheckSquare },
   { key: 'content',  label: 'Contenido',  icon: Sparkles },
-  { key: 'captions', label: 'Captions',   icon: MessageSquareText },
+  { key: 'brand',    label: 'Marca',      icon: Palette },
+  { key: 'access',   label: 'Accesos',    icon: KeyRound },
+  { key: 'account',  label: 'Cuenta',     icon: Briefcase },
 ]
 
-export function ClientTabs({
-  defaultTab = 'overview',
-  overview,
-  schedule,
-  brand,
-  contract,
-  billing,
-  assets,
-  tasks,
-  content,
-  captions,
-}: Props) {
-  const [tab, setTab] = useState<ClientTabKey>(defaultTab)
+export function ClientTabs({ defaultTab = 'overview', ...slots }: Props) {
+  const visible = TAB_META.filter((t) => slots[t.key] !== undefined)
+  const initial = visible.some((t) => t.key === defaultTab) ? defaultTab : 'overview'
+  const [tab, setTab] = useState<ClientTabKey>(initial)
 
   return (
     <Tabs value={tab} onValueChange={(v) => setTab(v as ClientTabKey)} className="w-full">
@@ -56,7 +62,7 @@ export function ClientTabs({
             'md:w-auto md:overflow-visible',
           )}
         >
-          {TAB_META.map(({ key, label, icon: Icon }) => (
+          {visible.map(({ key, label, icon: Icon }) => (
             <TabsTrigger
               key={key}
               value={key}
@@ -74,33 +80,11 @@ export function ClientTabs({
         </TabsList>
       </div>
 
-      <TabsContent value="overview" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {overview}
-      </TabsContent>
-      <TabsContent value="schedule" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {schedule}
-      </TabsContent>
-      <TabsContent value="brand" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {brand}
-      </TabsContent>
-      <TabsContent value="contract" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {contract}
-      </TabsContent>
-      <TabsContent value="billing" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {billing}
-      </TabsContent>
-      <TabsContent value="assets" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {assets}
-      </TabsContent>
-      <TabsContent value="tasks" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {tasks}
-      </TabsContent>
-      <TabsContent value="content" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {content}
-      </TabsContent>
-      <TabsContent value="captions" className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {captions}
-      </TabsContent>
+      {visible.map(({ key }) => (
+        <TabsContent key={key} value={key} className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+          {slots[key]}
+        </TabsContent>
+      ))}
     </Tabs>
   )
 }

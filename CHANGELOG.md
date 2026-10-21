@@ -1,3 +1,13 @@
+## v5.150 — 20 de octubre de 2026
+
+**El perfil de cada cliente es más sencillo, y ahora guarda los usuarios y contraseñas de sus redes.**
+- Seis pestañas en vez de nueve: Resumen, Calendario, Contenido, Marca, Accesos y Cuenta. Tareas, posts y captions quedan juntos en Contenido; el banco de archivos en Marca; contrato, pagos y el contacto del dueño en Cuenta.
+- El Resumen muestra solo cómo va el cliente (pipeline y semanas de contenido). Metricool, modo de edición, último meeting y buffer quedan en «Ajustes del cliente», cerrado hasta que lo abras.
+- Nueva pestaña «Accesos»: un usuario y una contraseña por red (Instagram, Facebook, TikTok…). La contraseña aparece oculta, con botones para mostrarla y copiarla.
+- Las contraseñas se guardan cifradas y solo las ven el owner y los supervisores.
+
+![Perfil del cliente más sencillo](/changelog/v5.150-perfil-sencillo.png)
+
 ## v5.149 — 19 de octubre de 2026
 
 **El calendario muestra la semana completa. El sábado y las tarjetas del día ya no se cortan.**
