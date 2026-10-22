@@ -1,5 +1,7 @@
 'use client'
 
+import { ReciboClientNotice } from './recibo-client-notice'
+
 import { useMemo, useState } from 'react'
 import styles from './recibo-board.module.css'
 import { ReciboThumbnail } from './recibo-thumbnail'
@@ -119,6 +121,7 @@ export function ReciboBoard({
   showUploadCounts = false,
   sentIdeaIds = [],
   cadenceByClient = {},
+  clientNoticesById = {},
   occupancyIdeas,
   todayISO,
   publishedTotal = 0,
@@ -129,6 +132,7 @@ export function ReciboBoard({
   showUploadCounts?: boolean
   sentIdeaIds?: string[]
   cadenceByClient?: Record<string, ReciboCadence>
+  clientNoticesById?: Record<string, string | null>
   occupancyIdeas?: IdeaWithPipeline[]
   todayISO?: string
   publishedTotal?: number
@@ -390,6 +394,7 @@ export function ReciboBoard({
                               : `${clientIdeas.length} video${clientIdeas.length === 1 ? '' : 's'} · Sin cadencia`}
                       </p>
                       <MonthCounts counts={clientMonths} testId={`recibo-client-months-${client.id}`} compact />
+                      <ReciboClientNotice notice={clientNoticesById[client.id]} />
                     </div>
                   </div>
 

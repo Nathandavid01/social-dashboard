@@ -63,8 +63,8 @@ export default async function ReciboPage({ searchParams }: { searchParams?: { cl
           .order('decided_at', { ascending: false })
       : Promise.resolve({ data: [] as { idea_id: string; status: string | null; decided_at: string | null }[] }),
     shownClientIds.length
-      ? supabase.from('clients').select('id, posting_days, posting_time, posting_schedule, metricool_blog_id').in('id', shownClientIds)
-      : Promise.resolve({ data: [] as { id: string; posting_days: number[] | null; posting_time: string | null; posting_schedule: Record<string, string> | null; metricool_blog_id: string | null }[] }),
+      ? supabase.from('clients').select('id, posting_days, posting_time, posting_schedule, metricool_blog_id, notes').in('id', shownClientIds)
+      : Promise.resolve({ data: [] as { id: string; posting_days: number[] | null; posting_time: string | null; posting_schedule: Record<string, string> | null; metricool_blog_id: string | null; notes: string | null }[] }),
   ])
   const reviewByIdea = reviewStatusByIdea(reviewRows ?? [])
   const occupancyWithReview = applyEntregasReviewStatus(occupancyIdeas, reviewByIdea)
@@ -76,6 +76,7 @@ export default async function ReciboPage({ searchParams }: { searchParams?: { cl
     postingSchedule: client.posting_schedule,
     metricool: Boolean(client.metricool_blog_id?.trim()),
   }]))
+  const clientNoticesById = Object.fromEntries((cadenceRows ?? []).map((client) => [client.id, client.notes?.match(/\[recibo\]([\s\S]*?)\[\/recibo\]/)?.[1].trim() || null]))
   const { data: auth } = await supabase.auth.getUser()
   const viewer = auth.user
   let viewerName: string | null = null
@@ -95,6 +96,7 @@ export default async function ReciboPage({ searchParams }: { searchParams?: { cl
         aiClients={visibleAiClients}
         sentIdeaIds={(reviewRows ?? []).map((row) => row.idea_id)}
         cadenceByClient={cadenceByClient}
+        clientNoticesById={clientNoticesById}
         todayISO={todayISOInTimeZone(POSTING_TZ)}
         publishedTotal={published.total}
         publishedByClient={published.byClient}
