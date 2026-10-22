@@ -610,3 +610,10 @@ it('uses the cover of the current cut rather than an older version', () => {
   render(<ReciboBoard aiClients={[]} ideas={[idea]} />)
   expect(screen.getByRole('img', { name: 'Miniatura de Reel playa' })).toHaveAttribute('src', 'https://img.example/current.jpg')
 })
+
+
+it('shows the recording scheduling notice under the correct client', () => {
+  render(<ReciboBoard aiClients={[]} ideas={[editedIdea]} clientNoticesById={{ c1: 'Hay que agendar una nueva grabación.', c2: 'Aviso de otro cliente' }} />)
+  expect(screen.getByText('Hay que agendar una nueva grabación.')).toBeInTheDocument()
+  expect(screen.queryByText('Aviso de otro cliente')).not.toBeInTheDocument()
+})

@@ -1,3 +1,8 @@
+## v5.150 — 21 de octubre de 2026
+
+**Recibo muestra los avisos de producción junto al nombre del cliente.**
+- El equipo puede ver cuándo hace falta agendar una nueva grabación, separado de los captions y del estado de publicación. Solo se muestran notas marcadas para Recibo; los demás datos internos no se envían al tablero.
+
 ## v5.149 — 19 de octubre de 2026
 
 **El calendario muestra la semana completa. El sábado y las tarjetas del día ya no se cortan.**
