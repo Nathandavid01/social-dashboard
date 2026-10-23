@@ -1,3 +1,10 @@
+## v5.152 — 23 de octubre de 2026
+
+**El asistente opera el Pipeline de videos de Video QC, no un trabajo aparte de Entregas.**
+- Puede listar los videos de esa pantalla, ver en qué etapa van, preparar la subida del corte editado y registrarlo cuando el archivo ya está en el bucket.
+- El corte aparece en el tab. La idea no cambia de estado y no entra a Revisión. El caption que genera queda en borrador.
+- La guía de comandos está en `docs/VIDEO_PIPELINE_OPERATOR.md`.
+
 ## v5.151 — 23 de octubre de 2026
 
 **El asistente puede arrancar y consultar un video del pipeline sin abrir el tablero.**

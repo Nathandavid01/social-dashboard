@@ -1,26 +1,34 @@
-# Operador del pipeline de video
+# Operador del Pipeline de videos
 
-Entrada HTTP para arrancar un trabajo, ver su estado, listar salidas y reintentar, sin usar el tablero. La pieza sigue siendo una fila de `content_ideas`. Aprobar, publicar en Metricool y devolver un corte a edición siguen en Revisión y Entregas, con una persona.
+Entrada HTTP del tab **Pipeline de videos** en **Video QC** (`/video-reviews`). Sirve para ver esos videos, subir el corte editado y reintentar el caption, sin abrir el tablero.
 
-## Qué hace el pipeline
+Esa pantalla es la que el menú llama **Video QC** (grupo Desarrollo). El tab por defecto es **Pipeline de videos**. La pestaña **Editores** es la cola: hay material crudo y todavía no hay corte. **Tablero de revisiones** es otra pestaña de la misma página y este operador no la usa.
 
-1. **On Site / grabación.** El videógrafo marca tomas. El material crudo queda en Drive (link) o en el bucket R2 del pipeline.
-2. **Edición.** Una persona edita. El corte final se sube a **Entregas R2** (`storage_provider = entregas-r2`), no al bucket de crudos.
-3. **IA.** Al subir desde el navegador, el editor manda fotogramas a `POST /api/video-analysis` (visión) y el sistema deja un **borrador** de caption (`caption_draft`). Guardar el caption es lo que lo promueve a `generated_caption`.
-4. **Revisión.** Con el corte registrado y `approval_status = submitted`, supervisor u owner aprueban o piden cambios.
-5. **Entregas / Recibo / Metricool.** El archivo aprobado es el que se agenda. Este operador no publica.
+No es el tablero **Pipeline** (`/pipeline`), ni Revisión, ni Entregas. No crea ideas, no sube crudo ni b-roll, no cambia el estado de la idea y no la manda a revisión.
 
-Hoy el tablero se dispara desde la UI (`/onsite`, `/pipeline`, `/revision`, `/entregas`). La subida a Drive por API no está hecha: `getServiceAccountAccessToken` responde que la implementación está pendiente. Pegar un link de Drive sí funciona.
+## Qué muestra el tab
+
+Cada fila es una idea de contenido con sus archivos (crudo, b-roll, editado). Las etapas, en este orden, son las mismas que la fila:
+
+1. **Idea** — hay gancho.
+2. **Material** — al menos un crudo activo (la cuenta se ve como n/4).
+3. **Editado** — al menos un corte activo (n/2).
+4. **Banco** — el cliente tiene algún asset.
+5. **Aprobación** — la idea está aprobada. Mientras no, se ve Sin enviar / En revisión / Cambios.
+6. **Caption** — hay `generated_caption`. Un borrador en `caption_draft` no completa esta etapa.
+7. **Publicado** — hay `published_at`.
+
+Hoy una persona abre `/video-reviews`. En **Editores** (quien tiene permiso de subir video) descarga el material y pulsa **Subir video editado**: el archivo va al bucket R2 del pipeline (`ideas/{ideaId}/edited/…`, `storage_provider = r2`). Este operador hace esa subida y el registro del archivo. No mueve la idea a `producida` ni a `submitted`, así que no entra a Revisión ni sale del banco de crudos por un cambio de estado.
+
+El inventario cuenta cualquier corte editado usable como «listo». Es la regla que ya tiene un archivo editado, también si se sube desde la tarjeta.
+
+Filas viejas con `theme = operator-hold` son el contrato retirado. Esta API no las lista ni las modifica.
 
 ## URL
 
 La URL que el repo deja escrita es `https://social-dashboard-zeta-orpin.vercel.app` (`SETUP.md` y el fallback de `lib/actions/review-staff.ts`). Si en el servidor existe `NEXT_PUBLIC_SITE_URL`, esa es la base. En local: `http://localhost:3020`.
 
-Hay que confirmar que ese host es el despliegue vivo y que ahí están las variables de abajo. Sin `PIPELINE_OPERATOR_TOKEN` en ese entorno, la ruta responde 503.
-
 ## Auth
-
-Todas las rutas de este documento exigen:
 
 ```http
 Authorization: Bearer <PIPELINE_OPERATOR_TOKEN>
@@ -28,7 +36,7 @@ Authorization: Bearer <PIPELINE_OPERATOR_TOKEN>
 
 `PIPELINE_OPERATOR_TOKEN` es distinto de `CRON_SECRET`. Si el token no está configurado: **503**. Si falta el header o no coincide: **401**. Si falta `SUPABASE_SERVICE_ROLE_KEY`: **503**.
 
-No pongas el valor en el repo, en Slack ni en el comando que quede en un log compartido. En la caja del asistente:
+No pongas el valor en el repo, en Slack ni en un comando que quede en un log compartido.
 
 ```bash
 export BASE="${NEXT_PUBLIC_SITE_URL:-https://social-dashboard-zeta-orpin.vercel.app}"
@@ -43,16 +51,16 @@ Obligatorias para esta entrada:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-Para subir el corte editado:
+Para subir y descargar el corte en el bucket del pipeline:
 
-- `ENTREGAS_R2_ACCOUNT_ID`
-- `ENTREGAS_R2_ACCESS_KEY_ID`
-- `ENTREGAS_R2_SECRET_ACCESS_KEY`
-- `ENTREGAS_R2_BUCKET`
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET` (si falta el nombre, el código usa `nmedia-videos`)
 
-Opcional, link público permanente del corte (Metricool lo usa en otros flujos): `ENTREGAS_R2_PUBLIC_BASE_URL`.
+Opcional, URL pública de otros flujos: `R2_PUBLIC_BASE_URL`. Esta subida no la necesita; usa una URL firmada de una hora.
 
-Para reintentar el caption:
+Para reintentar el caption (solo escribe `caption_draft`):
 
 - `XAI_API_KEY` (proveedor por defecto) o `ANTHROPIC_API_KEY` si `CAPTION_PROVIDER=claude`
 - `CAPTION_PROVIDER` (`grok` o `claude`)
@@ -62,164 +70,174 @@ Para reintentar el caption:
 
 El QC visual (`GROK_VISION_MODEL`, `POST /api/video-analysis`) sigue exigiendo fotogramas del navegador y una sesión con `video.upload`. Este operador no lo reintenta.
 
-Crudos en el otro bucket (no esta subida): `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`.
+`ENTREGAS_R2_*` no es el bucket de esta pantalla.
 
-Drive por API, todavía sin implementar: `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GDRIVE_ROOT_FOLDER_ID`.
+## Listar
 
-## Empezar un trabajo
+`GET /api/pipeline/operator/jobs`
+
+Query opcional:
+
+- `clientId` — UUID del cliente
+- `queue=todos` (default) o `queue=editores` (la cola: crudo activo, sin corte, no descartada)
+- `limit` — entero de 1 a 50, default 20
+
+```bash
+curl -sS "$BASE/api/pipeline/operator/jobs?queue=editores&limit=5" \
+  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN"
+```
+
+```json
+{
+  "count": 1,
+  "items": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "clientId": "11111111-1111-4111-8111-111111111111",
+      "clientName": "La Güira",
+      "title": "Reel de verano",
+      "contentType": "R",
+      "contentTypeLabel": "Reel",
+      "status": "grabada",
+      "statusLabel": "Grabada",
+      "approvalStatus": "pending",
+      "approvalLabel": "Sin enviar",
+      "readyToEdit": true,
+      "stageLabel": "Editado",
+      "slots": { "raw": 1, "broll": 0, "edited": 0 },
+      "progress": {
+        "completed": 2,
+        "total": 7,
+        "percent": 29,
+        "missing": ["Editado", "Banco", "Aprobación", "Caption", "Publicado"]
+      },
+      "caption": { "draft": null, "generated": null },
+      "outputs": [
+        {
+          "kind": "raw",
+          "label": "crudo.mp4",
+          "videoId": "raw-1",
+          "provider": "r2",
+          "href": null
+        }
+      ],
+      "retryable": ["upload", "register", "caption"]
+    }
+  ]
+}
+```
+
+En el listado, `href` solo viene lleno en archivos de Drive. La URL firmada de R2 está en el GET de un video.
+
+## Ver uno
+
+`GET /api/pipeline/operator/jobs/{ideaId}`
+
+Misma forma, dentro de `{ "item": { ... } }`. Cada archivo `storage_provider = r2` trae `href` firmado por una hora (descarga con el nombre del archivo). **404** si no existe o si es una fila `operator-hold`.
+
+```bash
+curl -sS "$BASE/api/pipeline/operator/jobs/22222222-2222-4222-8222-222222222222" \
+  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN"
+```
+
+## Subir el corte
 
 `POST /api/pipeline/operator/jobs`
 
-`phase` por defecto es `edited`. Hasta que el corte se registra, la fila queda apartada (`status=descartada`, `theme=operator-hold`) y la respuesta dice `stage: "waiting"` / «Esperando archivo». Así no entra a On Site, Mi Día, el runway, el inventario ni al banco del editor. No es un descarte del equipo. No entra a Revisión hasta el `register` de abajo.
+No crea la idea. El video ya tiene que estar en el tab y en la cola de Editores.
 
 ```bash
 curl -sS -X POST "$BASE/api/pipeline/operator/jobs" \
   -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "clientId": "11111111-1111-4111-8111-111111111111",
-    "title": "Reel de verano",
-    "hook": "De qué es el video",
-    "publishDate": "2026-10-24",
-    "phase": "edited",
+    "ideaId": "22222222-2222-4222-8222-222222222222",
     "fileName": "corte.mp4",
     "contentType": "video/mp4"
   }'
 ```
 
-Respuesta **201** (el `job` también trae `videos`, `outputs`, `caption` y `metricool`):
+`kind` se puede omitir. Si se manda, tiene que ser `edited`.
 
 ```json
 {
-  "job": {
-    "id": "JOB_ID",
-    "clientId": "11111111-1111-4111-8111-111111111111",
-    "clientName": "Cliente",
-    "title": "Reel de verano",
-    "status": "descartada",
-    "approvalStatus": "pending",
-    "stage": "waiting",
-    "stageLabel": "Esperando archivo",
-    "retryable": ["upload", "register"]
-  },
+  "item": { "id": "22222222-2222-4222-8222-222222222222", "readyToEdit": true },
   "upload": {
-    "url": "https://ACCOUNT.r2.cloudflarestorage.com/...",
-    "key": "entregas/JOB_ID/edited/1720000000000-corte.mp4",
+    "url": "https://…r2.cloudflarestorage.com/…",
+    "key": "ideas/22222222-2222-4222-8222-222222222222/edited/1710000000000-corte.mp4",
     "method": "PUT",
     "headers": { "Content-Type": "video/mp4" }
   }
 }
 ```
 
-Si faltan `ENTREGAS_R2_*`, el trabajo igual se crea y `upload` es `{ "error": "R2 de Entregas no está configurado (faltan ENTREGAS_R2_*)" }`.
-
-Sube el archivo a la URL firmada (caduca en 1 hora) y luego regístralo:
+Después, el PUT del archivo (máximo 5 GB). La URL firmada dura una hora.
 
 ```bash
-curl -sS -X PUT -H "Content-Type: video/mp4" --data-binary @corte.mp4 "$UPLOAD_URL"
+curl -sS -X PUT -H "Content-Type: video/mp4" \
+  --data-binary @corte.mp4 \
+  "$UPLOAD_URL"
+```
 
-curl -sS -X POST "$BASE/api/pipeline/operator/jobs/$JOB_ID/retry" \
+**404** si ese id no está en Pipeline de videos. **409** si no está en Editores (sin crudo, ya tiene corte, descartada, aprobada o publicada). **503** si faltan `R2_*`. **400** si el cuerpo es el contrato viejo (cliente + título, sin `ideaId`).
+
+## Registrar el archivo
+
+Cuando el PUT respondió 200, registra esa key. No cambies el estado de la idea.
+
+`POST /api/pipeline/operator/jobs/{ideaId}/retry`
+
+```bash
+curl -sS -X POST "$BASE/api/pipeline/operator/jobs/22222222-2222-4222-8222-222222222222/retry" \
   -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "step": "register",
-    "key": "entregas/JOB_ID/edited/1720000000000-corte.mp4",
+    "key": "ideas/22222222-2222-4222-8222-222222222222/edited/1710000000000-corte.mp4",
     "name": "corte.mp4",
-    "sizeBytes": 12345,
+    "sizeBytes": 1048576,
     "mimeType": "video/mp4"
   }'
 ```
 
-Con `approval_status=pending`, el registro pasa el trabajo a Revisión (`submitted`). Respuesta **200**:
-
 ```json
 {
-  "videoId": "VIDEO_ID",
-  "reviewUnchanged": false,
-  "note": "El corte quedó registrado y pasó a revisión.",
-  "job": { "stage": "approval", "stageLabel": "Revisión", "approvalStatus": "submitted" }
+  "videoId": "…",
+  "note": "El corte quedó en Pipeline de videos. La idea no cambió de estado y no entró a Revisión.",
+  "item": { "readyToEdit": false, "slots": { "raw": 1, "broll": 0, "edited": 1 } }
 }
 ```
 
-La `key` tiene que empezar por `entregas/{id-de-este-trabajo}/edited/`. Máximo 2 GB. Solo `video/*`.
+La key tiene que ser exactamente `ideas/{ideaId}/edited/{archivo}` de esa URL. `sizeBytes` es un entero entre 1 y 5 GB. `name` es obligatorio.
 
-Material crudo (no entra a Revisión): `phase` `raw` y un link de Drive. No se manda `fileName`; el crudo no va al bucket de Entregas.
+## Reintentos
 
-```bash
-curl -sS -X POST "$BASE/api/pipeline/operator/jobs" \
-  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clientId": "11111111-1111-4111-8111-111111111111",
-    "title": "Toma 1",
-    "phase": "raw",
-    "driveLink": "https://drive.google.com/file/d/FILE_ID/view"
-  }'
+El mismo `POST …/retry`.
+
+Otra URL de subida, si la anterior venció y el corte todavía no está registrado:
+
+```json
+{ "step": "upload", "fileName": "corte.mp4", "contentType": "video/mp4" }
 ```
 
-Eso deja `status=grabada` y un video `kind=raw`, `storage_provider=drive`.
+Caption. Solo guarda el borrador. La etapa Caption del tab sigue en falta hasta que alguien guarde `generated_caption` en la ficha.
 
-## Estado
-
-`GET /api/pipeline/operator/jobs/{id}`
-
-```bash
-curl -sS "$BASE/api/pipeline/operator/jobs/$JOB_ID" \
-  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN"
-```
-
-`stage` sale de la misma función que el tablero de Entregas: `edited` (Editado), `approval` (Revisión), `copy` (Copy), `publication` (Publicación). Un borrador de caption no mueve la etapa. `downloadUrl` es un GET firmado de 1 hora del corte editado vigente en Entregas. Pide el estado otra vez si caducó.
-
-## Listar
-
-`GET /api/pipeline/operator/jobs?clientId={uuid}&limit=20`
-
-`limit` va de 1 a 50. Sin `clientId`, los más recientes. La lista no firma descargas; el detalle sí.
-
-```bash
-curl -sS "$BASE/api/pipeline/operator/jobs?clientId=11111111-1111-4111-8111-111111111111&limit=20" \
-  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN"
+```json
+{ "step": "caption" }
 ```
 
 ```json
-{ "count": 1, "jobs": [ { "id": "JOB_ID", "stage": "approval", "outputs": [] } ] }
+{
+  "caption": "Texto del borrador…",
+  "note": "El borrador quedó en caption_draft. La etapa Caption del tab usa generated_caption y no se promueve aquí."
+}
 ```
 
-## Reintentar
+`retryable` en el item dice cuáles de `upload`, `register` y `caption` aplican ahora.
 
-`POST /api/pipeline/operator/jobs/{id}/retry`
+## Qué no hace
 
-| `step` | Cuándo | Cuerpo extra |
-| --- | --- | --- |
-| `upload` | Nueva URL firmada. **409** si ya está aprobado, publicado, descartado o en Metricool. | `fileName`, `contentType` |
-| `register` | Después de un PUT correcto. En `pending` entra a Revisión. En `revision_needed` o `submitted` guarda el archivo y **no** cambia la revisión. | `key`, `name`, `sizeBytes`, `mimeType` |
-| `caption` | Ya hay un video. Hace falta el gancho (`hook`) o un análisis visual previo. Escribe solo `caption_draft`. | ninguno |
-
-```bash
-curl -sS -X POST "$BASE/api/pipeline/operator/jobs/$JOB_ID/retry" \
-  -H "Authorization: Bearer $PIPELINE_OPERATOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{ "step": "caption" }'
-```
-
-**200** incluye `caption` (el borrador) y `job`. **422** si falta el video, el gancho o la IA no respondió. **503** en `upload` si faltan `ENTREGAS_R2_*`.
-
-## Errores
-
-| Código | Significado |
-| --- | --- |
-| 400 | JSON o campos inválidos |
-| 401 | Token ausente o distinto |
-| 404 | Cliente o trabajo inexistente |
-| 409 | No se puede adjuntar otro corte (aprobado, publicado o cerrado) |
-| 422 | El caption no se pudo generar |
-| 500 | Error de base |
-| 503 | Falta `PIPELINE_OPERATOR_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY` o, en la subida, `ENTREGAS_R2_*` |
-
-## Estado actual
-
-- El tablero (ideas, Entregas R2, revisión, caption en borrador, Metricool) es el pipeline que usa el equipo. No hay un render automático dentro de este repo.
-- Esta entrada crea y lee ese mismo trabajo. No aprueba ni publica.
-- Subir el editado por aquí depende de que Entregas R2 esté configurado en el servidor.
-- El QC de visión no se puede relanzar desde aquí: los fotogramas no se guardan y la ruta actual pide sesión de editor.
-- Varias migraciones de `docs/TODO.md` (entre ellas `0061_video_analysis.sql`) pueden seguir sin aplicar. El caption se genera igual; el reporte visual no aparece hasta que exista la tabla.
+- No aprueba, no publica en Metricool y no pulsa «Enviar a revisión».
+- No crea ideas ni adjunta crudo o b-roll. Eso sigue en On Site y en la ficha.
+- No promueve el caption a la etapa Caption del tab.
+- No reintenta el QC visual.

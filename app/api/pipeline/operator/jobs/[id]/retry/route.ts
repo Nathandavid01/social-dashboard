@@ -15,8 +15,9 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
   const parsed = parseRetry(body, params.id)
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
   const result = await retryOperatorJob(gate.db, params.id, parsed, generateIdeaCaptionWithClient)
-  if (result.status === 200) {
-    for (const path of ['/revision', '/entregas', '/pipeline', '/mi-dia', '/recibo']) revalidatePath(path)
+  if (result.status === 200 && parsed.step === 'register') {
+    revalidatePath('/video-reviews')
+    revalidatePath('/pipeline')
   }
   return NextResponse.json(result.body, { status: result.status })
 }
