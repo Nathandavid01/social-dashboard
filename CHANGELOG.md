@@ -1,3 +1,10 @@
+## v5.151 — 23 de octubre de 2026
+
+**El asistente puede arrancar y consultar un video del pipeline sin abrir el tablero.**
+- Con un token del servidor se puede crear el trabajo, ver en qué paso está, listar las salidas y reintentar la subida o el caption.
+- El corte no entra a Revisión hasta que el archivo editado queda registrado. Mientras espera el archivo no aparece en On Site, Mi Día ni el inventario. Aprobar y publicar sigue siendo del equipo.
+- La guía de comandos está en `docs/VIDEO_PIPELINE_OPERATOR.md`.
+
 ## v5.150 — 21 de octubre de 2026
 
 **Recibo muestra los avisos de producción junto al nombre del cliente.**
