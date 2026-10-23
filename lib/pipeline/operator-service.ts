@@ -3,57 +3,43 @@ import 'server-only'
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  entregasR2Bucket,
-  entregasR2Client,
-  isEntregasR2Configured,
-} from '@/lib/integrations/entregas-r2'
+import { isR2Configured, r2Bucket, r2Client } from '@/lib/integrations/r2'
 import { attachmentDisposition } from '@/lib/utils/content-disposition'
 import {
-  OPERATOR_JOB_SELECT,
-  decideRegister,
-  editedVideoInsert,
-  entregasEditedObjectKey,
-  ideaInsertForStart,
-  rawVideoInsert,
-  registerUpdate,
-  shapeOperatorJob,
-  type NormalizedStart,
+  PIPELINE_ITEM_SELECT,
+  PIPELINE_THEME_OR,
+  acceptsEditedUpload,
+  includePipelineRow,
+  inOperatorQueue,
+  pipelineEditedObjectKey,
+  pipelineVideoInsert,
+  shapePipelineItem,
+  type NormalizedSubmit,
   type OperatorIdeaRow,
-  type OperatorJobView,
+  type OperatorQueue,
   type OperatorVideoRow,
+  type PipelineItemView,
   type RetryRequest,
 } from '@/lib/pipeline/operator-jobs'
 
-const ENTREGAS_MISSING = 'R2 de Entregas no está configurado (faltan ENTREGAS_R2_*)'
+const R2_MISSING = 'R2 no está configurado (faltan R2_ACCOUNT_ID, R2_ACCESS_KEY_ID o R2_SECRET_ACCESS_KEY)'
+const NOT_IN_PIPELINE = 'Ese video no está en Pipeline de videos'
+const NOT_IN_EDITORS = 'Este video no está en Editores. Hace falta material crudo activo y que todavía no tenga corte.'
 
 export interface OperatorResult {
   status: number
   body: Record<string, unknown>
 }
 
-function currentEdited(videos: OperatorVideoRow[]): OperatorVideoRow | null {
-  const usable = videos.filter(
-    (v) =>
-      v.kind === 'edited' &&
-      v.storage_provider === 'entregas-r2' &&
-      !!v.drive_file_id &&
-      v.status !== 'archived' &&
-      v.status !== 'failed',
-  )
-  usable.sort((a, b) => (b.uploaded_at ?? '').localeCompare(a.uploaded_at ?? ''))
-  return usable[0] ?? null
-}
-
 async function presignPut(ideaId: string, fileName: string, contentType: string) {
-  if (!isEntregasR2Configured()) return { error: ENTREGAS_MISSING as string }
-  const client = entregasR2Client()
-  if (!client) return { error: ENTREGAS_MISSING }
-  const key = entregasEditedObjectKey(ideaId, fileName, Date.now())
+  if (!isR2Configured()) return { error: R2_MISSING }
+  const client = r2Client()
+  if (!client) return { error: R2_MISSING }
+  const key = pipelineEditedObjectKey(ideaId, fileName, Date.now())
   try {
     const url = await getSignedUrl(
       client,
-      new PutObjectCommand({ Bucket: entregasR2Bucket(), Key: key, ContentType: contentType }),
+      new PutObjectCommand({ Bucket: r2Bucket(), Key: key, ContentType: contentType }),
       { expiresIn: 60 * 60 },
     )
     return { url, key, method: 'PUT' as const, headers: { 'Content-Type': contentType } }
@@ -63,14 +49,14 @@ async function presignPut(ideaId: string, fileName: string, contentType: string)
 }
 
 async function presignGet(video: OperatorVideoRow): Promise<string | null> {
-  if (!video.drive_file_id || !isEntregasR2Configured()) return null
-  const client = entregasR2Client()
+  if (video.storage_provider !== 'r2' || !video.drive_file_id || !isR2Configured()) return null
+  const client = r2Client()
   if (!client) return null
   try {
     return await getSignedUrl(
       client,
       new GetObjectCommand({
-        Bucket: entregasR2Bucket(),
+        Bucket: r2Bucket(),
         Key: video.drive_file_id,
         ResponseContentDisposition: attachmentDisposition(video.name),
       }),
@@ -81,88 +67,77 @@ async function presignGet(video: OperatorVideoRow): Promise<string | null> {
   }
 }
 
-export async function loadOperatorJob(db: SupabaseClient, id: string): Promise<OperatorIdeaRow | null> {
+export async function loadPipelineItem(db: SupabaseClient, id: string): Promise<OperatorIdeaRow | null> {
   const { data, error } = await db
     .from('content_ideas')
-    .select(OPERATOR_JOB_SELECT)
+    .select(PIPELINE_ITEM_SELECT)
     .eq('id', id)
     .maybeSingle()
   if (error || !data) return null
-  return data as unknown as OperatorIdeaRow
+  const row = data as unknown as OperatorIdeaRow
+  if (!includePipelineRow(row)) return null
+  return row
 }
 
-async function presentJob(db: SupabaseClient, id: string): Promise<OperatorJobView | null> {
-  const row = await loadOperatorJob(db, id)
+async function assetCount(db: SupabaseClient, clientId: string): Promise<number> {
+  const { count, error } = await db
+    .from('client_assets')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', clientId)
+  if (error || typeof count !== 'number') return 0
+  return count
+}
+
+async function presentItem(db: SupabaseClient, id: string): Promise<PipelineItemView | null> {
+  const row = await loadPipelineItem(db, id)
   if (!row) return null
-  const { data: analysis } = await db
-    .from('content_idea_video_analysis')
-    .select('status, error_note, visual_summary')
-    .eq('idea_id', id)
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const edited = currentEdited(row.videos ?? [])
-  const downloadUrl = edited ? await presignGet(edited) : null
-  return shapeOperatorJob(row, {
-    analysis: (analysis as { status: string; error_note?: string | null; visual_summary?: string | null } | null) ?? null,
-    downloadUrl,
-    downloadVideoId: edited?.id ?? null,
-  })
-}
-
-export async function startOperatorJob(db: SupabaseClient, input: NormalizedStart): Promise<OperatorResult> {
-  const { data: client, error: clientError } = await db
-    .from('clients')
-    .select('id, name')
-    .eq('id', input.clientId)
-    .maybeSingle()
-  if (clientError) return { status: 500, body: { error: clientError.message } }
-  if (!client) return { status: 404, body: { error: 'Cliente no encontrado' } }
-
-  const { data: created, error } = await db
-    .from('content_ideas')
-    .insert(ideaInsertForStart(input))
-    .select('id')
-    .single()
-  if (error || !created?.id) return { status: 500, body: { error: error?.message ?? 'No se pudo crear el trabajo' } }
-
-  const raw = rawVideoInsert(created.id, input)
-  if (raw) {
-    const { error: videoError } = await db.from('content_idea_videos').insert(raw).select('id').single()
-    if (videoError) {
-      return { status: 500, body: { error: videoError.message, jobId: created.id } }
+  const assets = await assetCount(db, row.client_id)
+  const downloadUrls: Record<string, string | null> = {}
+  for (const video of row.videos ?? []) {
+    if (video.storage_provider === 'r2' && video.drive_file_id) {
+      downloadUrls[video.id] = await presignGet(video)
     }
   }
+  return shapePipelineItem(row, { assetCount: assets, downloadUrls })
+}
 
-  const upload = input.fileName && input.contentType
-    ? await presignPut(created.id, input.fileName, input.contentType)
-    : null
-  const job = await presentJob(db, created.id)
-  return {
-    status: 201,
-    body: {
-      job: job ?? { id: created.id },
-      ...(upload ? { upload } : {}),
-    },
-  }
+function closed(row: OperatorIdeaRow): OperatorResult | null {
+  if (acceptsEditedUpload({ ...row, videos: row.videos ?? [] })) return null
+  return { status: 409, body: { error: NOT_IN_EDITORS } }
+}
+
+export async function submitPipelineVideo(db: SupabaseClient, input: NormalizedSubmit): Promise<OperatorResult> {
+  const row = await loadPipelineItem(db, input.ideaId)
+  if (!row) return { status: 404, body: { error: NOT_IN_PIPELINE } }
+  const blocked = closed(row)
+  if (blocked) return blocked
+  const upload = await presignPut(input.ideaId, input.fileName, input.contentType)
+  if ('error' in upload) return { status: 503, body: { error: upload.error } }
+  const item = await presentItem(db, input.ideaId)
+  return { status: 200, body: { item: item ?? { id: input.ideaId }, upload } }
 }
 
 export async function listOperatorJobs(
   db: SupabaseClient,
-  filter: { clientId: string | null; limit: number },
+  filter: { clientId: string | null; limit: number; queue: OperatorQueue },
 ): Promise<OperatorResult> {
-  let query = db.from('content_ideas').select(OPERATOR_JOB_SELECT)
+  let query = db
+    .from('content_ideas')
+    .select(PIPELINE_ITEM_SELECT)
+    .or(PIPELINE_THEME_OR)
   if (filter.clientId) query = query.eq('client_id', filter.clientId)
   const { data, error } = await query.order('created_at', { ascending: false }).limit(filter.limit)
   if (error) return { status: 500, body: { error: error.message } }
-  const jobs = ((data ?? []) as unknown as OperatorIdeaRow[]).map((row) => shapeOperatorJob(row))
-  return { status: 200, body: { count: jobs.length, jobs } }
+  const items = ((data ?? []) as unknown as OperatorIdeaRow[])
+    .filter((row) => inOperatorQueue(row, filter.queue))
+    .map((row) => shapePipelineItem(row))
+  return { status: 200, body: { count: items.length, items } }
 }
 
 export async function getOperatorJob(db: SupabaseClient, id: string): Promise<OperatorResult> {
-  const job = await presentJob(db, id)
-  if (!job) return { status: 404, body: { error: 'Trabajo no encontrado' } }
-  return { status: 200, body: { job } }
+  const item = await presentItem(db, id)
+  if (!item) return { status: 404, body: { error: NOT_IN_PIPELINE } }
+  return { status: 200, body: { item } }
 }
 
 export async function retryOperatorJob(
@@ -174,30 +149,37 @@ export async function retryOperatorJob(
     ideaId: string,
   ) => Promise<{ ok?: true; caption?: string; error?: string }>,
 ): Promise<OperatorResult> {
-  const row = await loadOperatorJob(db, id)
-  if (!row) return { status: 404, body: { error: 'Trabajo no encontrado' } }
+  const row = await loadPipelineItem(db, id)
+  if (!row) return { status: 404, body: { error: NOT_IN_PIPELINE } }
 
   if (request.step === 'caption') {
     const result = await generateCaption(db, id)
     if (result.error || !result.ok) {
-      return { status: 422, body: { error: result.error ?? 'No se pudo generar el caption', jobId: id } }
+      return { status: 422, body: { error: result.error ?? 'No se pudo generar el caption', ideaId: id } }
     }
-    const job = await presentJob(db, id)
-    return { status: 200, body: { job, caption: result.caption ?? null } }
+    const item = await presentItem(db, id)
+    return {
+      status: 200,
+      body: {
+        item,
+        caption: result.caption ?? null,
+        note: 'El borrador quedó en caption_draft. La etapa Caption del tab usa generated_caption y no se promueve aquí.',
+      },
+    }
   }
 
-  const decision = decideRegister(row)
-  if (!decision.ok) return { status: 409, body: { error: decision.error } }
+  const blocked = closed(row)
+  if (blocked) return blocked
 
   if (request.step === 'upload') {
     const upload = await presignPut(id, request.fileName, request.contentType)
-    if ('error' in upload) return { status: 503, body: { error: upload.error, jobId: id } }
-    return { status: 200, body: { jobId: id, upload } }
+    if ('error' in upload) return { status: 503, body: { error: upload.error, ideaId: id } }
+    return { status: 200, body: { ideaId: id, upload } }
   }
 
   const { data: video, error: videoError } = await db
     .from('content_idea_videos')
-    .insert(editedVideoInsert({
+    .insert(pipelineVideoInsert({
       ideaId: id,
       key: request.key,
       name: request.name,
@@ -210,34 +192,13 @@ export async function retryOperatorJob(
     return { status: 500, body: { error: videoError?.message ?? 'No se pudo registrar el corte' } }
   }
 
-  const patch = registerUpdate(row, new Date().toISOString())
-  let reviewUnchanged = !decision.submitToReview
-  if (patch) {
-    const { data: changed, error: updateError } = await db
-      .from('content_ideas')
-      .update(patch)
-      .eq('id', id)
-      .eq('approval_status', row.approval_status)
-      .eq('status', row.status)
-      .select('id')
-      .maybeSingle()
-    if (updateError || !changed) {
-      reviewUnchanged = true
-    } else {
-      reviewUnchanged = false
-    }
-  }
-
-  const job = await presentJob(db, id)
+  const item = await presentItem(db, id)
   return {
     status: 200,
     body: {
-      job,
+      item,
       videoId: video.id,
-      reviewUnchanged,
-      ...(reviewUnchanged
-        ? { note: 'El corte quedó registrado. El estado de revisión no cambió.' }
-        : { note: 'El corte quedó registrado y pasó a revisión.' }),
+      note: 'El corte quedó en Pipeline de videos. La idea no cambió de estado y no entró a Revisión.',
     },
   }
 }
