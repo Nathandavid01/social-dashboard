@@ -4,6 +4,8 @@ Consulta también las instrucciones del proyecto en [CLAUDE.md](CLAUDE.md).
 
 ## Edición de video
 
+En cada edición y revisión, aplica el [Grafo de Revisión Nate](docs/GRAFO-REVISION-NATE.md), incluido el agente de documentación y actualización de Obsidian.
+
 En todas las ediciones de video, lee y aplica el [master prompt de efectos de sonido](docs/SOUND-EFFECTS-MASTER-PROMPT.md), salvo que el usuario indique una excepción o cambie estas reglas.
 
 ## Entrega de cambios — Eric, 18 de octubre de 2026
