@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: '20'
           cache: npm
+      - name: Video publication preflight tests
+        run: python3 -m unittest discover -s tools/nate-video-review -p "test_*.py"
       - run: npm ci
       - name: Unit tests
         run: npm test -- --exclude '**/.claude/**' --exclude '**/*.live.test.ts'
