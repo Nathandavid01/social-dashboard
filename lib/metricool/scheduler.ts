@@ -28,6 +28,7 @@ export interface ScheduledPost {
   brandName?: string
   targetBrandId?: number
   media?: unknown[]
+  videoThumbnailUrl?: string
 }
 
 export interface ScheduleVerification {

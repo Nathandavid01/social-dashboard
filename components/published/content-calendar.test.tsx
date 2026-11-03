@@ -92,6 +92,50 @@ it('plays an uploaded video in its detail card',async()=>{
  expect(screen.getByRole('dialog').querySelector('video')).toHaveAttribute('controls')
 })
 
+it('shows a VIDEO/REEL carátula from the existing thumbnail the same way a POST shows its image', async () => {
+  const video = { ...base, id: 3, text: 'Ubicación — La Mía Pizza (V11)', media: [{ url: 'https://media.example/ubicacion.mp4', type: 'video', thumbnail: 'https://media.example/ubicacion.jpg' }] }
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [video] }) }))
+  render(<ContentCalendar clients={[]} />)
+  const card = (await screen.findAllByRole('button', { name: /Ubicación — La Mía Pizza/ })).find(button => button.closest('[data-calendar-date]'))
+  expect(card).toBeTruthy()
+  const cover = card!.querySelector('img')
+  expect(cover).toHaveAttribute('src', 'https://media.example/ubicacion.jpg')
+  expect(cover).toHaveAttribute('alt', expect.stringMatching(/Ubicación/))
+  expect(card!.querySelector('video')).toBeNull()
+})
+
+it('keeps a VIDEO/REEL card without a carátula text-only in the grid', async () => {
+  const video = { ...base, id: 4, text: 'Me hacen falta los cubiertos', media: [{ url: 'https://media.example/cubiertos.mp4', type: 'video' }] }
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [video] }) }))
+  render(<ContentCalendar clients={[]} />)
+  const card = (await screen.findAllByRole('button', { name: /Me hacen falta los cubiertos/ })).find(button => button.closest('[data-calendar-date]'))
+  expect(card).toBeTruthy()
+  expect(card!.querySelector('img')).toBeNull()
+  expect(card!.querySelector('video')).toBeNull()
+  expect(card!.querySelector('svg')).toBeTruthy()
+})
+
+it('shows a VIDEO/REEL carátula from Metricool videoThumbnailUrl when media is only the mp4', async () => {
+  const video = { ...base, id: 6, text: 'Ubicación — La Mía Pizza (V11)', media: [{ url: 'https://media.example/ubicacion.mp4', type: 'video' }], videoThumbnailUrl: 'https://media.example/ubicacion-cover.jpg' }
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [video] }) }))
+  render(<ContentCalendar clients={[]} />)
+  const card = (await screen.findAllByRole('button', { name: /Ubicación — La Mía Pizza/ })).find(button => button.closest('[data-calendar-date]'))
+  expect(card!.querySelector('img')).toHaveAttribute('src', 'https://media.example/ubicacion-cover.jpg')
+  expect(card!.querySelector('video')).toBeNull()
+})
+
+it('still plays a VIDEO/REEL with carátula in the detail dialog', async () => {
+  const video = { ...base, id: 5, text: 'Ubicación — La Mía Pizza (V11)', media: [{ url: 'https://media.example/ubicacion.mp4', type: 'video', thumbnail: 'https://media.example/ubicacion.jpg' }] }
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ posts: [video] }) }))
+  render(<ContentCalendar clients={[]} />)
+  fireEvent.click((await screen.findAllByRole('button', { name: /Ubicación — La Mía Pizza/ }))[0])
+  const dialog = screen.getByRole('dialog')
+  const player = dialog.querySelector('video')
+  expect(player).toHaveAttribute('src', 'https://media.example/ubicacion.mp4')
+  expect(player).toHaveAttribute('controls')
+  expect(player).toHaveAttribute('poster', 'https://media.example/ubicacion.jpg')
+})
+
 it('shows each client frequency and marks expected weekdays even when Metricool has no posts',async()=>{
  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],checkedAt:new Date().toISOString()})}))
  render(<ContentCalendar clients={[{id:'a',name:'Cliente A',metricool_blog_id:'1',posting_days:[1,3,5],posting_time:'10:00'},{id:'b',name:'Cliente B',metricool_blog_id:null,posting_days:[]}]} />)

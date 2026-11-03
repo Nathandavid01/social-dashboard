@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nate Media · v5.154 · Carátula de Reels</title>
+<style>
+  body{margin:0;background:#090909;color:#f4f4f4;font:15px/1.45 system-ui,sans-serif}
+  main{max-width:980px;margin:auto;padding:36px 20px 56px}
+  h1{color:#eab308;font-size:28px;margin:8px 0 12px}
+  p{color:#c7c7c7}
+  .week{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:28px 0}
+  .day{background:#111;border:1px solid #2a2a2a;border-radius:18px;padding:14px}
+  .day h2{margin:0 0 12px;font-size:14px;color:#aaa}
+  article{background:#181818;border:1px solid #333;border-radius:14px;overflow:hidden}
+  .cover{aspect-ratio:4/3;background:#222 center/cover no-repeat}
+  .cover.empty{display:grid;place-items:center;color:#666;font-size:12px}
+  .body{padding:10px 12px 12px}
+  .tag{display:inline-flex;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.02em}
+  .reel{background:#14532d;color:#bbf7d0}
+  .post{background:#7c2d12;color:#fdba74}
+  .title{margin:8px 0 4px;font-size:13px;font-weight:600}
+  .state{font-size:11px;color:#9ca3af}
+  .note{background:#151515;border:1px solid #333;border-radius:14px;padding:16px 18px;margin-top:8px}
+</style>
+<main>
+  <p>v5.154 · Vista previa · Calendario de publicaciones</p>
+  <h1>Los Reels ya muestran carátula</h1>
+  <p>Misma semana de La Mía: el Post del jueves ya tenía foto. Miércoles y viernes ahora usan la miniatura que ya existe.</p>
+  <div class="week" aria-label="Después">
+    <div class="day">
+      <h2>Mié 4</h2>
+      <article>
+        <div class="cover" style="background-image:linear-gradient(180deg,#1f2937,#0f172a),radial-gradient(circle at 40% 40%,#f59e0b33,transparent 55%)" role="img" aria-label="Carátula de Ubicación — La Mía Pizza (V11)"></div>
+        <div class="body">
+          <span class="tag reel">VIDEO / REEL</span>
+          <p class="title">Ubicación — La Mía Pizza (V11)</p>
+          <p class="state">Disponible</p>
+        </div>
+      </article>
+    </div>
+    <div class="day">
+      <h2>Jue 5</h2>
+      <article>
+        <div class="cover" style="background:#7f1d1d;display:grid;place-items:center;font-weight:800;letter-spacing:.04em">ME DEBES<br>UNA PIZZA</div>
+        <div class="body">
+          <span class="tag post">POST</span>
+          <p class="title">Me debes una pizza y lo sabes — La Mía (Post V3)</p>
+          <p class="state">Draft</p>
+        </div>
+      </article>
+    </div>
+    <div class="day">
+      <h2>Vie 6</h2>
+      <article>
+        <div class="cover" style="background-image:linear-gradient(180deg,#111827,#1e293b)" role="img" aria-label="Carátula de Me hacen falta los cubiertos"></div>
+        <div class="body">
+          <span class="tag reel">VIDEO / REEL</span>
+          <p class="title">Me hacen falta los cubiertos… (v4 · con el loading)</p>
+          <p class="state">Disponible</p>
+        </div>
+      </article>
+    </div>
+  </div>
+  <div class="note">
+    <p><strong>Si no hay carátula:</strong> la tarjeta se queda en texto, como antes. No se inventa una foto.</p>
+    <p>Antes (referencia): Mié y Vie salían solo con título, sin miniatura.</p>
+  </div>
+</main>
+</html>

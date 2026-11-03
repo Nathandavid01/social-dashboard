@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ChevronLeft, ChevronRight, RefreshCw, CalendarDays, ImageIcon, ArrowUpRight } from 'lucide-react'
 import type { PublishedPost } from '@/app/api/metricool/posts/route'
+import { calendarCoverUrl } from '@/lib/published/calendar-cover'
 import { calendarPostDate, calendarPostState, puertoRicoNow, type CalendarPostState } from '@/lib/published/calendar-post'
 import { calendarCadenceDays, calendarCadenceSlot, CADENCE_DAY_NAMES } from '@/lib/published/calendar-cadence'
 import { cn } from '@/lib/utils'
@@ -51,12 +52,13 @@ function StateBadge({ post }: { post: PublishedPost }) {
 function Thumbnail({ post, className, playable = false }: { post: PublishedPost; className?: string; playable?: boolean }) {
   const [failed, setFailed] = useState(false)
   const media = post.media?.[0]
+  const cover = calendarCoverUrl(post.media, post.videoThumbnailUrl)
   const isVideo = media?.type?.toLowerCase().includes('video') || /\.(mp4|mov|webm)(?:\?|$)/i.test(media?.url ?? '')
   return <div className={cn('overflow-hidden rounded-lg bg-muted flex items-center justify-center', className)}>
-    {media?.url && isVideo && !failed
-      ? <video src={media.url} muted={!playable} controls={playable} preload="metadata" className="h-full w-full object-cover" onError={() => setFailed(true)} />
-      : media?.url && !isVideo && !failed
-      ? <img width={320} height={200} src={media.url} alt={post.text.slice(0, 70) || 'Vista previa del contenido'} loading="lazy" className="h-full w-full object-cover" onError={() => setFailed(true)} />
+    {playable && media?.url && isVideo && !failed
+      ? <video src={media.url} poster={cover ?? undefined} muted={!playable} controls={playable} preload="metadata" className="h-full w-full object-cover" onError={() => setFailed(true)} />
+      : cover && !failed
+      ? <img width={320} height={200} src={cover} alt={post.text.slice(0, 70) || 'Vista previa del contenido'} loading="lazy" className="h-full w-full object-cover" onError={() => setFailed(true)} />
       : <ImageIcon className="h-5 w-5 text-muted-foreground/50" />}
   </div>
 }
