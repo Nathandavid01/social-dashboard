@@ -3,24 +3,55 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CalendarPostControls } from './calendar-post-controls'
 const h = vi.hoisted(() => ({ allowed: true, deleteAllowed: true }))
 vi.mock('@/components/auth/role-gate', () => ({ useHasPermission: (perm: string) => h.allowed && (perm !== 'posting.calendar.delete_draft' || h.deleteAllowed) }))
-const post = { id: 4, uuid: 'u', clientId: 'c', blogId: '1', text: 'Caption', draft: false, autoPublish: true, publicationDate: '2099-10-20T10:00:00', timezone: 'America/Puerto_Rico', media: [], platforms: ['instagram'], providerStatuses: ['PENDING'] }
+const post = { id: 4, uuid: 'u', clientId: 'c', clientName: 'Cliente A', blogId: '1', text: 'Caption', draft: false, autoPublish: true, publicationDate: '2099-10-20T10:00:00', timezone: 'America/Puerto_Rico', media: [], platforms: ['instagram'], providerStatuses: ['PENDING'] }
 afterEach(() => { cleanup(); h.allowed = true; h.deleteAllowed = true; vi.unstubAllGlobals() })
 describe('calendar draft and schedule controls', () => {
-  it('sends the chosen date to schedule the existing post', async () => {
+  it('asks for confirmation before scheduling a new date in Metricool', async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, confirmed: true, postId: 9 }) })
     vi.stubGlobal('fetch', fetcher)
     const changed = vi.fn()
     render(<CalendarPostControls post={post} onChanged={changed} onVerify={() => {}} />)
     fireEvent.change(screen.getByLabelText('Fecha y hora de publicación'), { target: { value: '2099-10-22T18:30' } })
     fireEvent.click(screen.getByRole('button', { name: 'Programar' }))
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(screen.getByText('¿Reprogramar en Metricool?')).toBeInTheDocument()
+    expect(screen.getByText(/2099-10-22 · 18:30/)).toBeInTheDocument()
+    expect(screen.getByText(/Cliente A|instagram/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sí, reprogramar' }))
     await waitFor(() => expect(changed).toHaveBeenCalled())
     expect(JSON.parse(fetcher.mock.calls[0][1].body)).toMatchObject({ action: 'schedule', postId: 4, dateTime: '2099-10-22T18:30' })
   })
-  it('saves a draft without a scheduling request', async () => {
+
+  it('cancelling the schedule confirmation does not write to Metricool', () => {
+    const fetcher = vi.fn()
+    vi.stubGlobal('fetch', fetcher)
+    render(<CalendarPostControls post={post} onChanged={() => {}} onVerify={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Fecha y hora de publicación'), { target: { value: '2099-10-22T18:30' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Programar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.queryByText('¿Reprogramar en Metricool?')).toBeNull()
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+
+  it('does not call Metricool when the chosen date is already scheduled', async () => {
+    const fetcher = vi.fn()
+    vi.stubGlobal('fetch', fetcher)
+    const changed = vi.fn()
+    render(<CalendarPostControls post={post} onChanged={changed} onVerify={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Programar' }))
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(changed).not.toHaveBeenCalled()
+    expect(screen.queryByText('¿Reprogramar en Metricool?')).toBeNull()
+    expect(await screen.findByText(/Sin cambios/)).toBeInTheDocument()
+  })
+  it('saves a draft only after confirming the Metricool write', async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, confirmed: true }) })
     vi.stubGlobal('fetch', fetcher)
     render(<CalendarPostControls post={post} onChanged={() => {}} onVerify={() => {}} />)
     fireEvent.click(screen.getByRole('button', { name: 'Guardar como borrador' }))
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(screen.getByText('¿Guardar como borrador en Metricool?')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sí, guardar borrador' }))
     await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1))
     expect(JSON.parse(fetcher.mock.calls[0][1].body)).toMatchObject({ action: 'draft', postId: 4 })
   })
@@ -29,6 +60,7 @@ describe('calendar draft and schedule controls', () => {
     const verify = vi.fn()
     render(<CalendarPostControls post={post} onChanged={() => {}} onVerify={verify} />)
     fireEvent.click(screen.getByRole('button', { name: 'Guardar como borrador' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sí, guardar borrador' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Verifica antes de repetir.')
     expect(screen.getByRole('button', { name: 'Programar' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Verificar calendario' }))

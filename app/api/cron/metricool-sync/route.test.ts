@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const runMetricoolPublishedSync = vi.fn(async () => ({ moved: 1 }))
@@ -78,6 +80,11 @@ describe('GET /api/cron/metricool-sync — auditoría: el cron ya no acepta a cu
     expect(res.status).toBe(200)
     expect(runMetricoolPublishedSync).toHaveBeenCalledTimes(1)
   })
+  it('corre el pull de Metricool al calendario cada 6 horas', () => {
+    const vercel = JSON.parse(readFileSync(resolve(process.cwd(), 'vercel.json'), 'utf8')) as { crons: { path: string; schedule: string }[] }
+    expect(vercel.crons.find((cron) => cron.path === '/api/cron/metricool-sync')?.schedule).toBe('0 */6 * * *')
+  })
+
   it('le da al cruce de Recibo un plazo de 20 s: el cron tiene 60 y el sync de siempre va después', async () => {
     vi.stubEnv('CRON_SECRET', 'secreto-real')
     const before = Date.now()

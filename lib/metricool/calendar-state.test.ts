@@ -12,6 +12,14 @@ describe('Metricool draft and scheduling transitions', () => {
   it('rejects invalid and elapsed dates rather than publishing immediately', () => {
     for (const date of ['2026-02-30T10:00', '2026-10-22T25:00', '2020-01-01T10:00', '']) expect(() => buildCalendarStateUpdate(post, 'schedule', date, new Date('2026-10-08T12:00:00Z'))).toThrow()
   })
+  it('moves a draft to another day without turning on auto-publish', () => {
+    expect(buildCalendarStateUpdate({ ...post, draft: true }, 'draft', '2026-10-22T18:30', new Date('2026-10-08T12:00:00Z'))).toMatchObject({
+      draft: true,
+      autoPublish: false,
+      publicationDate: { dateTime: '2026-10-22T18:30:00', timezone: 'America/Puerto_Rico' },
+    })
+  })
+
   it('cannot rewind a published post or change a post currently being published', () => {
     for (const status of ['PUBLISHED', 'PUBLISHING', 'UNKNOWN']) expect(() => buildCalendarStateUpdate({ ...post, providers: [{ network: 'instagram', status }] }, 'draft')).toThrow()
   })
