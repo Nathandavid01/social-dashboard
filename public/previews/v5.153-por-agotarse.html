@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>v5.153 — Cerrar clientes por agotarse</title>
+  <style>
+    body { margin: 0; font-family: Inter, Arial, Helvetica, sans-serif; background: #0b0d0f; color: #f5f5f4; }
+    main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 22px; margin: 0; }
+    p { color: #a8a29e; font-size: 13px; line-height: 1.45; }
+    .muted { color: #78716c; font-size: 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0; }
+    .select, .chip, .btn {
+      min-height: 44px; border-radius: 999px; border: 1px solid #292524;
+      background: #12161a; color: #f5f5f4; padding: 0 14px; font-size: 12px;
+    }
+    .panel { border: 1px solid #292524; border-radius: 16px; padding: 18px; background: #12161a; }
+    .head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .kicker { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #a8a29e; margin: 0; }
+    .title { font-size: 20px; margin: 6px 0 4px; }
+    .badge { display: inline-flex; align-items: center; min-height: 32px; border-radius: 999px; border: 1px solid #44403c; padding: 0 10px; font-size: 12px; }
+    .x { min-width: 44px; min-height: 44px; border-radius: 999px; border: 1px solid #44403c; background: transparent; color: #f5f5f4; }
+    .grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 16px; }
+    @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .card { border: 1px solid #292524; border-radius: 14px; padding: 16px; background: #0b0d0f; }
+    .horizon { font-size: 11px; color: #a8a29e; margin: 0 0 6px; }
+    .name { font-size: 14px; font-weight: 700; margin: 0; }
+    .cal { margin-top: 12px; min-height: 44px; border: 0; border-radius: 999px; background: #e6af23; color: #000; font-weight: 700; padding: 0 14px; }
+    .after { margin-top: 36px; }
+    .cal-box { border: 1px dashed #44403c; border-radius: 16px; padding: 24px; text-align: center; color: #a8a29e; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">Vista de ejemplo · v5.153 · Grabación</p>
+    <h1>Antes: la lista de por agotarse tapa el calendario</h1>
+    <p>Con un cliente elegido (Mia Pizzeria) todavía se veía la pared de 9 clientes. No había forma de cerrarla.</p>
+    <div class="row">
+      <span class="select">Cliente · Mia Pizzeria (hasta ≈ 15 nov 2026)</span>
+      <span class="chip">Todos los clientes</span>
+      <span class="chip">Por grabar</span>
+    </div>
+    <section class="panel">
+      <div class="head">
+        <div>
+          <p class="kicker">Preparar próximas grabaciones</p>
+          <h2 class="title">Clientes por quedarse sin videos</h2>
+          <p>Menos de dos semanas de videos editados pendientes, según su frecuencia semanal.</p>
+        </div>
+        <span class="badge">9 por agotarse</span>
+      </div>
+      <div class="grid">
+        <article class="card"><p class="horizon">Una semana o menos</p><p class="name">643 Sport Bar &amp; Pizzeria</p><p>1 video editado pendiente — 3 por semana</p><p>Hasta ≈ 4 nov 2026</p><button class="cal" type="button">Ver calendario</button></article>
+        <article class="card"><p class="horizon">Una semana o menos</p><p class="name">Apiario Coffee</p><p>2 videos editados pendientes — 3 por semana</p><p>Hasta ≈ 6 nov 2026</p><button class="cal" type="button">Ver calendario</button></article>
+        <article class="card"><p class="horizon">Una semana o menos</p><p class="name">El Caldo</p><p>2 videos editados pendientes — 3 por semana</p><p>Hasta ≈ 6 nov 2026</p><button class="cal" type="button">Ver calendario</button></article>
+      </div>
+    </section>
+
+    <div class="after">
+      <h1>Después: cierras el panel, o eliges un cliente y desaparece</h1>
+      <p>Cerrar / Ocultar lo guarda. El chip «2 por agotarse» o «Por grabar» lo vuelve a abrir. Con un cliente elegido solo ves su calendario.</p>
+      <div class="row">
+        <span class="select">Cliente · Todos los clientes</span>
+        <span class="chip">2 por agotarse</span>
+        <span class="chip">Por grabar</span>
+      </div>
+      <section class="panel">
+        <div class="head">
+          <div>
+            <p class="kicker">Preparar próximas grabaciones</p>
+            <h2 class="title">Clientes por quedarse sin videos</h2>
+            <p>Menos de dos semanas de videos editados pendientes, según su frecuencia semanal.</p>
+          </div>
+          <div class="row" style="margin:0">
+            <span class="badge">2 por agotarse</span>
+            <button class="x" type="button" aria-label="Cerrar">✕</button>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card"><p class="horizon">Una semana o menos</p><p class="name">643 Sport Bar &amp; Pizzeria</p><p>1 video editado pendiente — 3 por semana</p><p>Hasta ≈ 4 nov 2026</p><button class="cal" type="button">Ver calendario</button></article>
+          <article class="card"><p class="horizon">1–2 semanas</p><p class="name">Mia Pizzeria</p><p>2 videos editados pendientes — 2 por semana</p><p>Hasta ≈ 15 nov 2026</p><button class="cal" type="button">Ver calendario</button></article>
+        </div>
+      </section>
+      <div class="row" style="margin-top:28px">
+        <span class="select">Cliente · Mia Pizzeria</span>
+      </div>
+      <div class="cal-box">Calendario de Grabación · solo Mia Pizzeria. El muro de por agotarse no está.</div>
+    </div>
+  </main>
+</body>
+</html>

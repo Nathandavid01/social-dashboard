@@ -547,3 +547,49 @@ describe('confirmation filter chips (#166 follow-up)', () => {
     expect(screen.queryByText('Cliente Abierto')).not.toBeInTheDocument()
   })
 })
+
+describe('panel de clientes por agotarse', () => {
+  const lowStock = [{
+    clientId: 'c1',
+    clientName: 'Nora Fitness',
+    logoUrl: null,
+    perWeek: 3,
+    listos: 1,
+    reels: 1,
+    posts: 0,
+    agendados: 0,
+    crudo: 0,
+    sinArchivo: 0,
+    porGrabar: 0,
+    salieron: 0,
+    lastRawAt: null,
+    daysLeft: 4,
+    runOutDate: '2026-11-04',
+    runOutFormat: 'reel' as const,
+    necesitaGrabar: true,
+    health: 'critico' as const,
+  }]
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('shows the wall on Todos and hides it when that client is chosen', () => {
+    render(
+      <RecordingCalendarClient
+        initialSessions={[session()]}
+        clients={clients}
+        teamMembers={team}
+        clientIdeasMap={{}}
+        lowStockClients={lowStock}
+      />,
+    )
+    expect(screen.getByRole('region', { name: 'Clientes por quedarse sin videos' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('combobox', { name: 'Cliente' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Nora Fitness' }))
+    expect(screen.queryByRole('region', { name: 'Clientes por quedarse sin videos' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('combobox', { name: 'Cliente' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Todos los clientes' }))
+    expect(screen.getByRole('region', { name: 'Clientes por quedarse sin videos' })).toBeInTheDocument()
+  })
+})
