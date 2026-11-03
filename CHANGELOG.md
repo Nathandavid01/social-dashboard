@@ -1,3 +1,12 @@
+## v5.153 — 3 de noviembre de 2026
+
+**En Grabación puedes cerrar la lista de clientes por agotarse y, si eliges uno, pasas directo a su calendario.**
+- El panel «Clientes por quedarse sin videos» tiene Cerrar / Ocultar. Si lo cierras, al volver a la página no se abre solo.
+- Si eliges un cliente en el dropdown, la lista de varios clientes se esconde y ves su calendario. «Todos los clientes» o «Por grabar» la vuelven a mostrar.
+- El chip «N por agotarse» reabre el panel cuando lo habías cerrado.
+
+![Cerrar clientes por agotarse](/changelog/v5.153-por-agotarse.png)
+
 ## v5.152 — 23 de octubre de 2026
 
 **El asistente opera el Pipeline de videos de Video QC, no un trabajo aparte de Entregas.**

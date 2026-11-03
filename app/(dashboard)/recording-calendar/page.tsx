@@ -1,4 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { currentUserHas } from '@/lib/auth/server'
+import { loadVideoStock } from '@/lib/inventario/load-video-stock'
+import { selectLowStockClients } from '@/lib/recording/low-stock-panel'
 import { RecordingCalendarClient } from '@/components/recording/recording-calendar-client'
 import type { Client, Profile, ContentIdea } from '@/lib/supabase/types'
 
@@ -14,7 +17,8 @@ export default async function RecordingCalendarPage({ searchParams }: { searchPa
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1)
   const monthEnd = nextMonth.toISOString().slice(0, 10)
 
-  const [sessionsResult, { data: clients }, { data: teamMembers }, { data: ideas }] = await Promise.all([
+  const canReadStock = await currentUserHas('video_stock.read')
+  const [sessionsResult, { data: clients }, { data: teamMembers }, { data: ideas }, stock] = await Promise.all([
     supabase
       .from('recording_sessions')
       .select(`
@@ -34,6 +38,7 @@ export default async function RecordingCalendarPage({ searchParams }: { searchPa
       .select('*')
       .in('status', ['idea', 'asignada', 'grabada'])
       .order('created_at', { ascending: false }),
+    canReadStock ? loadVideoStock() : Promise.resolve(null),
   ])
 
   // Build a map: clientId → ideas[]
@@ -50,6 +55,7 @@ export default async function RecordingCalendarPage({ searchParams }: { searchPa
       clients={(clients ?? []) as Pick<Client, 'id' | 'name' | 'posting_days' | 'assigned_to'>[]}
       teamMembers={(teamMembers ?? []) as Pick<Profile, 'id' | 'full_name'>[]}
       clientIdeasMap={clientIdeasMap}
+      lowStockClients={stock ? selectLowStockClients(stock.clients) : []}
     />
   )
 }

@@ -94,6 +94,8 @@ import { es } from 'date-fns/locale'
 import { friendlyError } from '@/lib/utils/error-message'
 import { videographerConflictsInRange } from '@/lib/utils/videographer-conflicts'
 import { GOOGLE_CALENDAR_HOME_URL, sessionsToIcs } from '@/lib/utils/google-calendar'
+import type { ClientStock } from '@/lib/inventario/video-stock-core'
+import { LowStockClientsPanel } from './low-stock-clients-panel'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -108,6 +110,8 @@ interface RecordingCalendarClientProps {
   clients: (Pick<Client, 'id' | 'name'> & Partial<Pick<Client, 'posting_days' | 'assigned_to'>>)[]
   teamMembers: Pick<Profile, 'id' | 'full_name'>[]
   clientIdeasMap: Record<string, ContentIdea[]>  // clientId → ideas
+  /** Clients with < 2 weeks of edited videos. Empty when the reader lacks video_stock.read. */
+  lowStockClients?: ClientStock[]
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -603,7 +607,7 @@ function SessionCard({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap, initialVideographer }: RecordingCalendarClientProps) {
+export function RecordingCalendarClient({ initialSessions, clients, teamMembers, clientIdeasMap, initialVideographer, lowStockClients = [] }: RecordingCalendarClientProps) {
   const canAssign = useHasPermission('recording.brief')
   const canConfirm = useHasAnyPermission(['recording.create', 'operations.overview'])
   const [sessions, setSessions] = useState<ExtendedSession[]>(initialSessions)
@@ -924,7 +928,7 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </SelectContent>
         </Select>
         <Select value={filterClient} onValueChange={setFilterClient}>
-          <SelectTrigger className="h-11 w-full text-xs sm:w-[190px]">
+          <SelectTrigger className="h-11 w-full text-xs sm:w-[190px]" aria-label="Cliente">
             <SelectValue placeholder="Todos los clientes" />
           </SelectTrigger>
           <SelectContent>
@@ -938,6 +942,14 @@ export function RecordingCalendarClient({ initialSessions, clients, teamMembers,
           </Button>
         )}
       </div>
+
+      {lowStockClients.length > 0 && (
+        <LowStockClientsPanel
+          clients={lowStockClients}
+          selectedClientId={filterClient === 'all' ? null : filterClient}
+          onSelectClient={setFilterClient}
+        />
+      )}
 
       <div className="flex flex-wrap items-center gap-1.5" aria-label="Filtro de confirmación">
         {([
