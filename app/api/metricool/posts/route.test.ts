@@ -81,3 +81,11 @@ it('normalizes media URLs returned as strings so uploaded images have calendar p
  const data=await (await GET(new NextRequest('http://localhost/api/metricool/posts?clientId=c&includeDrafts=true'))).json()
  expect(data.posts[0].media).toEqual([{url:'https://media.example/photo.jpg'}])
 })
+
+it('keeps the Metricool thumbnail on a VIDEO so calendar cards can show a carátula',async()=>{
+ vi.stubEnv('METRICOOL_TOKEN','test');vi.stubEnv('METRICOOL_USER_ID','test')
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({data:[{id:1,draft:true,providers:[],publicationDate:{dateTime:'2099-10-20T10:30:00'},media:[{url:'https://media.example/ubicacion.mp4',type:'video',thumbnail:'https://media.example/ubicacion.jpg'}],videoThumbnailUrl:'https://media.example/ubicacion-cover.jpg'}]})}))
+ const data=await (await GET(new NextRequest('http://localhost/api/metricool/posts?clientId=c&includeDrafts=true'))).json()
+ expect(data.posts[0].media).toEqual([{url:'https://media.example/ubicacion.mp4',type:'video',thumbnail:'https://media.example/ubicacion.jpg'}])
+ expect(data.posts[0].videoThumbnailUrl).toBe('https://media.example/ubicacion-cover.jpg')
+})

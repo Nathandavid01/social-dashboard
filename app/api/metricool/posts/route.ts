@@ -16,7 +16,8 @@ export interface PublishedPost {
   providers?: { network: string; status: string; detailedStatus?: string; publicUrl?: string }[]
   draft: boolean
   autoPublish: boolean
-  media: { url?: string; type?: string }[]
+  media: { url?: string; type?: string; thumbnail?: string; thumbnailUrl?: string; poster?: string; preview?: string; previewUrl?: string; imageUrl?: string }[]
+  videoThumbnailUrl?: string
   clientName?: string
   clientId?: string
   blogId: string
@@ -32,7 +33,9 @@ async function fetchMetricoolPosts(blogId: string, start: string, end: string): 
     providerStatuses: (p.providers || []).map(x => x.status ?? 'UNKNOWN'),
     providers: (p.providers || []).map(x => ({ network: x.network, status: x.status ?? 'UNKNOWN', detailedStatus: x.detailedStatus, publicUrl: x.publicUrl })),
     draft: p.draft, autoPublish: p.autoPublish,
-    media: (p.media || []).map(m => typeof m === 'string' ? {url:m} : m) as PublishedPost['media'], blogId,
+    media: (p.media || []).map(m => typeof m === 'string' ? {url:m} : m) as PublishedPost['media'],
+    videoThumbnailUrl: typeof p.videoThumbnailUrl === 'string' ? p.videoThumbnailUrl : undefined,
+    blogId,
   }))
 }
 export async function GET(req: NextRequest) {

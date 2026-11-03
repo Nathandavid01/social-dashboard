@@ -1,3 +1,12 @@
+## v5.154 — 3 de noviembre de 2026
+
+**Los Reels del calendario ya muestran carátula, igual que los Posts.**
+- Si Metricool ya tiene miniatura (`videoThumbnailUrl` o poster), el VIDEO/REEL la enseña en la tarjeta como un Post.
+- Si no hay carátula, la tarjeta sigue en texto: no se inventa una foto ni se abre un video vacío.
+- Al tocar la pieza, el detalle sigue reproduciendo el video.
+
+![Carátula de Reels en el calendario](/changelog/v5.154-calendar-video-cover.png)
+
 ## v5.153 — 3 de noviembre de 2026
 
 **El calendario se sincroniza con Metricool cada 6 horas, y un cambio de fecha pide confirmación antes de escribir.**
