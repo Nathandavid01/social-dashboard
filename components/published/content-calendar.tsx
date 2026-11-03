@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useHasPermission } from '@/components/auth/role-gate'
 import { calendarDraftUnavailableReason } from '@/lib/recibo/calendar-draft-support'
+import { pullMetricoolCalendar } from '@/lib/actions/metricool-calendar-sync'
+import { calendarWriteNeedsMetricool } from '@/lib/metricool/calendar-write-intent'
 import { draftReciboOnDate } from '@/lib/actions/recibo-calendar-draft'
 import { sendReciboOnDate } from '@/lib/actions/recibo-calendar-send'
 import { setReciboCalendarHidden } from '@/lib/actions/recibo-calendar-hide'
@@ -58,10 +60,10 @@ function Thumbnail({ post, className, playable = false }: { post: PublishedPost;
       : <ImageIcon className="h-5 w-5 text-muted-foreground/50" />}
   </div>
 }
-function PostCard({ post, onOpen, compact = false }: { post: PublishedPost; onOpen: () => void; compact?: boolean }) {
+function PostCard({ post, onOpen, compact = false, draggable = false, onDragStart, onDragEnd }: { post: PublishedPost; onOpen: () => void; compact?: boolean; draggable?: boolean; onDragStart?: () => void; onDragEnd?: () => void }) {
   const wall = calendarPostDate(post)
   const time = wall.slice(11, 16)
-  return <button type="button" onClick={onOpen} className={cn('w-full min-w-0 text-left transition hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', compact ? 'flex gap-3 rounded-xl border border-border bg-card p-3' : 'overflow-hidden rounded-lg border border-border bg-card')}>
+  return <button type="button" draggable={draggable} onDragStart={event => { if (!draggable) { event.preventDefault(); return } event.dataTransfer.effectAllowed = 'move'; onDragStart?.() }} onDragEnd={onDragEnd} onClick={onOpen} className={cn('w-full min-w-0 text-left transition hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', compact ? 'flex gap-3 rounded-xl border border-border bg-card p-3' : 'overflow-hidden rounded-lg border border-border bg-card', draggable && 'cursor-grab')}>
     {compact && <Thumbnail post={post} className="h-20 w-20 shrink-0" />}
     <div className={cn('min-w-0 flex-1 space-y-1.5', !compact && 'p-1.5')}>
       <div className="flex flex-wrap gap-x-2 gap-y-1 text-[10px]">
@@ -80,12 +82,17 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
   const canDraft = useHasPermission('posting.publish')
   const canSend = useHasPermission('metricool.write')
   const canHide = useHasPermission('posting.calendar.hide')
+  const canSync = useHasPermission('metricool.read')
+  const canWriteMetricool = useHasPermission('metricool.write')
   const [drafted, setDrafted] = useState<string[]>([])
   const [hiddenOverride, setHiddenOverride] = useState<Record<string, boolean>>({})
   const [draftMessage, setDraftMessage] = useState('')
   const [dragging, setDragging] = useState(false)
   const dragPayload = useRef<{ideaId:string;clientId:string;videoId:string}|null>(null)
+  const metricoolDrag = useRef<PublishedPost | null>(null)
   const [dateChoice,setDateChoice] = useState<{ideaId:string;clientId:string;videoId:string;date:string;mode:'draft'|'send'}|null>(null)
+  const [reschedule,setReschedule] = useState<{post:PublishedPost;dateTime:string;action:'draft'|'schedule'}|null>(null)
+  const [syncing,setSyncing] = useState(false)
   const [view, setView] = useState<'month' | 'week'>('month')
   const [anchor, setAnchor] = useState(() => new Date(`${puertoRicoNow().slice(0, 10)}T12:00:00`))
   const [clientFilter, setClientFilter] = useState(clientId ?? 'all')
@@ -218,6 +225,93 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       {canHide && <button type="button" disabled={calendarBusy} className="w-full px-2 py-1 text-[11px] text-amber-900 underline-offset-2 hover:underline disabled:opacity-50" onClick={()=>void setHidden(idea,true)}>Quitar del calendario</button>}
     </article>
   }
+  function canDragPost(post: PublishedPost) {
+    const state = calendarPostState(post)
+    if (!post.clientId || ['published', 'partial', 'unknown'].includes(state)) return false
+    return post.draft ? canWriteMetricool : canWriteMetricool && canDraft
+  }
+  function requestMetricoolMove(post: PublishedPost, date: string) {
+    const current = calendarPostDate(post)
+    if (current.slice(0, 10) === date) return
+    const dateTime = `${date}T${current.slice(11, 16) || '10:00'}`
+    const action = post.draft ? 'draft' : 'schedule'
+    if (!calendarWriteNeedsMetricool({
+      action,
+      currentDraft: post.draft,
+      currentDateTime: post.publicationDate,
+      currentTimezone: post.timezone,
+      requestedDateTime: dateTime,
+    })) {
+      setDraftMessage('Sin cambios en Metricool. Esta publicación ya está en esa fecha.')
+      return
+    }
+    setReschedule({ post, dateTime, action })
+  }
+  async function confirmMetricoolMove() {
+    if (!reschedule || mutationInFlight.current) return
+    const { post, dateTime, action } = reschedule
+    mutationInFlight.current = true
+    setCalendarBusy(true)
+    setDraftMessage(action === 'schedule' ? 'Reprogramando en Metricool…' : 'Moviendo el borrador en Metricool…')
+    try {
+      const response = await fetch('/api/metricool/calendar-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          clientId: post.clientId,
+          blogId: post.blogId,
+          postId: post.id,
+          uuid: post.uuid,
+          dateTime,
+          expected: { draft: post.draft, publicationDate: post.publicationDate, timezone: post.timezone, text: post.text },
+        }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.ok) {
+        setDraftMessage(result.error || 'No se pudo reprogramar. Verifica Metricool antes de repetir.')
+        return
+      }
+      if (result.noop) {
+        setDraftMessage('Sin cambios en Metricool. Esta publicación ya está en esa fecha.')
+        setReschedule(null)
+        return
+      }
+      setReschedule(null)
+      setDraftMessage(result.confirmed
+        ? `${action === 'schedule' ? 'Reprogramado' : 'Borrador movido'} en Metricool para el ${dateTime.replace('T', ' · ')}.`
+        : `Metricool aceptó el cambio para el ${dateTime.replace('T', ' · ')}, pero falta verificarlo.`)
+      setStateFilter('all')
+      if (result.confirmed && action === 'schedule') setAnchor(new Date(`${dateTime.slice(0, 10)}T12:00:00`))
+      setRefresh(value => value + 1)
+    } catch {
+      setDraftMessage('No se pudo confirmar el cambio. Verifica Metricool antes de repetir.')
+    } finally {
+      mutationInFlight.current = false
+      setCalendarBusy(false)
+      metricoolDrag.current = null
+      setDragging(false)
+    }
+  }
+  async function sincronizar() {
+    if (!canSync || syncing || calendarBusy) return
+    setSyncing(true)
+    setDraftMessage('Sincronizando con Metricool…')
+    try {
+      const result = await pullMetricoolCalendar()
+      const unverified = result.unverifiedClients?.length
+        ? ` ${result.unverifiedClients.map(client => `${client.name} sin verificar`).join(', ')}.`
+        : ''
+      setDraftMessage(result.ok
+        ? `Sincronizado con Metricool.${unverified}`
+        : result.error || 'No se pudo sincronizar Metricool.')
+    } catch {
+      setDraftMessage('No se pudo sincronizar Metricool.')
+    } finally {
+      setSyncing(false)
+      setRefresh(value => value + 1)
+    }
+  }
   function onPostChanged(result: CalendarStateChange) {
     setSelected(null); setStateFilter('all')
     if (result.confirmed && result.action === 'schedule' && result.dateTime) setAnchor(new Date(`${result.dateTime.slice(0, 10)}T12:00:00`))
@@ -245,16 +339,17 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
         <Button aria-label="Período anterior" variant="outline" size="icon" disabled={calendarBusy} onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
         <Button aria-label="Período siguiente" variant="outline" size="icon" disabled={calendarBusy} onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
         <div className="flex rounded-lg border bg-muted/40 p-1">{(['month', 'week'] as const).map(v => <button key={v} disabled={calendarBusy} aria-pressed={view === v} onClick={() => setView(v)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', view === v ? 'bg-primary/15 text-primary' : 'text-muted-foreground')}>{v === 'month' ? '5 semanas' : 'Semana'}</button>)}</div>
-        <Button aria-label="Verificar con Metricool" variant="outline" size="sm" disabled={loading || calendarBusy} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Verificar</Button>
+        <Button aria-label="Verificar con Metricool" variant="outline" size="sm" disabled={loading || calendarBusy || syncing} onClick={() => setRefresh(r => r + 1)}><RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Verificar</Button>
+        {canSync && <Button aria-label="Sincronizar" variant="outline" size="sm" disabled={loading || calendarBusy || syncing} onClick={() => void sincronizar()}><RefreshCw className={cn('h-4 w-4', syncing && 'animate-spin')} /> Sincronizar</Button>}
       </div>
     </div>
     <div aria-live="polite" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <span className={cn('h-2 w-2 rounded-full', error || failedClients.length ? 'bg-amber-500' : checkedAt ? 'bg-emerald-500' : 'bg-muted-foreground')} />
-      {loading ? 'Verificando con Metricool…' : error ? 'Verificación no disponible' : failedClients.length ? 'Verificación incompleta' : checkedAt ? `Verificado con Metricool · ${new Date(checkedAt).toLocaleTimeString('es-PR', { timeZone: 'America/Puerto_Rico', hour: 'numeric', minute: '2-digit', second: '2-digit' })}` : 'Esperando verificación de Metricool'}
+      {loading ? 'Verificando con Metricool…' : error ? 'Verificación no disponible' : failedClients.length ? 'Clientes sin verificar' : checkedAt ? `Verificado con Metricool · ${new Date(checkedAt).toLocaleTimeString('es-PR', { timeZone: 'America/Puerto_Rico', hour: 'numeric', minute: '2-digit', second: '2-digit' })}` : 'Esperando verificación de Metricool'}
       <span>· Actualización automática cada minuto con el calendario abierto</span>
     </div>
     {draftMessage && <p role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">{draftMessage}</p>}
-    {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No se pudo verificar: {failedClients.map(c => c.name).join(', ')}. Los conteos están incompletos.</div>}
+    {failedClients.length > 0 && !error && <div role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{failedClients.map(c => `${c.name} sin verificar`).join(', ')}. Los conteos están incompletos; el cliente no se oculta.</div>}
     {activeClient && !activeClient.metricool_blog_id && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">Conecta {activeClient.name} con Metricool para ver sus publicaciones y subir contenido.</p>}
     {error && <div role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
     {projectionIdeas && !activeClient && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Selecciona un cliente para ver sus posts y videos pendientes en las fechas proyectadas y su cobertura.</p>}
@@ -296,12 +391,12 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
             const expected = cadenceClients.flatMap(client=>{const slot=calendarCadenceSlot(client,day.getDay());return slot?[{client,...slot}]:[]})
             const expectedShown=expandedCadenceDays[date]?expected:expected.slice(0,2)
             const shown = expandedDays[date] ? dayPosts : dayPosts.slice(0, 2)
-            return <div key={date} data-calendar-date={date} onDragOver={event=>{if(dragPayload.current && date>=today && !calendarBusy){event.preventDefault();event.dataTransfer.dropEffect='move'}}} onDrop={event=>{event.preventDefault();const payload=dragPayload.current;if(payload)void createCalendarDraft(payload,date)}} className={cn('min-h-[150px] min-w-0 break-words border-b border-r border-border/70 p-2 space-y-2 [overflow-wrap:anywhere]', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5', dragging && date>=today && 'ring-1 ring-inset ring-amber-400')}>
+            return <div key={date} data-calendar-date={date} onDragOver={event=>{if((dragPayload.current || metricoolDrag.current) && date>=today && !calendarBusy){event.preventDefault();event.dataTransfer.dropEffect='move'}}} onDrop={event=>{event.preventDefault();const metricool=metricoolDrag.current;if(metricool){if(date>=today && !calendarBusy)requestMetricoolMove(metricool,date);metricoolDrag.current=null;setDragging(false);return}const payload=dragPayload.current;if(payload && date>=today && !calendarBusy)setDateChoice({...payload,date,mode:'draft'})}} className={cn('min-h-[150px] min-w-0 break-words border-b border-r border-border/70 p-2 space-y-2 [overflow-wrap:anywhere]', day.getMonth() !== anchor.getMonth() && view === 'month' ? 'bg-muted/20' : 'bg-background/40', date === today && 'bg-primary/5', dragging && date>=today && 'ring-1 ring-inset ring-amber-400')}>
               <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-xs', date === today ? 'bg-primary font-semibold text-primary-foreground' : 'text-muted-foreground')}>{day.getDate()}</span>
               {expectedShown.map(slot=><p key={slot.client.id} className="break-words rounded-md border border-dashed border-violet-300 bg-violet-50 p-1.5 text-[11px] leading-snug text-violet-800 [overflow-wrap:anywhere]">Previsto · {slot.client.name}{slot.format?` · ${slot.format}`:''}{slot.time?` · ${slot.time}`:''}</p>)}
               {expected.length>2&&<button type="button" onClick={()=>setExpandedCadenceDays(s=>({...s,[date]:!s[date]}))} className="text-[10px] text-violet-700">{expandedCadenceDays[date]?'Ocultar días previstos':`+${expected.length-2} clientes previstos`}</button>}
               {stateFilter === 'all' && projection?.posts.filter(post => post.date === date).map(({idea,videoId,image}) => pendingCard(idea,videoId,image,true,date))}
-              {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} />)}
+              {loading ? <Skeleton className="h-20 rounded-lg" /> : shown.map(p => <PostCard key={key(p)} post={p} onOpen={() => setSelected(p)} draggable={canDragPost(p) && !calendarBusy} onDragStart={() => { metricoolDrag.current = p; dragPayload.current = null; setDragging(true) }} onDragEnd={() => { metricoolDrag.current = null; setDragging(false) }} />)}
               {dayPosts.length > 2 && <button onClick={() => setExpandedDays(s => ({ ...s, [date]: !s[date] }))} className="px-1 text-xs text-primary">{expandedDays[date] ? 'Ver menos' : `+${dayPosts.length - 2} más`}</button>}
             </div>
           })}</div>
@@ -326,6 +421,7 @@ export function ContentCalendar({ clients, clientId, projectionIdeas }: { client
       </aside>
     </div>
     <Dialog open={!!dateChoice} onOpenChange={open=>{if(!open && !calendarBusy)setDateChoice(null)}}><DialogContent className={styles.theme}><DialogHeader><DialogTitle>{dateChoice?.mode==='send'?'Enviar a Metricool':'Crear borrador para un día'}</DialogTitle><DialogDescription>{dateChoice?.mode==='send'?`Se publicará automáticamente el ${dateChoice.date} a las ${(dateChoice.date && calendarCadenceSlot(activeClient ?? {posting_days:[]},new Date(`${dateChoice.date}T12:00:00`).getDay())?.time) || 'hora configurada del cliente'} (Puerto Rico) en las redes del cliente.`:'Se guardará en Metricool como borrador. Publicarlo requiere una acción aparte.'}</DialogDescription></DialogHeader><label className="space-y-2 text-sm">Fecha · Puerto Rico<input aria-label={dateChoice?.mode==='send'?'Fecha de publicación':'Fecha del borrador'} type="date" min={today} value={dateChoice?.date??today} disabled={calendarBusy} className="block min-h-12 w-full rounded-lg border bg-background p-3 text-base" onChange={event=>setDateChoice(choice=>choice?{...choice,date:event.target.value}:null)}/></label><Button disabled={calendarBusy || !dateChoice?.date || dateChoice.date<today} onClick={()=>{if(dateChoice)void createCalendarDraft(dateChoice,dateChoice.date,dateChoice.mode)}}>{dateChoice?.mode==='send'?(calendarBusy?'Enviando…':'Programar publicación'):(calendarBusy?'Creando borrador…':'Crear borrador')}</Button></DialogContent></Dialog>
+    <Dialog open={!!reschedule} onOpenChange={open=>{if(!open && !calendarBusy)setReschedule(null)}}><DialogContent className={styles.theme}><DialogHeader><DialogTitle>¿Reprogramar en Metricool?</DialogTitle><DialogDescription>{reschedule && `${reschedule.post.clientName ?? 'Cliente'} · ${reschedule.dateTime.replace('T', ' · ')} · Hora de Puerto Rico · ${reschedule.post.platforms.join(', ')}${reschedule.action==='draft' ? '. Se mantiene como borrador; no se publica automáticamente.' : '. Se publicará automáticamente a esa hora.'}`}</DialogDescription></DialogHeader><div className="flex flex-wrap gap-2"><Button disabled={calendarBusy} onClick={()=>void confirmMetricoolMove()}>Sí, reprogramar</Button><Button variant="outline" disabled={calendarBusy} onClick={()=>setReschedule(null)}>Cancelar</Button></div></DialogContent></Dialog>
     <Dialog open={upcomingOpen} onOpenChange={setUpcomingOpen}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>Próximas publicaciones</DialogTitle><DialogDescription>Publicaciones programadas en el período seleccionado · Hora de Puerto Rico</DialogDescription></DialogHeader><div className="space-y-3">{upcoming.length ? upcoming.map(p => <PostCard key={key(p)} post={p} compact onOpen={() => { setUpcomingOpen(false); setSelected(p) }} />) : <p className="text-sm text-muted-foreground">Sin publicaciones programadas próximas.</p>}</div></DialogContent></Dialog>
     <Dialog open={!!selectedPost} onOpenChange={open => { if (!open && !mutationInFlight.current) setSelected(null) }}><DialogContent className={cn(styles.theme, 'max-h-[85vh] overflow-y-auto')}><DialogHeader><DialogTitle>{selectedPost?.clientName ?? 'Detalle de publicación'}</DialogTitle><DialogDescription>{selectedPost && `${calendarPostDate(selectedPost).replace('T', ' · ')} · Puerto Rico`}</DialogDescription></DialogHeader>{selectedPost && <div className="space-y-4"><StateBadge post={selectedPost} /><p className="text-xs capitalize text-muted-foreground">{selectedPost.platforms.join(' · ')}</p><Thumbnail post={selectedPost} className="h-56 w-full" playable /><div className="space-y-2 rounded-xl border p-3"><h4 className="text-sm font-semibold">Verificación por red</h4>{(selectedPost.providers ?? selectedPost.platforms.map((network, i) => ({ network, status: selectedPost.providerStatuses?.[i] ?? 'UNKNOWN', detailedStatus: undefined, publicUrl: undefined }))).map((provider, i) => <div key={`${provider.network}:${i}`} className="space-y-1 border-b py-2 last:border-0"><p className="text-xs"><span className="font-semibold capitalize">{provider.network}</span> · {provider.status === 'PUBLISHED' ? 'Publicado' : provider.status === 'PENDING' ? 'Pendiente' : provider.status === 'ERROR' ? 'Error' : 'Sin confirmar'}</p>{provider.detailedStatus && provider.detailedStatus !== provider.status && <p className="text-xs text-muted-foreground">{provider.detailedStatus}</p>}{provider.status === 'PUBLISHED' && provider.publicUrl && /^https?:\/\//i.test(provider.publicUrl) && <a href={provider.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary">Ver publicación en {provider.network}<ArrowUpRight className="h-3 w-3" /></a>}</div>)}</div><p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedPost.text || 'Sin caption'}</p><CalendarPostControls key={`${key(selectedPost)}:${checkedAt}`} post={selectedPost} onChanged={onPostChanged} verifying={loading} onBusy={busy => { mutationInFlight.current = busy; setCalendarBusy(busy) }} onVerify={() => setRefresh(r => r + 1)} /><Button asChild variant="outline"><Link href="/published">Abrir contenido publicado</Link></Button></div>}</DialogContent></Dialog>
   </section>

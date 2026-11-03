@@ -1,3 +1,13 @@
+## v5.153 — 3 de noviembre de 2026
+
+**El calendario se sincroniza con Metricool cada 6 horas, y un cambio de fecha pide confirmación antes de escribir.**
+- Nuevo botón **Sincronizar** en el calendario de publicaciones: trae borradores, programados y publicados de Metricool al día correcto (hora de Puerto Rico).
+- El cron de Metricool ahora corre cada 6 horas. Sigue enlazando Recibo y marcando ideas publicadas; además actualiza la fecha del calendario. Si un perfil falla, el cliente queda **sin verificar** — no se oculta.
+- Arrastrar o programar una tarjeta de Metricool abre **¿Reprogramar en Metricool?** con fecha, hora, cliente y redes. Cancelar no escribe nada. Si la fecha no cambió, no se llama a Metricool.
+- Crear un borrador al soltar una pieza de Recibo también pide confirmación. Publicar sigue exigiendo el clic explícito; no hay auto-post.
+
+![Sincronizar y confirmar en el calendario](/changelog/v5.153-calendario-sincronizar.png)
+
 ## v5.152 — 23 de octubre de 2026
 
 **El asistente opera el Pipeline de videos de Video QC, no un trabajo aparte de Entregas.**

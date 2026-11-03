@@ -5,6 +5,7 @@ vi.mock('@/lib/actions/recibo-calendar-draft',()=>({draftReciboOnDate:draft}))
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
+vi.mock('@/lib/actions/metricool-calendar-sync',()=>({pullMetricoolCalendar:vi.fn(async()=>({ok:true,updated:0,checked:0}))}))
 vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importOriginal<object>(),puertoRicoNow:()=> '2026-10-16T20:00:00'}))
 vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId,image,title}:{ideaId:string;image?:boolean;title?:string})=>image?<img alt={title} data-testid={`image-${ideaId}`}/>:<video controls data-testid={`preview-${ideaId}`}/>}))
 import { ContentCalendar } from './content-calendar'
@@ -88,7 +89,7 @@ it('shows pending graphics as images without dates when cadence is unconfigured'
  expect(screen.getByText(/1 pieza pendiente/)).toBeInTheDocument()
 })
 
-it('dragging an approved projection creates an exact-day draft once and removes its suggestion',async()=>{
+it('dragging an approved projection asks before creating an exact-day draft once',async()=>{
  draft.mockReset();let finish:(value:unknown)=>void=()=>{};draft.mockImplementation(()=>new Promise(resolve=>{finish=resolve}))
  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({posts:[],complete:true})}))
  const {container}=render(<ContentCalendar clients={[client]} clientId="c" projectionIdeas={[{...idea,staff_client_approval:'approved'}]} />)
@@ -98,6 +99,11 @@ it('dragging an approved projection creates an exact-day draft once and removes 
  fireEvent.dragStart(card,{dataTransfer:transfer})
  const day=container.querySelector('[data-calendar-date="2026-10-20"]')!
  fireEvent.drop(day,{dataTransfer:transfer});fireEvent.drop(day,{dataTransfer:transfer})
+ expect(draft).not.toHaveBeenCalled()
+ const dialog=screen.getByRole('dialog')
+ expect(within(dialog).getByRole('heading',{name:'Crear borrador para un día'})).toBeInTheDocument()
+ fireEvent.drop(day,{dataTransfer:transfer})
+ await act(async()=>{fireEvent.click(within(dialog).getByRole('button',{name:'Crear borrador'}));fireEvent.click(within(dialog).getByRole('button',{name:'Crear borrador'}))})
  expect(draft).toHaveBeenCalledTimes(1)
  expect(draft).toHaveBeenCalledWith({ideaId:'i',clientId:'c',videoId:'v',date:'2026-10-20'})
  await act(async()=>finish({ok:true}))

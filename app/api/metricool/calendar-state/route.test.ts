@@ -41,6 +41,16 @@ describe('calendar state writes', () => {
     expect(h.persist).toHaveBeenCalledWith(expect.objectContaining({ publish_date: '2099-10-22' }))
     expect(h.activity).toHaveBeenCalledWith([expect.objectContaining({ content_idea_id: 'idea-1', metadata: expect.objectContaining({ draft: false, autoPublish: true, metricoolPostId: 4 }) })])
   })
+  it('does not PUT Metricool when the requested schedule is already the current instant', async () => {
+    const current = { ...h.remote, publicationDate: { dateTime: '2099-10-20T10:00:00', timezone: 'America/Puerto_Rico' } }
+    h.read.mockResolvedValue(current)
+    const response = await POST(request({ action: 'schedule', dateTime: '2099-10-20T10:00', expected: { draft: false, publicationDate: current.publicationDate.dateTime, text: 'Caption', timezone: 'America/Puerto_Rico' } }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ ok: true, confirmed: true, noop: true })
+    expect(h.write).not.toHaveBeenCalled()
+    expect(h.persist).not.toHaveBeenCalled()
+  })
+
   it('requires publish permission to schedule even with Metricool write access', async () => {
     h.scheduleAllowed = false
     expect((await POST(request({ action: 'schedule', dateTime: '2099-10-22T18:30' }))).status).toBe(403)

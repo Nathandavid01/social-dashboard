@@ -1,0 +1,55 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nate Media · Sincronizar calendario con Metricool</title>
+<style>
+body{margin:0;background:#101011;color:#fafafa;font:15px system-ui;padding:32px}main{max-width:1040px;margin:auto}header{font-size:24px;font-weight:700;margin-bottom:8px}header b{color:#e7b315}
+h2{font-size:22px;margin:0 0 6px}.muted{color:#aaa;font-size:13px}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#e7b315;margin-bottom:8px}
+.bar{background:#fcfcff;color:#111;border-radius:12px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid #ddd;background:#fff;border-radius:8px;padding:8px 12px;font-size:13px}.gold{border-color:#e7b315}
+.status{font-size:12px;color:#555}.dot{display:inline-block;width:8px;height:8px;border-radius:99px;background:#16a34a;margin-right:6px}.warn{background:#f59e0b}
+.day{background:#fcfcff;color:#111;border-radius:12px;padding:12px}.num{font-size:13px;color:#666}
+.card{border:1px solid #ddd;background:#fff;border-radius:12px;padding:8px;margin-top:8px}.thumb{height:90px;border-radius:10px;background:linear-gradient(135deg,#3b1d0e,#8a4b22)}
+.pill{display:inline-block;margin-top:8px;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:600;background:#ede9fe;color:#5b21b6}
+.t{font-weight:600;font-size:13px;margin:6px 0 2px}.s{font-size:11px;color:#666}
+.dialog{background:#fff;color:#111;border-radius:14px;padding:20px}.dialog h3{margin:0 0 6px}.primary{background:#111;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:600;margin-right:8px}.ghost{border:1px solid #ddd;background:#fff;border-radius:8px;padding:12px}
+.alert{background:#fffbeb;color:#78350f;border-radius:12px;padding:12px;font-size:13px}
+@media(max-width:600px){body{padding:16px}}
+</style>
+<main><header>Nate <b>Media</b></header>
+<h2>Calendario de publicaciones · v5.153</h2>
+<p class="muted">Hora de Puerto Rico · Metricool entra cada 6 horas y con el botón Sincronizar</p>
+<div class="cols">
+ <div>
+  <div class="label">Barra del calendario</div>
+  <div class="bar">
+   <button class="btn">Hoy</button>
+   <button class="btn">5 semanas</button>
+   <button class="btn">Verificar</button>
+   <button class="btn gold">Sincronizar</button>
+   <span class="status"><span class="dot"></span>Sincronizado con Metricool.</span>
+  </div>
+ </div>
+ <div>
+  <div class="label">Perfil que no respondió</div>
+  <div class="alert"><span class="dot warn"></span>643 Sport Bar sin verificar. Los conteos están incompletos; el cliente no se oculta.</div>
+ </div>
+</div>
+<div class="cols">
+ <div>
+  <div class="label">Arrastrar a otro día</div>
+  <div class="day"><div class="num">22</div><div class="card"><div class="thumb"></div><span class="pill">Programado</span><p class="t">Oferta de octubre</p><p class="s">instagram · 10:00 · 643 Sport Bar</p></div></div>
+ </div>
+ <div>
+  <div class="label">Antes de escribir en Metricool</div>
+  <div class="dialog">
+   <h3>¿Reprogramar en Metricool?</h3>
+   <p class="muted" style="color:#555">643 Sport Bar · 2026-10-22 · 10:00 · Hora de Puerto Rico · instagram. Se publicará automáticamente a esa hora.</p>
+   <button class="primary">Sí, reprogramar</button>
+   <button class="ghost">Cancelar</button>
+  </div>
+ </div>
+ <div>
+  <div class="label">Si la fecha no cambió</div>
+  <div class="alert">Sin cambios en Metricool. Esta publicación ya está en esa fecha. No se envió nada.</div>
+ </div>
+</div>
+</main></html>

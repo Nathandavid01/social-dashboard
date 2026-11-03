@@ -7,6 +7,7 @@ vi.mock('@/lib/actions/recibo-calendar-hide',()=>({setReciboCalendarHidden:hide}
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn()}))
+vi.mock('@/lib/actions/metricool-calendar-sync',()=>({pullMetricoolCalendar:vi.fn(async()=>({ok:true,updated:0,checked:0}))}))
 vi.mock('@/lib/published/calendar-post',async importOriginal=>({...await importOriginal<object>(),puertoRicoNow:()=> '2026-10-16T20:00:00'}))
 vi.mock('@/components/recibo/recibo-video-preview',()=>({ReciboVideoPreview:({ideaId}:{ideaId:string})=><video data-testid={`preview-${ideaId}`}/>}))
 import { ContentCalendar } from './content-calendar'

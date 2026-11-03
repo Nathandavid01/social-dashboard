@@ -1,12 +1,13 @@
 import { updateScheduledPost } from '@/lib/metricool/post'
 import { getScheduledPost } from '@/lib/metricool/scheduler'
 import { buildCalendarStateUpdate, type EditableCalendarPost } from '@/lib/metricool/calendar-state'
+import { calendarWriteNeedsMetricool } from '@/lib/metricool/calendar-write-intent'
 import type { createClient } from '@/lib/supabase/server'
 
 type Db = Awaited<ReturnType<typeof createClient>>
 type Account = Parameters<typeof getScheduledPost>[0] & { blogId: string }
 export type CalendarStateApplied =
-  | { status: 200; body: { ok: true; confirmed: boolean; postId: number; uuid: string; action: 'draft' | 'schedule'; warning?: string } }
+  | { status: 200; body: { ok: true; confirmed: boolean; postId: number; uuid: string; action: 'draft' | 'schedule'; warning?: string; noop?: true } }
   | { status: 409 | 502; body: { error: string; uncertain?: true } }
 
 /**
@@ -14,6 +15,15 @@ export type CalendarStateApplied =
  * Shared by the calendar route and the Recibo «Enviar» action so both keep the same safeguards.
  */
 export async function applyCalendarState(db: Db, account: Account, clientId: string, original: EditableCalendarPost, action: 'draft' | 'schedule', dateTime?: string): Promise<CalendarStateApplied> {
+  if (!calendarWriteNeedsMetricool({
+    action,
+    currentDraft: original.draft,
+    currentDateTime: original.publicationDate?.dateTime || '',
+    currentTimezone: original.publicationDate?.timezone,
+    requestedDateTime: dateTime,
+  })) {
+    return { status: 200, body: { ok: true, confirmed: true, postId: original.id, uuid: original.uuid, action, noop: true } }
+  }
   let update
   try { update = buildCalendarStateUpdate(original, action, dateTime) } catch (error) { return { status: 409, body: { error: error instanceof Error ? error.message : 'No se puede cambiar este post.' } } }
   let result
@@ -26,7 +36,7 @@ export async function applyCalendarState(db: Db, account: Account, clientId: str
   let warning: string | undefined
   let linkedIdeas: { id: string }[] = []
   try {
-    const { data: linked, error } = await db.from('content_ideas').update({ metricool_post_id: postId, metricool_uuid: uuid, ...(action === 'schedule' ? { publish_date: dateTime!.slice(0, 10) } : {}) }).eq('client_id', clientId).or(`metricool_post_id.eq.${original.id},metricool_uuid.eq.${JSON.stringify(original.uuid)}`).select('id')
+    const { data: linked, error } = await db.from('content_ideas').update({ metricool_post_id: postId, metricool_uuid: uuid, ...(dateTime ? { publish_date: dateTime.slice(0, 10) } : {}) }).eq('client_id', clientId).or(`metricool_post_id.eq.${original.id},metricool_uuid.eq.${JSON.stringify(original.uuid)}`).select('id')
     if (error) warning = 'Metricool aceptó el cambio, pero no se pudo actualizar la referencia del dashboard. No vuelvas a enviar el post.'
     else linkedIdeas = linked ?? []
   } catch { warning = 'Metricool aceptó el cambio; la referencia del dashboard necesita revisión.' }

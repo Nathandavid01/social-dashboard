@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 vi.mock('@/components/auth/role-gate',()=>({useHasPermission:()=>true}))
 vi.mock('@/lib/actions/client-cadence',()=>({updateClientCadence:vi.fn(async()=>({ok:true}))}))
+vi.mock('@/lib/actions/metricool-calendar-sync',()=>({pullMetricoolCalendar:vi.fn(async()=>({ok:true,updated:0,checked:0}))}))
 import { ContentCalendar } from './content-calendar'
 import styles from './content-calendar.module.css'
 const date = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Puerto_Rico' })

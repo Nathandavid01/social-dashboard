@@ -11,10 +11,11 @@ export const maxDuration = 60
 const RECIBO_BUDGET_MS = 20_000
 
 /**
- * Background sync: every published Metricool post moves its dashboard card to
- * Publication. Triggered by the Vercel cron (see vercel.json). Protected by
- * CRON_SECRET — ONLY `Authorization: Bearer <CRON_SECRET>` authorizes (see
- * lib/auth/cron.ts). Fails closed: no CRON_SECRET in env → never runs.
+ * Background sync every 6 hours: pull Metricool dates/status into the calendar
+ * and move published posts to Publication. Triggered by the Vercel cron
+ * (see vercel.json). Protected by CRON_SECRET — ONLY
+ * `Authorization: Bearer <CRON_SECRET>` authorizes (see lib/auth/cron.ts).
+ * Fails closed: no CRON_SECRET in env → never runs. Never writes to Metricool.
  */
 export async function GET(req: NextRequest) {
   const denial = cronAuthDenial(req)
